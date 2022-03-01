@@ -205,6 +205,68 @@ public final class datalakeDRGrpc {
     return getListDatalakeBackupsMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest,
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse> getCancelDatalakeBackupMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CancelDatalakeBackup",
+      requestType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest.class,
+      responseType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest,
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse> getCancelDatalakeBackupMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse> getCancelDatalakeBackupMethod;
+    if ((getCancelDatalakeBackupMethod = datalakeDRGrpc.getCancelDatalakeBackupMethod) == null) {
+      synchronized (datalakeDRGrpc.class) {
+        if ((getCancelDatalakeBackupMethod = datalakeDRGrpc.getCancelDatalakeBackupMethod) == null) {
+          datalakeDRGrpc.getCancelDatalakeBackupMethod = getCancelDatalakeBackupMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CancelDatalakeBackup"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("CancelDatalakeBackup"))
+              .build();
+        }
+      }
+    }
+    return getCancelDatalakeBackupMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest,
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse> getCancelDatalakeRestoreMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CancelDatalakeRestore",
+      requestType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest.class,
+      responseType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest,
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse> getCancelDatalakeRestoreMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse> getCancelDatalakeRestoreMethod;
+    if ((getCancelDatalakeRestoreMethod = datalakeDRGrpc.getCancelDatalakeRestoreMethod) == null) {
+      synchronized (datalakeDRGrpc.class) {
+        if ((getCancelDatalakeRestoreMethod = datalakeDRGrpc.getCancelDatalakeRestoreMethod) == null) {
+          datalakeDRGrpc.getCancelDatalakeRestoreMethod = getCancelDatalakeRestoreMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CancelDatalakeRestore"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("CancelDatalakeRestore"))
+              .build();
+        }
+      }
+    }
+    return getCancelDatalakeRestoreMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -322,6 +384,28 @@ public final class datalakeDRGrpc {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListDatalakeBackupsMethod(), responseObserver);
     }
 
+    /**
+     * <pre>
+     **
+     * Cancel backup operation
+     * </pre>
+     */
+    public void cancelDatalakeBackup(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCancelDatalakeBackupMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     **
+     * Cancel restore operation
+     * </pre>
+     */
+    public void cancelDatalakeRestore(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCancelDatalakeRestoreMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -366,6 +450,20 @@ public final class datalakeDRGrpc {
                 com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest,
                 com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse>(
                   this, METHODID_LIST_DATALAKE_BACKUPS)))
+          .addMethod(
+            getCancelDatalakeBackupMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest,
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse>(
+                  this, METHODID_CANCEL_DATALAKE_BACKUP)))
+          .addMethod(
+            getCancelDatalakeRestoreMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest,
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse>(
+                  this, METHODID_CANCEL_DATALAKE_RESTORE)))
           .build();
     }
   }
@@ -458,6 +556,30 @@ public final class datalakeDRGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getListDatalakeBackupsMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     **
+     * Cancel backup operation
+     * </pre>
+     */
+    public void cancelDatalakeBackup(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCancelDatalakeBackupMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     **
+     * Cancel restore operation
+     * </pre>
+     */
+    public void cancelDatalakeRestore(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCancelDatalakeRestoreMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -541,6 +663,28 @@ public final class datalakeDRGrpc {
     public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse listDatalakeBackups(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getListDatalakeBackupsMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Cancel backup operation
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse cancelDatalakeBackup(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCancelDatalakeBackupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Cancel restore operation
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse cancelDatalakeRestore(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCancelDatalakeRestoreMethod(), getCallOptions(), request);
     }
   }
 
@@ -632,6 +776,30 @@ public final class datalakeDRGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getListDatalakeBackupsMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     **
+     * Cancel backup operation
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse> cancelDatalakeBackup(
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCancelDatalakeBackupMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     **
+     * Cancel restore operation
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse> cancelDatalakeRestore(
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCancelDatalakeRestoreMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_VERSION = 0;
@@ -640,6 +808,8 @@ public final class datalakeDRGrpc {
   private static final int METHODID_BACKUP_DATALAKE_STATUS = 3;
   private static final int METHODID_RESTORE_DATALAKE_STATUS = 4;
   private static final int METHODID_LIST_DATALAKE_BACKUPS = 5;
+  private static final int METHODID_CANCEL_DATALAKE_BACKUP = 6;
+  private static final int METHODID_CANCEL_DATALAKE_RESTORE = 7;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -681,6 +851,14 @@ public final class datalakeDRGrpc {
         case METHODID_LIST_DATALAKE_BACKUPS:
           serviceImpl.listDatalakeBackups((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse>) responseObserver);
+          break;
+        case METHODID_CANCEL_DATALAKE_BACKUP:
+          serviceImpl.cancelDatalakeBackup((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse>) responseObserver);
+          break;
+        case METHODID_CANCEL_DATALAKE_RESTORE:
+          serviceImpl.cancelDatalakeRestore((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -749,6 +927,8 @@ public final class datalakeDRGrpc {
               .addMethod(getBackupDatalakeStatusMethod())
               .addMethod(getRestoreDatalakeStatusMethod())
               .addMethod(getListDatalakeBackupsMethod())
+              .addMethod(getCancelDatalakeBackupMethod())
+              .addMethod(getCancelDatalakeRestoreMethod())
               .build();
         }
       }

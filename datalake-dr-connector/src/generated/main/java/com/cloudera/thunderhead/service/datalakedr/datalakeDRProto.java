@@ -14,6 +14,7405 @@ public final class datalakeDRProto {
     registerAllExtensions(
         (com.google.protobuf.ExtensionRegistryLite) registry);
   }
+  public interface BackupRestoreOperationStatusOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:datalakedr.BackupRestoreOperationStatus)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The operation status
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     * @return The status.
+     */
+    java.lang.String getStatus();
+    /**
+     * <pre>
+     * The operation status
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     * @return The bytes for status.
+     */
+    com.google.protobuf.ByteString
+        getStatusBytes();
+
+    /**
+     * <pre>
+     * Reason for operation failure. Only set if operation fails.
+     * </pre>
+     *
+     * <code>string failureReason = 2;</code>
+     * @return The failureReason.
+     */
+    java.lang.String getFailureReason();
+    /**
+     * <pre>
+     * Reason for operation failure. Only set if operation fails.
+     * </pre>
+     *
+     * <code>string failureReason = 2;</code>
+     * @return The bytes for failureReason.
+     */
+    com.google.protobuf.ByteString
+        getFailureReasonBytes();
+  }
+  /**
+   * <pre>
+   * BackupRestoreOperationStatus
+   * </pre>
+   *
+   * Protobuf type {@code datalakedr.BackupRestoreOperationStatus}
+   */
+  public static final class BackupRestoreOperationStatus extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:datalakedr.BackupRestoreOperationStatus)
+      BackupRestoreOperationStatusOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use BackupRestoreOperationStatus.newBuilder() to construct.
+    private BackupRestoreOperationStatus(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private BackupRestoreOperationStatus() {
+      status_ = "";
+      failureReason_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new BackupRestoreOperationStatus();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private BackupRestoreOperationStatus(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              status_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              failureReason_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_BackupRestoreOperationStatus_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_BackupRestoreOperationStatus_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder.class);
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 1;
+    private volatile java.lang.Object status_;
+    /**
+     * <pre>
+     * The operation status
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     * @return The status.
+     */
+    @java.lang.Override
+    public java.lang.String getStatus() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        status_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The operation status
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     * @return The bytes for status.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStatusBytes() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        status_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int FAILUREREASON_FIELD_NUMBER = 2;
+    private volatile java.lang.Object failureReason_;
+    /**
+     * <pre>
+     * Reason for operation failure. Only set if operation fails.
+     * </pre>
+     *
+     * <code>string failureReason = 2;</code>
+     * @return The failureReason.
+     */
+    @java.lang.Override
+    public java.lang.String getFailureReason() {
+      java.lang.Object ref = failureReason_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        failureReason_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Reason for operation failure. Only set if operation fails.
+     * </pre>
+     *
+     * <code>string failureReason = 2;</code>
+     * @return The bytes for failureReason.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getFailureReasonBytes() {
+      java.lang.Object ref = failureReason_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        failureReason_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, status_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, failureReason_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, status_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, failureReason_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus) obj;
+
+      if (!getStatus()
+          .equals(other.getStatus())) return false;
+      if (!getFailureReason()
+          .equals(other.getFailureReason())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getStatus().hashCode();
+      hash = (37 * hash) + FAILUREREASON_FIELD_NUMBER;
+      hash = (53 * hash) + getFailureReason().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * BackupRestoreOperationStatus
+     * </pre>
+     *
+     * Protobuf type {@code datalakedr.BackupRestoreOperationStatus}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:datalakedr.BackupRestoreOperationStatus)
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_BackupRestoreOperationStatus_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_BackupRestoreOperationStatus_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        status_ = "";
+
+        failureReason_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_BackupRestoreOperationStatus_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus build() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus buildPartial() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus(this);
+        result.status_ = status_;
+        result.failureReason_ = failureReason_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus) {
+          return mergeFrom((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus other) {
+        if (other == com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance()) return this;
+        if (!other.getStatus().isEmpty()) {
+          status_ = other.status_;
+          onChanged();
+        }
+        if (!other.getFailureReason().isEmpty()) {
+          failureReason_ = other.failureReason_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object status_ = "";
+      /**
+       * <pre>
+       * The operation status
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @return The status.
+       */
+      public java.lang.String getStatus() {
+        java.lang.Object ref = status_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          status_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The operation status
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @return The bytes for status.
+       */
+      public com.google.protobuf.ByteString
+          getStatusBytes() {
+        java.lang.Object ref = status_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          status_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The operation status
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatus(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The operation status
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatus() {
+        
+        status_ = getDefaultInstance().getStatus();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The operation status
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @param value The bytes for status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        status_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object failureReason_ = "";
+      /**
+       * <pre>
+       * Reason for operation failure. Only set if operation fails.
+       * </pre>
+       *
+       * <code>string failureReason = 2;</code>
+       * @return The failureReason.
+       */
+      public java.lang.String getFailureReason() {
+        java.lang.Object ref = failureReason_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          failureReason_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Reason for operation failure. Only set if operation fails.
+       * </pre>
+       *
+       * <code>string failureReason = 2;</code>
+       * @return The bytes for failureReason.
+       */
+      public com.google.protobuf.ByteString
+          getFailureReasonBytes() {
+        java.lang.Object ref = failureReason_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          failureReason_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Reason for operation failure. Only set if operation fails.
+       * </pre>
+       *
+       * <code>string failureReason = 2;</code>
+       * @param value The failureReason to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFailureReason(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        failureReason_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Reason for operation failure. Only set if operation fails.
+       * </pre>
+       *
+       * <code>string failureReason = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearFailureReason() {
+        
+        failureReason_ = getDefaultInstance().getFailureReason();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Reason for operation failure. Only set if operation fails.
+       * </pre>
+       *
+       * <code>string failureReason = 2;</code>
+       * @param value The bytes for failureReason to set.
+       * @return This builder for chaining.
+       */
+      public Builder setFailureReasonBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        failureReason_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:datalakedr.BackupRestoreOperationStatus)
+    }
+
+    // @@protoc_insertion_point(class_scope:datalakedr.BackupRestoreOperationStatus)
+    private static final com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus();
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<BackupRestoreOperationStatus>
+        PARSER = new com.google.protobuf.AbstractParser<BackupRestoreOperationStatus>() {
+      @java.lang.Override
+      public BackupRestoreOperationStatus parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new BackupRestoreOperationStatus(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<BackupRestoreOperationStatus> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<BackupRestoreOperationStatus> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface AdminOperationsBackupRestoreStateOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:datalakedr.AdminOperationsBackupRestoreState)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Stopping services before a backup or restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+     * @return Whether the stopServices field is set.
+     */
+    boolean hasStopServices();
+    /**
+     * <pre>
+     * Stopping services before a backup or restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+     * @return The stopServices.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getStopServices();
+    /**
+     * <pre>
+     * Stopping services before a backup or restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getStopServicesOrBuilder();
+
+    /**
+     * <pre>
+     * Restarting services after the backup or restore is complete.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+     * @return Whether the startServices field is set.
+     */
+    boolean hasStartServices();
+    /**
+     * <pre>
+     * Restarting services after the backup or restore is complete.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+     * @return The startServices.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getStartServices();
+    /**
+     * <pre>
+     * Restarting services after the backup or restore is complete.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getStartServicesOrBuilder();
+  }
+  /**
+   * <pre>
+   * AdminOperationsBackupRestoreState
+   * </pre>
+   *
+   * Protobuf type {@code datalakedr.AdminOperationsBackupRestoreState}
+   */
+  public static final class AdminOperationsBackupRestoreState extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:datalakedr.AdminOperationsBackupRestoreState)
+      AdminOperationsBackupRestoreStateOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use AdminOperationsBackupRestoreState.newBuilder() to construct.
+    private AdminOperationsBackupRestoreState(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private AdminOperationsBackupRestoreState() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AdminOperationsBackupRestoreState();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private AdminOperationsBackupRestoreState(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (stopServices_ != null) {
+                subBuilder = stopServices_.toBuilder();
+              }
+              stopServices_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(stopServices_);
+                stopServices_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 18: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (startServices_ != null) {
+                subBuilder = startServices_.toBuilder();
+              }
+              startServices_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(startServices_);
+                startServices_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_AdminOperationsBackupRestoreState_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_AdminOperationsBackupRestoreState_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.Builder.class);
+    }
+
+    public static final int STOPSERVICES_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus stopServices_;
+    /**
+     * <pre>
+     * Stopping services before a backup or restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+     * @return Whether the stopServices field is set.
+     */
+    @java.lang.Override
+    public boolean hasStopServices() {
+      return stopServices_ != null;
+    }
+    /**
+     * <pre>
+     * Stopping services before a backup or restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+     * @return The stopServices.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getStopServices() {
+      return stopServices_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : stopServices_;
+    }
+    /**
+     * <pre>
+     * Stopping services before a backup or restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getStopServicesOrBuilder() {
+      return getStopServices();
+    }
+
+    public static final int STARTSERVICES_FIELD_NUMBER = 2;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus startServices_;
+    /**
+     * <pre>
+     * Restarting services after the backup or restore is complete.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+     * @return Whether the startServices field is set.
+     */
+    @java.lang.Override
+    public boolean hasStartServices() {
+      return startServices_ != null;
+    }
+    /**
+     * <pre>
+     * Restarting services after the backup or restore is complete.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+     * @return The startServices.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getStartServices() {
+      return startServices_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : startServices_;
+    }
+    /**
+     * <pre>
+     * Restarting services after the backup or restore is complete.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getStartServicesOrBuilder() {
+      return getStartServices();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (stopServices_ != null) {
+        output.writeMessage(1, getStopServices());
+      }
+      if (startServices_ != null) {
+        output.writeMessage(2, getStartServices());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (stopServices_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getStopServices());
+      }
+      if (startServices_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getStartServices());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState) obj;
+
+      if (hasStopServices() != other.hasStopServices()) return false;
+      if (hasStopServices()) {
+        if (!getStopServices()
+            .equals(other.getStopServices())) return false;
+      }
+      if (hasStartServices() != other.hasStartServices()) return false;
+      if (hasStartServices()) {
+        if (!getStartServices()
+            .equals(other.getStartServices())) return false;
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasStopServices()) {
+        hash = (37 * hash) + STOPSERVICES_FIELD_NUMBER;
+        hash = (53 * hash) + getStopServices().hashCode();
+      }
+      if (hasStartServices()) {
+        hash = (37 * hash) + STARTSERVICES_FIELD_NUMBER;
+        hash = (53 * hash) + getStartServices().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * AdminOperationsBackupRestoreState
+     * </pre>
+     *
+     * Protobuf type {@code datalakedr.AdminOperationsBackupRestoreState}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:datalakedr.AdminOperationsBackupRestoreState)
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreStateOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_AdminOperationsBackupRestoreState_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_AdminOperationsBackupRestoreState_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (stopServicesBuilder_ == null) {
+          stopServices_ = null;
+        } else {
+          stopServices_ = null;
+          stopServicesBuilder_ = null;
+        }
+        if (startServicesBuilder_ == null) {
+          startServices_ = null;
+        } else {
+          startServices_ = null;
+          startServicesBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_AdminOperationsBackupRestoreState_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState build() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState buildPartial() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState(this);
+        if (stopServicesBuilder_ == null) {
+          result.stopServices_ = stopServices_;
+        } else {
+          result.stopServices_ = stopServicesBuilder_.build();
+        }
+        if (startServicesBuilder_ == null) {
+          result.startServices_ = startServices_;
+        } else {
+          result.startServices_ = startServicesBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState) {
+          return mergeFrom((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState other) {
+        if (other == com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.getDefaultInstance()) return this;
+        if (other.hasStopServices()) {
+          mergeStopServices(other.getStopServices());
+        }
+        if (other.hasStartServices()) {
+          mergeStartServices(other.getStartServices());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus stopServices_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> stopServicesBuilder_;
+      /**
+       * <pre>
+       * Stopping services before a backup or restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+       * @return Whether the stopServices field is set.
+       */
+      public boolean hasStopServices() {
+        return stopServicesBuilder_ != null || stopServices_ != null;
+      }
+      /**
+       * <pre>
+       * Stopping services before a backup or restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+       * @return The stopServices.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getStopServices() {
+        if (stopServicesBuilder_ == null) {
+          return stopServices_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : stopServices_;
+        } else {
+          return stopServicesBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Stopping services before a backup or restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+       */
+      public Builder setStopServices(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (stopServicesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          stopServices_ = value;
+          onChanged();
+        } else {
+          stopServicesBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Stopping services before a backup or restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+       */
+      public Builder setStopServices(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (stopServicesBuilder_ == null) {
+          stopServices_ = builderForValue.build();
+          onChanged();
+        } else {
+          stopServicesBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Stopping services before a backup or restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+       */
+      public Builder mergeStopServices(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (stopServicesBuilder_ == null) {
+          if (stopServices_ != null) {
+            stopServices_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(stopServices_).mergeFrom(value).buildPartial();
+          } else {
+            stopServices_ = value;
+          }
+          onChanged();
+        } else {
+          stopServicesBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Stopping services before a backup or restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+       */
+      public Builder clearStopServices() {
+        if (stopServicesBuilder_ == null) {
+          stopServices_ = null;
+          onChanged();
+        } else {
+          stopServices_ = null;
+          stopServicesBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Stopping services before a backup or restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getStopServicesBuilder() {
+        
+        onChanged();
+        return getStopServicesFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Stopping services before a backup or restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getStopServicesOrBuilder() {
+        if (stopServicesBuilder_ != null) {
+          return stopServicesBuilder_.getMessageOrBuilder();
+        } else {
+          return stopServices_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : stopServices_;
+        }
+      }
+      /**
+       * <pre>
+       * Stopping services before a backup or restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus stopServices = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getStopServicesFieldBuilder() {
+        if (stopServicesBuilder_ == null) {
+          stopServicesBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getStopServices(),
+                  getParentForChildren(),
+                  isClean());
+          stopServices_ = null;
+        }
+        return stopServicesBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus startServices_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> startServicesBuilder_;
+      /**
+       * <pre>
+       * Restarting services after the backup or restore is complete.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+       * @return Whether the startServices field is set.
+       */
+      public boolean hasStartServices() {
+        return startServicesBuilder_ != null || startServices_ != null;
+      }
+      /**
+       * <pre>
+       * Restarting services after the backup or restore is complete.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+       * @return The startServices.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getStartServices() {
+        if (startServicesBuilder_ == null) {
+          return startServices_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : startServices_;
+        } else {
+          return startServicesBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Restarting services after the backup or restore is complete.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+       */
+      public Builder setStartServices(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (startServicesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          startServices_ = value;
+          onChanged();
+        } else {
+          startServicesBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Restarting services after the backup or restore is complete.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+       */
+      public Builder setStartServices(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (startServicesBuilder_ == null) {
+          startServices_ = builderForValue.build();
+          onChanged();
+        } else {
+          startServicesBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Restarting services after the backup or restore is complete.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+       */
+      public Builder mergeStartServices(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (startServicesBuilder_ == null) {
+          if (startServices_ != null) {
+            startServices_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(startServices_).mergeFrom(value).buildPartial();
+          } else {
+            startServices_ = value;
+          }
+          onChanged();
+        } else {
+          startServicesBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Restarting services after the backup or restore is complete.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+       */
+      public Builder clearStartServices() {
+        if (startServicesBuilder_ == null) {
+          startServices_ = null;
+          onChanged();
+        } else {
+          startServices_ = null;
+          startServicesBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Restarting services after the backup or restore is complete.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getStartServicesBuilder() {
+        
+        onChanged();
+        return getStartServicesFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Restarting services after the backup or restore is complete.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getStartServicesOrBuilder() {
+        if (startServicesBuilder_ != null) {
+          return startServicesBuilder_.getMessageOrBuilder();
+        } else {
+          return startServices_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : startServices_;
+        }
+      }
+      /**
+       * <pre>
+       * Restarting services after the backup or restore is complete.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus startServices = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getStartServicesFieldBuilder() {
+        if (startServicesBuilder_ == null) {
+          startServicesBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getStartServices(),
+                  getParentForChildren(),
+                  isClean());
+          startServices_ = null;
+        }
+        return startServicesBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:datalakedr.AdminOperationsBackupRestoreState)
+    }
+
+    // @@protoc_insertion_point(class_scope:datalakedr.AdminOperationsBackupRestoreState)
+    private static final com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState();
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<AdminOperationsBackupRestoreState>
+        PARSER = new com.google.protobuf.AbstractParser<AdminOperationsBackupRestoreState>() {
+      @java.lang.Override
+      public AdminOperationsBackupRestoreState parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new AdminOperationsBackupRestoreState(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<AdminOperationsBackupRestoreState> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<AdminOperationsBackupRestoreState> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface HbaseBackupRestoreStateOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:datalakedr.HbaseBackupRestoreState)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+     * @return Whether the atlasEntityAuditEventTable field is set.
+     */
+    boolean hasAtlasEntityAuditEventTable();
+    /**
+     * <pre>
+     * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+     * @return The atlasEntityAuditEventTable.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getAtlasEntityAuditEventTable();
+    /**
+     * <pre>
+     * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getAtlasEntityAuditEventTableOrBuilder();
+
+    /**
+     * <pre>
+     * State of the ATLAS_JANUS_TABLE backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+     * @return Whether the atlasJanusTable field is set.
+     */
+    boolean hasAtlasJanusTable();
+    /**
+     * <pre>
+     * State of the ATLAS_JANUS_TABLE backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+     * @return The atlasJanusTable.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getAtlasJanusTable();
+    /**
+     * <pre>
+     * State of the ATLAS_JANUS_TABLE backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getAtlasJanusTableOrBuilder();
+  }
+  /**
+   * <pre>
+   * HbaseBackupRestoreState
+   * </pre>
+   *
+   * Protobuf type {@code datalakedr.HbaseBackupRestoreState}
+   */
+  public static final class HbaseBackupRestoreState extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:datalakedr.HbaseBackupRestoreState)
+      HbaseBackupRestoreStateOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use HbaseBackupRestoreState.newBuilder() to construct.
+    private HbaseBackupRestoreState(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private HbaseBackupRestoreState() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new HbaseBackupRestoreState();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private HbaseBackupRestoreState(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (atlasEntityAuditEventTable_ != null) {
+                subBuilder = atlasEntityAuditEventTable_.toBuilder();
+              }
+              atlasEntityAuditEventTable_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(atlasEntityAuditEventTable_);
+                atlasEntityAuditEventTable_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 18: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (atlasJanusTable_ != null) {
+                subBuilder = atlasJanusTable_.toBuilder();
+              }
+              atlasJanusTable_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(atlasJanusTable_);
+                atlasJanusTable_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_HbaseBackupRestoreState_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_HbaseBackupRestoreState_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.Builder.class);
+    }
+
+    public static final int ATLASENTITYAUDITEVENTTABLE_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus atlasEntityAuditEventTable_;
+    /**
+     * <pre>
+     * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+     * @return Whether the atlasEntityAuditEventTable field is set.
+     */
+    @java.lang.Override
+    public boolean hasAtlasEntityAuditEventTable() {
+      return atlasEntityAuditEventTable_ != null;
+    }
+    /**
+     * <pre>
+     * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+     * @return The atlasEntityAuditEventTable.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getAtlasEntityAuditEventTable() {
+      return atlasEntityAuditEventTable_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : atlasEntityAuditEventTable_;
+    }
+    /**
+     * <pre>
+     * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getAtlasEntityAuditEventTableOrBuilder() {
+      return getAtlasEntityAuditEventTable();
+    }
+
+    public static final int ATLASJANUSTABLE_FIELD_NUMBER = 2;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus atlasJanusTable_;
+    /**
+     * <pre>
+     * State of the ATLAS_JANUS_TABLE backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+     * @return Whether the atlasJanusTable field is set.
+     */
+    @java.lang.Override
+    public boolean hasAtlasJanusTable() {
+      return atlasJanusTable_ != null;
+    }
+    /**
+     * <pre>
+     * State of the ATLAS_JANUS_TABLE backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+     * @return The atlasJanusTable.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getAtlasJanusTable() {
+      return atlasJanusTable_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : atlasJanusTable_;
+    }
+    /**
+     * <pre>
+     * State of the ATLAS_JANUS_TABLE backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getAtlasJanusTableOrBuilder() {
+      return getAtlasJanusTable();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (atlasEntityAuditEventTable_ != null) {
+        output.writeMessage(1, getAtlasEntityAuditEventTable());
+      }
+      if (atlasJanusTable_ != null) {
+        output.writeMessage(2, getAtlasJanusTable());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (atlasEntityAuditEventTable_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getAtlasEntityAuditEventTable());
+      }
+      if (atlasJanusTable_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getAtlasJanusTable());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState) obj;
+
+      if (hasAtlasEntityAuditEventTable() != other.hasAtlasEntityAuditEventTable()) return false;
+      if (hasAtlasEntityAuditEventTable()) {
+        if (!getAtlasEntityAuditEventTable()
+            .equals(other.getAtlasEntityAuditEventTable())) return false;
+      }
+      if (hasAtlasJanusTable() != other.hasAtlasJanusTable()) return false;
+      if (hasAtlasJanusTable()) {
+        if (!getAtlasJanusTable()
+            .equals(other.getAtlasJanusTable())) return false;
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasAtlasEntityAuditEventTable()) {
+        hash = (37 * hash) + ATLASENTITYAUDITEVENTTABLE_FIELD_NUMBER;
+        hash = (53 * hash) + getAtlasEntityAuditEventTable().hashCode();
+      }
+      if (hasAtlasJanusTable()) {
+        hash = (37 * hash) + ATLASJANUSTABLE_FIELD_NUMBER;
+        hash = (53 * hash) + getAtlasJanusTable().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * HbaseBackupRestoreState
+     * </pre>
+     *
+     * Protobuf type {@code datalakedr.HbaseBackupRestoreState}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:datalakedr.HbaseBackupRestoreState)
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreStateOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_HbaseBackupRestoreState_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_HbaseBackupRestoreState_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (atlasEntityAuditEventTableBuilder_ == null) {
+          atlasEntityAuditEventTable_ = null;
+        } else {
+          atlasEntityAuditEventTable_ = null;
+          atlasEntityAuditEventTableBuilder_ = null;
+        }
+        if (atlasJanusTableBuilder_ == null) {
+          atlasJanusTable_ = null;
+        } else {
+          atlasJanusTable_ = null;
+          atlasJanusTableBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_HbaseBackupRestoreState_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState build() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState buildPartial() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState(this);
+        if (atlasEntityAuditEventTableBuilder_ == null) {
+          result.atlasEntityAuditEventTable_ = atlasEntityAuditEventTable_;
+        } else {
+          result.atlasEntityAuditEventTable_ = atlasEntityAuditEventTableBuilder_.build();
+        }
+        if (atlasJanusTableBuilder_ == null) {
+          result.atlasJanusTable_ = atlasJanusTable_;
+        } else {
+          result.atlasJanusTable_ = atlasJanusTableBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState) {
+          return mergeFrom((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState other) {
+        if (other == com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.getDefaultInstance()) return this;
+        if (other.hasAtlasEntityAuditEventTable()) {
+          mergeAtlasEntityAuditEventTable(other.getAtlasEntityAuditEventTable());
+        }
+        if (other.hasAtlasJanusTable()) {
+          mergeAtlasJanusTable(other.getAtlasJanusTable());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus atlasEntityAuditEventTable_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> atlasEntityAuditEventTableBuilder_;
+      /**
+       * <pre>
+       * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+       * @return Whether the atlasEntityAuditEventTable field is set.
+       */
+      public boolean hasAtlasEntityAuditEventTable() {
+        return atlasEntityAuditEventTableBuilder_ != null || atlasEntityAuditEventTable_ != null;
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+       * @return The atlasEntityAuditEventTable.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getAtlasEntityAuditEventTable() {
+        if (atlasEntityAuditEventTableBuilder_ == null) {
+          return atlasEntityAuditEventTable_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : atlasEntityAuditEventTable_;
+        } else {
+          return atlasEntityAuditEventTableBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+       */
+      public Builder setAtlasEntityAuditEventTable(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (atlasEntityAuditEventTableBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          atlasEntityAuditEventTable_ = value;
+          onChanged();
+        } else {
+          atlasEntityAuditEventTableBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+       */
+      public Builder setAtlasEntityAuditEventTable(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (atlasEntityAuditEventTableBuilder_ == null) {
+          atlasEntityAuditEventTable_ = builderForValue.build();
+          onChanged();
+        } else {
+          atlasEntityAuditEventTableBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+       */
+      public Builder mergeAtlasEntityAuditEventTable(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (atlasEntityAuditEventTableBuilder_ == null) {
+          if (atlasEntityAuditEventTable_ != null) {
+            atlasEntityAuditEventTable_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(atlasEntityAuditEventTable_).mergeFrom(value).buildPartial();
+          } else {
+            atlasEntityAuditEventTable_ = value;
+          }
+          onChanged();
+        } else {
+          atlasEntityAuditEventTableBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+       */
+      public Builder clearAtlasEntityAuditEventTable() {
+        if (atlasEntityAuditEventTableBuilder_ == null) {
+          atlasEntityAuditEventTable_ = null;
+          onChanged();
+        } else {
+          atlasEntityAuditEventTable_ = null;
+          atlasEntityAuditEventTableBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getAtlasEntityAuditEventTableBuilder() {
+        
+        onChanged();
+        return getAtlasEntityAuditEventTableFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getAtlasEntityAuditEventTableOrBuilder() {
+        if (atlasEntityAuditEventTableBuilder_ != null) {
+          return atlasEntityAuditEventTableBuilder_.getMessageOrBuilder();
+        } else {
+          return atlasEntityAuditEventTable_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : atlasEntityAuditEventTable_;
+        }
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasEntityAuditEventTable = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getAtlasEntityAuditEventTableFieldBuilder() {
+        if (atlasEntityAuditEventTableBuilder_ == null) {
+          atlasEntityAuditEventTableBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getAtlasEntityAuditEventTable(),
+                  getParentForChildren(),
+                  isClean());
+          atlasEntityAuditEventTable_ = null;
+        }
+        return atlasEntityAuditEventTableBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus atlasJanusTable_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> atlasJanusTableBuilder_;
+      /**
+       * <pre>
+       * State of the ATLAS_JANUS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+       * @return Whether the atlasJanusTable field is set.
+       */
+      public boolean hasAtlasJanusTable() {
+        return atlasJanusTableBuilder_ != null || atlasJanusTable_ != null;
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_JANUS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+       * @return The atlasJanusTable.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getAtlasJanusTable() {
+        if (atlasJanusTableBuilder_ == null) {
+          return atlasJanusTable_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : atlasJanusTable_;
+        } else {
+          return atlasJanusTableBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_JANUS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+       */
+      public Builder setAtlasJanusTable(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (atlasJanusTableBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          atlasJanusTable_ = value;
+          onChanged();
+        } else {
+          atlasJanusTableBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_JANUS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+       */
+      public Builder setAtlasJanusTable(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (atlasJanusTableBuilder_ == null) {
+          atlasJanusTable_ = builderForValue.build();
+          onChanged();
+        } else {
+          atlasJanusTableBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_JANUS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+       */
+      public Builder mergeAtlasJanusTable(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (atlasJanusTableBuilder_ == null) {
+          if (atlasJanusTable_ != null) {
+            atlasJanusTable_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(atlasJanusTable_).mergeFrom(value).buildPartial();
+          } else {
+            atlasJanusTable_ = value;
+          }
+          onChanged();
+        } else {
+          atlasJanusTableBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_JANUS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+       */
+      public Builder clearAtlasJanusTable() {
+        if (atlasJanusTableBuilder_ == null) {
+          atlasJanusTable_ = null;
+          onChanged();
+        } else {
+          atlasJanusTable_ = null;
+          atlasJanusTableBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_JANUS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getAtlasJanusTableBuilder() {
+        
+        onChanged();
+        return getAtlasJanusTableFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_JANUS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getAtlasJanusTableOrBuilder() {
+        if (atlasJanusTableBuilder_ != null) {
+          return atlasJanusTableBuilder_.getMessageOrBuilder();
+        } else {
+          return atlasJanusTable_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : atlasJanusTable_;
+        }
+      }
+      /**
+       * <pre>
+       * State of the ATLAS_JANUS_TABLE backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus atlasJanusTable = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getAtlasJanusTableFieldBuilder() {
+        if (atlasJanusTableBuilder_ == null) {
+          atlasJanusTableBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getAtlasJanusTable(),
+                  getParentForChildren(),
+                  isClean());
+          atlasJanusTable_ = null;
+        }
+        return atlasJanusTableBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:datalakedr.HbaseBackupRestoreState)
+    }
+
+    // @@protoc_insertion_point(class_scope:datalakedr.HbaseBackupRestoreState)
+    private static final com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState();
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<HbaseBackupRestoreState>
+        PARSER = new com.google.protobuf.AbstractParser<HbaseBackupRestoreState>() {
+      @java.lang.Override
+      public HbaseBackupRestoreState parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new HbaseBackupRestoreState(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<HbaseBackupRestoreState> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<HbaseBackupRestoreState> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface SolrBackupRestoreStateOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:datalakedr.SolrBackupRestoreState)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * State of the EDGE_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+     * @return Whether the edgeIndexCollection field is set.
+     */
+    boolean hasEdgeIndexCollection();
+    /**
+     * <pre>
+     * State of the EDGE_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+     * @return The edgeIndexCollection.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getEdgeIndexCollection();
+    /**
+     * <pre>
+     * State of the EDGE_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getEdgeIndexCollectionOrBuilder();
+
+    /**
+     * <pre>
+     * State of the FULLTEXT_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+     * @return Whether the fulltextIndexCollection field is set.
+     */
+    boolean hasFulltextIndexCollection();
+    /**
+     * <pre>
+     * State of the FULLTEXT_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+     * @return The fulltextIndexCollection.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getFulltextIndexCollection();
+    /**
+     * <pre>
+     * State of the FULLTEXT_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getFulltextIndexCollectionOrBuilder();
+
+    /**
+     * <pre>
+     * State of the RANGER_AUDITS_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+     * @return Whether the rangerAuditsCollection field is set.
+     */
+    boolean hasRangerAuditsCollection();
+    /**
+     * <pre>
+     * State of the RANGER_AUDITS_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+     * @return The rangerAuditsCollection.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getRangerAuditsCollection();
+    /**
+     * <pre>
+     * State of the RANGER_AUDITS_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getRangerAuditsCollectionOrBuilder();
+
+    /**
+     * <pre>
+     * State of the VERTEX_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+     * @return Whether the vertexIndexCollection field is set.
+     */
+    boolean hasVertexIndexCollection();
+    /**
+     * <pre>
+     * State of the VERTEX_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+     * @return The vertexIndexCollection.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getVertexIndexCollection();
+    /**
+     * <pre>
+     * State of the VERTEX_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getVertexIndexCollectionOrBuilder();
+
+    /**
+     * <pre>
+     * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+     * @return Whether the edgeIndexCollectionDelete field is set.
+     */
+    boolean hasEdgeIndexCollectionDelete();
+    /**
+     * <pre>
+     * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+     * @return The edgeIndexCollectionDelete.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getEdgeIndexCollectionDelete();
+    /**
+     * <pre>
+     * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getEdgeIndexCollectionDeleteOrBuilder();
+
+    /**
+     * <pre>
+     * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+     * @return Whether the fulltextIndexCollectionDelete field is set.
+     */
+    boolean hasFulltextIndexCollectionDelete();
+    /**
+     * <pre>
+     * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+     * @return The fulltextIndexCollectionDelete.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getFulltextIndexCollectionDelete();
+    /**
+     * <pre>
+     * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getFulltextIndexCollectionDeleteOrBuilder();
+
+    /**
+     * <pre>
+     * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+     * @return Whether the rangerAuditsCollectionDelete field is set.
+     */
+    boolean hasRangerAuditsCollectionDelete();
+    /**
+     * <pre>
+     * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+     * @return The rangerAuditsCollectionDelete.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getRangerAuditsCollectionDelete();
+    /**
+     * <pre>
+     * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getRangerAuditsCollectionDeleteOrBuilder();
+
+    /**
+     * <pre>
+     * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+     * @return Whether the vertexIndexCollectionDelete field is set.
+     */
+    boolean hasVertexIndexCollectionDelete();
+    /**
+     * <pre>
+     * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+     * @return The vertexIndexCollectionDelete.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getVertexIndexCollectionDelete();
+    /**
+     * <pre>
+     * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getVertexIndexCollectionDeleteOrBuilder();
+  }
+  /**
+   * <pre>
+   * SolrBackupRestoreState
+   * </pre>
+   *
+   * Protobuf type {@code datalakedr.SolrBackupRestoreState}
+   */
+  public static final class SolrBackupRestoreState extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:datalakedr.SolrBackupRestoreState)
+      SolrBackupRestoreStateOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use SolrBackupRestoreState.newBuilder() to construct.
+    private SolrBackupRestoreState(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private SolrBackupRestoreState() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SolrBackupRestoreState();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private SolrBackupRestoreState(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (edgeIndexCollection_ != null) {
+                subBuilder = edgeIndexCollection_.toBuilder();
+              }
+              edgeIndexCollection_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(edgeIndexCollection_);
+                edgeIndexCollection_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 18: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (fulltextIndexCollection_ != null) {
+                subBuilder = fulltextIndexCollection_.toBuilder();
+              }
+              fulltextIndexCollection_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(fulltextIndexCollection_);
+                fulltextIndexCollection_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 26: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (rangerAuditsCollection_ != null) {
+                subBuilder = rangerAuditsCollection_.toBuilder();
+              }
+              rangerAuditsCollection_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(rangerAuditsCollection_);
+                rangerAuditsCollection_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 34: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (vertexIndexCollection_ != null) {
+                subBuilder = vertexIndexCollection_.toBuilder();
+              }
+              vertexIndexCollection_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(vertexIndexCollection_);
+                vertexIndexCollection_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 42: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (edgeIndexCollectionDelete_ != null) {
+                subBuilder = edgeIndexCollectionDelete_.toBuilder();
+              }
+              edgeIndexCollectionDelete_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(edgeIndexCollectionDelete_);
+                edgeIndexCollectionDelete_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 50: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (fulltextIndexCollectionDelete_ != null) {
+                subBuilder = fulltextIndexCollectionDelete_.toBuilder();
+              }
+              fulltextIndexCollectionDelete_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(fulltextIndexCollectionDelete_);
+                fulltextIndexCollectionDelete_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 58: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (rangerAuditsCollectionDelete_ != null) {
+                subBuilder = rangerAuditsCollectionDelete_.toBuilder();
+              }
+              rangerAuditsCollectionDelete_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(rangerAuditsCollectionDelete_);
+                rangerAuditsCollectionDelete_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 66: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (vertexIndexCollectionDelete_ != null) {
+                subBuilder = vertexIndexCollectionDelete_.toBuilder();
+              }
+              vertexIndexCollectionDelete_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(vertexIndexCollectionDelete_);
+                vertexIndexCollectionDelete_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_SolrBackupRestoreState_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_SolrBackupRestoreState_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.Builder.class);
+    }
+
+    public static final int EDGEINDEXCOLLECTION_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus edgeIndexCollection_;
+    /**
+     * <pre>
+     * State of the EDGE_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+     * @return Whether the edgeIndexCollection field is set.
+     */
+    @java.lang.Override
+    public boolean hasEdgeIndexCollection() {
+      return edgeIndexCollection_ != null;
+    }
+    /**
+     * <pre>
+     * State of the EDGE_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+     * @return The edgeIndexCollection.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getEdgeIndexCollection() {
+      return edgeIndexCollection_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : edgeIndexCollection_;
+    }
+    /**
+     * <pre>
+     * State of the EDGE_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getEdgeIndexCollectionOrBuilder() {
+      return getEdgeIndexCollection();
+    }
+
+    public static final int FULLTEXTINDEXCOLLECTION_FIELD_NUMBER = 2;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus fulltextIndexCollection_;
+    /**
+     * <pre>
+     * State of the FULLTEXT_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+     * @return Whether the fulltextIndexCollection field is set.
+     */
+    @java.lang.Override
+    public boolean hasFulltextIndexCollection() {
+      return fulltextIndexCollection_ != null;
+    }
+    /**
+     * <pre>
+     * State of the FULLTEXT_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+     * @return The fulltextIndexCollection.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getFulltextIndexCollection() {
+      return fulltextIndexCollection_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : fulltextIndexCollection_;
+    }
+    /**
+     * <pre>
+     * State of the FULLTEXT_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getFulltextIndexCollectionOrBuilder() {
+      return getFulltextIndexCollection();
+    }
+
+    public static final int RANGERAUDITSCOLLECTION_FIELD_NUMBER = 3;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus rangerAuditsCollection_;
+    /**
+     * <pre>
+     * State of the RANGER_AUDITS_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+     * @return Whether the rangerAuditsCollection field is set.
+     */
+    @java.lang.Override
+    public boolean hasRangerAuditsCollection() {
+      return rangerAuditsCollection_ != null;
+    }
+    /**
+     * <pre>
+     * State of the RANGER_AUDITS_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+     * @return The rangerAuditsCollection.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getRangerAuditsCollection() {
+      return rangerAuditsCollection_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : rangerAuditsCollection_;
+    }
+    /**
+     * <pre>
+     * State of the RANGER_AUDITS_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getRangerAuditsCollectionOrBuilder() {
+      return getRangerAuditsCollection();
+    }
+
+    public static final int VERTEXINDEXCOLLECTION_FIELD_NUMBER = 4;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus vertexIndexCollection_;
+    /**
+     * <pre>
+     * State of the VERTEX_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+     * @return Whether the vertexIndexCollection field is set.
+     */
+    @java.lang.Override
+    public boolean hasVertexIndexCollection() {
+      return vertexIndexCollection_ != null;
+    }
+    /**
+     * <pre>
+     * State of the VERTEX_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+     * @return The vertexIndexCollection.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getVertexIndexCollection() {
+      return vertexIndexCollection_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : vertexIndexCollection_;
+    }
+    /**
+     * <pre>
+     * State of the VERTEX_INDEX_COLLECTION backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getVertexIndexCollectionOrBuilder() {
+      return getVertexIndexCollection();
+    }
+
+    public static final int EDGEINDEXCOLLECTIONDELETE_FIELD_NUMBER = 5;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus edgeIndexCollectionDelete_;
+    /**
+     * <pre>
+     * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+     * @return Whether the edgeIndexCollectionDelete field is set.
+     */
+    @java.lang.Override
+    public boolean hasEdgeIndexCollectionDelete() {
+      return edgeIndexCollectionDelete_ != null;
+    }
+    /**
+     * <pre>
+     * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+     * @return The edgeIndexCollectionDelete.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getEdgeIndexCollectionDelete() {
+      return edgeIndexCollectionDelete_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : edgeIndexCollectionDelete_;
+    }
+    /**
+     * <pre>
+     * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getEdgeIndexCollectionDeleteOrBuilder() {
+      return getEdgeIndexCollectionDelete();
+    }
+
+    public static final int FULLTEXTINDEXCOLLECTIONDELETE_FIELD_NUMBER = 6;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus fulltextIndexCollectionDelete_;
+    /**
+     * <pre>
+     * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+     * @return Whether the fulltextIndexCollectionDelete field is set.
+     */
+    @java.lang.Override
+    public boolean hasFulltextIndexCollectionDelete() {
+      return fulltextIndexCollectionDelete_ != null;
+    }
+    /**
+     * <pre>
+     * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+     * @return The fulltextIndexCollectionDelete.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getFulltextIndexCollectionDelete() {
+      return fulltextIndexCollectionDelete_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : fulltextIndexCollectionDelete_;
+    }
+    /**
+     * <pre>
+     * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getFulltextIndexCollectionDeleteOrBuilder() {
+      return getFulltextIndexCollectionDelete();
+    }
+
+    public static final int RANGERAUDITSCOLLECTIONDELETE_FIELD_NUMBER = 7;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus rangerAuditsCollectionDelete_;
+    /**
+     * <pre>
+     * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+     * @return Whether the rangerAuditsCollectionDelete field is set.
+     */
+    @java.lang.Override
+    public boolean hasRangerAuditsCollectionDelete() {
+      return rangerAuditsCollectionDelete_ != null;
+    }
+    /**
+     * <pre>
+     * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+     * @return The rangerAuditsCollectionDelete.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getRangerAuditsCollectionDelete() {
+      return rangerAuditsCollectionDelete_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : rangerAuditsCollectionDelete_;
+    }
+    /**
+     * <pre>
+     * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getRangerAuditsCollectionDeleteOrBuilder() {
+      return getRangerAuditsCollectionDelete();
+    }
+
+    public static final int VERTEXINDEXCOLLECTIONDELETE_FIELD_NUMBER = 8;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus vertexIndexCollectionDelete_;
+    /**
+     * <pre>
+     * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+     * @return Whether the vertexIndexCollectionDelete field is set.
+     */
+    @java.lang.Override
+    public boolean hasVertexIndexCollectionDelete() {
+      return vertexIndexCollectionDelete_ != null;
+    }
+    /**
+     * <pre>
+     * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+     * @return The vertexIndexCollectionDelete.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getVertexIndexCollectionDelete() {
+      return vertexIndexCollectionDelete_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : vertexIndexCollectionDelete_;
+    }
+    /**
+     * <pre>
+     * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getVertexIndexCollectionDeleteOrBuilder() {
+      return getVertexIndexCollectionDelete();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (edgeIndexCollection_ != null) {
+        output.writeMessage(1, getEdgeIndexCollection());
+      }
+      if (fulltextIndexCollection_ != null) {
+        output.writeMessage(2, getFulltextIndexCollection());
+      }
+      if (rangerAuditsCollection_ != null) {
+        output.writeMessage(3, getRangerAuditsCollection());
+      }
+      if (vertexIndexCollection_ != null) {
+        output.writeMessage(4, getVertexIndexCollection());
+      }
+      if (edgeIndexCollectionDelete_ != null) {
+        output.writeMessage(5, getEdgeIndexCollectionDelete());
+      }
+      if (fulltextIndexCollectionDelete_ != null) {
+        output.writeMessage(6, getFulltextIndexCollectionDelete());
+      }
+      if (rangerAuditsCollectionDelete_ != null) {
+        output.writeMessage(7, getRangerAuditsCollectionDelete());
+      }
+      if (vertexIndexCollectionDelete_ != null) {
+        output.writeMessage(8, getVertexIndexCollectionDelete());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (edgeIndexCollection_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getEdgeIndexCollection());
+      }
+      if (fulltextIndexCollection_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getFulltextIndexCollection());
+      }
+      if (rangerAuditsCollection_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getRangerAuditsCollection());
+      }
+      if (vertexIndexCollection_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getVertexIndexCollection());
+      }
+      if (edgeIndexCollectionDelete_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(5, getEdgeIndexCollectionDelete());
+      }
+      if (fulltextIndexCollectionDelete_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(6, getFulltextIndexCollectionDelete());
+      }
+      if (rangerAuditsCollectionDelete_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(7, getRangerAuditsCollectionDelete());
+      }
+      if (vertexIndexCollectionDelete_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(8, getVertexIndexCollectionDelete());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState) obj;
+
+      if (hasEdgeIndexCollection() != other.hasEdgeIndexCollection()) return false;
+      if (hasEdgeIndexCollection()) {
+        if (!getEdgeIndexCollection()
+            .equals(other.getEdgeIndexCollection())) return false;
+      }
+      if (hasFulltextIndexCollection() != other.hasFulltextIndexCollection()) return false;
+      if (hasFulltextIndexCollection()) {
+        if (!getFulltextIndexCollection()
+            .equals(other.getFulltextIndexCollection())) return false;
+      }
+      if (hasRangerAuditsCollection() != other.hasRangerAuditsCollection()) return false;
+      if (hasRangerAuditsCollection()) {
+        if (!getRangerAuditsCollection()
+            .equals(other.getRangerAuditsCollection())) return false;
+      }
+      if (hasVertexIndexCollection() != other.hasVertexIndexCollection()) return false;
+      if (hasVertexIndexCollection()) {
+        if (!getVertexIndexCollection()
+            .equals(other.getVertexIndexCollection())) return false;
+      }
+      if (hasEdgeIndexCollectionDelete() != other.hasEdgeIndexCollectionDelete()) return false;
+      if (hasEdgeIndexCollectionDelete()) {
+        if (!getEdgeIndexCollectionDelete()
+            .equals(other.getEdgeIndexCollectionDelete())) return false;
+      }
+      if (hasFulltextIndexCollectionDelete() != other.hasFulltextIndexCollectionDelete()) return false;
+      if (hasFulltextIndexCollectionDelete()) {
+        if (!getFulltextIndexCollectionDelete()
+            .equals(other.getFulltextIndexCollectionDelete())) return false;
+      }
+      if (hasRangerAuditsCollectionDelete() != other.hasRangerAuditsCollectionDelete()) return false;
+      if (hasRangerAuditsCollectionDelete()) {
+        if (!getRangerAuditsCollectionDelete()
+            .equals(other.getRangerAuditsCollectionDelete())) return false;
+      }
+      if (hasVertexIndexCollectionDelete() != other.hasVertexIndexCollectionDelete()) return false;
+      if (hasVertexIndexCollectionDelete()) {
+        if (!getVertexIndexCollectionDelete()
+            .equals(other.getVertexIndexCollectionDelete())) return false;
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasEdgeIndexCollection()) {
+        hash = (37 * hash) + EDGEINDEXCOLLECTION_FIELD_NUMBER;
+        hash = (53 * hash) + getEdgeIndexCollection().hashCode();
+      }
+      if (hasFulltextIndexCollection()) {
+        hash = (37 * hash) + FULLTEXTINDEXCOLLECTION_FIELD_NUMBER;
+        hash = (53 * hash) + getFulltextIndexCollection().hashCode();
+      }
+      if (hasRangerAuditsCollection()) {
+        hash = (37 * hash) + RANGERAUDITSCOLLECTION_FIELD_NUMBER;
+        hash = (53 * hash) + getRangerAuditsCollection().hashCode();
+      }
+      if (hasVertexIndexCollection()) {
+        hash = (37 * hash) + VERTEXINDEXCOLLECTION_FIELD_NUMBER;
+        hash = (53 * hash) + getVertexIndexCollection().hashCode();
+      }
+      if (hasEdgeIndexCollectionDelete()) {
+        hash = (37 * hash) + EDGEINDEXCOLLECTIONDELETE_FIELD_NUMBER;
+        hash = (53 * hash) + getEdgeIndexCollectionDelete().hashCode();
+      }
+      if (hasFulltextIndexCollectionDelete()) {
+        hash = (37 * hash) + FULLTEXTINDEXCOLLECTIONDELETE_FIELD_NUMBER;
+        hash = (53 * hash) + getFulltextIndexCollectionDelete().hashCode();
+      }
+      if (hasRangerAuditsCollectionDelete()) {
+        hash = (37 * hash) + RANGERAUDITSCOLLECTIONDELETE_FIELD_NUMBER;
+        hash = (53 * hash) + getRangerAuditsCollectionDelete().hashCode();
+      }
+      if (hasVertexIndexCollectionDelete()) {
+        hash = (37 * hash) + VERTEXINDEXCOLLECTIONDELETE_FIELD_NUMBER;
+        hash = (53 * hash) + getVertexIndexCollectionDelete().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * SolrBackupRestoreState
+     * </pre>
+     *
+     * Protobuf type {@code datalakedr.SolrBackupRestoreState}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:datalakedr.SolrBackupRestoreState)
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreStateOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_SolrBackupRestoreState_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_SolrBackupRestoreState_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (edgeIndexCollectionBuilder_ == null) {
+          edgeIndexCollection_ = null;
+        } else {
+          edgeIndexCollection_ = null;
+          edgeIndexCollectionBuilder_ = null;
+        }
+        if (fulltextIndexCollectionBuilder_ == null) {
+          fulltextIndexCollection_ = null;
+        } else {
+          fulltextIndexCollection_ = null;
+          fulltextIndexCollectionBuilder_ = null;
+        }
+        if (rangerAuditsCollectionBuilder_ == null) {
+          rangerAuditsCollection_ = null;
+        } else {
+          rangerAuditsCollection_ = null;
+          rangerAuditsCollectionBuilder_ = null;
+        }
+        if (vertexIndexCollectionBuilder_ == null) {
+          vertexIndexCollection_ = null;
+        } else {
+          vertexIndexCollection_ = null;
+          vertexIndexCollectionBuilder_ = null;
+        }
+        if (edgeIndexCollectionDeleteBuilder_ == null) {
+          edgeIndexCollectionDelete_ = null;
+        } else {
+          edgeIndexCollectionDelete_ = null;
+          edgeIndexCollectionDeleteBuilder_ = null;
+        }
+        if (fulltextIndexCollectionDeleteBuilder_ == null) {
+          fulltextIndexCollectionDelete_ = null;
+        } else {
+          fulltextIndexCollectionDelete_ = null;
+          fulltextIndexCollectionDeleteBuilder_ = null;
+        }
+        if (rangerAuditsCollectionDeleteBuilder_ == null) {
+          rangerAuditsCollectionDelete_ = null;
+        } else {
+          rangerAuditsCollectionDelete_ = null;
+          rangerAuditsCollectionDeleteBuilder_ = null;
+        }
+        if (vertexIndexCollectionDeleteBuilder_ == null) {
+          vertexIndexCollectionDelete_ = null;
+        } else {
+          vertexIndexCollectionDelete_ = null;
+          vertexIndexCollectionDeleteBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_SolrBackupRestoreState_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState build() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState buildPartial() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState(this);
+        if (edgeIndexCollectionBuilder_ == null) {
+          result.edgeIndexCollection_ = edgeIndexCollection_;
+        } else {
+          result.edgeIndexCollection_ = edgeIndexCollectionBuilder_.build();
+        }
+        if (fulltextIndexCollectionBuilder_ == null) {
+          result.fulltextIndexCollection_ = fulltextIndexCollection_;
+        } else {
+          result.fulltextIndexCollection_ = fulltextIndexCollectionBuilder_.build();
+        }
+        if (rangerAuditsCollectionBuilder_ == null) {
+          result.rangerAuditsCollection_ = rangerAuditsCollection_;
+        } else {
+          result.rangerAuditsCollection_ = rangerAuditsCollectionBuilder_.build();
+        }
+        if (vertexIndexCollectionBuilder_ == null) {
+          result.vertexIndexCollection_ = vertexIndexCollection_;
+        } else {
+          result.vertexIndexCollection_ = vertexIndexCollectionBuilder_.build();
+        }
+        if (edgeIndexCollectionDeleteBuilder_ == null) {
+          result.edgeIndexCollectionDelete_ = edgeIndexCollectionDelete_;
+        } else {
+          result.edgeIndexCollectionDelete_ = edgeIndexCollectionDeleteBuilder_.build();
+        }
+        if (fulltextIndexCollectionDeleteBuilder_ == null) {
+          result.fulltextIndexCollectionDelete_ = fulltextIndexCollectionDelete_;
+        } else {
+          result.fulltextIndexCollectionDelete_ = fulltextIndexCollectionDeleteBuilder_.build();
+        }
+        if (rangerAuditsCollectionDeleteBuilder_ == null) {
+          result.rangerAuditsCollectionDelete_ = rangerAuditsCollectionDelete_;
+        } else {
+          result.rangerAuditsCollectionDelete_ = rangerAuditsCollectionDeleteBuilder_.build();
+        }
+        if (vertexIndexCollectionDeleteBuilder_ == null) {
+          result.vertexIndexCollectionDelete_ = vertexIndexCollectionDelete_;
+        } else {
+          result.vertexIndexCollectionDelete_ = vertexIndexCollectionDeleteBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState) {
+          return mergeFrom((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState other) {
+        if (other == com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.getDefaultInstance()) return this;
+        if (other.hasEdgeIndexCollection()) {
+          mergeEdgeIndexCollection(other.getEdgeIndexCollection());
+        }
+        if (other.hasFulltextIndexCollection()) {
+          mergeFulltextIndexCollection(other.getFulltextIndexCollection());
+        }
+        if (other.hasRangerAuditsCollection()) {
+          mergeRangerAuditsCollection(other.getRangerAuditsCollection());
+        }
+        if (other.hasVertexIndexCollection()) {
+          mergeVertexIndexCollection(other.getVertexIndexCollection());
+        }
+        if (other.hasEdgeIndexCollectionDelete()) {
+          mergeEdgeIndexCollectionDelete(other.getEdgeIndexCollectionDelete());
+        }
+        if (other.hasFulltextIndexCollectionDelete()) {
+          mergeFulltextIndexCollectionDelete(other.getFulltextIndexCollectionDelete());
+        }
+        if (other.hasRangerAuditsCollectionDelete()) {
+          mergeRangerAuditsCollectionDelete(other.getRangerAuditsCollectionDelete());
+        }
+        if (other.hasVertexIndexCollectionDelete()) {
+          mergeVertexIndexCollectionDelete(other.getVertexIndexCollectionDelete());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus edgeIndexCollection_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> edgeIndexCollectionBuilder_;
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+       * @return Whether the edgeIndexCollection field is set.
+       */
+      public boolean hasEdgeIndexCollection() {
+        return edgeIndexCollectionBuilder_ != null || edgeIndexCollection_ != null;
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+       * @return The edgeIndexCollection.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getEdgeIndexCollection() {
+        if (edgeIndexCollectionBuilder_ == null) {
+          return edgeIndexCollection_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : edgeIndexCollection_;
+        } else {
+          return edgeIndexCollectionBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+       */
+      public Builder setEdgeIndexCollection(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (edgeIndexCollectionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          edgeIndexCollection_ = value;
+          onChanged();
+        } else {
+          edgeIndexCollectionBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+       */
+      public Builder setEdgeIndexCollection(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (edgeIndexCollectionBuilder_ == null) {
+          edgeIndexCollection_ = builderForValue.build();
+          onChanged();
+        } else {
+          edgeIndexCollectionBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+       */
+      public Builder mergeEdgeIndexCollection(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (edgeIndexCollectionBuilder_ == null) {
+          if (edgeIndexCollection_ != null) {
+            edgeIndexCollection_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(edgeIndexCollection_).mergeFrom(value).buildPartial();
+          } else {
+            edgeIndexCollection_ = value;
+          }
+          onChanged();
+        } else {
+          edgeIndexCollectionBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+       */
+      public Builder clearEdgeIndexCollection() {
+        if (edgeIndexCollectionBuilder_ == null) {
+          edgeIndexCollection_ = null;
+          onChanged();
+        } else {
+          edgeIndexCollection_ = null;
+          edgeIndexCollectionBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getEdgeIndexCollectionBuilder() {
+        
+        onChanged();
+        return getEdgeIndexCollectionFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getEdgeIndexCollectionOrBuilder() {
+        if (edgeIndexCollectionBuilder_ != null) {
+          return edgeIndexCollectionBuilder_.getMessageOrBuilder();
+        } else {
+          return edgeIndexCollection_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : edgeIndexCollection_;
+        }
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollection = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getEdgeIndexCollectionFieldBuilder() {
+        if (edgeIndexCollectionBuilder_ == null) {
+          edgeIndexCollectionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getEdgeIndexCollection(),
+                  getParentForChildren(),
+                  isClean());
+          edgeIndexCollection_ = null;
+        }
+        return edgeIndexCollectionBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus fulltextIndexCollection_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> fulltextIndexCollectionBuilder_;
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+       * @return Whether the fulltextIndexCollection field is set.
+       */
+      public boolean hasFulltextIndexCollection() {
+        return fulltextIndexCollectionBuilder_ != null || fulltextIndexCollection_ != null;
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+       * @return The fulltextIndexCollection.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getFulltextIndexCollection() {
+        if (fulltextIndexCollectionBuilder_ == null) {
+          return fulltextIndexCollection_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : fulltextIndexCollection_;
+        } else {
+          return fulltextIndexCollectionBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+       */
+      public Builder setFulltextIndexCollection(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (fulltextIndexCollectionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          fulltextIndexCollection_ = value;
+          onChanged();
+        } else {
+          fulltextIndexCollectionBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+       */
+      public Builder setFulltextIndexCollection(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (fulltextIndexCollectionBuilder_ == null) {
+          fulltextIndexCollection_ = builderForValue.build();
+          onChanged();
+        } else {
+          fulltextIndexCollectionBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+       */
+      public Builder mergeFulltextIndexCollection(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (fulltextIndexCollectionBuilder_ == null) {
+          if (fulltextIndexCollection_ != null) {
+            fulltextIndexCollection_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(fulltextIndexCollection_).mergeFrom(value).buildPartial();
+          } else {
+            fulltextIndexCollection_ = value;
+          }
+          onChanged();
+        } else {
+          fulltextIndexCollectionBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+       */
+      public Builder clearFulltextIndexCollection() {
+        if (fulltextIndexCollectionBuilder_ == null) {
+          fulltextIndexCollection_ = null;
+          onChanged();
+        } else {
+          fulltextIndexCollection_ = null;
+          fulltextIndexCollectionBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getFulltextIndexCollectionBuilder() {
+        
+        onChanged();
+        return getFulltextIndexCollectionFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getFulltextIndexCollectionOrBuilder() {
+        if (fulltextIndexCollectionBuilder_ != null) {
+          return fulltextIndexCollectionBuilder_.getMessageOrBuilder();
+        } else {
+          return fulltextIndexCollection_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : fulltextIndexCollection_;
+        }
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollection = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getFulltextIndexCollectionFieldBuilder() {
+        if (fulltextIndexCollectionBuilder_ == null) {
+          fulltextIndexCollectionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getFulltextIndexCollection(),
+                  getParentForChildren(),
+                  isClean());
+          fulltextIndexCollection_ = null;
+        }
+        return fulltextIndexCollectionBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus rangerAuditsCollection_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> rangerAuditsCollectionBuilder_;
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+       * @return Whether the rangerAuditsCollection field is set.
+       */
+      public boolean hasRangerAuditsCollection() {
+        return rangerAuditsCollectionBuilder_ != null || rangerAuditsCollection_ != null;
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+       * @return The rangerAuditsCollection.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getRangerAuditsCollection() {
+        if (rangerAuditsCollectionBuilder_ == null) {
+          return rangerAuditsCollection_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : rangerAuditsCollection_;
+        } else {
+          return rangerAuditsCollectionBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+       */
+      public Builder setRangerAuditsCollection(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (rangerAuditsCollectionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          rangerAuditsCollection_ = value;
+          onChanged();
+        } else {
+          rangerAuditsCollectionBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+       */
+      public Builder setRangerAuditsCollection(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (rangerAuditsCollectionBuilder_ == null) {
+          rangerAuditsCollection_ = builderForValue.build();
+          onChanged();
+        } else {
+          rangerAuditsCollectionBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+       */
+      public Builder mergeRangerAuditsCollection(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (rangerAuditsCollectionBuilder_ == null) {
+          if (rangerAuditsCollection_ != null) {
+            rangerAuditsCollection_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(rangerAuditsCollection_).mergeFrom(value).buildPartial();
+          } else {
+            rangerAuditsCollection_ = value;
+          }
+          onChanged();
+        } else {
+          rangerAuditsCollectionBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+       */
+      public Builder clearRangerAuditsCollection() {
+        if (rangerAuditsCollectionBuilder_ == null) {
+          rangerAuditsCollection_ = null;
+          onChanged();
+        } else {
+          rangerAuditsCollection_ = null;
+          rangerAuditsCollectionBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getRangerAuditsCollectionBuilder() {
+        
+        onChanged();
+        return getRangerAuditsCollectionFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getRangerAuditsCollectionOrBuilder() {
+        if (rangerAuditsCollectionBuilder_ != null) {
+          return rangerAuditsCollectionBuilder_.getMessageOrBuilder();
+        } else {
+          return rangerAuditsCollection_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : rangerAuditsCollection_;
+        }
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollection = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getRangerAuditsCollectionFieldBuilder() {
+        if (rangerAuditsCollectionBuilder_ == null) {
+          rangerAuditsCollectionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getRangerAuditsCollection(),
+                  getParentForChildren(),
+                  isClean());
+          rangerAuditsCollection_ = null;
+        }
+        return rangerAuditsCollectionBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus vertexIndexCollection_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> vertexIndexCollectionBuilder_;
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+       * @return Whether the vertexIndexCollection field is set.
+       */
+      public boolean hasVertexIndexCollection() {
+        return vertexIndexCollectionBuilder_ != null || vertexIndexCollection_ != null;
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+       * @return The vertexIndexCollection.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getVertexIndexCollection() {
+        if (vertexIndexCollectionBuilder_ == null) {
+          return vertexIndexCollection_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : vertexIndexCollection_;
+        } else {
+          return vertexIndexCollectionBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+       */
+      public Builder setVertexIndexCollection(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (vertexIndexCollectionBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          vertexIndexCollection_ = value;
+          onChanged();
+        } else {
+          vertexIndexCollectionBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+       */
+      public Builder setVertexIndexCollection(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (vertexIndexCollectionBuilder_ == null) {
+          vertexIndexCollection_ = builderForValue.build();
+          onChanged();
+        } else {
+          vertexIndexCollectionBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+       */
+      public Builder mergeVertexIndexCollection(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (vertexIndexCollectionBuilder_ == null) {
+          if (vertexIndexCollection_ != null) {
+            vertexIndexCollection_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(vertexIndexCollection_).mergeFrom(value).buildPartial();
+          } else {
+            vertexIndexCollection_ = value;
+          }
+          onChanged();
+        } else {
+          vertexIndexCollectionBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+       */
+      public Builder clearVertexIndexCollection() {
+        if (vertexIndexCollectionBuilder_ == null) {
+          vertexIndexCollection_ = null;
+          onChanged();
+        } else {
+          vertexIndexCollection_ = null;
+          vertexIndexCollectionBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getVertexIndexCollectionBuilder() {
+        
+        onChanged();
+        return getVertexIndexCollectionFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getVertexIndexCollectionOrBuilder() {
+        if (vertexIndexCollectionBuilder_ != null) {
+          return vertexIndexCollectionBuilder_.getMessageOrBuilder();
+        } else {
+          return vertexIndexCollection_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : vertexIndexCollection_;
+        }
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollection = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getVertexIndexCollectionFieldBuilder() {
+        if (vertexIndexCollectionBuilder_ == null) {
+          vertexIndexCollectionBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getVertexIndexCollection(),
+                  getParentForChildren(),
+                  isClean());
+          vertexIndexCollection_ = null;
+        }
+        return vertexIndexCollectionBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus edgeIndexCollectionDelete_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> edgeIndexCollectionDeleteBuilder_;
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+       * @return Whether the edgeIndexCollectionDelete field is set.
+       */
+      public boolean hasEdgeIndexCollectionDelete() {
+        return edgeIndexCollectionDeleteBuilder_ != null || edgeIndexCollectionDelete_ != null;
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+       * @return The edgeIndexCollectionDelete.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getEdgeIndexCollectionDelete() {
+        if (edgeIndexCollectionDeleteBuilder_ == null) {
+          return edgeIndexCollectionDelete_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : edgeIndexCollectionDelete_;
+        } else {
+          return edgeIndexCollectionDeleteBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+       */
+      public Builder setEdgeIndexCollectionDelete(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (edgeIndexCollectionDeleteBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          edgeIndexCollectionDelete_ = value;
+          onChanged();
+        } else {
+          edgeIndexCollectionDeleteBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+       */
+      public Builder setEdgeIndexCollectionDelete(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (edgeIndexCollectionDeleteBuilder_ == null) {
+          edgeIndexCollectionDelete_ = builderForValue.build();
+          onChanged();
+        } else {
+          edgeIndexCollectionDeleteBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+       */
+      public Builder mergeEdgeIndexCollectionDelete(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (edgeIndexCollectionDeleteBuilder_ == null) {
+          if (edgeIndexCollectionDelete_ != null) {
+            edgeIndexCollectionDelete_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(edgeIndexCollectionDelete_).mergeFrom(value).buildPartial();
+          } else {
+            edgeIndexCollectionDelete_ = value;
+          }
+          onChanged();
+        } else {
+          edgeIndexCollectionDeleteBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+       */
+      public Builder clearEdgeIndexCollectionDelete() {
+        if (edgeIndexCollectionDeleteBuilder_ == null) {
+          edgeIndexCollectionDelete_ = null;
+          onChanged();
+        } else {
+          edgeIndexCollectionDelete_ = null;
+          edgeIndexCollectionDeleteBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getEdgeIndexCollectionDeleteBuilder() {
+        
+        onChanged();
+        return getEdgeIndexCollectionDeleteFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getEdgeIndexCollectionDeleteOrBuilder() {
+        if (edgeIndexCollectionDeleteBuilder_ != null) {
+          return edgeIndexCollectionDeleteBuilder_.getMessageOrBuilder();
+        } else {
+          return edgeIndexCollectionDelete_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : edgeIndexCollectionDelete_;
+        }
+      }
+      /**
+       * <pre>
+       * State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus edgeIndexCollectionDelete = 5;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getEdgeIndexCollectionDeleteFieldBuilder() {
+        if (edgeIndexCollectionDeleteBuilder_ == null) {
+          edgeIndexCollectionDeleteBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getEdgeIndexCollectionDelete(),
+                  getParentForChildren(),
+                  isClean());
+          edgeIndexCollectionDelete_ = null;
+        }
+        return edgeIndexCollectionDeleteBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus fulltextIndexCollectionDelete_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> fulltextIndexCollectionDeleteBuilder_;
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+       * @return Whether the fulltextIndexCollectionDelete field is set.
+       */
+      public boolean hasFulltextIndexCollectionDelete() {
+        return fulltextIndexCollectionDeleteBuilder_ != null || fulltextIndexCollectionDelete_ != null;
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+       * @return The fulltextIndexCollectionDelete.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getFulltextIndexCollectionDelete() {
+        if (fulltextIndexCollectionDeleteBuilder_ == null) {
+          return fulltextIndexCollectionDelete_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : fulltextIndexCollectionDelete_;
+        } else {
+          return fulltextIndexCollectionDeleteBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+       */
+      public Builder setFulltextIndexCollectionDelete(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (fulltextIndexCollectionDeleteBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          fulltextIndexCollectionDelete_ = value;
+          onChanged();
+        } else {
+          fulltextIndexCollectionDeleteBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+       */
+      public Builder setFulltextIndexCollectionDelete(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (fulltextIndexCollectionDeleteBuilder_ == null) {
+          fulltextIndexCollectionDelete_ = builderForValue.build();
+          onChanged();
+        } else {
+          fulltextIndexCollectionDeleteBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+       */
+      public Builder mergeFulltextIndexCollectionDelete(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (fulltextIndexCollectionDeleteBuilder_ == null) {
+          if (fulltextIndexCollectionDelete_ != null) {
+            fulltextIndexCollectionDelete_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(fulltextIndexCollectionDelete_).mergeFrom(value).buildPartial();
+          } else {
+            fulltextIndexCollectionDelete_ = value;
+          }
+          onChanged();
+        } else {
+          fulltextIndexCollectionDeleteBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+       */
+      public Builder clearFulltextIndexCollectionDelete() {
+        if (fulltextIndexCollectionDeleteBuilder_ == null) {
+          fulltextIndexCollectionDelete_ = null;
+          onChanged();
+        } else {
+          fulltextIndexCollectionDelete_ = null;
+          fulltextIndexCollectionDeleteBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getFulltextIndexCollectionDeleteBuilder() {
+        
+        onChanged();
+        return getFulltextIndexCollectionDeleteFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getFulltextIndexCollectionDeleteOrBuilder() {
+        if (fulltextIndexCollectionDeleteBuilder_ != null) {
+          return fulltextIndexCollectionDeleteBuilder_.getMessageOrBuilder();
+        } else {
+          return fulltextIndexCollectionDelete_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : fulltextIndexCollectionDelete_;
+        }
+      }
+      /**
+       * <pre>
+       * State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getFulltextIndexCollectionDeleteFieldBuilder() {
+        if (fulltextIndexCollectionDeleteBuilder_ == null) {
+          fulltextIndexCollectionDeleteBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getFulltextIndexCollectionDelete(),
+                  getParentForChildren(),
+                  isClean());
+          fulltextIndexCollectionDelete_ = null;
+        }
+        return fulltextIndexCollectionDeleteBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus rangerAuditsCollectionDelete_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> rangerAuditsCollectionDeleteBuilder_;
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+       * @return Whether the rangerAuditsCollectionDelete field is set.
+       */
+      public boolean hasRangerAuditsCollectionDelete() {
+        return rangerAuditsCollectionDeleteBuilder_ != null || rangerAuditsCollectionDelete_ != null;
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+       * @return The rangerAuditsCollectionDelete.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getRangerAuditsCollectionDelete() {
+        if (rangerAuditsCollectionDeleteBuilder_ == null) {
+          return rangerAuditsCollectionDelete_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : rangerAuditsCollectionDelete_;
+        } else {
+          return rangerAuditsCollectionDeleteBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+       */
+      public Builder setRangerAuditsCollectionDelete(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (rangerAuditsCollectionDeleteBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          rangerAuditsCollectionDelete_ = value;
+          onChanged();
+        } else {
+          rangerAuditsCollectionDeleteBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+       */
+      public Builder setRangerAuditsCollectionDelete(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (rangerAuditsCollectionDeleteBuilder_ == null) {
+          rangerAuditsCollectionDelete_ = builderForValue.build();
+          onChanged();
+        } else {
+          rangerAuditsCollectionDeleteBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+       */
+      public Builder mergeRangerAuditsCollectionDelete(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (rangerAuditsCollectionDeleteBuilder_ == null) {
+          if (rangerAuditsCollectionDelete_ != null) {
+            rangerAuditsCollectionDelete_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(rangerAuditsCollectionDelete_).mergeFrom(value).buildPartial();
+          } else {
+            rangerAuditsCollectionDelete_ = value;
+          }
+          onChanged();
+        } else {
+          rangerAuditsCollectionDeleteBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+       */
+      public Builder clearRangerAuditsCollectionDelete() {
+        if (rangerAuditsCollectionDeleteBuilder_ == null) {
+          rangerAuditsCollectionDelete_ = null;
+          onChanged();
+        } else {
+          rangerAuditsCollectionDelete_ = null;
+          rangerAuditsCollectionDeleteBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getRangerAuditsCollectionDeleteBuilder() {
+        
+        onChanged();
+        return getRangerAuditsCollectionDeleteFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getRangerAuditsCollectionDeleteOrBuilder() {
+        if (rangerAuditsCollectionDeleteBuilder_ != null) {
+          return rangerAuditsCollectionDeleteBuilder_.getMessageOrBuilder();
+        } else {
+          return rangerAuditsCollectionDelete_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : rangerAuditsCollectionDelete_;
+        }
+      }
+      /**
+       * <pre>
+       * State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getRangerAuditsCollectionDeleteFieldBuilder() {
+        if (rangerAuditsCollectionDeleteBuilder_ == null) {
+          rangerAuditsCollectionDeleteBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getRangerAuditsCollectionDelete(),
+                  getParentForChildren(),
+                  isClean());
+          rangerAuditsCollectionDelete_ = null;
+        }
+        return rangerAuditsCollectionDeleteBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus vertexIndexCollectionDelete_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> vertexIndexCollectionDeleteBuilder_;
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+       * @return Whether the vertexIndexCollectionDelete field is set.
+       */
+      public boolean hasVertexIndexCollectionDelete() {
+        return vertexIndexCollectionDeleteBuilder_ != null || vertexIndexCollectionDelete_ != null;
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+       * @return The vertexIndexCollectionDelete.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getVertexIndexCollectionDelete() {
+        if (vertexIndexCollectionDeleteBuilder_ == null) {
+          return vertexIndexCollectionDelete_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : vertexIndexCollectionDelete_;
+        } else {
+          return vertexIndexCollectionDeleteBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+       */
+      public Builder setVertexIndexCollectionDelete(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (vertexIndexCollectionDeleteBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          vertexIndexCollectionDelete_ = value;
+          onChanged();
+        } else {
+          vertexIndexCollectionDeleteBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+       */
+      public Builder setVertexIndexCollectionDelete(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (vertexIndexCollectionDeleteBuilder_ == null) {
+          vertexIndexCollectionDelete_ = builderForValue.build();
+          onChanged();
+        } else {
+          vertexIndexCollectionDeleteBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+       */
+      public Builder mergeVertexIndexCollectionDelete(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (vertexIndexCollectionDeleteBuilder_ == null) {
+          if (vertexIndexCollectionDelete_ != null) {
+            vertexIndexCollectionDelete_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(vertexIndexCollectionDelete_).mergeFrom(value).buildPartial();
+          } else {
+            vertexIndexCollectionDelete_ = value;
+          }
+          onChanged();
+        } else {
+          vertexIndexCollectionDeleteBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+       */
+      public Builder clearVertexIndexCollectionDelete() {
+        if (vertexIndexCollectionDeleteBuilder_ == null) {
+          vertexIndexCollectionDelete_ = null;
+          onChanged();
+        } else {
+          vertexIndexCollectionDelete_ = null;
+          vertexIndexCollectionDeleteBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getVertexIndexCollectionDeleteBuilder() {
+        
+        onChanged();
+        return getVertexIndexCollectionDeleteFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getVertexIndexCollectionDeleteOrBuilder() {
+        if (vertexIndexCollectionDeleteBuilder_ != null) {
+          return vertexIndexCollectionDeleteBuilder_.getMessageOrBuilder();
+        } else {
+          return vertexIndexCollectionDelete_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : vertexIndexCollectionDelete_;
+        }
+      }
+      /**
+       * <pre>
+       * State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus vertexIndexCollectionDelete = 8;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getVertexIndexCollectionDeleteFieldBuilder() {
+        if (vertexIndexCollectionDeleteBuilder_ == null) {
+          vertexIndexCollectionDeleteBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getVertexIndexCollectionDelete(),
+                  getParentForChildren(),
+                  isClean());
+          vertexIndexCollectionDelete_ = null;
+        }
+        return vertexIndexCollectionDeleteBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:datalakedr.SolrBackupRestoreState)
+    }
+
+    // @@protoc_insertion_point(class_scope:datalakedr.SolrBackupRestoreState)
+    private static final com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState();
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<SolrBackupRestoreState>
+        PARSER = new com.google.protobuf.AbstractParser<SolrBackupRestoreState>() {
+      @java.lang.Override
+      public SolrBackupRestoreState parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new SolrBackupRestoreState(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<SolrBackupRestoreState> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<SolrBackupRestoreState> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DatabaseBackupRestoreStateOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:datalakedr.DatabaseBackupRestoreState)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * State of the database backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+     * @return Whether the database field is set.
+     */
+    boolean hasDatabase();
+    /**
+     * <pre>
+     * State of the database backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+     * @return The database.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getDatabase();
+    /**
+     * <pre>
+     * State of the database backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getDatabaseOrBuilder();
+  }
+  /**
+   * <pre>
+   * DatabaseBackupRestoreState
+   * </pre>
+   *
+   * Protobuf type {@code datalakedr.DatabaseBackupRestoreState}
+   */
+  public static final class DatabaseBackupRestoreState extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:datalakedr.DatabaseBackupRestoreState)
+      DatabaseBackupRestoreStateOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DatabaseBackupRestoreState.newBuilder() to construct.
+    private DatabaseBackupRestoreState(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DatabaseBackupRestoreState() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DatabaseBackupRestoreState();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private DatabaseBackupRestoreState(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder subBuilder = null;
+              if (database_ != null) {
+                subBuilder = database_.toBuilder();
+              }
+              database_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(database_);
+                database_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_DatabaseBackupRestoreState_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_DatabaseBackupRestoreState_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.Builder.class);
+    }
+
+    public static final int DATABASE_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus database_;
+    /**
+     * <pre>
+     * State of the database backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+     * @return Whether the database field is set.
+     */
+    @java.lang.Override
+    public boolean hasDatabase() {
+      return database_ != null;
+    }
+    /**
+     * <pre>
+     * State of the database backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+     * @return The database.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getDatabase() {
+      return database_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : database_;
+    }
+    /**
+     * <pre>
+     * State of the database backup.
+     * </pre>
+     *
+     * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getDatabaseOrBuilder() {
+      return getDatabase();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (database_ != null) {
+        output.writeMessage(1, getDatabase());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (database_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getDatabase());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState) obj;
+
+      if (hasDatabase() != other.hasDatabase()) return false;
+      if (hasDatabase()) {
+        if (!getDatabase()
+            .equals(other.getDatabase())) return false;
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasDatabase()) {
+        hash = (37 * hash) + DATABASE_FIELD_NUMBER;
+        hash = (53 * hash) + getDatabase().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * DatabaseBackupRestoreState
+     * </pre>
+     *
+     * Protobuf type {@code datalakedr.DatabaseBackupRestoreState}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:datalakedr.DatabaseBackupRestoreState)
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreStateOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_DatabaseBackupRestoreState_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_DatabaseBackupRestoreState_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (databaseBuilder_ == null) {
+          database_ = null;
+        } else {
+          database_ = null;
+          databaseBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_DatabaseBackupRestoreState_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState build() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState buildPartial() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState(this);
+        if (databaseBuilder_ == null) {
+          result.database_ = database_;
+        } else {
+          result.database_ = databaseBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState) {
+          return mergeFrom((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState other) {
+        if (other == com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.getDefaultInstance()) return this;
+        if (other.hasDatabase()) {
+          mergeDatabase(other.getDatabase());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus database_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> databaseBuilder_;
+      /**
+       * <pre>
+       * State of the database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+       * @return Whether the database field is set.
+       */
+      public boolean hasDatabase() {
+        return databaseBuilder_ != null || database_ != null;
+      }
+      /**
+       * <pre>
+       * State of the database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+       * @return The database.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus getDatabase() {
+        if (databaseBuilder_ == null) {
+          return database_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : database_;
+        } else {
+          return databaseBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * State of the database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+       */
+      public Builder setDatabase(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (databaseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          database_ = value;
+          onChanged();
+        } else {
+          databaseBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+       */
+      public Builder setDatabase(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder builderForValue) {
+        if (databaseBuilder_ == null) {
+          database_ = builderForValue.build();
+          onChanged();
+        } else {
+          databaseBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+       */
+      public Builder mergeDatabase(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus value) {
+        if (databaseBuilder_ == null) {
+          if (database_ != null) {
+            database_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.newBuilder(database_).mergeFrom(value).buildPartial();
+          } else {
+            database_ = value;
+          }
+          onChanged();
+        } else {
+          databaseBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+       */
+      public Builder clearDatabase() {
+        if (databaseBuilder_ == null) {
+          database_ = null;
+          onChanged();
+        } else {
+          database_ = null;
+          databaseBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder getDatabaseBuilder() {
+        
+        onChanged();
+        return getDatabaseFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * State of the database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder getDatabaseOrBuilder() {
+        if (databaseBuilder_ != null) {
+          return databaseBuilder_.getMessageOrBuilder();
+        } else {
+          return database_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.getDefaultInstance() : database_;
+        }
+      }
+      /**
+       * <pre>
+       * State of the database backup.
+       * </pre>
+       *
+       * <code>.datalakedr.BackupRestoreOperationStatus database = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder> 
+          getDatabaseFieldBuilder() {
+        if (databaseBuilder_ == null) {
+          databaseBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatus.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupRestoreOperationStatusOrBuilder>(
+                  getDatabase(),
+                  getParentForChildren(),
+                  isClean());
+          database_ = null;
+        }
+        return databaseBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:datalakedr.DatabaseBackupRestoreState)
+    }
+
+    // @@protoc_insertion_point(class_scope:datalakedr.DatabaseBackupRestoreState)
+    private static final com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState();
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DatabaseBackupRestoreState>
+        PARSER = new com.google.protobuf.AbstractParser<DatabaseBackupRestoreState>() {
+      @java.lang.Override
+      public DatabaseBackupRestoreState parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new DatabaseBackupRestoreState(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<DatabaseBackupRestoreState> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DatabaseBackupRestoreState> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface InternalBackupRestoreStateOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:datalakedr.InternalBackupRestoreState)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Admin operations
+     * </pre>
+     *
+     * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+     * @return Whether the adminOperations field is set.
+     */
+    boolean hasAdminOperations();
+    /**
+     * <pre>
+     * Admin operations
+     * </pre>
+     *
+     * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+     * @return The adminOperations.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState getAdminOperations();
+    /**
+     * <pre>
+     * Admin operations
+     * </pre>
+     *
+     * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreStateOrBuilder getAdminOperationsOrBuilder();
+
+    /**
+     * <pre>
+     * Hbase backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+     * @return Whether the hbase field is set.
+     */
+    boolean hasHbase();
+    /**
+     * <pre>
+     * Hbase backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+     * @return The hbase.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState getHbase();
+    /**
+     * <pre>
+     * Hbase backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreStateOrBuilder getHbaseOrBuilder();
+
+    /**
+     * <pre>
+     * Solr backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+     * @return Whether the solr field is set.
+     */
+    boolean hasSolr();
+    /**
+     * <pre>
+     * Solr backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+     * @return The solr.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState getSolr();
+    /**
+     * <pre>
+     * Solr backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreStateOrBuilder getSolrOrBuilder();
+
+    /**
+     * <pre>
+     * Database backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+     * @return Whether the database field is set.
+     */
+    boolean hasDatabase();
+    /**
+     * <pre>
+     * Database backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+     * @return The database.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState getDatabase();
+    /**
+     * <pre>
+     * Database backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreStateOrBuilder getDatabaseOrBuilder();
+  }
+  /**
+   * <pre>
+   * InternalBackupRestoreState
+   * </pre>
+   *
+   * Protobuf type {@code datalakedr.InternalBackupRestoreState}
+   */
+  public static final class InternalBackupRestoreState extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:datalakedr.InternalBackupRestoreState)
+      InternalBackupRestoreStateOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use InternalBackupRestoreState.newBuilder() to construct.
+    private InternalBackupRestoreState(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private InternalBackupRestoreState() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new InternalBackupRestoreState();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private InternalBackupRestoreState(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.Builder subBuilder = null;
+              if (adminOperations_ != null) {
+                subBuilder = adminOperations_.toBuilder();
+              }
+              adminOperations_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(adminOperations_);
+                adminOperations_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 18: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.Builder subBuilder = null;
+              if (hbase_ != null) {
+                subBuilder = hbase_.toBuilder();
+              }
+              hbase_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(hbase_);
+                hbase_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 26: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.Builder subBuilder = null;
+              if (solr_ != null) {
+                subBuilder = solr_.toBuilder();
+              }
+              solr_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(solr_);
+                solr_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 34: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.Builder subBuilder = null;
+              if (database_ != null) {
+                subBuilder = database_.toBuilder();
+              }
+              database_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(database_);
+                database_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_InternalBackupRestoreState_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_InternalBackupRestoreState_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder.class);
+    }
+
+    public static final int ADMINOPERATIONS_FIELD_NUMBER = 1;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState adminOperations_;
+    /**
+     * <pre>
+     * Admin operations
+     * </pre>
+     *
+     * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+     * @return Whether the adminOperations field is set.
+     */
+    @java.lang.Override
+    public boolean hasAdminOperations() {
+      return adminOperations_ != null;
+    }
+    /**
+     * <pre>
+     * Admin operations
+     * </pre>
+     *
+     * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+     * @return The adminOperations.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState getAdminOperations() {
+      return adminOperations_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.getDefaultInstance() : adminOperations_;
+    }
+    /**
+     * <pre>
+     * Admin operations
+     * </pre>
+     *
+     * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreStateOrBuilder getAdminOperationsOrBuilder() {
+      return getAdminOperations();
+    }
+
+    public static final int HBASE_FIELD_NUMBER = 2;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState hbase_;
+    /**
+     * <pre>
+     * Hbase backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+     * @return Whether the hbase field is set.
+     */
+    @java.lang.Override
+    public boolean hasHbase() {
+      return hbase_ != null;
+    }
+    /**
+     * <pre>
+     * Hbase backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+     * @return The hbase.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState getHbase() {
+      return hbase_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.getDefaultInstance() : hbase_;
+    }
+    /**
+     * <pre>
+     * Hbase backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreStateOrBuilder getHbaseOrBuilder() {
+      return getHbase();
+    }
+
+    public static final int SOLR_FIELD_NUMBER = 3;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState solr_;
+    /**
+     * <pre>
+     * Solr backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+     * @return Whether the solr field is set.
+     */
+    @java.lang.Override
+    public boolean hasSolr() {
+      return solr_ != null;
+    }
+    /**
+     * <pre>
+     * Solr backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+     * @return The solr.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState getSolr() {
+      return solr_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.getDefaultInstance() : solr_;
+    }
+    /**
+     * <pre>
+     * Solr backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreStateOrBuilder getSolrOrBuilder() {
+      return getSolr();
+    }
+
+    public static final int DATABASE_FIELD_NUMBER = 4;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState database_;
+    /**
+     * <pre>
+     * Database backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+     * @return Whether the database field is set.
+     */
+    @java.lang.Override
+    public boolean hasDatabase() {
+      return database_ != null;
+    }
+    /**
+     * <pre>
+     * Database backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+     * @return The database.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState getDatabase() {
+      return database_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.getDefaultInstance() : database_;
+    }
+    /**
+     * <pre>
+     * Database backup or restore
+     * </pre>
+     *
+     * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreStateOrBuilder getDatabaseOrBuilder() {
+      return getDatabase();
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (adminOperations_ != null) {
+        output.writeMessage(1, getAdminOperations());
+      }
+      if (hbase_ != null) {
+        output.writeMessage(2, getHbase());
+      }
+      if (solr_ != null) {
+        output.writeMessage(3, getSolr());
+      }
+      if (database_ != null) {
+        output.writeMessage(4, getDatabase());
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (adminOperations_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(1, getAdminOperations());
+      }
+      if (hbase_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, getHbase());
+      }
+      if (solr_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(3, getSolr());
+      }
+      if (database_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(4, getDatabase());
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState) obj;
+
+      if (hasAdminOperations() != other.hasAdminOperations()) return false;
+      if (hasAdminOperations()) {
+        if (!getAdminOperations()
+            .equals(other.getAdminOperations())) return false;
+      }
+      if (hasHbase() != other.hasHbase()) return false;
+      if (hasHbase()) {
+        if (!getHbase()
+            .equals(other.getHbase())) return false;
+      }
+      if (hasSolr() != other.hasSolr()) return false;
+      if (hasSolr()) {
+        if (!getSolr()
+            .equals(other.getSolr())) return false;
+      }
+      if (hasDatabase() != other.hasDatabase()) return false;
+      if (hasDatabase()) {
+        if (!getDatabase()
+            .equals(other.getDatabase())) return false;
+      }
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (hasAdminOperations()) {
+        hash = (37 * hash) + ADMINOPERATIONS_FIELD_NUMBER;
+        hash = (53 * hash) + getAdminOperations().hashCode();
+      }
+      if (hasHbase()) {
+        hash = (37 * hash) + HBASE_FIELD_NUMBER;
+        hash = (53 * hash) + getHbase().hashCode();
+      }
+      if (hasSolr()) {
+        hash = (37 * hash) + SOLR_FIELD_NUMBER;
+        hash = (53 * hash) + getSolr().hashCode();
+      }
+      if (hasDatabase()) {
+        hash = (37 * hash) + DATABASE_FIELD_NUMBER;
+        hash = (53 * hash) + getDatabase().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * InternalBackupRestoreState
+     * </pre>
+     *
+     * Protobuf type {@code datalakedr.InternalBackupRestoreState}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:datalakedr.InternalBackupRestoreState)
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_InternalBackupRestoreState_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_InternalBackupRestoreState_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        if (adminOperationsBuilder_ == null) {
+          adminOperations_ = null;
+        } else {
+          adminOperations_ = null;
+          adminOperationsBuilder_ = null;
+        }
+        if (hbaseBuilder_ == null) {
+          hbase_ = null;
+        } else {
+          hbase_ = null;
+          hbaseBuilder_ = null;
+        }
+        if (solrBuilder_ == null) {
+          solr_ = null;
+        } else {
+          solr_ = null;
+          solrBuilder_ = null;
+        }
+        if (databaseBuilder_ == null) {
+          database_ = null;
+        } else {
+          database_ = null;
+          databaseBuilder_ = null;
+        }
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_InternalBackupRestoreState_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState build() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState buildPartial() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState(this);
+        if (adminOperationsBuilder_ == null) {
+          result.adminOperations_ = adminOperations_;
+        } else {
+          result.adminOperations_ = adminOperationsBuilder_.build();
+        }
+        if (hbaseBuilder_ == null) {
+          result.hbase_ = hbase_;
+        } else {
+          result.hbase_ = hbaseBuilder_.build();
+        }
+        if (solrBuilder_ == null) {
+          result.solr_ = solr_;
+        } else {
+          result.solr_ = solrBuilder_.build();
+        }
+        if (databaseBuilder_ == null) {
+          result.database_ = database_;
+        } else {
+          result.database_ = databaseBuilder_.build();
+        }
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState) {
+          return mergeFrom((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState other) {
+        if (other == com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance()) return this;
+        if (other.hasAdminOperations()) {
+          mergeAdminOperations(other.getAdminOperations());
+        }
+        if (other.hasHbase()) {
+          mergeHbase(other.getHbase());
+        }
+        if (other.hasSolr()) {
+          mergeSolr(other.getSolr());
+        }
+        if (other.hasDatabase()) {
+          mergeDatabase(other.getDatabase());
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState adminOperations_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreStateOrBuilder> adminOperationsBuilder_;
+      /**
+       * <pre>
+       * Admin operations
+       * </pre>
+       *
+       * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+       * @return Whether the adminOperations field is set.
+       */
+      public boolean hasAdminOperations() {
+        return adminOperationsBuilder_ != null || adminOperations_ != null;
+      }
+      /**
+       * <pre>
+       * Admin operations
+       * </pre>
+       *
+       * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+       * @return The adminOperations.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState getAdminOperations() {
+        if (adminOperationsBuilder_ == null) {
+          return adminOperations_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.getDefaultInstance() : adminOperations_;
+        } else {
+          return adminOperationsBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Admin operations
+       * </pre>
+       *
+       * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+       */
+      public Builder setAdminOperations(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState value) {
+        if (adminOperationsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          adminOperations_ = value;
+          onChanged();
+        } else {
+          adminOperationsBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Admin operations
+       * </pre>
+       *
+       * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+       */
+      public Builder setAdminOperations(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.Builder builderForValue) {
+        if (adminOperationsBuilder_ == null) {
+          adminOperations_ = builderForValue.build();
+          onChanged();
+        } else {
+          adminOperationsBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Admin operations
+       * </pre>
+       *
+       * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+       */
+      public Builder mergeAdminOperations(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState value) {
+        if (adminOperationsBuilder_ == null) {
+          if (adminOperations_ != null) {
+            adminOperations_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.newBuilder(adminOperations_).mergeFrom(value).buildPartial();
+          } else {
+            adminOperations_ = value;
+          }
+          onChanged();
+        } else {
+          adminOperationsBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Admin operations
+       * </pre>
+       *
+       * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+       */
+      public Builder clearAdminOperations() {
+        if (adminOperationsBuilder_ == null) {
+          adminOperations_ = null;
+          onChanged();
+        } else {
+          adminOperations_ = null;
+          adminOperationsBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Admin operations
+       * </pre>
+       *
+       * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.Builder getAdminOperationsBuilder() {
+        
+        onChanged();
+        return getAdminOperationsFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Admin operations
+       * </pre>
+       *
+       * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreStateOrBuilder getAdminOperationsOrBuilder() {
+        if (adminOperationsBuilder_ != null) {
+          return adminOperationsBuilder_.getMessageOrBuilder();
+        } else {
+          return adminOperations_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.getDefaultInstance() : adminOperations_;
+        }
+      }
+      /**
+       * <pre>
+       * Admin operations
+       * </pre>
+       *
+       * <code>.datalakedr.AdminOperationsBackupRestoreState adminOperations = 1;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreStateOrBuilder> 
+          getAdminOperationsFieldBuilder() {
+        if (adminOperationsBuilder_ == null) {
+          adminOperationsBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.AdminOperationsBackupRestoreStateOrBuilder>(
+                  getAdminOperations(),
+                  getParentForChildren(),
+                  isClean());
+          adminOperations_ = null;
+        }
+        return adminOperationsBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState hbase_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreStateOrBuilder> hbaseBuilder_;
+      /**
+       * <pre>
+       * Hbase backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+       * @return Whether the hbase field is set.
+       */
+      public boolean hasHbase() {
+        return hbaseBuilder_ != null || hbase_ != null;
+      }
+      /**
+       * <pre>
+       * Hbase backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+       * @return The hbase.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState getHbase() {
+        if (hbaseBuilder_ == null) {
+          return hbase_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.getDefaultInstance() : hbase_;
+        } else {
+          return hbaseBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Hbase backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+       */
+      public Builder setHbase(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState value) {
+        if (hbaseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          hbase_ = value;
+          onChanged();
+        } else {
+          hbaseBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Hbase backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+       */
+      public Builder setHbase(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.Builder builderForValue) {
+        if (hbaseBuilder_ == null) {
+          hbase_ = builderForValue.build();
+          onChanged();
+        } else {
+          hbaseBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Hbase backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+       */
+      public Builder mergeHbase(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState value) {
+        if (hbaseBuilder_ == null) {
+          if (hbase_ != null) {
+            hbase_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.newBuilder(hbase_).mergeFrom(value).buildPartial();
+          } else {
+            hbase_ = value;
+          }
+          onChanged();
+        } else {
+          hbaseBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Hbase backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+       */
+      public Builder clearHbase() {
+        if (hbaseBuilder_ == null) {
+          hbase_ = null;
+          onChanged();
+        } else {
+          hbase_ = null;
+          hbaseBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Hbase backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.Builder getHbaseBuilder() {
+        
+        onChanged();
+        return getHbaseFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Hbase backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreStateOrBuilder getHbaseOrBuilder() {
+        if (hbaseBuilder_ != null) {
+          return hbaseBuilder_.getMessageOrBuilder();
+        } else {
+          return hbase_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.getDefaultInstance() : hbase_;
+        }
+      }
+      /**
+       * <pre>
+       * Hbase backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.HbaseBackupRestoreState hbase = 2;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreStateOrBuilder> 
+          getHbaseFieldBuilder() {
+        if (hbaseBuilder_ == null) {
+          hbaseBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.HbaseBackupRestoreStateOrBuilder>(
+                  getHbase(),
+                  getParentForChildren(),
+                  isClean());
+          hbase_ = null;
+        }
+        return hbaseBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState solr_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreStateOrBuilder> solrBuilder_;
+      /**
+       * <pre>
+       * Solr backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+       * @return Whether the solr field is set.
+       */
+      public boolean hasSolr() {
+        return solrBuilder_ != null || solr_ != null;
+      }
+      /**
+       * <pre>
+       * Solr backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+       * @return The solr.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState getSolr() {
+        if (solrBuilder_ == null) {
+          return solr_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.getDefaultInstance() : solr_;
+        } else {
+          return solrBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Solr backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+       */
+      public Builder setSolr(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState value) {
+        if (solrBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          solr_ = value;
+          onChanged();
+        } else {
+          solrBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Solr backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+       */
+      public Builder setSolr(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.Builder builderForValue) {
+        if (solrBuilder_ == null) {
+          solr_ = builderForValue.build();
+          onChanged();
+        } else {
+          solrBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Solr backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+       */
+      public Builder mergeSolr(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState value) {
+        if (solrBuilder_ == null) {
+          if (solr_ != null) {
+            solr_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.newBuilder(solr_).mergeFrom(value).buildPartial();
+          } else {
+            solr_ = value;
+          }
+          onChanged();
+        } else {
+          solrBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Solr backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+       */
+      public Builder clearSolr() {
+        if (solrBuilder_ == null) {
+          solr_ = null;
+          onChanged();
+        } else {
+          solr_ = null;
+          solrBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Solr backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.Builder getSolrBuilder() {
+        
+        onChanged();
+        return getSolrFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Solr backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreStateOrBuilder getSolrOrBuilder() {
+        if (solrBuilder_ != null) {
+          return solrBuilder_.getMessageOrBuilder();
+        } else {
+          return solr_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.getDefaultInstance() : solr_;
+        }
+      }
+      /**
+       * <pre>
+       * Solr backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.SolrBackupRestoreState solr = 3;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreStateOrBuilder> 
+          getSolrFieldBuilder() {
+        if (solrBuilder_ == null) {
+          solrBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SolrBackupRestoreStateOrBuilder>(
+                  getSolr(),
+                  getParentForChildren(),
+                  isClean());
+          solr_ = null;
+        }
+        return solrBuilder_;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState database_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreStateOrBuilder> databaseBuilder_;
+      /**
+       * <pre>
+       * Database backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+       * @return Whether the database field is set.
+       */
+      public boolean hasDatabase() {
+        return databaseBuilder_ != null || database_ != null;
+      }
+      /**
+       * <pre>
+       * Database backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+       * @return The database.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState getDatabase() {
+        if (databaseBuilder_ == null) {
+          return database_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.getDefaultInstance() : database_;
+        } else {
+          return databaseBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * Database backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+       */
+      public Builder setDatabase(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState value) {
+        if (databaseBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          database_ = value;
+          onChanged();
+        } else {
+          databaseBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Database backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+       */
+      public Builder setDatabase(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.Builder builderForValue) {
+        if (databaseBuilder_ == null) {
+          database_ = builderForValue.build();
+          onChanged();
+        } else {
+          databaseBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Database backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+       */
+      public Builder mergeDatabase(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState value) {
+        if (databaseBuilder_ == null) {
+          if (database_ != null) {
+            database_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.newBuilder(database_).mergeFrom(value).buildPartial();
+          } else {
+            database_ = value;
+          }
+          onChanged();
+        } else {
+          databaseBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Database backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+       */
+      public Builder clearDatabase() {
+        if (databaseBuilder_ == null) {
+          database_ = null;
+          onChanged();
+        } else {
+          database_ = null;
+          databaseBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * Database backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.Builder getDatabaseBuilder() {
+        
+        onChanged();
+        return getDatabaseFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * Database backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreStateOrBuilder getDatabaseOrBuilder() {
+        if (databaseBuilder_ != null) {
+          return databaseBuilder_.getMessageOrBuilder();
+        } else {
+          return database_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.getDefaultInstance() : database_;
+        }
+      }
+      /**
+       * <pre>
+       * Database backup or restore
+       * </pre>
+       *
+       * <code>.datalakedr.DatabaseBackupRestoreState database = 4;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreStateOrBuilder> 
+          getDatabaseFieldBuilder() {
+        if (databaseBuilder_ == null) {
+          databaseBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatabaseBackupRestoreStateOrBuilder>(
+                  getDatabase(),
+                  getParentForChildren(),
+                  isClean());
+          database_ = null;
+        }
+        return databaseBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:datalakedr.InternalBackupRestoreState)
+    }
+
+    // @@protoc_insertion_point(class_scope:datalakedr.InternalBackupRestoreState)
+    private static final com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState();
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<InternalBackupRestoreState>
+        PARSER = new com.google.protobuf.AbstractParser<InternalBackupRestoreState>() {
+      @java.lang.Override
+      public InternalBackupRestoreState parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new InternalBackupRestoreState(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<InternalBackupRestoreState> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<InternalBackupRestoreState> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface BackupDatalakeRequestOrBuilder extends
       // @@protoc_insertion_point(interface_extends:datalakedr.BackupDatalakeRequest)
       com.google.protobuf.MessageOrBuilder {
@@ -1177,7 +8576,7 @@ public final class datalakeDRProto {
 
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -1186,7 +8585,7 @@ public final class datalakeDRProto {
     java.lang.String getInternalState();
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -1277,7 +8676,7 @@ public final class datalakeDRProto {
 
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -1286,7 +8685,7 @@ public final class datalakeDRProto {
     java.lang.String getFailureReason();
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -1294,6 +8693,53 @@ public final class datalakeDRProto {
      */
     com.google.protobuf.ByteString
         getFailureReasonBytes();
+
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return Whether the operationStates field is set.
+     */
+    boolean hasOperationStates();
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return The operationStates.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates();
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder();
+
+    /**
+     * <pre>
+     * The runtime version of the datalake when the backup was taken.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The runtimeVersion.
+     */
+    java.lang.String getRuntimeVersion();
+    /**
+     * <pre>
+     * The runtime version of the datalake when the backup was taken.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The bytes for runtimeVersion.
+     */
+    com.google.protobuf.ByteString
+        getRuntimeVersionBytes();
   }
   /**
    * <pre>
@@ -1323,6 +8769,7 @@ public final class datalakeDRProto {
       endTimestamp_ = "";
       backupLocation_ = "";
       failureReason_ = "";
+      runtimeVersion_ = "";
     }
 
     @java.lang.Override
@@ -1413,6 +8860,25 @@ public final class datalakeDRProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               failureReason_ = s;
+              break;
+            }
+            case 90: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder subBuilder = null;
+              if (operationStates_ != null) {
+                subBuilder = operationStates_.toBuilder();
+              }
+              operationStates_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(operationStates_);
+                operationStates_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 98: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              runtimeVersion_ = s;
               break;
             }
             default: {
@@ -1635,7 +9101,7 @@ public final class datalakeDRProto {
     private volatile java.lang.Object internalState_;
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -1656,7 +9122,7 @@ public final class datalakeDRProto {
     }
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -1865,7 +9331,7 @@ public final class datalakeDRProto {
     private volatile java.lang.Object failureReason_;
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -1886,7 +9352,7 @@ public final class datalakeDRProto {
     }
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -1901,6 +9367,90 @@ public final class datalakeDRProto {
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         failureReason_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int OPERATIONSTATES_FIELD_NUMBER = 11;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState operationStates_;
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return Whether the operationStates field is set.
+     */
+    @java.lang.Override
+    public boolean hasOperationStates() {
+      return operationStates_ != null;
+    }
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return The operationStates.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates() {
+      return operationStates_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+    }
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder() {
+      return getOperationStates();
+    }
+
+    public static final int RUNTIMEVERSION_FIELD_NUMBER = 12;
+    private volatile java.lang.Object runtimeVersion_;
+    /**
+     * <pre>
+     * The runtime version of the datalake when the backup was taken.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The runtimeVersion.
+     */
+    @java.lang.Override
+    public java.lang.String getRuntimeVersion() {
+      java.lang.Object ref = runtimeVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        runtimeVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The runtime version of the datalake when the backup was taken.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The bytes for runtimeVersion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRuntimeVersionBytes() {
+      java.lang.Object ref = runtimeVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        runtimeVersion_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -1951,6 +9501,12 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, failureReason_);
       }
+      if (operationStates_ != null) {
+        output.writeMessage(11, getOperationStates());
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 12, runtimeVersion_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -1990,6 +9546,13 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, failureReason_);
       }
+      if (operationStates_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(11, getOperationStates());
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, runtimeVersion_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -2025,6 +9588,13 @@ public final class datalakeDRProto {
           .equals(other.getBackupLocation())) return false;
       if (!getFailureReason()
           .equals(other.getFailureReason())) return false;
+      if (hasOperationStates() != other.hasOperationStates()) return false;
+      if (hasOperationStates()) {
+        if (!getOperationStates()
+            .equals(other.getOperationStates())) return false;
+      }
+      if (!getRuntimeVersion()
+          .equals(other.getRuntimeVersion())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -2056,6 +9626,12 @@ public final class datalakeDRProto {
       hash = (53 * hash) + getBackupLocation().hashCode();
       hash = (37 * hash) + FAILUREREASON_FIELD_NUMBER;
       hash = (53 * hash) + getFailureReason().hashCode();
+      if (hasOperationStates()) {
+        hash = (37 * hash) + OPERATIONSTATES_FIELD_NUMBER;
+        hash = (53 * hash) + getOperationStates().hashCode();
+      }
+      hash = (37 * hash) + RUNTIMEVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getRuntimeVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -2214,6 +9790,14 @@ public final class datalakeDRProto {
 
         failureReason_ = "";
 
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = null;
+        } else {
+          operationStates_ = null;
+          operationStatesBuilder_ = null;
+        }
+        runtimeVersion_ = "";
+
         return this;
       }
 
@@ -2250,6 +9834,12 @@ public final class datalakeDRProto {
         result.endTimestamp_ = endTimestamp_;
         result.backupLocation_ = backupLocation_;
         result.failureReason_ = failureReason_;
+        if (operationStatesBuilder_ == null) {
+          result.operationStates_ = operationStates_;
+        } else {
+          result.operationStates_ = operationStatesBuilder_.build();
+        }
+        result.runtimeVersion_ = runtimeVersion_;
         onBuilt();
         return result;
       }
@@ -2336,6 +9926,13 @@ public final class datalakeDRProto {
         }
         if (!other.getFailureReason().isEmpty()) {
           failureReason_ = other.failureReason_;
+          onChanged();
+        }
+        if (other.hasOperationStates()) {
+          mergeOperationStates(other.getOperationStates());
+        }
+        if (!other.getRuntimeVersion().isEmpty()) {
+          runtimeVersion_ = other.runtimeVersion_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -2754,7 +10351,7 @@ public final class datalakeDRProto {
       private java.lang.Object internalState_ = "";
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -2774,7 +10371,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -2795,7 +10392,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -2814,7 +10411,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -2828,7 +10425,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -3234,7 +10831,7 @@ public final class datalakeDRProto {
       private java.lang.Object failureReason_ = "";
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -3254,7 +10851,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -3275,7 +10872,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -3294,7 +10891,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -3308,7 +10905,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -3323,6 +10920,257 @@ public final class datalakeDRProto {
   checkByteStringIsUtf8(value);
         
         failureReason_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState operationStates_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder> operationStatesBuilder_;
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       * @return Whether the operationStates field is set.
+       */
+      public boolean hasOperationStates() {
+        return operationStatesBuilder_ != null || operationStates_ != null;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       * @return The operationStates.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates() {
+        if (operationStatesBuilder_ == null) {
+          return operationStates_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+        } else {
+          return operationStatesBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder setOperationStates(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState value) {
+        if (operationStatesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          operationStates_ = value;
+          onChanged();
+        } else {
+          operationStatesBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder setOperationStates(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder builderForValue) {
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = builderForValue.build();
+          onChanged();
+        } else {
+          operationStatesBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder mergeOperationStates(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState value) {
+        if (operationStatesBuilder_ == null) {
+          if (operationStates_ != null) {
+            operationStates_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.newBuilder(operationStates_).mergeFrom(value).buildPartial();
+          } else {
+            operationStates_ = value;
+          }
+          onChanged();
+        } else {
+          operationStatesBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder clearOperationStates() {
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = null;
+          onChanged();
+        } else {
+          operationStates_ = null;
+          operationStatesBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder getOperationStatesBuilder() {
+        
+        onChanged();
+        return getOperationStatesFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder() {
+        if (operationStatesBuilder_ != null) {
+          return operationStatesBuilder_.getMessageOrBuilder();
+        } else {
+          return operationStates_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+        }
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder> 
+          getOperationStatesFieldBuilder() {
+        if (operationStatesBuilder_ == null) {
+          operationStatesBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder>(
+                  getOperationStates(),
+                  getParentForChildren(),
+                  isClean());
+          operationStates_ = null;
+        }
+        return operationStatesBuilder_;
+      }
+
+      private java.lang.Object runtimeVersion_ = "";
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return The runtimeVersion.
+       */
+      public java.lang.String getRuntimeVersion() {
+        java.lang.Object ref = runtimeVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          runtimeVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return The bytes for runtimeVersion.
+       */
+      public com.google.protobuf.ByteString
+          getRuntimeVersionBytes() {
+        java.lang.Object ref = runtimeVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          runtimeVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @param value The runtimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRuntimeVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        runtimeVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRuntimeVersion() {
+        
+        runtimeVersion_ = getDefaultInstance().getRuntimeVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @param value The bytes for runtimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRuntimeVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        runtimeVersion_ = value;
         onChanged();
         return this;
       }
@@ -4811,7 +12659,7 @@ public final class datalakeDRProto {
 
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -4820,7 +12668,7 @@ public final class datalakeDRProto {
     java.lang.String getInternalState();
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -4911,7 +12759,7 @@ public final class datalakeDRProto {
 
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -4920,7 +12768,7 @@ public final class datalakeDRProto {
     java.lang.String getFailureReason();
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -4928,6 +12776,33 @@ public final class datalakeDRProto {
      */
     com.google.protobuf.ByteString
         getFailureReasonBytes();
+
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return Whether the operationStates field is set.
+     */
+    boolean hasOperationStates();
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return The operationStates.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates();
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder();
   }
   /**
    * <pre>
@@ -5047,6 +12922,19 @@ public final class datalakeDRProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               failureReason_ = s;
+              break;
+            }
+            case 90: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder subBuilder = null;
+              if (operationStates_ != null) {
+                subBuilder = operationStates_.toBuilder();
+              }
+              operationStates_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(operationStates_);
+                operationStates_ = subBuilder.buildPartial();
+              }
+
               break;
             }
             default: {
@@ -5261,7 +13149,7 @@ public final class datalakeDRProto {
     private volatile java.lang.Object internalState_;
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -5282,7 +13170,7 @@ public final class datalakeDRProto {
     }
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -5491,7 +13379,7 @@ public final class datalakeDRProto {
     private volatile java.lang.Object failureReason_;
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -5512,7 +13400,7 @@ public final class datalakeDRProto {
     }
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -5531,6 +13419,44 @@ public final class datalakeDRProto {
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
+    }
+
+    public static final int OPERATIONSTATES_FIELD_NUMBER = 11;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState operationStates_;
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return Whether the operationStates field is set.
+     */
+    @java.lang.Override
+    public boolean hasOperationStates() {
+      return operationStates_ != null;
+    }
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return The operationStates.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates() {
+      return operationStates_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+    }
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder() {
+      return getOperationStates();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -5577,6 +13503,9 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, failureReason_);
       }
+      if (operationStates_ != null) {
+        output.writeMessage(11, getOperationStates());
+      }
       unknownFields.writeTo(output);
     }
 
@@ -5616,6 +13545,10 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, failureReason_);
       }
+      if (operationStates_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(11, getOperationStates());
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -5651,6 +13584,11 @@ public final class datalakeDRProto {
           .equals(other.getBackupLocation())) return false;
       if (!getFailureReason()
           .equals(other.getFailureReason())) return false;
+      if (hasOperationStates() != other.hasOperationStates()) return false;
+      if (hasOperationStates()) {
+        if (!getOperationStates()
+            .equals(other.getOperationStates())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -5682,6 +13620,10 @@ public final class datalakeDRProto {
       hash = (53 * hash) + getBackupLocation().hashCode();
       hash = (37 * hash) + FAILUREREASON_FIELD_NUMBER;
       hash = (53 * hash) + getFailureReason().hashCode();
+      if (hasOperationStates()) {
+        hash = (37 * hash) + OPERATIONSTATES_FIELD_NUMBER;
+        hash = (53 * hash) + getOperationStates().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -5840,6 +13782,12 @@ public final class datalakeDRProto {
 
         failureReason_ = "";
 
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = null;
+        } else {
+          operationStates_ = null;
+          operationStatesBuilder_ = null;
+        }
         return this;
       }
 
@@ -5876,6 +13824,11 @@ public final class datalakeDRProto {
         result.endTimestamp_ = endTimestamp_;
         result.backupLocation_ = backupLocation_;
         result.failureReason_ = failureReason_;
+        if (operationStatesBuilder_ == null) {
+          result.operationStates_ = operationStates_;
+        } else {
+          result.operationStates_ = operationStatesBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -5963,6 +13916,9 @@ public final class datalakeDRProto {
         if (!other.getFailureReason().isEmpty()) {
           failureReason_ = other.failureReason_;
           onChanged();
+        }
+        if (other.hasOperationStates()) {
+          mergeOperationStates(other.getOperationStates());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -6360,7 +14316,7 @@ public final class datalakeDRProto {
       private java.lang.Object internalState_ = "";
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -6380,7 +14336,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -6401,7 +14357,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -6420,7 +14376,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -6434,7 +14390,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -6840,7 +14796,7 @@ public final class datalakeDRProto {
       private java.lang.Object failureReason_ = "";
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -6860,7 +14816,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -6881,7 +14837,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -6900,7 +14856,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -6914,7 +14870,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -6931,6 +14887,161 @@ public final class datalakeDRProto {
         failureReason_ = value;
         onChanged();
         return this;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState operationStates_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder> operationStatesBuilder_;
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       * @return Whether the operationStates field is set.
+       */
+      public boolean hasOperationStates() {
+        return operationStatesBuilder_ != null || operationStates_ != null;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       * @return The operationStates.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates() {
+        if (operationStatesBuilder_ == null) {
+          return operationStates_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+        } else {
+          return operationStatesBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder setOperationStates(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState value) {
+        if (operationStatesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          operationStates_ = value;
+          onChanged();
+        } else {
+          operationStatesBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder setOperationStates(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder builderForValue) {
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = builderForValue.build();
+          onChanged();
+        } else {
+          operationStatesBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder mergeOperationStates(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState value) {
+        if (operationStatesBuilder_ == null) {
+          if (operationStates_ != null) {
+            operationStates_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.newBuilder(operationStates_).mergeFrom(value).buildPartial();
+          } else {
+            operationStates_ = value;
+          }
+          onChanged();
+        } else {
+          operationStatesBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder clearOperationStates() {
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = null;
+          onChanged();
+        } else {
+          operationStates_ = null;
+          operationStatesBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder getOperationStatesBuilder() {
+        
+        onChanged();
+        return getOperationStatesFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder() {
+        if (operationStatesBuilder_ != null) {
+          return operationStatesBuilder_.getMessageOrBuilder();
+        } else {
+          return operationStates_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+        }
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder> 
+          getOperationStatesFieldBuilder() {
+        if (operationStatesBuilder_ == null) {
+          operationStatesBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder>(
+                  getOperationStates(),
+                  getParentForChildren(),
+                  isClean());
+          operationStates_ = null;
+        }
+        return operationStatesBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -8057,7 +16168,7 @@ public final class datalakeDRProto {
 
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -8066,7 +16177,7 @@ public final class datalakeDRProto {
     java.lang.String getInternalState();
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -8157,7 +16268,7 @@ public final class datalakeDRProto {
 
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -8166,7 +16277,7 @@ public final class datalakeDRProto {
     java.lang.String getFailureReason();
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -8174,6 +16285,53 @@ public final class datalakeDRProto {
      */
     com.google.protobuf.ByteString
         getFailureReasonBytes();
+
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return Whether the operationStates field is set.
+     */
+    boolean hasOperationStates();
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return The operationStates.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates();
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder();
+
+    /**
+     * <pre>
+     * The runtime version of the datalake when the backup was taken.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The runtimeVersion.
+     */
+    java.lang.String getRuntimeVersion();
+    /**
+     * <pre>
+     * The runtime version of the datalake when the backup was taken.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The bytes for runtimeVersion.
+     */
+    com.google.protobuf.ByteString
+        getRuntimeVersionBytes();
   }
   /**
    * <pre>
@@ -8203,6 +16361,7 @@ public final class datalakeDRProto {
       endTimestamp_ = "";
       backupLocation_ = "";
       failureReason_ = "";
+      runtimeVersion_ = "";
     }
 
     @java.lang.Override
@@ -8293,6 +16452,25 @@ public final class datalakeDRProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               failureReason_ = s;
+              break;
+            }
+            case 90: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder subBuilder = null;
+              if (operationStates_ != null) {
+                subBuilder = operationStates_.toBuilder();
+              }
+              operationStates_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(operationStates_);
+                operationStates_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 98: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              runtimeVersion_ = s;
               break;
             }
             default: {
@@ -8515,7 +16693,7 @@ public final class datalakeDRProto {
     private volatile java.lang.Object internalState_;
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -8536,7 +16714,7 @@ public final class datalakeDRProto {
     }
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -8745,7 +16923,7 @@ public final class datalakeDRProto {
     private volatile java.lang.Object failureReason_;
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -8766,7 +16944,7 @@ public final class datalakeDRProto {
     }
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -8781,6 +16959,90 @@ public final class datalakeDRProto {
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         failureReason_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int OPERATIONSTATES_FIELD_NUMBER = 11;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState operationStates_;
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return Whether the operationStates field is set.
+     */
+    @java.lang.Override
+    public boolean hasOperationStates() {
+      return operationStates_ != null;
+    }
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return The operationStates.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates() {
+      return operationStates_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+    }
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder() {
+      return getOperationStates();
+    }
+
+    public static final int RUNTIMEVERSION_FIELD_NUMBER = 12;
+    private volatile java.lang.Object runtimeVersion_;
+    /**
+     * <pre>
+     * The runtime version of the datalake when the backup was taken.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The runtimeVersion.
+     */
+    @java.lang.Override
+    public java.lang.String getRuntimeVersion() {
+      java.lang.Object ref = runtimeVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        runtimeVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The runtime version of the datalake when the backup was taken.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The bytes for runtimeVersion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRuntimeVersionBytes() {
+      java.lang.Object ref = runtimeVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        runtimeVersion_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -8831,6 +17093,12 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, failureReason_);
       }
+      if (operationStates_ != null) {
+        output.writeMessage(11, getOperationStates());
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 12, runtimeVersion_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -8870,6 +17138,13 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, failureReason_);
       }
+      if (operationStates_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(11, getOperationStates());
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, runtimeVersion_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -8905,6 +17180,13 @@ public final class datalakeDRProto {
           .equals(other.getBackupLocation())) return false;
       if (!getFailureReason()
           .equals(other.getFailureReason())) return false;
+      if (hasOperationStates() != other.hasOperationStates()) return false;
+      if (hasOperationStates()) {
+        if (!getOperationStates()
+            .equals(other.getOperationStates())) return false;
+      }
+      if (!getRuntimeVersion()
+          .equals(other.getRuntimeVersion())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -8936,6 +17218,12 @@ public final class datalakeDRProto {
       hash = (53 * hash) + getBackupLocation().hashCode();
       hash = (37 * hash) + FAILUREREASON_FIELD_NUMBER;
       hash = (53 * hash) + getFailureReason().hashCode();
+      if (hasOperationStates()) {
+        hash = (37 * hash) + OPERATIONSTATES_FIELD_NUMBER;
+        hash = (53 * hash) + getOperationStates().hashCode();
+      }
+      hash = (37 * hash) + RUNTIMEVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getRuntimeVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -9094,6 +17382,14 @@ public final class datalakeDRProto {
 
         failureReason_ = "";
 
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = null;
+        } else {
+          operationStates_ = null;
+          operationStatesBuilder_ = null;
+        }
+        runtimeVersion_ = "";
+
         return this;
       }
 
@@ -9130,6 +17426,12 @@ public final class datalakeDRProto {
         result.endTimestamp_ = endTimestamp_;
         result.backupLocation_ = backupLocation_;
         result.failureReason_ = failureReason_;
+        if (operationStatesBuilder_ == null) {
+          result.operationStates_ = operationStates_;
+        } else {
+          result.operationStates_ = operationStatesBuilder_.build();
+        }
+        result.runtimeVersion_ = runtimeVersion_;
         onBuilt();
         return result;
       }
@@ -9216,6 +17518,13 @@ public final class datalakeDRProto {
         }
         if (!other.getFailureReason().isEmpty()) {
           failureReason_ = other.failureReason_;
+          onChanged();
+        }
+        if (other.hasOperationStates()) {
+          mergeOperationStates(other.getOperationStates());
+        }
+        if (!other.getRuntimeVersion().isEmpty()) {
+          runtimeVersion_ = other.runtimeVersion_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -9634,7 +17943,7 @@ public final class datalakeDRProto {
       private java.lang.Object internalState_ = "";
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -9654,7 +17963,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -9675,7 +17984,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -9694,7 +18003,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -9708,7 +18017,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -10114,7 +18423,7 @@ public final class datalakeDRProto {
       private java.lang.Object failureReason_ = "";
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -10134,7 +18443,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -10155,7 +18464,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -10174,7 +18483,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -10188,7 +18497,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -10203,6 +18512,257 @@ public final class datalakeDRProto {
   checkByteStringIsUtf8(value);
         
         failureReason_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState operationStates_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder> operationStatesBuilder_;
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       * @return Whether the operationStates field is set.
+       */
+      public boolean hasOperationStates() {
+        return operationStatesBuilder_ != null || operationStates_ != null;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       * @return The operationStates.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates() {
+        if (operationStatesBuilder_ == null) {
+          return operationStates_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+        } else {
+          return operationStatesBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder setOperationStates(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState value) {
+        if (operationStatesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          operationStates_ = value;
+          onChanged();
+        } else {
+          operationStatesBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder setOperationStates(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder builderForValue) {
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = builderForValue.build();
+          onChanged();
+        } else {
+          operationStatesBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder mergeOperationStates(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState value) {
+        if (operationStatesBuilder_ == null) {
+          if (operationStates_ != null) {
+            operationStates_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.newBuilder(operationStates_).mergeFrom(value).buildPartial();
+          } else {
+            operationStates_ = value;
+          }
+          onChanged();
+        } else {
+          operationStatesBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder clearOperationStates() {
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = null;
+          onChanged();
+        } else {
+          operationStates_ = null;
+          operationStatesBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder getOperationStatesBuilder() {
+        
+        onChanged();
+        return getOperationStatesFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder() {
+        if (operationStatesBuilder_ != null) {
+          return operationStatesBuilder_.getMessageOrBuilder();
+        } else {
+          return operationStates_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+        }
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder> 
+          getOperationStatesFieldBuilder() {
+        if (operationStatesBuilder_ == null) {
+          operationStatesBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder>(
+                  getOperationStates(),
+                  getParentForChildren(),
+                  isClean());
+          operationStates_ = null;
+        }
+        return operationStatesBuilder_;
+      }
+
+      private java.lang.Object runtimeVersion_ = "";
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return The runtimeVersion.
+       */
+      public java.lang.String getRuntimeVersion() {
+        java.lang.Object ref = runtimeVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          runtimeVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return The bytes for runtimeVersion.
+       */
+      public com.google.protobuf.ByteString
+          getRuntimeVersionBytes() {
+        java.lang.Object ref = runtimeVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          runtimeVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @param value The runtimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRuntimeVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        runtimeVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRuntimeVersion() {
+        
+        runtimeVersion_ = getDefaultInstance().getRuntimeVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @param value The bytes for runtimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRuntimeVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        runtimeVersion_ = value;
         onChanged();
         return this;
       }
@@ -11145,7 +19705,7 @@ public final class datalakeDRProto {
 
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -11154,7 +19714,7 @@ public final class datalakeDRProto {
     java.lang.String getInternalState();
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -11245,7 +19805,7 @@ public final class datalakeDRProto {
 
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -11254,7 +19814,7 @@ public final class datalakeDRProto {
     java.lang.String getFailureReason();
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -11262,6 +19822,33 @@ public final class datalakeDRProto {
      */
     com.google.protobuf.ByteString
         getFailureReasonBytes();
+
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return Whether the operationStates field is set.
+     */
+    boolean hasOperationStates();
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return The operationStates.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates();
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder();
   }
   /**
    * <pre>
@@ -11381,6 +19968,19 @@ public final class datalakeDRProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               failureReason_ = s;
+              break;
+            }
+            case 90: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder subBuilder = null;
+              if (operationStates_ != null) {
+                subBuilder = operationStates_.toBuilder();
+              }
+              operationStates_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(operationStates_);
+                operationStates_ = subBuilder.buildPartial();
+              }
+
               break;
             }
             default: {
@@ -11603,7 +20203,7 @@ public final class datalakeDRProto {
     private volatile java.lang.Object internalState_;
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -11624,7 +20224,7 @@ public final class datalakeDRProto {
     }
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -11833,7 +20433,7 @@ public final class datalakeDRProto {
     private volatile java.lang.Object failureReason_;
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -11854,7 +20454,7 @@ public final class datalakeDRProto {
     }
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -11873,6 +20473,44 @@ public final class datalakeDRProto {
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
+    }
+
+    public static final int OPERATIONSTATES_FIELD_NUMBER = 11;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState operationStates_;
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return Whether the operationStates field is set.
+     */
+    @java.lang.Override
+    public boolean hasOperationStates() {
+      return operationStates_ != null;
+    }
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return The operationStates.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates() {
+      return operationStates_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+    }
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder() {
+      return getOperationStates();
     }
 
     private byte memoizedIsInitialized = -1;
@@ -11919,6 +20557,9 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, failureReason_);
       }
+      if (operationStates_ != null) {
+        output.writeMessage(11, getOperationStates());
+      }
       unknownFields.writeTo(output);
     }
 
@@ -11958,6 +20599,10 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, failureReason_);
       }
+      if (operationStates_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(11, getOperationStates());
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -11993,6 +20638,11 @@ public final class datalakeDRProto {
           .equals(other.getBackupLocation())) return false;
       if (!getFailureReason()
           .equals(other.getFailureReason())) return false;
+      if (hasOperationStates() != other.hasOperationStates()) return false;
+      if (hasOperationStates()) {
+        if (!getOperationStates()
+            .equals(other.getOperationStates())) return false;
+      }
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -12024,6 +20674,10 @@ public final class datalakeDRProto {
       hash = (53 * hash) + getBackupLocation().hashCode();
       hash = (37 * hash) + FAILUREREASON_FIELD_NUMBER;
       hash = (53 * hash) + getFailureReason().hashCode();
+      if (hasOperationStates()) {
+        hash = (37 * hash) + OPERATIONSTATES_FIELD_NUMBER;
+        hash = (53 * hash) + getOperationStates().hashCode();
+      }
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -12182,6 +20836,12 @@ public final class datalakeDRProto {
 
         failureReason_ = "";
 
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = null;
+        } else {
+          operationStates_ = null;
+          operationStatesBuilder_ = null;
+        }
         return this;
       }
 
@@ -12218,6 +20878,11 @@ public final class datalakeDRProto {
         result.endTimestamp_ = endTimestamp_;
         result.backupLocation_ = backupLocation_;
         result.failureReason_ = failureReason_;
+        if (operationStatesBuilder_ == null) {
+          result.operationStates_ = operationStates_;
+        } else {
+          result.operationStates_ = operationStatesBuilder_.build();
+        }
         onBuilt();
         return result;
       }
@@ -12305,6 +20970,9 @@ public final class datalakeDRProto {
         if (!other.getFailureReason().isEmpty()) {
           failureReason_ = other.failureReason_;
           onChanged();
+        }
+        if (other.hasOperationStates()) {
+          mergeOperationStates(other.getOperationStates());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -12722,7 +21390,7 @@ public final class datalakeDRProto {
       private java.lang.Object internalState_ = "";
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -12742,7 +21410,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -12763,7 +21431,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -12782,7 +21450,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -12796,7 +21464,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -13202,7 +21870,7 @@ public final class datalakeDRProto {
       private java.lang.Object failureReason_ = "";
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -13222,7 +21890,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -13243,7 +21911,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -13262,7 +21930,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -13276,7 +21944,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -13293,6 +21961,161 @@ public final class datalakeDRProto {
         failureReason_ = value;
         onChanged();
         return this;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState operationStates_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder> operationStatesBuilder_;
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       * @return Whether the operationStates field is set.
+       */
+      public boolean hasOperationStates() {
+        return operationStatesBuilder_ != null || operationStates_ != null;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       * @return The operationStates.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates() {
+        if (operationStatesBuilder_ == null) {
+          return operationStates_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+        } else {
+          return operationStatesBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder setOperationStates(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState value) {
+        if (operationStatesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          operationStates_ = value;
+          onChanged();
+        } else {
+          operationStatesBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder setOperationStates(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder builderForValue) {
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = builderForValue.build();
+          onChanged();
+        } else {
+          operationStatesBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder mergeOperationStates(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState value) {
+        if (operationStatesBuilder_ == null) {
+          if (operationStates_ != null) {
+            operationStates_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.newBuilder(operationStates_).mergeFrom(value).buildPartial();
+          } else {
+            operationStates_ = value;
+          }
+          onChanged();
+        } else {
+          operationStatesBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder clearOperationStates() {
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = null;
+          onChanged();
+        } else {
+          operationStates_ = null;
+          operationStatesBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder getOperationStatesBuilder() {
+        
+        onChanged();
+        return getOperationStatesFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder() {
+        if (operationStatesBuilder_ != null) {
+          return operationStatesBuilder_.getMessageOrBuilder();
+        } else {
+          return operationStates_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+        }
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder> 
+          getOperationStatesFieldBuilder() {
+        if (operationStatesBuilder_ == null) {
+          operationStatesBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder>(
+                  getOperationStates(),
+                  getParentForChildren(),
+                  isClean());
+          operationStates_ = null;
+        }
+        return operationStatesBuilder_;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -13433,7 +22256,7 @@ public final class datalakeDRProto {
 
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -13442,7 +22265,7 @@ public final class datalakeDRProto {
     java.lang.String getInternalState();
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -13533,7 +22356,7 @@ public final class datalakeDRProto {
 
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -13542,7 +22365,7 @@ public final class datalakeDRProto {
     java.lang.String getFailureReason();
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -13550,6 +22373,53 @@ public final class datalakeDRProto {
      */
     com.google.protobuf.ByteString
         getFailureReasonBytes();
+
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return Whether the operationStates field is set.
+     */
+    boolean hasOperationStates();
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return The operationStates.
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates();
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     */
+    com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder();
+
+    /**
+     * <pre>
+     * The runtime version of the datalake when the backup was taken.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The runtimeVersion.
+     */
+    java.lang.String getRuntimeVersion();
+    /**
+     * <pre>
+     * The runtime version of the datalake when the backup was taken.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The bytes for runtimeVersion.
+     */
+    com.google.protobuf.ByteString
+        getRuntimeVersionBytes();
   }
   /**
    * <pre>
@@ -13579,6 +22449,7 @@ public final class datalakeDRProto {
       endTimestamp_ = "";
       backupLocation_ = "";
       failureReason_ = "";
+      runtimeVersion_ = "";
     }
 
     @java.lang.Override
@@ -13669,6 +22540,25 @@ public final class datalakeDRProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               failureReason_ = s;
+              break;
+            }
+            case 90: {
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder subBuilder = null;
+              if (operationStates_ != null) {
+                subBuilder = operationStates_.toBuilder();
+              }
+              operationStates_ = input.readMessage(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.parser(), extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(operationStates_);
+                operationStates_ = subBuilder.buildPartial();
+              }
+
+              break;
+            }
+            case 98: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              runtimeVersion_ = s;
               break;
             }
             default: {
@@ -13891,7 +22781,7 @@ public final class datalakeDRProto {
     private volatile java.lang.Object internalState_;
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -13912,7 +22802,7 @@ public final class datalakeDRProto {
     }
     /**
      * <pre>
-     * The current operation in progress.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string internalState = 5;</code>
@@ -14121,7 +23011,7 @@ public final class datalakeDRProto {
     private volatile java.lang.Object failureReason_;
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -14142,7 +23032,7 @@ public final class datalakeDRProto {
     }
     /**
      * <pre>
-     * Reason for the failure.
+     * DEPRECATED - maintained for backwards compatibility
      * </pre>
      *
      * <code>string failureReason = 10;</code>
@@ -14157,6 +23047,90 @@ public final class datalakeDRProto {
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
         failureReason_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int OPERATIONSTATES_FIELD_NUMBER = 11;
+    private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState operationStates_;
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return Whether the operationStates field is set.
+     */
+    @java.lang.Override
+    public boolean hasOperationStates() {
+      return operationStates_ != null;
+    }
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     * @return The operationStates.
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates() {
+      return operationStates_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+    }
+    /**
+     * <pre>
+     * The status of each operation, including any failure reasons.
+     * </pre>
+     *
+     * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder() {
+      return getOperationStates();
+    }
+
+    public static final int RUNTIMEVERSION_FIELD_NUMBER = 12;
+    private volatile java.lang.Object runtimeVersion_;
+    /**
+     * <pre>
+     * The runtime version of the datalake when the backup was taken.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The runtimeVersion.
+     */
+    @java.lang.Override
+    public java.lang.String getRuntimeVersion() {
+      java.lang.Object ref = runtimeVersion_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        runtimeVersion_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The runtime version of the datalake when the backup was taken.
+     * </pre>
+     *
+     * <code>string runtimeVersion = 12;</code>
+     * @return The bytes for runtimeVersion.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRuntimeVersionBytes() {
+      java.lang.Object ref = runtimeVersion_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        runtimeVersion_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
@@ -14207,6 +23181,12 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, failureReason_);
       }
+      if (operationStates_ != null) {
+        output.writeMessage(11, getOperationStates());
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 12, runtimeVersion_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -14246,6 +23226,13 @@ public final class datalakeDRProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, failureReason_);
       }
+      if (operationStates_ != null) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(11, getOperationStates());
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(runtimeVersion_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, runtimeVersion_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -14281,6 +23268,13 @@ public final class datalakeDRProto {
           .equals(other.getBackupLocation())) return false;
       if (!getFailureReason()
           .equals(other.getFailureReason())) return false;
+      if (hasOperationStates() != other.hasOperationStates()) return false;
+      if (hasOperationStates()) {
+        if (!getOperationStates()
+            .equals(other.getOperationStates())) return false;
+      }
+      if (!getRuntimeVersion()
+          .equals(other.getRuntimeVersion())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -14312,6 +23306,12 @@ public final class datalakeDRProto {
       hash = (53 * hash) + getBackupLocation().hashCode();
       hash = (37 * hash) + FAILUREREASON_FIELD_NUMBER;
       hash = (53 * hash) + getFailureReason().hashCode();
+      if (hasOperationStates()) {
+        hash = (37 * hash) + OPERATIONSTATES_FIELD_NUMBER;
+        hash = (53 * hash) + getOperationStates().hashCode();
+      }
+      hash = (37 * hash) + RUNTIMEVERSION_FIELD_NUMBER;
+      hash = (53 * hash) + getRuntimeVersion().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -14470,6 +23470,14 @@ public final class datalakeDRProto {
 
         failureReason_ = "";
 
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = null;
+        } else {
+          operationStates_ = null;
+          operationStatesBuilder_ = null;
+        }
+        runtimeVersion_ = "";
+
         return this;
       }
 
@@ -14506,6 +23514,12 @@ public final class datalakeDRProto {
         result.endTimestamp_ = endTimestamp_;
         result.backupLocation_ = backupLocation_;
         result.failureReason_ = failureReason_;
+        if (operationStatesBuilder_ == null) {
+          result.operationStates_ = operationStates_;
+        } else {
+          result.operationStates_ = operationStatesBuilder_.build();
+        }
+        result.runtimeVersion_ = runtimeVersion_;
         onBuilt();
         return result;
       }
@@ -14592,6 +23606,13 @@ public final class datalakeDRProto {
         }
         if (!other.getFailureReason().isEmpty()) {
           failureReason_ = other.failureReason_;
+          onChanged();
+        }
+        if (other.hasOperationStates()) {
+          mergeOperationStates(other.getOperationStates());
+        }
+        if (!other.getRuntimeVersion().isEmpty()) {
+          runtimeVersion_ = other.runtimeVersion_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -15010,7 +24031,7 @@ public final class datalakeDRProto {
       private java.lang.Object internalState_ = "";
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -15030,7 +24051,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -15051,7 +24072,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -15070,7 +24091,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -15084,7 +24105,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * The current operation in progress.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string internalState = 5;</code>
@@ -15490,7 +24511,7 @@ public final class datalakeDRProto {
       private java.lang.Object failureReason_ = "";
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -15510,7 +24531,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -15531,7 +24552,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -15550,7 +24571,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -15564,7 +24585,7 @@ public final class datalakeDRProto {
       }
       /**
        * <pre>
-       * Reason for the failure.
+       * DEPRECATED - maintained for backwards compatibility
        * </pre>
        *
        * <code>string failureReason = 10;</code>
@@ -15579,6 +24600,257 @@ public final class datalakeDRProto {
   checkByteStringIsUtf8(value);
         
         failureReason_ = value;
+        onChanged();
+        return this;
+      }
+
+      private com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState operationStates_;
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder> operationStatesBuilder_;
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       * @return Whether the operationStates field is set.
+       */
+      public boolean hasOperationStates() {
+        return operationStatesBuilder_ != null || operationStates_ != null;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       * @return The operationStates.
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState getOperationStates() {
+        if (operationStatesBuilder_ == null) {
+          return operationStates_ == null ? com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+        } else {
+          return operationStatesBuilder_.getMessage();
+        }
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder setOperationStates(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState value) {
+        if (operationStatesBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          operationStates_ = value;
+          onChanged();
+        } else {
+          operationStatesBuilder_.setMessage(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder setOperationStates(
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder builderForValue) {
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = builderForValue.build();
+          onChanged();
+        } else {
+          operationStatesBuilder_.setMessage(builderForValue.build());
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder mergeOperationStates(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState value) {
+        if (operationStatesBuilder_ == null) {
+          if (operationStates_ != null) {
+            operationStates_ =
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.newBuilder(operationStates_).mergeFrom(value).buildPartial();
+          } else {
+            operationStates_ = value;
+          }
+          onChanged();
+        } else {
+          operationStatesBuilder_.mergeFrom(value);
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public Builder clearOperationStates() {
+        if (operationStatesBuilder_ == null) {
+          operationStates_ = null;
+          onChanged();
+        } else {
+          operationStates_ = null;
+          operationStatesBuilder_ = null;
+        }
+
+        return this;
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder getOperationStatesBuilder() {
+        
+        onChanged();
+        return getOperationStatesFieldBuilder().getBuilder();
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder getOperationStatesOrBuilder() {
+        if (operationStatesBuilder_ != null) {
+          return operationStatesBuilder_.getMessageOrBuilder();
+        } else {
+          return operationStates_ == null ?
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.getDefaultInstance() : operationStates_;
+        }
+      }
+      /**
+       * <pre>
+       * The status of each operation, including any failure reasons.
+       * </pre>
+       *
+       * <code>.datalakedr.InternalBackupRestoreState operationStates = 11;</code>
+       */
+      private com.google.protobuf.SingleFieldBuilderV3<
+          com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder> 
+          getOperationStatesFieldBuilder() {
+        if (operationStatesBuilder_ == null) {
+          operationStatesBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreState.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.InternalBackupRestoreStateOrBuilder>(
+                  getOperationStates(),
+                  getParentForChildren(),
+                  isClean());
+          operationStates_ = null;
+        }
+        return operationStatesBuilder_;
+      }
+
+      private java.lang.Object runtimeVersion_ = "";
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return The runtimeVersion.
+       */
+      public java.lang.String getRuntimeVersion() {
+        java.lang.Object ref = runtimeVersion_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          runtimeVersion_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return The bytes for runtimeVersion.
+       */
+      public com.google.protobuf.ByteString
+          getRuntimeVersionBytes() {
+        java.lang.Object ref = runtimeVersion_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          runtimeVersion_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @param value The runtimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRuntimeVersion(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        runtimeVersion_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRuntimeVersion() {
+        
+        runtimeVersion_ = getDefaultInstance().getRuntimeVersion();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The runtime version of the datalake when the backup was taken.
+       * </pre>
+       *
+       * <code>string runtimeVersion = 12;</code>
+       * @param value The bytes for runtimeVersion to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRuntimeVersionBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        runtimeVersion_ = value;
         onChanged();
         return this;
       }
@@ -17136,6 +26408,2492 @@ public final class datalakeDRProto {
 
   }
 
+  public interface CancelDatalakeBackupRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:datalakedr.CancelDatalakeBackupRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Id of the backup operation performed.
+     * </pre>
+     *
+     * <code>string backupId = 1;</code>
+     * @return The backupId.
+     */
+    java.lang.String getBackupId();
+    /**
+     * <pre>
+     * Id of the backup operation performed.
+     * </pre>
+     *
+     * <code>string backupId = 1;</code>
+     * @return The bytes for backupId.
+     */
+    com.google.protobuf.ByteString
+        getBackupIdBytes();
+  }
+  /**
+   * <pre>
+   **
+   * Request to invalidate datalake backup status.
+   * </pre>
+   *
+   * Protobuf type {@code datalakedr.CancelDatalakeBackupRequest}
+   */
+  public static final class CancelDatalakeBackupRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:datalakedr.CancelDatalakeBackupRequest)
+      CancelDatalakeBackupRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CancelDatalakeBackupRequest.newBuilder() to construct.
+    private CancelDatalakeBackupRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CancelDatalakeBackupRequest() {
+      backupId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CancelDatalakeBackupRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CancelDatalakeBackupRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              backupId_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeBackupRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeBackupRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest.Builder.class);
+    }
+
+    public static final int BACKUPID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object backupId_;
+    /**
+     * <pre>
+     * Id of the backup operation performed.
+     * </pre>
+     *
+     * <code>string backupId = 1;</code>
+     * @return The backupId.
+     */
+    @java.lang.Override
+    public java.lang.String getBackupId() {
+      java.lang.Object ref = backupId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        backupId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Id of the backup operation performed.
+     * </pre>
+     *
+     * <code>string backupId = 1;</code>
+     * @return The bytes for backupId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getBackupIdBytes() {
+      java.lang.Object ref = backupId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        backupId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, backupId_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, backupId_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest) obj;
+
+      if (!getBackupId()
+          .equals(other.getBackupId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + BACKUPID_FIELD_NUMBER;
+      hash = (53 * hash) + getBackupId().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     **
+     * Request to invalidate datalake backup status.
+     * </pre>
+     *
+     * Protobuf type {@code datalakedr.CancelDatalakeBackupRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:datalakedr.CancelDatalakeBackupRequest)
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeBackupRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeBackupRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        backupId_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeBackupRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest build() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest buildPartial() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest(this);
+        result.backupId_ = backupId_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest other) {
+        if (other == com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest.getDefaultInstance()) return this;
+        if (!other.getBackupId().isEmpty()) {
+          backupId_ = other.backupId_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object backupId_ = "";
+      /**
+       * <pre>
+       * Id of the backup operation performed.
+       * </pre>
+       *
+       * <code>string backupId = 1;</code>
+       * @return The backupId.
+       */
+      public java.lang.String getBackupId() {
+        java.lang.Object ref = backupId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          backupId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Id of the backup operation performed.
+       * </pre>
+       *
+       * <code>string backupId = 1;</code>
+       * @return The bytes for backupId.
+       */
+      public com.google.protobuf.ByteString
+          getBackupIdBytes() {
+        java.lang.Object ref = backupId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          backupId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Id of the backup operation performed.
+       * </pre>
+       *
+       * <code>string backupId = 1;</code>
+       * @param value The backupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBackupId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        backupId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Id of the backup operation performed.
+       * </pre>
+       *
+       * <code>string backupId = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearBackupId() {
+        
+        backupId_ = getDefaultInstance().getBackupId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Id of the backup operation performed.
+       * </pre>
+       *
+       * <code>string backupId = 1;</code>
+       * @param value The bytes for backupId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBackupIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        backupId_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:datalakedr.CancelDatalakeBackupRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:datalakedr.CancelDatalakeBackupRequest)
+    private static final com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CancelDatalakeBackupRequest>
+        PARSER = new com.google.protobuf.AbstractParser<CancelDatalakeBackupRequest>() {
+      @java.lang.Override
+      public CancelDatalakeBackupRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CancelDatalakeBackupRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CancelDatalakeBackupRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CancelDatalakeBackupRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CancelDatalakeBackupResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:datalakedr.CancelDatalakeBackupResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * result of the invalidation operation.
+     * </pre>
+     *
+     * <code>string result = 1;</code>
+     * @return The result.
+     */
+    java.lang.String getResult();
+    /**
+     * <pre>
+     * result of the invalidation operation.
+     * </pre>
+     *
+     * <code>string result = 1;</code>
+     * @return The bytes for result.
+     */
+    com.google.protobuf.ByteString
+        getResultBytes();
+  }
+  /**
+   * <pre>
+   **
+   * Response to invalidate datalake backup status request.
+   * </pre>
+   *
+   * Protobuf type {@code datalakedr.CancelDatalakeBackupResponse}
+   */
+  public static final class CancelDatalakeBackupResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:datalakedr.CancelDatalakeBackupResponse)
+      CancelDatalakeBackupResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CancelDatalakeBackupResponse.newBuilder() to construct.
+    private CancelDatalakeBackupResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CancelDatalakeBackupResponse() {
+      result_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CancelDatalakeBackupResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CancelDatalakeBackupResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              result_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeBackupResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeBackupResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse.Builder.class);
+    }
+
+    public static final int RESULT_FIELD_NUMBER = 1;
+    private volatile java.lang.Object result_;
+    /**
+     * <pre>
+     * result of the invalidation operation.
+     * </pre>
+     *
+     * <code>string result = 1;</code>
+     * @return The result.
+     */
+    @java.lang.Override
+    public java.lang.String getResult() {
+      java.lang.Object ref = result_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        result_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * result of the invalidation operation.
+     * </pre>
+     *
+     * <code>string result = 1;</code>
+     * @return The bytes for result.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getResultBytes() {
+      java.lang.Object ref = result_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        result_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(result_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, result_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(result_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, result_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse) obj;
+
+      if (!getResult()
+          .equals(other.getResult())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + RESULT_FIELD_NUMBER;
+      hash = (53 * hash) + getResult().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     **
+     * Response to invalidate datalake backup status request.
+     * </pre>
+     *
+     * Protobuf type {@code datalakedr.CancelDatalakeBackupResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:datalakedr.CancelDatalakeBackupResponse)
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeBackupResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeBackupResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        result_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeBackupResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse build() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse buildPartial() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse(this);
+        result.result_ = result_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse other) {
+        if (other == com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse.getDefaultInstance()) return this;
+        if (!other.getResult().isEmpty()) {
+          result_ = other.result_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object result_ = "";
+      /**
+       * <pre>
+       * result of the invalidation operation.
+       * </pre>
+       *
+       * <code>string result = 1;</code>
+       * @return The result.
+       */
+      public java.lang.String getResult() {
+        java.lang.Object ref = result_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          result_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * result of the invalidation operation.
+       * </pre>
+       *
+       * <code>string result = 1;</code>
+       * @return The bytes for result.
+       */
+      public com.google.protobuf.ByteString
+          getResultBytes() {
+        java.lang.Object ref = result_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          result_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * result of the invalidation operation.
+       * </pre>
+       *
+       * <code>string result = 1;</code>
+       * @param value The result to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResult(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        result_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * result of the invalidation operation.
+       * </pre>
+       *
+       * <code>string result = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearResult() {
+        
+        result_ = getDefaultInstance().getResult();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * result of the invalidation operation.
+       * </pre>
+       *
+       * <code>string result = 1;</code>
+       * @param value The bytes for result to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResultBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        result_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:datalakedr.CancelDatalakeBackupResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:datalakedr.CancelDatalakeBackupResponse)
+    private static final com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CancelDatalakeBackupResponse>
+        PARSER = new com.google.protobuf.AbstractParser<CancelDatalakeBackupResponse>() {
+      @java.lang.Override
+      public CancelDatalakeBackupResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CancelDatalakeBackupResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CancelDatalakeBackupResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CancelDatalakeBackupResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeBackupResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CancelDatalakeRestoreRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:datalakedr.CancelDatalakeRestoreRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Id of the backup operation performed.
+     * </pre>
+     *
+     * <code>string restoreId = 1;</code>
+     * @return The restoreId.
+     */
+    java.lang.String getRestoreId();
+    /**
+     * <pre>
+     * Id of the backup operation performed.
+     * </pre>
+     *
+     * <code>string restoreId = 1;</code>
+     * @return The bytes for restoreId.
+     */
+    com.google.protobuf.ByteString
+        getRestoreIdBytes();
+  }
+  /**
+   * <pre>
+   **
+   * Request to invalidate datalake backup status.
+   * </pre>
+   *
+   * Protobuf type {@code datalakedr.CancelDatalakeRestoreRequest}
+   */
+  public static final class CancelDatalakeRestoreRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:datalakedr.CancelDatalakeRestoreRequest)
+      CancelDatalakeRestoreRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CancelDatalakeRestoreRequest.newBuilder() to construct.
+    private CancelDatalakeRestoreRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CancelDatalakeRestoreRequest() {
+      restoreId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CancelDatalakeRestoreRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CancelDatalakeRestoreRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              restoreId_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeRestoreRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeRestoreRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest.Builder.class);
+    }
+
+    public static final int RESTOREID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object restoreId_;
+    /**
+     * <pre>
+     * Id of the backup operation performed.
+     * </pre>
+     *
+     * <code>string restoreId = 1;</code>
+     * @return The restoreId.
+     */
+    @java.lang.Override
+    public java.lang.String getRestoreId() {
+      java.lang.Object ref = restoreId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        restoreId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Id of the backup operation performed.
+     * </pre>
+     *
+     * <code>string restoreId = 1;</code>
+     * @return The bytes for restoreId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRestoreIdBytes() {
+      java.lang.Object ref = restoreId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        restoreId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(restoreId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, restoreId_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(restoreId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, restoreId_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest) obj;
+
+      if (!getRestoreId()
+          .equals(other.getRestoreId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + RESTOREID_FIELD_NUMBER;
+      hash = (53 * hash) + getRestoreId().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     **
+     * Request to invalidate datalake backup status.
+     * </pre>
+     *
+     * Protobuf type {@code datalakedr.CancelDatalakeRestoreRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:datalakedr.CancelDatalakeRestoreRequest)
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeRestoreRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeRestoreRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        restoreId_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeRestoreRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest build() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest buildPartial() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest(this);
+        result.restoreId_ = restoreId_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest other) {
+        if (other == com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest.getDefaultInstance()) return this;
+        if (!other.getRestoreId().isEmpty()) {
+          restoreId_ = other.restoreId_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object restoreId_ = "";
+      /**
+       * <pre>
+       * Id of the backup operation performed.
+       * </pre>
+       *
+       * <code>string restoreId = 1;</code>
+       * @return The restoreId.
+       */
+      public java.lang.String getRestoreId() {
+        java.lang.Object ref = restoreId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          restoreId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Id of the backup operation performed.
+       * </pre>
+       *
+       * <code>string restoreId = 1;</code>
+       * @return The bytes for restoreId.
+       */
+      public com.google.protobuf.ByteString
+          getRestoreIdBytes() {
+        java.lang.Object ref = restoreId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          restoreId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Id of the backup operation performed.
+       * </pre>
+       *
+       * <code>string restoreId = 1;</code>
+       * @param value The restoreId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRestoreId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        restoreId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Id of the backup operation performed.
+       * </pre>
+       *
+       * <code>string restoreId = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRestoreId() {
+        
+        restoreId_ = getDefaultInstance().getRestoreId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Id of the backup operation performed.
+       * </pre>
+       *
+       * <code>string restoreId = 1;</code>
+       * @param value The bytes for restoreId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRestoreIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        restoreId_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:datalakedr.CancelDatalakeRestoreRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:datalakedr.CancelDatalakeRestoreRequest)
+    private static final com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CancelDatalakeRestoreRequest>
+        PARSER = new com.google.protobuf.AbstractParser<CancelDatalakeRestoreRequest>() {
+      @java.lang.Override
+      public CancelDatalakeRestoreRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CancelDatalakeRestoreRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CancelDatalakeRestoreRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CancelDatalakeRestoreRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface CancelDatalakeRestoreResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:datalakedr.CancelDatalakeRestoreResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * result of the invalidation operation.
+     * </pre>
+     *
+     * <code>string result = 1;</code>
+     * @return The result.
+     */
+    java.lang.String getResult();
+    /**
+     * <pre>
+     * result of the invalidation operation.
+     * </pre>
+     *
+     * <code>string result = 1;</code>
+     * @return The bytes for result.
+     */
+    com.google.protobuf.ByteString
+        getResultBytes();
+  }
+  /**
+   * <pre>
+   **
+   * Response to invalidate datalake backup status request.
+   * </pre>
+   *
+   * Protobuf type {@code datalakedr.CancelDatalakeRestoreResponse}
+   */
+  public static final class CancelDatalakeRestoreResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:datalakedr.CancelDatalakeRestoreResponse)
+      CancelDatalakeRestoreResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use CancelDatalakeRestoreResponse.newBuilder() to construct.
+    private CancelDatalakeRestoreResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private CancelDatalakeRestoreResponse() {
+      result_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CancelDatalakeRestoreResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private CancelDatalakeRestoreResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              result_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeRestoreResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeRestoreResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse.Builder.class);
+    }
+
+    public static final int RESULT_FIELD_NUMBER = 1;
+    private volatile java.lang.Object result_;
+    /**
+     * <pre>
+     * result of the invalidation operation.
+     * </pre>
+     *
+     * <code>string result = 1;</code>
+     * @return The result.
+     */
+    @java.lang.Override
+    public java.lang.String getResult() {
+      java.lang.Object ref = result_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        result_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * result of the invalidation operation.
+     * </pre>
+     *
+     * <code>string result = 1;</code>
+     * @return The bytes for result.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getResultBytes() {
+      java.lang.Object ref = result_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        result_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(result_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, result_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(result_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, result_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse) obj;
+
+      if (!getResult()
+          .equals(other.getResult())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + RESULT_FIELD_NUMBER;
+      hash = (53 * hash) + getResult().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     **
+     * Response to invalidate datalake backup status request.
+     * </pre>
+     *
+     * Protobuf type {@code datalakedr.CancelDatalakeRestoreResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:datalakedr.CancelDatalakeRestoreResponse)
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeRestoreResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeRestoreResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse.class, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        result_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.internal_static_datalakedr_CancelDatalakeRestoreResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse build() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse buildPartial() {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse(this);
+        result.result_ = result_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse other) {
+        if (other == com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse.getDefaultInstance()) return this;
+        if (!other.getResult().isEmpty()) {
+          result_ = other.result_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object result_ = "";
+      /**
+       * <pre>
+       * result of the invalidation operation.
+       * </pre>
+       *
+       * <code>string result = 1;</code>
+       * @return The result.
+       */
+      public java.lang.String getResult() {
+        java.lang.Object ref = result_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          result_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * result of the invalidation operation.
+       * </pre>
+       *
+       * <code>string result = 1;</code>
+       * @return The bytes for result.
+       */
+      public com.google.protobuf.ByteString
+          getResultBytes() {
+        java.lang.Object ref = result_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          result_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * result of the invalidation operation.
+       * </pre>
+       *
+       * <code>string result = 1;</code>
+       * @param value The result to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResult(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        result_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * result of the invalidation operation.
+       * </pre>
+       *
+       * <code>string result = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearResult() {
+        
+        result_ = getDefaultInstance().getResult();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * result of the invalidation operation.
+       * </pre>
+       *
+       * <code>string result = 1;</code>
+       * @param value The bytes for result to set.
+       * @return This builder for chaining.
+       */
+      public Builder setResultBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        result_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:datalakedr.CancelDatalakeRestoreResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:datalakedr.CancelDatalakeRestoreResponse)
+    private static final com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<CancelDatalakeRestoreResponse>
+        PARSER = new com.google.protobuf.AbstractParser<CancelDatalakeRestoreResponse>() {
+      @java.lang.Override
+      public CancelDatalakeRestoreResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new CancelDatalakeRestoreResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<CancelDatalakeRestoreResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<CancelDatalakeRestoreResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.CancelDatalakeRestoreResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_datalakedr_BackupRestoreOperationStatus_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_datalakedr_BackupRestoreOperationStatus_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_datalakedr_AdminOperationsBackupRestoreState_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_datalakedr_AdminOperationsBackupRestoreState_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_datalakedr_HbaseBackupRestoreState_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_datalakedr_HbaseBackupRestoreState_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_datalakedr_SolrBackupRestoreState_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_datalakedr_SolrBackupRestoreState_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_datalakedr_DatabaseBackupRestoreState_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_datalakedr_DatabaseBackupRestoreState_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_datalakedr_InternalBackupRestoreState_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_datalakedr_InternalBackupRestoreState_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_datalakedr_BackupDatalakeRequest_descriptor;
   private static final 
@@ -17191,6 +28949,26 @@ public final class datalakeDRProto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_datalakedr_ListDatalakeBackupResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_datalakedr_CancelDatalakeBackupRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_datalakedr_CancelDatalakeBackupRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_datalakedr_CancelDatalakeBackupResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_datalakedr_CancelDatalakeBackupResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_datalakedr_CancelDatalakeRestoreRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_datalakedr_CancelDatalakeRestoreRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_datalakedr_CancelDatalakeRestoreResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_datalakedr_CancelDatalakeRestoreResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -17201,140 +28979,256 @@ public final class datalakeDRProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\020datalakedr.proto\022\ndatalakedr\032\rversion." +
-      "proto\"u\n\025BackupDatalakeRequest\022\024\n\014datala" +
-      "keName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\026\n\016back" +
-      "upLocation\030\003 \001(\t\022\032\n\022closeDbConnections\030\004" +
-      " \001(\010\"\354\001\n\026BackupDatalakeResponse\022\022\n\nbacku" +
-      "pName\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007userCr" +
-      "n\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinternalSta" +
-      "te\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startT" +
-      "imestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016" +
-      "backupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n " +
-      "\001(\t\"\234\001\n\026RestoreDatalakeRequest\022\024\n\014datala" +
-      "keName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\020\n\010back" +
-      "upId\030\003 \001(\t\022\027\n\017includeDatabase\030\004 \001(\010\022\r\n\005f" +
-      "orce\030\005 \001(\010\022\036\n\026backupLocationOverride\030\006 \001" +
-      "(\t\"\354\001\n\027RestoreDatalakeResponse\022\021\n\taccoun" +
-      "tId\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\021\n\trestoreId" +
-      "\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rinternalState" +
-      "\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTim" +
-      "estamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016ba" +
-      "ckupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n \001(" +
-      "\t\"Y\n\033BackupDatalakeStatusRequest\022\024\n\014data" +
-      "lakeName\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\022\n\nback" +
-      "upName\030\003 \001(\t\"\362\001\n\034BackupDatalakeStatusRes" +
-      "ponse\022\022\n\nbackupName\030\001 \001(\t\022\021\n\taccountId\030\002" +
+      "proto\"E\n\034BackupRestoreOperationStatus\022\016\n" +
+      "\006status\030\001 \001(\t\022\025\n\rfailureReason\030\002 \001(\t\"\244\001\n" +
+      "!AdminOperationsBackupRestoreState\022>\n\014st" +
+      "opServices\030\001 \001(\0132(.datalakedr.BackupRest" +
+      "oreOperationStatus\022?\n\rstartServices\030\002 \001(" +
+      "\0132(.datalakedr.BackupRestoreOperationSta" +
+      "tus\"\252\001\n\027HbaseBackupRestoreState\022L\n\032atlas" +
+      "EntityAuditEventTable\030\001 \001(\0132(.datalakedr" +
+      ".BackupRestoreOperationStatus\022A\n\017atlasJa" +
+      "nusTable\030\002 \001(\0132(.datalakedr.BackupRestor" +
+      "eOperationStatus\"\372\004\n\026SolrBackupRestoreSt" +
+      "ate\022E\n\023edgeIndexCollection\030\001 \001(\0132(.datal" +
+      "akedr.BackupRestoreOperationStatus\022I\n\027fu" +
+      "lltextIndexCollection\030\002 \001(\0132(.datalakedr" +
+      ".BackupRestoreOperationStatus\022H\n\026rangerA" +
+      "uditsCollection\030\003 \001(\0132(.datalakedr.Backu" +
+      "pRestoreOperationStatus\022G\n\025vertexIndexCo" +
+      "llection\030\004 \001(\0132(.datalakedr.BackupRestor" +
+      "eOperationStatus\022K\n\031edgeIndexCollectionD" +
+      "elete\030\005 \001(\0132(.datalakedr.BackupRestoreOp" +
+      "erationStatus\022O\n\035fulltextIndexCollection" +
+      "Delete\030\006 \001(\0132(.datalakedr.BackupRestoreO" +
+      "perationStatus\022N\n\034rangerAuditsCollection" +
+      "Delete\030\007 \001(\0132(.datalakedr.BackupRestoreO" +
+      "perationStatus\022M\n\033vertexIndexCollectionD" +
+      "elete\030\010 \001(\0132(.datalakedr.BackupRestoreOp" +
+      "erationStatus\"X\n\032DatabaseBackupRestoreSt" +
+      "ate\022:\n\010database\030\001 \001(\0132(.datalakedr.Backu" +
+      "pRestoreOperationStatus\"\204\002\n\032InternalBack" +
+      "upRestoreState\022F\n\017adminOperations\030\001 \001(\0132" +
+      "-.datalakedr.AdminOperationsBackupRestor" +
+      "eState\0222\n\005hbase\030\002 \001(\0132#.datalakedr.Hbase" +
+      "BackupRestoreState\0220\n\004solr\030\003 \001(\0132\".datal" +
+      "akedr.SolrBackupRestoreState\0228\n\010database" +
+      "\030\004 \001(\0132&.datalakedr.DatabaseBackupRestor" +
+      "eState\"u\n\025BackupDatalakeRequest\022\024\n\014datal" +
+      "akeName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\026\n\016bac" +
+      "kupLocation\030\003 \001(\t\022\032\n\022closeDbConnections\030" +
+      "\004 \001(\010\"\305\002\n\026BackupDatalakeResponse\022\022\n\nback" +
+      "upName\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007userC" +
+      "rn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinternalSt" +
+      "ate\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016start" +
+      "Timestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n" +
+      "\016backupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n" +
+      " \001(\t\022?\n\017operationStates\030\013 \001(\0132&.datalake" +
+      "dr.InternalBackupRestoreState\022\026\n\016runtime" +
+      "Version\030\014 \001(\t\"\234\001\n\026RestoreDatalakeRequest" +
+      "\022\024\n\014datalakeName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001" +
+      "(\t\022\020\n\010backupId\030\003 \001(\t\022\027\n\017includeDatabase\030" +
+      "\004 \001(\010\022\r\n\005force\030\005 \001(\010\022\036\n\026backupLocationOv" +
+      "erride\030\006 \001(\t\"\255\002\n\027RestoreDatalakeResponse" +
+      "\022\021\n\taccountId\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\021\n" +
+      "\trestoreId\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rint" +
+      "ernalState\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026" +
+      "\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010" +
+      " \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailureR" +
+      "eason\030\n \001(\t\022?\n\017operationStates\030\013 \001(\0132&.d" +
+      "atalakedr.InternalBackupRestoreState\"Y\n\033" +
+      "BackupDatalakeStatusRequest\022\024\n\014datalakeN" +
+      "ame\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\022\n\nbackupNam" +
+      "e\030\003 \001(\t\"\313\002\n\034BackupDatalakeStatusResponse" +
+      "\022\022\n\nbackupName\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022" +
+      "\017\n\007userCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rin" +
+      "ternalState\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022" +
+      "\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimestamp\030" +
+      "\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailure" +
+      "Reason\030\n \001(\t\022?\n\017operationStates\030\013 \001(\0132&." +
+      "datalakedr.InternalBackupRestoreState\022\026\n" +
+      "\016runtimeVersion\030\014 \001(\t\"Y\n\034RestoreDatalake" +
+      "StatusRequest\022\024\n\014datalakeName\030\001 \001(\t\022\021\n\tr" +
+      "estoreId\030\002 \001(\tJ\004\010\003\020\004R\nbackupName\"\263\002\n\035Res" +
+      "toreDatalakeStatusResponse\022\021\n\taccountId\030" +
+      "\001 \001(\t\022\021\n\trestoreId\030\002 \001(\t\022\020\n\010backupId\030\003 \001" +
+      "(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rinternalState\030\005 \001" +
+      "(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTimesta" +
+      "mp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backup" +
+      "Location\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\022?\n" +
+      "\017operationStates\030\013 \001(\0132&.datalakedr.Inte" +
+      "rnalBackupRestoreState\"\301\002\n\022DatalakeBacku" +
+      "pInfo\022\022\n\nbackupName\030\001 \001(\t\022\021\n\taccountId\030\002" +
       " \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022" +
       "\025\n\rinternalState\030\005 \001(\t\022\024\n\014overallState\030\006" +
       " \001(\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimes" +
       "tamp\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfa" +
-      "ilureReason\030\n \001(\t\"Y\n\034RestoreDatalakeStat" +
-      "usRequest\022\024\n\014datalakeName\030\001 \001(\t\022\021\n\tresto" +
-      "reId\030\002 \001(\tJ\004\010\003\020\004R\nbackupName\"\362\001\n\035Restore" +
-      "DatalakeStatusResponse\022\021\n\taccountId\030\001 \001(" +
-      "\t\022\021\n\trestoreId\030\002 \001(\t\022\020\n\010backupId\030\003 \001(\t\022\017" +
-      "\n\007userCrn\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t\022\024" +
-      "\n\014overallState\030\006 \001(\t\022\026\n\016startTimestamp\030\007" +
-      " \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLoca" +
-      "tion\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\"\350\001\n\022Da" +
-      "talakeBackupInfo\022\022\n\nbackupName\030\001 \001(\t\022\021\n\t" +
-      "accountId\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010back" +
-      "upId\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t\022\024\n\014ove" +
-      "rallState\030\006 \001(\t\022\026\n\016startTimestamp\030\007 \001(\t\022" +
-      "\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLocation\030" +
-      "\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\"1\n\031ListData" +
-      "lakeBackupRequest\022\024\n\014datalakeName\030\001 \001(\t\"" +
-      "S\n\032ListDatalakeBackupResponse\0225\n\rdatalak" +
-      "e_info\030\001 \003(\0132\036.datalakedr.DatalakeBackup" +
-      "Info2\315\004\n\ndatalakeDR\022A\n\nGetVersion\022\027.vers" +
-      "ion.VersionRequest\032\030.version.VersionResp" +
-      "onse\"\000\022Y\n\016BackupDatalake\022!.datalakedr.Ba" +
-      "ckupDatalakeRequest\032\".datalakedr.BackupD" +
-      "atalakeResponse\"\000\022\\\n\017RestoreDatalake\022\".d" +
-      "atalakedr.RestoreDatalakeRequest\032#.datal" +
-      "akedr.RestoreDatalakeResponse\"\000\022k\n\024Backu" +
-      "pDatalakeStatus\022\'.datalakedr.BackupDatal" +
-      "akeStatusRequest\032(.datalakedr.BackupData" +
-      "lakeStatusResponse\"\000\022n\n\025RestoreDatalakeS" +
-      "tatus\022(.datalakedr.RestoreDatalakeStatus" +
-      "Request\032).datalakedr.RestoreDatalakeStat" +
-      "usResponse\"\000\022f\n\023ListDatalakeBackups\022%.da" +
-      "talakedr.ListDatalakeBackupRequest\032&.dat" +
-      "alakedr.ListDatalakeBackupResponse\"\000B>\n+" +
-      "com.cloudera.thunderhead.service.datalak" +
-      "edrB\017datalakeDRProtob\006proto3"
+      "ilureReason\030\n \001(\t\022?\n\017operationStates\030\013 \001" +
+      "(\0132&.datalakedr.InternalBackupRestoreSta" +
+      "te\022\026\n\016runtimeVersion\030\014 \001(\t\"1\n\031ListDatala" +
+      "keBackupRequest\022\024\n\014datalakeName\030\001 \001(\t\"S\n" +
+      "\032ListDatalakeBackupResponse\0225\n\rdatalake_" +
+      "info\030\001 \003(\0132\036.datalakedr.DatalakeBackupIn" +
+      "fo\"/\n\033CancelDatalakeBackupRequest\022\020\n\010bac" +
+      "kupId\030\001 \001(\t\".\n\034CancelDatalakeBackupRespo" +
+      "nse\022\016\n\006result\030\001 \001(\t\"1\n\034CancelDatalakeRes" +
+      "toreRequest\022\021\n\trestoreId\030\001 \001(\t\"/\n\035Cancel" +
+      "DatalakeRestoreResponse\022\016\n\006result\030\001 \001(\t2" +
+      "\252\006\n\ndatalakeDR\022A\n\nGetVersion\022\027.version.V" +
+      "ersionRequest\032\030.version.VersionResponse\"" +
+      "\000\022Y\n\016BackupDatalake\022!.datalakedr.BackupD" +
+      "atalakeRequest\032\".datalakedr.BackupDatala" +
+      "keResponse\"\000\022\\\n\017RestoreDatalake\022\".datala" +
+      "kedr.RestoreDatalakeRequest\032#.datalakedr" +
+      ".RestoreDatalakeResponse\"\000\022k\n\024BackupData" +
+      "lakeStatus\022\'.datalakedr.BackupDatalakeSt" +
+      "atusRequest\032(.datalakedr.BackupDatalakeS" +
+      "tatusResponse\"\000\022n\n\025RestoreDatalakeStatus" +
+      "\022(.datalakedr.RestoreDatalakeStatusReque" +
+      "st\032).datalakedr.RestoreDatalakeStatusRes" +
+      "ponse\"\000\022f\n\023ListDatalakeBackups\022%.datalak" +
+      "edr.ListDatalakeBackupRequest\032&.datalake" +
+      "dr.ListDatalakeBackupResponse\"\000\022k\n\024Cance" +
+      "lDatalakeBackup\022\'.datalakedr.CancelDatal" +
+      "akeBackupRequest\032(.datalakedr.CancelData" +
+      "lakeBackupResponse\"\000\022n\n\025CancelDatalakeRe" +
+      "store\022(.datalakedr.CancelDatalakeRestore" +
+      "Request\032).datalakedr.CancelDatalakeResto" +
+      "reResponse\"\000B>\n+com.cloudera.thunderhead" +
+      ".service.datalakedrB\017datalakeDRProtob\006pr" +
+      "oto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
         });
-    internal_static_datalakedr_BackupDatalakeRequest_descriptor =
+    internal_static_datalakedr_BackupRestoreOperationStatus_descriptor =
       getDescriptor().getMessageTypes().get(0);
+    internal_static_datalakedr_BackupRestoreOperationStatus_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_datalakedr_BackupRestoreOperationStatus_descriptor,
+        new java.lang.String[] { "Status", "FailureReason", });
+    internal_static_datalakedr_AdminOperationsBackupRestoreState_descriptor =
+      getDescriptor().getMessageTypes().get(1);
+    internal_static_datalakedr_AdminOperationsBackupRestoreState_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_datalakedr_AdminOperationsBackupRestoreState_descriptor,
+        new java.lang.String[] { "StopServices", "StartServices", });
+    internal_static_datalakedr_HbaseBackupRestoreState_descriptor =
+      getDescriptor().getMessageTypes().get(2);
+    internal_static_datalakedr_HbaseBackupRestoreState_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_datalakedr_HbaseBackupRestoreState_descriptor,
+        new java.lang.String[] { "AtlasEntityAuditEventTable", "AtlasJanusTable", });
+    internal_static_datalakedr_SolrBackupRestoreState_descriptor =
+      getDescriptor().getMessageTypes().get(3);
+    internal_static_datalakedr_SolrBackupRestoreState_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_datalakedr_SolrBackupRestoreState_descriptor,
+        new java.lang.String[] { "EdgeIndexCollection", "FulltextIndexCollection", "RangerAuditsCollection", "VertexIndexCollection", "EdgeIndexCollectionDelete", "FulltextIndexCollectionDelete", "RangerAuditsCollectionDelete", "VertexIndexCollectionDelete", });
+    internal_static_datalakedr_DatabaseBackupRestoreState_descriptor =
+      getDescriptor().getMessageTypes().get(4);
+    internal_static_datalakedr_DatabaseBackupRestoreState_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_datalakedr_DatabaseBackupRestoreState_descriptor,
+        new java.lang.String[] { "Database", });
+    internal_static_datalakedr_InternalBackupRestoreState_descriptor =
+      getDescriptor().getMessageTypes().get(5);
+    internal_static_datalakedr_InternalBackupRestoreState_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_datalakedr_InternalBackupRestoreState_descriptor,
+        new java.lang.String[] { "AdminOperations", "Hbase", "Solr", "Database", });
+    internal_static_datalakedr_BackupDatalakeRequest_descriptor =
+      getDescriptor().getMessageTypes().get(6);
     internal_static_datalakedr_BackupDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_BackupDatalakeRequest_descriptor,
         new java.lang.String[] { "DatalakeName", "BackupName", "BackupLocation", "CloseDbConnections", });
     internal_static_datalakedr_BackupDatalakeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(1);
+      getDescriptor().getMessageTypes().get(7);
     internal_static_datalakedr_BackupDatalakeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_BackupDatalakeResponse_descriptor,
-        new java.lang.String[] { "BackupName", "AccountId", "UserCrn", "BackupId", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", });
+        new java.lang.String[] { "BackupName", "AccountId", "UserCrn", "BackupId", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", "OperationStates", "RuntimeVersion", });
     internal_static_datalakedr_RestoreDatalakeRequest_descriptor =
-      getDescriptor().getMessageTypes().get(2);
+      getDescriptor().getMessageTypes().get(8);
     internal_static_datalakedr_RestoreDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_RestoreDatalakeRequest_descriptor,
         new java.lang.String[] { "DatalakeName", "BackupName", "BackupId", "IncludeDatabase", "Force", "BackupLocationOverride", });
     internal_static_datalakedr_RestoreDatalakeResponse_descriptor =
-      getDescriptor().getMessageTypes().get(3);
+      getDescriptor().getMessageTypes().get(9);
     internal_static_datalakedr_RestoreDatalakeResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_RestoreDatalakeResponse_descriptor,
-        new java.lang.String[] { "AccountId", "BackupId", "RestoreId", "UserCrn", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", });
+        new java.lang.String[] { "AccountId", "BackupId", "RestoreId", "UserCrn", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", "OperationStates", });
     internal_static_datalakedr_BackupDatalakeStatusRequest_descriptor =
-      getDescriptor().getMessageTypes().get(4);
+      getDescriptor().getMessageTypes().get(10);
     internal_static_datalakedr_BackupDatalakeStatusRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_BackupDatalakeStatusRequest_descriptor,
         new java.lang.String[] { "DatalakeName", "BackupId", "BackupName", });
     internal_static_datalakedr_BackupDatalakeStatusResponse_descriptor =
-      getDescriptor().getMessageTypes().get(5);
+      getDescriptor().getMessageTypes().get(11);
     internal_static_datalakedr_BackupDatalakeStatusResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_BackupDatalakeStatusResponse_descriptor,
-        new java.lang.String[] { "BackupName", "AccountId", "UserCrn", "BackupId", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", });
+        new java.lang.String[] { "BackupName", "AccountId", "UserCrn", "BackupId", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", "OperationStates", "RuntimeVersion", });
     internal_static_datalakedr_RestoreDatalakeStatusRequest_descriptor =
-      getDescriptor().getMessageTypes().get(6);
+      getDescriptor().getMessageTypes().get(12);
     internal_static_datalakedr_RestoreDatalakeStatusRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_RestoreDatalakeStatusRequest_descriptor,
         new java.lang.String[] { "DatalakeName", "RestoreId", });
     internal_static_datalakedr_RestoreDatalakeStatusResponse_descriptor =
-      getDescriptor().getMessageTypes().get(7);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_datalakedr_RestoreDatalakeStatusResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_RestoreDatalakeStatusResponse_descriptor,
-        new java.lang.String[] { "AccountId", "RestoreId", "BackupId", "UserCrn", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", });
+        new java.lang.String[] { "AccountId", "RestoreId", "BackupId", "UserCrn", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", "OperationStates", });
     internal_static_datalakedr_DatalakeBackupInfo_descriptor =
-      getDescriptor().getMessageTypes().get(8);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_datalakedr_DatalakeBackupInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_DatalakeBackupInfo_descriptor,
-        new java.lang.String[] { "BackupName", "AccountId", "UserCrn", "BackupId", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", });
+        new java.lang.String[] { "BackupName", "AccountId", "UserCrn", "BackupId", "InternalState", "OverallState", "StartTimestamp", "EndTimestamp", "BackupLocation", "FailureReason", "OperationStates", "RuntimeVersion", });
     internal_static_datalakedr_ListDatalakeBackupRequest_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_datalakedr_ListDatalakeBackupRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_ListDatalakeBackupRequest_descriptor,
         new java.lang.String[] { "DatalakeName", });
     internal_static_datalakedr_ListDatalakeBackupResponse_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_datalakedr_ListDatalakeBackupResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_ListDatalakeBackupResponse_descriptor,
         new java.lang.String[] { "DatalakeInfo", });
+    internal_static_datalakedr_CancelDatalakeBackupRequest_descriptor =
+      getDescriptor().getMessageTypes().get(17);
+    internal_static_datalakedr_CancelDatalakeBackupRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_datalakedr_CancelDatalakeBackupRequest_descriptor,
+        new java.lang.String[] { "BackupId", });
+    internal_static_datalakedr_CancelDatalakeBackupResponse_descriptor =
+      getDescriptor().getMessageTypes().get(18);
+    internal_static_datalakedr_CancelDatalakeBackupResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_datalakedr_CancelDatalakeBackupResponse_descriptor,
+        new java.lang.String[] { "Result", });
+    internal_static_datalakedr_CancelDatalakeRestoreRequest_descriptor =
+      getDescriptor().getMessageTypes().get(19);
+    internal_static_datalakedr_CancelDatalakeRestoreRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_datalakedr_CancelDatalakeRestoreRequest_descriptor,
+        new java.lang.String[] { "RestoreId", });
+    internal_static_datalakedr_CancelDatalakeRestoreResponse_descriptor =
+      getDescriptor().getMessageTypes().get(20);
+    internal_static_datalakedr_CancelDatalakeRestoreResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_datalakedr_CancelDatalakeRestoreResponse_descriptor,
+        new java.lang.String[] { "Result", });
     com.cloudera.thunderhead.service.common.version.Version.getDescriptor();
   }
 
