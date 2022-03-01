@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.environmentDatalakePattern;
 
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
@@ -201,9 +202,8 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
         testContext.given(SdxChangeImageCatalogTestDto.class)
                 .withImageCatalog(imageCatalogB.getName())
                 .whenException(sdxTestClient.changeImageCatalog(), ForbiddenException.class,
-                        expectedMessage("Doesn't have " +
-                                "'datalake/changeImageCatalog' right on any of the environment[(]s[)] " +
-                                "[\\[]crn: crn:cdp:environments:us-west-1:.*:environment:.*[]] or on .*"))
+                        expectedMessage("Doesn't have 'datalake/changeImageCatalog' right on any of the environment[(]s[)] " +
+                                environmentDatalakePattern(testContext) + " or on .*"))
                 .validate();
 
         //ENV_CREATOR_B can't change ENV_CREATOR_A's DH image catalog in case of having environment admin right but the catalog is created by ENV_CREATOR_A
