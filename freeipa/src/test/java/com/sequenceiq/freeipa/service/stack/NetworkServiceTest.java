@@ -66,7 +66,7 @@ class NetworkServiceTest {
         stack.setCloudPlatform(PLATFORM);
         stack.setRegion(REGION);
         stack.setPlatformvariant(PLATFORM);
-        Credential credential = new Credential(PLATFORM, "", "", "", "acc");
+        Credential credential = new Credential(PLATFORM, "", "", "");
         ExtendedCloudCredential extendedCred = new ExtendedCloudCredential(new CloudCredential(), PLATFORM, "", "", "");
         CloudSubnet subnet1 = new CloudSubnet(SUBNET_1, SUBNET_1, "", "10.1.0.0/24");
         CloudSubnet subnet2 = new CloudSubnet(SUBNET_2, SUBNET_2, "", "10.1.1.0/24");
@@ -97,7 +97,7 @@ class NetworkServiceTest {
         stack.setCloudPlatform(PLATFORM);
         stack.setRegion(REGION);
         stack.setPlatformvariant(PLATFORM);
-        Credential credential = new Credential(PLATFORM, "", "", "", "acc");
+        Credential credential = new Credential(PLATFORM, "", "", "");
         ExtendedCloudCredential extendedCred = new ExtendedCloudCredential(new CloudCredential(), PLATFORM, "", "", "");
         CloudSubnet subnet1 = new CloudSubnet(SUBNET_1, SUBNET_1, "", "10.1.0.0/24");
         CloudSubnet subnet2 = new CloudSubnet(SUBNET_2, SUBNET_2, "", "10.1.1.0/24");

@@ -130,8 +130,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String environmentDomain;
 
-        private String accountId;
-
         private Builder() {
         }
 
@@ -295,11 +293,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
-        public Builder withAccountId(String accountId) {
-            this.accountId = accountId;
-            return this;
-        }
-
         public Builder withCcmV2TlsType(CcmV2TlsType ccmV2TlsType) {
             this.ccmV2TlsType = ccmV2TlsType;
             return this;
@@ -352,7 +345,6 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             detailedEnvironmentResponse.setCcmV2TlsType(ccmV2TlsType);
             detailedEnvironmentResponse.setDeletionType(deletionType);
             detailedEnvironmentResponse.setEnvironmentDomain(environmentDomain);
-            detailedEnvironmentResponse.setAccountId(accountId);
             return detailedEnvironmentResponse;
         }
     }

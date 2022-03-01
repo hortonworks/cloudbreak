@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -61,7 +60,7 @@ class AzurePlatformResourcesTest {
         virtualMachineSizes.add(createVirtualMachineSize("Standard_E64ds_v4", 1400000));
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
 
-        CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, Map.of(), List.of());
+        CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, Map.of());
 
         assertNotNull(actual);
         assertNotNull(actual.getCloudVmResponses());
@@ -90,7 +89,7 @@ class AzurePlatformResourcesTest {
         virtualMachineSizes.add(e64sVmTypeWithoutResourceDisk);
         when(azureClient.getVmTypes(region.value())).thenReturn(virtualMachineSizes);
 
-        CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, Map.of(), List.of());
+        CloudVmTypes actual = underTest.virtualMachines(cloudCredential, region, Map.of());
 
         Set<VirtualMachineSize> vmTypeWithoutResourceDisk = Set.of(d2sTypeWithoutResourceDisk, e64sVmTypeWithoutResourceDisk);
         assertNotNull(actual);

@@ -78,7 +78,7 @@ class NetworkCreationRequestFactoryTest {
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsAreNotPresent() {
         EnvironmentDto environmentDto = createEnvironmentDtoWithoutAzureParams().build();
-        CloudCredential cloudCredential = new CloudCredential("1", "asd", "account");
+        CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
         when(defaultSubnetCidrProvider.provide(NETWORK_CIDR, false)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
@@ -101,7 +101,7 @@ class NetworkCreationRequestFactoryTest {
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsArePresent() {
         EnvironmentDto environmentDto = createEnvironmentDtoWithAzureParams(ServiceEndpointCreation.DISABLED).build();
-        CloudCredential cloudCredential = new CloudCredential("1", "asd", "account");
+        CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
         when(defaultSubnetCidrProvider.provide(NETWORK_CIDR, false)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
@@ -124,7 +124,7 @@ class NetworkCreationRequestFactoryTest {
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenResourceGroupNameIsPresent() {
         EnvironmentDto environmentDto = createAzureParametersDto(ServiceEndpointCreation.DISABLED).build();
-        CloudCredential cloudCredential = new CloudCredential("1", "asd", "account");
+        CloudCredential cloudCredential = new CloudCredential("1", "asd");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
         when(defaultSubnetCidrProvider.provide(NETWORK_CIDR, false)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
@@ -139,7 +139,7 @@ class NetworkCreationRequestFactoryTest {
     void testCreateProviderSpecificNetworkResourcesShouldCreateAProviderSpecificNetworkResourcesCreationRequestWhenResourceGroupNameIsPresent(
             ServiceEndpointCreation serviceEndpointCreation) {
         EnvironmentDto environmentDto = createAzureParametersDto(serviceEndpointCreation).build();
-        CloudCredential cloudCredential = new CloudCredential("1", "asd", "account");
+        CloudCredential cloudCredential = new CloudCredential("1", "asd");
         BaseNetwork baseNetwork = getNetwork();
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);

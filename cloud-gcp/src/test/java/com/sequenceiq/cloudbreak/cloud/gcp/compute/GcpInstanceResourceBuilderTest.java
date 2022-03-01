@@ -187,7 +187,7 @@ public class GcpInstanceResourceBuilderTest {
                 .withPlatform("GCP")
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
-        CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname", "account");
+        CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
         String projectId = "projectId";
         String serviceAccountId = "serviceAccountId";

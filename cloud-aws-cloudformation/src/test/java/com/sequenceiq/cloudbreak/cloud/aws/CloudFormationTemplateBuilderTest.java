@@ -1574,7 +1574,7 @@ public class CloudFormationTemplateBuilderTest {
                 .withLocation(location)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
-        CloudCredential credential = new CloudCredential("crn", null, "account");
+        CloudCredential credential = new CloudCredential("crn", null);
         return new AuthenticatedContext(context, credential);
     }
 

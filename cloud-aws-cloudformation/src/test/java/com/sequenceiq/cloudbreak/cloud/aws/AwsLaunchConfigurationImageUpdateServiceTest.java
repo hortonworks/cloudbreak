@@ -78,7 +78,7 @@ public class AwsLaunchConfigurationImageUpdateServiceTest {
                 .withLocation(location)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
-        CloudCredential cc = new CloudCredential("crn", "cc", "account");
+        CloudCredential cc = new CloudCredential("crn", "cc");
         ac = new AuthenticatedContext(context, cc);
         when(stack.getImage()).thenReturn(image);
         when(image.getImageName()).thenReturn(IMAGE_NAME);

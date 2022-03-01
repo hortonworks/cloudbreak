@@ -28,7 +28,6 @@ import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
@@ -75,9 +74,6 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     @Inject
     private AwsLoadBalancerMetadataCollector awsLoadBalancerMetadataCollector;
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
@@ -347,7 +343,6 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     @Override
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
-        return awsPlatformResources.collectInstanceStorageCount(ac, instanceTypes,
-                entitlementService.getEntitlements(ac.getCloudCredential().getAccountId()));
+        return awsPlatformResources.collectInstanceStorageCount(ac, instanceTypes);
     }
 }

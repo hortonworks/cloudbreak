@@ -80,7 +80,7 @@ public class CloudStorageValidatorTest {
         when(environment.getCredential()).thenReturn(new CredentialResponse());
         when(secretService.getByResponse(any())).thenReturn("secret");
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
-                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc", false));
+                new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), false));
         when(entitlementService.cloudStorageValidationEnabled(any())).thenReturn(true);
         when(cloudProviderServicesV4Endopint.validateObjectStorage(any())).thenReturn(new ObjectStorageValidateResponse());
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();

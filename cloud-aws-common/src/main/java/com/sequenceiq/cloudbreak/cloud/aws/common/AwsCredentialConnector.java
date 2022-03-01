@@ -125,8 +125,7 @@ public class AwsCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId,
-        String deploymentAddress, CredentialType type) {
+    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress, CredentialType type) {
         String policyJson;
         switch (type) {
             case ENVIRONMENT:

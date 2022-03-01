@@ -158,7 +158,7 @@ class EnvironmentNetworkServiceTest {
 
     @Test
     void testDeleteNetworkShouldDeleteTheNetwork() {
-        CloudCredential cloudCredential = new CloudCredential("1", "asd", "account");
+        CloudCredential cloudCredential = new CloudCredential("1", "asd");
         EnvironmentDto environmentDto = createEnvironmentDto(null);
 
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
@@ -179,7 +179,7 @@ class EnvironmentNetworkServiceTest {
 
     @Test
     void testDeleteNetworkShouldDeleteTheNetworkWithResourceGroupWhenUsagePatternMultiple() {
-        CloudCredential cloudCredential = new CloudCredential("1", "credName", "account");
+        CloudCredential cloudCredential = new CloudCredential("1", "credName");
         EnvironmentDto environmentDto = createEnvironmentDto("resourceGroup");
 
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
@@ -202,7 +202,7 @@ class EnvironmentNetworkServiceTest {
     @ParameterizedTest
     @EnumSource(value = ResourceGroupUsagePattern.class, names = {"USE_SINGLE", "USE_SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT"})
     void testDeleteNetworkShouldNotDeleteResourceGroupWhenUsagePatternSingle(ResourceGroupUsagePattern resourceGroupUsagePattern) {
-        CloudCredential cloudCredential = new CloudCredential("1", "credName", "account");
+        CloudCredential cloudCredential = new CloudCredential("1", "credName");
         EnvironmentDto environmentDto = createEnvironmentDto("resourceGroup", "mySingleRg", resourceGroupUsagePattern);
 
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);

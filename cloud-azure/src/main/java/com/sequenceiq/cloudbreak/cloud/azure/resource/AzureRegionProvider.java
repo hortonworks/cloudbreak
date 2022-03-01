@@ -51,25 +51,22 @@ public class AzureRegionProvider {
         enabledRegions = readEnabledRegions();
     }
 
-    public CloudRegions regions(Region region, Collection<com.microsoft.azure.management.resources.fluentcore.arm.Region> azureRegions,
-        List<String> entitlements) {
+    public CloudRegions regions(Region region, Collection<com.microsoft.azure.management.resources.fluentcore.arm.Region> azureRegions) {
         Map<Region, List<AvailabilityZone>> cloudRegions = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
         String defaultRegion = armZoneParameterDefault;
         azureRegions = filterByEnabledRegions(azureRegions);
         for (com.microsoft.azure.management.resources.fluentcore.arm.Region azureRegion : azureRegions) {
-            Coordinate coordinate = enabledRegions.get(region(azureRegion.label()));
-            if (isEntitledFor(coordinate, entitlements)) {
-                cloudRegions.put(region(azureRegion.label()), new ArrayList<>());
-                displayNames.put(region(azureRegion.label()), azureRegion.label());
+            cloudRegions.put(region(azureRegion.label()), new ArrayList<>());
+            displayNames.put(region(azureRegion.label()), azureRegion.label());
 
-                if (coordinate == null || coordinate.getLongitude() == null || coordinate.getLatitude() == null) {
-                    LOGGER.warn("Unregistered region with location coordinates on azure side: {} using default California", azureRegion.label());
-                    coordinates.put(region(azureRegion.label()), Coordinate.defaultCoordinate());
-                } else {
-                    coordinates.put(region(azureRegion.label()), coordinate);
-                }
+            Coordinate coordinate = enabledRegions.get(region(azureRegion.label()));
+            if (coordinate == null || coordinate.getLongitude() == null || coordinate.getLatitude() == null) {
+                LOGGER.warn("Unregistered region with location coordinates on azure side: {} using default California", azureRegion.label());
+                coordinates.put(region(azureRegion.label()), Coordinate.defaultCoordinate());
+            } else {
+                coordinates.put(region(azureRegion.label()), coordinate);
             }
         }
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
@@ -78,22 +75,9 @@ public class AzureRegionProvider {
         return new CloudRegions(cloudRegions, displayNames, coordinates, defaultRegion, true);
     }
 
-    private boolean isEntitledFor(Coordinate coordinate, List<String> entitlements) {
-        if (coordinate != null && coordinate.getEntitlements() != null && !coordinate.getEntitlements().isEmpty()) {
-            for (String entitlement : coordinate.getEntitlements()) {
-                if (!entitlements.contains(entitlement)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     private Set<com.microsoft.azure.management.resources.fluentcore.arm.Region> filterByEnabledRegions(
             Collection<com.microsoft.azure.management.resources.fluentcore.arm.Region> azureRegions) {
-        return azureRegions.stream()
-                .filter(reg -> enabledRegions.containsKey(region(reg.label())))
-                .collect(Collectors.toSet());
+        return azureRegions.stream().filter(reg -> enabledRegions.containsKey(region(reg.label()))).collect(Collectors.toSet());
     }
 
     private String resourceDefinition() {
@@ -112,8 +96,7 @@ public class AzureRegionProvider {
                                 regionCoordinateSpecification.getLatitude(),
                                 findByLabelOrName(regionCoordinateSpecification.getName()).label(),
                                 findByLabelOrName(regionCoordinateSpecification.getName()).name(),
-                                regionCoordinateSpecification.isK8sSupported(),
-                                regionCoordinateSpecification.getEntitlements()));
+                                regionCoordinateSpecification.isK8sSupported()));
             }
         } catch (IOException ignored) {
             LOGGER.error("Failed to read enabled Azure regions from file.");

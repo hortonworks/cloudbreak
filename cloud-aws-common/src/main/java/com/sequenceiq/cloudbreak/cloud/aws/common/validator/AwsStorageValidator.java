@@ -75,7 +75,7 @@ public class AwsStorageValidator implements Validator {
 
     private List<String> getInstanceStorageNotSupportedTypes(AuthenticatedContext ac, Set<String> instanceTypes) {
         Location location = ac.getCloudContext().getLocation();
-        CloudVmTypes cloudVmTypes = awsPlatformResources.virtualMachines(ac.getCloudCredential(), location.getRegion(), Map.of(), List.of());
+        CloudVmTypes cloudVmTypes = awsPlatformResources.virtualMachines(ac.getCloudCredential(), location.getRegion(), Map.of());
         Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
         String az = location.getAvailabilityZone().value();
         return cloudVmResponses.get(az).stream()

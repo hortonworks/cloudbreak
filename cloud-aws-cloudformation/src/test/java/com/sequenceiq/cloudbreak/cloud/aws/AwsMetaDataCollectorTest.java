@@ -521,7 +521,7 @@ public class AwsMetaDataCollectorTest {
                 .withLocation(location)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
-        CloudCredential credential = new CloudCredential("crn", null, null, "acc", false);
+        CloudCredential credential = new CloudCredential("crn", null, null, false);
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, credential);
         authenticatedContext.putParameter(AmazonEc2Client.class, amazonEC2Client);
         return authenticatedContext;

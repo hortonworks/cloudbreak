@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.EPHEMERAL_VOLUMES;
 import static java.util.Collections.emptyMap;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -151,7 +150,7 @@ public class AwsStorageValidatorsTest {
         VmType noStorageType = VmType.vmTypeWithMeta("noStorage", VmTypeMeta.VmTypeMetaBuilder.builder().create(), true);
         Map<String, Set<VmType>> responses = Map.of("az", Set.of(storageType, noStorageType));
         cloudVmTypes.setCloudVmResponses(responses);
-        when(awsPlatformResources.virtualMachines(any(), eq(Region.region("region")), any(), anyList())).thenReturn(cloudVmTypes);
+        when(awsPlatformResources.virtualMachines(any(), eq(Region.region("region")), any())).thenReturn(cloudVmTypes);
         Assertions.assertThrows(CloudConnectorException.class,
                 () -> awsStorageValidatorUnderTest.validate(authenticatedContext, cloudStack),
                 "The following instance types does not support instance storage: [noStorage]");

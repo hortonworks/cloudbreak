@@ -254,6 +254,6 @@ public class GcpCredentialConnectorTest {
     }
 
     private CloudCredential createCloudCredential() {
-        return new CloudCredential("crn", "name", CREDENTIAL_PARAMETERS, "acc", false);
+        return new CloudCredential("crn", "name", CREDENTIAL_PARAMETERS, false);
     }
 }

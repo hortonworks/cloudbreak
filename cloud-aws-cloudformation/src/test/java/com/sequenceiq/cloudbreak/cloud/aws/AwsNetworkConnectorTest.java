@@ -524,7 +524,7 @@ public class AwsNetworkConnectorTest {
         return new NetworkDeletionRequest.Builder()
                 .withRegion(REGION.value())
                 .withStackName(NETWORK_ID)
-                .withCloudCredential(new CloudCredential("1", "credential", "account"))
+                .withCloudCredential(new CloudCredential("1", "credential"))
                 .build();
     }
 
@@ -543,7 +543,7 @@ public class AwsNetworkConnectorTest {
                 .withEnvName(ENV_NAME)
                 .withEnvId(1L)
                 .withEnvCrn(ENV_CRN)
-                .withCloudCredential(new CloudCredential("1", "credential", "account"))
+                .withCloudCredential(new CloudCredential("1", "credential"))
                 .withRegion(REGION)
                 .withNetworkCidr(networkCidr)
                 .withPrivateSubnets(subnets)

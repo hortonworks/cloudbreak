@@ -190,7 +190,7 @@ public class AwsPlatformResourcesTest {
         ReflectionTestUtils.setField(underTest, "enabledRegions", Set.of(region));
         ReflectionTestUtils.setField(underTest, "enabledAvailabilityZones", Set.of(availabilityZone(AZ_NAME)));
 
-        cloudCredential = new CloudCredential("crn", "aws-credential", "account");
+        cloudCredential = new CloudCredential("crn", "aws-credential");
     }
 
     private InstanceTypeInfo getInstanceTypeInfo(String name) {
@@ -309,7 +309,7 @@ public class AwsPlatformResourcesTest {
     public void testVirtualMachinesDisabledTypesEmpty() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.emptyList());
 
-        CloudVmTypes result = underTest.virtualMachines(cloudCredential, region, Collections.emptyMap(), List.of());
+        CloudVmTypes result = underTest.virtualMachines(cloudCredential, region, Collections.emptyMap());
 
         assertEquals("m5.2xlarge", result.getCloudVmResponses().get(AZ_NAME).iterator().next().value());
     }
@@ -318,7 +318,7 @@ public class AwsPlatformResourcesTest {
     public void testVirtualMachinesDisabledTypesContainsEmpty() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList(""));
 
-        CloudVmTypes result = underTest.virtualMachines(cloudCredential, region, Collections.emptyMap(), List.of());
+        CloudVmTypes result = underTest.virtualMachines(cloudCredential, region, Collections.emptyMap());
 
         assertEquals("m5.2xlarge", result.getCloudVmResponses().get(AZ_NAME).iterator().next().value());
     }
@@ -327,7 +327,7 @@ public class AwsPlatformResourcesTest {
     public void testVirtualMachinesOkStartWith() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList("m5"));
 
-        CloudVmTypes result = underTest.virtualMachines(cloudCredential, region, Collections.emptyMap(), List.of());
+        CloudVmTypes result = underTest.virtualMachines(cloudCredential, region, Collections.emptyMap());
 
         assertTrue(result.getCloudVmResponses().get(AZ_NAME).isEmpty());
     }
@@ -336,7 +336,7 @@ public class AwsPlatformResourcesTest {
     public void testVirtualMachinesOkFullMatch() {
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", Collections.singletonList("m5.2xlarge"));
 
-        CloudVmTypes result = underTest.virtualMachines(cloudCredential, region, Collections.emptyMap(), List.of());
+        CloudVmTypes result = underTest.virtualMachines(cloudCredential, region, Collections.emptyMap());
 
         assertTrue(result.getCloudVmResponses().get(AZ_NAME).isEmpty());
     }
@@ -401,7 +401,7 @@ public class AwsPlatformResourcesTest {
     public void regionsShouldBeFilteredByEnabledRegionsAndEnabledAvailabilityZones() {
         setUpRegions();
 
-        CloudRegions cloudRegions = underTest.regions(cloudCredential, region, Map.of(), true, List.of());
+        CloudRegions cloudRegions = underTest.regions(cloudCredential, region, Map.of(), true);
         assertThat(cloudRegions.getCloudRegions())
                 .containsKey(region)
                 .doesNotContainKey(region(NOT_ENABLED_REGION_NAME));
@@ -436,7 +436,7 @@ public class AwsPlatformResourcesTest {
                 region(NOT_ENABLED_REGION_NAME), vmType("vm2")));
         ReflectionTestUtils.setField(underTest, "disabledInstanceTypes", List.of());
 
-        CloudVmTypes cloudVmTypes = underTest.virtualMachines(cloudCredential, region, Map.of(), List.of());
+        CloudVmTypes cloudVmTypes = underTest.virtualMachines(cloudCredential, region, Map.of());
         assertThat(cloudVmTypes.getCloudVmResponses())
                 .containsKey(AZ_NAME)
                 .doesNotContainKey(NOT_ENABLED_AZ_NAME);
@@ -529,7 +529,7 @@ public class AwsPlatformResourcesTest {
         CloudContext cloudContext = new Builder().withLocation(Location.location(region, availabilityZone(AZ_NAME))).build();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
 
-        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("m5.2xlarge"), List.of());
+        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("m5.2xlarge"));
 
         assertEquals(2, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("m5.2xlarge"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("unsupported"));
@@ -541,14 +541,14 @@ public class AwsPlatformResourcesTest {
         CloudContext cloudContext = new Builder().withLocation(Location.location(region, availabilityZone(AZ_NAME))).build();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
 
-        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("unsupported"), List.of());
+        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("unsupported"));
 
         assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("unsupported"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("unsupported"));
         assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("m5.2xlarge"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("m5.2xlarge"));
 
-        instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, new ArrayList<>(), List.of());
+        instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, new ArrayList<>());
 
         assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("m5.2xlarge"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("m5.2xlarge"));

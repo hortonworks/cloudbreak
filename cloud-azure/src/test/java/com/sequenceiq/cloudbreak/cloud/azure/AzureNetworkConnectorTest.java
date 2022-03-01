@@ -436,7 +436,7 @@ public class AzureNetworkConnectorTest {
     }
 
     private CloudCredential getCredential() {
-        return new CloudCredential("1", "credential", "account");
+        return new CloudCredential("1", "credential");
     }
 
     private CloudContext createCloudContext() {

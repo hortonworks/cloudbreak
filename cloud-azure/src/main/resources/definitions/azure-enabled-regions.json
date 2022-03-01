@@ -146,12 +146,6 @@
       "longitude": "55.316666"
     },
     {
-      "name": "UAE Central",
-      "latitude": "59.913868",
-      "longitude": "10.752245",
-      "entitlements": [ "CDP_AZURE_IMAGE_MARKETPLACE", "CDP_AZURE_UAE_CENTRAL" ]
-    },
-    {
       "name": "South Africa North",
       "latitude": "-25.731340",
       "longitude": "28.218370"

@@ -151,7 +151,7 @@ public class AzureLoadBalancerMetadataCollectorTest {
                 .withLocation(location)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
-        CloudCredential credential = new CloudCredential("crn", null, null, "acc", false);
+        CloudCredential credential = new CloudCredential("crn", null, null, false);
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, credential);
         authenticatedContext.putParameter(AzureClient.class, azureClient);
         return authenticatedContext;

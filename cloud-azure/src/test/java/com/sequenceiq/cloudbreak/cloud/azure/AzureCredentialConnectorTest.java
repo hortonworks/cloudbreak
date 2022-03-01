@@ -108,7 +108,7 @@ public class AzureCredentialConnectorTest {
     public void testInteractiveLoginIsEnabled() {
         when(azureInteractiveLogin.login(any(CloudContext.class), any(ExtendedCloudCredential.class),
                 any(CredentialNotifier.class))).thenReturn(Maps.newHashMap());
-        CloudCredential cloudCredential = new CloudCredential("anId", "aName", "account");
+        CloudCredential cloudCredential = new CloudCredential("anId", "aName");
         ExtendedCloudCredential extendedCloudCredential = new ExtendedCloudCredential(cloudCredential, null, null, USER_ID, "accountId");
         underTest.interactiveLogin(TEST_CLOUD_CONTEXT, extendedCloudCredential, credentialSender);
         verify(azureInteractiveLogin, times(1)).login(any(CloudContext.class), any(ExtendedCloudCredential.class),
@@ -132,7 +132,7 @@ public class AzureCredentialConnectorTest {
         azureParams.put("codeGrantFlowBased", codeGrantFlowParams);
         parameters.put("azure", azureParams);
 
-        CloudCredential cloudCredential = new CloudCredential("anId", "aName", parameters, "acc", false);
+        CloudCredential cloudCredential = new CloudCredential("anId", "aName", parameters, false);
         when(appCreationCommand.getRedirectURL(String.valueOf(WORKSPACE_ID), DEPLOYMENT_ADDRESS)).thenReturn(redirectUrl);
 
         Map<String, String> result = underTest.initCodeGrantFlow(TEST_CLOUD_CONTEXT, cloudCredential);

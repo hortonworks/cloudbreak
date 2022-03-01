@@ -44,7 +44,7 @@ public class PollerUtilTest {
         ReflectionTestUtils.setField(underTest, "pollingInterval", 1);
         ReflectionTestUtils.setField(underTest, "pollingAttempt", 1);
         CloudContext context = createCloudContext();
-        CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "", "account");
+        CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         AuthenticatedContext ac = new AuthenticatedContext(context, cloudCredential);
 
         List<CloudVmInstanceStatus> actual = underTest.waitFor(ac, Collections.emptyList(), Collections.emptySet(), "");
@@ -67,7 +67,7 @@ public class PollerUtilTest {
         ReflectionTestUtils.setField(underTest, "pollingInterval", 1);
         ReflectionTestUtils.setField(underTest, "pollingAttempt", 1);
         CloudContext context = createCloudContext();
-        CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "", "account");
+        CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         AuthenticatedContext ac = new AuthenticatedContext(context, cloudCredential);
         CloudInstance cloudInstance = new CloudInstance("instanceId", null, null, "subnet-1", "az1");
         List<CloudInstance> instances = List.of(cloudInstance);
@@ -88,7 +88,7 @@ public class PollerUtilTest {
         ReflectionTestUtils.setField(underTest, "pollingInterval", 1);
         ReflectionTestUtils.setField(underTest, "pollingAttempt", 2);
         CloudContext context = createCloudContext();
-        CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "", "account");
+        CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         AuthenticatedContext ac = new AuthenticatedContext(context, cloudCredential);
         CloudInstance cloudInstance = new CloudInstance("instanceId", null, null, "subnet-1", "az1");
         List<CloudInstance> instances = List.of(cloudInstance);
@@ -111,7 +111,7 @@ public class PollerUtilTest {
         ReflectionTestUtils.setField(underTest, "pollingInterval", 1);
         ReflectionTestUtils.setField(underTest, "pollingAttempt", 1);
 
-        CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "", "account");
+        CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
         CloudInstance cloudInstance = new CloudInstance("instanceId", null, null, "subnet-1", "az1");
         List<CloudInstance> instances = List.of(cloudInstance);
@@ -129,7 +129,7 @@ public class PollerUtilTest {
         ReflectionTestUtils.setField(underTest, "pollingInterval", 1);
         ReflectionTestUtils.setField(underTest, "pollingAttempt", 1);
 
-        CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "", "account");
+        CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
         CloudInstance cloudInstance = new CloudInstance("instanceId", null, null, "subnet-1", "az1");
         List<CloudInstance> instances = List.of(cloudInstance);

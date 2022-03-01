@@ -307,8 +307,7 @@ public class AwsPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getLatitude(),
                                 regionCoordinateSpecification.getDisplayName(),
                                 regionEntry.isPresent() ? regionEntry.get().getKey().value() : regionCoordinateSpecification.getDisplayName(),
-                                regionCoordinateSpecification.isK8sSupported(),
-                                regionCoordinateSpecification.getEntitlements()));
+                                regionCoordinateSpecification.isK8sSupported()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;
@@ -460,7 +459,7 @@ public class AwsPlatformResources implements PlatformResources {
     public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudSshKey>> result = new HashMap<>();
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
-            CloudRegions regions = regions(cloudCredential, region, new HashMap<>(), true, List.of());
+            CloudRegions regions = regions(cloudCredential, region, new HashMap<>(), true);
             for (Region actualRegion : regions.getCloudRegions().keySet()) {
                 // If region is provided then should filter for those region
                 if (regionMatch(actualRegion, region)) {
@@ -536,8 +535,7 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "{ #cloudCredential?.id, #availabilityZonesNeeded }")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters,
-        boolean availabilityZonesNeeded, List<String> entitlements) {
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential));
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
@@ -626,26 +624,26 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
-    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters, List<String> entitlements) {
-        return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter, false, entitlements);
+    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter, false);
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
-    public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters, List<String> entitlements) {
+    public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         if (restrictInstanceTypes) {
-            return getCloudVmTypes(cloudCredential, region, filters, enabledDistroxInstanceTypeFilter, true, entitlements);
+            return getCloudVmTypes(cloudCredential, region, filters, enabledDistroxInstanceTypeFilter, true);
         } else {
-            return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter, true, entitlements);
+            return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter, true);
         }
     }
 
     private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters,
-            Predicate<VmType> enabledInstanceTypeFilter, boolean enableMinimalHardwareFilter, List<String> entitlements) {
+            Predicate<VmType> enabledInstanceTypeFilter, boolean enableMinimalHardwareFilter) {
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
-            CloudRegions regions = regions(cloudCredential, region, filters, true, entitlements);
+            CloudRegions regions = regions(cloudCredential, region, filters, true);
             AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
             AmazonEc2Client ec2Client = awsClient.createEc2Client(awsCredentialView, region.getRegionName());
 
@@ -776,7 +774,7 @@ public class AwsPlatformResources implements PlatformResources {
     public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudGateWay>> resultCloudGateWayMap = new HashMap<>();
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
-            CloudRegions regions = regions(cloudCredential, region, filters, true, List.of());
+            CloudRegions regions = regions(cloudCredential, region, filters, true);
             for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
                 if (regionListEntry.getKey().value().equals(region.value())) {
                     AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), regionListEntry.getKey().value());
@@ -1044,11 +1042,10 @@ public class AwsPlatformResources implements PlatformResources {
         return properties;
     }
 
-    public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes, List<String> entitlements) {
+    public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
         Location location = ac.getCloudContext().getLocation();
         try {
-            String accountId = ac.getCloudContext().getAccountId();
-            CloudVmTypes cloudVmTypes = virtualMachines(ac.getCloudCredential(), location.getRegion(), Map.of(), entitlements);
+            CloudVmTypes cloudVmTypes = virtualMachines(ac.getCloudCredential(), location.getRegion(), Map.of());
             Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
             Map<String, VolumeParameterConfig> instanceTypeToInstanceStorageMap = cloudVmResponses.getOrDefault(location.getAvailabilityZone().value(), Set.of())
                     .stream()

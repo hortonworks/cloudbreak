@@ -79,7 +79,7 @@ public class SubnetListerServiceTest {
     public void testListSubnetsAws() {
         when(environmentNetworkResponse.getSubnetMetas()).thenReturn(subnets);
         when(environmentNetworkResponse.getCbSubnets()).thenReturn(subnets);
-        credential = new Credential(CREDENTIAL_CRN, CREDENTIAL_NAME, CREDENTIAL_ATTRIBUTES, "acc");
+        credential = new Credential(CREDENTIAL_CRN, CREDENTIAL_NAME, CREDENTIAL_ATTRIBUTES);
         when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_CRN)).thenReturn(credential);
 
         List<CloudSubnet> subnets = underTest.listSubnets(detailedEnvironmentResponse, CloudPlatform.AWS);
@@ -95,7 +95,7 @@ public class SubnetListerServiceTest {
         when(environmentNetworkResponse.getAzure().getResourceGroupName()).thenReturn(RESOURCE_GROUP);
         when(environmentNetworkResponse.getAzure().getNetworkId()).thenReturn(NETWORK_ID);
         Credential.AzureParameters azure = new Credential.AzureParameters(SUBSCRIPTION_ID);
-        credential = new Credential(CREDENTIAL_CRN, CREDENTIAL_NAME, CREDENTIAL_ATTRIBUTES, azure, "acc");
+        credential = new Credential(CREDENTIAL_CRN, CREDENTIAL_NAME, CREDENTIAL_ATTRIBUTES, azure);
         when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_CRN)).thenReturn(credential);
 
         List<CloudSubnet> subnets = underTest.listSubnets(detailedEnvironmentResponse, CloudPlatform.AZURE);

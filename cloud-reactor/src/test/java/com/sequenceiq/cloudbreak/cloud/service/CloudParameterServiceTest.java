@@ -47,7 +47,7 @@ class CloudParameterServiceTest {
         }).when(eventBus).notify(anyString(), any(Event.class));
         CloudNoSqlTables noSqlTables = underTest.getNoSqlTables(
                 new ExtendedCloudCredential(
-                        new CloudCredential("id", "name", "acc"), "aws", "desc", "crn", "account"),
+                        new CloudCredential("id", "name"), "aws", "desc", "crn", "account"),
                 "region",
                 "aws",
                 null);

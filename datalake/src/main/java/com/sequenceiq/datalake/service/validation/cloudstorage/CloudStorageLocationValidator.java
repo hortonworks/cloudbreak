@@ -59,11 +59,9 @@ public class CloudStorageLocationValidator {
     }
 
     private Credential getCredential(DetailedEnvironmentResponse environment) {
-        return new Credential(
-                environment.getCloudPlatform(),
+        return new Credential(environment.getCloudPlatform(),
                 environment.getCredential().getName(),
                 secretService.getByResponse(environment.getCredential().getAttributes()),
-                environment.getCredential().getCrn(),
-                environment.getAccountId());
+                environment.getCredential().getCrn());
     }
 }

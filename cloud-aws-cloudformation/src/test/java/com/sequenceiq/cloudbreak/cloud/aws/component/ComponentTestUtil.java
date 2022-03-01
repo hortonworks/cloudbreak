@@ -91,7 +91,7 @@ public class ComponentTestUtil {
                 .withLocation(location)
                 .withAccountId("5")
                 .build();
-        CloudCredential cloudCredential = new CloudCredential("crn", "credentialName", "account");
+        CloudCredential cloudCredential = new CloudCredential("crn", "credentialName");
         return new AuthenticatedContext(context, cloudCredential);
     }
 

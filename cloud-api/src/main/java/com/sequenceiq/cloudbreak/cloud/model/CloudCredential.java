@@ -15,25 +15,22 @@ public class CloudCredential extends DynamicModel {
 
     private boolean verifyPermissions;
 
-    private String accountId;
-
     public CloudCredential() {
     }
 
-    public CloudCredential(String id, String name, String account) {
-        this(id, name, new HashMap<>(), account, false);
+    public CloudCredential(String id, String name) {
+        this(id, name, new HashMap<>(), false);
     }
 
-    public CloudCredential(String id, String name, String account, boolean verifyPermissions) {
-        this(id, name, new HashMap<>(), account, verifyPermissions);
+    public CloudCredential(String id, String name, boolean verifyPermissions) {
+        this(id, name, new HashMap<>(), verifyPermissions);
     }
 
-    public CloudCredential(String id, String name, Map<String, Object> parameters, String acountId, boolean verifyPermissions) {
+    public CloudCredential(String id, String name, Map<String, Object> parameters, boolean verifyPermissions) {
         super(parameters);
         this.id = id;
         this.name = name;
         this.verifyPermissions = verifyPermissions;
-        this.accountId = acountId;
     }
 
     public String getName() {
@@ -58,10 +55,6 @@ public class CloudCredential extends DynamicModel {
 
     public void setVerifyPermissions(boolean verifyPermissions) {
         this.verifyPermissions = verifyPermissions;
-    }
-
-    public String getAccountId() {
-        return accountId;
     }
 
     // Must not reveal any secrets, hence not including DynamicModel.toString()!

@@ -123,7 +123,7 @@ public class AzureStackViewProviderTest {
     }
 
     private CloudCredential createCloudCredential() {
-        return new CloudCredential("id", "name", "account");
+        return new CloudCredential("id", "name");
     }
 
     private CloudContext createCloudContext() {

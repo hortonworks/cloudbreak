@@ -60,8 +60,7 @@ public class GcpCredentialFactoryTest {
         json.put("credentialJson", getCredentialJson(jsonString));
         gcp.put("json", json);
         parameters.put("gcp", gcp);
-        return new CloudCredential("1", "name", parameters,
-                "acc", true);
+        return new CloudCredential("1", "name", parameters, true);
     }
 
 }

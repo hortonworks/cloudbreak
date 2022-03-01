@@ -118,7 +118,6 @@ public class EnvironmentResponseConverter {
                 .withEnvironmentServiceVersion(environmentDto.getEnvironmentServiceVersion())
                 .withDeletionType(deletionType(environmentDto.getDeletionType()))
                 .withCcmV2TlsType(environmentDto.getExperimentalFeatures().getCcmV2TlsType())
-                .withAccountId(environmentDto.getAccountId())
                 .withEnvironmentDomain(environmentDto.getDomain());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),

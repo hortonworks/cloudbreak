@@ -30,7 +30,7 @@ class AzureMockAccountMappingServiceTest {
     void setUp() {
         underTest = new AzureMockAccountMappingService();
         Map<String, Object> attributes = Map.of("azure", Map.of("subscriptionId", SUBSCRIPTION_ID));
-        credential = new CloudCredential("id", "name", attributes, "acc", false);
+        credential = new CloudCredential("id", "name", attributes, false);
     }
 
     @Test

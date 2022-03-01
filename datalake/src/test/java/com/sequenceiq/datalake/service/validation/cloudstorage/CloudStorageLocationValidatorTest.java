@@ -46,7 +46,7 @@ public class CloudStorageLocationValidatorTest {
 
     private static final String CLOUD_PLATFORM = "cloudPlatform";
 
-    private static final CloudCredential CLOUD_CREDENTIAL = new CloudCredential("id", "name", "account");
+    private static final CloudCredential CLOUD_CREDENTIAL = new CloudCredential("id", "name");
 
     @Mock
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;

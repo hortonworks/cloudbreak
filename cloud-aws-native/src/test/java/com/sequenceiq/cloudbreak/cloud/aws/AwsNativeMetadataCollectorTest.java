@@ -105,7 +105,7 @@ class AwsNativeMetadataCollectorTest {
                 .build();
         Map<String, Object> credentialParams = Map.of("aws",
                 Map.of("keyBased", Map.of("accessKey", "mo", "secretKey", "su")));
-        CloudCredential credential = new CloudCredential("id", "alma", credentialParams, "acc", false);
+        CloudCredential credential = new CloudCredential("id", "alma", credentialParams, false);
         when(authenticatedContext.getCloudContext()).thenReturn(context);
         when(authenticatedContext.getCloudCredential()).thenReturn(credential);
     }

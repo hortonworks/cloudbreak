@@ -72,7 +72,7 @@ public class AzureDnsZoneServiceTest {
                 .withCrn("")
                 .withPlatform("")
                 .build();
-        CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "", "account");
+        CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "");
         ac = new AuthenticatedContext(cloudContext, cloudCredential);
 
         when(azureResourceIdProviderService.generateDeploymentId(any(), any(), any())).thenReturn(DEPLOYMENT_ID);

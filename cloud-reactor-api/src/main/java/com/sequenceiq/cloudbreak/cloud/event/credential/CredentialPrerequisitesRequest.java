@@ -31,5 +31,4 @@ public class CredentialPrerequisitesRequest extends CloudPlatformRequest<Credent
     public CredentialType getType() {
         return type;
     }
-
 }

@@ -22,7 +22,7 @@ public class CredentialToCloudCredentialConverter implements Converter<Credentia
             return null;
         }
         Map<String, Object> fields = isEmpty(credential.getAttributes()) ? new HashMap<>() : new Json(credential.getAttributes()).getMap();
-        return new CloudCredential(credential.getCrn(), credential.getName(), fields, credential.getAccountId(), false);
+        return new CloudCredential(credential.getCrn(), credential.getName(), fields, false);
     }
 
 }

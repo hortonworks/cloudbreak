@@ -47,7 +47,7 @@ public class StorageValidationService {
         CredentialResponse credentialResponse = environmentClientService.getCredentialByCrn(credentialCrn);
         String attributes = secretService.getByResponse(credentialResponse.getAttributes());
         CloudCredential cloudCredential = new CloudCredential(credentialResponse.getCrn(), credentialResponse.getName(), new Json(attributes).getMap(),
-                credentialResponse.getAccountId(), credentialResponse.isVerifyPermissions());
+                credentialResponse.isVerifyPermissions());
         CloudStorageRequest cloudStorageRequest = cloudStorageManifester.initSdxCloudStorageRequest(credentialResponse.getCloudPlatform(),
                 blueprintName, clusterName, sdxCloudStorageRequest);
         AccountMappingBase accountMapping = new AccountMappingBase();

@@ -50,7 +50,7 @@ class GetPlatformNoSqlTablesHandlerTest {
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
         when(cloudConnector.platformResources()).thenReturn(platformResources);
 
-        CloudCredential cloudCredential = new CloudCredential("id", "name", "acc");
+        CloudCredential cloudCredential = new CloudCredential("id", "name");
         GetPlatformNoSqlTablesRequest request = spy(new GetPlatformNoSqlTablesRequest(cloudCredential,
                 new ExtendedCloudCredential(
                         cloudCredential, "aws", "desc", "crn", "account"),

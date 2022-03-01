@@ -14,7 +14,7 @@ class CloudCredentialTest {
 
     @Test
     void toStringTestShouldNotIncludeSecrets() {
-        CloudCredential underTest = new CloudCredential("id", "name", Map.of(CONFIDENTIAL, SECRET), "acc", true);
+        CloudCredential underTest = new CloudCredential("id", "name", Map.of(CONFIDENTIAL, SECRET), true);
         String result = underTest.toString();
 
         assertThat(underTest.getStringParameter(CONFIDENTIAL)).isEqualTo(SECRET);

@@ -211,7 +211,7 @@ public class GcpMetadataCollectorTest {
 
     private AuthenticatedContext createAuthenticatedContext() {
         CloudContext cloudContext = createCloudContext();
-        CloudCredential cloudCredential = new CloudCredential("1", "gcp-cred", Collections.singletonMap("projectId", "gcp-cred"), "acc", false);
+        CloudCredential cloudCredential = new CloudCredential("1", "gcp-cred", Collections.singletonMap("projectId", "gcp-cred"), false);
         return new AuthenticatedContext(cloudContext, cloudCredential);
     }
 

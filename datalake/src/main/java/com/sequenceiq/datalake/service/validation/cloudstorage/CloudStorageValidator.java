@@ -133,7 +133,6 @@ public class CloudStorageValidator {
         return new Credential(environment.getCloudPlatform(),
                 environment.getCredential().getName(),
                 secretService.getByResponse(environment.getCredential().getAttributes()),
-                environment.getCredential().getCrn(),
-                environment.getCredential().getAccountId());
+                environment.getCredential().getCrn());
     }
 }

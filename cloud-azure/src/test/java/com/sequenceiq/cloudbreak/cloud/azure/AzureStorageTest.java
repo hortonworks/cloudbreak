@@ -154,7 +154,7 @@ public class AzureStorageTest {
     private CloudCredential createCloudCredential() {
         Map<String, String> azureParameters = new HashMap<>();
         azureParameters.put("subscriptionId", SUBSCRIPTION_ONE);
-        CloudCredential cloudCredential = new CloudCredential("id", "name", "account");
+        CloudCredential cloudCredential = new CloudCredential("id", "name");
         cloudCredential.putParameter("azure", azureParameters);
         return cloudCredential;
     }
