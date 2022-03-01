@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.datalakePattern;
+import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.environmentDatalakePattern;
 import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.environmentPattern;
 
 import javax.inject.Inject;
@@ -74,9 +75,10 @@ public class DataStewardTest extends AbstractIntegrationTest {
 
         testContext
                 .given(SdxInternalTestDto.class)
-                .whenException(sdxTestClient.repairInternal("master"), ForbiddenException.class, expectedMessage("Doesn't have 'datalake/repairDatalake'" +
-                        " right on any of the environment[(]s[)] [\\[]crn: crn:cdp:environments:us-west-1:.*:environment:.*[]] or on " +
-                        datalakePattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
+                .whenException(sdxTestClient.repairInternal("master"), ForbiddenException.class,
+                        expectedMessage("Doesn't have 'datalake/repairDatalake' right on any of the environment[(]s[)] " +
+                                environmentDatalakePattern(testContext) + " or on " + datalakePattern(testContext))
+                                .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
                 .validate();
     }
 
