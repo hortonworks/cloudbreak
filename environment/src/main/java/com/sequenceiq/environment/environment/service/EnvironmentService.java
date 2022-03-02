@@ -24,9 +24,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -62,7 +61,7 @@ import io.grpc.StatusRuntimeException;
 
 @Service
 public class EnvironmentService extends AbstractAccountAwareResourceService<Environment>
-        implements ResourceIdProvider, ResourcePropertyProvider, PayloadContextProvider {
+        implements ResourceIdProvider, EnvironmentPropertyProvider, PayloadContextProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
@@ -366,11 +365,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
         return environmentRepository.findAllCrnByNameAndAccountIdAndArchivedIsFalse(resourceNames, ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.ENVIRONMENT);
     }
 
     public List<String> findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(String accountId, Long parentEnvironmentId) {
