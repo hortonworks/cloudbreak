@@ -403,8 +403,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_DATAHUB_INSTANCE)
-    public void deleteInstanceByName(@ResourceName String name, Boolean forced, String instanceId) {
-        stackOperations.deleteInstance(
+    public FlowIdentifier deleteInstanceByName(@ResourceName String name, Boolean forced, String instanceId) {
+        return stackOperations.deleteInstance(
                 NameOrCrn.ofName(name),
                 getWorkspaceIdForCurrentUser(),
                 forced,
@@ -413,9 +413,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATAHUB_INSTANCE)
-    public void deleteInstanceByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn, Boolean forced,
+    public FlowIdentifier deleteInstanceByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn, Boolean forced,
             String instanceId) {
-        stackOperations.deleteInstance(
+        return stackOperations.deleteInstance(
                 NameOrCrn.ofCrn(crn),
                 getWorkspaceIdForCurrentUser(),
                 forced,
@@ -424,9 +424,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DELETE_DATAHUB_INSTANCE)
-    public void deleteInstancesByName(@ResourceName String name, List<String> instances,
+    public FlowIdentifier deleteInstancesByName(@ResourceName String name, List<String> instances,
             MultipleInstanceDeleteRequest request, boolean forced) {
-        stackOperations.deleteInstances(
+        return stackOperations.deleteInstances(
                 NameOrCrn.ofName(name),
                 getWorkspaceIdForCurrentUser(),
                 getInstances(instances, request),
@@ -435,9 +435,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_DATAHUB_INSTANCE)
-    public void deleteInstancesByCrn(@TenantAwareParam @ResourceCrn String crn, List<String> instances,
+    public FlowIdentifier deleteInstancesByCrn(@TenantAwareParam @ResourceCrn String crn, List<String> instances,
             MultipleInstanceDeleteRequest request, boolean forced) {
-        stackOperations.deleteInstances(
+        return stackOperations.deleteInstances(
                 NameOrCrn.ofCrn(crn),
                 getWorkspaceIdForCurrentUser(),
                 getInstances(instances, request),
