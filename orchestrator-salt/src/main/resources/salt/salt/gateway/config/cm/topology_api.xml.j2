@@ -669,6 +669,17 @@
     {%- endif %}
     {%- endif %}
 
+    {% if 'MODEL_REGISTRY' in salt['pillar.get']('gateway:location') -%}
+    {% if 'MODEL_REGISTRY' in exposed -%}
+    <service>
+        <role>MODEL_REGISTRY</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['MODEL_REGISTRY'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['MODEL_REGISTRY'] }}/</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
     {% if 'SPARK3_YARN_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
     {% if 'SPARK3HISTORYUI' in exposed -%}
     <service>

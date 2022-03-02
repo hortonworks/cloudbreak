@@ -759,6 +759,20 @@
       "visibleForDatahub": true,
       "withoutProxyPath": true,
       "minVersion": "7.2.9"
+    },
+    {
+      "name": "MODEL_REGISTRY",
+      "displayName": "Model Registry",
+      "serviceName": "MODEL_REGISTRY",
+      "knoxService": "MODEL_REGISTRY",
+      "knoxUrl": "/model-registry/",
+      "ssoSupported": false,
+      "port": 8188,
+      "tlsPort": 8188,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": true,
+      "visibleForDatahub": false
     }
   ]
 }
