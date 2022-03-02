@@ -84,6 +84,9 @@ class SdxReactorFlowManagerTest {
         sdxCluster = getValidSdxCluster("7.2.10");
         sdxCluster.setRangerRazEnabled(false);
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform("AWS");
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
         when(environmentClientService.getBackupLocation(ENV_CRN)).thenReturn(BACKUP_LOCATION);
         when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
         when(datalakeDrConfig.isConfigured()).thenReturn(true);
@@ -109,6 +112,9 @@ class SdxReactorFlowManagerTest {
     void testSdxBackupOnUpgradeAzureSupported() {
         sdxCluster = getValidSdxCluster("7.2.2");
         sdxCluster.setRangerRazEnabled(false);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform("AZURE");
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
         when(environmentClientService.getBackupLocation(ENV_CRN)).thenReturn(BACKUP_LOCATION);
         when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
         when(datalakeDrConfig.isConfigured()).thenReturn(true);
@@ -143,7 +149,7 @@ class SdxReactorFlowManagerTest {
     }
 
     @Test
-    void testSdxBackupOnUpgradeForMockPlatformWithEmptyFIleSystemType() {
+    void testSdxBackupOnUpgradeForMockPlatformWithEmptyFileSystemType() {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setCloudPlatform("MOCK");
         sdxCluster = getValidSdxCluster("7.2.9");
@@ -214,6 +220,9 @@ class SdxReactorFlowManagerTest {
         sdxCluster = getValidSdxCluster("7.2.10");
         sdxCluster.setRangerRazEnabled(false);
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform("AWS");
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
         when(environmentClientService.getBackupLocation(ENV_CRN)).thenThrow(new BadRequestException("No backup location"));
         when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
         when(datalakeDrConfig.isConfigured()).thenReturn(true);
