@@ -121,6 +121,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 
 @ExtendWith(MockitoExtension.class)
@@ -1489,6 +1490,28 @@ class SdxServiceTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals(String.format("Provisioning a micro duty data lake cluster is not enabled for %s. ", CloudPlatform.AZURE.name()) +
                 "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
+    }
+
+    @Test
+    void testGetDefaultTemplateWhenMissingRequiredParameters() {
+        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplate(null,  "7.2.14", "AWS"));
+        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplate(LIGHT_DUTY,  null, "AWS"));
+        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplate(LIGHT_DUTY,  "7.2.14", null));
+    }
+
+    @Test
+    void testGetDefaultTemplateWhenMissingTemplateForParameters() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(null);
+        assertThrows(NotFoundException.class, () -> underTest.getDefaultTemplate(LIGHT_DUTY,  "7.2.14", "AWS"));
+    }
+
+    @Test
+    void testGetDefaultTemplate() {
+        StackV4Request defaultTemplate = new StackV4Request();
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(defaultTemplate);
+
+        SdxDefaultTemplateResponse response = underTest.getDefaultTemplate(LIGHT_DUTY, "7.2.14", "AWS");
+        assertEquals(defaultTemplate, response.getTemplate());
     }
 
 }

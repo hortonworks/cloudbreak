@@ -66,6 +66,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
@@ -401,6 +402,12 @@ public class SdxController implements SdxEndpoint {
     public SdxGenerateImageCatalogResponse generateImageCatalog(@ResourceName String name) {
         CloudbreakImageCatalogV3 imageCatalog = sdxImageCatalogService.generateImageCatalog(name);
         return new SdxGenerateImageCatalogResponse(imageCatalog);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
+    public SdxDefaultTemplateResponse getDefaultTemplate(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform) {
+        return sdxService.getDefaultTemplate(clusterShape, runtimeVersion, cloudPlatform);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

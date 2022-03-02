@@ -41,6 +41,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
@@ -289,4 +290,11 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = GENERATE_IMAGE_CATALOG, nickname = "generateImageCatalog")
     SdxGenerateImageCatalogResponse generateImageCatalog(@PathParam("name") String name);
+
+    @GET
+    @Path("default_template")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Gets the default template for the given datalake shape, cloud platform and runtime version", nickname = "getDefaultTemplate")
+    SdxDefaultTemplateResponse getDefaultTemplate(@QueryParam("clusterShape") SdxClusterShape clusterShape, @QueryParam("runtimeVersion") String runtimeVersion,
+            @QueryParam("cloudPlatform") String cloudPlatform);
 }
