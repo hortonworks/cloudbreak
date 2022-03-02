@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
@@ -78,12 +79,15 @@ public class MultiAzCalculatorService {
     }
 
     public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup) {
+        LOGGER.debug("Calculate the subnet by round robin from {}", subnetAzPairs);
         Map<String, Integer> subnetUsage = new HashMap<>();
         Set<String> subnetIds = collectSubnetIds(instanceGroup, NetworkScaleDetails.getEmpty());
+        LOGGER.debug("Collected subnetIds: {}", subnetIds);
         initializeSubnetUsage(subnetAzPairs, subnetIds, subnetUsage);
         collectCurrentSubnetUsage(instanceGroup, subnetUsage);
 
         if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
+            checkSubnetUsageCount(subnetUsage, subnetIds);
             for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
                 if (isNullOrEmpty(instanceMetaData.getSubnetId())) {
                     Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForUsage(subnetUsage);
@@ -100,15 +104,18 @@ public class MultiAzCalculatorService {
 
     public void calculateByRoundRobin(Map<String, String> subnetAzPairs, InstanceGroup instanceGroup, InstanceMetaData instanceMetaData,
             NetworkScaleDetails networkScaleDetails) {
+        LOGGER.debug("Calculate the subnet by round robin for {} from {}", instanceMetaData.getDiscoveryFQDN(), subnetAzPairs);
         Map<String, Integer> subnetUsage = new HashMap<>();
         Set<String> subnetIds = collectSubnetIds(instanceGroup, networkScaleDetails);
+        LOGGER.debug("Collected subnetIds: {}", subnetIds);
         initializeSubnetUsage(subnetAzPairs, subnetIds, subnetUsage);
         collectCurrentSubnetUsage(instanceGroup, subnetUsage);
-
         if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
+            checkSubnetUsageCount(subnetUsage, subnetIds);
             if (isNullOrEmpty(instanceMetaData.getSubnetId())) {
                 Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForUsage(subnetUsage);
                 String leastUsedSubnetId = searchTheSmallestUsedID(subnetUsage, numberOfInstanceInASubnet);
+                LOGGER.debug("Smallest count is {} with subnet: {}", numberOfInstanceInASubnet, leastUsedSubnetId);
 
                 instanceMetaData.setSubnetId(leastUsedSubnetId);
                 instanceMetaData.setAvailabilityZone(subnetAzPairs.get(leastUsedSubnetId));
@@ -117,12 +124,25 @@ public class MultiAzCalculatorService {
         }
     }
 
+    private void checkSubnetUsageCount(Map<String, Integer> subnetUsage, Set<String> subnetIds) {
+        if (subnetUsage.isEmpty()) {
+            LOGGER.debug("The following subnets are missing from the Environment, you may have removed them during an environment update previously? " +
+                    "Missing subnets: {}", subnetIds);
+            throw new CloudbreakServiceException("The following subnets are missing from the Environment, you may have removed them during an environment " +
+                    "update previously? Missing subnets: " + subnetIds);
+        }
+        LOGGER.debug("Subnet usage: {}", subnetUsage);
+    }
+
     public Map<String, String> filterSubnetByLeastUsedAz(InstanceGroup instanceGroup, Map<String, String> subnetAzPairs) {
+        LOGGER.debug("Filter the subnet and az pairs with the least used AZ. {}", subnetAzPairs);
         Map<String, List<String>> azSubnetPairs = createAzSubnetPairsFromSubnetAzPairs(subnetAzPairs);
+        LOGGER.debug("Converted az and subnet pairs: {}", azSubnetPairs);
         Map<String, Integer> azUsage = new HashMap<>();
         Set<String> azs = azSubnetPairs.keySet();
         azs.forEach(az -> azUsage.computeIfAbsent(az, k -> 0));
         collectCurrentAzUsage(instanceGroup, azUsage, subnetAzPairs);
+        LOGGER.debug("AZ usage: {}", azUsage);
         Integer numberOfInstanceInAnAz = searchTheSmallestInstanceCountForUsage(azUsage);
         String leastUsedAz = searchTheSmallestUsedID(azUsage, numberOfInstanceInAnAz);
         Set<String> subnetsForLeastUsedAz = new HashSet<>(azSubnetPairs.get(leastUsedAz));
