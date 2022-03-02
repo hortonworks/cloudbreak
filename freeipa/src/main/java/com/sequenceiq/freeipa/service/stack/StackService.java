@@ -20,8 +20,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
@@ -38,7 +37,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
 @Service
-public class StackService implements ResourcePropertyProvider, PayloadContextProvider {
+public class StackService implements EnvironmentPropertyProvider, PayloadContextProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
@@ -195,11 +194,6 @@ public class StackService implements ResourcePropertyProvider, PayloadContextPro
         } else {
             return stackRepository.findMultipleByEnvironmentCrnAndAccountIdWithStatuses(environmentCrns, accountId, statuses);
         }
-    }
-
-    @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.ENVIRONMENT);
     }
 
     @Override

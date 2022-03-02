@@ -13,8 +13,12 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Joiner;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.model.AllMatch;
 import com.sequenceiq.authorization.service.model.AnyMatch;
@@ -22,9 +26,12 @@ import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.service.model.HasRight;
 import com.sequenceiq.authorization.service.model.HasRightOnAll;
 import com.sequenceiq.authorization.service.model.HasRightOnAny;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 @Component
 public class EnvironmentBasedAuthorizationProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentBasedAuthorizationProvider.class);
 
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
@@ -32,7 +39,10 @@ public class EnvironmentBasedAuthorizationProvider {
     public Optional<AuthorizationRule> getAuthorizations(String resourceCrn, AuthorizationResourceAction action) {
         ResourcePropertyProvider resourceBasedCrnProvider = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action);
         if (resourceBasedCrnProvider == null) {
-            return Optional.empty();
+            LOGGER.error("There is no resource based crn provider implemented for action {} against resource type {}, " +
+                    "thus authorization is failing automatically.", action, Crn.safeFromString(resourceCrn).getResourceType().name());
+            throw new AccessDeniedException(String.format("Action %s is not supported over resource %s, thus access is denied",
+                    action.getRight(), resourceCrn));
         }
         Optional<String> environmentCrn = resourceBasedCrnProvider.getEnvironmentCrnByResourceCrn(resourceCrn);
         if (environmentCrn.isPresent()) {
@@ -45,7 +55,11 @@ public class EnvironmentBasedAuthorizationProvider {
     public Optional<AuthorizationRule> getAuthorizations(Collection<String> resourceCrns, AuthorizationResourceAction action) {
         ResourcePropertyProvider resourceBasedCrnProvider = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action);
         if (resourceBasedCrnProvider == null) {
-            return Optional.empty();
+            LOGGER.error("There is no resource based crn provider implemented for action {} against resource types {}, " +
+                    "thus authorization is failing automatically.", action, Joiner.on(",").join(
+                            resourceCrns.stream().map(crn -> Crn.safeFromString(crn).getResourceType().name()).collect(Collectors.toSet())));
+            throw new AccessDeniedException(String.format("Action %s is not supported over resources %s, thus access is denied",
+                    action.getRight(), Joiner.on(",").join(resourceCrns)));
         }
         Map<String, Optional<String>> withEnvironmentCrn = resourceBasedCrnProvider.getEnvironmentCrnsByResourceCrns(resourceCrns);
         if (MapUtils.isEmpty(withEnvironmentCrn)) {

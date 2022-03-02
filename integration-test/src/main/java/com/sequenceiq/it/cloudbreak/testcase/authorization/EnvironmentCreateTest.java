@@ -83,10 +83,12 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 // testing unauthorized calls for environment
-                .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
-                        " right on environment " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
-                        " right on environment " + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
+                .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage(
+                        "Doesn't have 'environments/describeEnvironment' right on any of the environment[(]s[)] "
+                        + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage(
+                        "Doesn't have 'environments/describeEnvironment' right on any of the environment[(]s[)] "
+                        + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
 
         testFreeipaCreation(testContext);
@@ -149,11 +151,14 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .await(Status.AVAILABLE)
                 //testing unathorized freeipa calls for the environment
                 .whenException(freeIpaTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
-                        " right on environment " + environmentFreeIpaPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .whenException(freeIpaTestClient.stop(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/stopEnvironment' right on" +
-                        " environment " + environmentFreeIpaPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
-                .whenException(freeIpaTestClient.start(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/startEnvironment' right on" +
-                        " environment " + environmentFreeIpaPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                        " right on any of the environment[(]s[)] "
+                        + environmentFreeIpaPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .whenException(freeIpaTestClient.stop(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/stopEnvironment'" +
+                        " right on any of the environment[(]s[)] "
+                        + environmentFreeIpaPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                .whenException(freeIpaTestClient.start(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/startEnvironment'" +
+                        " right on any of the environment[(]s[)] "
+                        + environmentFreeIpaPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .validate();
     }
 
