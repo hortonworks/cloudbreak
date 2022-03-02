@@ -169,7 +169,7 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         InstanceGroup instanceGroup = createInstanceGroup();
         instanceMetaData.setInstanceGroup(instanceGroup);
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
-        given(instanceMetaDataService.findNotTerminatedForStack(anyLong())).willReturn(instanceMetaDataSet);
+        given(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).willReturn(instanceMetaDataSet);
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
         given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(fluentConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);
@@ -189,15 +189,15 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         InstanceGroup instanceGroup = createInstanceGroup();
         instanceMetaData.setInstanceGroup(instanceGroup);
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
-        given(instanceMetaDataService.findNotTerminatedForStack(anyLong())).willReturn(instanceMetaDataSet);
+        given(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).willReturn(instanceMetaDataSet);
         given(telemetryOrchestrator.collectUnresponsiveNodes(any(), any(), any())).willReturn(Set.of(new Node(null, null, null, null)));
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
         given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(fluentConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);
         // WHEN
-        ExistingStackPatchApplyException exception = assertThrows(ExistingStackPatchApplyException.class, () -> underTest.doApply(createStack()));
+        boolean result = underTest.doApply(createStack());
         // THEN
-        assertTrue(exception.getMessage().contains("Not found any available nodes"));
+        assertFalse(result);
 
     }
 
@@ -235,7 +235,7 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         InstanceGroup instanceGroup = createInstanceGroup();
         instanceMetaData.setInstanceGroup(instanceGroup);
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
-        given(instanceMetaDataService.findNotTerminatedForStack(anyLong())).willReturn(instanceMetaDataSet);
+        given(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).willReturn(instanceMetaDataSet);
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
         given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(fluentConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);

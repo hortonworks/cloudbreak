@@ -143,7 +143,7 @@ public class ClusterNodeNameGeneratorTest {
     }
 
     private void testHostNameGenerationForStack(Stack underTestStack, Set<String> expectedNodeNames) {
-        Set<InstanceMetaData> testInstanceMetadata = underTestStack.getNotTerminatedInstanceMetaDataSet();
+        Set<InstanceMetaData> testInstanceMetadata = underTestStack.getNotTerminatedAndNotZombieInstanceMetaDataSet();
         Map<String, AtomicLong> hostGroupNodeCount = new HashMap<>();
         underTestStack.getInstanceGroups().stream().forEach(
                 instanceGroup -> hostGroupNodeCount.put(instanceGroup.getGroupName(), new AtomicLong(0L)));

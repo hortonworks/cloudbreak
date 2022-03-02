@@ -34,7 +34,7 @@ class SdxClusterDetailResponseTest {
 
     @Test
     void testWhenInternalStackV4ResponseIsNotNullAndTheInputKeyIsNotNullThenNullShouldReturn() {
-        underTest = new SdxClusterDetailResponse(new SdxClusterDetailResponse(), new StackV4Response());
+        underTest = SdxClusterDetailResponse.create(new SdxClusterDetailResponse(), new StackV4Response());
         String result = underTest.getTagValue(TAG_KEY);
 
         assertNull(result);
@@ -42,7 +42,7 @@ class SdxClusterDetailResponseTest {
 
     @Test
     void testWhenInternalStackV4ResponseIsNotNullAndTheInputKeyIsNullThenNullShouldReturn() {
-        underTest = new SdxClusterDetailResponse(new SdxClusterDetailResponse(), new StackV4Response());
+        underTest = SdxClusterDetailResponse.create(new SdxClusterDetailResponse(), new StackV4Response());
         String result = underTest.getTagValue(null);
 
         assertNull(result);

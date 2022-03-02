@@ -88,7 +88,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         when(instanceMetaDataService.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer((Answer<Optional<InstanceMetaData>>) invocation -> {
             Object[] args = invocation.getArguments();
             String ip = (String) args[1];
-            for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
+            for (InstanceMetaData instanceMetaData : stack.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
                 if (instanceMetaData.getPrivateIp().equals(ip)) {
                     return Optional.of(instanceMetaData);
                 }
@@ -99,7 +99,7 @@ public class ClusterBootstrapperErrorHandlerTest {
                 .thenAnswer((Answer<Optional<InstanceGroup>>) invocation -> {
                     Object[] args = invocation.getArguments();
                     String name = (String) args[1];
-                    for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
+                    for (InstanceMetaData instanceMetaData : stack.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
                         if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
                             InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
                             instanceGroup.getInstanceMetaDataSet().forEach(im -> im.setInstanceStatus(InstanceStatus.TERMINATED));
@@ -130,7 +130,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         when(instanceMetaDataService.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer((Answer<Optional<InstanceMetaData>>) invocation -> {
             Object[] args = invocation.getArguments();
             String ip = (String) args[1];
-            for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
+            for (InstanceMetaData instanceMetaData : stack.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
                 if (instanceMetaData.getPrivateIp().equals(ip)) {
                     return Optional.of(instanceMetaData);
                 }
@@ -141,7 +141,7 @@ public class ClusterBootstrapperErrorHandlerTest {
                 .thenAnswer((Answer<Optional<InstanceGroup>>) invocation -> {
                     Object[] args = invocation.getArguments();
                     String name = (String) args[1];
-                    for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
+                    for (InstanceMetaData instanceMetaData : stack.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
                         if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
                             return Optional.ofNullable(instanceMetaData.getInstanceGroup());
                         }
@@ -163,7 +163,7 @@ public class ClusterBootstrapperErrorHandlerTest {
 
     private Set<Node> prepareNodes(Stack stack) {
         Set<Node> nodes = new HashSet<>();
-        for (InstanceMetaData instanceMetaData : stack.getNotDeletedInstanceMetaDataSet()) {
+        for (InstanceMetaData instanceMetaData : stack.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
             nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(), null, null));
         }
         return nodes;

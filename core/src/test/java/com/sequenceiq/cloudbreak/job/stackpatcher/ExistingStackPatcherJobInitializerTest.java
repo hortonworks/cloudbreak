@@ -1,5 +1,13 @@
 package com.sequenceiq.cloudbreak.job.stackpatcher;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.LOGGING_AGENT_AUTO_RESTART;
+import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.METERING_AZURE_METADATA;
+import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.UNBOUND_RESTART;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -8,6 +16,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,10 +28,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.job.stackpatcher.config.ExistingStackPatcherConfig;
 import com.sequenceiq.cloudbreak.job.stackpatcher.config.StackPatchTypeConfig;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,25 +53,26 @@ class ExistingStackPatcherJobInitializerTest {
     private StackService stackService;
 
     @Mock
-    private StackTtlView stack1;
+    private JobResource stack1;
 
     @Mock
-    private StackTtlView stack2;
+    private JobResource stack2;
 
     @Captor
     private ArgumentCaptor<ExistingStackPatcherJobAdapter> captor;
 
     @BeforeEach
     void setUp() {
-        lenient().when(stack1.getCrn()).thenReturn(CRN_1);
-        lenient().when(stack2.getCrn()).thenReturn(CRN_2);
-        lenient().when(stackService.getAllAlive()).thenReturn(List.of(stack1, stack2));
+        lenient().when(stack1.getRemoteResourceId()).thenReturn(CRN_1);
+        lenient().when(stack2.getRemoteResourceId()).thenReturn(CRN_2);
+        lenient().when(stackService.getAllAliveForAutoSync(Set.of(DELETE_COMPLETED, DELETE_IN_PROGRESS, DELETE_FAILED, CREATE_FAILED, CREATE_IN_PROGRESS)))
+                .thenReturn(List.of(stack1, stack2));
     }
 
     @Test
     void emptyEnabled() {
         StackPatchTypeConfig disabledConfig = getConfig(false);
-        when(config.getPatchConfigs()).thenReturn(Map.of(StackPatchType.UNBOUND_RESTART, disabledConfig));
+        when(config.getPatchConfigs()).thenReturn(Map.of(UNBOUND_RESTART, disabledConfig));
 
         underTest.initJobs();
 
@@ -73,18 +82,18 @@ class ExistingStackPatcherJobInitializerTest {
     @Test
     void multipleEnabled() {
         when(config.getPatchConfigs()).thenReturn(Map.of(
-                StackPatchType.UNBOUND_RESTART, getConfig(true),
-                StackPatchType.LOGGING_AGENT_AUTO_RESTART, getConfig(true),
-                StackPatchType.METERING_AZURE_METADATA, getConfig(false)));
+                UNBOUND_RESTART, getConfig(true),
+                LOGGING_AGENT_AUTO_RESTART, getConfig(true),
+                METERING_AZURE_METADATA, getConfig(false)));
 
         underTest.initJobs();
 
         verify(jobService, times(4)).schedule(captor.capture());
         Assertions.assertThat(captor.getAllValues())
-                .anyMatch(a -> a.getRemoteResourceId().equals(CRN_1) && a.getStackPatchType().equals(StackPatchType.UNBOUND_RESTART))
-                .anyMatch(a -> a.getRemoteResourceId().equals(CRN_1) && a.getStackPatchType().equals(StackPatchType.LOGGING_AGENT_AUTO_RESTART))
-                .anyMatch(a -> a.getRemoteResourceId().equals(CRN_2) && a.getStackPatchType().equals(StackPatchType.UNBOUND_RESTART))
-                .anyMatch(a -> a.getRemoteResourceId().equals(CRN_2) && a.getStackPatchType().equals(StackPatchType.LOGGING_AGENT_AUTO_RESTART));
+                .anyMatch(a -> a.getJobResource().getRemoteResourceId().equals(CRN_1) && a.getStackPatchType().equals(UNBOUND_RESTART))
+                .anyMatch(a -> a.getJobResource().getRemoteResourceId().equals(CRN_1) && a.getStackPatchType().equals(LOGGING_AGENT_AUTO_RESTART))
+                .anyMatch(a -> a.getJobResource().getRemoteResourceId().equals(CRN_2) && a.getStackPatchType().equals(UNBOUND_RESTART))
+                .anyMatch(a -> a.getJobResource().getRemoteResourceId().equals(CRN_2) && a.getStackPatchType().equals(LOGGING_AGENT_AUTO_RESTART));
     }
 
     private StackPatchTypeConfig getConfig(boolean enabled) {

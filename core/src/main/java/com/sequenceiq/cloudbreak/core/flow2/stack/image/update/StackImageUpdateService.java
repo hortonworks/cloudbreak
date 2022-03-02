@@ -137,7 +137,7 @@ public class StackImageUpdateService {
     }
 
     public CheckResult checkPackageVersions(Stack stack, StatedImage newImage) {
-        Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+        Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedAndNotZombieInstanceMetaDataSet();
 
         CheckResult instanceHaveMultipleVersionResult = packageVersionChecker.checkInstancesHaveMultiplePackageVersions(instanceMetaDataSet);
         if (instanceHaveMultipleVersionResult.getStatus() == EventStatus.FAILED) {

@@ -88,7 +88,7 @@ public class MultiAzCalculatorService {
 
         if (!subnetIds.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
             checkSubnetUsageCount(subnetUsage, subnetIds);
-            for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+            for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
                 if (isNullOrEmpty(instanceMetaData.getSubnetId())) {
                     Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForUsage(subnetUsage);
                     String leastUsedSubnetId = searchTheSmallestUsedID(subnetUsage, numberOfInstanceInASubnet);
@@ -159,7 +159,7 @@ public class MultiAzCalculatorService {
     }
 
     private void collectCurrentAzUsage(InstanceGroup instanceGroup, Map<String, Integer> azUsage, Map<String, String> subnetAzPairs) {
-        for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+        for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
             String subnetId = instanceMetaData.getSubnetId();
             if (!isNullOrEmpty(subnetId)) {
                 String az = subnetAzPairs.get(subnetId);
@@ -197,7 +197,7 @@ public class MultiAzCalculatorService {
 
     private void collectCurrentSubnetUsage(InstanceGroup instanceGroup, Map<String, Integer> subnetUsage) {
 
-        for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+        for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
             String subnetId = instanceMetaData.getSubnetId();
             if (!isNullOrEmpty(subnetId)) {
                 Integer countOfInstances = subnetUsage.get(subnetId);

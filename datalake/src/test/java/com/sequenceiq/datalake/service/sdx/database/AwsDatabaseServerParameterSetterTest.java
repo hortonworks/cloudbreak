@@ -36,7 +36,7 @@ public class AwsDatabaseServerParameterSetterTest {
 
     @Test
     public void testHAServer() {
-        underTest.setParameters(request, SdxDatabaseAvailabilityType.HA);
+        underTest.setParameters(request, SdxDatabaseAvailabilityType.HA, null);
 
         verify(request).setAws(captor.capture());
         AwsDatabaseServerV4Parameters awsDatabaseServerV4Parameters = captor.getValue();
@@ -46,7 +46,7 @@ public class AwsDatabaseServerParameterSetterTest {
 
     @Test
     public void testNonHAServer() {
-        underTest.setParameters(request, SdxDatabaseAvailabilityType.NON_HA);
+        underTest.setParameters(request, SdxDatabaseAvailabilityType.NON_HA, null);
 
         verify(request).setAws(captor.capture());
         AwsDatabaseServerV4Parameters awsDatabaseServerV4Parameters = captor.getValue();
@@ -55,9 +55,20 @@ public class AwsDatabaseServerParameterSetterTest {
     }
 
     @Test
+    public void testEngineVersion() {
+        underTest.setParameters(request, SdxDatabaseAvailabilityType.NON_HA, "13");
+
+        verify(request).setAws(captor.capture());
+        AwsDatabaseServerV4Parameters awsDatabaseServerV4Parameters = captor.getValue();
+        assertEquals("false", awsDatabaseServerV4Parameters.getMultiAZ());
+        assertEquals(0, awsDatabaseServerV4Parameters.getBackupRetentionPeriod());
+        assertEquals("13", awsDatabaseServerV4Parameters.getEngineVersion());
+    }
+
+    @Test
     public void shouldThrowExceptionWhenAvailabilityTypeIsNotSupported() {
         IllegalArgumentException result =
-                Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.setParameters(request, SdxDatabaseAvailabilityType.NONE));
+                Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.setParameters(request, SdxDatabaseAvailabilityType.NONE, null));
 
         assertEquals("NONE database availability type is not supported on AWS.", result.getMessage());
     }

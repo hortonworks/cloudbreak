@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -54,7 +55,7 @@ public class StackService implements ResourcePropertyProvider, PayloadContextPro
         return stackRepository.findAllRunning();
     }
 
-    public List<Stack> findAllForAutoSync() {
+    public List<JobResource> findAllForAutoSync() {
         return stackRepository.findAllRunningAndStatusIn(List.of(
                 Status.AVAILABLE,
                 Status.UPDATE_FAILED,

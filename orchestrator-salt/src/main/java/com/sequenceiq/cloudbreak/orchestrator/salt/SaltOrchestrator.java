@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.CmAgentStopFlags;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
+import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -968,7 +969,8 @@ public class SaltOrchestrator implements HostOrchestrator {
     public void stopClusterManagerAgent(OrchestratorAware stack, GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> nodesUnderStopping,
             ExitCriteriaModel exitCriteriaModel, CmAgentStopFlags flags) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            Set<Node> responsiveNodes = getResponsiveNodes(allNodes, sc);
+            NodeReachabilityResult nodeReachabilityResult = getResponsiveNodes(allNodes, sc);
+            Set<Node> responsiveNodes = nodeReachabilityResult.getReachableNodes();
             Set<String> nodesUnderStoppingIPs = nodesUnderStopping.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             Set<Node> responsiveNodesUnderStopping =
                     responsiveNodes.stream().filter(responsiveNode -> nodesUnderStoppingIPs.contains(responsiveNode.getPrivateIp())).collect(Collectors.toSet());
@@ -1077,7 +1079,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public Set<Node> getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig) {
+    public NodeReachabilityResult getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig) {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gatewayConfig)) {
             return getResponsiveNodes(nodes, saltConnector);
         }
@@ -1332,8 +1334,9 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    private Set<Node> getResponsiveNodes(Set<Node> nodes, SaltConnector sc) {
+    private NodeReachabilityResult getResponsiveNodes(Set<Node> nodes, SaltConnector sc) {
         Set<Node> responsiveNodes = new HashSet<>();
+        Set<Node> unresponsiveNodes = new HashSet<>();
         Set<String> minionIpAddresses = SaltStates.collectMinionIpAddresses(retry, sc);
         nodes.forEach(node -> {
             if (minionIpAddresses.contains(node.getPrivateIp())) {
@@ -1341,8 +1344,9 @@ public class SaltOrchestrator implements HostOrchestrator {
                 responsiveNodes.add(node);
             } else {
                 LOGGER.warn("Salt-minion is not responding on host: {}", node);
+                unresponsiveNodes.add(node);
             }
         });
-        return responsiveNodes;
+        return new NodeReachabilityResult(responsiveNodes, unresponsiveNodes);
     }
 }

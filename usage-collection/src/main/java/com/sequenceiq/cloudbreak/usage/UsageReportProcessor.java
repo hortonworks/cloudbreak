@@ -240,6 +240,14 @@ public class UsageReportProcessor implements UsageReporter {
                 .build());
     }
 
+    @Override
+    public void cdpStackPatcherEvent(UsageProto.CDPStackPatchEvent details) {
+        checkNotNull(details);
+        usageProcessingStrategy.processUsage(eventBuilder()
+                .setCdpStackPatchEvent(details)
+                .build(), null);
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())

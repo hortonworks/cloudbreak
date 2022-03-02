@@ -175,7 +175,7 @@ public class DiagnosticsFlowService {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
         Set<String> hosts = new HashSet<>(Arrays.asList(primaryGatewayIp));
-        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, new HashSet<>(), new HashSet<>());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
@@ -189,7 +189,7 @@ public class DiagnosticsFlowService {
     public Set<String> collectUnresponsiveNodes(Long stackId, Set<String> hosts, Set<String> hostGroups, Set<String> initialExcludeHosts)
             throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, new HashSet<>(), new HashSet<>(), new HashSet<>());
         ClusterDeletionBasedExitCriteriaModel exitModel = new ClusterDeletionBasedExitCriteriaModel(stackId, stack.getCluster().getId());
@@ -277,7 +277,7 @@ public class DiagnosticsFlowService {
     public void init(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
         LOGGER.debug("Starting diagnostics init. resourceCrn: '{}'", stack.getResourceCrn());
@@ -292,7 +292,7 @@ public class DiagnosticsFlowService {
     public void telemetryUpgrade(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts,
             boolean skipComponentRestart) throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
         LOGGER.debug("Starting cdp-telemetry upgrade for diagnostics. resourceCrn: '{}'", stack.getResourceCrn());
@@ -308,7 +308,7 @@ public class DiagnosticsFlowService {
     public void vmPreFlightCheck(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
         LOGGER.debug("Starting diagnostics VM preflight check. resourceCrn: '{}'", stack.getResourceCrn());
@@ -323,7 +323,7 @@ public class DiagnosticsFlowService {
     public void collect(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
         LOGGER.debug("Starting diagnostics collection. resourceCrn: '{}'", stack.getResourceCrn());
@@ -346,7 +346,7 @@ public class DiagnosticsFlowService {
     public void upload(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
         LOGGER.debug("Starting diagnostics upload. resourceCrn: '{}'", stack.getResourceCrn());
@@ -369,7 +369,7 @@ public class DiagnosticsFlowService {
     public void cleanup(Long stackId, Map<String, Object> parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts)
             throws CloudbreakOrchestratorFailedException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stackId);
+        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId);
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         Set<Node> allNodes = getNodes(instanceMetaDataSet, hosts, hostGroups, excludeHosts);
         LOGGER.debug("Starting diagnostics cleanup. resourceCrn: '{}'", stack.getResourceCrn());

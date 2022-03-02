@@ -23,7 +23,7 @@ public class ArchiveInstanceMetaDataJobInitializer extends AbstractStackJobIniti
     public void initJobs() {
         if (config.isArchiveInstanceMetaDataEnabled()) {
             LOGGER.info("Scheduling archive InstanceMetaData jobs");
-            getAliveAndNotDeleteInProgressStacksStream()
+            getAliveJobResources()
                     .forEach(s -> jobService.schedule(new ArchiveInstanceMetaDataJobAdapter(s)));
         } else {
             LOGGER.info("Skipping scheduling archive InstanceMetaData jobs, as they are disabled");

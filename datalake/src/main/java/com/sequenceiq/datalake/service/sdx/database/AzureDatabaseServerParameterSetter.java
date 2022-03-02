@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -29,7 +30,7 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
     boolean geoRedundantBackupNonHa;
 
     @Override
-    public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType) {
+    public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType, String databaseEngineVersion) {
         AzureDatabaseServerV4Parameters parameters = new AzureDatabaseServerV4Parameters();
         if (SdxDatabaseAvailabilityType.HA.equals(availabilityType)) {
             parameters.setBackupRetentionDays(backupRetentionPeriodHa);
@@ -39,6 +40,9 @@ public class AzureDatabaseServerParameterSetter implements DatabaseServerParamet
             parameters.setGeoRedundantBackup(geoRedundantBackupNonHa);
         } else {
             throw new IllegalArgumentException(availabilityType + " database availability type is not supported on Azure.");
+        }
+        if (StringUtils.isNotEmpty(databaseEngineVersion)) {
+            parameters.setDbVersion(databaseEngineVersion);
         }
         request.setAzure(parameters);
     }

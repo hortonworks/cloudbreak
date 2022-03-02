@@ -117,9 +117,9 @@ public class StopStartDownscaleActions {
 
 
                 Set<Long> instancesToStop = stackService.getPrivateIdsForHostNames(
-                        stack.getNotDeletedInstanceMetaDataList(), payload.getDecommissionedHostFqdns());
+                        stack.getNotDeletedAndNotZombieInstanceMetaDataList(), payload.getDecommissionedHostFqdns());
 
-                List<InstanceMetaData> instanceMetaDataList = stack.getNotDeletedInstanceMetaDataList();
+                List<InstanceMetaData> instanceMetaDataList = stack.getNotDeletedAndNotZombieInstanceMetaDataList();
                 List<InstanceMetaData> instanceMetaDataForHg = instanceMetaDataList.stream().filter(
                         x -> x.getInstanceGroupName().equals(context.getHostGroupName())).collect(Collectors.toList());
 
@@ -159,7 +159,7 @@ public class StopStartDownscaleActions {
                         .filter(x -> x.getStatus() == InstanceStatus.STOPPED)
                         .map(x -> x.getCloudInstance().getInstanceId())
                         .collect(Collectors.toUnmodifiableSet());
-                List<InstanceMetaData> stoppedInstanceMetadata = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedInstances(
+                List<InstanceMetaData> stoppedInstanceMetadata = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
                         context.getStack(), context.getHostGroupName(), cloudInstanceIdsStopped);
                 stopStartDownscaleFlowService.instancesStopped(context.getStack().getId(), stoppedInstanceMetadata);
 
