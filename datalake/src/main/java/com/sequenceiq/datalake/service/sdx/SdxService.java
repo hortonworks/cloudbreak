@@ -260,14 +260,19 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         }
     }
 
-    public List<SdxCluster> getSdxClustersByCrn(String userCrn, String clusterCrn) {
+    public List<SdxCluster> getSdxClustersByCrn(String userCrn, String clusterCrn, boolean includeDeleted) {
         LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
         List<SdxCluster> sdxClusterList = new ArrayList<>();
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (sdxCluster.isPresent()) {
             sdxClusterList.add(sdxCluster.get());
-            sdxCluster = sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
+            if (includeDeleted) {
+                sdxCluster = sdxClusterRepository.findByAccountIdAndOriginalCrn(accountIdFromCrn, clusterCrn);
+            } else {
+                sdxCluster = sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
+
+            }
             if (sdxCluster.isPresent()) {
                 LOGGER.info("Found a detached data lake associated with crn:{}", clusterCrn);
                 sdxClusterList.add(sdxCluster.get());
@@ -765,7 +770,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     @Override
     public List<Long> getResourceIdsByResourceCrn(String resourceCrn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return getSdxClustersByCrn(userCrn, resourceCrn).stream().map(cluster -> cluster.getId()).collect(Collectors.toList());
+        return getSdxClustersByCrn(userCrn, resourceCrn, true).stream().map(cluster -> cluster.getId()).collect(Collectors.toList());
     }
 
     @Override
