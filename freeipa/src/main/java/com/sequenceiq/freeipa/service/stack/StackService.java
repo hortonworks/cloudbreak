@@ -197,7 +197,7 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+    public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crns) {
         Map<String, Optional<String>> result = new HashMap<>();
         Boolean envType = Optional.ofNullable(crns)
                 .map(Collection::stream)

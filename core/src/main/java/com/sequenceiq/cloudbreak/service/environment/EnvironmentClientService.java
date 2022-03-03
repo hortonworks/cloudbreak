@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
 import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -22,7 +23,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
 
 @Service
-public class EnvironmentClientService implements EnvironmentPropertyProvider {
+public class EnvironmentClientService implements EnvironmentPropertyProvider, AuthorizationResourceCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentClientService.class);
 

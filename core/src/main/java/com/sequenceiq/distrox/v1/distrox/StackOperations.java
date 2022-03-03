@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.HierarchyAuthResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.Recove
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
@@ -78,7 +79,7 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.RetryableFlow;
 
 @Service
-public class StackOperations implements ResourcePropertyProvider {
+public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackOperations.class);
 
@@ -368,13 +369,18 @@ public class StackOperations implements ResourcePropertyProvider {
     }
 
     @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.DATAHUB);
+    public AuthorizationResourceType getSupportedAuthorizationResourceType() {
+        return AuthorizationResourceType.DATAHUB;
     }
 
     @Override
     public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
-        return Optional.of(stackService.getEnvCrnByCrn(resourceCrn));
+        try {
+            return Optional.of(stackService.getEnvCrnByCrn(resourceCrn));
+        } catch (NotFoundException e) {
+            LOGGER.error(String.format("Getting environment crn by resource crn %s failed, ", resourceCrn), e);
+            return Optional.empty();
+        }
     }
 
     @Override

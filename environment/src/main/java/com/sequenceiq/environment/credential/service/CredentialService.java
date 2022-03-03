@@ -32,8 +32,8 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -62,7 +62,7 @@ import com.sequenceiq.environment.environment.verification.PolicyValidationError
 import com.sequenceiq.notification.NotificationSender;
 
 @Service
-public class CredentialService extends AbstractCredentialService implements ResourcePropertyProvider {
+public class CredentialService extends AbstractCredentialService implements CompositeAuthResourcePropertyProvider {
 
     private static final String DEPLOYMENT_ADDRESS_ATTRIBUTE_NOT_FOUND = "The 'deploymentAddress' parameter needs to be specified in the interactive login "
             + "request!";
@@ -382,12 +382,12 @@ public class CredentialService extends AbstractCredentialService implements Reso
     }
 
     @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.CREDENTIAL);
+    public AuthorizationResourceType getSupportedAuthorizationResourceType() {
+        return AuthorizationResourceType.CREDENTIAL;
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+    public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crns) {
         Map<String, Optional<String>> result = new HashMap<>();
         repository.findResourceNamesByCrnAndAccountId(crns, ThreadBasedUserCrnProvider.getAccountId(), getEnabledPlatforms()).stream()
                 .forEach(nameAndCrn -> result.put(nameAndCrn.getCrn(), Optional.ofNullable(nameAndCrn.getName())));

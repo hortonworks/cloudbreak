@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -21,8 +22,14 @@ public interface StackViewRepository extends WorkspaceResourceRepository<StackVi
     @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.name LIKE :name")
     Optional<StackView> findByWorkspaceIdAndName(@Param("workspaceId") Long workspaceId, @Param("name") String name);
 
+    @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.name IN (:names)")
+    Set<StackView> findByWorkspaceIdAndNames(@Param("workspaceId") Long workspaceId, @Param("names") List<String> names);
+
     @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.resourceCrn LIKE :crn")
     Optional<StackView> findByWorkspaceIdAndCrn(@Param("workspaceId") Long workspaceId, @Param("crn") String resourceCrn);
+
+    @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.resourceCrn IN (:crns)")
+    Set<StackView> findByWorkspaceIdAndCrns(@Param("workspaceId") Long workspaceId, @Param("crns") Collection<String> resourceCrns);
 
     @Query("SELECT s FROM StackView s WHERE s.environmentCrn= :environmentCrn AND s.terminated = null AND s.type LIKE 'DATALAKE' ORDER BY s.created DESC")
     List<StackView> findDatalakeViewByEnvironmentCrnOrderedByCreationTime(@Param("environmentCrn") String environmentCrn);

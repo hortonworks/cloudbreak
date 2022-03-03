@@ -1,14 +1,14 @@
 package com.sequenceiq.authorization;
 
-import static com.sequenceiq.authorization.EnforceAuthorizationLogicsUtil.GenericType.list;
-import static com.sequenceiq.authorization.EnforceAuthorizationLogicsUtil.GenericType.set;
+import static com.sequenceiq.authorization.EnforceAuthorizationAnnotationTestUtil.GenericType.list;
+import static com.sequenceiq.authorization.EnforceAuthorizationAnnotationTestUtil.GenericType.set;
+import static com.sequenceiq.authorization.EnforceAuthorizationTestUtil.validateMethodByFunction;
 import static java.util.stream.Collectors.toList;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -25,14 +25,6 @@ import javax.ws.rs.Path;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.reflections.Reflections;
-import org.reflections.scanners.FieldAnnotationsScanner;
-import org.reflections.scanners.MemberUsageScanner;
-import org.reflections.scanners.MethodAnnotationsScanner;
-import org.reflections.scanners.MethodParameterNamesScanner;
-import org.reflections.scanners.MethodParameterScanner;
-import org.reflections.scanners.SubTypesScanner;
-import org.reflections.scanners.TypeAnnotationsScanner;
 import org.springframework.stereotype.Controller;
 
 import com.google.common.base.Joiner;
@@ -57,20 +49,7 @@ import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
 import com.sequenceiq.authorization.util.AuthorizationAnnotationUtils;
 
-import uk.co.jemos.podam.api.PodamFactoryImpl;
-
-public class EnforceAuthorizationLogicsUtil {
-
-    private static final Reflections REFLECTIONS = new Reflections("com.sequenceiq",
-            new FieldAnnotationsScanner(),
-            new TypeAnnotationsScanner(),
-            new SubTypesScanner(false),
-            new MemberUsageScanner(),
-            new MethodAnnotationsScanner(),
-            new MethodParameterScanner(),
-            new MethodParameterNamesScanner());
-
-    private static final PodamFactoryImpl SAMPLE_OBJECT_FACTORY = new PodamFactoryImpl();
+public class EnforceAuthorizationAnnotationTestUtil {
 
     private static final Map<Class<? extends Annotation>, Function<Method, Optional<String>>> METHOD_VALIDATORS =
             ImmutableMap.<Class<? extends Annotation>, Function<Method, Optional<String>>>builder()
@@ -87,16 +66,16 @@ public class EnforceAuthorizationLogicsUtil {
                     .put(CheckPermissionByCompositeRequestProperty.class, hasParamWhere(RequestObject.class, requestObject()))
                     .build();
 
-    private EnforceAuthorizationLogicsUtil() {
+    private EnforceAuthorizationAnnotationTestUtil() {
 
     }
 
     public static void testIfControllerClassHasProperAnnotation() {
-        Set<Class<?>> apiClasses = REFLECTIONS.getTypesAnnotatedWith(Path.class);
+        Set<Class<?>> apiClasses = EnforceAuthorizationTestUtil.getReflections().getTypesAnnotatedWith(Path.class);
         Set<String> controllersClasses = Sets.newHashSet();
-        apiClasses.stream().forEach(apiClass -> controllersClasses.addAll(
-                REFLECTIONS.getSubTypesOf((Class<Object>) apiClass).stream().map(Class::getSimpleName).collect(Collectors.toSet())));
-        Set<String> classesWithControllerAnnotation = REFLECTIONS.getTypesAnnotatedWith(Controller.class)
+        apiClasses.stream().forEach(apiClass -> controllersClasses.addAll(EnforceAuthorizationTestUtil.getReflections()
+                .getSubTypesOf((Class<Object>) apiClass).stream().map(Class::getSimpleName).collect(Collectors.toSet())));
+        Set<String> classesWithControllerAnnotation = EnforceAuthorizationTestUtil.getReflections().getTypesAnnotatedWith(Controller.class)
                 .stream().map(Class::getSimpleName).collect(Collectors.toSet());
         Set<String> controllersWithoutAnnotation = Sets.difference(controllersClasses, classesWithControllerAnnotation);
 
@@ -104,22 +83,11 @@ public class EnforceAuthorizationLogicsUtil {
                 controllersWithoutAnnotation.isEmpty());
     }
 
-    public static void testIfControllerMethodsHaveProperAuthorizationAnnotation(Set<String> exclude) {
-        Set<Class<?>> authorizationResourceClasses = REFLECTIONS.getTypesAnnotatedWith(Controller.class);
-        Set<Class<?>> disabledAuthzOrInternalOnlyClasses = Sets.union(REFLECTIONS.getTypesAnnotatedWith(InternalOnly.class),
-                REFLECTIONS.getTypesAnnotatedWith(DisableCheckPermissions.class));
-        List<String> validationErrors = Sets.difference(authorizationResourceClasses, Sets.union(exclude, disabledAuthzOrInternalOnlyClasses))
-                .stream()
-                .map(Class::getDeclaredMethods)
-                .flatMap(Arrays::stream)
-                .filter(method -> Modifier.isPublic(method.getModifiers()))
-                .map(EnforceAuthorizationLogicsUtil::validateMethod)
-                .flatMap(Collection::stream)
-                .collect(toList());
-        assertTrue(Joiner.on(System.lineSeparator()).join(validationErrors), validationErrors.isEmpty());
+    public static void testIfControllerMethodsHaveProperAuthorizationAnnotation() {
+        validateMethodByFunction(EnforceAuthorizationAnnotationTestUtil::validateAnnotationsOnMethod);
     }
 
-    private static List<String> validateMethod(Method method) {
+    private static List<String> validateAnnotationsOnMethod(Method method) {
         List<Class<? extends Annotation>> annotations = AuthorizationAnnotationUtils
                 .getPossibleMethodAnnotations()
                 .stream()
@@ -233,7 +201,7 @@ public class EnforceAuthorizationLogicsUtil {
             Method method = ctx.getKey();
             Class<?> type = ctx.getValue();
             try {
-                Object requestSample = SAMPLE_OBJECT_FACTORY.manufacturePojo(type);
+                Object requestSample = EnforceAuthorizationTestUtil.getSampleObjectFactory().manufacturePojo(type);
                 Set<String> errorMessages = Sets.newHashSet();
                 Arrays.stream(method.getAnnotations())
                         .forEach(annotation -> {

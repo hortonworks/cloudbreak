@@ -114,7 +114,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                             .getCatalog() + "&changed=true&index=3")
         //ENV_CREATOR_B can't change FreeIPA image catalog in case of FreeIPA is created by ENV_CREATOR_A
                 .whenException(freeIpaTestClient.changeImageCatalog(), ForbiddenException.class,
-                        expectedMessage("Doesn't have 'environments/changeFreeipaImageCatalog' right on any of the environment[(]s[)] "
+                        expectedMessage("Doesn't have 'environments/changeFreeipaImageCatalog' right on environment "
                         + environmentFreeIpaPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .validate();
     }

@@ -39,8 +39,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.HierarchyAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -126,7 +126,7 @@ import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 
 @Service
-public class SdxService implements ResourceIdProvider, ResourcePropertyProvider, PayloadContextProvider {
+public class SdxService implements ResourceIdProvider, PayloadContextProvider, HierarchyAuthResourcePropertyProvider {
 
     public static final String MICRO_DUTY_REQUIRED_VERSION = "7.2.12";
 
@@ -1223,7 +1223,12 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
 
     @Override
     public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
-        return Optional.of(getEnvCrnByCrn(ThreadBasedUserCrnProvider.getUserCrn(), resourceCrn));
+        try {
+            return Optional.of(getEnvCrnByCrn(ThreadBasedUserCrnProvider.getUserCrn(), resourceCrn));
+        } catch (NotFoundException e) {
+            LOGGER.error(String.format("Getting environment crn by resource crn %s failed, ", resourceCrn), e);
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -1238,8 +1243,8 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     }
 
     @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.DATALAKE);
+    public AuthorizationResourceType getSupportedAuthorizationResourceType() {
+        return AuthorizationResourceType.DATALAKE;
     }
 
     public SdxCluster save(SdxCluster sdxCluster) {
@@ -1251,7 +1256,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+    public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crns) {
         Map<String, Optional<String>> result = new HashMap<>();
         sdxClusterRepository.findResourceNamesByCrnAndAccountId(crns, ThreadBasedUserCrnProvider.getAccountId())
                 .forEach(nameAndCrn -> result.put(nameAndCrn.getCrn(), Optional.ofNullable(nameAndCrn.getName())));

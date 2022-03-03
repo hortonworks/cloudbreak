@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.service.imagecatalog;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -11,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
@@ -24,7 +23,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 
 @Service
-public class ImageCatalogService implements ResourcePropertyProvider {
+public class ImageCatalogService implements AuthorizationResourceCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
 
@@ -32,8 +31,8 @@ public class ImageCatalogService implements ResourcePropertyProvider {
     private CloudbreakInternalCrnClient cloudbreakInternalCrnClient;
 
     @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.IMAGE_CATALOG);
+    public AuthorizationResourceType getSupportedAuthorizationResourceType() {
+        return AuthorizationResourceType.IMAGE_CATALOG;
     }
 
     @Override

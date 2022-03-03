@@ -122,17 +122,27 @@ To support list filtering you need to extend the `AbstractAuthorizationFiltering
 
 The method's arguments should conatin extactly one `@ResourceCrn` annotated `String` argument (valid Crn).
 
+If hierarchical authorization is needed for resource type (like for datalake), then implementation of `AuthorizationEnvironmentCrnProvider` is needed.
+
 #### CheckPermissionByResourceName
 
 The method's arguments should conatin extactly one `@ResourceName` annotated `String` argument.
+
+For the corresponding resource type the service should have an implementation of `AuthoriationResourceCrnProvider` interface.
+If hierarchical authorization is needed for resource type (like for datalake), then implementation of `AuthorizationEnvironmentCrnProvider` is also needed.
 
 #### CheckPermissionByResourceCrnList
 
 The method's arguments should conatin extactly one `@ResourceCrnList` annotated `Collection<String>` argument (valid Crns).
 
+If hierarchical authorization is needed for resource type (like for datalake), then implementation of `AuthorizationEnvironmentCrnListProvider` is needed.
+
 #### CheckPermissionByResourceNameList
 
 The method's arguments should conatin extactly one `@ResourceNameList` annotated `Collection<String>` argument.
+
+For the corresponding resource type the service should have an implementation of `AuthoriationResourceCrnListProvider` interface.
+If hierarchical authorization is needed for resource type (like for datalake), then implementation of `AuthorizationEnvironmentCrnListProvider` is also needed.
 
 #### CheckPermissionByRequestProperty
 
@@ -140,9 +150,15 @@ This can be used mulitple times on any method. The method's arguments should con
 
 Where:
 
-- `T` should contain a valid field path defined by `CheckPermissionByRequestProperty.path`,
-- the field can be `null` based on `CheckPermissionByRequestProperty.skipOnNull`,
-- the field will be handled as crn, name, crn list or name list based on `CheckPermissionByRequestProperty.type`
+1. `T` should contain a valid field path defined by `CheckPermissionByRequestProperty.path`,
+2. the field can be `null` based on `CheckPermissionByRequestProperty.skipOnNull`,
+3. the field will be handled as crn, name, crn list or name list based on `CheckPermissionByRequestProperty.type`
+
+Additional interface implementation needed based on `CheckPermissionByRequestProperty.type`:
+- crn: `AuthorizationEnvironmentCrnProvider` if hierarchical authorization is needed for resource type
+- name: `AuthorizationResourceCrnProvider` is needed always and `AuthorizationEnvironmentCrnProvider` if hierarchical authorization is needed for resource type
+- crn list: `AuthorizationEnvironmentCrnListProvider` if hierarchical authorization is needed for resource type
+- name list: `AuthorizationResourceCrnListProvider` is needed always and `AuthorizationEnvironmentCrnListProvider` if hierarchical authorization is needed for resource type
 
 ### List filtering
 
@@ -252,12 +268,14 @@ You can support authorization on new resources, and you can specify the rights a
 
 1. Define new resource types in `AuthorizationResourceType`,
 2. define new rights by extending `AuthorizationResourceAction` enum with new (String right, AuthorizationResourceType type) values (the new right should be defined in UMS previously),
-3. implement `ResourceBasedCrnProvider`'s methods to support different scenarios on API level,
-    - `ResourceBasedCrnProvider.getResourceCrnByResourceName(String)` - if you want to support resoure names,
-    - `ResourceBasedCrnProvider.getResourceCrnListByResourceNameList(Collection<String>)` - if you want to support list of resoure names,
-    - `ResourceBasedCrnProvider.getEnvironmentCrnByResourceCrn(String)` - if you want to support environment level authorization as well (has right on resource or on resource's environment),
-    - `ResourceBasedCrnProvider.getEnvironmentCrnsByResourceCrns(Collection<String>)` - if you want to support environment level authorization when the request contains a list of crn-s, names,
+3. implement necessary interface as described in `Rules for annotation usage section`
 4. if certain resoures should be handled as default resources (for example default image catalog), and the authorization shouldn't call UMS at all, implement `DefaultResourceChecker` interface.
+
+Useful interfaces:
+
+`HierarchyAuthResourcePropertyProvider`: if hierarchical authorization needed, then this can be useful, since this will require all related methods' implementation
+
+`CompositeAuthResourcePropertyProvider`: if there is no need for hierarchical authorization, this can be a good choice for the new resource (requires basic methods' implenentation like getting CRN by name, getting CRN list by name list)
 
 ## How does it work internally
 

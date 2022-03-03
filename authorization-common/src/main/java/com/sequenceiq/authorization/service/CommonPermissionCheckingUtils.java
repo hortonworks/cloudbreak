@@ -44,15 +44,7 @@ public class CommonPermissionCheckingUtils {
     @Inject
     private Map<AuthorizationResourceType, DefaultResourceChecker> defaultResourceCheckerMap;
 
-    @Inject
-    private Map<AuthorizationResourceType, ResourcePropertyProvider> resourceBasedCrnProviderMap;
-
     private AuthorizationMessageUtilsService authorizationMessageUtilsService;
-
-    public ResourcePropertyProvider getResourceBasedCrnProvider(AuthorizationResourceAction action) {
-        AuthorizationResourceType resourceType = umsRightProvider.getResourceType(action);
-        return resourceBasedCrnProviderMap.get(resourceType);
-    }
 
     public void checkPermissionForUser(AuthorizationResourceAction action, String userCrn) {
         umsAccountAuthorizationService.checkRightOfUser(userCrn, action);

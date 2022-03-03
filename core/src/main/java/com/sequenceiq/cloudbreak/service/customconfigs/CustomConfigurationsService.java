@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -30,15 +30,15 @@ import com.sequenceiq.cloudbreak.domain.CustomConfigurationProperty;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.CustomConfigurationsCreationException;
-import com.sequenceiq.cloudbreak.repository.CustomConfigurationPropertyRepository;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.repository.CustomConfigurationPropertyRepository;
 import com.sequenceiq.cloudbreak.repository.CustomConfigurationsRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.CustomConfigurationsValidator;
 
 @Service
-public class CustomConfigurationsService implements ResourcePropertyProvider {
+public class CustomConfigurationsService implements CompositeAuthResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomConfigurationsService.class);
 
@@ -207,8 +207,8 @@ public class CustomConfigurationsService implements ResourcePropertyProvider {
     }
 
     @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.CUSTOM_CONFIGURATIONS);
+    public AuthorizationResourceType getSupportedAuthorizationResourceType() {
+        return AuthorizationResourceType.CUSTOM_CONFIGURATIONS;
     }
 
     @Override
@@ -217,7 +217,7 @@ public class CustomConfigurationsService implements ResourcePropertyProvider {
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+    public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crns) {
         return customConfigurationsRepository.findResourceNamesByCrnsAndAccountId(ThreadBasedUserCrnProvider.getAccountId(), crns)
                 .stream()
                 .collect(Collectors.toMap(k -> k.getCrn(), v -> Optional.ofNullable(v.getName())));
