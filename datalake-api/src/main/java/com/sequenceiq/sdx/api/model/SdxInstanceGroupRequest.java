@@ -1,7 +1,10 @@
 package com.sequenceiq.sdx.api.model;
 
+import javax.validation.constraints.NotNull;
+
 public class SdxInstanceGroupRequest {
 
+    @NotNull
     private String name;
 
     private String instanceType;

@@ -122,6 +122,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
+import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 
 @ExtendWith(MockitoExtension.class)
@@ -1027,6 +1028,56 @@ class SdxServiceTest {
         assertEquals("imageId_1", stackV4Request.getImage().getId());
     }
 
+    @Test
+    void testCreateSdxClusterWithCustomInstanceGroup() throws Exception {
+        final String runtime = "7.2.12";
+        when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
+        String microDutyJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/micro_duty.json");
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(microDutyJson, StackV4Request.class));
+        when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MICRO_DUTY);
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        withCloudStorage(sdxClusterRequest);
+        withRecipe(sdxClusterRequest);
+        withCustomInstanceGroups(sdxClusterRequest);
+        RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
+        RecipeViewV4Response recipeViewV4Response = new RecipeViewV4Response();
+        recipeViewV4Response.setName("post-install");
+        recipeViewV4Responses.setResponses(List.of(recipeViewV4Response));
+        when(recipeV4Endpoint.listInternal(anyLong(), anyString())).thenReturn(recipeViewV4Responses);
+        long id = 10L;
+        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
+            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
+            sdxWithId.setId(id);
+            return sdxWithId;
+        });
+        when(clock.getCurrentTimeMillis()).thenReturn(1L);
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
+        when(entitlementService.microDutySdxEnabled(anyString())).thenReturn(true);
+
+        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
+
+        SdxCluster createdSdxCluster = result.getLeft();
+        assertEquals(id, createdSdxCluster.getId());
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        verify(sdxClusterRepository, times(1)).save(captor.capture());
+        verify(recipeV4Endpoint, times(1)).listInternal(anyLong(), anyString());
+        SdxCluster capturedSdx = captor.getValue();
+        assertEquals(MICRO_DUTY, capturedSdx.getClusterShape());
+        StackV4Request stackRequest = JsonUtil.readValue(capturedSdx.getStackRequest(), StackV4Request.class);
+        Optional<InstanceGroupV4Request> masterGroup = stackRequest.getInstanceGroups().stream()
+                .filter(instanceGroup -> "master".equals(instanceGroup.getName()))
+                .findAny();
+        assertTrue(masterGroup.isPresent());
+        assertEquals("verylarge", masterGroup.get().getTemplate().getInstanceType());
+        Optional<InstanceGroupV4Request> idbrokerGroup = stackRequest.getInstanceGroups().stream()
+                .filter(instanceGroup -> "idbroker".equals(instanceGroup.getName()))
+                .findAny();
+        assertTrue(idbrokerGroup.isPresent());
+        assertEquals("notverylarge", idbrokerGroup.get().getTemplate().getInstanceType());
+    }
+
     private void setSpot(SdxClusterRequestBase sdxClusterRequest) {
         SdxAwsRequest aws = new SdxAwsRequest();
         SdxAwsSpotParameters spot = new SdxAwsSpotParameters();
@@ -1122,6 +1173,18 @@ class SdxServiceTest {
         cloudStorage.setBaseLocation("s3a://some/dir/");
         cloudStorage.setS3(new S3CloudStorageV1Parameters());
         sdxClusterRequest.setCloudStorage(cloudStorage);
+    }
+
+    private void withCustomInstanceGroups(SdxClusterRequestBase sdxClusterRequest) {
+        sdxClusterRequest.setCustomInstanceGroups(List.of(withInstanceGroup("master", "verylarge"),
+                withInstanceGroup("idbroker", "notverylarge")));
+    }
+
+    private SdxInstanceGroupRequest withInstanceGroup(String name, String instanceType) {
+        SdxInstanceGroupRequest masterInstanceGroup = new SdxInstanceGroupRequest();
+        masterInstanceGroup.setName(name);
+        masterInstanceGroup.setInstanceType(instanceType);
+        return masterInstanceGroup;
     }
 
     private SdxCustomClusterRequest createSdxCustomClusterRequest(SdxClusterShape shape, String catalog, String imageId) {
