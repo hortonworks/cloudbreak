@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -20,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 class PlatformResourcesTest {
 
     @Mock
-    private CloudCredential cloudCredential;
+    private ExtendedCloudCredential cloudCredential;
 
     @Mock
     private Region region;
@@ -44,57 +44,58 @@ class PlatformResourcesTest {
     private static class PlatformResourcesImpl implements PlatformResources {
 
         @Override
-        public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        public CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
         }
 
         @Override
-        public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        public CloudSshKeys sshKeys(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
         }
 
         @Override
-        public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        public CloudSecurityGroups securityGroups(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
         }
 
         @Override
-        public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
+        public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
+            boolean availabilityZonesNeeded) {
             return null;
         }
 
         @Override
-        public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
         }
 
         @Override
-        public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        public CloudGateWays gateways(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
         }
 
         @Override
-        public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        public CloudIpPools publicIpPool(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
         }
 
         @Override
-        public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        public CloudAccessConfigs accessConfigs(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
         }
 
         @Override
-        public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        public CloudEncryptionKeys encryptionKeys(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
         }
 
         @Override
-        public CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        public CloudNoSqlTables noSqlTables(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
         }
 
         @Override
-        public CloudResourceGroups resourceGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        public CloudResourceGroups resourceGroups(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
         }
 

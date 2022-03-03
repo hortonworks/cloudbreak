@@ -1193,6 +1193,8 @@ message CDPEnvironmentGcpDetails {
 
 // AWS specific environment details
 message CDPEnvironmentAwsDetails {
+  // True if user provides encryption key Arn to encrypt AWS EBS volumes with CMK
+  bool resourceEncryptionEnabled = 1;
 }
 
 message CDPEnvironmentTelemetryFeatureDetails {

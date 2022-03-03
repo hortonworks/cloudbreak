@@ -3,7 +3,6 @@ package com.sequenceiq.environment.environment.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,11 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
+import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
 import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
@@ -28,7 +26,7 @@ public class EnvironmentDeletionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentDeletionService.class);
 
-    private final EnvironmentService environmentService;
+    private final EnvironmentViewService environmentViewService;
 
     private final EnvironmentDtoConverter environmentDtoConverter;
 
@@ -38,7 +36,7 @@ public class EnvironmentDeletionService {
 
     private final EnvironmentJobService environmentJobService;
 
-    public EnvironmentDeletionService(EnvironmentService environmentService,
+    public EnvironmentDeletionService(EnvironmentViewService environmentViewService,
             EnvironmentJobService environmentJobService,
             EnvironmentDtoConverter environmentDtoConverter,
             EnvironmentReactorFlowManager reactorFlowManager,
@@ -46,37 +44,33 @@ public class EnvironmentDeletionService {
         this.environmentResourceDeletionService = environmentResourceDeletionService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentJobService = environmentJobService;
-        this.environmentService = environmentService;
+        this.environmentViewService = environmentViewService;
         this.reactorFlowManager = reactorFlowManager;
     }
 
-    public EnvironmentDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn,
+    public EnvironmentViewDto deleteByNameAndAccountId(String environmentName, String accountId, String actualUserCrn,
             boolean cascading, boolean forced) {
-        Optional<Environment> environment = environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId);
-        MDCBuilder.buildMdcContext(environment.orElseThrow(()
-                -> new NotFoundException(String.format("No environment found with name '%s'", environmentName))));
-        LOGGER.debug(String.format("Deleting environment [name: %s]", environment.get().getName()));
-        delete(environment.get(), actualUserCrn, cascading, forced);
-        return environmentDtoConverter.environmentToDto(environment.get());
+        EnvironmentView environment = environmentViewService.getByNameAndAccountId(environmentName, accountId);
+        MDCBuilder.buildMdcContext(environment);
+        LOGGER.debug(String.format("Deleting environment [name: %s]", environment.getName()));
+        delete(environment, actualUserCrn, cascading, forced);
+        return environmentDtoConverter.environmentViewToViewDto(environment);
     }
 
-    public EnvironmentDto deleteByCrnAndAccountId(String crn, String accountId, String actualUserCrn,
+    public EnvironmentViewDto deleteByCrnAndAccountId(String crn, String accountId, String actualUserCrn,
             boolean cascading, boolean forced) {
-        Optional<Environment> environment = environmentService
-                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId);
-        MDCBuilder.buildMdcContext(environment.orElseThrow(()
-                -> new NotFoundException(String.format("No environment found with crn '%s'", crn))));
-        LOGGER.debug(String.format("Deleting  environment [name: %s]", environment.get().getName()));
-        delete(environment.get(), actualUserCrn, cascading, forced);
-        return environmentDtoConverter.environmentToDto(environment.get());
+        EnvironmentView environment = environmentViewService.getByCrnAndAccountId(crn, accountId);
+        MDCBuilder.buildMdcContext(environment);
+        LOGGER.debug(String.format("Deleting  environment [name: %s]", environment.getName()));
+        delete(environment, actualUserCrn, cascading, forced);
+        return environmentDtoConverter.environmentViewToViewDto(environment);
     }
 
-    public Environment delete(Environment environment, String userCrn,
+    public EnvironmentView delete(EnvironmentView environment, String userCrn,
             boolean cascading, boolean forced) {
         MDCBuilder.buildMdcContext(environment);
         validateDeletion(environment, cascading);
-        environment = updateEnvironmentDeletionType(environment, forced);
+        updateEnvironmentDeletionType(environment, forced);
         LOGGER.debug("Deleting environment with name: {}", environment.getName());
         environmentJobService.unschedule(environment.getId());
         if (cascading) {
@@ -88,34 +82,34 @@ public class EnvironmentDeletionService {
         return environment;
     }
 
-    private Environment updateEnvironmentDeletionType(Environment environment, boolean forced) {
-        return environmentService.editDeletionType(environment, forced);
+    private void updateEnvironmentDeletionType(EnvironmentView environment, boolean forced) {
+        environmentViewService.editDeletionType(environment, forced);
     }
 
-    public List<EnvironmentDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn,
+    public List<EnvironmentViewDto> deleteMultipleByNames(Set<String> environmentNames, String accountId, String actualUserCrn,
             boolean cascading, boolean forced) {
-        Collection<Environment> environments = environmentService.findByNameInAndAccountIdAndArchivedIsFalse(environmentNames, accountId);
-        return deleteMultiple(actualUserCrn, cascading, forced, environments);
+        Collection<EnvironmentView> environmentViews = environmentViewService.findByNamesInAccount(environmentNames, accountId);
+        return deleteMultiple(actualUserCrn, cascading, forced, environmentViews);
     }
 
-    public List<EnvironmentDto> deleteMultipleByCrns(Set<String> crns, String accountId, String actualUserCrn,
+    public List<EnvironmentViewDto> deleteMultipleByCrns(Set<String> crns, String accountId, String actualUserCrn,
             boolean cascading, boolean forced) {
-        Collection<Environment> environments = environmentService.findByResourceCrnInAndAccountIdAndArchivedIsFalse(crns, accountId);
-        return deleteMultiple(actualUserCrn, cascading, forced, environments);
+        Collection<EnvironmentView> environmentViews = environmentViewService.findByResourceCrnsInAccount(crns, accountId);
+        return deleteMultiple(actualUserCrn, cascading, forced, environmentViews);
     }
 
-    private List<EnvironmentDto> deleteMultiple(String actualUserCrn, boolean cascading, boolean forced, Collection<Environment> environments) {
+    private List<EnvironmentViewDto> deleteMultiple(String actualUserCrn, boolean cascading, boolean forced, Collection<EnvironmentView> environments) {
         return new ArrayList<>(environments).stream()
                 .map(environment -> {
                     LOGGER.debug(String.format("Starting to archive environment [name: %s, CRN: %s]", environment.getName(), environment.getResourceCrn()));
                     delete(environment, actualUserCrn, cascading, forced);
-                    return environmentDtoConverter.environmentToDto(environment);
+                    return environmentDtoConverter.environmentViewToViewDto(environment);
                 })
                 .collect(Collectors.toList());
     }
 
     @VisibleForTesting
-    void checkIsEnvironmentDeletable(Environment env) {
+    void checkIsEnvironmentDeletable(EnvironmentView env) {
         LOGGER.info("Checking if environment [name: {}] is deletable", env.getName());
 
         Set<String> distroXClusterNames = environmentResourceDeletionService.getAttachedDistroXClusterNames(env);
@@ -151,10 +145,10 @@ public class EnvironmentDeletionService {
         }
     }
 
-    void validateDeletion(Environment environment, boolean cascading) {
+    void validateDeletion(EnvironmentView environmentView, boolean cascading) {
         if (!cascading) {
             List<String> childEnvNames =
-                    environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(environment.getAccountId(), environment.getId());
+                    environmentViewService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(environmentView.getAccountId(), environmentView.getId());
             if (!childEnvNames.isEmpty()) {
                 throw new BadRequestException(String.format("The following Environment(s) must be deleted before Environment deletion [%s]",
                         String.join(", ", childEnvNames)));

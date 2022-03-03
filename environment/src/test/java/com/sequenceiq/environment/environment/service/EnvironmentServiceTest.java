@@ -94,7 +94,7 @@ class EnvironmentServiceTest {
         when(environmentRepository
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(TestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
-        when(environmentDtoConverter.environmentToDto(any())).thenReturn(environmentDto);
+        when(environmentDtoConverter.environmentToDto(any(Environment.class))).thenReturn(environmentDto);
         assertEquals(environmentDto, environmentServiceUnderTest
                 .getByNameAndAccountId(EnvironmentTestData.ENVIRONMENT_NAME, TestConstants.ACCOUNT_ID));
     }
@@ -113,7 +113,7 @@ class EnvironmentServiceTest {
         when(environmentRepository
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(TestConstants.CRN), eq(TestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
-        when(environmentDtoConverter.environmentToDto(any())).thenReturn(environmentDto);
+        when(environmentDtoConverter.environmentToDto(any(Environment.class))).thenReturn(environmentDto);
         assertEquals(environmentDto, environmentServiceUnderTest
                 .getByCrnAndAccountId(TestConstants.CRN, TestConstants.ACCOUNT_ID));
     }
@@ -125,7 +125,7 @@ class EnvironmentServiceTest {
         when(environmentRepository.findByAccountId(eq(TestConstants.ACCOUNT_ID))).thenReturn(twoEnvironment);
         environmentServiceUnderTest.listByAccountId(TestConstants.ACCOUNT_ID);
         verify(environmentRepository).findByAccountId(eq(TestConstants.ACCOUNT_ID));
-        verify(environmentDtoConverter, times(twoInvocations)).environmentToDto(any());
+        verify(environmentDtoConverter, times(twoInvocations)).environmentToDto(any(Environment.class));
     }
 
     @Test

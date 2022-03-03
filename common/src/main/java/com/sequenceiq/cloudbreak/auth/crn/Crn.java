@@ -173,7 +173,8 @@ public class Crn {
         ACCOUNTTAG("accounttag", NON_ADMIN_SERVICE),
         ACCOUNTTELEMETRY("accounttelemetry", NON_ADMIN_SERVICE),
         ML("ml", NON_ADMIN_SERVICE),
-        DF("df", NON_ADMIN_SERVICE);
+        DF("df", NON_ADMIN_SERVICE),
+        CCMV2("ccmv2", NON_ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
 
@@ -373,7 +374,8 @@ public class Crn {
         ACCOUNT_TELEMETRY("accountTelemetry"),
         DATAHUB_AUTOSCALE_CONFIG("datahubAutoscaleConfig"),
         PROXY_CONIFG("proxyConfig"),
-        SERVICE("service");
+        SERVICE("service"),
+        AGENT("agent");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
 

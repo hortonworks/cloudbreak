@@ -306,7 +306,7 @@ public interface DistroXV1Endpoint {
     @Path("name/{name}/instance")
     @ApiOperation(value = DELETE_INSTANCE_BY_ID_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstanceDistroXV1ByName")
-    void deleteInstanceByName(@PathParam("name") String name,
+    FlowIdentifier deleteInstanceByName(@PathParam("name") String name,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("instanceId") String instanceId);
 
@@ -314,7 +314,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/instance")
     @ApiOperation(value = DELETE_INSTANCE_BY_ID_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstanceDistroXV1ByCrn")
-    void deleteInstanceByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+    FlowIdentifier deleteInstanceByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("instanceId") String instanceId);
 
@@ -322,7 +322,7 @@ public interface DistroXV1Endpoint {
     @Path("name/{name}/instances")
     @ApiOperation(value = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstancesDistroXV1ByName")
-    void deleteInstancesByName(@PathParam("name") String name,
+    FlowIdentifier deleteInstancesByName(@PathParam("name") String name,
             @QueryParam("id") List<String> instances,
             MultipleInstanceDeleteRequest request,
             @QueryParam("forced") @DefaultValue("false") boolean forced);
@@ -331,7 +331,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/instances")
     @ApiOperation(value = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstancesDistroXV1ByCrn")
-    void deleteInstancesByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+    FlowIdentifier deleteInstancesByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @QueryParam("id") List<String> instances,
             MultipleInstanceDeleteRequest request,
             @QueryParam("forced") @DefaultValue("false") boolean forced);

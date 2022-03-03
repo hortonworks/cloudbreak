@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.authorization;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.environmentDatalakePattern;
+import static com.sequenceiq.it.cloudbreak.util.AuthorizationTestUtil.environmentFreeIpaPattern;
 
 import javax.inject.Inject;
 import javax.ws.rs.ForbiddenException;
@@ -113,8 +114,8 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                             .getCatalog() + "&changed=true&index=3")
         //ENV_CREATOR_B can't change FreeIPA image catalog in case of FreeIPA is created by ENV_CREATOR_A
                 .whenException(freeIpaTestClient.changeImageCatalog(), ForbiddenException.class,
-                        expectedMessage("Doesn't have 'environments/changeFreeipaImageCatalog' right on environment .*")
-                        .withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
+                        expectedMessage("Doesn't have 'environments/changeFreeipaImageCatalog' right on any of the environment[(]s[)] "
+                        + environmentFreeIpaPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .validate();
     }
 

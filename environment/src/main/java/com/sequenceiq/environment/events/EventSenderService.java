@@ -58,19 +58,18 @@ public class EventSenderService {
         sendEventAndNotification(environmentDto, userCrn, resourceEvent, new HashSet<>());
     }
 
-    public void sendEventAndNotification(EnvironmentDto environmentDto, String userCrn, ResourceEvent resourceEvent,
-        Collection<?> messageArgs) {
+    public void sendEventAndNotification(EnvironmentDto environmentDto, String userCrn, ResourceEvent resourceEvent, Collection<?> messageArgs) {
         SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
         sendEventAndNotificationWithPayload(environmentDto, userCrn, resourceEvent, simpleResponse, messageArgs);
     }
 
     public void sendEventAndNotificationWithPayload(AccountAwareResource resource, String userCrn, ResourceEvent resourceEvent,
-        Object payload) {
+            Object payload) {
         sendEventAndNotificationWithPayload(resource, userCrn, resourceEvent, payload, new HashSet<>());
     }
 
     public void sendEventAndNotificationWithPayload(AccountAwareResource resource, String userCrn, ResourceEvent resourceEvent, Object payload,
-        Collection<?> messageArgs) {
+            Collection<?> messageArgs) {
         CDPStructuredNotificationEvent cdpStructuredEvent = getStructuredEvent(resource, resourceEvent, payload, messageArgs);
         cdpDefaultStructuredEventClient.sendStructuredEvent(cdpStructuredEvent);
         notificationService.send(resourceEvent, payload, userCrn);
@@ -83,7 +82,7 @@ public class EventSenderService {
     }
 
     private CDPStructuredNotificationEvent getStructuredEvent(AccountAwareResource resource, ResourceEvent resourceEvent, Object payload,
-        Collection<?> messageArgs) {
+            Collection<?> messageArgs) {
         String resourceType = resource.getClass().getSimpleName().toLowerCase();
         String resourceCrn = resource.getResourceCrn();
         CDPOperationDetails operationDetails = new CDPOperationDetails(

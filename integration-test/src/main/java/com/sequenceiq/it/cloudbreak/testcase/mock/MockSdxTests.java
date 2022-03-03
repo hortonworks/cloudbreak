@@ -10,8 +10,10 @@ import javax.inject.Inject;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -28,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.util.ResourceUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -71,8 +74,10 @@ public class MockSdxTests extends AbstractMockTest {
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(sdxCustom, SdxCustomTestDto.class)
+                .withCustomInstanceGroup("master", "small")
                 .when(sdxTestClient.createCustom(), key(sdxCustom))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxCustom))
+                .then(MockSdxTests::validateInstanceGroupInstanceTypeIsModified)
                 .then((tc, testDto, client) -> sdxTestClient.deleteCustom().action(tc, testDto, client))
                 .await(SdxClusterStatusResponse.DELETED, key(sdxCustom))
                 .validate();
@@ -213,5 +218,15 @@ public class MockSdxTests extends AbstractMockTest {
                 .when(sdxTestClient.startInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .validate();
+    }
+
+    private static SdxCustomTestDto validateInstanceGroupInstanceTypeIsModified(TestContext testContext, SdxCustomTestDto testDto, SdxClient client) {
+        InstanceGroupV4Response instanceGroupResponse = testDto.getResponse().getStackV4Response().getInstanceGroups().stream()
+                .filter(instanceGroup -> "master".equals(instanceGroup.getName()))
+                .findAny().orElseThrow(() -> new TestFailException("Could not find master instance group."));
+        if (instanceGroupResponse.getTemplate() == null || !"small".equals(instanceGroupResponse.getTemplate().getInstanceType())) {
+            throw new TestFailException("Instance type of master instance group is not small!");
+        }
+        return testDto;
     }
 }

@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -38,7 +37,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
-import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -78,13 +77,12 @@ class EnvironmentResourceDeletionServiceTest {
     @Inject
     private EnvironmentResourceDeletionService environmentResourceDeletionServiceUnderTest;
 
-    private Environment environment;
+    private EnvironmentView environment;
 
     @BeforeEach
     void setup() {
-        environment = new Environment();
+        environment = new EnvironmentView();
         environment.setId(1L);
-        environment.setCreator(CRN);
         environment.setName(ENVIRONMENT_NAME);
         environment.setResourceCrn(ENVIRONMENT_CRN);
     }

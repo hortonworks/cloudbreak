@@ -24,9 +24,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -42,7 +41,6 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.structuredevent.service.AbstractAccountAwareResourceService;
-import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -62,7 +60,7 @@ import io.grpc.StatusRuntimeException;
 
 @Service
 public class EnvironmentService extends AbstractAccountAwareResourceService<Environment>
-        implements ResourceIdProvider, ResourcePropertyProvider, PayloadContextProvider {
+        implements ResourceIdProvider, EnvironmentPropertyProvider, PayloadContextProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
@@ -303,30 +301,12 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         }
     }
 
-    Environment editDeletionType(Environment environment, boolean forced) {
-        LOGGER.debug("Editing deletion type for environment.");
-        if (forced) {
-            environment.setDeletionType(EnvironmentDeletionType.FORCE);
-        } else {
-            environment.setDeletionType(EnvironmentDeletionType.SIMPLE);
-        }
-        return save(environment);
-    }
-
     public void setAdminGroupName(Environment environment, String adminGroupName) {
         if (isEmpty(adminGroupName)) {
             environment.setAdminGroupName(adminGroupNamePrefix + environment.getName());
         } else {
             environment.setAdminGroupName(adminGroupName);
         }
-    }
-
-    public Collection<Environment> findByResourceCrnInAndAccountIdAndArchivedIsFalse(Collection<String> crns, String accountId) {
-        return environmentRepository.findByResourceCrnInAndAccountIdAndArchivedIsFalse(crns, accountId);
-    }
-
-    public Collection<Environment> findByNameInAndAccountIdAndArchivedIsFalse(Collection<String> environmentNames, String accountId) {
-        return environmentRepository.findByNameInAndAccountIdAndArchivedIsFalse(environmentNames, accountId);
     }
 
     public String getCrnByNameAndAccountId(String environmentName, String accountId) {
@@ -365,16 +345,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
-        return environmentRepository.findAllCrnByNameAndAccountIdAndArchivedIsFalse(resourceNames, ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.ENVIRONMENT);
-    }
-
-    public List<String> findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(String accountId, Long parentEnvironmentId) {
-        return environmentRepository.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(accountId, parentEnvironmentId);
+        return environmentRepository.findAllCrnByNameInAndAccountIdAndArchivedIsFalse(resourceNames, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     public List<Environment> findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(String accountId, Long parentEnvironmentId) {

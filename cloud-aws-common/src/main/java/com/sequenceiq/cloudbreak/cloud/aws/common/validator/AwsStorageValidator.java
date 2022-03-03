@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
@@ -38,6 +40,9 @@ public class AwsStorageValidator implements Validator {
 
     @Inject
     private AwsPlatformResources awsPlatformResources;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public void validate(AuthenticatedContext ac, CloudStack cloudStack) {
@@ -75,7 +80,15 @@ public class AwsStorageValidator implements Validator {
 
     private List<String> getInstanceStorageNotSupportedTypes(AuthenticatedContext ac, Set<String> instanceTypes) {
         Location location = ac.getCloudContext().getLocation();
-        CloudVmTypes cloudVmTypes = awsPlatformResources.virtualMachines(ac.getCloudCredential(), location.getRegion(), Map.of());
+        String accountId = ac.getCloudContext().getAccountId();
+        ExtendedCloudCredential extendedCloudCredential = new ExtendedCloudCredential(
+                ac.getCloudCredential(),
+                ac.getCloudContext().getPlatform().value(),
+                "",
+                ac.getCloudContext().getCrn(),
+                accountId,
+                entitlementService.getEntitlements(accountId));
+        CloudVmTypes cloudVmTypes = awsPlatformResources.virtualMachines(extendedCloudCredential, location.getRegion(), Map.of());
         Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
         String az = location.getAvailabilityZone().value();
         return cloudVmResponses.get(az).stream()

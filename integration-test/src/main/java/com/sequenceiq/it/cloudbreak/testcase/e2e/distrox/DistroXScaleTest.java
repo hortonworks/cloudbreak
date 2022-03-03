@@ -64,7 +64,7 @@ public class DistroXScaleTest extends AbstractE2ETest {
                 .awaitForFlow()
                 // removing deleted instance since downscale still validates if stack is available
                 .when(distroXTestClient.removeInstance())
-                .await(STACK_AVAILABLE)
+                .awaitForFlow()
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleDownTarget()))
                 .awaitForFlow();
         IntStream.range(1, params.getTimes()).forEach(i -> testContext.given(DistroXTestDto.class)

@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
-import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent;
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesEvent.EnvStackConfigUpdatesEventBuilder;
@@ -72,7 +72,7 @@ public class EnvironmentReactorFlowManager {
         return Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
     }
 
-    public FlowIdentifier triggerDeleteFlow(Environment environment, String userCrn, boolean forced) {
+    public FlowIdentifier triggerDeleteFlow(EnvironmentView environment, String userCrn, boolean forced) {
         LOGGER.info("Environment deletion flow triggered for '{}'.", environment.getName());
         flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
@@ -86,7 +86,7 @@ public class EnvironmentReactorFlowManager {
         return eventSender.sendEvent(envDeleteEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
-    public FlowIdentifier triggerCascadingDeleteFlow(Environment environment, String userCrn, boolean forced) {
+    public FlowIdentifier triggerCascadingDeleteFlow(EnvironmentView environment, String userCrn, boolean forced) {
         LOGGER.info("Environment forced deletion flow triggered for '{}'.", environment.getName());
         flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
@@ -125,7 +125,7 @@ public class EnvironmentReactorFlowManager {
         return eventSender.sendEvent(envSrartEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
-    public FlowIdentifier triggerStackConfigUpdatesFlow(Environment environment, String userCrn) {
+    public FlowIdentifier triggerStackConfigUpdatesFlow(EnvironmentView environment, String userCrn) {
         stackService.cancelRunningStackConfigUpdates(environment);
 
         LOGGER.info("Environment stack configurations update flow triggered.");

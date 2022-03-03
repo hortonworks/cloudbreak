@@ -22,6 +22,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.EnabledIf;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsDefaultZoneProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsEnvironmentVariableChecker;
@@ -87,6 +88,9 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
     @MockBean
     private AwsNativeLbMetadataCollector awsNativeLbMetadataCollector;
 
+    @MockBean
+    private EntitlementService entitlementService;
+
     @Inject
     private AwsAuthenticator awsAuthenticator;
 
@@ -114,7 +118,7 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
                 .build();
         Map<String, Object> credentialParams = Map.of("aws",
                 Map.of("keyBased", Map.of("accessKey", awsAccessKey, "secretKey", awsSecretKey)));
-        CloudCredential credential = new CloudCredential("id", "alma", credentialParams, false);
+        CloudCredential credential = new CloudCredential("id", "alma", credentialParams, "acc", false);
         authenticatedContext = awsAuthenticator.authenticate(context, credential);
     }
 

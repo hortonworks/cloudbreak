@@ -1,6 +1,7 @@
 package com.sequenceiq.authorization.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.model.AllMatch;
@@ -29,19 +31,19 @@ public class EnvironmentBasedAuthorizationProviderTest {
 
     private static final AuthorizationResourceAction ACTION = AuthorizationResourceAction.EDIT_CREDENTIAL;
 
-    private static final String RESOURCE_CRN_1 = "resourceCrn1";
+    private static final String RESOURCE_CRN_1 = "crn:cdp:datalake:us-west-1:tenant:datalake:resourceCrn1";
 
-    private static final String RESOURCE_CRN_2 = "resourceCrn2";
+    private static final String RESOURCE_CRN_2 = "crn:cdp:datalake:us-west-1:tenant:datalake:resourceCrn2";
 
-    private static final String RESOURCE_CRN_3 = "resourceCrn3";
+    private static final String RESOURCE_CRN_3 = "crn:cdp:datalake:us-west-1:tenant:datalake:resourceCrn3";
 
-    private static final String RESOURCE_CRN_WITHOUT_ENV_1 = "resourceCrnWithoutEnv1";
+    private static final String RESOURCE_CRN_WITHOUT_ENV_1 = "crn:cdp:datalake:us-west-1:tenant:datalake:resourceCrnWithoutEnv1";
 
-    private static final String RESOURCE_CRN_WITHOUT_ENV_2 = "resourceCrnWithoutEnv2";
+    private static final String RESOURCE_CRN_WITHOUT_ENV_2 = "crn:cdp:datalake:us-west-1:tenant:datalake:resourceCrnWithoutEnv2";
 
-    private static final String ENV_CRN_1 = "envCrn1";
+    private static final String ENV_CRN_1 = "crn:cdp:environments:us-west-1:tenant:environment:envCrn1";
 
-    private static final String ENV_CRN_2 = "envCrn2";
+    private static final String ENV_CRN_2 = "crn:cdp:environments:us-west-1:tenant:environment:envCrn2";
 
     @Mock
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
@@ -74,8 +76,8 @@ public class EnvironmentBasedAuthorizationProviderTest {
     public void testWithoutCrnProvider() {
         when(commonPermissionCheckingUtils.getResourceBasedCrnProvider(eq(ACTION))).thenReturn(null);
 
-        Optional<AuthorizationRule> authorization = underTest.getAuthorizations(RESOURCE_CRN_1, ACTION);
-        assertEquals(Optional.empty(), authorization);
+        assertThrows(AccessDeniedException.class, () -> underTest.getAuthorizations(RESOURCE_CRN_1, ACTION),
+                String.format("Action %s is not supported over resource %s, thus access is denied!", ACTION.getRight(), RESOURCE_CRN_1));
     }
 
     @Test

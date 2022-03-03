@@ -252,7 +252,7 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
         return "BaseNetwork{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", environment=" + environment +
+                ", environment=" + environment.getName() +
                 ", archived=" + archived +
                 ", deletionTimestamp=" + deletionTimestamp +
                 ", networkCidr='" + networkCidr + '\'' +

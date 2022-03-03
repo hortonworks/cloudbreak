@@ -21,6 +21,18 @@ public class CredentialViewConverter {
         return response;
     }
 
+    public CredentialViewResponse convertResponse(Credential credentialView) {
+        CredentialViewResponse response = new CredentialViewResponse();
+        response.setName(credentialView.getName());
+        response.setCloudPlatform(credentialView.getCloudPlatform());
+        response.setCreator(credentialView.getCreator());
+        response.setCrn(credentialView.getResourceCrn());
+        response.setDescription(credentialView.getDescription());
+        response.setVerificationStatusText(credentialView.getVerificationStatusText());
+        response.setType(credentialView.getType());
+        return response;
+    }
+
     public CredentialView convert(Credential credential) {
         CredentialView credentialView = new CredentialView();
         credentialView.setAccountId(credential.getAccountId());

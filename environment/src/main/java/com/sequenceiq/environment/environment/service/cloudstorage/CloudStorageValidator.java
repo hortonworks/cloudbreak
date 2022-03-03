@@ -42,7 +42,7 @@ public class CloudStorageValidator {
                 false);
         String attributes = credential.getAttributes();
         CloudCredential cloudCredential = new CloudCredential(credential.getResourceCrn(), credential.getName(), new Json(attributes).getMap(),
-                credential.isVerifyPermissions());
+                credential.getAccountId(), credential.isVerifyPermissions());
         CloudStorageRequest cloudStorageRequest = new CloudStorageRequest();
 
         TelemetryRequest telemetryRequest = environmentCloudStorageValidationRequest.getTelemetry();

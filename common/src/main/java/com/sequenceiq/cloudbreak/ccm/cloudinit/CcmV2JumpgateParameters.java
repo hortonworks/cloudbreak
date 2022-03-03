@@ -21,6 +21,8 @@ public interface CcmV2JumpgateParameters extends CcmV2Parameters {
         }
     }
 
+    String getEnvironmentCrn();
+
     String getAgentMachineUserAccessKey();
 
     String getAgentMachineUserEncipheredAccessKey();

@@ -40,7 +40,7 @@ public class GetPlatformNetworksHandler implements CloudPlatformEventHandler<Get
                     Variant.variant(request.getVariant()));
             CloudNetworks networks = cloudPlatformConnectors.get(cloudPlatformVariant)
                     .platformResources()
-                    .networks(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+                    .networks(request.getExtendedCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformNetworksResult getPlatformNetworksResult = new GetPlatformNetworksResult(request.getResourceId(), networks);
             request.getResult().onNext(getPlatformNetworksResult);
             LOGGER.debug("Platform networks result : {}", getPlatformNetworksResult);

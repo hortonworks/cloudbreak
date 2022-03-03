@@ -119,7 +119,7 @@ public class EnvironmentResponseConverterTest {
         when(regionConverter.convertRegions(environment.getRegions())).thenReturn(compactRegionResponse);
         when(telemetryApiConverter.convert(environment.getTelemetry())).thenReturn(telemetryResponse);
         when(backupConverter.convert(environment.getBackup())).thenReturn(backupResponse);
-        when(proxyConfigToProxyResponseConverter.convert(environment.getProxyConfig())).thenReturn(proxyResponse);
+        when(proxyConfigToProxyResponseConverter.convert((ProxyConfig) environment.getProxyConfig())).thenReturn(proxyResponse);
         when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), true))
                 .thenReturn(environmentNetworkResponse);
 
@@ -166,7 +166,7 @@ public class EnvironmentResponseConverterTest {
     @ParameterizedTest
     @EnumSource(value = CloudPlatform.class, names = {"AWS", "AZURE"})
     void testDtoToSimpleResponse(CloudPlatform cloudPlatform) {
-        EnvironmentDto environment = createEnvironmentDto(cloudPlatform);
+        EnvironmentDto environmentDto = createEnvironmentDto(cloudPlatform);
         CredentialViewResponse credentialResponse = mock(CredentialViewResponse.class);
         FreeIpaResponse freeIpaResponse = mock(FreeIpaResponse.class);
         CompactRegionResponse compactRegionResponse = mock(CompactRegionResponse.class);
@@ -174,46 +174,46 @@ public class EnvironmentResponseConverterTest {
         ProxyViewResponse proxyResponse = mock(ProxyViewResponse.class);
         EnvironmentNetworkResponse environmentNetworkResponse = mock(EnvironmentNetworkResponse.class);
 
-        when(credentialViewConverter.convert(environment.getCredentialView())).thenReturn(credentialResponse);
-        when(freeIpaConverter.convert(environment.getFreeIpaCreation())).thenReturn(freeIpaResponse);
-        when(regionConverter.convertRegions(environment.getRegions())).thenReturn(compactRegionResponse);
-        when(telemetryApiConverter.convert(environment.getTelemetry())).thenReturn(telemetryResponse);
-        when(proxyConfigToProxyResponseConverter.convertToView(environment.getProxyConfig())).thenReturn(proxyResponse);
-        when(networkDtoToResponseConverter.convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), false))
+        when(credentialViewConverter.convertResponse(environmentDto.getCredential())).thenReturn(credentialResponse);
+        when(freeIpaConverter.convert(environmentDto.getFreeIpaCreation())).thenReturn(freeIpaResponse);
+        when(regionConverter.convertRegions(environmentDto.getRegions())).thenReturn(compactRegionResponse);
+        when(telemetryApiConverter.convert(environmentDto.getTelemetry())).thenReturn(telemetryResponse);
+        when(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())).thenReturn(proxyResponse);
+        when(networkDtoToResponseConverter.convert(environmentDto.getNetwork(), environmentDto.getExperimentalFeatures().getTunnel(), false))
                 .thenReturn(environmentNetworkResponse);
 
-        SimpleEnvironmentResponse actual = underTest.dtoToSimpleResponse(environment);
+        SimpleEnvironmentResponse actual = underTest.dtoToSimpleResponse(environmentDto);
 
-        assertEquals(environment.getResourceCrn(), actual.getCrn());
-        assertEquals(environment.getName(), actual.getName());
-        assertEquals(environment.getDescription(), actual.getDescription());
-        assertEquals(environment.getCloudPlatform(), actual.getCloudPlatform());
+        assertEquals(environmentDto.getResourceCrn(), actual.getCrn());
+        assertEquals(environmentDto.getName(), actual.getName());
+        assertEquals(environmentDto.getDescription(), actual.getDescription());
+        assertEquals(environmentDto.getCloudPlatform(), actual.getCloudPlatform());
         assertEquals(credentialResponse, actual.getCredential());
-        assertEquals(environment.getStatus().getResponseStatus(), actual.getEnvironmentStatus());
-        assertEquals(environment.getCreator(), actual.getCreator());
-        assertLocation(environment.getLocation(), actual.getLocation());
+        assertEquals(environmentDto.getStatus().getResponseStatus(), actual.getEnvironmentStatus());
+        assertEquals(environmentDto.getCreator(), actual.getCreator());
+        assertLocation(environmentDto.getLocation(), actual.getLocation());
         assertTrue(actual.getCreateFreeIpa());
         assertEquals(freeIpaResponse, actual.getFreeIpa());
-        assertEquals(environment.getStatusReason(), actual.getStatusReason());
-        assertEquals(environment.getCreated(), actual.getCreated());
-        assertEquals(environment.getExperimentalFeatures().getTunnel(), actual.getTunnel());
-        assertEquals(environment.getExperimentalFeatures().getCcmV2TlsType(), actual.getCcmV2TlsType());
-        assertEquals(environment.getAdminGroupName(), actual.getAdminGroupName());
-        assertEquals(environment.getTags().getUserDefinedTags(), actual.getTags().getUserDefined());
-        assertEquals(environment.getTags().getDefaultTags(), actual.getTags().getDefaults());
+        assertEquals(environmentDto.getStatusReason(), actual.getStatusReason());
+        assertEquals(environmentDto.getCreated(), actual.getCreated());
+        assertEquals(environmentDto.getExperimentalFeatures().getTunnel(), actual.getTunnel());
+        assertEquals(environmentDto.getExperimentalFeatures().getCcmV2TlsType(), actual.getCcmV2TlsType());
+        assertEquals(environmentDto.getAdminGroupName(), actual.getAdminGroupName());
+        assertEquals(environmentDto.getTags().getUserDefinedTags(), actual.getTags().getUserDefined());
+        assertEquals(environmentDto.getTags().getDefaultTags(), actual.getTags().getDefaults());
         assertEquals(telemetryResponse, actual.getTelemetry());
         assertEquals(compactRegionResponse, actual.getRegions());
-        assertParameters(environment, actual, cloudPlatform);
-        assertEquals(environment.getParentEnvironmentName(), actual.getParentEnvironmentName());
+        assertParameters(environmentDto, actual, cloudPlatform);
+        assertEquals(environmentDto.getParentEnvironmentName(), actual.getParentEnvironmentName());
         assertEquals(proxyResponse, actual.getProxyConfig());
         assertEquals(environmentNetworkResponse, actual.getNetwork());
 
-        verify(credentialViewConverter).convert(environment.getCredentialView());
-        verify(freeIpaConverter).convert(environment.getFreeIpaCreation());
-        verify(regionConverter).convertRegions(environment.getRegions());
-        verify(telemetryApiConverter).convert(environment.getTelemetry());
-        verify(proxyConfigToProxyResponseConverter).convertToView(environment.getProxyConfig());
-        verify(networkDtoToResponseConverter).convert(environment.getNetwork(), environment.getExperimentalFeatures().getTunnel(), false);
+        verify(credentialViewConverter).convertResponse(environmentDto.getCredential());
+        verify(freeIpaConverter).convert(environmentDto.getFreeIpaCreation());
+        verify(regionConverter).convertRegions(environmentDto.getRegions());
+        verify(telemetryApiConverter).convert(environmentDto.getTelemetry());
+        verify(proxyConfigToProxyResponseConverter).convertToView(environmentDto.getProxyConfig());
+        verify(networkDtoToResponseConverter).convert(environmentDto.getNetwork(), environmentDto.getExperimentalFeatures().getTunnel(), false);
     }
 
     private void assertParameters(EnvironmentDto environment, EnvironmentBaseResponse actual, CloudPlatform cloudPlatform) {
@@ -264,11 +264,12 @@ public class EnvironmentResponseConverterTest {
 
     private EnvironmentDto createEnvironmentDto(CloudPlatform cloudPlatform) {
         return EnvironmentDto.builder()
+                .withProxyConfig(new ProxyConfig())
+                .withCredential(new Credential())
                 .withResourceCrn("resource-crn")
                 .withName("my-env")
                 .withDescription("Test environment.")
                 .withCloudPlatform("AWS")
-                .withCredential(new Credential())
                 .withEnvironmentStatus(EnvironmentStatus.AVAILABLE)
                 .withLocationDto(createLocationDto())
                 .withFreeIpaCreation(createFreeIpaCreationDto())
@@ -285,7 +286,6 @@ public class EnvironmentResponseConverterTest {
                 .withParentEnvironmentCrn("environment crn")
                 .withParentEnvironmentName("parent-env")
                 .withParentEnvironmentCloudPlatform("AWS")
-                .withProxyConfig(new ProxyConfig())
                 .withNetwork(NetworkDto.builder().build())
                 .withSecurityAccess(createSecurityAccess())
                 .withEnvironmentDeletionType(EnvironmentDeletionType.FORCE)

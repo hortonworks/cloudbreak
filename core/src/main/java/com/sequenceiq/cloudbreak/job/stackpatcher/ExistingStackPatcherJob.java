@@ -2,9 +2,6 @@ package com.sequenceiq.cloudbreak.job.stackpatcher;
 
 import static com.sequenceiq.cloudbreak.job.stackpatcher.ExistingStackPatcherJobAdapter.STACK_PATCH_TYPE_NAME;
 
-import java.util.Collection;
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
@@ -15,11 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.domain.converter.StackPatchTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchApplyException;
@@ -41,13 +38,10 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
     private StackService stackService;
 
     @Inject
-    private StackPatchTypeConverter stackPatchTypeConverter;
-
-    @Inject
     private ExistingStackPatcherJobService jobService;
 
     @Inject
-    private Collection<ExistingStackPatchService> existingStackPatchServices;
+    private ExistingStackPatcherServiceProvider existingStackPatcherServiceProvider;
 
     @Inject
     private StackPatchUsageReporterService stackPatchUsageReporterService;
@@ -66,26 +60,20 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
         Stack stack = stackService.getByIdWithListsInTransaction(getStackId());
         Status stackStatus = stack.getStatus();
         String stackPatchTypeName = context.getJobDetail().getJobDataMap().getString(STACK_PATCH_TYPE_NAME);
-        StackPatchType stackPatchType = stackPatchTypeConverter.convertToEntityAttribute(stackPatchTypeName);
-        if (!Status.getUnschedulableStatuses().contains(stackStatus)) {
-            if (stackPatchType == null || StackPatchType.UNKNOWN.equals(stackPatchType)) {
-                String message = String.format("Stack patch type %s is unknown", stackPatchTypeName);
-                unscheduleAndFailJob(message, context, stack, stackPatchType);
-            } else {
-                Optional<ExistingStackPatchService> optionalExistingStackPatchService = getStackPatchServiceForType(stackPatchType);
-                if (optionalExistingStackPatchService.isEmpty()) {
-                    String message = "No stack patcher implementation found for type " + stackPatchType;
-                    unscheduleAndFailJob(message, context, stack, stackPatchType);
-                } else {
-                    boolean success = applyStackPatch(optionalExistingStackPatchService.get(), stack);
-                    if (success) {
-                        unscheduleJob(context, stack, stackPatchType);
-                    }
+        try {
+            ExistingStackPatchService existingStackPatchService = existingStackPatcherServiceProvider.provide(stackPatchTypeName);
+            if (!Status.getUnschedulableStatuses().contains(stackStatus)) {
+                boolean success = applyStackPatch(existingStackPatchService, stack);
+                if (success) {
+                    unscheduleJob(context, stack, existingStackPatchService.getStackPatchType());
                 }
+            } else {
+                LOGGER.debug("Existing stack patching will be unscheduled, because stack {} status is {}", stack.getResourceCrn(), stackStatus);
+                unscheduleJob(context, stack, existingStackPatchService.getStackPatchType());
             }
-        } else {
-            LOGGER.debug("Existing stack patching will be unscheduled, because stack {} status is {}", stack.getResourceCrn(), stackStatus);
-            unscheduleJob(context, stack, stackPatchType);
+        } catch (CloudbreakException e) {
+            String message = "Unknown stack patch type: " + stackPatchTypeName;
+            unscheduleAndFailJob(message, context, stack, StackPatchType.UNKNOWN);
         }
     }
 
@@ -100,12 +88,6 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
     private void unscheduleJob(JobExecutionContext context, Stack stack, StackPatchType stackPatchType) {
         LOGGER.info("Unscheduling stack patcher {} job for stack {}", stackPatchType, stack);
         jobService.unschedule(context.getJobDetail().getKey());
-    }
-
-    private Optional<ExistingStackPatchService> getStackPatchServiceForType(StackPatchType stackPatchType) {
-        return existingStackPatchServices.stream()
-                .filter(existingStackPatchService -> stackPatchType.equals(existingStackPatchService.getStackPatchType()))
-                .findFirst();
     }
 
     private boolean applyStackPatch(ExistingStackPatchService existingStackPatchService, Stack stack) throws JobExecutionException {

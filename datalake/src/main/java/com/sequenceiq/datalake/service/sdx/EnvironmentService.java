@@ -3,7 +3,6 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,12 +22,10 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.google.common.collect.Maps;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
 import com.sequenceiq.authorization.service.list.Resource;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -44,7 +41,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
 @Service
-public class EnvironmentService implements ResourcePropertyProvider {
+public class EnvironmentService implements EnvironmentPropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
@@ -147,21 +144,6 @@ public class EnvironmentService implements ResourcePropertyProvider {
     }
 
     @Override
-    public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
-        return Optional.of(resourceCrn);
-    }
-
-    @Override
-    public Map<String, Optional<String>> getEnvironmentCrnsByResourceCrns(Collection<String> resourceCrns) {
-        return resourceCrns.stream().collect(Collectors.toMap(crn -> crn, crn -> Optional.of(crn)));
-    }
-
-    @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.ENVIRONMENT);
-    }
-
-    @Override
     public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
         Set<SdxClusterView> dlByEnvCrns = sdxClusterViewRepository.findByAccountIdAndEnvCrnIn(ThreadBasedUserCrnProvider.getAccountId(), crns);
         Map<String, Optional<String>> result = Maps.newHashMap();
@@ -169,10 +151,5 @@ public class EnvironmentService implements ResourcePropertyProvider {
                 .filter(dl -> StringUtils.isNotBlank(dl.getEnvCrn()) && StringUtils.isNotBlank(dl.getEnvName()))
                 .forEach(dl -> result.putIfAbsent(dl.getEnvCrn(), Optional.of(dl.getEnvName())));
         return result;
-    }
-
-    @Override
-    public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
-        return EnumSet.of(Crn.ResourceType.ENVIRONMENT);
     }
 }

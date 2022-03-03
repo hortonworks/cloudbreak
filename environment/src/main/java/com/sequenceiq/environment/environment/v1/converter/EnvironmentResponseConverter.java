@@ -35,6 +35,7 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverte
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -118,6 +119,7 @@ public class EnvironmentResponseConverter {
                 .withEnvironmentServiceVersion(environmentDto.getEnvironmentServiceVersion())
                 .withDeletionType(deletionType(environmentDto.getDeletionType()))
                 .withCcmV2TlsType(environmentDto.getExperimentalFeatures().getCcmV2TlsType())
+                .withAccountId(environmentDto.getAccountId())
                 .withEnvironmentDomain(environmentDto.getDomain());
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
@@ -132,13 +134,49 @@ public class EnvironmentResponseConverter {
         return networkDtoToResponseConverter.convert(network, tunnel, detailedResponse);
     }
 
+    public SimpleEnvironmentResponse dtoToSimpleResponse(EnvironmentViewDto environmentViewDto) {
+        SimpleEnvironmentResponse.Builder builder = SimpleEnvironmentResponse.builder()
+                .withCrn(environmentViewDto.getResourceCrn())
+                .withName(environmentViewDto.getName())
+                .withDescription(environmentViewDto.getDescription())
+                .withCloudPlatform(environmentViewDto.getCloudPlatform())
+                .withCredentialView(credentialViewConverter.convert(environmentViewDto.getCredentialView()))
+                .withEnvironmentStatus(environmentViewDto.getStatus().getResponseStatus())
+                .withCreator(environmentViewDto.getCreator())
+                .withLocation(locationDtoToResponse(environmentViewDto.getLocation()))
+                .withCreateFreeIpa(environmentViewDto.getFreeIpaCreation().getCreate())
+                .withFreeIpa(freeIpaConverter.convert(environmentViewDto.getFreeIpaCreation()))
+                .withStatusReason(environmentViewDto.getStatusReason())
+                .withCreated(environmentViewDto.getCreated())
+                .withTunnel(environmentViewDto.getExperimentalFeatures().getTunnel())
+                .withAdminGroupName(environmentViewDto.getAdminGroupName())
+                .withTag(getIfNotNull(environmentViewDto.getTags(), this::environmentTagsToTagResponse))
+                .withTelemetry(telemetryApiConverter.convert(environmentViewDto.getTelemetry()))
+                .withBackup(backupConverter.convert(environmentViewDto.getBackup()))
+                .withRegions(regionConverter.convertRegions(environmentViewDto.getRegions()))
+                .withAws(getIfNotNull(environmentViewDto.getParameters(), this::awsEnvParamsToAwsEnvironmentParams))
+                .withAzure(getIfNotNull(environmentViewDto.getParameters(), this::azureEnvParamsToAzureEnvironmentParams))
+                .withYarn(getIfNotNull(environmentViewDto.getParameters(), this::yarnEnvParamsToYarnEnvironmentParams))
+                .withGcp(getIfNotNull(environmentViewDto.getParameters(), this::gcpEnvParamsToGcpEnvironmentParams))
+                .withDeletionType(deletionType(environmentViewDto.getDeletionType()))
+                .withParentEnvironmentName(environmentViewDto.getParentEnvironmentName())
+                .withCcmV2TlsType(environmentViewDto.getExperimentalFeatures().getCcmV2TlsType())
+                .withEnvironmentDomain(environmentViewDto.getDomain());
+
+        NullUtil.doIfNotNull(environmentViewDto.getProxyConfig(),
+                proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentViewDto.getProxyConfig())));
+        NullUtil.doIfNotNull(environmentViewDto.getNetwork(),
+                network -> builder.withNetwork(networkDtoToResponse(network, environmentViewDto.getExperimentalFeatures().getTunnel(), false)));
+        return builder.build();
+    }
+
     public SimpleEnvironmentResponse dtoToSimpleResponse(EnvironmentDto environmentDto) {
         SimpleEnvironmentResponse.Builder builder = SimpleEnvironmentResponse.builder()
                 .withCrn(environmentDto.getResourceCrn())
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())
                 .withCloudPlatform(environmentDto.getCloudPlatform())
-                .withCredentialView(credentialViewConverter.convert(environmentDto.getCredentialView()))
+                .withCredentialView(credentialViewConverter.convertResponse(environmentDto.getCredential()))
                 .withEnvironmentStatus(environmentDto.getStatus().getResponseStatus())
                 .withCreator(environmentDto.getCreator())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))

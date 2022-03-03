@@ -41,7 +41,7 @@ public class GetPlatformAccessConfigsHandler implements CloudPlatformEventHandle
                     Platform.platform(request.getExtendedCloudCredential().getCloudPlatform()),
                     Variant.variant(request.getVariant()));
             CloudAccessConfigs cloudAccessConfigs = cloudPlatformConnectors.get(cloudPlatformVariant)
-                    .platformResources().accessConfigs(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+                    .platformResources().accessConfigs(request.getExtendedCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformCloudAccessConfigsResult getPlatformCloudAccessConfigsResult =
                     new GetPlatformCloudAccessConfigsResult(request.getResourceId(), cloudAccessConfigs);
             request.getResult().onNext(getPlatformCloudAccessConfigsResult);

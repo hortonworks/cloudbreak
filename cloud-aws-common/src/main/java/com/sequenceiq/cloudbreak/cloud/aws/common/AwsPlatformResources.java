@@ -124,6 +124,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -307,7 +308,8 @@ public class AwsPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getLatitude(),
                                 regionCoordinateSpecification.getDisplayName(),
                                 regionEntry.isPresent() ? regionEntry.get().getKey().value() : regionCoordinateSpecification.getDisplayName(),
-                                regionCoordinateSpecification.isK8sSupported()));
+                                regionCoordinateSpecification.isK8sSupported(),
+                                regionCoordinateSpecification.getEntitlements()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;
@@ -335,7 +337,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), region.value());
         try {
             LOGGER.debug("Describing route tables in region {}", region.getRegionName());
@@ -456,7 +458,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudSshKeys sshKeys(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudSshKey>> result = new HashMap<>();
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             CloudRegions regions = regions(cloudCredential, region, new HashMap<>(), true);
@@ -489,7 +491,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudSecurityGroups securityGroups(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
         Set<CloudSecurityGroup> cloudSecurityGroups = new HashSet<>();
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), region.value());
@@ -535,7 +537,8 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "{ #cloudCredential?.id, #availabilityZonesNeeded }")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
+    public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
+        boolean availabilityZonesNeeded) {
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential));
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
@@ -624,13 +627,13 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
-    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return getCloudVmTypes(cloudCredential, region, filters, enabledInstanceTypeFilter, false);
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
-    public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         if (restrictInstanceTypes) {
             return getCloudVmTypes(cloudCredential, region, filters, enabledDistroxInstanceTypeFilter, true);
         } else {
@@ -638,7 +641,7 @@ public class AwsPlatformResources implements PlatformResources {
         }
     }
 
-    private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters,
+    private CloudVmTypes getCloudVmTypes(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
             Predicate<VmType> enabledInstanceTypeFilter, boolean enableMinimalHardwareFilter) {
         Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
@@ -771,7 +774,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudGateWays gateways(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Map<String, Set<CloudGateWay>> resultCloudGateWayMap = new HashMap<>();
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             CloudRegions regions = regions(cloudCredential, region, filters, true);
@@ -806,12 +809,12 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudIpPools publicIpPool(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudIpPools();
     }
 
     @Override
-    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudAccessConfigs accessConfigs(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudAccessConfigs cloudAccessConfigs = new CloudAccessConfigs(new HashSet<>());
         AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
         AmazonIdentityManagementClient client = awsClient.createAmazonIdentityManagement(awsCredentialView);
@@ -827,7 +830,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudEncryptionKeys encryptionKeys(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         String queryFailedMessage = "Could not get encryption keys from Amazon: ";
 
         CloudEncryptionKeys cloudEncryptionKeys = new CloudEncryptionKeys(new HashSet<>());
@@ -894,7 +897,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudNoSqlTables noSqlTables(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         List<CloudNoSqlTable> noSqlTables = new ArrayList<>();
         AmazonDynamoDBClient dynamoDbClient = getAmazonDynamoDBClient(cloudCredential, region);
         ListTablesRequest listTablesRequest = new ListTablesRequest();
@@ -912,7 +915,7 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudResourceGroups resourceGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudResourceGroups resourceGroups(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudResourceGroups();
     }
 
@@ -1042,10 +1045,19 @@ public class AwsPlatformResources implements PlatformResources {
         return properties;
     }
 
-    public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
+    public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes, List<String> entitlements) {
         Location location = ac.getCloudContext().getLocation();
         try {
-            CloudVmTypes cloudVmTypes = virtualMachines(ac.getCloudCredential(), location.getRegion(), Map.of());
+            String accountId = ac.getCloudContext().getAccountId();
+            ExtendedCloudCredential extendedCloudCredential = new ExtendedCloudCredential(
+                    ac.getCloudCredential(),
+                    ac.getCloudContext().getPlatform().value(),
+                    "",
+                    ac.getCloudContext().getCrn(),
+                    accountId,
+                    entitlements
+            );
+            CloudVmTypes cloudVmTypes = virtualMachines(extendedCloudCredential, location.getRegion(), Map.of());
             Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
             Map<String, VolumeParameterConfig> instanceTypeToInstanceStorageMap = cloudVmResponses.getOrDefault(location.getAvailabilityZone().value(), Set.of())
                     .stream()

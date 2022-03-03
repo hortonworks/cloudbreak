@@ -29,10 +29,10 @@ public class DefaultCcmV2JumpgateParameterSupplier extends DefaultCcmV2Parameter
 
         LOGGER.debug("CcmV2JumpgateConfig successfully retrieved InvertingProxyHost: '{}', InvertingProxyStatus: '{}', InvertingProxyAgentCrn: '{}', " +
                         "EnvironmentCrnOpt: '{}'", invertingProxy.getHostname(), invertingProxy.getStatus(),
-                invertingProxyAgent.getAgentCrn(), Optional.of(invertingProxyAgent.getEnvironmentCrn()));
+                invertingProxyAgent.getAgentCrn(), invertingProxyAgent.getEnvironmentCrn());
 
         return new DefaultCcmV2JumpgateParameters(invertingProxy.getHostname(), invertingProxy.getCertificate(), invertingProxyAgent.getAgentCrn(), agentKeyId,
-                invertingProxyAgent.getEncipheredPrivateKey(), invertingProxyAgent.getCertificate(),
+                invertingProxyAgent.getEncipheredPrivateKey(), invertingProxyAgent.getCertificate(), invertingProxyAgent.getEnvironmentCrn(),
                 invertingProxyAgent.getAccessKeyId(), invertingProxyAgent.getEncipheredAccessKey());
     }
 }

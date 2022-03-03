@@ -22,6 +22,7 @@ import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.InternetGateway;
 import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
 import com.amazonaws.services.ec2.model.Subnet;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
@@ -34,12 +35,14 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.common.api.type.ImageStatusResult;
@@ -75,6 +78,9 @@ public abstract class AwsSetup implements Setup {
     @Inject
     private AwsPlatformResources awsPlatformResources;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, Image image) {
         return new ImageStatusResult(ImageStatus.CREATE_FINISHED, FINISHED_PROGRESS_VALUE);
@@ -109,7 +115,15 @@ public abstract class AwsSetup implements Setup {
     }
 
     private void validateRegionAndZone(CloudCredential cloudCredential, Location location) {
-        CloudRegions regions = awsPlatformResources.regions(cloudCredential, location.getRegion(), Collections.emptyMap(), true);
+        List<String> entitlements = entitlementService.getEntitlements(cloudCredential.getAccountId());
+        ExtendedCloudCredential extendedCloudCredential = new ExtendedCloudCredential(
+                cloudCredential,
+                CloudPlatform.AWS.name(),
+                "",
+                null,
+                cloudCredential.getAccountId(),
+                entitlements);
+        CloudRegions regions = awsPlatformResources.regions(extendedCloudCredential, location.getRegion(), Collections.emptyMap(), true);
         List<AvailabilityZone> availabilityZones = regions.getCloudRegions().get(location.getRegion());
         if (availabilityZones == null) {
             throw new CloudConnectorException(String.format("Region [%s] doesn't contain any availability zone",

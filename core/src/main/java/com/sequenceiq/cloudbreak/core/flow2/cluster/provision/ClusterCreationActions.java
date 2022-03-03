@@ -13,14 +13,17 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
+import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
 import com.sequenceiq.cloudbreak.job.instancemetadata.ArchiveInstanceMetaDataJobService;
+import com.sequenceiq.cloudbreak.job.stackpatcher.ExistingStackPatcherJobService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -113,6 +116,9 @@ public class ClusterCreationActions {
 
     @Inject
     private InstanceMetadataProcessor instanceMetadataProcessor;
+
+    @Inject
+    private ExistingStackPatcherJobService existingStackPatcherJobService;
 
     @Bean(name = "CLUSTER_PROXY_REGISTRATION_STATE")
     public Action<?, ?> clusterProxyRegistrationAction() {
@@ -651,6 +657,9 @@ public class ClusterCreationActions {
                 jobService.schedule(context.getStackId(), StackJobAdapter.class);
                 syncJobService.schedule(context.getStackId(), StructuredSynchronizerJobAdapter.class);
                 aimJobService.schedule(context.getStackId());
+                if (CloudPlatform.MOCK.equalsIgnoreCase(context.getStack().cloudPlatform())) {
+                    existingStackPatcherJobService.schedule(context.getStackId(), StackPatchType.MOCK);
+                }
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }

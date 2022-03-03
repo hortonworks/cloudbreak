@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
@@ -30,7 +31,7 @@ public interface PlatformResources {
      * @param filters the filter statement (vpcId = will query only that vpdId)
      * @return the {@link CloudNetworks} contains every vpc per region
      */
-    CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
+    CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
 
     /**
      * Return the sshkeys in the defined region
@@ -39,7 +40,7 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudSshKeys} contains every sshkey per region
      */
-    CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters);
+    CloudSshKeys sshKeys(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     /**
      * Return the securitygroup in the defined region
@@ -48,7 +49,7 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudSecurityGroups} contains every securitygroup per region
      */
-    CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
+    CloudSecurityGroups securityGroups(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
 
     /**
      * Return the regions
@@ -59,7 +60,8 @@ public interface PlatformResources {
      *                                Skipping this fetching can speed up processing the request and results in fewer API calls (in case of AWS).
      * @return the {@link CloudRegions} contains every region per region
      */
-    CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) throws Exception;
+    CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
+        boolean availabilityZonesNeeded) throws Exception;
 
     /**
      * Return the virtual machines in the defined region
@@ -68,7 +70,7 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudVmTypes} contains every vmtype per region
      */
-    CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters);
+    CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     /**
      * Return the virtual machines in the defined region
@@ -77,7 +79,7 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudVmTypes} contains every vmtype per region
      */
-    default CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    default CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return virtualMachines(cloudCredential, region, filters);
     }
 
@@ -88,7 +90,7 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudGateWays} contains every gateway per region
      */
-    CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters);
+    CloudGateWays gateways(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     /**
      * Return the ip pool
@@ -97,7 +99,7 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudIpPools} contains every ip pool per region
      */
-    CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters);
+    CloudIpPools publicIpPool(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     /**
      * Return the accessConfigs
@@ -106,7 +108,7 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudAccessConfigs} contains every accessrole
      */
-    CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters);
+    CloudAccessConfigs accessConfigs(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     /**
      * Return the encryptionKeys
@@ -115,7 +117,7 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudEncryptionKeys} contains every encryption key
      */
-    CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters);
+    CloudEncryptionKeys encryptionKeys(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     /**
      * Return the No SQL table list in the requested region
@@ -124,9 +126,9 @@ public interface PlatformResources {
      * @param filters not used (reserved)
      * @return the {@link CloudNoSqlTables} contains every No SQL table for the specified region
      */
-    CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters);
+    CloudNoSqlTables noSqlTables(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters);
 
-    CloudResourceGroups resourceGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters);
+    CloudResourceGroups resourceGroups(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     default boolean regionMatch(Region actualRegion, Region expectedRegion) {
         return expectedRegion == null || Strings.isNullOrEmpty(expectedRegion.value()) || actualRegion.value().equals(expectedRegion.value());

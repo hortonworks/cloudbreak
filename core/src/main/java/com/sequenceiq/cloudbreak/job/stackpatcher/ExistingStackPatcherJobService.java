@@ -1,12 +1,5 @@
 package com.sequenceiq.cloudbreak.job.stackpatcher;
 
-import java.security.SecureRandom;
-import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.util.Date;
-import java.util.Random;
-import java.util.concurrent.TimeUnit;
-
 import javax.inject.Inject;
 
 import org.quartz.JobBuilder;
@@ -22,7 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.job.stackpatcher.config.ExistingStackPatcherConfig;
+import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchService;
 
 @Service
 public class ExistingStackPatcherJobService {
@@ -33,28 +30,38 @@ public class ExistingStackPatcherJobService {
 
     private static final String TRIGGER_GROUP = "existing-stack-patcher-triggers";
 
-    private static final Random RANDOM = new SecureRandom();
-
-    @Inject
-    private ExistingStackPatcherConfig properties;
-
     @Inject
     private Scheduler scheduler;
+
+    @Inject
+    private StackService stackService;
+
+    @Inject
+    private ExistingStackPatcherServiceProvider existingStackPatcherServiceProvider;
+
+    public void schedule(Long stackId, StackPatchType stackPatchType) {
+        JobResource jobResource = stackService.getJobResource(stackId);
+        schedule(new ExistingStackPatcherJobAdapter(jobResource, stackPatchType));
+    }
 
     public void schedule(ExistingStackPatcherJobAdapter resource) {
         JobDetail jobDetail = buildJobDetail(resource);
         JobKey jobKey = jobDetail.getKey();
-        Trigger trigger = buildJobTrigger(jobDetail);
+        StackPatchType stackPatchType = resource.getStackPatchType();
         try {
+            ExistingStackPatchService existingStackPatchService = existingStackPatcherServiceProvider.provide(stackPatchType);
+            Trigger trigger = buildJobTrigger(jobDetail, existingStackPatchService);
             if (scheduler.getJobDetail(jobKey) != null) {
                 LOGGER.info("Unscheduling stack patcher job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 unschedule(jobKey);
             }
             LOGGER.info("Scheduling stack patcher {} job for stack with key: '{}' and group: '{}'",
-                    resource.getStackPatchType(), jobKey.getName(), jobKey.getGroup());
+                    stackPatchType, jobKey.getName(), jobKey.getGroup());
             scheduler.scheduleJob(jobDetail, trigger);
+        } catch (CloudbreakException e) {
+            LOGGER.error("Failed to get stack patcher for type {}", stackPatchType, e);
         } catch (SchedulerException e) {
-            LOGGER.error(String.format("Error during scheduling stack patcher job: %s", jobDetail), e);
+            LOGGER.error("Error during scheduling stack patcher job: {}", jobDetail, e);
         }
     }
 
@@ -80,21 +87,16 @@ public class ExistingStackPatcherJobService {
                 .build();
     }
 
-    private Trigger buildJobTrigger(JobDetail jobDetail) {
+    private Trigger buildJobTrigger(JobDetail jobDetail, ExistingStackPatchService existingStackPatchService) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
-                .withDescription("Trigger for patching existing stack")
-                .startAt(delayedFirstStart())
+                .withDescription("Trigger for existing stack patch " + existingStackPatchService.getStackPatchType().name())
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                        .withIntervalInHours(properties.getIntervalInHours())
+                        .withIntervalInMinutes(existingStackPatchService.getIntervalInMinutes())
                         .repeatForever()
                         .withMisfireHandlingInstructionNextWithExistingCount())
+                .startAt(existingStackPatchService.getFirstStart())
                 .build();
-    }
-
-    private Date delayedFirstStart() {
-        int delayInMinutes = RANDOM.nextInt((int) TimeUnit.HOURS.toMinutes(properties.getMaxInitialStartDelayInHours()));
-        return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofMinutes(delayInMinutes)));
     }
 }
