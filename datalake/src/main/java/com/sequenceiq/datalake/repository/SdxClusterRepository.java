@@ -90,8 +90,16 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
     List<ResourceWithId> findAuthorizationResourcesByAccountIdAndEnvName(@Param("accountId") String accountId, @Param("envName") String envName);
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.crn, s.envCrn) FROM SdxCluster s " +
+            "WHERE s.accountId = :accountId AND s.envName IN (:envNames) AND s.deleted IS NULL")
+    List<ResourceWithId> findAuthorizationResourcesByAccountIdAndEnvNames(@Param("accountId") String accountId, @Param("envNames") List<String> envNames);
+
+    @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.crn, s.envCrn) FROM SdxCluster s " +
             "WHERE s.accountId = :accountId AND s.envCrn = :envCrn AND s.deleted IS NULL")
     List<ResourceWithId> findAuthorizationResourcesByAccountIdAndEnvCrn(@Param("accountId") String accountId, @Param("envCrn") String envCrn);
+
+    @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.crn, s.envCrn) FROM SdxCluster s " +
+            "WHERE s.accountId = :accountId AND s.envCrn IN (:envCrns) AND s.deleted IS NULL")
+    List<ResourceWithId> findAuthorizationResourcesByAccountIdAndEnvCrns(@Param("accountId") String accountId, @Param("envCrns") List<String> envCrns);
 
     @Query("SELECT s.id as localId, s.stackCrn as remoteResourceId, s.name as name " +
             "FROM SdxCluster s " +

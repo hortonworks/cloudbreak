@@ -11,6 +11,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import org.junit.jupiter.api.Assertions;
 import org.testng.annotations.Test;
 
@@ -160,6 +161,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 addListDeleteDnsZonesBySubnet(ipaClient, environmentCrn);
                 createBindUser(testContext, ipaClient, environmentCrn);
                 generateHostKeyTab(ipaClient, environmentCrn);
+                generateServiceKeytab(ipaClient, environmentCrn);
                 cleanUp(testContext, ipaClient, environmentCrn);
                 kinit(testContext.given(SdxTestDto.class), testContext.getSdxClient());
                 syncUsers(testContext, ipaClient, environmentCrn, accountId);
@@ -265,6 +267,20 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
         } catch (Exception e) {
             logger.error("Generate Host keytab test failed during upgrade", e);
             throw new TestFailException("Generate Host keytab test failed during upgrade with: " + e.getMessage(), e);
+        }
+    }
+
+    private void generateServiceKeytab(com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn) {
+        try {
+            ServiceKeytabRequest serviceKeytabRequest = new ServiceKeytabRequest();
+            serviceKeytabRequest.setEnvironmentCrn(environmentCrn);
+            serviceKeytabRequest.setServiceName("test");
+            serviceKeytabRequest.setServerHostName("test.local");
+            serviceKeytabRequest.setDoNotRecreateKeytab(Boolean.FALSE);
+            ipaClient.getKerberosMgmtV1Endpoint().generateServiceKeytab(serviceKeytabRequest, null);
+        } catch (Exception e) {
+            logger.error("Generate Service keytab test failed during upgrade", e);
+            throw new TestFailException("Generate Service keytab test failed during upgrade with: " + e.getMessage(), e);
         }
     }
 

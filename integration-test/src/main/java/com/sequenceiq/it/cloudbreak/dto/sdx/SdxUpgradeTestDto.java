@@ -30,7 +30,9 @@ public class SdxUpgradeTestDto extends AbstractSdxTestDto<SdxUpgradeRequest, Sdx
     @Override
     public SdxUpgradeTestDto valid() {
         return withRuntime(commonClusterManagerProperties.getUpgrade().getTargetRuntimeVersion())
-                .withReplaceVms(SdxUpgradeReplaceVms.ENABLED);
+                .withReplaceVms(SdxUpgradeReplaceVms.ENABLED)
+                .setSkipBackup(Boolean.TRUE);
+
     }
 
     public SdxUpgradeTestDto withRuntime(String runtime) {
@@ -40,6 +42,11 @@ public class SdxUpgradeTestDto extends AbstractSdxTestDto<SdxUpgradeRequest, Sdx
 
     public SdxUpgradeTestDto withReplaceVms(SdxUpgradeReplaceVms replaceVms) {
         getRequest().setReplaceVms(replaceVms);
+        return this;
+    }
+
+    public SdxUpgradeTestDto setSkipBackup(Boolean skipBackup) {
+        getRequest().setSkipBackup(skipBackup);
         return this;
     }
 }

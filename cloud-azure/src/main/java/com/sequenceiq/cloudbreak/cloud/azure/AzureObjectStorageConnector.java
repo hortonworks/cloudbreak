@@ -4,10 +4,13 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
+import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.storage.Kind;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -44,6 +47,9 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private AzureUtils azureUtils;
+
     @Override
     public ObjectStorageMetadataResponse getObjectStorageMetadata(ObjectStorageMetadataRequest request) {
         AzureClient client = azureClientService.getClient(request.getCredential());
@@ -73,21 +79,29 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
         SpiFileSystem spiFileSystem = request.getSpiFileSystem();
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
         resultBuilder.prefix("Cloud Storage validation failed");
-        ValidationResult validationResult = azureIDBrokerObjectStorageValidator.validateObjectStorage(
-                client, spiFileSystem, request.getLogsLocationBase(), request.getBackupLocationBase(),
-                getSingleResourceGroupName(request), resultBuilder);
-        ObjectStorageValidateResponse response;
-        if (validationResult.hasError()) {
-            response = ObjectStorageValidateResponse.builder()
-                    .withStatus(ResponseStatus.ERROR)
-                    .withError(validationResult.getFormattedErrors())
-                    .build();
-        } else {
-            response = ObjectStorageValidateResponse.builder()
-                    .withStatus(ResponseStatus.OK)
-                    .build();
+        try {
+            ValidationResult validationResult = azureIDBrokerObjectStorageValidator.validateObjectStorage(
+                    client, spiFileSystem, request.getLogsLocationBase(), request.getBackupLocationBase(),
+                    getSingleResourceGroupName(request), resultBuilder);
+            ObjectStorageValidateResponse response;
+            if (validationResult.hasError()) {
+                response = ObjectStorageValidateResponse.builder()
+                        .withStatus(ResponseStatus.ERROR)
+                        .withError(validationResult.getFormattedErrors())
+                        .build();
+            } else {
+                response = ObjectStorageValidateResponse.builder()
+                        .withStatus(ResponseStatus.OK)
+                        .build();
+            }
+            return response;
+        } catch (CloudException e) {
+            if (e.body() != null && StringUtils.equals("AuthorizationFailed", e.body().code())) {
+                LOGGER.error("Object storage validation failed on Azure due to authorization failure: ", e.getMessage());
+                throw new AccessDeniedException("Object storage validation failed on Azure due to authorization failure: ", e);
+            }
+            throw azureUtils.convertToCloudConnectorException(e, "Object storage validation");
         }
-        return response;
     }
 
     private String getSingleResourceGroupName(ObjectStorageValidateRequest request) {

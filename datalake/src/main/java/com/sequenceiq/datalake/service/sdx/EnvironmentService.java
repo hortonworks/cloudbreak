@@ -2,12 +2,19 @@ package com.sequenceiq.datalake.service.sdx;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,19 +22,29 @@ import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
+import com.google.common.collect.Maps;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.list.Resource;
+import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.entity.SdxClusterView;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.repository.SdxClusterViewRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
 @Service
-public class EnvironmentService {
+public class EnvironmentService implements ResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
@@ -39,6 +56,9 @@ public class EnvironmentService {
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
+
+    @Inject
+    private SdxClusterViewRepository sdxClusterViewRepository;
 
     @Inject
     private SdxStatusService sdxStatusService;
@@ -103,4 +123,56 @@ public class EnvironmentService {
         return environmentClientService.getByName(environmentName);
     }
 
+    @Override
+    public String getResourceCrnByResourceName(String resourceName) {
+        List<ResourceWithId> dlsByEnv = sdxClusterRepository
+                .findAuthorizationResourcesByAccountIdAndEnvName(ThreadBasedUserCrnProvider.getAccountId(), resourceName);
+        return dlsByEnv
+                .stream()
+                .filter(dl -> dl.getParentResourceCrn().isPresent())
+                .findFirst().orElseThrow(() -> new NotFoundException(String.format("There is no environment with name %s", resourceName)))
+                .getParentResourceCrn().orElseThrow(() -> new NotFoundException(String.format("There is no environment with name %s", resourceName)));
+    }
+
+    @Override
+    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+        List<ResourceWithId> dlsByEnvs = sdxClusterRepository
+                .findAuthorizationResourcesByAccountIdAndEnvNames(ThreadBasedUserCrnProvider.getAccountId(), resourceNames);
+        return dlsByEnvs.stream()
+                .map(Resource::getParentResourceCrn)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
+        return Optional.of(resourceCrn);
+    }
+
+    @Override
+    public Map<String, Optional<String>> getEnvironmentCrnsByResourceCrns(Collection<String> resourceCrns) {
+        return resourceCrns.stream().collect(Collectors.toMap(crn -> crn, crn -> Optional.of(crn)));
+    }
+
+    @Override
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.ENVIRONMENT);
+    }
+
+    @Override
+    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+        Set<SdxClusterView> dlByEnvCrns = sdxClusterViewRepository.findByAccountIdAndEnvCrnIn(ThreadBasedUserCrnProvider.getAccountId(), crns);
+        Map<String, Optional<String>> result = Maps.newHashMap();
+        dlByEnvCrns.stream()
+                .filter(dl -> StringUtils.isNotBlank(dl.getEnvCrn()) && StringUtils.isNotBlank(dl.getEnvName()))
+                .forEach(dl -> result.putIfAbsent(dl.getEnvCrn(), Optional.of(dl.getEnvName())));
+        return result;
+    }
+
+    @Override
+    public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
+        return EnumSet.of(Crn.ResourceType.ENVIRONMENT);
+    }
 }
