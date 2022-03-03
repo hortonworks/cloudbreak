@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.model.network;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -25,6 +27,8 @@ public class NetworkResourcesCreationRequest {
 
     private final boolean privateEndpointsEnabled;
 
+    private final String existingPrivateDnsZoneId;
+
     private final Map<String, String> tags;
 
     private NetworkResourcesCreationRequest(Builder builder) {
@@ -36,6 +40,7 @@ public class NetworkResourcesCreationRequest {
         region = builder.region;
         resourceGroup = builder.resourceGroup;
         privateEndpointsEnabled = builder.privateEndpointsEnabled;
+        existingPrivateDnsZoneId = builder.existingPrivateDnsZoneId;
         tags = builder.tags;
     }
 
@@ -71,6 +76,14 @@ public class NetworkResourcesCreationRequest {
         return privateEndpointsEnabled;
     }
 
+    public String getExistingPrivateDnsZoneId() {
+        return existingPrivateDnsZoneId;
+    }
+
+    public boolean isExistingPrivateDnsZone() {
+        return StringUtils.isNotEmpty(existingPrivateDnsZoneId);
+    }
+
     public Map<String, String> getTags() {
         return tags;
     }
@@ -92,6 +105,8 @@ public class NetworkResourcesCreationRequest {
         private String resourceGroup;
 
         private boolean privateEndpointsEnabled;
+
+        private String existingPrivateDnsZoneId;
 
         private Map<String, String> tags = new HashMap<>();
 
@@ -137,6 +152,11 @@ public class NetworkResourcesCreationRequest {
 
         public Builder withTags(Map<String, String> tags) {
             this.tags = tags;
+            return this;
+        }
+
+        public Builder withExistingPrivateDnsZone(String existingPrivateDnsZoneId) {
+            this.existingPrivateDnsZoneId = existingPrivateDnsZoneId;
             return this;
         }
 

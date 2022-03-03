@@ -59,6 +59,7 @@ public class NetworkDtoToResponseConverter {
                         .withNetworkId(p.getNetworkId())
                         .withResourceGroupName(p.getResourceGroupName())
                         .withNoPublicIp(p.isNoPublicIp())
+                        .withPrivateDnsZoneId(p.getPrivateDnsZoneId())
                         .build()))
                 .withGcp(getIfNotNull(network.getGcp(), p -> EnvironmentNetworkGcpParams.EnvironmentNetworkGcpParamsBuilder
                         .anEnvironmentNetworkGcpParamsBuilder()

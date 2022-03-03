@@ -1,18 +1,22 @@
 package com.sequenceiq.environment.network.v1.converter;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.NETWORK_ID;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.PRIVATE_DNS_ZONE_ID;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.RG_NAME;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -39,6 +43,9 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             azureNetwork.setNetworkId(azureParams.getNetworkId());
             azureNetwork.setResourceGroupName(azureParams.getResourceGroupName());
             azureNetwork.setNoPublicIp(azureParams.isNoPublicIp());
+            if (ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT.equals(network.getServiceEndpointCreation())) {
+                azureNetwork.setPrivateDnsZoneId(azureParams.getPrivateDnsZoneId());
+            }
         }
         return azureNetwork;
     }
@@ -70,11 +77,12 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
         AzureNetwork azureNetwork = (AzureNetwork) network;
         return builder.withAzure(
-                AzureParams.builder()
-                        .withNetworkId(azureNetwork.getNetworkId())
-                        .withResourceGroupName(azureNetwork.getResourceGroupName())
-                        .withNoPublicIp(azureNetwork.getNoPublicIp())
-                        .build())
+                        AzureParams.builder()
+                                .withNetworkId(azureNetwork.getNetworkId())
+                                .withResourceGroupName(azureNetwork.getResourceGroupName())
+                                .withNoPublicIp(azureNetwork.getNoPublicIp())
+                                .withPrivateDnsZoneId(azureNetwork.getPrivateDnsZoneId())
+                                .build())
                 .build();
     }
 
@@ -102,8 +110,9 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     public Network convertToNetwork(BaseNetwork baseNetwork) {
         AzureNetwork azureNetwork = (AzureNetwork) baseNetwork;
         Map<String, Object> param = new HashMap<>();
-        param.put(AzureUtils.RG_NAME, azureNetwork.getResourceGroupName());
-        param.put(AzureUtils.NETWORK_ID, azureNetwork.getNetworkId());
+        param.put(RG_NAME, azureNetwork.getResourceGroupName());
+        param.put(NETWORK_ID, azureNetwork.getNetworkId());
+        param.put(PRIVATE_DNS_ZONE_ID, azureNetwork.getPrivateDnsZoneId());
         return new Network(null, param);
     }
 }

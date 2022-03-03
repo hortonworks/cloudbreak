@@ -44,6 +44,7 @@ public class NetworkRequestToDtoConverter {
                     .withNetworkId(network.getAzure().getNetworkId())
                     .withNoPublicIp(Boolean.TRUE.equals(network.getAzure().getNoPublicIp()))
                     .withResourceGroupName(network.getAzure().getResourceGroupName())
+                    .withPrivateDnsZoneId(network.getAzure().getPrivateDnsZoneId())
                     .build();
             builder.withAzure(azureParams);
             builder.withNetworkId(network.getAzure().getNetworkId());
