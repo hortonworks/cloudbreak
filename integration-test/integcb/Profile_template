@@ -36,4 +36,4 @@ export PERISCOPE_JAVA_OPTS="-Dperiscope.hibernate.circuitbreaker=BREAK -Dhiberna
 export FREEIPA_JAVA_OPTS="-Dfreeipa.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=25 -Dhibernate.session.circuitbreak.max.count=50"
 export REDBEAMS_JAVA_OPTS="-Dredbeams.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25"
 export DATALAKE_JAVA_OPTS="-Ddatalake.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25"
-export ENVIRONMENT_JAVA_OPTS="-Denvironment.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=25 -Denvironment.tunnel.default=CLUSTER_PROXY"
+export ENVIRONMENT_JAVA_OPTS="-Denvironment.hibernate.circuitbreaker=BREAK -Dhibernate.session.warning.max.count=10 -Dhibernate.session.circuitbreak.max.count=3 -Denvironment.tunnel.default=CLUSTER_PROXY"
