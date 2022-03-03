@@ -8,10 +8,13 @@ public class AzureParams {
 
     private boolean noPublicIp;
 
+    private String privateDnsZoneId;
+
     private AzureParams(Builder builder) {
         networkId = builder.networkId;
         resourceGroupName = builder.resourceGroupName;
         noPublicIp = builder.noPublicIp;
+        privateDnsZoneId = builder.privateDnsZoneId;
     }
 
     public String getNetworkId() {
@@ -38,12 +41,21 @@ public class AzureParams {
         this.noPublicIp = noPublicIp;
     }
 
+    public String getPrivateDnsZoneId() {
+        return privateDnsZoneId;
+    }
+
+    public void setPrivateDnsZoneId(String privateDnsZoneId) {
+        this.privateDnsZoneId = privateDnsZoneId;
+    }
+
     @Override
     public String toString() {
         return "AzureParams{" +
                 "networkId='" + networkId + '\'' +
                 ", resourceGroupName='" + resourceGroupName + '\'' +
                 ", noPublicIp=" + noPublicIp +
+                ", privateDnsZoneId='" + privateDnsZoneId + '\'' +
                 '}';
     }
 
@@ -57,6 +69,8 @@ public class AzureParams {
         private String resourceGroupName;
 
         private boolean noPublicIp;
+
+        private String privateDnsZoneId;
 
         private Builder() {
         }
@@ -73,6 +87,11 @@ public class AzureParams {
 
         public Builder withNoPublicIp(boolean noPublicIp) {
             this.noPublicIp = noPublicIp;
+            return this;
+        }
+
+        public Builder withPrivateDnsZoneId(String privateDnsZoneId) {
+            this.privateDnsZoneId = privateDnsZoneId;
             return this;
         }
 

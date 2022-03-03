@@ -16,12 +16,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkResourcesCreationRequest;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.cloudbreak.util.NullUtil;
-import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
+import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
 import com.sequenceiq.environment.environment.service.EnvironmentTagProvider;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -97,6 +97,7 @@ public class NetworkCreationRequestFactory {
                 .withCloudContext(getCloudContext(environment))
                 .withRegion(Region.region(environment.getLocation().getName()))
                 .withPrivateEndpointsEnabled(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT == networkDto.getServiceEndpointCreation())
+                .withExistingPrivateDnsZone(networkDto.getAzure().getPrivateDnsZoneId())
                 .withTags(environmentTagProvider.getTags(environment, environment.getNetwork().getResourceCrn()));
                 getResourceGroupName(environment).ifPresent(builder::withResourceGroup);
         return builder.build();

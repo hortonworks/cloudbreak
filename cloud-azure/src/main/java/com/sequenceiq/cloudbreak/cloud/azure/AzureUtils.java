@@ -72,6 +72,8 @@ public class AzureUtils {
 
     public static final String NETWORK_ID = "networkId";
 
+    public static final String PRIVATE_DNS_ZONE_ID = "privateDnsZoneId";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureUtils.class);
 
     private static final String NO_PUBLIC_IP = "noPublicIp";
@@ -202,6 +204,10 @@ public class AzureUtils {
 
     public String getCustomNetworkId(Network network) {
         return network.getStringParameter(NETWORK_ID);
+    }
+
+    public String getPrivateDnsZoneId(Network network) {
+        return network.getStringParameter(PRIVATE_DNS_ZONE_ID);
     }
 
     public String getCustomResourceGroupName(Network network) {
