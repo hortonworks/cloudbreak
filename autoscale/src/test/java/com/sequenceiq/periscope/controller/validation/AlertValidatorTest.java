@@ -4,6 +4,8 @@ import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_CLUSTER_LI
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENTITLEMENT_NOT_ENABLED;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED;
 import static com.sequenceiq.periscope.common.MessageCode.UNSUPPORTED_AUTOSCALING_HOSTGROUP;
+import static com.sequenceiq.periscope.common.MessageCode.VALIDATION_TIME_STOP_START_UNSUPPORTED;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -11,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -31,6 +34,7 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertType;
+import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.LoadAlertConfigurationRequest;
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
@@ -38,6 +42,7 @@ import com.sequenceiq.periscope.api.model.ScalingPolicyRequest;
 import com.sequenceiq.periscope.api.model.TimeAlertRequest;
 import com.sequenceiq.periscope.controller.AutoScaleClusterCommonService;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.service.AutoscaleRecommendationService;
 import com.sequenceiq.periscope.service.DateService;
 import com.sequenceiq.periscope.service.EntitlementValidationService;
@@ -212,6 +217,151 @@ public class AlertValidatorTest {
         expectedException.expectMessage("unsupported.hostgroup");
 
         underTest.validateSupportedHostGroup(aCluster, requestHostGroups, AlertType.TIME);
+    }
+
+    @Test
+    public void testTimeAlertCreateWhenStopStartEnabledInRequest() {
+        DistroXAutoscaleClusterRequest autoscaleClusterRequest = new DistroXAutoscaleClusterRequest();
+        List<TimeAlertRequest> timeAlerts = new ArrayList<>();
+        List.of("compute", "compute", "compute1").forEach(
+                hostGroup -> {
+                    ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
+                    sp1.setHostGroup("compute");
+                    TimeAlertRequest timeAlertRequest1 = new TimeAlertRequest();
+                    timeAlertRequest1.setScalingPolicy(sp1);
+                    timeAlertRequest1.setCron("1 0 1 1 1 1");
+                    timeAlertRequest1.setTimeZone("GMT");
+                    timeAlerts.add(timeAlertRequest1);
+                }
+        );
+        autoscaleClusterRequest.setUseStopStartMechanism(Boolean.TRUE);
+        autoscaleClusterRequest.setTimeAlertRequests(timeAlerts);
+
+        when(messagesService.getMessage(VALIDATION_TIME_STOP_START_UNSUPPORTED))
+                .thenReturn("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
+
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
+
+        underTest.validateScheduleWithStopStart(aCluster, autoscaleClusterRequest);
+    }
+
+    @Test
+    public void testTimeAlertCreateWhenStopStartEnabledInClusterEntity() {
+        DistroXAutoscaleClusterRequest autoscaleClusterRequest = new DistroXAutoscaleClusterRequest();
+        List<TimeAlertRequest> timeAlerts = new ArrayList<>();
+        List.of("compute", "compute", "compute1").forEach(
+                hostGroup -> {
+                    ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
+                    sp1.setHostGroup("compute");
+                    TimeAlertRequest timeAlertRequest1 = new TimeAlertRequest();
+                    timeAlertRequest1.setScalingPolicy(sp1);
+                    timeAlertRequest1.setCron("1 0 1 1 1 1");
+                    timeAlertRequest1.setTimeZone("GMT");
+                    timeAlerts.add(timeAlertRequest1);
+                }
+        );
+        aCluster.setStopStartScalingEnabled(Boolean.TRUE);
+        autoscaleClusterRequest.setTimeAlertRequests(timeAlerts);
+
+        when(messagesService.getMessage(VALIDATION_TIME_STOP_START_UNSUPPORTED))
+                .thenReturn("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
+
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
+
+        underTest.validateScheduleWithStopStart(aCluster, autoscaleClusterRequest);
+    }
+
+    @Test
+    public void testEnableStopStartWithTimeAlertPreCreated() {
+        AutoscaleClusterState autoscaleState = new AutoscaleClusterState();
+        autoscaleState.setUseStopStartMechanism(Boolean.TRUE);
+        TimeAlert timeAlert = new TimeAlert();
+        timeAlert.setTimeZone("Asia/Calcutta");
+        timeAlert.setCluster(aCluster);
+        timeAlert.setCron("1 0 1 1 1 1");
+        aCluster.setTimeAlerts(Set.of(timeAlert));
+
+        when(messagesService.getMessage(VALIDATION_TIME_STOP_START_UNSUPPORTED))
+                .thenReturn("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
+
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
+
+        underTest.validateScheduleWithStopStart(aCluster, autoscaleState);
+    }
+
+    @Test
+    public void testEnableStopStartInRequestWithTimeAlertPreCreated() {
+        DistroXAutoscaleClusterRequest autoscaleRequest = new DistroXAutoscaleClusterRequest();
+        autoscaleRequest.setEnableAutoscaling(Boolean.TRUE);
+        autoscaleRequest.setUseStopStartMechanism(Boolean.TRUE);
+        TimeAlert timeAlert = new TimeAlert();
+        timeAlert.setTimeZone("Asia/Calcutta");
+        timeAlert.setCluster(aCluster);
+        timeAlert.setCron("1 0 1 1 1 1");
+        aCluster.setTimeAlerts(Set.of(timeAlert));
+
+        when(messagesService.getMessage(VALIDATION_TIME_STOP_START_UNSUPPORTED))
+                .thenReturn("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
+
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
+
+        underTest.validateScheduleWithStopStart(aCluster, autoscaleRequest);
+    }
+
+    @Test
+    public void testCreateTimeAlertSuccessWithStopStartDisabled() {
+        DistroXAutoscaleClusterRequest autoscaleClusterRequest = new DistroXAutoscaleClusterRequest();
+        List<TimeAlertRequest> timeAlerts = new ArrayList<>();
+        List.of("compute", "compute", "compute1").forEach(
+                hostGroup -> {
+                    ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
+                    sp1.setHostGroup("compute");
+                    TimeAlertRequest timeAlertRequest1 = new TimeAlertRequest();
+                    timeAlertRequest1.setScalingPolicy(sp1);
+                    timeAlertRequest1.setCron("1 0 1 1 1 1");
+                    timeAlertRequest1.setTimeZone("GMT");
+                    timeAlerts.add(timeAlertRequest1);
+                }
+        );
+        autoscaleClusterRequest.setUseStopStartMechanism(Boolean.FALSE);
+        autoscaleClusterRequest.setTimeAlertRequests(timeAlerts);
+
+        assertDoesNotThrow(() -> underTest.validateScheduleWithStopStart(aCluster, autoscaleClusterRequest));
+    }
+
+    @Test
+    public void testEnableStopStartSuccessWithNoTimeAlertPreCreated() {
+        AutoscaleClusterState autoscaleState = new AutoscaleClusterState();
+        aCluster.setTimeAlerts(Collections.emptySet());
+        autoscaleState.setUseStopStartMechanism(Boolean.TRUE);
+
+        assertDoesNotThrow(() -> underTest.validateScheduleWithStopStart(aCluster, autoscaleState));
+    }
+
+    @Test
+    public void testCreateTimeAlertSuccessIfStopStartDisabledInRequestButEnabledInClusterEntity() {
+        DistroXAutoscaleClusterRequest autoscaleClusterRequest = new DistroXAutoscaleClusterRequest();
+        List<TimeAlertRequest> timeAlerts = new ArrayList<>();
+        List.of("compute", "compute", "compute1").forEach(
+                hostGroup -> {
+                    ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
+                    sp1.setHostGroup("compute");
+                    TimeAlertRequest timeAlertRequest1 = new TimeAlertRequest();
+                    timeAlertRequest1.setScalingPolicy(sp1);
+                    timeAlertRequest1.setCron("1 0 1 1 1 1");
+                    timeAlertRequest1.setTimeZone("GMT");
+                    timeAlerts.add(timeAlertRequest1);
+                }
+        );
+        autoscaleClusterRequest.setUseStopStartMechanism(Boolean.FALSE);
+        autoscaleClusterRequest.setTimeAlertRequests(timeAlerts);
+        aCluster.setStopStartScalingEnabled(Boolean.TRUE);
+
+        assertDoesNotThrow(() -> underTest.validateScheduleWithStopStart(aCluster, autoscaleClusterRequest));
     }
 
     @Test

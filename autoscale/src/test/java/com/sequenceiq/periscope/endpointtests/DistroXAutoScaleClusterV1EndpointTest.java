@@ -149,13 +149,21 @@ public class DistroXAutoScaleClusterV1EndpointTest {
 
         UserManagementProto.User user = UserManagementProto.User.newBuilder()
                 .setCrn(TEST_USER_CRN).setEmail("dummyuser@cloudera.com").setUserId(TEST_USER_ID.toString()).build();
+        UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
+                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AWS_AUTOSCALING").build())
+                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AZURE_AUTOSCALING").build())
+                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_GCP_AUTOSCALING").build())
+                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AWS_STOP_START_SCALING").build())
+                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_AZURE_STOP_START_SCALING").build())
+                .addEntitlements(UserManagementProto.Entitlement.newBuilder().setEntitlementName("DATAHUB_GCP_STOP_START_SCALING").build())
+                .build();
         testCluster.setClusterPertain(
                 clusterPertainRepsitory.findByUserCrn(clusterPertain.getUserCrn())
                         .orElseGet(() -> clusterPertainRepsitory.save(clusterPertain)));
         clusterRepository.save(testCluster);
 
         when(grpcUmsClient.getUserDetails(anyString(), any())).thenReturn(user);
-        when(grpcUmsClient.getAccountDetails(anyString(), any())).thenReturn(UserManagementProto.Account.newBuilder().build());
+        when(grpcUmsClient.getAccountDetails(anyString(), any())).thenReturn(account);
         doNothing().when(resourceAuthorizationService).authorize(eq("crn:cdp:iam:us-west-1:accid:cluster:mockuser@cloudera.com"), any(), any(), any());
         when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("http://clusterproxy"));
         when(limitsConfigurationService.getMaxNodeCountLimit()).thenReturn(400);
@@ -383,6 +391,74 @@ public class DistroXAutoScaleClusterV1EndpointTest {
 
         distroXAutoScaleClusterV1Endpoint
                 .updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testUpdateAutoscaleConfigWithTimeAlertsAndStopStartEnabled() {
+        List<TimeAlertRequest> timeAlertRequests = getTimeAlertRequests(2, List.of("compute", "compute"));
+        DistroXAutoscaleClusterRequest distroXAutoscaleClusterRequest = new DistroXAutoscaleClusterRequest();
+        distroXAutoscaleClusterRequest.setTimeAlertRequests(timeAlertRequests);
+        distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
+        distroXAutoscaleClusterRequest.setUseStopStartMechanism(true);
+
+        distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testEnableStopStartScalingViaStateUpdateWithPreExistingTimeAlerts() {
+        DistroXAutoscaleClusterRequest distroXAutoscaleClusterRequest = new DistroXAutoscaleClusterRequest();
+        distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
+        List<TimeAlertRequest> timeAlertRequests = getTimeAlertRequests(2, List.of("compute", "compute"));
+        distroXAutoscaleClusterRequest.setTimeAlertRequests(timeAlertRequests);
+
+        distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
+
+        distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.enableStopStart());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testEnableStopStartScalingViaConfigUpdateWithPreExistingTimeAlerts() {
+        DistroXAutoscaleClusterRequest distroXAutoscaleClusterRequest = new DistroXAutoscaleClusterRequest();
+        distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
+        List<TimeAlertRequest> timeAlertRequests = getTimeAlertRequests(2, List.of("compute", "compute"));
+        distroXAutoscaleClusterRequest.setTimeAlertRequests(timeAlertRequests);
+
+        distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
+
+        distroXAutoscaleClusterRequest.setTimeAlertRequests(null);
+        distroXAutoscaleClusterRequest.setUseStopStartMechanism(true);
+
+        distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testCreateTimeAlertWithStopStartAlreadyEnabled() {
+        distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.enableStopStart());
+
+        DistroXAutoscaleClusterRequest autoscaleRequest = new DistroXAutoscaleClusterRequest();
+        List<TimeAlertRequest> timeAlertRequests = getTimeAlertRequests(2, List.of("compute", "compute"));
+        autoscaleRequest.setTimeAlertRequests(timeAlertRequests);
+        autoscaleRequest.setEnableAutoscaling(true);
+
+        distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, autoscaleRequest);
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testCreateTimeAlertWithPreExistingStopStartLoadAlert() {
+        DistroXAutoscaleClusterRequest autoscaleRequest = new DistroXAutoscaleClusterRequest();
+        List<LoadAlertRequest> loadAlertRequests = getLoadAlertRequests(1, List.of("compute"));
+        autoscaleRequest.setLoadAlertRequests(loadAlertRequests);
+        autoscaleRequest.setUseStopStartMechanism(true);
+        autoscaleRequest.setEnableAutoscaling(true);
+
+        distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, autoscaleRequest);
+
+        List<TimeAlertRequest> timeAlertRequests = getTimeAlertRequests(2, List.of("compute", "compute"));
+        autoscaleRequest.setTimeAlertRequests(timeAlertRequests);
+        autoscaleRequest.setLoadAlertRequests(null);
+        autoscaleRequest.setUseStopStartMechanism(null);
+
+        distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, autoscaleRequest);
     }
 
     private void validateLoadAlertResponse(LoadAlertResponse alertResponse) {
