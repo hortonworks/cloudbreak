@@ -33,7 +33,7 @@ public class EntitlementValidationService {
         return entitled;
     }
 
-    @Cacheable(cacheNames = "accountEntitlementCache", key = "{#accountId,#cloudPlatform}")
+    @Cacheable(cacheNames = "accountEntitlementCacheStopStart", key = "{#accountId,#cloudPlatform}")
     public boolean stopStartAutoscalingEntitlementEnabled(String accountId, String cloudPlatform) {
         boolean entitled = autoscalingEntitlementEnabled(accountId, cloudPlatform);
         if (!entitled) {
