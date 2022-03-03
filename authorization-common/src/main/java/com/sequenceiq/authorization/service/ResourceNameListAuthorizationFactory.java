@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -15,12 +16,14 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Joiner;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 
 @Component
@@ -33,6 +36,9 @@ public class ResourceNameListAuthorizationFactory extends TypedAuthorizationFact
 
     @Inject
     private ResourceCrnListAuthorizationFactory resourceCrnListAuthorizationFactory;
+
+    @Inject
+    private Map<AuthorizationResourceType, AuthorizationResourceCrnListProvider> resourceCrnListProviderMap;
 
     @Override
     public Optional<AuthorizationRule> doGetAuthorization(CheckPermissionByResourceNameList methodAnnotation, String userCrn,
@@ -49,7 +55,14 @@ public class ResourceNameListAuthorizationFactory extends TypedAuthorizationFact
         if (CollectionUtils.isEmpty(resourceNames)) {
             return Optional.empty();
         }
-        List<String> resourceCrns = commonPermissionCheckingUtils.getResourceBasedCrnProvider(action)
+        AuthorizationResourceCrnListProvider authorizationResourceCrnListProvider = resourceCrnListProviderMap.get(action.getAuthorizationResourceType());
+        if (authorizationResourceCrnListProvider == null) {
+            LOGGER.error("There is no resource based crn provider implemented for action {} against resources {}, " +
+                    "thus authorization is failing automatically.", action, Joiner.on(",").join(resourceNames));
+            throw new AccessDeniedException(String.format("Action %s is not supported over resources %s, thus access is denied",
+                    action.getRight(), Joiner.on(",").join(resourceNames)));
+        }
+        List<String> resourceCrns = authorizationResourceCrnListProvider
                 .getResourceCrnListByResourceNameList(getNotNullValues(resourceNames));
         return resourceCrnListAuthorizationFactory.calcAuthorization(getNotNullValues(resourceCrns), action);
     }

@@ -31,8 +31,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.MapBindingResult;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -76,7 +76,7 @@ import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
 @Service
-public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> implements ResourcePropertyProvider {
+public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blueprint> implements CompositeAuthResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintService.class);
 
@@ -505,8 +505,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.CLUSTER_TEMPLATE);
+    public AuthorizationResourceType getSupportedAuthorizationResourceType() {
+        return AuthorizationResourceType.CLUSTER_TEMPLATE;
     }
 
     public BlueprintStatusView getStatusViewByResourceCrn(String resourceCrn) {
@@ -514,7 +514,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+    public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crns) {
         Map<String, Optional<String>> result = new HashMap<>();
         blueprintRepository.findResourceNamesByCrnAndAccountId(crns, ThreadBasedUserCrnProvider.getAccountId()).stream()
                 .forEach(nameAndCrn -> result.put(nameAndCrn.getCrn(), Optional.ofNullable(nameAndCrn.getName())));

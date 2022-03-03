@@ -1,20 +1,24 @@
 package com.sequenceiq.redbeams;
 
-import java.util.Set;
-
 import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.authorization.EnforceAuthorizationLogicsUtil;
+import com.sequenceiq.authorization.EnforceAuthorizationAnnotationTestUtil;
+import com.sequenceiq.authorization.EnforcePropertyProviderTestUtil;
 
 public class EnforceAuthorizationAnnotationsTest {
 
     @Test
     public void testIfControllerClassHasProperAnnotation() {
-        EnforceAuthorizationLogicsUtil.testIfControllerClassHasProperAnnotation();
+        EnforceAuthorizationAnnotationTestUtil.testIfControllerClassHasProperAnnotation();
     }
 
     @Test
     public void testIfControllerMethodsHaveProperAuthorizationAnnotation() {
-        EnforceAuthorizationLogicsUtil.testIfControllerMethodsHaveProperAuthorizationAnnotation(Set.of("ExampleAuthorizationResourceClass"));
+        EnforceAuthorizationAnnotationTestUtil.testIfControllerMethodsHaveProperAuthorizationAnnotation();
+    }
+
+    @Test
+    public void testIfAllNecessaryResourceProviderPresent() {
+        EnforcePropertyProviderTestUtil.testIfAllNecessaryResourceProviderImplemented();
     }
 }

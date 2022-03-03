@@ -34,8 +34,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
-import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.AuthorizationResourceNamesProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -125,7 +124,7 @@ import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
 @Service
-public class StackService implements ResourceIdProvider, ResourcePropertyProvider, PayloadContextProvider {
+public class StackService implements ResourceIdProvider, AuthorizationResourceNamesProvider, PayloadContextProvider {
 
     public static final Set<String> REATTACH_COMPATIBLE_PLATFORMS = Set.of(CloudConstants.AWS, CloudConstants.AZURE, CloudConstants.GCP, CloudConstants.MOCK,
             CloudConstants.AWS_NATIVE);
@@ -974,7 +973,7 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+    public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crns) {
         Map<String, Optional<String>> result = new HashMap<>();
         Long workspaceId = workspaceService.getForCurrentUser().getId();
         stackRepository.findResourceNamesByCrnAndWorkspaceId(crns, workspaceId)
@@ -985,11 +984,6 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     @Override
     public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.DATALAKE, Crn.ResourceType.CLUSTER, Crn.ResourceType.STACK);
-    }
-
-    @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.empty();
     }
 
     public CloudPlatformVariant getPlatformVariantByStackId(Long resourceId) {

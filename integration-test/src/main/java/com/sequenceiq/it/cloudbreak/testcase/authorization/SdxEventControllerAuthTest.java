@@ -102,7 +102,7 @@ public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
                 .when(sdxTestClient.getAuditEvents(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(
                         sdxTestClient.getAuditEvents(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment' " +
-                                "right on any of the environment[(]s[)] " + environmentPattern(testContext)
+                                "right on environment " + environmentPattern(testContext)
                 ).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .when(sdxTestClient.getDatalakeEventsZip(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_A)))
                 .then(checkZipEndpointStatusManually(200))

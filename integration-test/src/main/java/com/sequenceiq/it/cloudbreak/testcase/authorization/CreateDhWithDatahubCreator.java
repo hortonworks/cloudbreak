@@ -100,10 +100,10 @@ public class CreateDhWithDatahubCreator extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 // testing unauthorized calls for environment
                 .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage(
-                        "Doesn't have 'environments/describeEnvironment' right on any of the environment[(]s[)] "
+                        "Doesn't have 'environments/describeEnvironment' right on environment "
                         + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage(
-                        "Doesn't have 'environments/describeEnvironment' right on any of the environment[(]s[)] "
+                        "Doesn't have 'environments/describeEnvironment' right on environment "
                         + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
                 .validate();
 

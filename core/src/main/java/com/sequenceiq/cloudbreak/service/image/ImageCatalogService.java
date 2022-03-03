@@ -38,8 +38,8 @@ import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -74,7 +74,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 import com.sequenceiq.common.api.type.ImageType;
 
 @Component
-public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> implements ResourcePropertyProvider {
+public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<ImageCatalog> implements CompositeAuthResourcePropertyProvider {
 
     public static final String UNDEFINED = "";
 
@@ -716,12 +716,12 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.IMAGE_CATALOG);
+    public AuthorizationResourceType getSupportedAuthorizationResourceType() {
+        return AuthorizationResourceType.IMAGE_CATALOG;
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+    public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crns) {
         Map<String, Optional<String>> result = new HashMap<>();
         List<String> notDefault = new ArrayList<>();
         for (String crn : crns) {

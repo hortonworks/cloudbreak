@@ -26,8 +26,8 @@ import org.springframework.validation.MapBindingResult;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
@@ -49,7 +49,7 @@ import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
 import com.sequenceiq.redbeams.service.validation.DatabaseConnectionValidator;
 
 @Service
-public class DatabaseConfigService extends AbstractArchivistService<DatabaseConfig> implements ResourceIdProvider, ResourcePropertyProvider {
+public class DatabaseConfigService extends AbstractArchivistService<DatabaseConfig> implements ResourceIdProvider, CompositeAuthResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConfigService.class);
 
@@ -288,8 +288,8 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.DATABASE);
+    public AuthorizationResourceType getSupportedAuthorizationResourceType() {
+        return AuthorizationResourceType.DATABASE;
     }
 
     @Override
@@ -304,7 +304,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crnStrings) {
+    public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crnStrings) {
         Map<String, Optional<String>> result = new HashMap<>();
         List<Crn> crns = crnStrings.stream().map(crnString -> Crn.safeFromString(crnString)).collect(Collectors.toList());
         repository.findByResourceCrnIn(crns).stream()

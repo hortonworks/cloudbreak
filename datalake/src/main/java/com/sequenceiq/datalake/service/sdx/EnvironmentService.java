@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.google.common.collect.Maps;
+import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
 import com.sequenceiq.authorization.service.list.Resource;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
@@ -41,7 +42,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
 @Service
-public class EnvironmentService implements EnvironmentPropertyProvider {
+public class EnvironmentService implements EnvironmentPropertyProvider, CompositeAuthResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
@@ -144,7 +145,7 @@ public class EnvironmentService implements EnvironmentPropertyProvider {
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+    public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crns) {
         Set<SdxClusterView> dlByEnvCrns = sdxClusterViewRepository.findByAccountIdAndEnvCrnIn(ThreadBasedUserCrnProvider.getAccountId(), crns);
         Map<String, Optional<String>> result = Maps.newHashMap();
         dlByEnvCrns.stream()

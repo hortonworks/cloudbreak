@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,8 +35,16 @@ public class StackViewService {
         return stackViewRepository.findByWorkspaceIdAndName(workspaceId, name);
     }
 
+    public Set<StackView> findNotTerminatedByNames(List<String> names, Long workspaceId) {
+        return stackViewRepository.findByWorkspaceIdAndNames(workspaceId, names);
+    }
+
     public Optional<StackView> findNotTerminatedByCrn(String crn, Long workspaceId) {
         return stackViewRepository.findByWorkspaceIdAndCrn(workspaceId, crn);
+    }
+
+    public Set<StackView> findNotTerminatedByCrns(Collection<String> crns, Long workspaceId) {
+        return stackViewRepository.findByWorkspaceIdAndCrns(workspaceId, crns);
     }
 
     public Optional<String> findResourceCrnByNameAndTenantName(String name, String tenantName) {

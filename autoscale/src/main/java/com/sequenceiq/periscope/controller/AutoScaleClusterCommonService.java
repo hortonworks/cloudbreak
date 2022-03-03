@@ -18,7 +18,8 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.AuthorizationEnvironmentCrnProvider;
+import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
@@ -43,7 +44,7 @@ import com.sequenceiq.periscope.service.UsageReportingService;
 import com.sequenceiq.periscope.service.configuration.ClusterProxyConfigurationService;
 
 @Component
-public class AutoScaleClusterCommonService implements ResourcePropertyProvider {
+public class AutoScaleClusterCommonService implements AuthorizationResourceCrnProvider, AuthorizationEnvironmentCrnProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(AutoScaleClusterCommonService.class);
 
     @Inject
@@ -160,14 +161,20 @@ public class AutoScaleClusterCommonService implements ResourcePropertyProvider {
     }
 
     @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.DATAHUB);
+    public AuthorizationResourceType getSupportedAuthorizationResourceType() {
+        return AuthorizationResourceType.DATAHUB;
     }
 
     @Override
     @Retryable(value = NotFoundException.class, maxAttempts = 3, backoff = @Backoff(delay = 5000))
     public String getResourceCrnByResourceName(String clusterName) {
         return getClusterByCrnOrName(NameOrCrn.ofName(clusterName)).getStackCrn();
+    }
+
+    @Override
+    public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
+        // this is a hack, but unfortunately environment crn is not present in autoscale service
+        return Optional.of(resourceCrn);
     }
 
     protected Cluster getClusterByCrnOrName(NameOrCrn nameOrCrn) {

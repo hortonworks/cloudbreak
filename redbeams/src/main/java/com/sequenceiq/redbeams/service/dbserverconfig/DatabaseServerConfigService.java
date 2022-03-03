@@ -27,8 +27,8 @@ import org.springframework.validation.MapBindingResult;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.archive.AbstractArchivistService;
@@ -56,7 +56,7 @@ import com.sequenceiq.redbeams.service.stack.DBStackService;
 import com.sequenceiq.redbeams.service.validation.DatabaseServerConnectionValidator;
 
 @Service
-public class DatabaseServerConfigService extends AbstractArchivistService<DatabaseServerConfig> implements ResourcePropertyProvider {
+public class DatabaseServerConfigService extends AbstractArchivistService<DatabaseServerConfig> implements CompositeAuthResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseServerConfigService.class);
 
@@ -328,8 +328,8 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     }
 
     @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.DATABASE_SERVER);
+    public AuthorizationResourceType getSupportedAuthorizationResourceType() {
+        return AuthorizationResourceType.DATABASE_SERVER;
     }
 
     @Override
@@ -344,7 +344,7 @@ public class DatabaseServerConfigService extends AbstractArchivistService<Databa
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crnStrings) {
+    public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crnStrings) {
         Map<String, Optional<String>> result = new HashMap<>();
         List<Crn> crns = crnStrings.stream().map(crnString -> Crn.safeFromString(crnString)).collect(Collectors.toList());
         repository.findByResourceCrnIn(crns).stream()
