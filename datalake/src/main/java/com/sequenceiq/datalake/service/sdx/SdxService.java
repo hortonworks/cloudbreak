@@ -120,6 +120,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 
 @Service
@@ -1244,5 +1245,18 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
             result = stackV4Request.getInstanceGroups().stream().map(InstanceGroupV4Base::getName).collect(Collectors.toSet());
         }
         return result;
+    }
+
+    public SdxDefaultTemplateResponse getDefaultTemplate(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform) {
+        if (clusterShape == null || StringUtils.isAnyBlank(runtimeVersion, cloudPlatform)) {
+            throw new BadRequestException("The following query params needs to be filled for this request: clusterShape, runtimeVersion, cloudPlatform");
+        }
+        StackV4Request defaultTemplate = cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.valueOf(cloudPlatform), clusterShape, runtimeVersion));
+        if (defaultTemplate == null) {
+            LOGGER.warn("Can't find template for cloudplatform: {}, shape {}, cdp version: {}", cloudPlatform, clusterShape, runtimeVersion);
+            throw notFound("Default template", "cloudPlatform: " + cloudPlatform + ", shape: " + clusterShape +
+                    ", runtime version: " + runtimeVersion).get();
+        }
+        return new SdxDefaultTemplateResponse(defaultTemplate);
     }
 }

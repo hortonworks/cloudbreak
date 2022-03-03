@@ -86,6 +86,7 @@ public class DistroXOSUpgradeTests extends AbstractE2ETest {
                 .given(SdxUpgradeTestDto.class)
                     .withReplaceVms(SdxUpgradeReplaceVms.ENABLED)
                     .withRuntime(targetRuntimeVersion)
+                    .setSkipBackup(Boolean.TRUE)
                 .given(sdxName, SdxTestDto.class)
                 .when(sdxTestClient.upgrade(), key(sdxName))
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdxName).withWaitForFlow(Boolean.FALSE))

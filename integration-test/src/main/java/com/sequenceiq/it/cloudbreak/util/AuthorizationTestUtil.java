@@ -48,6 +48,11 @@ public class AuthorizationTestUtil {
                 testContext.get(EnvironmentTestDto.class).getName());
     }
 
+    public static String environmentDatalakePattern(TestContext testContext) {
+        return String.format("[\\[]name: %s, crn: crn:cdp:environments:us-west-1:.*:environment:.*[]]\\",
+                testContext.get(EnvironmentTestDto.class).getName());
+    }
+
     public static String environmentDatahubPattern(TestContext testContext) {
         return "environment[(]s[)] [\\[]crn: crn:cdp:environments:us-west-1:.*:environment:.*";
     }
