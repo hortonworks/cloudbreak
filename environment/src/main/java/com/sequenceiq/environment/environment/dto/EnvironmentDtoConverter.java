@@ -31,6 +31,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
+import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
 import com.sequenceiq.environment.tags.domain.AccountTag;
 import com.sequenceiq.environment.tags.service.AccountTagService;
@@ -276,18 +277,16 @@ public class EnvironmentDtoConverter {
 
     private FreeIpaCreationDto environmentToFreeIpaCreationDto(Environment environment) {
         return getFreeIpaCreationDto(environment.isCreateFreeIpa(), environment.getFreeIpaInstanceCountByGroup(), environment.getFreeIpaImageCatalog(),
-                environment.getFreeIpaImageId(), environment.isFreeIpaEnableMultiAz(), environment.getCloudPlatform(),
-                (AwsParameters) environment.getParameters());
+                environment.getFreeIpaImageId(), environment.isFreeIpaEnableMultiAz(), environment.getCloudPlatform(), environment.getParameters());
     }
 
     private FreeIpaCreationDto environmentToFreeIpaCreationDto(EnvironmentView environment) {
         return getFreeIpaCreationDto(environment.isCreateFreeIpa(), environment.getFreeIpaInstanceCountByGroup(), environment.getFreeIpaImageCatalog(),
-                environment.getFreeIpaImageId(), environment.isFreeIpaEnableMultiAz(), environment.getCloudPlatform(),
-                (AwsParameters) environment.getParameters());
+                environment.getFreeIpaImageId(), environment.isFreeIpaEnableMultiAz(), environment.getCloudPlatform(), environment.getParameters());
     }
 
     private FreeIpaCreationDto getFreeIpaCreationDto(boolean createFreeIpa, Integer freeIpaInstanceCountByGroup, String freeIpaImageCatalog,
-            String freeIpaImageId, boolean freeIpaEnableMultiAz, String cloudPlatform, AwsParameters parameters) {
+            String freeIpaImageId, boolean freeIpaEnableMultiAz, String cloudPlatform, BaseParameters parameters) {
         FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder()
                 .withCreate(createFreeIpa);
         Optional.ofNullable(freeIpaInstanceCountByGroup).ifPresent(builder::withInstanceCountByGroup);
@@ -295,11 +294,12 @@ public class EnvironmentDtoConverter {
         builder.withImageId(freeIpaImageId);
         builder.withEnableMultiAz(freeIpaEnableMultiAz);
         if (cloudPlatform.equals(CloudPlatform.AWS.name())) {
+            AwsParameters awsParameters = (AwsParameters) parameters;
             if (Objects.nonNull(parameters)) {
                 builder.withAws(FreeIpaCreationAwsParametersDto.builder()
                         .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
-                                .withPercentage(parameters.getFreeIpaSpotPercentage())
-                                .withMaxPrice(parameters.getFreeIpaSpotMaxPrice())
+                                .withPercentage(awsParameters.getFreeIpaSpotPercentage())
+                                .withMaxPrice(awsParameters.getFreeIpaSpotMaxPrice())
                                 .build())
                         .build());
             }
