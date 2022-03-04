@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.auth.security.AuthResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
-import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.parameters.dao.converter.CredentialTypeConverter;
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.secret.domain;
+package com.sequenceiq.cloudbreak.common.dal.model;
 
 public interface AccountIdAwareResource {
 

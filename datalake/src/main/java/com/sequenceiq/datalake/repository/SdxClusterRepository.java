@@ -17,7 +17,7 @@ import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
-import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.datalake.entity.SdxCluster;

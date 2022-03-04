@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
-import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
 
 @Entity

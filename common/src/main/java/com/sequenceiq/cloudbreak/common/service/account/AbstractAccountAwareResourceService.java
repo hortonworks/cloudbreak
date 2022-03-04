@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.structuredevent.service;
+package com.sequenceiq.cloudbreak.common.service.account;
 
 import java.util.Map;
 import java.util.Optional;
@@ -17,8 +17,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
-import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 
 public abstract class AbstractAccountAwareResourceService<T extends AccountAwareResource> implements AccountAwareResourceService<T> {
 

@@ -11,7 +11,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"environmentcrn"}))

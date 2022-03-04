@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.structuredevent.repository;
+package com.sequenceiq.cloudbreak.common.dal.repository;
 
 import java.io.Serializable;
 import java.util.Optional;
@@ -9,6 +9,8 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.NoRepositoryBean;
+
+import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 
 @NoRepositoryBean
 @Transactional(TxType.REQUIRED)

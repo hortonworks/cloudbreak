@@ -11,7 +11,7 @@ import javax.persistence.MappedSuperclass;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
-import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 
 @MappedSuperclass
 public class ProxyConfigBase implements Serializable, AuthResource, AccountIdAwareResource {

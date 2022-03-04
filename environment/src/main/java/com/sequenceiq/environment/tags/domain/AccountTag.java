@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
-import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 
 @Entity
 @Where(clause = "archived = false")

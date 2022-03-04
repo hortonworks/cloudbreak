@@ -1,8 +1,8 @@
-package com.sequenceiq.cloudbreak.structuredevent.service;
+package com.sequenceiq.cloudbreak.common.service.account;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 
 public interface AccountAwareResourceService<T extends AccountAwareResource> {
 
