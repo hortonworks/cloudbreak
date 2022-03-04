@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
@@ -211,6 +212,13 @@ public class StackOperations implements ResourcePropertyProvider {
         LOGGER.info("Adding environment name to the response.");
         environmentServiceDecorator.prepareEnvironment(stackViewV4Response);
         return stackViewV4Response;
+    }
+
+    public StackStatusV4Responses getStatusForInternalCrns(List<String> crns, StackType stackType) {
+        LOGGER.info("Get stackstatuses against internal user.");
+        List<StackClusterStatusView> statuses = stackService.getStatusesByCrnsInternal(crns, stackType);
+        LOGGER.info("Query Stack (status) successfully finished with crns {}", crns);
+        return stackClusterStatusViewToStatusConverter.convert(statuses);
     }
 
     public FlowIdentifier deleteInstance(@NotNull NameOrCrn nameOrCrn, Long workspaceId, boolean forced, String instanceId) {

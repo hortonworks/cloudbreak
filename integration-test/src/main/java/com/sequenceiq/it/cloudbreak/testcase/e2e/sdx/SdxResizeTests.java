@@ -38,8 +38,8 @@ public class SdxResizeTests extends PreconditionSdxE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
-            when = "upgrade called on the SDX cluster",
-            then = "SDX upgrade should be successful, the cluster should be up and running"
+            when = "resize called on the SDX cluster",
+            then = "SDX resize should be successful, the cluster should be up and running"
     )
     public void testSDXResize(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
@@ -59,12 +59,12 @@ public class SdxResizeTests extends PreconditionSdxE2ETest {
                 .then((tc, testDto, client) -> {
                     expectedShape.set(sdxUtil.getShape(testDto, client));
                     expectedCrn.set(sdxUtil.getCrn(testDto, client));
-                    expectedName.set(sdx);
+                    expectedName.set(testDto.getName());
                     return testDto;
                 })
                 .when(sdxTestClient.resize(), key(sdx))
                 .await(SdxClusterStatusResponse.STOP_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
-                .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS)
+                .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, dto, client) -> validateStackCrn(expectedCrn, dto))

@@ -17,6 +17,7 @@ public class ModelDescriptions {
     public static final String WORKSPACE_OF_THE_RESOURCE = "workspace of the resource";
     public static final String CREATOR = "the creator of the resource";
     public static final String CRN = "the unique crn of the resource";
+    public static final String CRNS = "the unique crns of the resource";
     public static final String USER_ID = "User ID in the new authorization model";
     public static final String WORKSPACE_ID = "Workspace ID of the resource";
     public static final String PREINSTALLED = "Denotes that the image is prewarmed or base image.";

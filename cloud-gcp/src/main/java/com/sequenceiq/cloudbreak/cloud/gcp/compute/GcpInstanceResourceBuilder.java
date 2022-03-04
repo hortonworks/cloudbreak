@@ -48,7 +48,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.GcpNetworkInterfaceProvider;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionCreatorService;
@@ -80,8 +79,6 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpInstanceResourceBuilder.class);
 
-    private static final String SERVICE_ACCOUNT_EMAIL = "serviceAccountEmail";
-
     private static final String GCP_DISK_TYPE = "PERSISTENT";
 
     private static final String GCP_DISK_MODE = "READ_WRITE";
@@ -89,8 +86,6 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private static final String PREEMPTIBLE = "preemptible";
 
     private static final String GCP_CLOUD_STORAGE_RW_SCOPE = "https://www.googleapis.com/auth/devstorage.read_write";
-
-    private static final int MAX_TAG_LENGTH = 63;
 
     private static final int ORDER = 3;
 
@@ -106,13 +101,13 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     private PersistenceNotifier persistenceNotifier;
 
     @Inject
-    private GcpNetworkInterfaceProvider gcpNetworkInterfaceProvider;
-
-    @Inject
     private GcpStackUtil gcpStackUtil;
 
     @Inject
     private GcpLabelUtil gcpLabelUtil;
+
+    @Inject
+    private GcpInstanceStateChecker instanceStateChecker;
 
     @Override
     public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -358,33 +353,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public List<CloudVmInstanceStatus> checkInstances(GcpContext context, AuthenticatedContext auth, List<CloudInstance> instances) {
-        List<CloudVmInstanceStatus> result = new ArrayList<>();
-        String instanceName = instances.isEmpty() ? "" : instances.get(0).getInstanceId();
-        if (!StringUtils.isEmpty(instanceName)) {
-            List<Instance> gcpInstances = gcpNetworkInterfaceProvider.getInstances(auth, instanceName.split("-")[0]);
-            for (CloudInstance instance : instances) {
-                Optional<Instance> gcpInstanceOpt = gcpInstances.stream().filter(inst -> inst.getName().equalsIgnoreCase(instance.getInstanceId())).findFirst();
-                if (gcpInstanceOpt.isPresent()) {
-                    Instance gcpInstance = gcpInstanceOpt.get();
-                    InstanceStatus status;
-                    switch (gcpInstance.getStatus()) {
-                        case "RUNNING":
-                            status = InstanceStatus.STARTED;
-                            break;
-                        case "TERMINATED":
-                            status = InstanceStatus.STOPPED;
-                            break;
-                        default:
-                            status = InstanceStatus.IN_PROGRESS;
-                    }
-                    result.add(new CloudVmInstanceStatus(instance, status));
-                } else {
-                    LOGGER.warn("Instance {} cannot be found", instance.getInstanceId());
-                    result.add(new CloudVmInstanceStatus(instance, InstanceStatus.TERMINATED));
-                }
-            }
-        }
-        return result;
+        return instanceStateChecker.checkBasedOnOperation(context, instances);
     }
 
     @Override
@@ -541,5 +510,4 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             return protectedDisk;
         };
     }
-
 }

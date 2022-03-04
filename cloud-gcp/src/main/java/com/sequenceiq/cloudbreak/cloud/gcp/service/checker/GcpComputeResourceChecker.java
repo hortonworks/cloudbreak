@@ -79,7 +79,7 @@ public class GcpComputeResourceChecker {
                 if (e1.getDetails().get("code").equals(HttpStatus.SC_NOT_FOUND) || e1.getDetails().get("code").equals(HttpStatus.SC_FORBIDDEN)) {
                     String availabilityZone = Strings.isNullOrEmpty(cloudResource.getAvailabilityZone())
                             ? location.getAvailabilityZone().value() : cloudResource.getAvailabilityZone();
-                    Operation execute = gcpStackUtil.zoneOperations(context.getCompute(), context.getProjectId(), operationId,
+                    Operation execute = gcpStackUtil.zoneOperation(context.getCompute(), context.getProjectId(), operationId,
                             availabilityZone).execute();
                     checkComputeOperationError(execute);
                     return execute;
