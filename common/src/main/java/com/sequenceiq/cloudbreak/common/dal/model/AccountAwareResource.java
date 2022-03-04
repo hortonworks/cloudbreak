@@ -1,6 +1,4 @@
-package com.sequenceiq.cloudbreak.structuredevent.repository;
-
-import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
+package com.sequenceiq.cloudbreak.common.dal.model;
 
 public interface AccountAwareResource extends AccountIdAwareResource {
 

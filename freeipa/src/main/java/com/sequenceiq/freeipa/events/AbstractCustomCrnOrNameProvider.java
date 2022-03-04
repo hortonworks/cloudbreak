@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestCallDetails;
-import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.structuredevent.rest.CustomCrnOrNameProvider;
 
 public abstract class AbstractCustomCrnOrNameProvider implements CustomCrnOrNameProvider {

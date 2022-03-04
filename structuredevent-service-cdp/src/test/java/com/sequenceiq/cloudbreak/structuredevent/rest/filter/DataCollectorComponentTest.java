@@ -21,8 +21,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
-import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 
 @ExtendWith(MockitoExtension.class)
 public class DataCollectorComponentTest {

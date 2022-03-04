@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
-import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;

@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.events;
 
-import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 
 public class SdxClusterDto implements AccountAwareResource {
 

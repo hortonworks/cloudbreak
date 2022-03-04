@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 
 @Service
 public class CDPAccountAwareRepositoryLookupService extends CDPRepositoryLookupService<AccountAwareResourceRepository<?, ?>> {

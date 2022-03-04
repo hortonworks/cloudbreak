@@ -9,7 +9,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
-import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.parameters.dao.converter.CredentialTypeConverter;
 
