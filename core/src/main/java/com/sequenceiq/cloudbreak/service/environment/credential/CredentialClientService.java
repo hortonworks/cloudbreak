@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.environment.credential;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -8,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -15,7 +19,7 @@ import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
 @Service
-public class CredentialClientService {
+public class CredentialClientService implements ResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialClientService.class);
 
@@ -59,5 +63,10 @@ public class CredentialClientService {
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
+    }
+
+    @Override
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.CREDENTIAL);
     }
 }

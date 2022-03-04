@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -28,7 +30,7 @@ import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
-public class DatalakeService {
+public class DatalakeService implements ResourcePropertyProvider {
 
     public static final String RANGER = "RANGER";
 
@@ -171,5 +173,10 @@ public class DatalakeService {
             fqdn = datalakeStack.getClusterManagerIp();
         }
         return fqdn;
+    }
+
+    @Override
+    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
+        return Optional.of(AuthorizationResourceType.DATALAKE);
     }
 }
