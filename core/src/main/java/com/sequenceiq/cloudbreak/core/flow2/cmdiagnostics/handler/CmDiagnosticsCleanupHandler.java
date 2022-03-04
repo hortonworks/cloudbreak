@@ -12,7 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowService;
+import com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.CmDiagnosticsFlowService;
 import com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionFailureEvent;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
@@ -32,7 +32,7 @@ public class CmDiagnosticsCleanupHandler extends EventSenderAwareHandler<CmDiagn
     private EventBus eventBus;
 
     @Inject
-    private DiagnosticsFlowService diagnosticsFlowService;
+    private CmDiagnosticsFlowService cmDiagnosticsFlowService;
 
     public CmDiagnosticsCleanupHandler(EventSender eventSender) {
         super(eventSender);
@@ -55,7 +55,7 @@ public class CmDiagnosticsCleanupHandler extends EventSenderAwareHandler<CmDiagn
             if (DiagnosticsDestination.SUPPORT.equals(parameters.getDestination())) {
                 LOGGER.debug("CM based diagnostics uses SUPPORT destination, no support specific cleanup step yet.");
             } else {
-                diagnosticsFlowService.cleanup(resourceId, parameterMap, new HashSet<>());
+                cmDiagnosticsFlowService.cleanup(resourceId, parameterMap, new HashSet<>());
             }
             CmDiagnosticsCollectionEvent diagnosticsCollectionEvent = CmDiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)

@@ -13,6 +13,7 @@ import org.springframework.statemachine.action.Action;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.telemetry.diagnostics.DiagnosticsOperationsService;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionEvent;
@@ -26,7 +27,7 @@ public class DiagnosticsCollectionActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsCollectionActions.class);
 
     @Inject
-    private DiagnosticsFlowService diagnosticsFlowService;
+    private DiagnosticsOperationsService diagnosticsOperationsService;
 
     @Bean(name = "DIAGNOSTICS_SALT_VALIDATION_STATE")
     public Action<?, ?> diagnosticsSaltValidateAction() {
@@ -40,6 +41,42 @@ public class DiagnosticsCollectionActions {
                         .withResourceId(payload.getResourceId())
                         .withResourceCrn(resourceCrn)
                         .withSelector(DiagnosticsCollectionHandlerSelectors.SALT_VALIDATION_DIAGNOSTICS_EVENT.selector())
+                        .withParameters(payload.getParameters())
+                        .build();
+                sendEvent(context, event);
+            }
+        };
+    }
+
+    @Bean(name = "DIAGNOSTICS_SALT_PILLAR_UPDATE_STATE")
+    public Action<?, ?> diagnosticsSaltPillaarUpdateAction() {
+        return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                String resourceCrn = payload.getResourceCrn();
+                LOGGER.debug("Flow entered into DIAGNOSTICS_SALT_PILLAR_UPDATE_STATE. resourceCrn: '{}'", resourceCrn);
+                DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
+                        .withResourceId(payload.getResourceId())
+                        .withResourceCrn(resourceCrn)
+                        .withSelector(DiagnosticsCollectionHandlerSelectors.SALT_PILLAR_UPDATE_DIAGNOSTICS_EVENT.selector())
+                        .withParameters(payload.getParameters())
+                        .build();
+                sendEvent(context, event);
+            }
+        };
+    }
+
+    @Bean(name = "DIAGNOSTICS_SALT_STATE_UPDATE_STATE")
+    public Action<?, ?> diagnosticsSaltStateUpdateAction() {
+        return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                String resourceCrn = payload.getResourceCrn();
+                LOGGER.debug("Flow entered into DIAGNOSTICS_SALT_STATE_UPDATE_STATE. resourceCrn: '{}'", resourceCrn);
+                DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
+                        .withResourceId(payload.getResourceId())
+                        .withResourceCrn(resourceCrn)
+                        .withSelector(DiagnosticsCollectionHandlerSelectors.SALT_STATE_UPDATE_DIAGNOSTICS_EVENT.selector())
                         .withParameters(payload.getParameters())
                         .build();
                 sendEvent(context, event);
@@ -205,7 +242,7 @@ public class DiagnosticsCollectionActions {
                         .withSelector(DiagnosticsCollectionStateSelectors.FINALIZE_DIAGNOSTICS_COLLECTION_EVENT.selector())
                         .withParameters(payload.getParameters())
                         .build();
-                diagnosticsFlowService.vmDiagnosticsReport(resourceCrn, payload.getParameters());
+                diagnosticsOperationsService.vmDiagnosticsReport(resourceCrn, payload.getParameters());
                 sendEvent(context, event);
             }
         };
@@ -229,7 +266,7 @@ public class DiagnosticsCollectionActions {
                         .withSelector(DiagnosticsCollectionStateSelectors.HANDLED_FAILED_DIAGNOSTICS_COLLECTION_EVENT.selector())
                         .withParameters(parameters)
                         .build();
-                diagnosticsFlowService.vmDiagnosticsReport(resourceCrn, payload.getParameters(),
+                diagnosticsOperationsService.vmDiagnosticsReport(resourceCrn, payload.getParameters(),
                         UsageProto.CDPVMDiagnosticsFailureType.Value.valueOf(payload.getFailureType()), payload.getException());
                 sendEvent(context, event);
             }

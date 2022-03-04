@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.Diagnostics
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_CLEANUP_EVENT;
 
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -13,60 +12,48 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowService;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
-import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionFailureEvent;
+import com.sequenceiq.cloudbreak.telemetry.diagnostics.DiagnosticsOperationsService;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class DiagnosticsUploadHandler extends EventSenderAwareHandler<DiagnosticsCollectionEvent> {
+public class DiagnosticsUploadHandler extends AbstractDiagnosticsOperationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsUploadHandler.class);
 
     @Inject
-    private EventBus eventBus;
-
-    @Inject
-    private DiagnosticsFlowService diagnosticsFlowService;
-
-    protected DiagnosticsUploadHandler(EventSender eventSender) {
-        super(eventSender);
-    }
+    private DiagnosticsOperationsService diagnosticsOperationsService;
 
     @Override
-    public void accept(Event<DiagnosticsCollectionEvent> event) {
+    public Selectable executeOperation(HandlerEvent<DiagnosticsCollectionEvent> event) throws Exception {
         DiagnosticsCollectionEvent data = event.getData();
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
         DiagnosticParameters parameters = data.getParameters();
         Map<String, Object> parameterMap = parameters.toMap();
-        try {
-            LOGGER.debug("Diagnostics upload started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
-            Set<String> hosts = data.getHosts();
-            Set<String> hostGroups = data.getHostGroups();
-            Set<String> excludedHosts = data.getExcludeHosts();
-            diagnosticsFlowService.upload(resourceId, parameterMap, hosts, hostGroups, excludedHosts);
-            DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
-                    .withResourceCrn(resourceCrn)
-                    .withResourceId(resourceId)
-                    .withSelector(START_DIAGNOSTICS_CLEANUP_EVENT.selector())
-                    .withParameters(parameters)
-                    .withHosts(hosts)
-                    .withHostGroups(hostGroups)
-                    .withExcludeHosts(excludedHosts)
-                    .build();
-            eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
-        } catch (Exception e) {
-            LOGGER.debug("Diagnostics upload failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameterMap, e);
-            DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters,
-                    UsageProto.CDPVMDiagnosticsFailureType.Value.UPLOAD_FAILURE.name());
-            eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
-        }
+        LOGGER.debug("Diagnostics upload started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
+        diagnosticsOperationsService.upload(resourceId, parameters);
+        return DiagnosticsCollectionEvent.builder()
+                .withResourceCrn(resourceCrn)
+                .withResourceId(resourceId)
+                .withSelector(START_DIAGNOSTICS_CLEANUP_EVENT.selector())
+                .withParameters(parameters)
+                .withHosts(data.getHosts())
+                .withHostGroups(data.getHostGroups())
+                .withExcludeHosts(data.getExcludeHosts())
+                .build();
+    }
+
+    @Override
+    public UsageProto.CDPVMDiagnosticsFailureType.Value getFailureType() {
+        return UsageProto.CDPVMDiagnosticsFailureType.Value.UPLOAD_FAILURE;
+    }
+
+    @Override
+    public String getOperationName() {
+        return "Upload";
     }
 
     @Override

@@ -17,6 +17,8 @@ public class TelemetrySaltRetryConfig {
 
     private int meteringUpgrade;
 
+    private int telemetryUpgrade;
+
     public int getCloudStorageValidation() {
         return cloudStorageValidation;
     }
@@ -57,6 +59,14 @@ public class TelemetrySaltRetryConfig {
         this.meteringUpgrade = meteringUpgrade;
     }
 
+    public int getTelemetryUpgrade() {
+        return telemetryUpgrade;
+    }
+
+    public void setTelemetryUpgrade(int telemetryUpgrade) {
+        this.telemetryUpgrade = telemetryUpgrade;
+    }
+
     @Override
     public String toString() {
         return "TelemetrySaltRetryConfig{" +
@@ -65,6 +75,7 @@ public class TelemetrySaltRetryConfig {
                 ", nodeStatusCollect=" + nodeStatusCollect +
                 ", diagnosticsCollect=" + diagnosticsCollect +
                 ", meteringUpgrade=" + meteringUpgrade +
+                ", telemetryUpgrade=" + telemetryUpgrade +
                 '}';
     }
 }
