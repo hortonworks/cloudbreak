@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -42,7 +43,7 @@ public class ComponentLocatorService {
 
         for (HostGroup hg : hostGroupService.getByCluster(cluster.getId())) {
             Set<String> hgComponents = new HashSet<>(processor.getImpalaCoordinatorsInHostGroup(hg.getName()));
-            fillList(result, hg, hgComponents);
+            fillListWithFunctionalFqdns(result, hg, hgComponents);
         }
         return result;
     }
@@ -63,7 +64,7 @@ public class ComponentLocatorService {
         for (HostGroup hg : hostGroupService.getByCluster(cluster.getId())) {
             Set<String> hgComponents = new HashSet<>(processor.getComponentsInHostGroup(hg.getName()));
             hgComponents.retainAll(componentNames);
-            fillList(fqdnsByService, hg, hgComponents);
+            fillListWithFunctionalFqdns(fqdnsByService, hg, hgComponents);
         }
         return fqdnsByService;
     }
@@ -73,16 +74,17 @@ public class ComponentLocatorService {
         for (HostGroup hg : hostGroupService.getByCluster(clusterId)) {
             Set<String> hgComponents = new HashSet<>(blueprintTextProcessor.getComponentsInHostGroup(hg.getName()));
             hgComponents.retainAll(componentNames);
-            fillList(fqdnsByComponent, hg, hgComponents);
+            fillListWithFunctionalFqdns(fqdnsByComponent, hg, hgComponents);
         }
         return fqdnsByComponent;
     }
 
-    private void fillList(Map<String, List<String>> fqdnsByComponent, HostGroup hg, Set<String> hgComponents) {
+    private void fillListWithFunctionalFqdns(Map<String, List<String>> fqdnsByComponent, HostGroup hg, Set<String> hgComponents) {
         List<String> fqdnList = hg.getInstanceGroup()
                 .getReachableInstanceMetaDataSet()
                 .stream()
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                .filter(instanceMetaData -> instanceMetaData.getInstanceStatus() != InstanceStatus.DECOMMISSIONED)
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(toList());
         for (String component : hgComponents) {

@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -79,6 +80,9 @@ class DecommissionHandlerTest {
 
     @Mock
     private EventBus eventBus;
+
+    @Mock
+    private ClusterServiceRunner clusterServiceRunner;
 
     @Mock
     private StackService stackService;
@@ -234,6 +238,8 @@ class DecommissionHandlerTest {
         verify(clusterDecomissionService, times(1)).removeHostsFromCluster(List.of(instance));
         verify(clusterDecomissionService, never()).decommissionClusterNodes(anyMap());
         verify(clusterDecomissionService, never()).deleteHostFromCluster(any());
+        verify(clusterServiceRunner, times(1)).redeployGatewayConfigs(any());
+
     }
 
     private DecommissionRequest forcedDecommissionRequest() {

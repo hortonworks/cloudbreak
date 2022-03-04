@@ -452,6 +452,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             retry.testWith2SecDelayMax5Times(() -> getRolesBeforeHighstateMagic(sc));
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+            runSyncAll(sc, allHostnames, allNodes, exitModel);
             runNewService(sc, new HighStateRunner(allHostnames, allNodes), exitModel);
         } catch (ExecutionException e) {
             LOGGER.info("Error occurred during bootstrap", e);

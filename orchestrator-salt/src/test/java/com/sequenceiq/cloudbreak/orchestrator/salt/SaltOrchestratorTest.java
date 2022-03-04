@@ -231,15 +231,18 @@ public class SaltOrchestratorTest {
         PowerMockito.mockStatic(SaltStates.class);
         PowerMockito.when(SaltStates.getGrains(any(), any(), any())).thenReturn(new HashMap<>());
 
+        Set<String> allNodes = targets.stream().map(Node::getHostname).collect(Collectors.toSet());
+
         SaltConfig saltConfig = new SaltConfig();
         saltOrchestrator.initServiceRun(() -> Set.of(), Collections.singletonList(gatewayConfig), targets, targets,
                 saltConfig, exitCriteriaModel, "testPlatform");
+
+        verifyNew(SyncAllRunner.class, times(1)).withArguments(eq(allNodes), eq(targets));
+
         saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
 
-        Set<String> allNodes = targets.stream().map(Node::getHostname).collect(Collectors.toSet());
-
         // verify syncgrains command
-        verifyNew(SyncAllRunner.class, times(1)).withArguments(eq(allNodes), eq(targets));
+        verifyNew(SyncAllRunner.class, times(2)).withArguments(eq(allNodes), eq(targets));
 
         // verify run new service
         verifyNew(HighStateRunner.class, atLeastOnce()).withArguments(eq(allNodes),

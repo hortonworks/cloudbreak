@@ -41,7 +41,7 @@ public class ClusterCertificateRedeployHandler implements EventHandler<ClusterCe
         LOGGER.debug("Redeploy certificate for stack 'id:{}'", stackId);
         Selectable response;
         try {
-            clusterServiceRunner.redeployGatewayCertificate(stackId);
+            clusterServiceRunner.redeployGatewayConfigs(stackId);
             LOGGER.info("Certificate of the cluster has been redeployed successfully.");
             response = new ClusterCertificateRedeploySuccess(stackId);
         } catch (Exception ex) {

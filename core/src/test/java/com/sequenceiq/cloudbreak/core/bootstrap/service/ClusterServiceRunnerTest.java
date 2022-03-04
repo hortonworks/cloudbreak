@@ -50,7 +50,7 @@ class ClusterServiceRunnerTest {
         when(stack.getCluster()).thenReturn(cluster);
         when(clusterService.findOneWithLists(anyLong())).thenThrow(new NotFoundException("Cluster could not be found"));
 
-        Assertions.assertThrows(NotFoundException.class, () -> underTest.redeployGatewayCertificate(0L));
+        Assertions.assertThrows(NotFoundException.class, () -> underTest.redeployGatewayConfigs(0L));
     }
 
     @Test
@@ -58,9 +58,9 @@ class ClusterServiceRunnerTest {
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         when(stack.getCluster()).thenReturn(cluster);
         when(clusterService.findOneWithLists(anyLong())).thenReturn(Optional.of(cluster));
-        doThrow(new RuntimeException("Stg. failed")).when(hostRunner).redeployGatewayCertificate(any(), any());
+        doThrow(new RuntimeException("Stg. failed")).when(hostRunner).redeployGatewayConfigs(any(), any());
 
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.redeployGatewayCertificate(0L));
+        Assertions.assertThrows(RuntimeException.class, () -> underTest.redeployGatewayConfigs(0L));
     }
 
     @Test
@@ -69,9 +69,9 @@ class ClusterServiceRunnerTest {
         when(stack.getCluster()).thenReturn(cluster);
         when(clusterService.findOneWithLists(anyLong())).thenReturn(Optional.of(cluster));
 
-        underTest.redeployGatewayCertificate(0L);
+        underTest.redeployGatewayConfigs(0L);
 
-        verify(hostRunner, times(1)).redeployGatewayCertificate(any(), any());
+        verify(hostRunner, times(1)).redeployGatewayConfigs(any(), any());
     }
 
 }
