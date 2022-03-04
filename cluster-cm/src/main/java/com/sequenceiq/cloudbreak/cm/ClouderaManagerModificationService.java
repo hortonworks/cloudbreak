@@ -814,6 +814,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         ClustersResourceApi apiInstance = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         String clusterName = cluster.getName();
         LOGGER.debug("Starting all services for cluster.");
+        configService.enableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClient, stack.getName());
         eventService
                 .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_STARTING);
         Collection<ApiService> apiServices = readServices(stack);

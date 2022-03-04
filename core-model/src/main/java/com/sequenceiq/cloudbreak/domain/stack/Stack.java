@@ -699,7 +699,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 || STOPPED.equals(getStatus())
                 || STOP_REQUESTED.equals(getStatus())
                 || STOP_IN_PROGRESS.equals(getStatus())
-                || EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus());
+                || EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus())
+                || NODE_FAILURE.equals(getStatus());
     }
 
     public boolean isExternalDatabaseStopped() {

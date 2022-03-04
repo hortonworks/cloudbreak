@@ -44,7 +44,7 @@ public class ClusterStopHandler implements EventHandler<ClusterStopRequest> {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             boolean clusterManagerRunning = apiConnectors.getConnector(stack).clusterStatusService().isClusterManagerRunning();
             if (clusterManagerRunning) {
-                apiConnectors.getConnector(stack).stopCluster(false);
+                apiConnectors.getConnector(stack).stopCluster(true);
             } else {
                 LOGGER.info("Cluster manager isn't running, cannot stop it.");
             }
