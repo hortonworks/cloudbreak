@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConv
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyResponse;
 import com.sequenceiq.environment.api.v1.proxy.model.response.ProxyViewResponse;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
+import com.sequenceiq.environment.proxy.domain.ProxyConfigBase;
 
 @Component
 public class ProxyConfigToProxyResponseConverter {
@@ -30,7 +31,7 @@ public class ProxyConfigToProxyResponseConverter {
         return response;
     }
 
-    public ProxyViewResponse convertToView(ProxyConfig source) {
+    public ProxyViewResponse convertToView(ProxyConfigBase source) {
         ProxyViewResponse response = new ProxyViewResponse();
         response.setCrn(source.getResourceCrn());
         response.setName(source.getName());

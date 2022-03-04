@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplate
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
-import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
@@ -60,7 +60,7 @@ public class EnvironmentResourceDeletionService {
         }
     }
 
-    public Set<String> getAttachedSdxClusterCrns(Environment environment) {
+    public Set<String> getAttachedSdxClusterCrns(EnvironmentView environment) {
         Set<String> clusterCrns = new HashSet<>();
         LOGGER.debug("Get SDX clusters of the environment: '{}'", environment.getName());
         try {
@@ -78,7 +78,7 @@ public class EnvironmentResourceDeletionService {
         return clusterCrns;
     }
 
-    public Set<String> getDatalakeClusterNames(Environment environment) {
+    public Set<String> getDatalakeClusterNames(EnvironmentView environment) {
         Set<String> clusterNames = new HashSet<>();
         LOGGER.debug("Get Datalake clusters of the environment: '{}'", environment.getName());
         try {
@@ -97,7 +97,7 @@ public class EnvironmentResourceDeletionService {
         return clusterNames;
     }
 
-    public int getConnectedExperienceAmount(Environment environment) {
+    public int getConnectedExperienceAmount(EnvironmentView environment) {
         EnvironmentExperienceDto dto = new EnvironmentExperienceDto.Builder()
                 .withName(environment.getName())
                 .withCrn(environment.getResourceCrn())
@@ -107,7 +107,7 @@ public class EnvironmentResourceDeletionService {
         return experienceConnectorService.getConnectedExperienceCount(dto);
     }
 
-    Set<String> getAttachedDistroXClusterNames(Environment environment) {
+    Set<String> getAttachedDistroXClusterNames(EnvironmentView environment) {
         Set<String> clusterNames = new HashSet<>();
         LOGGER.debug("Get DistroX clusters of the environment: '{}'", environment.getName());
         try {

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -28,7 +29,8 @@ class ExtendedCloudCredentialTest {
         when(cloudCredential.getName()).thenReturn("name");
         when(cloudCredential.isVerifyPermissions()).thenReturn(true);
 
-        ExtendedCloudCredential underTest = new ExtendedCloudCredential(cloudCredential, "AWS", "myCred", "myUser", "accountId");
+        ExtendedCloudCredential underTest = new ExtendedCloudCredential(cloudCredential, "AWS",
+                "myCred", "myUser", "accountId", new ArrayList<>());
         String result = underTest.toString();
 
         assertThat(underTest.getStringParameter(CONFIDENTIAL)).isEqualTo(SECRET);

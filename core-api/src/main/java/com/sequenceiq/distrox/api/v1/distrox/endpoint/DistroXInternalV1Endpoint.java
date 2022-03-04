@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRNS_INTERNAL;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRN_INTERNAL;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RENEW_CERTIFICATE_INTERNAL;
 
@@ -11,6 +12,8 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StatusCrnsV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -32,6 +35,12 @@ public interface DistroXInternalV1Endpoint {
     @ApiOperation(value = GET_BY_CRN_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "getDistroXInternalV1ByCrn")
     StackViewV4Response getByCrn(@PathParam("crn") String crn);
+
+    @POST
+    @Path("crn/status")
+    @ApiOperation(value = GET_BY_CRNS_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "getDistroXStatusInternalV1ByCrns")
+    StackStatusV4Responses getStatusByCrns(StatusCrnsV4Request request);
 
     @POST
     @Path("crn/{crn}/renew_certificate")

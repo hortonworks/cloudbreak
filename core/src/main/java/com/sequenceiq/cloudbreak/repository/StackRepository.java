@@ -168,6 +168,19 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "FROM Stack s "
             + "LEFT JOIN s.cluster c "
             + "LEFT JOIN s.stackStatus ss "
+            + "WHERE s.resourceCrn in :crns AND (s.type IS null OR s.type = :stackType)")
+    List<StackClusterStatusView> getStatusByCrnsInternal(@Param("crns") List<String> crns, @Param("stackType") StackType stackType);
+
+    @Query("SELECT s.id as id, "
+            + "s.resourceCrn as crn, "
+            + "ss.status as status, "
+            + "ss.statusReason as statusReason, "
+            + "c.status as clusterStatus, "
+            + "c.statusReason as clusterStatusReason, "
+            + "c.certExpirationState as certExpirationState "
+            + "FROM Stack s "
+            + "LEFT JOIN s.cluster c "
+            + "LEFT JOIN s.stackStatus ss "
             + "WHERE s.name = :name AND s.workspace.id= :workspaceId")
     Optional<StackClusterStatusView> getStatusByNameAndWorkspace(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 

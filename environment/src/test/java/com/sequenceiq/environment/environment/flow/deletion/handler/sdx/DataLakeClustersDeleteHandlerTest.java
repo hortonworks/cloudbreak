@@ -9,8 +9,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,12 +20,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -47,7 +45,7 @@ class DataLakeClustersDeleteHandlerTest {
     private EventSender eventSender;
 
     @Mock
-    private EnvironmentService environmentService;
+    private EnvironmentViewService environmentViewService;
 
     @Mock
     private SdxDeleteService sdxDeleteService;
@@ -84,8 +82,8 @@ class DataLakeClustersDeleteHandlerTest {
 
     @Test
     void accept() {
-        Environment environment = new Environment();
-        when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.of(environment));
+        EnvironmentView environment = new EnvironmentView();
+        when(environmentViewService.getById(ENV_ID)).thenReturn(environment);
         underTest.accept(environmentDtoEvent);
         verify(sdxDeleteService).deleteSdxClustersForEnvironment(any(PollingConfig.class), eq(environment), eq(false));
         verify(eventSender).sendEvent(any(EnvDeleteEvent.class), eq(headers));
@@ -98,23 +96,9 @@ class DataLakeClustersDeleteHandlerTest {
     }
 
     @Test
-    void acceptEnvironmentNotFound() {
-        when(environmentService.findEnvironmentById(ENV_ID)).thenReturn(Optional.empty());
-        underTest.accept(environmentDtoEvent);
-        verify(sdxDeleteService, never()).deleteSdxClustersForEnvironment(any(), any(), anyBoolean());
-        verify(eventSender).sendEvent(any(EnvDeleteEvent.class), eq(headers));
-        verify(eventSender, never()).sendEvent(any(EnvClusterDeleteFailedEvent.class), any());
-        EnvDeleteEvent capturedDeleteEvent = (EnvDeleteEvent) baseNamedFlowEvent.getValue();
-        assertThat(capturedDeleteEvent.getResourceName()).isEqualTo(ENV_NAME);
-        assertThat(capturedDeleteEvent.getResourceId()).isEqualTo(ENV_ID);
-        assertThat(capturedDeleteEvent.getResourceCrn()).isEqualTo(RESOURCE_CRN);
-        assertThat(capturedDeleteEvent.selector()).isEqualTo("FINISH_ENV_CLUSTERS_DELETE_EVENT");
-    }
-
-    @Test
     void acceptFail() {
         IllegalStateException error = new IllegalStateException("error");
-        when(environmentService.findEnvironmentById(ENV_ID)).thenThrow(error);
+        when(environmentViewService.getById(ENV_ID)).thenThrow(error);
         underTest.accept(environmentDtoEvent);
         verify(sdxDeleteService, never()).deleteSdxClustersForEnvironment(any(), any(), anyBoolean());
         verify(eventSender).sendEvent(any(EnvClusterDeleteFailedEvent.class), eq(headers));

@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.flow.chain;
 
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.STORAGE_VALIDATION_WAIT_EVENT;
-import static com.sequenceiq.datalake.flow.datahub.StartDatahubFlowEvent.START_DATAHUB_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_EVENT;
 import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent.SDX_RESIZE_FLOW_CHAIN_START_EVENT;
@@ -65,9 +64,6 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
         }
         // Delete  De-attached Sdx
         chain.add(new SdxDeleteStartEvent(SDX_DELETE_EVENT.event(), event.getResourceId(), event.getUserId(), true));
-
-        //Start any existing datahubs
-        chain.add(new SdxEvent(START_DATAHUB_EVENT.event(), event.getResourceId(), event.getUserId()));
 
         return new FlowTriggerEventQueue(getName(), event, chain);
     }

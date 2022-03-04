@@ -45,18 +45,34 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             + "AND e.archived = false")
     Set<Environment> findAllByIdNotArchived(@Param("ids") List<Long> ids);
 
-    Set<Environment> findByNameInAndAccountIdAndArchivedIsFalse(Collection<String> names, String accountId);
+    @Query("SELECT e.resourceCrn FROM Environment e " +
+            "WHERE e.name in (:names) " +
+            "AND e.accountId = :accountId " +
+            "AND e.archived = false")
+    List<String> findAllCrnByNameInAndAccountIdAndArchivedIsFalse(@Param("names") Collection<String> names, @Param("accountId") String accountId);
 
-    Set<Environment> findByResourceCrnInAndAccountIdAndArchivedIsFalse(Collection<String> resourceCrns, String accountId);
-
+    @Query("SELECT e FROM Environment e "
+            + "LEFT JOIN FETCH e.network n "
+            + "LEFT JOIN FETCH n.environment ev "
+            + "LEFT JOIN FETCH e.credential c "
+            + "LEFT JOIN FETCH e.authentication a "
+            + "LEFT JOIN FETCH e.parameters p "
+            + "WHERE e.accountId = :accountId "
+            + "AND e.name = :name "
+            + "AND e.archived = false")
     Optional<Environment> findByNameAndAccountIdAndArchivedIsFalse(@Param("name") String name, @Param("accountId") String accountId);
 
-    @Query("SELECT e.resourceCrn FROM Environment e " +
-            "WHERE e.accountId = :accountId " +
-            "AND e.name IN (:names) " +
-            "AND e.archived = false")
-    List<String> findAllCrnByNameAndAccountIdAndArchivedIsFalse(@Param("names") Collection<String> names, @Param("accountId") String accountId);
-
+    @Query("SELECT e FROM Environment e "
+            + "LEFT JOIN FETCH e.network n "
+            + "LEFT JOIN FETCH n.environment ev "
+            + "LEFT JOIN FETCH e.credential c "
+            + "LEFT JOIN FETCH e.authentication a "
+            + "LEFT JOIN FETCH e.parameters p "
+            + "LEFT JOIN FETCH e.proxyConfig pc "
+            + "LEFT JOIN FETCH e.parentEnvironment pe "
+            + "WHERE e.accountId = :accountId "
+            + "AND e.resourceCrn = :resourceCrn "
+            + "AND e.archived = false")
     Optional<Environment> findByResourceCrnAndAccountIdAndArchivedIsFalse(@Param("resourceCrn") String resourceCrn, @Param("accountId") String accountId);
 
     @Query("SELECT e.id FROM Environment e " +
@@ -87,12 +103,6 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
     @Query("SELECT e.name as name, e.resourceCrn as crn FROM Environment e WHERE e.accountId = :accountId AND e.resourceCrn IN (:resourceCrns)")
     List<ResourceCrnAndNameView> findResourceNamesByCrnAndAccountId(@Param("resourceCrns") Collection<String> resourceCrns,
             @Param("accountId") String accountId);
-
-    @Query("SELECT e.name FROM Environment e "
-            + "JOIN e.parentEnvironment pe "
-            + "WHERE pe.id = :parentEnvironmentId AND e.accountId = :accountId AND e.archived = false")
-    List<String> findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(@Param("accountId") String accountId,
-        @Param("parentEnvironmentId") Long parentEnvironmentId);
 
     @Query("SELECT e FROM Environment e "
             + "JOIN e.parentEnvironment pe "

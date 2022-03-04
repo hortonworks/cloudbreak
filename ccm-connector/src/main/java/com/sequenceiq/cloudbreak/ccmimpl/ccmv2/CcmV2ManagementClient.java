@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.ccmimpl.ccmv2;
 
+import java.util.List;
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -15,8 +18,6 @@ import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterC
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.ccm.exception.CcmV2Exception;
 import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.config.GrpcCcmV2Config;
-
-import java.util.Optional;
 
 @Component
 public class CcmV2ManagementClient {
@@ -78,6 +79,22 @@ public class CcmV2ManagementClient {
                 retryExhausted -> {
                     LOGGER.error("Error Deregistering Agent for agentCrn '{}', retryCount '{}'", agentCrn, retryExhausted.getRetryCount());
                     throw new CcmV2Exception("Error Deregistering CCM Agent", retryExhausted.getLastThrowable());
+                });
+    }
+
+    public List<InvertingProxyAgent> listInvertingProxyAgents(String requestId, String accountId, Optional<String> environmentCrnOpt) {
+        return getRetryTemplate().execute(
+                retryContext -> {
+                    LOGGER.debug("Listing Agents for account '{}' and environmentCrn '{}'", accountId, environmentCrnOpt);
+                    List<InvertingProxyAgent> agentList = grpcCcmV2Client.listAgents(requestId, ThreadBasedUserCrnProvider.getUserCrn(),
+                            accountId, environmentCrnOpt);
+                    LOGGER.debug("Listed Agent for account '{}' and environmentCrn '{}' list count: '{}'", accountId, environmentCrnOpt, agentList.size());
+                    return agentList;
+                },
+                retryExhausted -> {
+                    LOGGER.error("Error Listing Agents for account '{}' and environmentCrn '{}', retryCount '{}'",
+                            accountId, environmentCrnOpt, retryExhausted.getRetryCount());
+                    throw new CcmV2Exception("Error Listing CCM Agents", retryExhausted.getLastThrowable());
                 });
     }
 

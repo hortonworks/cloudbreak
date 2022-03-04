@@ -81,9 +81,9 @@ public class AbstractRedbeamsTerminationActionTest {
                 .setResource("resource")
                 .build().toString());
 
-        credential = new Credential("userId", null, "userCrn");
+        credential = new Credential("userId", null, "userCrn", "account");
 
-        cloudCredential = new CloudCredential("userId", "userName");
+        cloudCredential = new CloudCredential("userId", "userName", "account");
     }
 
     @Test

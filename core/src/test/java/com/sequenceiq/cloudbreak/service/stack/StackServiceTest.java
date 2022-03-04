@@ -35,6 +35,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
+import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackImageView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -74,6 +76,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.flow.core.FlowLogService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -371,6 +374,49 @@ public class StackServiceTest {
 
         Set<StackIdView> result = findClusterConnectedToDatalake(Set.of(i, j, k));
         assertEquals(3, result.size());
+    }
+
+    @Test
+    public void testGetStatusByCrnsInternalShouldReturnWithStatuses() {
+        when(stackRepository.getStatusByCrnsInternal(any(), any())).thenReturn(List.of(new StackClusterStatusView() {
+            @Override
+            public Long getId() {
+                return 1L;
+            }
+
+            @Override
+            public Status getStatus() {
+                return Status.AVAILABLE;
+            }
+
+            @Override
+            public String getStatusReason() {
+                return "ok";
+            }
+
+            @Override
+            public Status getClusterStatus() {
+                return Status.AVAILABLE;
+            }
+
+            @Override
+            public String getClusterStatusReason() {
+                return "ok";
+            }
+
+            @Override
+            public String getCrn() {
+                return "crn1";
+            }
+
+            @Override
+            public CertExpirationState getCertExpirationState() {
+                return CertExpirationState.HOST_CERT_EXPIRING;
+            }
+        }));
+
+        List<StackClusterStatusView> statuses = underTest.getStatusesByCrnsInternal(List.of("crn1"), StackType.WORKLOAD);
+        assertEquals(1, statuses.size());
     }
 
     private Set<StackIdView> findClusterConnectedToDatalake(

@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -26,6 +27,9 @@ public class CredentialToExtendedCloudCredentialConverter {
 
     @Inject
     private LegacyRestRequestThreadLocalService legacyRestRequestThreadLocalService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public ExtendedCloudCredential convert(Credential credential, Optional<User> optionalUser) {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
@@ -49,7 +53,8 @@ public class CredentialToExtendedCloudCredentialConverter {
                 credential.cloudPlatform(),
                 credential.getDescription(),
                 user.getUserCrn(),
-                user.getTenant().getName());
+                user.getTenant().getName(),
+                entitlementService.getEntitlements(credential.getAccount()));
     }
 
     public ExtendedCloudCredential convert(Credential credential) {

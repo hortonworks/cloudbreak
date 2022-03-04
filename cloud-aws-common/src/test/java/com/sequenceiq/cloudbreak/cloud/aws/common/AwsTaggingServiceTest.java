@@ -202,7 +202,7 @@ public class AwsTaggingServiceTest {
                 .withPlatform("AWS")
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
-        CloudCredential cloudCredential = new CloudCredential("crn", "credentialname");
+        CloudCredential cloudCredential = new CloudCredential("crn", "credentialname", "account");
         return new AuthenticatedContext(context, cloudCredential);
     }
 }

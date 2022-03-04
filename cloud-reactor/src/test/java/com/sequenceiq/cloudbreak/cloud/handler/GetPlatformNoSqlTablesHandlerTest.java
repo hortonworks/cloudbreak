@@ -8,6 +8,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,17 +52,18 @@ class GetPlatformNoSqlTablesHandlerTest {
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
         when(cloudConnector.platformResources()).thenReturn(platformResources);
 
-        CloudCredential cloudCredential = new CloudCredential("id", "name");
+        CloudCredential cloudCredential = new CloudCredential("id", "name", "acc");
+        ExtendedCloudCredential extendedCloudCredential = new ExtendedCloudCredential(
+                cloudCredential, "aws", "desc", "crn", "account", new ArrayList<>());
         GetPlatformNoSqlTablesRequest request = spy(new GetPlatformNoSqlTablesRequest(cloudCredential,
-                new ExtendedCloudCredential(
-                        cloudCredential, "aws", "desc", "crn", "account"),
+                extendedCloudCredential,
                 "aws",
                 "region",
                 null));
 
         underTest.accept(new Event<>(request));
 
-        verify(platformResources).noSqlTables(eq(cloudCredential), eq(Region.region("region")), isNull());
+        verify(platformResources).noSqlTables(eq(extendedCloudCredential), eq(Region.region("region")), isNull());
         verify(request).getResult();
     }
 }

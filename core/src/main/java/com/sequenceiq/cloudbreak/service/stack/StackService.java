@@ -336,6 +336,10 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         return foundStack.orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn)));
     }
 
+    public List<StackClusterStatusView> getStatusesByCrnsInternal(List<String> crns, StackType stackType) {
+        return stackRepository.getStatusByCrnsInternal(crns, stackType);
+    }
+
     public Set<AutoscaleStackV4Response> getAllForAutoscale() {
         try {
             return transactionService.required(() -> {

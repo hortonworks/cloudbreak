@@ -78,7 +78,7 @@ class NetworkCreationRequestFactoryTest {
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsAreNotPresent() {
         EnvironmentDto environmentDto = createEnvironmentDtoWithoutAzureParams().build();
-        CloudCredential cloudCredential = new CloudCredential("1", "asd");
+        CloudCredential cloudCredential = new CloudCredential("1", "asd", "account");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
         when(defaultSubnetCidrProvider.provide(NETWORK_CIDR, false)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
@@ -101,7 +101,7 @@ class NetworkCreationRequestFactoryTest {
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenAzureParamsArePresent() {
         EnvironmentDto environmentDto = createEnvironmentDtoWithAzureParams(ServiceEndpointCreation.DISABLED).build();
-        CloudCredential cloudCredential = new CloudCredential("1", "asd");
+        CloudCredential cloudCredential = new CloudCredential("1", "asd", "account");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
         when(defaultSubnetCidrProvider.provide(NETWORK_CIDR, false)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
@@ -124,7 +124,7 @@ class NetworkCreationRequestFactoryTest {
     @Test
     void testCreateShouldCreateANetworkCreationRequestWhenResourceGroupNameIsPresent() {
         EnvironmentDto environmentDto = createAzureParametersDto(ServiceEndpointCreation.DISABLED).build();
-        CloudCredential cloudCredential = new CloudCredential("1", "asd");
+        CloudCredential cloudCredential = new CloudCredential("1", "asd", "account");
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
         when(defaultSubnetCidrProvider.provide(NETWORK_CIDR, false)).thenReturn(cidrs(SUBNET_CIDRS, new HashSet<>()));
@@ -139,7 +139,7 @@ class NetworkCreationRequestFactoryTest {
     void testCreateProviderSpecificNetworkResourcesShouldCreateAProviderSpecificNetworkResourcesCreationRequestWhenResourceGroupNameIsPresent(
             ServiceEndpointCreation serviceEndpointCreation) {
         EnvironmentDto environmentDto = createAzureParametersDto(serviceEndpointCreation).build();
-        CloudCredential cloudCredential = new CloudCredential("1", "asd");
+        CloudCredential cloudCredential = new CloudCredential("1", "asd", "account");
         BaseNetwork baseNetwork = getNetwork();
 
         when(credentialToCloudCredentialConverter.convert(environmentDto.getCredential())).thenReturn(cloudCredential);
@@ -155,7 +155,7 @@ class NetworkCreationRequestFactoryTest {
         assertEquals(serviceEndpointCreation == ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT, request.isPrivateEndpointsEnabled());
     }
 
-    private EnvironmentDto.Builder createEnvironmentDtoWithoutAzureParams() {
+    private EnvironmentDto.EnvironmentDtoBuilder createEnvironmentDtoWithoutAzureParams() {
         return EnvironmentDto.builder()
                 .withName(ENV_NAME)
                 .withTags(new EnvironmentTags(new HashMap<>(), new HashMap<>()))
@@ -166,8 +166,8 @@ class NetworkCreationRequestFactoryTest {
                 .withNetwork(NetworkDto.builder().withId(NETWORK_ID).withNetworkCidr(NETWORK_CIDR).build());
     }
 
-    private EnvironmentDto.Builder createEnvironmentDtoWithAzureParams(ServiceEndpointCreation serviceEndpointCreation) {
-        EnvironmentDto.Builder builder = createEnvironmentDtoWithoutAzureParams();
+    private EnvironmentDto.EnvironmentDtoBuilder createEnvironmentDtoWithAzureParams(ServiceEndpointCreation serviceEndpointCreation) {
+        EnvironmentDto.EnvironmentDtoBuilder builder = createEnvironmentDtoWithoutAzureParams();
         builder.withNetwork(NetworkDto.builder()
                 .withId(NETWORK_ID)
                 .withServiceEndpointCreation(serviceEndpointCreation)
@@ -181,7 +181,7 @@ class NetworkCreationRequestFactoryTest {
         return builder;
     }
 
-    private EnvironmentDto.Builder createAzureParametersDto(ServiceEndpointCreation serviceEndpointCreation) {
+    private EnvironmentDto.EnvironmentDtoBuilder createAzureParametersDto(ServiceEndpointCreation serviceEndpointCreation) {
         return createEnvironmentDtoWithAzureParams(serviceEndpointCreation)
                 .withParameters(ParametersDto.builder()
                         .withAzureParameters(

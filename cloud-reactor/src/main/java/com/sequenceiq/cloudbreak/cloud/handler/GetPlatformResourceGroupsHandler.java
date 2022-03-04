@@ -39,7 +39,7 @@ public class GetPlatformResourceGroupsHandler implements CloudPlatformEventHandl
                     Platform.platform(request.getExtendedCloudCredential().getCloudPlatform()),
                     Variant.variant(request.getVariant()));
             CloudResourceGroups resourceGroups = cloudPlatformConnectors.get(cloudPlatformVariant)
-                    .platformResources().resourceGroups(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+                    .platformResources().resourceGroups(request.getExtendedCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformResourceGroupsResult result = new GetPlatformResourceGroupsResult(request.getResourceId(), resourceGroups);
             request.getResult().onNext(result);
             LOGGER.debug("Query platform Resource groups finished.");

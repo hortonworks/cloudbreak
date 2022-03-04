@@ -114,7 +114,7 @@ public class AwsAuthenticatorTest {
                 .withLocation(Location.location(Region.region("country")))
                 .withAccountId("account")
                 .build();
-        CloudCredential credential = new CloudCredential("id", "alma", parameters, false);
+        CloudCredential credential = new CloudCredential("id", "alma", parameters, "acc", false);
         AuthenticatedContext auth = underTest.authenticate(context, credential);
         assertTrue(auth.hasParameter(AmazonEc2Client.class.getName()),
                 "Authenticated context does not have amazonClient after authentication");

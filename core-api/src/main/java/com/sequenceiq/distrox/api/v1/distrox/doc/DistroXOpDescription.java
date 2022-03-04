@@ -13,6 +13,7 @@ public class DistroXOpDescription {
     public static final String GET_BY_NAME = "get stack by name";
     public static final String GET_BY_CRN = "get stack by crn";
     public static final String GET_BY_CRN_INTERNAL = "get stack by crn (for internal user)";
+    public static final String GET_BY_CRNS_INTERNAL = "get stack by crns (for internal user)";
     public static final String CREATE = "create stack";
     public static final String DELETE_BY_NAME = "delete stack by name";
     public static final String DELETE_BY_CRN = "delete stack by crn";

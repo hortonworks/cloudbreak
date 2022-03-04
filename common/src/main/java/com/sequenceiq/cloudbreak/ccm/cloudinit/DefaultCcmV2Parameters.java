@@ -67,6 +67,13 @@ public class DefaultCcmV2Parameters implements CcmV2Parameters, Serializable {
     }
 
     @Override
+    public String getAgentBackendIdPrefix() {
+        return StringUtils.isNotBlank(getAgentCrn())
+                ? String.format(CCMV2_BACKEND_ID_FORMAT, getAgentCrn(), EMPTY)
+                : EMPTY;
+    }
+
+    @Override
     public void addToTemplateModel(@Nonnull Map<String, Object> model) {
         model.put(CcmV2ParameterConstants.CCMV2_INVERTING_PROXY_HOST, getInvertingProxyHost());
         model.put(CcmV2ParameterConstants.CCMV2_INVERTING_PROXY_CERTIFICATE, getInvertingProxyCertificate());
@@ -75,8 +82,6 @@ public class DefaultCcmV2Parameters implements CcmV2Parameters, Serializable {
         model.put(CcmV2ParameterConstants.CCMV2_AGENT_CRN, getAgentCrn());
         model.put(CcmV2ParameterConstants.CCMV2_AGENT_ENCIPHERED_KEY, getAgentEncipheredPrivateKey());
         model.put(CcmV2ParameterConstants.CCMV2_AGENT_CERTIFICATE, getAgentCertificate());
-        model.put(CcmV2ParameterConstants.CCMV2_AGENT_BACKEND_ID_PREFIX, StringUtils.isNotBlank(getAgentCrn())
-                ? String.format(CCMV2_BACKEND_ID_FORMAT, getAgentCrn(), EMPTY)
-                : EMPTY);
+        model.put(CcmV2ParameterConstants.CCMV2_AGENT_BACKEND_ID_PREFIX, getAgentBackendIdPrefix());
     }
 }

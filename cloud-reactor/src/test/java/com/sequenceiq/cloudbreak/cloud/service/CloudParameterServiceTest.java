@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,8 @@ class CloudParameterServiceTest {
         }).when(eventBus).notify(anyString(), any(Event.class));
         CloudNoSqlTables noSqlTables = underTest.getNoSqlTables(
                 new ExtendedCloudCredential(
-                        new CloudCredential("id", "name"), "aws", "desc", "crn", "account"),
+                        new CloudCredential("id", "name", "acc"), "aws", "desc", "crn",
+                        "account", new ArrayList<>()),
                 "region",
                 "aws",
                 null);

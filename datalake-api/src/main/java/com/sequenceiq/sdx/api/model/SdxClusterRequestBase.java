@@ -32,6 +32,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
 
     private boolean enableMultiAz;
 
+    @Valid
     private List<SdxInstanceGroupRequest> customInstanceGroups;
 
     public String getEnvironment() {

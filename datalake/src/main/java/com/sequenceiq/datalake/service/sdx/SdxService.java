@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.Cus
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
@@ -121,6 +122,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
+import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 
 @Service
@@ -261,14 +263,19 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         }
     }
 
-    public List<SdxCluster> getSdxClustersByCrn(String userCrn, String clusterCrn) {
+    public List<SdxCluster> getSdxClustersByCrn(String userCrn, String clusterCrn, boolean includeDeleted) {
         LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
         List<SdxCluster> sdxClusterList = new ArrayList<>();
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (sdxCluster.isPresent()) {
             sdxClusterList.add(sdxCluster.get());
-            sdxCluster = sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
+            if (includeDeleted) {
+                sdxCluster = sdxClusterRepository.findByAccountIdAndOriginalCrn(accountIdFromCrn, clusterCrn);
+            } else {
+                sdxCluster = sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
+
+            }
             if (sdxCluster.isPresent()) {
                 LOGGER.info("Found a detached data lake associated with crn:{}", clusterCrn);
                 sdxClusterList.add(sdxCluster.get());
@@ -403,6 +410,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(),
                 internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request);
+        overrideDefaultTemplateValues(stackRequest, sdxClusterRequest.getCustomInstanceGroups());
         validateRecipes(sdxClusterRequest, stackRequest, userCrn);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
@@ -426,6 +434,28 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         }
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(savedSdxCluster);
         return Pair.of(savedSdxCluster, flowIdentifier);
+    }
+
+    private void overrideDefaultTemplateValues(StackV4Request defaultTemplate, List<SdxInstanceGroupRequest> customInstanceGroups) {
+        if (CollectionUtils.isNotEmpty(customInstanceGroups)) {
+            LOGGER.debug("Override default template with custom instance groups from request.");
+            customInstanceGroups.forEach(customInstanceGroup -> {
+                InstanceGroupV4Request templateInstanceGroup = defaultTemplate.getInstanceGroups().stream()
+                        .filter(templateGroup -> templateGroup.getName() != null && templateGroup.getName().equals(customInstanceGroup.getName()))
+                        .findAny()
+                        .orElseThrow(() -> new BadRequestException("Custom instance group is missing from default template: " + customInstanceGroup.getName()));
+                overrideInstanceType(templateInstanceGroup, customInstanceGroup.getInstanceType());
+            });
+        }
+    }
+
+    private void overrideInstanceType(InstanceGroupV4Request templateGroup, String newInstanceType) {
+        InstanceTemplateV4Request instanceTemplate = templateGroup.getTemplate();
+        if (instanceTemplate != null && StringUtils.isNoneBlank(newInstanceType)) {
+            LOGGER.debug("Override instance group {} instance type from {} to {}",
+                    templateGroup.getName(),  instanceTemplate.getInstanceType(), newInstanceType);
+            instanceTemplate.setInstanceType(newInstanceType);
+        }
     }
 
     private void validateRecipes(SdxClusterRequest sdxClusterRequest, StackV4Request stackV4Request, String userCrn) {
@@ -766,7 +796,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     @Override
     public List<Long> getResourceIdsByResourceCrn(String resourceCrn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return getSdxClustersByCrn(userCrn, resourceCrn).stream().map(cluster -> cluster.getId()).collect(Collectors.toList());
+        return getSdxClustersByCrn(userCrn, resourceCrn, true).stream().map(cluster -> cluster.getId()).collect(Collectors.toList());
     }
 
     @Override
