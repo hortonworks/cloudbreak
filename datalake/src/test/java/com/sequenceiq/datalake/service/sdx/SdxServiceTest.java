@@ -103,6 +103,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.FreeipaService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
@@ -215,6 +216,9 @@ class SdxServiceTest {
 
     @Mock
     private ImageCatalogService imageCatalogService;
+
+    @Mock
+    private FreeipaService freeIpaService;
 
     @InjectMocks
     private SdxService underTest;
@@ -1262,7 +1266,7 @@ class SdxServiceTest {
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
-
+        when(freeIpaService.getNodeCount(anyString())).thenReturn(3L);
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterResizeRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(CloudPlatform.AWS.name());

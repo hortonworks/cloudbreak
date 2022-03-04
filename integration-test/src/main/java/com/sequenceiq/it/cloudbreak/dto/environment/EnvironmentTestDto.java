@@ -120,6 +120,11 @@ public class EnvironmentTestDto
         return this;
     }
 
+    public EnvironmentTestDto withFreeIpaInstanceCount(Integer instanceCountByGroup) {
+        getRequest().getFreeIpa().setInstanceCountByGroup(instanceCountByGroup);
+        return this;
+    }
+
     public EnvironmentTestDto withFreeIpaImage(String imageCatalog, String imageUuid) {
         if (!Strings.isNullOrEmpty(imageCatalog) && !Strings.isNullOrEmpty(imageUuid)) {
             FreeIpaImageRequest imageRequest = new FreeIpaImageRequest();

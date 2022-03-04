@@ -106,6 +106,7 @@ import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.FreeipaService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -113,6 +114,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.service.FlowCancelService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxAwsBase;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxAzureBase;
@@ -195,6 +197,9 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
 
     @Inject
     private ImageCatalogService imageCatalogService;
+
+    @Inject
+    private FreeipaService freeipaService;
 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
@@ -499,6 +504,10 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         final SdxCluster sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, clusterName)
                 .orElseThrow(() -> notFound("SDX cluster", clusterName).get());
 
+        long nodeCount = freeipaService.getNodeCount(sdxCluster.getEnvCrn());
+        if (AvailabilityType.NON_HA.getInstanceCount() == nodeCount) {
+            throw new BadRequestException("FreeIpa should be upscaled before resize");
+        }
         MDCBuilder.buildMdcContext(sdxCluster);
 
         validateSdxResizeRequest(sdxCluster, accountIdFromCrn, shape);

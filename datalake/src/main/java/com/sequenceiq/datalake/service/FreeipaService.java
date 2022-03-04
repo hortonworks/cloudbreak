@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Service
@@ -43,5 +44,18 @@ public class FreeipaService {
             LOGGER.error("Could not find freeipa with envCrn: " + envCrn, e);
         }
         return null;
+    }
+
+    public long getNodeCount(String envCrn) {
+        DescribeFreeIpaResponse response = null;
+        try {
+            response = freeIpaV1Endpoint.describe(envCrn);
+        } catch (NotFoundException e) {
+            LOGGER.error("Could not find freeipa with envCrn: " + envCrn, e);
+        }
+        if (response == null) {
+            return 0;
+        }
+        return response.getInstanceGroups().stream().mapToLong(InstanceGroupBase::getNodeCount).sum();
     }
 }
