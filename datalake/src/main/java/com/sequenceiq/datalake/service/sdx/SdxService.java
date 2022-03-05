@@ -309,7 +309,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public String getEnvCrnByCrn(String userCrn, String clusterCrn) {
         LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        Optional<String> envCrn = sdxClusterRepository.findEnvCrnByAccountIdAndCrnAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, clusterCrn);
+        Optional<String> envCrn = sdxClusterRepository.findEnvCrnByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (envCrn.isPresent()) {
             return envCrn.get();
         } else {
