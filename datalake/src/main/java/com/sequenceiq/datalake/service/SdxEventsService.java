@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.toList;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -22,6 +21,8 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
@@ -55,19 +56,14 @@ public class SdxEventsService {
         List<CDPStructuredEvent> dlEvents;
         List<List<CDPStructuredEvent>> cbEvents;
 
-        SdxCluster sdxCluster = getDatalake(environmentCrn);
-        if (sdxCluster == null) {
-            LOGGER.error("Datalake not found for environment with Crn:{}", environmentCrn);
-            return List.of();
-        }
-
+        ensureNonDeletedNonDetachedDatalakeExists(environmentCrn);
         List<SdxCluster> datalakes = getDatalakes(environmentCrn);
         dlEvents = retrieveDatalakeServiceEvents(types,
                 datalakes.stream().map(SdxCluster::getCrn).collect(toList()));
-        cbEvents = datalakes.stream().map(datalake -> retrieveCloudbreakServiceEvents(datalake)).collect(toList());
+        cbEvents = datalakes.stream().map(this::retrieveCloudbreakServiceEvents).collect(toList());
 
         List<CDPStructuredEvent> combinedEvents = new ArrayList<>();
-        cbEvents.forEach(events -> combinedEvents.addAll(events));
+        cbEvents.forEach(combinedEvents::addAll);
         combinedEvents.addAll(dlEvents);
 
         if (combinedEvents.isEmpty()) {
@@ -82,12 +78,7 @@ public class SdxEventsService {
         List<List<CDPStructuredEvent>> cbEvents;
 
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
-        SdxCluster sdxCluster = getDatalake(environmentCrn);
-        if (sdxCluster == null) {
-            LOGGER.error("Datalake not found for environment with Crn:{}", environmentCrn);
-            return List.of();
-        }
-
+        ensureNonDeletedNonDetachedDatalakeExists(environmentCrn);
         List<SdxCluster> datalakes = getDatalakes(environmentCrn);
         dlEvents = retrievePagableDatalakeServiceEvents(types,
                 datalakes.stream().map(SdxCluster::getCrn).collect(toList()), pageable);
@@ -95,7 +86,7 @@ public class SdxEventsService {
         cbEvents = datalakes.stream().map(datalake -> retrievePagedCloudbreakServiceEvents(datalake, page, size)).collect(toList());
 
         List<CDPStructuredEvent> combinedEvents = new ArrayList<>();
-        cbEvents.forEach(events -> combinedEvents.addAll(events));
+        cbEvents.forEach(combinedEvents::addAll);
         combinedEvents.addAll(dlEvents);
 
         if (combinedEvents.isEmpty()) {
@@ -107,7 +98,7 @@ public class SdxEventsService {
 
     private List<CDPStructuredEvent> retrievePagableDatalakeServiceEvents(List<StructuredEventType> types, List<String> datalakeCrns, PageRequest pageable) {
         Page<CDPStructuredEvent> pagedResponse = cdpStructuredEventDBService.getPagedEventsOfResources(types, datalakeCrns, pageable);
-        if (pagedResponse != null && pagedResponse.getContent().size() > 0) {
+        if (pagedResponse != null && !pagedResponse.getContent().isEmpty()) {
             return pagedResponse.getContent();
         } else {
             LOGGER.info("No events from datalake service");
@@ -117,7 +108,7 @@ public class SdxEventsService {
 
     private List<CDPStructuredEvent> retrieveDatalakeServiceEvents(List<StructuredEventType> types, List<String> datalakeCrns) {
         List<CDPStructuredEvent> response = cdpStructuredEventDBService.getEventsOfResources(types, datalakeCrns);
-        if (response != null && response.size() > 0) {
+        if (response != null && !response.isEmpty()) {
             return response;
         } else {
             LOGGER.info("No events from datalake service");
@@ -126,35 +117,38 @@ public class SdxEventsService {
     }
 
     private List<CDPStructuredEvent> retrievePagedCloudbreakServiceEvents(SdxCluster sdxCluster, Integer page, Integer size) {
-        List<CloudbreakEventV4Response> cloudbreakEventV4Responses;
         try {
-            cloudbreakEventV4Responses = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    eventV4Endpoint.getPagedCloudbreakEventListByStack(sdxCluster.getName(), page, size, getAccountId(sdxCluster.getEnvCrn())));
+            // Get and translate the cloudbreak events
+            List<CloudbreakEventV4Response> cloudbreakEventV4Responses = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                    eventV4Endpoint.getPagedCloudbreakEventListByStack(sdxCluster.getName(), page, size, getAccountId(sdxCluster.getEnvCrn()))
+            );
+            return cloudbreakEventV4Responses.stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(toList());
         } catch (Exception exception) {
-            cloudbreakEventV4Responses = List.of();
+            LOGGER.error("Failed to retrieve paged cloudbreak service events!", exception);
+            throw new CloudbreakServiceException("Failed to retrieve paged cloudbreak service events!", exception);
         }
-        // Translate the cloudbreak events
-        return cloudbreakEventV4Responses.stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(Collectors.toList());
     }
 
     private List<CDPStructuredEvent> retrieveCloudbreakServiceEvents(SdxCluster sdxCluster) {
         try {
-            StructuredEventContainer structuredEventContainer = eventV4Endpoint.structured(sdxCluster.getName(), getAccountId(sdxCluster.getEnvCrn()));
-            // Translate the cloudbreak events
-            return structuredEventContainer.getNotification().stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(Collectors.toList());
+            // Get and translate the cloudbreak events
+            StructuredEventContainer structuredEventContainer = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                    eventV4Endpoint.structured(sdxCluster.getName(), getAccountId(sdxCluster.getEnvCrn()))
+            );
+            return structuredEventContainer.getNotification().stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(toList());
         } catch (Exception exception) {
-            return List.of();
+            LOGGER.error("Failed to retrieve cloudbreak service events!", exception);
+            throw new CloudbreakServiceException("Failed to retrieve cloudbreak service events!", exception);
         }
-
     }
 
     private List<CDPStructuredEvent> sortAndFilterBasedOnPageSize(List<CDPStructuredEvent> eventList, Integer size) {
-        return eventList.stream().sorted(Comparator.comparingLong(f -> f.getOperation().getTimestamp())).collect(Collectors.toList())
+        return eventList.stream().sorted(Comparator.comparingLong(f -> f.getOperation().getTimestamp())).collect(toList())
                 .subList(0, (eventList.size() > size) ? size : eventList.size());
     }
 
     private List<CDPStructuredEvent> getSortedEvents(List<CDPStructuredEvent> eventList) {
-        return eventList.stream().sorted(Comparator.comparingLong(f -> f.getOperation().getTimestamp())).collect(Collectors.toList());
+        return eventList.stream().sorted(Comparator.comparingLong(f -> f.getOperation().getTimestamp())).collect(toList());
     }
 
     private String getAccountId(String crnString) {
@@ -162,7 +156,7 @@ public class SdxEventsService {
             Crn crn = Crn.safeFromString(crnString);
             return crn.getAccountId();
         } catch (NullPointerException | CrnParseException e) {
-            throw new BadRequestException("Can not parse CRN to find account ID: " + crnString);
+            throw new BadRequestException("Cannot parse CRN to find account ID: " + crnString);
         }
     }
 
@@ -177,19 +171,20 @@ public class SdxEventsService {
     }
 
     /**
-     * Get SdxCluster that is provisioned within the environment that is non-deleted and non-detached.
+     * Ensure there exists SdxCluster that is provisioned within the environment that is non-deleted and non-detached.
      *
      * @param environmentCrn an environment CRN
-     * @return SdxCluster related to the environment.
      */
-    private SdxCluster getDatalake(String environmentCrn) {
+    private void ensureNonDeletedNonDetachedDatalakeExists(String environmentCrn) {
         LOGGER.info("Looking for datalake associated with environment Crn {}", environmentCrn);
         List<SdxCluster> sdxClusters = sdxService.listSdxByEnvCrn(environmentCrn);
         sdxClusters.forEach(sdxCluster -> LOGGER.info("Found SDX cluster {}", sdxCluster));
-        if (!sdxClusters.isEmpty()) {
-            return sdxClusters.get(0);
+        if (sdxClusters.isEmpty()) {
+            LOGGER.error("Datalake not found for environment with Crn:{}", environmentCrn);
+            throw new NotFoundException(
+                    "No non-deleted and non-detached datalake found for environment with Crn:" + environmentCrn
+            );
         }
-        return null;
     }
 
     /**
