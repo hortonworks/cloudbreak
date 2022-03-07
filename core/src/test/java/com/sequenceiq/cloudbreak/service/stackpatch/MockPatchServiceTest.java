@@ -9,6 +9,9 @@ import static com.sequenceiq.cloudbreak.service.stackpatch.MockPatchService.STAC
 import static com.sequenceiq.cloudbreak.service.stackpatch.MockPatchService.STATUS_REASON;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -59,6 +62,8 @@ class MockPatchServiceTest {
         stack.setId(STACK_ID);
         stack.setResourceCrn("crn:cdp:datalake:us-west-1:tenant:datalake:935ad382-fe9c-400b-bf38-2156c1f09b6d");
         stack.setCloudPlatform(CloudPlatform.MOCK.name());
+
+        lenient().when(stackUpdater.updateStackStatus(any(), any(), anyString())).thenReturn(stack);
     }
 
     @Test

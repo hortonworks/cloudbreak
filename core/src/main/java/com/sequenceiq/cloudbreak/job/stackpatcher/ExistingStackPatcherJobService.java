@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchService;
 
@@ -58,7 +57,7 @@ public class ExistingStackPatcherJobService {
             LOGGER.info("Scheduling stack patcher {} job for stack with key: '{}' and group: '{}'",
                     stackPatchType, jobKey.getName(), jobKey.getGroup());
             scheduler.scheduleJob(jobDetail, trigger);
-        } catch (CloudbreakException e) {
+        } catch (UnknownStackPatchTypeException e) {
             LOGGER.error("Failed to get stack patcher for type {}", stackPatchType, e);
         } catch (SchedulerException e) {
             LOGGER.error("Error during scheduling stack patcher job: {}", jobDetail, e);

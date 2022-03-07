@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
@@ -56,24 +55,6 @@ class ExistingStackPatchServiceTest {
     }
 
     @Test
-    void isStackAlreadyFixedFalse() {
-        when(stackPatchRepository.findByStackAndType(stack, StackPatchType.UNKNOWN)).thenReturn(Optional.empty());
-
-        boolean result = underTest.isStackAlreadyFixed(stack);
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    void isStackAlreadyFixedTrue() {
-        when(stackPatchRepository.findByStackAndType(stack, StackPatchType.UNKNOWN)).thenReturn(Optional.of(new StackPatch()));
-
-        boolean result = underTest.isStackAlreadyFixed(stack);
-
-        assertThat(result).isTrue();
-    }
-
-    @Test
     void applyShouldNotSucceedWhenFlowIsRunning() throws ExistingStackPatchApplyException {
         when(flowLogService.isOtherFlowRunning(stack.getId())).thenReturn(true);
 
@@ -103,21 +84,10 @@ class ExistingStackPatchServiceTest {
     }
 
     @Test
-    void shouldSaveStackPatchWhenApplyIsSuccessful() throws ExistingStackPatchApplyException {
-        underTest.apply(stack);
-
-        verify(stackPatchRepository).save(stackPatchArgumentCaptor.capture());
-        StackPatch stackPatch = stackPatchArgumentCaptor.getValue();
-        assertThat(stackPatch)
-                .returns(stack, StackPatch::getStack)
-                .returns(StackPatchType.UNKNOWN, StackPatch::getType);
-    }
-
-    @Test
     void shouldTranslateUnexpectedExceptionType() throws ExistingStackPatchApplyException {
         assertThatThrownBy(() -> alsoUnderTest.apply(stack))
                 .isInstanceOf(ExistingStackPatchApplyException.class)
-                .hasMessage("Something unexpected went wrong with stack %s while applying patch %s",
+                .hasMessage("Something unexpected went wrong with stack %s while applying patch %s: Unexpected exception",
                         stack.getResourceCrn(), StackPatchType.UNKNOWN);
     }
 

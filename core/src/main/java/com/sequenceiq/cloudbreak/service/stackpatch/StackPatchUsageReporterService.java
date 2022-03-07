@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackPatch;
+import com.sequenceiq.cloudbreak.domain.stack.StackPatchStatus;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 
@@ -22,20 +24,23 @@ public class StackPatchUsageReporterService {
     @Inject
     private UsageReporter usageReporter;
 
-    public void reportAffected(Stack stack, StackPatchType stackPatchType) {
-        sendUsageReport(stack, stackPatchType, UsageProto.CDPStackPatchEventType.Value.AFFECTED);
+    public void reportUsage(StackPatch stackPatch) {
+        UsageProto.CDPStackPatchEventType.Value eventType = convertStatusToEventType(stackPatch.getStatus());
+        sendUsageReport(stackPatch.getStack(), stackPatch.getType(), eventType, stackPatch.getStatusReason());
     }
 
-    public void reportSuccess(Stack stack, StackPatchType stackPatchType) {
-        sendUsageReport(stack, stackPatchType, UsageProto.CDPStackPatchEventType.Value.SUCCESS);
-    }
-
-    public void reportFailure(Stack stack, StackPatchType stackPatchType, String failureMessage) {
-        sendUsageReport(stack, stackPatchType, UsageProto.CDPStackPatchEventType.Value.FAILURE, failureMessage);
-    }
-
-    private void sendUsageReport(Stack stack, StackPatchType stackPatchType, UsageProto.CDPStackPatchEventType.Value eventType) {
-        sendUsageReport(stack, stackPatchType, eventType, null);
+    private UsageProto.CDPStackPatchEventType.Value convertStatusToEventType(StackPatchStatus stackPatchStatus) {
+        switch (stackPatchStatus) {
+            case AFFECTED:
+                return UsageProto.CDPStackPatchEventType.Value.AFFECTED;
+            case FIXED:
+                return UsageProto.CDPStackPatchEventType.Value.SUCCESS;
+            case FAILED:
+                return UsageProto.CDPStackPatchEventType.Value.FAILURE;
+            default:
+                LOGGER.warn("Unrecognized StackPatchStatus {} for CDPStackPatchEventType", stackPatchStatus);
+                return UsageProto.CDPStackPatchEventType.Value.UNRECOGNIZED;
+        }
     }
 
     private void sendUsageReport(Stack stack, StackPatchType stackPatchType, UsageProto.CDPStackPatchEventType.Value eventType, String optionalMessage) {
