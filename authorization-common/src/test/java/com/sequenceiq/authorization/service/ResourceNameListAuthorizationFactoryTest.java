@@ -12,8 +12,11 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -23,6 +26,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.service.model.HasRightOnAll;
 
@@ -47,12 +51,17 @@ public class ResourceNameListAuthorizationFactoryTest {
     private ResourceNameListAuthorizationFactory underTest;
 
     @Mock
-    private ResourcePropertyProvider resourceBasedCrnProvider;
+    private AuthorizationResourceCrnListProvider resourceBasedCrnProvider;
+
+    @Before
+    public void setup() throws IllegalAccessException {
+        FieldUtils.writeField(underTest, "resourceCrnListProviderMap",
+                Map.of(AuthorizationResourceType.CREDENTIAL, resourceBasedCrnProvider), true);
+    }
 
     @Test
     public void testAuthorization() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(RESOURCES);
-        when(commonPermissionCheckingUtils.getResourceBasedCrnProvider(any())).thenReturn(resourceBasedCrnProvider);
         when(resourceBasedCrnProvider.getResourceCrnListByResourceNameList(anyList())).thenReturn(RESOURCE_CRNS);
         Optional<AuthorizationRule> expected = Optional.of(new HasRightOnAll(ACTION, RESOURCE_CRNS));
         when(resourceCrnListAuthorizationFactory.calcAuthorization(anyCollection(), any()))
@@ -78,7 +87,6 @@ public class ResourceNameListAuthorizationFactoryTest {
     @Test
     public void testAuthorizationWhenResourceCrnNotFound() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(RESOURCES);
-        when(commonPermissionCheckingUtils.getResourceBasedCrnProvider(any())).thenReturn(resourceBasedCrnProvider);
         when(resourceBasedCrnProvider.getResourceCrnListByResourceNameList(anyList())).thenReturn(Arrays.asList(null, null));
         when(resourceCrnListAuthorizationFactory.calcAuthorization(anyCollection(), any()))
                 .thenReturn(Optional.empty());

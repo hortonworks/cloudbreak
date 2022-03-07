@@ -33,7 +33,7 @@ public class UploadRepairSingleMasterRecipesHandler implements EventHandler<Uplo
         UploadRepairSingleMasterRecipesRequest request = event.getData();
         UploadRepairSingleMasterRecipesResult result;
         try {
-            clusterUpscaleService.uploadRecipesOnNewHosts(request.getResourceId(), request.getHostGroupName());
+            clusterUpscaleService.uploadRecipesOnNewHosts(request.getResourceId(), request.getHostGroupNames());
             result = new UploadRepairSingleMasterRecipesResult(request);
         } catch (Exception e) {
             result = new UploadRepairSingleMasterRecipesResult(e.getMessage(), e, request);

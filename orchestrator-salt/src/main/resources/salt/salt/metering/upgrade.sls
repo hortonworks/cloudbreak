@@ -28,7 +28,7 @@
 
 execute_metering_binary_upgrade:
   cmd.run:{% if fail_hard %}
-    - failHard: True{% endif %}
+    - failhard: True{% endif %}
     - name: "/opt/salt/scripts/metering_package_manager.sh upgrade{% if date_from %} -d {{ date_from }}{% endif %}{% if custom_rpm_url %} -u {{ custom_rpm_url }}{% endif %}{% if not fail_hard %}; exit 0{% endif %}"{% if proxy_full_url %}
     - env:
       - HTTPS_PROXY: {{ proxy_full_url }}{% if no_proxy_hosts %}

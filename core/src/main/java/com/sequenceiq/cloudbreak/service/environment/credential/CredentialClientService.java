@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.environment.credential;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.WebApplicationException;
@@ -11,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
-import com.sequenceiq.authorization.service.ResourcePropertyProvider;
+import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -19,7 +17,7 @@ import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
 @Service
-public class CredentialClientService implements ResourcePropertyProvider {
+public class CredentialClientService implements AuthorizationResourceCrnProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialClientService.class);
 
@@ -66,7 +64,13 @@ public class CredentialClientService implements ResourcePropertyProvider {
     }
 
     @Override
-    public Optional<AuthorizationResourceType> getSupportedAuthorizationResourceType() {
-        return Optional.of(AuthorizationResourceType.CREDENTIAL);
+    public String getResourceCrnByResourceName(String resourceName) {
+        // is there a better way to get credential crn by name in core?
+        return getByName(resourceName).getCrn();
+    }
+
+    @Override
+    public AuthorizationResourceType getSupportedAuthorizationResourceType() {
+        return AuthorizationResourceType.CREDENTIAL;
     }
 }

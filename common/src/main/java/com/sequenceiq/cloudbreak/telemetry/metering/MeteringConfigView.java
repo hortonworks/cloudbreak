@@ -21,6 +21,8 @@ public class MeteringConfigView implements TelemetryConfigView {
 
     private final String platform;
 
+    private final String desiredMeteringAgentDate;
+
     private MeteringConfigView(Builder builder) {
         this.enabled = builder.enabled;
         this.clusterCrn = builder.clusterCrn;
@@ -29,6 +31,7 @@ public class MeteringConfigView implements TelemetryConfigView {
         this.serviceVersion = builder.serviceVersion;
         this.streamName = builder.streamName;
         this.platform = builder.platform;
+        this.desiredMeteringAgentDate = builder.desiredMeteringAgentDate;
     }
 
     public boolean isEnabled() {
@@ -59,6 +62,10 @@ public class MeteringConfigView implements TelemetryConfigView {
         return platform;
     }
 
+    public String getDesiredMeteringAgentDate() {
+        return desiredMeteringAgentDate;
+    }
+
     @Override
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -69,6 +76,7 @@ public class MeteringConfigView implements TelemetryConfigView {
         map.put("serviceVersion", this.serviceVersion);
         map.put("streamName", this.streamName);
         map.put("platform", this.platform);
+        map.put("desiredMeteringAgentDate", this.desiredMeteringAgentDate);
         return map;
     }
 
@@ -87,6 +95,8 @@ public class MeteringConfigView implements TelemetryConfigView {
         private String streamName;
 
         private String platform;
+
+        private String desiredMeteringAgentDate;
 
         public MeteringConfigView build() {
             return new MeteringConfigView(this);
@@ -124,6 +134,11 @@ public class MeteringConfigView implements TelemetryConfigView {
 
         public Builder withPlatform(String platform) {
             this.platform = platform;
+            return this;
+        }
+
+        public MeteringConfigView.Builder withDesiredMeteringAgentDate(String desiredMeteringAgentDate) {
+            this.desiredMeteringAgentDate = desiredMeteringAgentDate;
             return this;
         }
     }

@@ -130,39 +130,44 @@ public class MetadataSetupService {
         });
     }
 
-    public void cleanupRequestedInstancesIfNotInList(Long stackId, String instanceGroupName, Set<Long> privateIds) {
+    public void cleanupRequestedInstancesIfNotInList(Long stackId, Set<String> instanceGroups, Set<Long> privateIds) {
         LOGGER.info("Cleanup the requested instances if private id not in {}", privateIds);
-        Optional<InstanceGroup> instanceGroup = instanceGroupService.findOneByStackIdAndGroupName(stackId, instanceGroupName);
-        instanceGroup.ifPresent(ig -> {
-            List<InstanceMetaData> requestedInstanceMetaDatas = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(ig, InstanceStatus.REQUESTED);
-            LOGGER.info("Instances in requested state: {}", requestedInstanceMetaDatas);
-            List<InstanceMetaData> removableInstanceMetaDatas = requestedInstanceMetaDatas.stream()
-                    .filter(instanceMetaData -> !privateIds.contains(instanceMetaData.getPrivateId()))
-                    .collect(Collectors.toList());
-            LOGGER.info("Cleanup the following instances: {}", requestedInstanceMetaDatas);
-            for (InstanceMetaData removableInstanceMetaData : removableInstanceMetaDatas) {
-                removableInstanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());
-                removableInstanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
-            }
-            instanceMetaDataService.saveAll(removableInstanceMetaDatas);
-        });
+        for (String instanceGroupName : instanceGroups) {
+            Optional<InstanceGroup> instanceGroup = instanceGroupService.findOneByStackIdAndGroupName(stackId, instanceGroupName);
+            instanceGroup.ifPresent(ig -> {
+                List<InstanceMetaData> requestedInstanceMetaDatas =
+                        instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(ig, InstanceStatus.REQUESTED);
+                LOGGER.info("Instances in requested state: {}", requestedInstanceMetaDatas);
+                List<InstanceMetaData> removableInstanceMetaDatas = requestedInstanceMetaDatas.stream()
+                        .filter(instanceMetaData -> !privateIds.contains(instanceMetaData.getPrivateId()))
+                        .collect(Collectors.toList());
+                LOGGER.info("Cleanup the following instances: {}", requestedInstanceMetaDatas);
+                for (InstanceMetaData removableInstanceMetaData : removableInstanceMetaDatas) {
+                    removableInstanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());
+                    removableInstanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
+                }
+                instanceMetaDataService.saveAll(removableInstanceMetaDatas);
+            });
+        }
     }
 
-    public void cleanupRequestedInstancesWithoutFQDN(Long stackId, String instanceGroupName) {
+    public void cleanupRequestedInstancesWithoutFQDN(Long stackId, Set<String> instanceGroups) {
         try {
             transactionService.required(() -> {
-                Optional<InstanceGroup> ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(stackId, instanceGroupName);
-                if (ig.isPresent()) {
-                    List<InstanceMetaData> requestedInstances = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(ig.get(),
-                            InstanceStatus.REQUESTED);
-                    List<InstanceMetaData> requestedInstancesWithoutFQDN =
-                            requestedInstances.stream().filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() == null).collect(Collectors.toList());
-                    LOGGER.info("Set requested instances without FQDN to terminated: {}", requestedInstancesWithoutFQDN);
-                    for (InstanceMetaData inst : requestedInstancesWithoutFQDN) {
-                        inst.setTerminationDate(clock.getCurrentTimeMillis());
-                        inst.setInstanceStatus(InstanceStatus.TERMINATED);
+                for (String instanceGroupName : instanceGroups) {
+                    Optional<InstanceGroup> ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(stackId, instanceGroupName);
+                    if (ig.isPresent()) {
+                        List<InstanceMetaData> requestedInstances = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(ig.get(),
+                                InstanceStatus.REQUESTED);
+                        List<InstanceMetaData> requestedInstancesWithoutFQDN =
+                                requestedInstances.stream().filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() == null).collect(Collectors.toList());
+                        LOGGER.info("Set requested instances without FQDN to terminated: {}", requestedInstancesWithoutFQDN);
+                        for (InstanceMetaData inst : requestedInstancesWithoutFQDN) {
+                            inst.setTerminationDate(clock.getCurrentTimeMillis());
+                            inst.setInstanceStatus(InstanceStatus.TERMINATED);
+                        }
+                        instanceMetaDataService.saveAll(requestedInstances);
                     }
-                    instanceMetaDataService.saveAll(requestedInstances);
                 }
             });
         } catch (TransactionExecutionException e) {

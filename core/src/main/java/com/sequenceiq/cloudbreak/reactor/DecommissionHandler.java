@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionR
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -126,10 +127,15 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             hostNames = getHostNamesForPrivateIds(request, stack);
             ClusterDecomissionService clusterDecomissionService = getClusterDecomissionService(stack);
-            Map<String, InstanceMetaData> hostsToRemove = getRemovableHosts(clusterDecomissionService, stack, request.getHostGroupName(), hostNames);
+            Map<String, InstanceMetaData> hostsToRemove = new HashMap<>();
+            Set<String> hostGroupNames = request.getHostGroupNames();
+            for (String hostGroup : hostGroupNames) {
+                hostsToRemove.putAll(getRemovableHosts(clusterDecomissionService, stack, hostGroup, hostNames));
+            }
+
             updateInstancesToDeleteRequested(hostsToRemove.values());
-            if (!hostsToRemove.isEmpty() && !forced) {
-                executePreTerminationRecipes(stack, request.getHostGroupName(), hostsToRemove.keySet());
+            if (!hostsToRemove.isEmpty()) {
+                executePreTerminationRecipes(stack, hostsToRemove.keySet());
             }
 
             Optional<String> runtimeVersion = runtimeVersionService.getRuntimeVersion(stack.getCluster().getId());
@@ -220,12 +226,10 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
         instances.forEach(instance -> instanceMetaDataService.updateInstanceStatus(instance, instanceStatus, statusReason));
     }
 
-    private void executePreTerminationRecipes(Stack stack, String hostGroupName, Set<String> hostNames) {
+    private void executePreTerminationRecipes(Stack stack, Set<String> hostNames) {
         try {
-            Optional<HostGroup> hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName));
-            if (hostGroup.isPresent()) {
-                recipeEngine.executePreTerminationRecipes(stack, Set.of(hostGroup.get()), hostNames);
-            }
+            Set<HostGroup> byClusterWithRecipes = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
+            recipeEngine.executePreTerminationRecipes(stack, byClusterWithRecipes, hostNames);
         } catch (Exception ex) {
             LOGGER.warn(ex.getLocalizedMessage(), ex);
         }

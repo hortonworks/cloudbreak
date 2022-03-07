@@ -6,7 +6,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.annotation.Annotation;
+import java.util.Map;
 
+import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ResourceNameAuthorizationFactoryTest {
@@ -35,13 +38,14 @@ public class ResourceNameAuthorizationFactoryTest {
     private ResourceNameAuthorizationFactory underTest;
 
     @Mock
-    private ResourcePropertyProvider resourceBasedCrnProvider;
+    private AuthorizationResourceCrnProvider resourceBasedCrnProvider;
 
     @Before
-    public void setUp() {
+    public void setUp() throws IllegalAccessException {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn("resource");
-        when(commonPermissionCheckingUtils.getResourceBasedCrnProvider(any())).thenReturn(resourceBasedCrnProvider);
         when(resourceBasedCrnProvider.getResourceCrnByResourceName(any())).thenReturn(RESOURCE_CRN);
+        FieldUtils.writeField(underTest, "resourceCrnProviderMap",
+                Map.of(AuthorizationResourceType.CREDENTIAL, resourceBasedCrnProvider), true);
     }
 
     @Test

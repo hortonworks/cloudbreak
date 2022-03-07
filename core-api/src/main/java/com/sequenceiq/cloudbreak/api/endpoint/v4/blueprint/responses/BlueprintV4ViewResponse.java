@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.BlueprintBasedUpgradeOption;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
@@ -30,6 +31,9 @@ public class BlueprintV4ViewResponse extends CompactViewV4Response {
 
     @ApiModelProperty(BlueprintModelDescription.TAGS)
     private Map<String, Object> tags = new HashMap<>();
+
+    @ApiModelProperty(BlueprintModelDescription.UPGRADEABLE)
+    private BlueprintBasedUpgradeOption upgradeable;
 
     private Long created;
 
@@ -87,5 +91,13 @@ public class BlueprintV4ViewResponse extends CompactViewV4Response {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public BlueprintBasedUpgradeOption isUpgradeable() {
+        return upgradeable;
+    }
+
+    public void setUpgradeable(BlueprintBasedUpgradeOption upgradeable) {
+        this.upgradeable = upgradeable;
     }
 }

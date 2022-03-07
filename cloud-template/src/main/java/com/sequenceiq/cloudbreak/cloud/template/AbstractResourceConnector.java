@@ -2,8 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.template;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -187,14 +188,16 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         //network
         context.addNetworkResources(networkResourceService.getNetworkResources(variant, resources));
 
-        Group scalingGroup = getScalingGroup(getGroup(stack.getGroups(), getGroupName(stack)));
+        Set<Group> scalingGroups = getScalingGroups(getGroups(stack.getGroups(), getGroupNames(stack)));
 
         //group
-        context.addGroupResources(scalingGroup.getName(), groupResourceService.getGroupResources(variant, resources));
+        for (Group scalingGroup : scalingGroups) {
+            context.addGroupResources(scalingGroup.getName(), groupResourceService.getGroupResources(variant, resources));
+            diskReattachment(resources, scalingGroup, context);
+        }
 
         //compute
-        diskReattachment(resources, scalingGroup, context);
-        return computeResourceService.buildResourcesForUpscale(context, auth, stack, Collections.singletonList(scalingGroup), adjustmentTypeWithThreshold);
+        return computeResourceService.buildResourcesForUpscale(context, auth, stack, scalingGroups, adjustmentTypeWithThreshold);
     }
 
     protected void diskReattachment(List<CloudResource> resources, Group scalingGroup, ResourceBuilderContext context) {
@@ -291,44 +294,48 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         return databaseServerCheckerService;
     }
 
-    protected Group getScalingGroup(Group scalingGroup) {
-        List<CloudInstance> instances = new ArrayList<>(scalingGroup.getInstances());
-        instances.removeIf(cloudInstance -> InstanceStatus.CREATE_REQUESTED != cloudInstance.getTemplate().getStatus());
-        return new Group(scalingGroup.getName(),
-                scalingGroup.getType(),
-                instances,
-                scalingGroup.getSecurity(),
-                null,
-                scalingGroup.getInstanceAuthentication(),
-                scalingGroup.getInstanceAuthentication().getLoginUserName(),
-                scalingGroup.getInstanceAuthentication().getPublicKey(),
-                scalingGroup.getRootVolumeSize(),
-                scalingGroup.getIdentity(),
-                scalingGroup.getNetwork(),
-                scalingGroup.getTags());
+    protected Set<Group> getScalingGroups(Set<Group> scalingGroups) {
+        Set<Group> groups = new HashSet<>();
+        for (Group scalingGroup : scalingGroups) {
+            List<CloudInstance> instances = new ArrayList<>(scalingGroup.getInstances());
+            instances.removeIf(cloudInstance -> InstanceStatus.CREATE_REQUESTED != cloudInstance.getTemplate().getStatus());
+            groups.add(new Group(scalingGroup.getName(),
+                    scalingGroup.getType(),
+                    instances,
+                    scalingGroup.getSecurity(),
+                    null,
+                    scalingGroup.getInstanceAuthentication(),
+                    scalingGroup.getInstanceAuthentication().getLoginUserName(),
+                    scalingGroup.getInstanceAuthentication().getPublicKey(),
+                    scalingGroup.getRootVolumeSize(),
+                    scalingGroup.getIdentity(),
+                    scalingGroup.getNetwork(),
+                    scalingGroup.getTags()));
+        }
+        return groups;
     }
 
-    protected Group getGroup(Iterable<Group> groups, String groupName) {
-        Group resultGroup = null;
+    protected Set<Group> getGroups(Iterable<Group> groups, Set<String> groupNames) {
+        Set<Group> resultGroup = new HashSet<>();
         for (Group group : groups) {
-            if (groupName.equalsIgnoreCase(group.getName())) {
-                resultGroup = group;
-                break;
+            if (groupNames.contains(group.getName())) {
+                resultGroup.add(group);
             }
         }
         return resultGroup;
     }
 
-    protected String getGroupName(CloudStack stack) {
+    protected Set<String> getGroupNames(CloudStack stack) {
+        Set<String> groupNames = new HashSet<>();
         for (Group group : stack.getGroups()) {
             for (CloudInstance instance : group.getInstances()) {
                 InstanceTemplate instanceTemplate = instance.getTemplate();
                 if (InstanceStatus.CREATE_REQUESTED == instanceTemplate.getStatus()) {
-                    return instanceTemplate.getGroupName();
+                    groupNames.add(instanceTemplate.getGroupName());
                 }
             }
         }
-        return null;
+        return groupNames;
     }
 
     protected Collection<CloudResource> getDeletableResources(Iterable<CloudResource> resources, Iterable<CloudInstance> instances) {

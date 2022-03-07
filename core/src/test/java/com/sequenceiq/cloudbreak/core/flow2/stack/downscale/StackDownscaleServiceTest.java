@@ -77,8 +77,8 @@ class StackDownscaleServiceTest {
         InstanceMetaData master = new InstanceMetaData();
         master.setInstanceId("i-1111");
         master.setDiscoveryFQDN("master1.cloudera.site");
+        master.setPrivateId(1L);
         masterGroup.setInstanceMetaData(Set.of(master));
-        when(stack.getInstanceGroupByInstanceGroupName(any())).thenReturn(masterGroup);
         ArrayList<Resource> volumes = new ArrayList<>();
         Resource volume1 = new Resource();
         volumes.add(volume1);
@@ -86,7 +86,7 @@ class StackDownscaleServiceTest {
         doReturn(Optional.of(new VolumeSetAttributes("az1", false, "",
                 new ArrayList<>(), 50, "gp2"))).when(resourceAttributeUtil).getTypedAttributes(volume1, VolumeSetAttributes.class);
         when(resourceService.findByStackIdAndType(any(), any())).thenReturn(volumes);
-        stackDownscaleService.finishStackDownscale(stackScalingFlowContext, "master", Set.of("i-1111"));
+        stackDownscaleService.finishStackDownscale(stackScalingFlowContext, Set.of(1L));
         verify(resourceService).saveAll(resourcesCaptor.capture());
         Iterable<Resource> resourcesCaptorValue = resourcesCaptor.getValue();
         Json attributes = resourcesCaptorValue.iterator().next().getAttributes();
@@ -104,9 +104,9 @@ class StackDownscaleServiceTest {
         when(stack.getInstanceGroups()).thenReturn(Set.of(masterGroup));
         InstanceMetaData master = new InstanceMetaData();
         master.setInstanceId("i-1111");
+        master.setPrivateId(1L);
         master.setDiscoveryFQDN("master1.cloudera.site");
         masterGroup.setInstanceMetaData(Set.of(master));
-        when(stack.getInstanceGroupByInstanceGroupName(any())).thenReturn(masterGroup);
         ArrayList<Resource> volumes = new ArrayList<>();
         Resource volume1 = new Resource();
         volumes.add(volume1);
@@ -117,7 +117,7 @@ class StackDownscaleServiceTest {
         volume1.setAttributes(Json.silent(volumeSetAttributes));
         doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(volume1, VolumeSetAttributes.class);
         when(resourceService.findByStackIdAndType(any(), any())).thenReturn(volumes);
-        stackDownscaleService.finishStackDownscale(stackScalingFlowContext, "master", Set.of("i-1111"));
+        stackDownscaleService.finishStackDownscale(stackScalingFlowContext, Set.of(1L));
         verify(resourceService).saveAll(resourcesCaptor.capture());
         Iterable<Resource> resourcesCaptorValue = resourcesCaptor.getValue();
         Json attributes = resourcesCaptorValue.iterator().next().getAttributes();

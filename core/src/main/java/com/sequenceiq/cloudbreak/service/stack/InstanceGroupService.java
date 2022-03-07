@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -102,6 +104,10 @@ public class InstanceGroupService {
 
     public Optional<InstanceGroup> findOneWithInstanceMetadataByGroupNameInStack(Long stackId, String groupName) {
         return repository.findOneWithInstanceMetadataByGroupNameInStack(stackId, groupName);
+    }
+
+    public List<InstanceGroup> findByStackIdAndInstanceGroupNames(Long stackId, Collection<String> groupNames) {
+        return repository.findByStackIdAndInstanceGroupNames(stackId, groupNames);
     }
 
     public Optional<InstanceGroup> findOneByStackIdAndGroupName(Long stackId, String groupName) {

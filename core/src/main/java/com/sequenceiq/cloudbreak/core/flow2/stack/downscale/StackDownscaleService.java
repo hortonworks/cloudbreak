@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -30,8 +31,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
 import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
@@ -70,27 +71,31 @@ public class StackDownscaleService {
     public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
         LOGGER.debug("Downscaling of stack {}", context.getStack().getId());
         stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
-        Set<Long> privateIds = stackDownscaleTriggerEvent.getPrivateIds();
+        Set<Long> privateIds = null;
+        if (stackDownscaleTriggerEvent.getHostGroupsWithPrivateIds() != null) {
+            privateIds = stackDownscaleTriggerEvent.getHostGroupsWithPrivateIds().values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+        }
         String msgParam;
-        if (privateIds != null) {
+        if (CollectionUtils.isNotEmpty(privateIds)) {
             Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
             List<String> instanceIdList = stackService.getInstanceIdsForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
             msgParam = String.join(",", instanceIdList);
+        } else if (stackDownscaleTriggerEvent.getHostGroupsWithAdjustment() != null) {
+            Integer adjustmentSize = stackDownscaleTriggerEvent.getHostGroupsWithAdjustment().values().stream().reduce(0, Integer::sum);
+            msgParam = String.valueOf(adjustmentSize);
         } else {
-            msgParam = String.valueOf(Math.abs(stackDownscaleTriggerEvent.getAdjustment()));
+            throw new CloudbreakRuntimeException("No adjustment was defined");
         }
         flowMessageService.fireEventAndLog(context.getStack().getId(), UPDATE_IN_PROGRESS.name(), STACK_DOWNSCALE_INSTANCES, msgParam);
     }
 
-    public void finishStackDownscale(StackScalingFlowContext context, String instanceGroupName, Collection<String> instanceIds)
+    public void finishStackDownscale(StackScalingFlowContext context, Collection<Long> privateIds)
             throws TransactionExecutionException {
         Stack stack = context.getStack();
-        InstanceGroup g = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        stackScalingService.updateRemovedResourcesState(instanceIds, g);
+        stackScalingService.updateInstancesToTerminated(privateIds, stack.getId());
         List<InstanceMetaData> instanceMetaDatas = stack.getInstanceGroups()
-                .stream().filter(ig -> ig.getGroupName().equals(instanceGroupName))
-                .flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
-                .filter(im -> instanceIds.contains(im.getInstanceId()))
+                .stream().flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
+                .filter(im -> privateIds.contains(im.getPrivateId()))
                 .collect(toList());
         if (context.isRepair()) {
             fillDiscoveryFQDNForRepair(stack, instanceMetaDatas);

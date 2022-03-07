@@ -8,6 +8,8 @@ import javax.persistence.Table;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
+import com.sequenceiq.cloudbreak.domain.converter.BlueprintUpgradeOptionConverter;
 import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
 
 @Entity
@@ -30,6 +32,9 @@ public class BlueprintView extends CompactView {
     private Json tags;
 
     private Long created;
+
+    @Convert(converter = BlueprintUpgradeOptionConverter.class)
+    private BlueprintUpgradeOption blueprintUpgradeOption;
 
     public String getStackType() {
         return stackType;
@@ -85,5 +90,13 @@ public class BlueprintView extends CompactView {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public BlueprintUpgradeOption getBlueprintUpgradeOption() {
+        return blueprintUpgradeOption;
+    }
+
+    public void setBlueprintUpgradeOption(BlueprintUpgradeOption blueprintUpgradeOption) {
+        this.blueprintUpgradeOption = blueprintUpgradeOption;
     }
 }

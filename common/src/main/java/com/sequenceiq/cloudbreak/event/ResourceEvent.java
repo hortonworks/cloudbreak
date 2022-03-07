@@ -216,6 +216,8 @@ public enum ResourceEvent {
     STACK_DATALAKE_UPDATE_FAILED("stack.datalake.update.failed"),
     STACK_DIAGNOSTICS_SALT_VALIDATION_RUNNING("stack.diagnostics.salt.validation.running"),
     STACK_DIAGNOSTICS_SALT_VALIDATION_RUNNING_SKIP_UNRESPONSIVE("stack.diagnostics.salt.validation.running.skip.unresponsive"),
+    STACK_DIAGNOSTICS_SALT_PILLAR_UPDATE_RUNNING("stack.diagnostics.salt.pillar.update.running"),
+    STACK_DIAGNOSTICS_SALT_STATE_UPDATE_RUNNING("stack.diagnostics.salt.state.update.running"),
     STACK_DIAGNOSTICS_PREFLIGHT_CHECK_RUNNING("stack.diagnostics.preflight.check.running"),
     STACK_DIAGNOSTICS_PREFLIGHT_CHECK_FINISHED("stack.diagnostics.preflight.check.finished"),
     STACK_DIAGNOSTICS_INIT_RUNNING("stack.diagnostics.init.running"),
@@ -391,11 +393,8 @@ public enum ResourceEvent {
     CLUSTER_MANAGER_CLUSTER_SERVICES_STOPPED("cluster.ambari.cluster.services.stopped"),
     CLUSTER_MANAGER_CLUSTER_SERVICES_STARTING("cluster.ambari.cluster.services.starting"),
     CLUSTER_MANAGER_CLUSTER_SERVICES_STARTED("cluster.ambari.cluster.services.started"),
-    CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("cluster.removing.node.from.hostgroup"),
-
-
-
-    CLUSTER_FORCE_REMOVING_NODE_FROM_HOSTGROUP("cluster.force.removing.node.from.hostgroup"),
+    CLUSTER_REMOVING_NODES("cluster.removing.nodes"),
+    CLUSTER_FORCE_REMOVING_NODES("cluster.force.removing.nodes"),
     CLUSTER_LOST_NODE_DECOMMISSION_ABORTED_TWICE("cluster.removing.node.lost.node.decommission.aborted"),
     CLUSTER_CERTIFICATE_REISSUE("cluster.certificate.reissue"),
     CLUSTER_CERTIFICATE_REDEPLOY("cluster.certificate.redeploy"),

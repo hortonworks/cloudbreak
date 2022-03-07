@@ -135,7 +135,7 @@ class UpdateDatabaseServerRegistrationHandlerTest {
     }
 
     @Test
-    void doAcceptTestWhenFailureDatabaseServerConfigNotFound() {
+    void doAcceptTestWhenFailureDatabaseServerConfigNotFound() throws Exception {
         DBStack dbStack = getDBStack();
         UpdateDatabaseServerRegistrationRequest request = getRequest(dbStack);
         when(event.getData()).thenReturn(request);
@@ -151,7 +151,7 @@ class UpdateDatabaseServerRegistrationHandlerTest {
     }
 
     @Test
-    void doAcceptTestWhenFailureCloudResourceHostnameNotFound() {
+    void doAcceptTestWhenFailureCloudResourceHostnameNotFound() throws Exception {
         DBStack dbStack = getDBStack();
         UpdateDatabaseServerRegistrationRequest request = getRequest(dbStack);
         when(event.getData()).thenReturn(request);
@@ -169,7 +169,7 @@ class UpdateDatabaseServerRegistrationHandlerTest {
     }
 
     @Test
-    void doAcceptTestWhenFailureCloudResourcePortNotFound() {
+    void doAcceptTestWhenFailureCloudResourcePortNotFound() throws Exception {
         DBStack dbStack = getDBStack();
         UpdateDatabaseServerRegistrationRequest request = getRequest(dbStack);
         when(event.getData()).thenReturn(request);

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cluster.api;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -17,7 +16,7 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public interface ClusterModificationService {
 
-    List<String> upscaleCluster(HostGroup hostGroup, Collection<InstanceMetaData> metas) throws CloudbreakException;
+    List<String> upscaleCluster(Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup) throws CloudbreakException;
 
     void stopCluster(boolean full) throws CloudbreakException;
 

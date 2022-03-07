@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cluster.api;
 
 import java.security.KeyPair;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -58,8 +57,8 @@ public interface ClusterApi {
         clusterSecurityService().changeOriginalCredentialsAndCreateCloudbreakUser(ldapConfigured);
     }
 
-    default List<String> upscaleCluster(HostGroup hostGroup, Collection<InstanceMetaData> metas) throws CloudbreakException {
-        return clusterModificationService().upscaleCluster(hostGroup, metas);
+    default List<String> upscaleCluster(Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup) throws CloudbreakException {
+        return clusterModificationService().upscaleCluster(instanceMetaDatasByHostGroup);
     }
 
     default void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade, Optional<String> remoteDataContext) throws CloudbreakException {

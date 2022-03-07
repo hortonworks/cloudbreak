@@ -98,7 +98,7 @@ class EntitlementDrivenPackageLocationFilterTest {
         ImageFilterResult actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.filter(imageFilterResult, imageFilterParams));
 
         assertTrue(actual.getImages().isEmpty());
-        assertEquals("There are no eligible images to upgrade because the location of the packages are not appropriate.", actual.getReason());
+        assertEquals("There are no eligible images to upgrade because the location of the packages is not appropriate.", actual.getReason());
     }
 
     @Test
@@ -111,7 +111,7 @@ class EntitlementDrivenPackageLocationFilterTest {
         ImageFilterResult actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.filter(imageFilterResult, imageFilterParams));
 
         assertTrue(actual.getImages().isEmpty());
-        assertEquals("There are no eligible images to upgrade because the location of the packages are not appropriate.", actual.getReason());
+        assertEquals("There are no eligible images to upgrade because the location of the packages is not appropriate.", actual.getReason());
     }
 
     private PackageLocationFilter createAcceptingFilter() {

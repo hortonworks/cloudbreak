@@ -36,8 +36,9 @@ public abstract class ExceptionCatcherEventHandler<T extends Payload> implements
                 throw new IllegalStateException(message);
             }
         } catch (Exception e) {
-            LOGGER.error("Something unexpected happened in handler {}", handlerName, e);
+            LOGGER.error("Something unexpected happened in handler " + handlerName, e);
             Selectable failureEvent = defaultFailureEvent(event.getData().getResourceId(), e, event);
+            LOGGER.error("Failure event: {}", failureEvent);
             eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
         }
     }

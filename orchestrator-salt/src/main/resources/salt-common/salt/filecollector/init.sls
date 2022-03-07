@@ -3,36 +3,9 @@
 {%- from 'fluent/settings.sls' import fluent with context %}
 {%- from 'databus/settings.sls' import databus with context %}
 
-{% set cdp_telemetry_version = '0.4.18' %}
-{% set cldr_service_delivery_repo = 'https://cloudera-service-delivery-cache.s3.amazonaws.com'%}
-{% set cdp_telemetry_rpm_location = cldr_service_delivery_repo + '/telemetry/cdp-telemetry/'%}
-{% set cdp_telemetry_rpm_repo_url = cdp_telemetry_rpm_location + 'cdp_telemetry-' + cdp_telemetry_version + '.x86_64.rpm' %}
-{% set cdp_telemetry_package_name = 'cdp-telemetry' %}
-
 {% if filecollector.updatePackage %}
-uninstall_telemetry_rpm_if_wrong_version:
-  cmd.run:
-    - name: rpm -e {{ cdp_telemetry_package_name }}
-    - onlyif: cdp-telemetry utils check-connection --url {{ cldr_service_delivery_repo }} && rpm -qa {{ cdp_telemetry_package_name }} | grep -v {{ cdp_telemetry_version }}
-    - failhard: True{% if filecollector.proxyUrl %}
-    - env:
-       - https_proxy: {{ filecollector.proxyUrl }}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
-       - no_proxy: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
-install_telemetry_rpm_manually:
-  cmd.run:
-    - name: "rpm -i {{ cdp_telemetry_rpm_repo_url }}"
-    - onlyif: "! rpm -q {{ cdp_telemetry_package_name }}"
-    - failhard: True{% if filecollector.proxyUrl %}
-    - env:{% if filecollector.proxyProtocol == "https" %}
-      - https_proxy: {{ filecollector.proxyUrl }}{% else %}
-      - http_proxy: {{ filecollector.proxyUrl }}{% endif %}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
-      - no_proxy: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
-{% else %}
-fail_if_telemetry_rpm_is_not_installed:
-  cmd.run:
-    - name: echo "cdp-telemetry binary is not installed, it is required for using filecollector (diagnostics)"; exit 1
-    - onlyif: "! rpm -q {{ cdp_telemetry_package_name }}"
-    - failhard: True
+include:
+  - telemetry.upgrade
 {% endif %}
 
 /var/lib/filecollector:
@@ -120,11 +93,11 @@ delete_test_cloud_storage_file:
 {% elif not filecollector.skipValidation and filecollector.destination == "ENG" and fluent.dbusClusterLogsCollection and databus.endpoint %}
 check_dbus_connection:
   cmd.run:
-    - name: "cdp-telemetry utils check-connection --url {{ databus.endpoint }}"
+    - name: "curl {{ telemetry.databusCurlConnectOpts }} -s -k {{ databus.endpoint }} > /dev/null"
     - failhard: True{% if filecollector.proxyUrl %}
     - env:
-       - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
-       - NO_PROXY: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
+       - https_proxy: {{ filecollector.proxyUrl }}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+       - no_proxy: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
 check_logging_agent_running_systemctl:
   cmd.run:
     - name: "systemctl is-active --quiet td-agent || systemctl is-active --quiet cdp-logging-agent"
@@ -132,21 +105,21 @@ check_logging_agent_running_systemctl:
 {% elif filecollector.dbusUrl and filecollector.destination == "SUPPORT" %}
 check_support_dbus_connection:
   cmd.run:
-    - name: "cdp-telemetry utils check-connection --url {{ filecollector.dbusUrl }}"
+    - name: "curl {{ telemetry.databusCurlConnectOpts }} -s -k {{ filecollector.dbusUrl }} > /dev/null"
     - failhard: True{% if filecollector.proxyUrl %}
     - env: {% if filecollector.proxyProtocol == "https" %}
-       - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% else %}
-       - HTTP_PROXY: {{ filecollector.proxyUrl }}{% endif %}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
-       - NO_PROXY: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
+       - https_proxy: {{ filecollector.proxyUrl }}{% else %}
+       - http_proxy: {{ filecollector.proxyUrl }}{% endif %}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+       - no_proxy: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
 {% if filecollector.dbusS3Url %}
 check_support_dbus_s3_connection:
   cmd.run:
-    - name: "cdp-telemetry utils check-connection --url {{ filecollector.dbusS3Url }}"
+    - name: "curl {{ telemetry.databusCurlConnectOpts }} -s -k {{ filecollector.dbusS3Url }} > /dev/null"
     - failhard: True{% if filecollector.proxyUrl %}
     - env: {% if filecollector.proxyProtocol == "https" %}
-       - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% else %}
-       - HTTP_PROXY: {{ filecollector.proxyUrl }}{% endif %}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
-       - NO_PROXY: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
+       - https_proxy: {{ filecollector.proxyUrl }}{% else %}
+       - http_proxy: {{ filecollector.proxyUrl }}{% endif %}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+       - no_proxy: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
 {% endif %}
 {% endif %}
 
@@ -155,13 +128,13 @@ filecollector_clean_dirs_at_startup:
   cmd.run:
     - names:
 {% if filecollector.destination == "LOCAL" %}
-        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p tmp/**
+        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p "tmp/**"
 {% elif filecollector.destination == "ENG" %}
         - cdp-telemetry utils clean -d /var/lib/filecollector/
 {% else %}
-        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p tmp/**
-        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p *.gz
+        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p "tmp/**"
+        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p "*.gz"
 {% if filecollector.mode == "CLOUDERA_MANAGER" %}
-        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p *.zip{% endif %}
+        - cdp-telemetry utils clean -d /var/lib/filecollector/ -p "*.zip"{% endif %}
 {% endif %}
 {% endif %}

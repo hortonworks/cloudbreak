@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
@@ -12,11 +13,23 @@ import reactor.rx.Promise;
 
 public class StackScaleTriggerEvent extends StackEvent {
 
-    private final String instanceGroup;
+    private Map<String, Set<Long>> hostGroupsWithPrivateIds;
 
-    private final Integer adjustment;
+    // @deprecated haven't removed for compatibility reasons, we should remove it in 2.54
+    @Deprecated
+    private String instanceGroup;
 
-    private final Set<String> hostNames;
+    // @deprecated haven't removed for compatibility reasons, we should remove it in 2.54
+    @Deprecated
+    private Integer adjustment;
+
+    // @deprecated haven't removed for compatibility reasons, we should remove it in 2.54
+    @Deprecated
+    private Set<String> hostNames;
+
+    private Map<String, Integer> hostGroupsWithAdjustment;
+
+    private Map<String, Set<String>> hostGroupsWithHostNames;
 
     private final String triggeredStackVariant;
 
@@ -26,34 +39,31 @@ public class StackScaleTriggerEvent extends StackEvent {
 
     private final AdjustmentTypeWithThreshold adjustmentTypeWithThreshold;
 
-    public StackScaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
-        this(selector, stackId, instanceGroup, adjustment, Collections.emptySet(), NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold,
-                triggeredStackVariant);
+    public StackScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment, Map<String, Set<Long>> hostGroupsWithPrivateIds,
+            Map<String, Set<String>> hostGroupsWithHostNames, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
+        this(selector, stackId, hostGroupsWithAdjustment, hostGroupsWithPrivateIds, hostGroupsWithHostNames, NetworkScaleDetails.getEmpty(),
+                adjustmentTypeWithThreshold, triggeredStackVariant);
     }
 
-    public StackScaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant, Promise<AcceptResult> accepted) {
-        this(selector, stackId, instanceGroup, adjustment, Collections.emptySet(), adjustmentTypeWithThreshold, triggeredStackVariant, accepted);
-    }
-
-    public StackScaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, Set<String> hostNames,
-            NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
+    public StackScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment, Map<String, Set<Long>> hostGroupsWithPrivateIds,
+            Map<String, Set<String>> hostGroupsWithHostNames, NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
+            String triggeredStackVariant) {
         super(selector, stackId);
-        this.instanceGroup = instanceGroup;
-        this.adjustment = adjustment;
-        this.hostNames = hostNames;
+        this.hostGroupsWithAdjustment = hostGroupsWithAdjustment;
+        this.hostGroupsWithPrivateIds = hostGroupsWithPrivateIds;
+        this.hostGroupsWithHostNames = hostGroupsWithHostNames;
         this.networkScaleDetails = networkScaleDetails;
         this.adjustmentTypeWithThreshold = adjustmentTypeWithThreshold;
         this.triggeredStackVariant = triggeredStackVariant;
     }
 
-    public StackScaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, Set<String> hostNames,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant, Promise<AcceptResult> accepted) {
+    public StackScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment, Map<String, Set<Long>> hostGroupsWithPrivateIds,
+            Map<String, Set<String>> hostGroupsWithHostNames, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant,
+            Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
-        this.instanceGroup = instanceGroup;
-        this.adjustment = adjustment;
-        this.hostNames = hostNames;
+        this.hostGroupsWithAdjustment = hostGroupsWithAdjustment;
+        this.hostGroupsWithPrivateIds = hostGroupsWithPrivateIds;
+        this.hostGroupsWithHostNames = hostGroupsWithHostNames;
         this.networkScaleDetails = new NetworkScaleDetails();
         this.adjustmentTypeWithThreshold = adjustmentTypeWithThreshold;
         this.triggeredStackVariant = triggeredStackVariant;
@@ -64,16 +74,37 @@ public class StackScaleTriggerEvent extends StackEvent {
         return this;
     }
 
-    public String getInstanceGroup() {
-        return instanceGroup;
+    public void setHostGroupsWithPrivateIds(Map<String, Set<Long>> hostGroupsWithPrivateIds) {
+        this.hostGroupsWithPrivateIds = hostGroupsWithPrivateIds;
     }
 
-    public Integer getAdjustment() {
-        return adjustment;
+    public Map<String, Set<Long>> getHostGroupsWithPrivateIds() {
+        if (hostGroupsWithPrivateIds == null) {
+            hostGroupsWithPrivateIds = Collections.emptyMap();
+        }
+        return hostGroupsWithPrivateIds;
     }
 
-    public Set<String> getHostNames() {
-        return hostNames;
+    public Map<String, Integer> getHostGroupsWithAdjustment() {
+        if (hostGroupsWithAdjustment == null) {
+            if (instanceGroup != null && adjustment != null) {
+                hostGroupsWithAdjustment = Collections.singletonMap(instanceGroup, adjustment);
+            } else {
+                hostGroupsWithAdjustment = Collections.emptyMap();
+            }
+        }
+        return hostGroupsWithAdjustment;
+    }
+
+    public Map<String, Set<String>> getHostGroupsWithHostNames() {
+        if (hostGroupsWithHostNames == null) {
+            if (instanceGroup != null && hostNames != null && !hostNames.isEmpty()) {
+                hostGroupsWithHostNames = Collections.singletonMap(instanceGroup, hostNames);
+            } else {
+                hostGroupsWithHostNames = Collections.emptyMap();
+            }
+        }
+        return hostGroupsWithHostNames;
     }
 
     public boolean isRepair() {
@@ -91,4 +122,10 @@ public class StackScaleTriggerEvent extends StackEvent {
     public String getTriggeredStackVariant() {
         return triggeredStackVariant;
     }
+
+    @Deprecated
+    public String getInstanceGroup() {
+        return instanceGroup;
+    }
+
 }

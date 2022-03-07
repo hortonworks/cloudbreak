@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.environment;
 
-import java.time.Duration;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -112,8 +111,6 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop())
                 .await(EnvironmentStatus.ENV_STOPPED)
-                //TODO workaround until CB-15932 has not been implemented
-                .waitingFor(Duration.ofMinutes(2), "Waiting for FreeIpa nodes to really be stopped on Gcp too has been interrupted")
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.start())
                 .await(EnvironmentStatus.AVAILABLE)

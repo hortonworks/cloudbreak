@@ -64,14 +64,6 @@
    {% set metered_cluster_name = cluster_name %}
 {% endif %}
 
-{% if salt['pillar.get']('tags:Cloudera-External-Cluster-Name') %}
-   {% set metered_cluster_name = salt['pillar.get']('tags:Cloudera-External-Cluster-Name') %}
-{% elif salt['pillar.get']('tags:cloudera-external-cluster-name') %}
-   {% set metered_cluster_name = salt['pillar.get']('tags:cloudera-external-cluster-name') %}
-{% else %}
-   {% set metered_cluster_name = cluster_name %}
-{% endif %}
-
 {% if salt['pillar.get']('tags:Cloudera-Service-Feature') %}
   {% set service_feature = salt['pillar.get']('tags:Cloudera-Service-Feature') %}
 {% else %}

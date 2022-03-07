@@ -130,7 +130,9 @@ collector:
         type: {{ filecollector.clusterType }}{% if filecollector.description %}
         name: {{ filecollector.description }}{% endif %}
         product-version: {{ filecollector.clusterVersion }}{% if filecollector.uuid %}
-        uuid: {{ filecollector.uuid }} {% endif %}
+        uuid: {{ filecollector.uuid }} {% endif %}{% if filecollector.hostname %}
+        hostname: "{{ filecollector.hostname }}"{% endif %}{% if telemetry.clusterName %}
+        cluster-name: "{{ telemetry.clusterName }}"{% endif %}
         crns:
            Cloudera-Creator-Resource-Name: {{ filecollector.creatorCrn }}
            Cloudera-Resource-Name: {{ filecollector.resourceCrn }}

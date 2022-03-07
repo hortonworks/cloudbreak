@@ -159,7 +159,7 @@ public class EnvironmentServiceTest {
     @Test
     public void testGetNamesByCrns() {
         when(sdxClusterViewRepository.findByAccountIdAndEnvCrnIn(any(), any())).thenReturn(Set.of());
-        assertTrue(ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getNamesByCrns(List.of("crn"))).isEmpty());
+        assertTrue(ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getNamesByCrnsForMessage(List.of("crn"))).isEmpty());
 
         when(sdxClusterViewRepository.findByAccountIdAndEnvCrnIn(any(), any())).thenReturn(Set.of(
                 getClusterView(null, null),
@@ -168,7 +168,7 @@ public class EnvironmentServiceTest {
                 getClusterView("envCrn2", "envName2"),
                 getClusterView(null, "whatever")
         ));
-        Map<String, Optional<String>> nameMap = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getNamesByCrns(List.of("crn")));
+        Map<String, Optional<String>> nameMap = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getNamesByCrnsForMessage(List.of("crn")));
         assertFalse(nameMap.isEmpty());
         assertTrue(nameMap.keySet().containsAll(Set.of("envCrn2")));
         assertEquals(1, nameMap.entrySet().size());

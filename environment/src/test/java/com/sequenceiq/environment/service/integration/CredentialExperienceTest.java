@@ -130,7 +130,7 @@ public class CredentialExperienceTest {
 
     @BeforeEach
     public void setup() {
-        when(userPreferencesRepository.save(any())).thenReturn(new UserPreferences("xid", "user"));
+        when(userPreferencesRepository.save(any())).thenReturn(new UserPreferences("xid", "audit-xid", "user"));
 
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(connector);
         when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
@@ -180,7 +180,7 @@ public class CredentialExperienceTest {
 
     private CredentialPrerequisitesResponse testSkeleton(String cloudProvider, Boolean entitlementEnabled) {
 
-        when(credentialConnector.getPrerequisites(any(), any(), any(), any())).thenReturn(getCredentialPrerequisitesResponse(cloudProvider, ASTERISK));
+        when(credentialConnector.getPrerequisites(any(), any(), any(), any(), any())).thenReturn(getCredentialPrerequisitesResponse(cloudProvider, ASTERISK));
 
         when(entitlementService.awsRestrictedPolicy(anyString())).thenReturn(entitlementEnabled);
 

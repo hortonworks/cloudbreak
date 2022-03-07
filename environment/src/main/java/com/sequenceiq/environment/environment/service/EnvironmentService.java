@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
@@ -39,8 +40,8 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
-import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
-import com.sequenceiq.cloudbreak.structuredevent.service.AbstractAccountAwareResourceService;
+import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -59,8 +60,8 @@ import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;
 
 @Service
-public class EnvironmentService extends AbstractAccountAwareResourceService<Environment>
-        implements ResourceIdProvider, EnvironmentPropertyProvider, PayloadContextProvider {
+public class EnvironmentService extends AbstractAccountAwareResourceService<Environment> implements ResourceIdProvider, EnvironmentPropertyProvider,
+        PayloadContextProvider, CompositeAuthResourcePropertyProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentService.class);
 
@@ -415,7 +416,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     }
 
     @Override
-    public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
+    public Map<String, Optional<String>> getNamesByCrnsForMessage(Collection<String> crns) {
         Map<String, Optional<String>> result = new HashMap<>();
         environmentRepository.findResourceNamesByCrnAndAccountId(crns, ThreadBasedUserCrnProvider.getAccountId()).stream()
                 .forEach(nameAndCrn -> result.put(nameAndCrn.getCrn(), Optional.ofNullable(nameAndCrn.getName())));

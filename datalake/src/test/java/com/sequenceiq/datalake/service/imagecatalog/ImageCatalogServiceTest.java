@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,9 +56,9 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void supportedAuthorizationResourceTypeShouldBeImageCatalog() {
-        Optional<AuthorizationResourceType> actual = victim.getSupportedAuthorizationResourceType();
+        AuthorizationResourceType actual = victim.getSupportedAuthorizationResourceType();
 
-        assertEquals(AuthorizationResourceType.IMAGE_CATALOG, actual.get());
+        assertEquals(AuthorizationResourceType.IMAGE_CATALOG, actual);
     }
 
     @Test

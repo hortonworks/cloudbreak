@@ -122,7 +122,7 @@ public class ReactorFlowManager {
                 instanceGroupAdjustment.getThreshold());
         CloudPlatformVariant cloudPlatformVariant = stackService.getPlatformVariantByStackId(stackId);
         Acceptable stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
-                stackId, instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment(),
+                stackId, Collections.singletonMap(instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment()),
                 withClusterEvent ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK,
                 getStackNetworkScaleDetails(instanceGroupAdjustment), adjustmentTypeWithThreshold, cloudPlatformVariant.getVariant().value());
         return reactorNotifier.notify(stackId, selector, stackAndClusterUpscaleTriggerEvent);
@@ -135,7 +135,7 @@ public class ReactorFlowManager {
                 instanceGroupAdjustment.getThreshold());
         CloudPlatformVariant cloudPlatformVariant = stackService.getPlatformVariantByStackId(stackId);
         Acceptable stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
-                stackId, instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment(),
+                stackId, Collections.singletonMap(instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment()),
                 withClusterEvent ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK,
                 getStackNetworkScaleDetails(instanceGroupAdjustment), adjustmentTypeWithThreshold, cloudPlatformVariant.getVariant().value());
         LOGGER.info("Triggering stack upscale with {} adjustment, {} adjustment type, {} threshold",
@@ -146,8 +146,9 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerStackDownscale(Long stackId, InstanceGroupAdjustmentV4Request instanceGroupAdjustment) {
         String selector = STACK_DOWNSCALE_EVENT.event();
         CloudPlatformVariant cloudPlatformVariant = stackService.getPlatformVariantByStackId(stackId);
-        Acceptable stackScaleTriggerEvent = new StackDownscaleTriggerEvent(selector, stackId, instanceGroupAdjustment.getInstanceGroup(),
-                instanceGroupAdjustment.getScalingAdjustment(), cloudPlatformVariant.getVariant().value());
+        Acceptable stackScaleTriggerEvent = new StackDownscaleTriggerEvent(selector, stackId,
+                Collections.singletonMap(instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment()),
+                cloudPlatformVariant.getVariant().value());
         return reactorNotifier.notify(stackId, selector, stackScaleTriggerEvent);
     }
 
@@ -163,8 +164,9 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId, boolean forced) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
         ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
-        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, hostGroup, Collections.singleton(privateId),
-                ScalingType.DOWNSCALE_TOGETHER, new Promise<>(), details);
+        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, Collections.singletonMap(hostGroup, 1),
+                Collections.singletonMap(hostGroup, Collections.singleton(privateId)), ScalingType.DOWNSCALE_TOGETHER,
+                new Promise<>(), details);
         return reactorNotifier.notify(stackId, selector, event);
     }
 
@@ -183,8 +185,8 @@ public class ReactorFlowManager {
         String selector = FlowChainTriggers.STOPSTART_DOWNSCALE_CHAIN_TRIGGER_EVENT;
 
         ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
-        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, hostGroup, privateIds,
-                ScalingType.DOWNSCALE_TOGETHER,  new Promise<>(), details);
+        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
+                Collections.singletonMap(hostGroup, privateIds), ScalingType.DOWNSCALE_TOGETHER,  new Promise<>(), details);
         return reactorNotifier.notify(stackId, selector, event);
     }
 
@@ -243,15 +245,15 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerClusterUpscale(Long stackId, HostGroupAdjustmentV4Request hostGroupAdjustment) {
         String selector = CLUSTER_UPSCALE_TRIGGER_EVENT.event();
         Acceptable event = new ClusterScaleTriggerEvent(selector, stackId,
-                hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
+                Collections.singletonMap(hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment()), null, null);
         return reactorNotifier.notify(stackId, selector, event);
     }
 
     public FlowIdentifier triggerClusterDownscale(Long stackId, HostGroupAdjustmentV4Request hostGroupAdjustment) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
         ScalingType scalingType = hostGroupAdjustment.getWithStackUpdate() ? ScalingType.DOWNSCALE_TOGETHER : ScalingType.DOWNSCALE_ONLY_CLUSTER;
-        Acceptable event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
-                hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment(), scalingType);
+        Acceptable event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, Collections.singletonMap(hostGroupAdjustment.getHostGroup(),
+                hostGroupAdjustment.getScalingAdjustment()), scalingType);
         return reactorNotifier.notify(stackId, selector, event);
     }
 

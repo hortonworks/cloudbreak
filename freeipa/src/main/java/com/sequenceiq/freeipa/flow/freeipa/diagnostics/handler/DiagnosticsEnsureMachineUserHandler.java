@@ -12,35 +12,25 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionEvent;
-import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionFailureEvent;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
 
-import reactor.bus.Event;
-import reactor.bus.EventBus;
-
 @Component
-public class DiagnosticsEnsureMachineUserHandler extends EventSenderAwareHandler<DiagnosticsCollectionEvent> {
+public class DiagnosticsEnsureMachineUserHandler extends AbstractDiagnosticsOperationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsEnsureMachineUserHandler.class);
 
     @Inject
-    private EventBus eventBus;
-
-    @Inject
     private AltusMachineUserService altusMachineUserService;
 
-    protected DiagnosticsEnsureMachineUserHandler(EventSender eventSender) {
-        super(eventSender);
-    }
-
     @Override
-    public void accept(Event<DiagnosticsCollectionEvent> event) {
+    public Selectable executeOperation(HandlerEvent<DiagnosticsCollectionEvent> event) throws Exception {
         DiagnosticsCollectionEvent data = event.getData();
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
@@ -55,19 +45,25 @@ public class DiagnosticsEnsureMachineUserHandler extends EventSenderAwareHandler
                 parameters.setSupportBundleDbusAccessKey(credential.getAccessKey());
                 parameters.setSupportBundleDbusPrivateKey(credential.getPrivateKey());
             }
-            DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
+            return DiagnosticsCollectionEvent.builder()
                     .withResourceCrn(resourceCrn)
                     .withResourceId(resourceId)
                     .withSelector(START_DIAGNOSTICS_COLLECTION_EVENT.selector())
                     .withParameters(parameters)
                     .build();
-            eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {
-            LOGGER.debug("Diagnostics collection ensure machine user operation failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameterMap, e);
-            DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters,
-                    UsageProto.CDPVMDiagnosticsFailureType.Value.UMS_RESOURCE_CHECK_FAILURE.name());
-            eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
+            throw new CloudbreakServiceException(e);
         }
+    }
+
+    @Override
+    public UsageProto.CDPVMDiagnosticsFailureType.Value getFailureType() {
+        return UsageProto.CDPVMDiagnosticsFailureType.Value.UMS_RESOURCE_CHECK_FAILURE;
+    }
+
+    @Override
+    public String getOperationName() {
+        return "UMS resource check";
     }
 
     @Override

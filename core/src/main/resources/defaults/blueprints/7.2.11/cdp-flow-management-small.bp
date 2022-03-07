@@ -3,7 +3,7 @@
   "blueprint": {
     "cdhVersion": "7.2.11",
     "displayName": "flow-management",
-    "blueprintUpgradeOption": "MAINTENANCE_UPGRADE_GA",
+    "blueprintUpgradeOption": "GA",
     "services": [
       {
         "refName": "core_settings",

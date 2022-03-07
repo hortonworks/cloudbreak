@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.ATTRIBUTES;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -101,46 +103,60 @@ public class InstanceMetaDataService {
         }
     }
 
-    public Stack saveInstanceAndGetUpdatedStack(Stack stack, int instanceToCreate, String groupName, boolean save, Set<String> hostNames, boolean repair,
-            NetworkScaleDetails networkScaleDetails) {
-        LOGGER.info("Get updated stack with instance count ({}) to instance group: {} and hostnames: {} and save: ({})", instanceToCreate, groupName, hostNames,
+    public Stack saveInstanceAndGetUpdatedStack(Stack stack, Map<String, Integer> hostGroupsWithInstanceCountToCreate,
+            Map<String, Set<String>> hostGroupWithHostnames, boolean save, boolean repair, NetworkScaleDetails networkScaleDetails) {
+        LOGGER.info("Get updated stack with instance count ({}) and hostnames: {} and save: ({})", hostGroupsWithInstanceCountToCreate, hostGroupWithHostnames,
                 save);
         DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(stack.getEnvironmentCrn());
         Map<String, String> subnetAzPairs = multiAzCalculatorService.prepareSubnetAzMap(environment);
         String stackSubnetId = getStackSubnetIdIfExists(stack);
         String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
-        Iterator<String> hostNameIterator = hostNames.iterator();
         long privateId = getFirstValidPrivateId(stack.getInstanceGroupsAsList());
-        for (int i = 0; i < instanceToCreate; i++) {
-            InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), groupName);
-            if (instanceGroup != null) {
-                InstanceMetaData instanceMetaData = new InstanceMetaData();
-                instanceMetaData.setPrivateId(privateId++);
-                instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
-                instanceMetaData.setInstanceGroup(instanceGroup);
-                instanceMetaData.setVariant(stack.getPlatformVariant());
-                if (hostNameIterator.hasNext()) {
-                    String hostName = hostNameIterator.next();
-                    repository.findHostInStack(stack.getId(), hostName).ifPresent(existingHost -> {
-                        throw new CloudbreakServiceException("There is an existing host with the same FQDN. It can happen if you retried a failed repair. " +
-                                "Please start the repairing process again instead of retry.");
-                    });
-                    LOGGER.info("We have hostname to be allocated: {}, set it to this instanceMetadata: {}", hostName, instanceMetaData);
-                    instanceMetaData.setDiscoveryFQDN(hostName);
-                    subnetAzPairs = getSubnetAzPairsFilteredByHostNameIfRepair(environment, stack, repair, instanceGroup.getGroupName(), hostName);
+        for (Map.Entry<String, Integer> hostGroupWithInstanceCount : hostGroupsWithInstanceCountToCreate.entrySet()) {
+            String hostGroup = hostGroupWithInstanceCount.getKey();
+            Integer instanceToCreate = hostGroupWithInstanceCount.getValue();
+            Iterator<String> hostNameIterator = getHostNameIterator(hostGroupWithHostnames.get(hostGroup));
+            for (int i = 0; i < instanceToCreate; i++) {
+                InstanceGroup instanceGroup = getInstanceGroup(stack.getInstanceGroups(), hostGroup);
+                if (instanceGroup != null) {
+                    InstanceMetaData instanceMetaData = new InstanceMetaData();
+                    instanceMetaData.setPrivateId(privateId++);
+                    instanceMetaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
+                    instanceMetaData.setInstanceGroup(instanceGroup);
+                    instanceMetaData.setVariant(stack.getPlatformVariant());
+                    if (hostNameIterator.hasNext()) {
+                        String hostName = hostNameIterator.next();
+                        repository.findHostInStack(stack.getId(), hostName).ifPresent(existingHost -> {
+                            throw new CloudbreakServiceException("There is an existing host with the same FQDN. It can happen if you retried a failed repair. " +
+                                    "Please start the repairing process again instead of retry.");
+                        });
+                        LOGGER.info("We have hostname to be allocated: {}, set it to this instanceMetadata: {}", hostName, instanceMetaData);
+                        instanceMetaData.setDiscoveryFQDN(hostName);
+                        subnetAzPairs = getSubnetAzPairsFilteredByHostNameIfRepair(environment, stack, repair, instanceGroup.getGroupName(), hostName);
+                    }
+                    Map<String, String> filteredSubnetsByLeastUsedAz = networkScaleDetails == null
+                            ? multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzPairs)
+                            : subnetAzPairs;
+                    prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(instanceGroup, instanceMetaData, filteredSubnetsByLeastUsedAz, stackSubnetId,
+                            stackAz, networkScaleDetails);
+                    if (save) {
+                        repository.save(instanceMetaData);
+                    }
+                    instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
                 }
-                Map<String, String> filteredSubnetsByLeastUsedAz = networkScaleDetails == null
-                        ? multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzPairs)
-                        : subnetAzPairs;
-                prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(instanceGroup, instanceMetaData, filteredSubnetsByLeastUsedAz, stackSubnetId, stackAz,
-                        networkScaleDetails);
-                if (save) {
-                    repository.save(instanceMetaData);
-                }
-                instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
             }
         }
         return stack;
+    }
+
+    private Iterator<String> getHostNameIterator(Set<String> hostNames) {
+        Iterator<String> hostNameIterator;
+        if (hostNames != null) {
+            hostNameIterator = hostNames.iterator();
+        } else {
+            hostNameIterator = Collections.emptyIterator();
+        }
+        return hostNameIterator;
     }
 
     private long getFirstValidPrivateId(List<InstanceGroup> instanceGroups) {
@@ -313,7 +329,7 @@ public class InstanceMetaDataService {
     }
 
     public Set<InstanceMetaData> findNotTerminatedForStack(Long stackId) {
-        return repository.findNotTerminatedForStack(stackId);
+        return repository.findNotDeletedForStack(stackId);
     }
 
     public Set<InstanceMetaData> findNotTerminatedAndNotZombieForStack(Long stackId) {
@@ -334,6 +350,10 @@ public class InstanceMetaDataService {
 
     public Optional<InstanceMetaData> findByStackIdAndInstanceId(Long stackId, String instanceId) {
         return repository.findByStackIdAndInstanceId(stackId, instanceId);
+    }
+
+    public List<InstanceMetaData> findByStackIdAndInstanceIds(Long stackId, Collection<String> instanceIds) {
+        return repository.findByStackIdAndInstanceIds(stackId, instanceIds);
     }
 
     public Optional<InstanceMetaData> findHostInStack(Long stackId, String hostName) {

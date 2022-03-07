@@ -245,7 +245,7 @@ class DecommissionHandlerTest {
     }
 
     private DecommissionRequest decommissionRequest(boolean forced) {
-        return new DecommissionRequest(STACK_ID, HOST_GROUP_NAME, Set.of(PRIVATE_ID), new ClusterDownscaleDetails(forced, false));
+        return new DecommissionRequest(STACK_ID, Set.of(HOST_GROUP_NAME), Set.of(PRIVATE_ID), new ClusterDownscaleDetails(forced, false));
     }
 
 }

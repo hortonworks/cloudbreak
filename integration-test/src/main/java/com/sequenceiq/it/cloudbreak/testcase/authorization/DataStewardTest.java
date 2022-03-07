@@ -65,10 +65,10 @@ public class DataStewardTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
                 .whenException(environmentTestClient.stop(), ForbiddenException.class, expectedMessage(
-                        "Doesn't have 'environments/stopEnvironment' right on any of the environment[(]s[)] "
+                        "Doesn't have 'environments/stopEnvironment' right on environment "
                         + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
                 .whenException(environmentTestClient.delete(), ForbiddenException.class, expectedMessage(
-                        "Doesn't have 'environments/deleteCdpEnvironment' right on any of the environment[(]s[)] "
+                        "Doesn't have 'environments/deleteCdpEnvironment' right on environment "
                         + environmentPattern(testContext)).withWho(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_DATA_STEWARD)))
                 .validate();
 

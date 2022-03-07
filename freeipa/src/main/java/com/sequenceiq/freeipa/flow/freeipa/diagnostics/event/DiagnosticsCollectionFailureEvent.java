@@ -29,5 +29,13 @@ public class DiagnosticsCollectionFailureEvent extends DiagnosticsCollectionEven
     public String getFailureType() {
         return failureType;
     }
+
+    @Override
+    public String toString() {
+        return "DiagnosticsCollectionFailureEvent{" +
+                "exception=" + exception +
+                ", failureType='" + failureType + '\'' +
+                "} " + super.toString();
+    }
 }
 

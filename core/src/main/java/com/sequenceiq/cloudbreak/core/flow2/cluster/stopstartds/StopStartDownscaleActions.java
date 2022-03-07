@@ -81,7 +81,6 @@ public class StopStartDownscaleActions {
             @Override
             protected void prepareExecution(StopStartDownscaleTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(HOSTGROUPNAME, payload.getHostGroupName());
-                variables.put(CLUSTER_MANAGER_TYPE, payload.getClusterManagerType());
                 variables.put(HOSTS_TO_REMOVE, payload.getHostIds());
             }
 
@@ -258,8 +257,6 @@ public class StopStartDownscaleActions {
 
         static final String HOSTS_TO_REMOVE = "HOSTS_TO_REMOVE";
 
-        static final String CLUSTER_MANAGER_TYPE = "CLUSTER_MANAGER_TYPE";
-
         @Inject
         private StackService stackService;
 
@@ -309,7 +306,7 @@ public class StopStartDownscaleActions {
             return new StopStartDownscaleContext(flowParameters, stack, stackService.getViewByIdWithoutAuth(stack.getId()),
                     cloudContext, cloudCredential, cloudStack,
                     getHostgroupName(variables), getHostsToRemove(variables),
-                    getClusterManagerType(variables));
+                    ClusterManagerType.CLOUDERA_MANAGER);
         }
 
         private String getHostgroupName(Map<Object, Object> variables) {
@@ -318,10 +315,6 @@ public class StopStartDownscaleActions {
 
         Set<Long> getHostsToRemove(Map<Object, Object> variables) {
             return (Set<Long>) variables.get(HOSTS_TO_REMOVE);
-        }
-
-        ClusterManagerType getClusterManagerType(Map<Object, Object> variables) {
-            return (ClusterManagerType) variables.get(CLUSTER_MANAGER_TYPE);
         }
     }
 }

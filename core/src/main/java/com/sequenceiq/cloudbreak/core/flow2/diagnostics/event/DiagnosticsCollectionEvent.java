@@ -56,6 +56,16 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
         return excludeHosts;
     }
 
+    @Override
+    public String toString() {
+        return "DiagnosticsCollectionEvent{" +
+                "parameters=" + parameters +
+                ", hosts=" + hosts +
+                ", hostGroups=" + hostGroups +
+                ", excludeHosts=" + excludeHosts +
+                "} " + super.toString();
+    }
+
     public static final class DiagnosticsCollectionEventBuilder {
 
         private String resourceCrn;

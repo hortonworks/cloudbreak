@@ -11,7 +11,9 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_QUOTA_ISSUE;
 import static java.lang.String.format;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -84,15 +86,18 @@ public class StackUpscaleService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    public void startAddInstances(Stack stack, Integer scalingAdjustment, String hostGroupName) {
-        String statusReason = format("Adding %s new instance(s) to instance group %s", scalingAdjustment, hostGroupName);
+    public void startAddInstances(Stack stack, Map<String, Integer> hostGroupWithAdjustment) {
+        Integer scalingAdjustment = hostGroupWithAdjustment.values().stream().reduce(0, Integer::sum);
+        String statusReason = format("Adding %s new instance(s) to instance group %s", scalingAdjustment,
+                String.join(", ", hostGroupWithAdjustment.keySet()));
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ADDING_NEW_INSTANCES, statusReason);
     }
 
-    public void addInstanceFireEventAndLog(Stack stack, Integer scalingAdjustment, String hostGroupName,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_ADDING_INSTANCES, String.valueOf(scalingAdjustment), hostGroupName,
-                String.valueOf(adjustmentTypeWithThreshold.getAdjustmentType()), String.valueOf(adjustmentTypeWithThreshold.getThreshold()));
+    public void addInstanceFireEventAndLog(Stack stack, Map<String, Integer> hostGroupWithAdjustment, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+        Integer scalingAdjustment = hostGroupWithAdjustment.values().stream().reduce(0, Integer::sum);
+        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_ADDING_INSTANCES, String.valueOf(scalingAdjustment),
+                String.join(", ", hostGroupWithAdjustment.keySet()), String.valueOf(adjustmentTypeWithThreshold.getAdjustmentType()),
+                String.valueOf(adjustmentTypeWithThreshold.getThreshold()));
     }
 
     public void finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
@@ -100,9 +105,10 @@ public class StackUpscaleService {
         List<CloudResourceStatus> results = payload.getResults();
         validateResourceResults(context, payload.getErrorDetails(), results);
         Set<Long> successfulPrivateIds = results.stream().map(CloudResourceStatus::getPrivateId).filter(Objects::nonNull).collect(Collectors.toSet());
-        metadataSetupService.cleanupRequestedInstancesIfNotInList(context.getStack().getId(), context.getInstanceGroupName(), successfulPrivateIds);
+        Set<String> instanceGroups = context.getHostGroupWithAdjustment().keySet();
+        metadataSetupService.cleanupRequestedInstancesIfNotInList(context.getStack().getId(), instanceGroups, successfulPrivateIds);
         if (successfulPrivateIds.isEmpty()) {
-            metadataSetupService.cleanupRequestedInstancesWithoutFQDN(context.getStack().getId(), context.getInstanceGroupName());
+            metadataSetupService.cleanupRequestedInstancesWithoutFQDN(context.getStack().getId(), instanceGroups);
             throw new OperationException("Failed to upscale the cluster since all create request failed. Resource set is empty");
         }
         LOGGER.debug("Adding new instances to the stack is DONE");
@@ -158,16 +164,18 @@ public class StackUpscaleService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STACK_UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
     }
 
-    public void handleStackUpscaleFailure(Boolean upscaleForRepair, Set<String> hostNames, Exception exception, Long stackId, String instanceGroupName) {
+    public void handleStackUpscaleFailure(Boolean upscaleForRepair, Map<String, Set<String>> hostgroupWithHostnames, Exception exception, Long stackId,
+            Map<String, Integer> hostGroupWithAdjustment) {
         LOGGER.info("Exception during the upscale of stack", exception);
         try {
             String errorReason = exception.getMessage();
             if (!upscaleForRepair) {
-                metadataSetupService.cleanupRequestedInstancesWithoutFQDN(stackId, instanceGroupName);
+                metadataSetupService.cleanupRequestedInstancesWithoutFQDN(stackId, hostGroupWithAdjustment.keySet());
                 stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_INFRASTRUCTURE_UPDATE_FAILED, errorReason);
             } else {
-                metadataSetupService.handleRepairFail(stackId, hostNames);
+                metadataSetupService.handleRepairFail(stackId, hostgroupWithHostnames.values().stream()
+                        .flatMap(Collection::stream).collect(Collectors.toSet()));
                 stackUpdater.updateStackStatus(stackId, DetailedStackStatus.REPAIR_FAILED, "Stack repair failed. " + errorReason);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_REPAIR_FAILED, errorReason);
             }

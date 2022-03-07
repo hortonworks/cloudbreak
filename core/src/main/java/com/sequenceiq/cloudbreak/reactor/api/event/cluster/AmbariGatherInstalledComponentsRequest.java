@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster;
 
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleRequest;
 
 public class AmbariGatherInstalledComponentsRequest extends AbstractClusterScaleRequest {
 
     private final String hostName;
 
-    public AmbariGatherInstalledComponentsRequest(Long stackId, String hostGroupName, String hostName) {
-        super(stackId, hostGroupName);
+    public AmbariGatherInstalledComponentsRequest(Long stackId, Set<String> hostGroupNames, String hostName) {
+        super(stackId, hostGroupNames);
         this.hostName = hostName;
     }
 

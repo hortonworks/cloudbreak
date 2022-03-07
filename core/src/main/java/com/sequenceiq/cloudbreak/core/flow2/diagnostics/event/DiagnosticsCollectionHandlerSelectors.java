@@ -4,6 +4,8 @@ import com.sequenceiq.flow.core.FlowEvent;
 
 public enum DiagnosticsCollectionHandlerSelectors implements FlowEvent {
     SALT_VALIDATION_DIAGNOSTICS_EVENT,
+    SALT_PILLAR_UPDATE_DIAGNOSTICS_EVENT,
+    SALT_STATE_UPDATE_DIAGNOSTICS_EVENT,
     PREFLIGHT_CHECK_DIAGNOSTICS_EVENT,
     INIT_DIAGNOSTICS_EVENT,
     UPGRADE_DIAGNOSTICS_EVENT,

@@ -126,8 +126,8 @@ class InstanceMetaDataServiceTest {
         }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class), any());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 1, groupName(0), save, new LinkedHashSet<>(hostnames), false,
-                NetworkScaleDetails.getEmpty());
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(0), 1), Map.of(groupName(0), new LinkedHashSet<>(hostnames)), save,
+                false, NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
         Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
@@ -213,8 +213,8 @@ class InstanceMetaDataServiceTest {
         }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class), any());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, INSTANCE_GROUP_COUNT, groupName(INSTANCE_GROUP_COUNT - 1), save,
-                new LinkedHashSet<>(hostnames), false, NetworkScaleDetails.getEmpty());
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), INSTANCE_GROUP_COUNT),
+                Map.of(groupName(INSTANCE_GROUP_COUNT - 1), new LinkedHashSet<>(hostnames)), save, false, NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
         Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
@@ -245,8 +245,8 @@ class InstanceMetaDataServiceTest {
         Map<String, String> subnetAzPairs = Map.of();
         when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 1, groupName(3), save, new LinkedHashSet<>(hostnames), false,
-                NetworkScaleDetails.getEmpty());
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(3), 1), Map.of(groupName(3), new LinkedHashSet<>(hostnames)),
+                save, false, NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
         Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
@@ -274,8 +274,8 @@ class InstanceMetaDataServiceTest {
         doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class), any());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, INSTANCE_GROUP_COUNT, groupName(INSTANCE_GROUP_COUNT - 1), save,
-                new LinkedHashSet<>(hostnames), false, NetworkScaleDetails.getEmpty());
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), INSTANCE_GROUP_COUNT),
+                Map.of(groupName(INSTANCE_GROUP_COUNT - 1), new LinkedHashSet<>(hostnames)), save, false, NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
         Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
@@ -292,8 +292,8 @@ class InstanceMetaDataServiceTest {
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(Map.of());
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 0, groupName(INSTANCE_GROUP_COUNT - 1), true, Set.of(), false,
-                NetworkScaleDetails.getEmpty());
+        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), 0), Map.of(groupName(0), Set.of()), true,
+                false, NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
 

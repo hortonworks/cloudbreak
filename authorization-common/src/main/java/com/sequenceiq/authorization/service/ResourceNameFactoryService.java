@@ -23,7 +23,7 @@ public class ResourceNameFactoryService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceNameFactoryService.class);
 
     @Inject
-    private Optional<List<ResourcePropertyProvider>> resourceNameProviderList;
+    private Optional<List<AuthorizationResourceNamesProvider>> resourceNameProviderList;
 
     public Map<String, Optional<String>> getNames(Collection<String> resourceCrns) {
         Map<String, Optional<String>> result = new HashMap<>();
@@ -37,7 +37,7 @@ public class ResourceNameFactoryService {
         return resourceNameProviderList.orElse(List.of()).stream()
                 .filter(provider -> provider.getSupportedCrnResourceTypes().contains(resourceType))
                 .findFirst()
-                .map(provider -> provider.getNamesByCrns(resourceCrns))
+                .map(provider -> provider.getNamesByCrnsForMessage(resourceCrns))
                 .orElse(resourceCrns.stream().collect(Collectors.toMap(crn -> crn, crn -> Optional.empty())));
     }
 

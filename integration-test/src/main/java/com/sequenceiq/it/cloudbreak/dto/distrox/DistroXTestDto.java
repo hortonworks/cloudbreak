@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
@@ -16,6 +15,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.collections4.ListUtils;
 import org.assertj.core.util.Sets;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +64,9 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private StackViewV4Response internalStackResponse;
 
-    private Optional<String> removableInstanceId = Optional.empty();
+    private List<String> actionableInstanceIds;
+
+    private Optional<List<String>> repairableInstanceIds = Optional.empty();
 
     private String initiatorUserCrn;
 
@@ -187,11 +189,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return awaitForInstance(instanceStatusMap);
     }
 
-    public DistroXTestDto awaitForRemovableInstance() {
-        if (getRemovableInstanceId().isPresent()) {
-            return awaitForInstance(Map.of(List.of(getRemovableInstanceId().get()), DELETED_ON_PROVIDER_SIDE));
+    public DistroXTestDto awaitForActionedInstances(InstanceStatus instanceStatus) {
+        if (!getInstanceIdsForAction().isEmpty()) {
+            return awaitForInstance(Map.of(getInstanceIdsForAction(), instanceStatus));
         } else {
-            throw new IllegalStateException("There is no removable instance to wait");
+            throw new IllegalStateException(String.format("There is no '%s' instance to wait!", instanceStatus));
         }
     }
 
@@ -341,11 +343,20 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return getResponse().getCrn();
     }
 
-    public void setRemovableInstanceId(String removableInstanceId) {
-        this.removableInstanceId = Optional.of(removableInstanceId);
+    public void setInstanceIdsForActions(List<String> actionableInstanceIds) {
+        this.actionableInstanceIds = actionableInstanceIds;
     }
 
-    public Optional<String> getRemovableInstanceId() {
-        return removableInstanceId;
+    public List<String> getInstanceIdsForAction() {
+        return ListUtils.emptyIfNull(actionableInstanceIds);
     }
+
+    public void setRepairableInstanceIds(List<String> repairableInstanceIds) {
+        this.repairableInstanceIds = Optional.of(repairableInstanceIds);
+    }
+
+    public Optional<List<String>> getRepairableInstanceIds() {
+        return repairableInstanceIds;
+    }
+
 }

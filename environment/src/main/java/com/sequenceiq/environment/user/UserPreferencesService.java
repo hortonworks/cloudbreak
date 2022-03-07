@@ -28,6 +28,10 @@ public class UserPreferencesService {
         return getExternalId(ThreadBasedUserCrnProvider.getUserCrn());
     }
 
+    public String getAuditExternalIdForCurrentUser() {
+        return getAuditExternalId(ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
     public String getExternalId(String userCrn) {
         LOGGER.debug("Get or create user preferences with external id for user '{}'", userCrn);
         Optional<UserPreferences> userPreferencesOptional = userPreferencesRepository.findByUserCrn(userCrn);
@@ -35,23 +39,47 @@ public class UserPreferencesService {
         if (userPreferencesOptional.isPresent()) {
             userPreferences = userPreferencesOptional.get();
             if (StringUtils.isEmpty(userPreferences.getExternalId())) {
-                LOGGER.debug("External id exist for current user with crn '{}'", userCrn);
+                LOGGER.debug("External id does not exist for current user with crn '{}'", userCrn);
                 userPreferences.setExternalId(generateExternalId());
                 userPreferences = userPreferencesRepository.save(userPreferences);
             }
         } else {
-            LOGGER.debug("User preferences does not exist, creating it with crn '{}'", userCrn);
-            userPreferences = new UserPreferences(generateExternalId(), userCrn);
-            try {
-                userPreferences = userPreferencesRepository.save(userPreferences);
-            } catch (AccessDeniedException | DataIntegrityViolationException e) {
-                LOGGER.debug("User exists with crn: '{}'", userCrn, e);
-                userPreferencesOptional = userPreferencesRepository.findByUserCrn(userCrn);
-                userPreferences = userPreferencesOptional.orElseThrow(() -> new NotFoundException("User does not exists with crn. If you see this error, " +
-                        "you've caught something big, because Duplicate exception occurred"));
-            }
+            userPreferences = getUserPreferences(userCrn);
         }
         return userPreferences.getExternalId();
+    }
+
+    public String getAuditExternalId(String userCrn) {
+        LOGGER.debug("Get or create user preferences with external id for user '{}'", userCrn);
+        Optional<UserPreferences> userPreferencesOptional = userPreferencesRepository.findByUserCrn(userCrn);
+        UserPreferences userPreferences;
+        if (userPreferencesOptional.isPresent()) {
+            userPreferences = userPreferencesOptional.get();
+            if (StringUtils.isEmpty(userPreferences.getAuditExternalId())) {
+                LOGGER.debug("Audit External id does not exist for current user with crn '{}'", userCrn);
+                userPreferences.setAuditExternalId(generateExternalId());
+                userPreferences = userPreferencesRepository.save(userPreferences);
+            }
+        } else {
+            userPreferences = getUserPreferences(userCrn);
+        }
+        return userPreferences.getAuditExternalId();
+    }
+
+    private UserPreferences getUserPreferences(String userCrn) {
+        UserPreferences userPreferences;
+        Optional<UserPreferences> userPreferencesOptional;
+        LOGGER.debug("User preferences does not exist, creating it with crn '{}'", userCrn);
+        userPreferences = new UserPreferences(generateExternalId(), generateExternalId(), userCrn);
+        try {
+            userPreferences = userPreferencesRepository.save(userPreferences);
+        } catch (AccessDeniedException | DataIntegrityViolationException e) {
+            LOGGER.debug("User exists with crn: '{}'", userCrn, e);
+            userPreferencesOptional = userPreferencesRepository.findByUserCrn(userCrn);
+            userPreferences = userPreferencesOptional.orElseThrow(() -> new NotFoundException("User does not exists with crn. If you see this error, " +
+                    "you've caught something big, because Duplicate exception occurred"));
+        }
+        return userPreferences;
     }
 
     private String generateExternalId() {

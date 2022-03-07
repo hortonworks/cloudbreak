@@ -20,7 +20,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -68,7 +67,6 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
-import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
@@ -98,9 +96,6 @@ public class ClusterService {
 
     @Inject
     private CloudbreakEventService eventService;
-
-    @Inject
-    private HostGroupService hostGroupService;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
@@ -206,19 +201,17 @@ public class ClusterService {
         return cluster;
     }
 
-    public void updateInstancesToRunning(Long clusterId, Map<String, List<String>> hostsPerHostGroup) {
+    public void updateInstancesToRunning(Long stackId, Set<Node> reachableNodes) {
         try {
             transactionService.required(() -> {
-                for (Entry<String, List<String>> hostGroupEntry : hostsPerHostGroup.entrySet()) {
-                    hostGroupService.getByClusterIdAndName(clusterId, hostGroupEntry.getKey()).ifPresent(hostGroup -> {
-                        hostGroup.getInstanceGroup().getUnattachedInstanceMetaDataSet()
-                                .forEach(instanceMetaData -> {
-                                    instanceMetaData.setInstanceStatus(SERVICES_RUNNING);
-                                    instanceMetaDataService.save(instanceMetaData);
-                                });
-                    });
+                List<InstanceMetaData> createdInstances =
+                        instanceMetaDataService.findNotTerminatedForStack(stackId).stream().filter(InstanceMetaData::isCreated).collect(Collectors.toList());
+                for (InstanceMetaData instanceMetaData : createdInstances) {
+                    if (reachableNodes.stream().anyMatch(node -> node.getHostname().equals(instanceMetaData.getDiscoveryFQDN()))) {
+                        instanceMetaData.setInstanceStatus(SERVICES_RUNNING);
+                        instanceMetaDataService.save(instanceMetaData);
+                    }
                 }
-                return null;
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
