@@ -32,6 +32,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
@@ -85,6 +86,8 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private static final String TELEMETRY_CLOUD_STORAGE_TEST = "telemetry.test-cloud-storage";
 
+    private static final String TELEMETRY_UPGRADE = "telemetry.upgrade";
+
     private static final String READ_WRITE_PERMISSION = "0600";
 
     private static final String EXECUTE_PERMISSION = "0700";
@@ -101,7 +104,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private static final String LOCAL_TELEMETRY_SCRIPTS_LOCATION = "salt-common/salt/telemetry/scripts/";
 
-    private static final String TELEMETRY_DEPLOYER_SCRIPT_FILENAME = "cdp_telemetry_deployer.sh";
+    private static final String TELEMETRY_DEPLOYER_SCRIPT_FILENAME = "cdp-telemetry-deployer.sh";
 
     private static final String LOCAL_SALT_RESOURCES_LOCATION = "salt";
 
@@ -192,31 +195,10 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
     }
 
     @Override
-    public void updateTelemetryComponent(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters, ExitCriteriaModel exitModel,
-            String component, String version, boolean skipComponentRestart) throws CloudbreakOrchestratorFailedException {
-        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateways);
-        Set<String> gatewayTargets = getGatewayPrivateIps(allGateways);
-        Set<String> gatewayHostnames = getGatewayHostnames(allGateways);
-        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            uploadScripts(sc, gatewayTargets, exitModel, LOCAL_TELEMETRY_SCRIPTS_LOCATION, TELEMETRY_DEPLOYER_SCRIPT_FILENAME);
-            String extraParams = "";
-            if (StringUtils.isNotBlank(component)) {
-                extraParams += String.format(" -c %s", component);
-            }
-            if (StringUtils.isNotBlank(version)) {
-                extraParams += String.format(" -v %s", version);
-            }
-            if (skipComponentRestart) {
-                extraParams += " -s";
-            }
-            String upgradeCommand = String.format("%s/%s upgrade%s", REMOTE_SCRIPTS_LOCATION, TELEMETRY_DEPLOYER_SCRIPT_FILENAME, extraParams);
-            Target<String> targets = new HostList(gatewayHostnames);
-            Map<String, String> upgradeResponse = SaltStates.runCommandOnHosts(retry, sc, targets, upgradeCommand);
-            LOGGER.debug("Upgrade response: {}", upgradeResponse);
-        } catch (Exception e) {
-            LOGGER.info("Error occurred during cdp_telemetry_deployer.sh script upload/execution", e);
-            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
-        }
+    public void updateTelemetryComponent(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel, Map<String, Object> parameters)
+            throws CloudbreakOrchestratorFailedException {
+        runSaltState(allGateways, nodes, parameters, exitModel, TELEMETRY_UPGRADE,
+                "Error occurred during telemetry upgrade.", telemetrySaltRetryConfig.getTelemetryUpgrade(), false);
     }
 
     @Override
@@ -330,6 +312,24 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         } catch (Exception e) {
             LOGGER.info("Error occurred during metering upgrade.", e);
             throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    @Override
+    public void updatePartialSaltDefinition(byte[] partialSaltState, List<String> components, List<GatewayConfig> gatewayConfigs,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+        LOGGER.debug("Start partial salt update for components: {}.", components);
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);
+        Set<String> gatewayTargets = getGatewayPrivateIps(gatewayConfigs);
+        Set<String> gatewayHostnames = getGatewayHostnames(gatewayConfigs);
+        Target<String> targets = new HostList(gatewayHostnames);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            uploadScripts(sc, gatewayTargets, exitModel, LOCAL_SALT_RESOURCES_LOCATION, SALT_STATE_UPDATER_SCRIPT);
+            String stateZip = "partial_salt_states.zip";
+            uploadFileToTargetsWithContentAndPermission(sc, gatewayTargets, exitModel, partialSaltState,
+                    REMOTE_TMP_FOLDER, stateZip, READ_WRITE_PERMISSION);
+            updateSaltStateComponentDefinition(sc, targets, stateZip, Joiner.on(',').join(components));
+            LOGGER.debug("Partial salt update has been successfully finished with components {}", components);
         }
     }
 

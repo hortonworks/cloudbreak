@@ -37,4 +37,5 @@ dependencies {
     }
 
     testImplementation group: 'com.hubspot.jinjava', name: 'jinjava', version: jinjavaVersion
+    testImplementation project(":telemetry-common")
 }

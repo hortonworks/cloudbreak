@@ -1,0 +1,10 @@
+[{{ repoName }}]
+name={{ repoName }}
+baseurl={{ repoBaseUrl }}
+gpgkey={{ repoGpgKey }}
+gpgcheck={{ repoGpgCheck }}
+skip_if_unavailable=1
+{% if salt['pillar.get']('cloudera-manager:paywall_username') %}
+username={{ salt['pillar.get']('cloudera-manager:paywall_username') }}
+password={{ salt['pillar.get']('cloudera-manager:paywall_password') }}
+{% endif %}

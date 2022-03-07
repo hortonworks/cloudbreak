@@ -280,6 +280,7 @@ dependencies {
   implementation project(':cluster-proxy')
   implementation project(':status-checker')
   implementation project(':node-status-monitor-client')
+  implementation project(':telemetry-common')
   implementation project(":notification-sender")
   implementation project(":custom-configurations-api")
   implementation project(":custom-configurations")

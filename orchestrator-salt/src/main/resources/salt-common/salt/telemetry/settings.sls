@@ -10,6 +10,12 @@
 {% set databus_endpoint = salt['pillar.get']('telemetry:databusEndpoint') %}
 {% set databus_s3_endpoint = salt['pillar.get']('telemetry:databusS3Endpoint') %}
 
+{% set databus_connect_max_time = salt['pillar.get']('telemetry:databusConnectMaxTime', 60) %}
+{% set databus_connect_retry_times = salt['pillar.get']('telemetry:databusConnectRetryTimes', 2) %}
+{% set databus_connect_retry_delay = salt['pillar.get']('telemetry:databusConnectRetryDelay', 5) %}
+{% set databus_connect_retry_max_time = salt['pillar.get']('telemetry:databusConnectRetryMaxTime', 120) %}
+{% set databus_curl_connect_opts = "--max-time " + databus_connect_max_time|string + " --retry " + databus_connect_retry_times|string + " --retry-delay " + databus_connect_retry_delay|string + " --retry-max-time " + databus_connect_retry_max_time|string %}
+
 {% if salt['pillar.get']('telemetry:databusEndpointValidation') %}
     {% set databus_endpoint_validation = True %}
 {% else %}
@@ -79,11 +85,14 @@
   {% set test_cloud_storage_upload_params = "gcs upload -p /tmp/.test_cloud_storage_upload.txt --location " + gcs_location + " --bucket " + gcs_bucket %}
 {% endif %}
 
-{% if salt['pkg.version']('cdp-telemetry') %}
-  {% set cdp_telemetry_package_version = salt['pkg.version']('cdp-telemetry') %}
-{% else %}
-  {% set cdp_telemetry_package_version = None %}
-{% endif %}
+{% set cdp_telemetry_package_version = salt['pkg.version']('cdp-telemetry') %}
+{% set cdp_logging_agent_package_version = salt['pkg.version']('cdp-logging-agent') %}
+{% set desired_cdp_telemetry_version = salt['pillar.get']('telemetry:desiredCdpTelemetryVersion') %}
+{% set desired_cdp_logging_agent_version = salt['pillar.get']('telemetry:desiredCdpLoggingAgentVersion') %}
+{% set repo_name = salt['pillar.get']('telemetry:repoName') %}
+{% set repo_base_url = salt['pillar.get']('telemetry:repoBaseUrl') %}
+{% set repo_gpg_key = salt['pillar.get']('telemetry:repoGpgKey') %}
+{% set repo_gpg_check = salt['pillar.get']('telemetry:repoGpgCheck') %}
 
 {% do telemetry.update({
     "platform": platform,
@@ -96,8 +105,16 @@
     "databusEndpoint": databus_endpoint,
     "databusEndpointValidation": databus_endpoint_validation,
     "databusS3Endpoint": databus_s3_endpoint,
+    "databusCurlConnectOpts": databus_curl_connect_opts,
     "cdpTelemetryVersion": cdp_telemetry_version,
     "cdpTelemetryPackageVersion": cdp_telemetry_package_version,
+    "cdpLoggingAgentPackageVersion": cdp_logging_agent_package_version,
+    "desiredCdpTelemetryVersion": desired_cdp_telemetry_version,
+    "desiredCdpLoggingAgentVersion": desired_cdp_logging_agent_version,
+    "repoName": repo_name,
+    "repoBaseUrl": repo_base_url,
+    "repoGpgKey": repo_gpg_key,
+    "repoGpgCheck": repo_gpg_check,
     "proxyUrl": proxy_full_url,
     "proxyProtocol": proxy_protocol,
     "noProxyHosts": no_proxy_hosts,

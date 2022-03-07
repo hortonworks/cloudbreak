@@ -28,6 +28,13 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
         return parameters;
     }
 
+    @Override
+    public String toString() {
+        return "DiagnosticsCollectionEvent{" +
+                "parameters=" + parameters +
+                "} " + super.toString();
+    }
+
     public static final class DiagnosticsCollectionEventBuilder {
 
         private String resourceCrn;

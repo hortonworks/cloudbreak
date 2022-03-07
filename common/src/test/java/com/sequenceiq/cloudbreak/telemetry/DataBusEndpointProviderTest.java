@@ -84,7 +84,7 @@ public class DataBusEndpointProviderTest {
     public void testGetDatabusS3EndpointWithIntUrl() {
         // GIVEN
         // WHEN
-        String result = underTest.getDatabusS3Endpoint("https://dbusapi.sigma-int.cloudera.com");
+        String result = underTest.getDatabusS3Endpoint("https://dbusapi.sigma-doesnotexist.cloudera.com");
         // THEN
         assertNull(result);
     }

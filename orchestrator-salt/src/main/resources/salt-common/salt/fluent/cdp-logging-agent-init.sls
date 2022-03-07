@@ -9,12 +9,10 @@ td_agent_stop:
   service.dead:
     - enable: False
     - name: td-agent
-
 uninstall_td_agent:
   pkg.purged:
     - name: td-agent
 {% endif %}
-
 {% if not fluent.cdpLoggingAgentInstalled %}
 {% if os == "RedHat" or os == "CentOS" %}
 install_cdp_logging_agent:
