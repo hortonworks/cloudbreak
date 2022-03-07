@@ -125,6 +125,7 @@
 {% else %}
    {% set cluster_version = '' %}
 {% endif %}
+{% set hostname = salt['grains.get']('fqdn') %}
 
 {% do filecollector.update({
     "destination": destination,
@@ -151,6 +152,7 @@
     "environmentCrn": environment_crn,
     "clusterType": cluster_type,
     "clusterVersion": cluster_version,
+    "hostname": hostname,
     "uuid": uuid,
     "accountId": account_id,
     "supportBundleDbusStreamName": support_bundle_dbus_stream_name,
