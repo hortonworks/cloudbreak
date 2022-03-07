@@ -74,7 +74,7 @@ import com.sequenceiq.sdx.api.model.SdxRestoreStatusResponse;
 @Service
 public class SdxBackupRestoreService {
 
-    private static final int MAX_SIZE_OF_FAILURE_REASON = 254;
+    private static final int MAX_SIZE_OF_FAILURE_REASON = 1999;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxBackupRestoreService.class);
 

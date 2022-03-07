@@ -1,5 +1,6 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.dr;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.BackupRestoreStatusService.ERRORS_STRING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_BACKUP;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_BACKUP_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_BACKUP_FINISHED;
@@ -20,7 +21,6 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.BackupRestoreStatusService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -28,6 +28,22 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 public class BackupRestoreStatusServiceTest {
 
     private static final String ERROR_MESSAGE = "error message";
+
+    private static final String RAW_STDERR = ERRORS_STRING + "Mar 04, 2022 6:02:29 PM org.apache.knox.gateway.shell.KnoxSession " +
+            "createClient\nINFO: Using default JAAS configuration\nmkdir: hreeve-dev3/denied/backup1_database_backup: PUT 0-byte " +
+            "object  on hreeve-dev3/denied/backup1_database_backup: com.amazonaws.services.s3.model.AmazonS3Exception: Access Denied " +
+            "(Service: Amazon S3; Status Code: 403; Error Code: AccessDenied; Request ID: AZWVXNAMVZGRMH6N; S3 Extended Request ID: " +
+            "+kQvwLsrvKvWJ8qXD6ffatnrAl6ktRwt7kNmv3CeF4rGLPVMLO5iKHShXR9SeA99apTunuMFHPk=; Proxy: null), S3 Extended Request ID: " +
+            "+kQvwLsrvKvWJ8qXD6ffatnrAl6ktRwt7kNmv3CeF4rGLPVMLO5iKHShXR9SeA99apTunuMFHPk=:AccessDenied\nMar 04, 2022 6:02:32 PM org." +
+            "apache.knox.gateway.shell.KnoxSession createClient\nINFO: Using default JAAS configuration\nmoveFromLocal: `s3a://eng-sdx-" +
+            "daily-v2-datalake/hreeve-dev3/denied/backup1_database_backup/hive_backup': No such file or directory";
+
+    private static final String PARSED_STDERR = "mkdir: hreeve-dev3/denied/backup1_database_backup: PUT 0-byte object  on hreeve-dev3/" +
+            "denied/backup1_database_backup: com.amazonaws.services.s3.model.AmazonS3Exception: Access Denied (Service: Amazon S3; Status " +
+            "Code: 403; Error Code: AccessDenied; Request ID: AZWVXNAMVZGRMH6N; S3 Extended Request ID: +kQvwLsrvKvWJ8qXD6ffatnrAl6ktRwt7k" +
+            "Nmv3CeF4rGLPVMLO5iKHShXR9SeA99apTunuMFHPk=; Proxy: null), S3 Extended Request ID: +kQvwLsrvKvWJ8qXD6ffatnrAl6ktRwt7kNmv3CeF4r" +
+            "GLPVMLO5iKHShXR9SeA99apTunuMFHPk=:AccessDenied; moveFromLocal: `s3a://eng-sdx-daily-v2-datalake/hreeve-dev3/denied/backup1_" +
+            "database_backup/hive_backup': No such file or directory; ";
 
     private static final long STACK_ID = 1L;
 
@@ -102,6 +118,24 @@ public class BackupRestoreStatusServiceTest {
         service.handleDatabaseRestoreFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.DATABASE_RESTORE_FAILED);
         verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_RESTORE_FAILED, ERROR_MESSAGE);
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_FAILED.name()), captor.capture(), eq(ERROR_MESSAGE));
+        assertEquals(DATALAKE_DATABASE_RESTORE_FAILED, captor.getValue());
+    }
+
+    @Test
+    public void testBackupFailureParseStderr() {
+        ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
+        service.handleDatabaseBackupFailure(STACK_ID, RAW_STDERR, DetailedStackStatus.DATABASE_BACKUP_FAILED);
+        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_BACKUP_FAILED, PARSED_STDERR);
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_FAILED.name()), captor.capture(), eq(RAW_STDERR));
+        assertEquals(DATALAKE_DATABASE_BACKUP_FAILED, captor.getValue());
+    }
+
+    @Test
+    public void testRestoreFailureParseStderr() {
+        ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
+        service.handleDatabaseRestoreFailure(STACK_ID, RAW_STDERR, DetailedStackStatus.DATABASE_RESTORE_FAILED);
+        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_RESTORE_FAILED, PARSED_STDERR);
+        verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_FAILED.name()), captor.capture(), eq(RAW_STDERR));
         assertEquals(DATALAKE_DATABASE_RESTORE_FAILED, captor.getValue());
     }
 }

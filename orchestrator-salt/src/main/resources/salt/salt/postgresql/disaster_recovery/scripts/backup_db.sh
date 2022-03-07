@@ -6,7 +6,6 @@
 
 set -o nounset
 set -o pipefail
-set -o xtrace
 
 if [[ $# -lt 6 || $# -gt 7 || "$1" == "None" ]]; then
   echo "Invalid inputs provided"
@@ -31,6 +30,10 @@ DATABASENAME="${7-}"
 LOGFILE=/var/log/dl_postgres_backup.log
 echo "Logs at ${LOGFILE}"
 
+exec 3>&1 4>&2
+trap 'exec 2>&4 1>&3' 0 1 2 3
+exec 1> >(tee -a "${LOGFILE}") 2> >(tee -a "${LOGFILE}" >&2)
+
 {%- from 'postgresql/settings.sls' import postgresql with context %}
 {% if postgresql.ssl_enabled == True %}
 export PGSSLROOTCERT="{{ postgresql.root_certs_file }}"
@@ -38,7 +41,6 @@ export PGSSLMODE=verify-full
 {%- endif %}
 
 doLog() {
-  set +x
   type_of_msg=$(echo "$@" | cut -d" " -f1)
   msg=$(echo "$*" | cut -d" " -f2-)
   [[ $type_of_msg == INFO ]] && type_of_msg="INFO " # one space for aligning
@@ -47,11 +49,9 @@ doLog() {
   # print to the terminal if we have one
   test -t 1 && echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg"
   echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg" >>$LOGFILE
-  set -x
 }
 
 errorExit() {
-  set +x
   doLog "ERROR $1"
   exit 1
 }
@@ -103,9 +103,9 @@ move_backup_to_cloud () {
   run_kinit
   doLog "INFO Uploading to ${BACKUP_LOCATION}"
 
-  hdfs dfs -mkdir -p "$BACKUP_LOCATION"
+  hdfs --loglevel ERROR dfs -mkdir -p "$BACKUP_LOCATION"
   OBJECT_STORE_PATH="${BACKUP_LOCATION}/${SERVICE}_backup"
-  hdfs dfs -moveFromLocal -f "$LOCAL_BACKUP" "$OBJECT_STORE_PATH" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to upload $SERVICE backup"
+  hdfs --loglevel ERROR dfs -moveFromLocal -f "$LOCAL_BACKUP" "$OBJECT_STORE_PATH" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to upload $SERVICE backup"
   doLog "INFO Completed upload to ${BACKUP_LOCATION}"
 }
 

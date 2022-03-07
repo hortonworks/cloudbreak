@@ -7,10 +7,14 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RESTORE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RESTORE_FINISHED;
 
+import java.util.Arrays;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -19,7 +23,13 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 @Service
 public class BackupRestoreStatusService {
 
-    private static final String ERRORS_STRING = "Error(s): ";
+    @VisibleForTesting
+    static final String ERRORS_STRING = "Error(s): ";
+
+    private static final List<String> PATTERNS_TO_STRIP = Arrays.asList(
+            "Using default JAAS configuration",
+            "org.apache.knox.gateway.shell.KnoxSession createClient"
+    );
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
@@ -59,8 +69,19 @@ public class BackupRestoreStatusService {
 
     private String extractSaltErrorIfAvailable(String errorReason) {
         if (errorReason.contains(ERRORS_STRING)) {
-            return errorReason.substring(errorReason.indexOf(ERRORS_STRING) + ERRORS_STRING.length()).replaceAll("\n", "; ");
+            String withoutHeader = errorReason.substring(errorReason.indexOf(ERRORS_STRING) + ERRORS_STRING.length());
+            StringBuilder cleanedUpErr = new StringBuilder();
+            Arrays.stream(withoutHeader.split("\n")).forEach(line -> {
+                if (!shouldStripLineFromOutput(line)) {
+                    cleanedUpErr.append(line).append("; ");
+                }
+            });
+            return cleanedUpErr.toString();
         }
         return errorReason;
+    }
+
+    private boolean shouldStripLineFromOutput(String line) {
+        return PATTERNS_TO_STRIP.stream().anyMatch(line::contains);
     }
 }
