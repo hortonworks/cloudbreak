@@ -82,9 +82,11 @@ public class StackToStackDetailsConverter {
     }
 
     private List<String> getSubnetIds(com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup e) {
-        Json attributes = e.getInstanceGroupNetwork().getAttributes();
-        if (attributes != null && attributes.getMap() != null) {
-            return (List<String>) attributes.getMap().getOrDefault(NetworkConstants.SUBNET_IDS, List.of());
+        if (e.getInstanceGroupNetwork() != null) {
+            Json attributes = e.getInstanceGroupNetwork().getAttributes();
+            if (attributes != null && attributes.getMap() != null) {
+                return (List<String>) attributes.getMap().getOrDefault(NetworkConstants.SUBNET_IDS, List.of());
+            }
         }
         return List.of();
     }

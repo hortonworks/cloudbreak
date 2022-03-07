@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.views.dialect.DefaultRdsViewDialect;
 import com.sequenceiq.cloudbreak.template.views.dialect.OracleRdsViewDialect;
 import com.sequenceiq.cloudbreak.template.views.dialect.RdsViewDialect;
@@ -27,43 +28,71 @@ public class RdsView {
 
     private static final String SSL_OPTIONS_WITHOUT_CERTIFICATE_FILE_PATH = "sslmode=verify-full&sslrootcert=";
 
-    private final String connectionURL;
+    private String connectionURL;
 
-    private final boolean useSsl;
+    private boolean useSsl;
 
-    private final String sslCertificateFilePath;
+    private String sslCertificateFilePath;
 
-    private final String connectionDriver;
+    private String connectionDriver;
 
-    private final String connectionUserName;
+    private String connectionUserName;
 
-    private final String connectionPassword;
+    private String connectionPassword;
 
-    private final String databaseName;
+    private String databaseName;
 
-    private final String host;
+    private String host;
 
-    private final String hostWithPortWithJdbc;
+    private String hostWithPortWithJdbc;
 
-    private final String subprotocol;
+    private String subprotocol;
 
-    private final String connectionString;
+    private String connectionString;
 
-    private final String port;
+    private String port;
 
-    private final DatabaseVendor databaseVendor;
+    private DatabaseVendor databaseVendor;
 
-    private final String withoutJDBCPrefix;
+    private String withoutJDBCPrefix;
 
-    private final RdsViewDialect rdsViewDialect;
+    private RdsViewDialect rdsViewDialect;
 
     public RdsView(RDSConfig rdsConfig) {
         this(rdsConfig, "");
     }
 
     public RdsView(RDSConfig rdsConfig, String sslCertificateFilePath) {
-        // Note: any value is valid for sslCertificateFile for sake of backward compatibility.
         this.sslCertificateFilePath = Objects.requireNonNullElse(sslCertificateFilePath, "");
+        setup(rdsConfig);
+    }
+
+    public RdsView(RdsConfigWithoutCluster rdsConfig) {
+        this(rdsConfig, "");
+    }
+
+    public RdsView(RdsConfigWithoutCluster rdsConfigWithoutCluster, String sslCertificateFilePath) {
+        this.sslCertificateFilePath = Objects.requireNonNullElse(sslCertificateFilePath, "");
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setArchived(rdsConfigWithoutCluster.isArchived());
+        rdsConfig.setConnectionDriver(rdsConfigWithoutCluster.getConnectionDriver());
+        rdsConfig.setConnectionURL(rdsConfigWithoutCluster.getConnectionURL());
+        rdsConfig.setConnectionPassword(rdsConfigWithoutCluster.getConnectionPassword().getRaw());
+        rdsConfig.setConnectionUserName(rdsConfigWithoutCluster.getConnectionUserName().getRaw());
+        rdsConfig.setConnectorJarUrl(rdsConfigWithoutCluster.getConnectorJarUrl());
+        rdsConfig.setCreationDate(rdsConfigWithoutCluster.getCreationDate());
+        rdsConfig.setDatabaseEngine(rdsConfigWithoutCluster.getDatabaseEngine());
+        rdsConfig.setDeletionTimestamp(rdsConfigWithoutCluster.getDeletionTimestamp());
+        rdsConfig.setDescription(rdsConfigWithoutCluster.getDescription());
+        rdsConfig.setId(rdsConfigWithoutCluster.getId());
+        rdsConfig.setName(rdsConfigWithoutCluster.getName());
+        rdsConfig.setSslMode(rdsConfigWithoutCluster.getSslMode());
+        rdsConfig.setType(rdsConfigWithoutCluster.getType());
+        setup(rdsConfig);
+    }
+
+    private void setup(RDSConfig rdsConfig) {
+        // Note: any value is valid for sslCertificateFile for sake of backward compatibility.
         useSsl = RdsSslMode.isEnabled(rdsConfig.getSslMode());
         if (useSsl) {
             String configConnectionURL = rdsConfig.getConnectionURL();
