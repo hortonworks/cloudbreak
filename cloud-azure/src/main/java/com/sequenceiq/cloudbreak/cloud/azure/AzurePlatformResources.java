@@ -33,6 +33,7 @@ import com.microsoft.azure.management.msi.Identity;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.Subnet;
+import com.microsoft.azure.management.privatedns.v2018_09_01.PrivateZone;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -60,6 +61,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZone;
+import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
@@ -341,6 +344,15 @@ public class AzurePlatformResources implements PlatformResources {
         resourceGroupPagedList.loadAll();
         List<CloudResourceGroup> resourceGroups = resourceGroupPagedList.stream().map(rg -> new CloudResourceGroup(rg.name())).collect(Collectors.toList());
         return new CloudResourceGroups(resourceGroups);
+    }
+
+    @Override
+    public CloudPrivateDnsZones privateDnsZones(ExtendedCloudCredential cloudCredential, Map<String, String> filters) {
+        List<PrivateZone> azurePrivateDnsZones = azureClientService.getClient(cloudCredential).getPrivateDnsZoneListFromAllSubscriptions();
+        List<CloudPrivateDnsZone> cloudPrivateDnsZoneList = azurePrivateDnsZones.stream()
+                .map(pdz -> new CloudPrivateDnsZone(pdz.id())).collect(Collectors.toList());
+        LOGGER.debug("Found private DNS zones are: {}", cloudPrivateDnsZoneList);
+        return new CloudPrivateDnsZones(cloudPrivateDnsZoneList);
     }
 
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {

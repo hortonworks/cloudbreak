@@ -863,6 +863,21 @@ public class AzureClient {
         return privatednsManager.privateZones().list();
     }
 
+    public List<PrivateZone> getPrivateDnsZoneListFromAllSubscriptions() {
+        PagedList<Subscription> subscriptions = azure.subscriptions().list();
+        subscriptions.loadAll();
+        return subscriptions.stream().map(s -> getPrivateDnsZones(s.subscriptionId()))
+                .flatMap(Collection::stream)
+                .collect(Collectors.toList());
+    }
+
+    private PagedList<PrivateZone> getPrivateDnsZones(String subscriptionId) {
+        privatednsManager dnsManager = azureClientCredentials.getPrivateDnsManagerWithAnotherSubscription(subscriptionId);
+        PagedList<PrivateZone> privateDnsZones = dnsManager.privateZones().list();
+        privateDnsZones.loadAll();
+        return privateDnsZones;
+    }
+
     public ValidationResult validateNetworkLinkExistenceForDnsZones(String networkLinkId, List<AzurePrivateDnsZoneServiceEnum> services,
             String resourceGroupName) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();

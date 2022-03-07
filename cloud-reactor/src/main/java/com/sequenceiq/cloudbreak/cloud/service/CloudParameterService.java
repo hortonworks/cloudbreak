@@ -36,6 +36,8 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNoSqlTablesRequ
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNoSqlTablesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformPrivateDnsZonesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformPrivateDnsZonesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequestV2;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsResult;
@@ -74,6 +76,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
+import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.service.OperationException;
@@ -493,6 +496,27 @@ public class CloudParameterService {
             return result.getResourceGroups();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting the platform ResourceGroupsResult", e);
+            throw new OperationException(e);
+        }
+    }
+
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
+    public CloudPrivateDnsZones getPrivateDnsZones(ExtendedCloudCredential cloudCredential, String platformVariant, Map<String, String> filters) {
+        LOGGER.debug("Get platform private DNS zones for credential: [{}]", cloudCredential.getName());
+
+        GetPlatformPrivateDnsZonesRequest request = new GetPlatformPrivateDnsZonesRequest(cloudCredential, cloudCredential, platformVariant, null);
+        eventBus.notify(request.selector(), Event.wrap(request));
+        try {
+            GetPlatformPrivateDnsZonesResult result = request.await();
+            LOGGER.debug("Platform PrivateDnsZonesResult result: {}", result);
+            if (result.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.debug("Failed to get platform PrivateDnsZonesResult", result.getErrorDetails());
+                throw new GetCloudParameterException(String.format("Failed to get private dns zones for the cloud provider: %s. %s",
+                        result.getStatusReason(), getCauseMessages(result.getErrorDetails())), result.getErrorDetails());
+            }
+            return result.getPrivateDnsZones();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform PrivateDnsZonesResult", e);
             throw new OperationException(e);
         }
     }

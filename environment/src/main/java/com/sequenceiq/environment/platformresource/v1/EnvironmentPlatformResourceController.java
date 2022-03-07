@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.common.api.type.CdpResourceType;
@@ -38,6 +39,8 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGateways
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformIpPoolsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNetworksResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNoSqlTablesResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformPrivateDnsZoneResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformPrivateDnsZonesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformResourceGroupResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformResourceGroupsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSecurityGroupsResponse;
@@ -359,6 +362,28 @@ public class EnvironmentPlatformResourceController implements EnvironmentPlatfor
                 .collect(Collectors.toList());
         PlatformResourceGroupsResponse response = new PlatformResourceGroupsResponse(platformResourceGroups);
         LOGGER.info("Resp /platform_resources/resource_groups, request: {}, resourceGroups: {}, response: {}", request, resourceGroups, response);
+        return response;
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public PlatformPrivateDnsZonesResponse getPrivateDnsZones(
+            @ResourceCrn String environmentCrn,
+            String platformVariant) {
+        String accountId = getAccountId();
+        validateEnvironmentCrnPattern(environmentCrn);
+        PlatformResourceRequest request = platformParameterService.getPlatformResourceRequestByEnvironment(
+                accountId,
+                environmentCrn,
+                platformVariant,
+                null);
+        LOGGER.debug("Get /platform_resources/private_dns_zones, request: {}", request);
+        CloudPrivateDnsZones privateDnsZones = platformParameterService.getPrivateDnsZones(request);
+        List<PlatformPrivateDnsZoneResponse> platformPrivateDnsZones = privateDnsZones.getPrivateDnsZones().stream()
+                .map(pdz -> new PlatformPrivateDnsZoneResponse(pdz.getPrivateDnsZoneId()))
+                .collect(Collectors.toList());
+        PlatformPrivateDnsZonesResponse response = new PlatformPrivateDnsZonesResponse(platformPrivateDnsZones);
+        LOGGER.debug("Resp /platform_resources/private_dns_zones, request: {}, privateDnsZones: {}, response: {}", request, privateDnsZones, response);
         return response;
     }
 

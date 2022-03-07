@@ -22,6 +22,7 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformGateways
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformIpPoolsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNetworksResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNoSqlTablesResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformPrivateDnsZonesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformResourceGroupsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSecurityGroupsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSshKeysResponse;
@@ -191,4 +192,15 @@ public interface CredentialPlatformResourceEndpoint {
             @QueryParam("region") String region,
             @QueryParam("platformVariant") String platformVariant,
             @QueryParam("availabilityZone") String availabilityZone);
+
+    @GET
+    @Path("private_dns_zones")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OpDescription.GET_PRIVATE_DNS_ZONES, produces = MediaType.APPLICATION_JSON, notes = CONNECTOR_NOTES,
+            nickname = "getPrivateDnsZones")
+    PlatformPrivateDnsZonesResponse getPrivateDnsZones(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("platformVariant") String platformVariant);
+
 }
