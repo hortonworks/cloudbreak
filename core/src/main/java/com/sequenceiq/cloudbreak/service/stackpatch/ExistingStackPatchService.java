@@ -16,10 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackPatch;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.job.stackpatcher.config.ExistingStackPatcherConfig;
-import com.sequenceiq.cloudbreak.repository.StackPatchRepository;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.FlowRetryService;
@@ -29,9 +27,6 @@ public abstract class ExistingStackPatchService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExistingStackPatchService.class);
 
     private static final Random RANDOM = new SecureRandom();
-
-    @Inject
-    private StackPatchRepository stackPatchRepository;
 
     @Inject
     private FlowLogService flowLogService;
@@ -49,10 +44,6 @@ public abstract class ExistingStackPatchService {
     public Date getFirstStart() {
         int delayInMinutes = RANDOM.nextInt((int) TimeUnit.HOURS.toMinutes(properties.getMaxInitialStartDelayInHours()));
         return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofMinutes(delayInMinutes)));
-    }
-
-    public boolean isStackAlreadyFixed(Stack stack) {
-        return stackPatchRepository.findByStackAndType(stack, getStackPatchType()).isPresent();
     }
 
     /**
@@ -73,7 +64,6 @@ public abstract class ExistingStackPatchService {
                             stack.getResourceCrn(), getStackPatchType());
                     if (success) {
                         LOGGER.info("Stack {} was patched successfully for {}", stack.getResourceCrn(), getStackPatchType());
-                        stackPatchRepository.save(new StackPatch(stack, getStackPatchType()));
                     } else {
                         LOGGER.info("Stack {} was not patched for {}", stack.getResourceCrn(), getStackPatchType());
                     }
@@ -81,8 +71,8 @@ public abstract class ExistingStackPatchService {
                 } catch (ExistingStackPatchApplyException e) {
                     throw e;
                 } catch (Exception e) {
-                    String message = String.format("Something unexpected went wrong with stack %s while applying patch %s",
-                            stack.getResourceCrn(), getStackPatchType());
+                    String message = String.format("Something unexpected went wrong with stack %s while applying patch %s: %s",
+                            stack.getResourceCrn(), getStackPatchType(), e.getMessage());
                     throw new ExistingStackPatchApplyException(message, e);
                 }
             } else {

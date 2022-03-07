@@ -13,6 +13,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackPatch;
+import com.sequenceiq.cloudbreak.domain.stack.StackPatchStatus;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 
@@ -34,22 +36,29 @@ class StackPatchUsageReporterServiceTest {
     @Captor
     private ArgumentCaptor<UsageProto.CDPStackPatchEvent> eventCaptor;
 
+    private StackPatch stackPatch;
+
     @BeforeEach
     void setUp() {
         stack = new Stack();
         stack.setResourceCrn(RESOURCE_CRN);
+        stackPatch = new StackPatch(stack, STACK_PATCH_TYPE);
     }
 
     @Test
     void shouldReportAffected() {
-        underTest.reportAffected(stack, STACK_PATCH_TYPE);
+        stackPatch.setStatus(StackPatchStatus.AFFECTED);
+
+        underTest.reportUsage(stackPatch);
 
         verifyNonNullValues(UsageProto.CDPStackPatchEventType.Value.AFFECTED, "");
     }
 
     @Test
     void shouldReportSuccess() {
-        underTest.reportSuccess(stack, STACK_PATCH_TYPE);
+        stackPatch.setStatus(StackPatchStatus.FIXED);
+
+        underTest.reportUsage(stackPatch);
 
         verifyNonNullValues(UsageProto.CDPStackPatchEventType.Value.SUCCESS, "");
     }
@@ -57,31 +66,19 @@ class StackPatchUsageReporterServiceTest {
     @Test
     void shouldReportFailure() {
         String failureMessage = "failure message";
+        stackPatch.setStatus(StackPatchStatus.FAILED);
+        stackPatch.setStatusReason(failureMessage);
 
-        underTest.reportFailure(stack, STACK_PATCH_TYPE, failureMessage);
+        underTest.reportUsage(stackPatch);
 
         verifyNonNullValues(UsageProto.CDPStackPatchEventType.Value.FAILURE, failureMessage);
     }
 
     @Test
     void affectedShouldNotFailWithNullValues() {
-        underTest.reportAffected(null, null);
+        stackPatch.setStack(null);
 
-        verifyNullValues(UsageProto.CDPStackPatchEventType.Value.AFFECTED);
-    }
-
-    @Test
-    void successShouldNotFailWithNullValues() {
-        underTest.reportSuccess(null, null);
-
-        verifyNullValues(UsageProto.CDPStackPatchEventType.Value.SUCCESS);
-    }
-
-    @Test
-    void failureShouldNotFailWithNullValues() {
-        underTest.reportFailure(null, null, null);
-
-        verifyNullValues(UsageProto.CDPStackPatchEventType.Value.FAILURE);
+        underTest.reportUsage(stackPatch);
     }
 
     private void verifyNonNullValues(UsageProto.CDPStackPatchEventType.Value eventType, String message) {
@@ -91,15 +88,6 @@ class StackPatchUsageReporterServiceTest {
                 .returns(STACK_PATCH_TYPE.name(), UsageProto.CDPStackPatchEvent::getStackPatchType)
                 .returns(eventType, UsageProto.CDPStackPatchEvent::getEventType)
                 .returns(message, UsageProto.CDPStackPatchEvent::getMessage);
-    }
-
-    private void verifyNullValues(UsageProto.CDPStackPatchEventType.Value eventType) {
-        Mockito.verify(usageReporter).cdpStackPatcherEvent(eventCaptor.capture());
-        Assertions.assertThat(eventCaptor.getValue())
-                .returns("", UsageProto.CDPStackPatchEvent::getResourceCrn)
-                .returns(StackPatchType.UNKNOWN.name(), UsageProto.CDPStackPatchEvent::getStackPatchType)
-                .returns(eventType, UsageProto.CDPStackPatchEvent::getEventType)
-                .returns("", UsageProto.CDPStackPatchEvent::getMessage);
     }
 
 }
