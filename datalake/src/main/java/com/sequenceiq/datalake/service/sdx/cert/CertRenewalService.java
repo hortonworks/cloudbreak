@@ -56,12 +56,13 @@ public class CertRenewalService {
 
     public FlowIdentifier triggerRenewCertificate(SdxCluster sdxCluster, String userCrn) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        return sdxReactorFlowManager.triggerCertRenewal(new SdxStartCertRenewalEvent(sdxCluster.getId(), userCrn));
+        return sdxReactorFlowManager.triggerCertRenewal(new SdxStartCertRenewalEvent(sdxCluster.getId(), userCrn), sdxCluster.getClusterName());
     }
 
     public FlowIdentifier triggerInternalRenewCertificate(SdxCluster sdxCluster) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        return sdxReactorFlowManager.triggerCertRenewal(new SdxStartCertRenewalEvent(sdxCluster.getId(), sdxCluster.getInitiatorUserCrn(), true));
+        return sdxReactorFlowManager.triggerCertRenewal(
+                new SdxStartCertRenewalEvent(sdxCluster.getId(), sdxCluster.getInitiatorUserCrn(), true), sdxCluster.getClusterName());
     }
 
     public void renewCertificate(SdxCluster sdxCluster, String userCrn) {
