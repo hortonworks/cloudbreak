@@ -8,7 +8,6 @@ import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupFailedEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupWaitRequest;
-import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -39,9 +38,6 @@ public class DatalakeDatabaseBackupWaitHandler extends ExceptionCatcherEventHand
 
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
-
-    @Inject
-    private SdxOperationRepository sdxOperationRepository;
 
     @Override
     public String selector() {
