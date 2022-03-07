@@ -116,12 +116,12 @@ public class TlsSecurityService {
         saltSecurityConfig.setSaltSignPrivateKey(BaseEncoding.base64().encode(keyPair.getKey().getBytes()));
     }
 
-    public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
+    public GatewayConfig buildGatewayConfig(Stack stack, InstanceMetaData gatewayInstance, Integer gatewayPort,
             SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
+        Long stackId = stack.getId();
         LOGGER.info("Build gateway config for stack with id: {}, gatewayInstance: {}, gatewayPort: {}, knoxGatewayEnabled: {}",
                 stackId, gatewayInstance, gatewayPort, knoxGatewayEnabled);
         SecurityConfig securityConfig = getSecurityConfigByStackIdOrThrowNotFound(stackId);
-        Stack stack = stackService.getById(stackId);
         String connectionIp = getGatewayIp(securityConfig, gatewayInstance, stack);
         HttpClientConfig conf = buildTLSClientConfig(stackId, stack.getCloudPlatform(), connectionIp, gatewayInstance);
         SaltSecurityConfig saltSecurityConfig = securityConfig.getSaltSecurityConfig();
