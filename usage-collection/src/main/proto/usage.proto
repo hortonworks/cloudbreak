@@ -1467,6 +1467,8 @@ message CDPClusterShape {
   bool temporaryStorageUsed = 5;
   // Cluster template details in JSON format
   string clusterTemplateDetails = 6;
+  // Cluster template overrides in JSON format
+  string clusterTemplateOverridesDetails = 7;
 }
 
 // The Shape of the Data lake.
