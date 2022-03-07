@@ -138,13 +138,4 @@ public class RdsConfigService extends AbstractWorkspaceAwareResourceService<RDSC
     public Set<Cluster> getClustersUsingResource(RDSConfig rdsConfig) {
         return clusterService.findByRdsConfig(rdsConfig.getId());
     }
-
-    public RDSConfig resolveVaultValues(RDSConfig config) {
-        String username = config.getConnectionUserName();
-        String password = config.getConnectionPassword();
-        config.setConnectionUserName(username);
-        config.setConnectionPassword(password);
-        return config;
-    }
-
 }

@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -21,8 +22,10 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceR
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -48,13 +51,18 @@ public class PillarConfigUpdateService {
     @Inject
     private ClusterHostServiceRunner clusterHostServiceRunner;
 
+    @Inject
+    private ClusterService clusterService;
+
     public void doConfigUpdate(Long stackId) {
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.BOOTSTRAPPING_MACHINES);
         flowMessageService
             .fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(),
                 CLUSTER_PILLAR_CONFIG_UPDATE_STARTED);
         Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
-        clusterHostServiceRunner.updateClusterConfigs(stack, stack.getCluster());
+        Long clusterId = stack.getCluster().getId();
+        Cluster cluster = clusterService.findOneWithLists(clusterId).orElseThrow(NotFoundException.notFound("Cluster", clusterId));
+        clusterHostServiceRunner.updateClusterConfigs(stack, cluster);
     }
 
     public void configUpdateFinished(StackView stackView) {

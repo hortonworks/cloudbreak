@@ -55,12 +55,12 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcel
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -82,7 +82,8 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -127,7 +128,7 @@ public class ClusterHostServiceRunnerTest {
     private ProxyConfigProvider proxyConfigProvider;
 
     @Mock
-    private RdsConfigService rdsConfigService;
+    private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
     @Mock
     private StackUtil stackUtil;
@@ -377,11 +378,12 @@ public class ClusterHostServiceRunnerTest {
         lenient().when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(Lists.newArrayList(gwIg.getAllInstanceMetaData()));
 
         when(stack.getInstanceGroups()).thenReturn(instanceGroups);
-        when(rdsConfigService.findByClusterIdAndType(any(), eq(DatabaseType.CLOUDERA_MANAGER))).thenReturn(new RDSConfig());
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType("asdf");
-        rdsConfig.setConnectionURL("jdbc:postgresql:subname://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger");
-        when(rdsConfigService.resolveVaultValues(any())).thenReturn(rdsConfig);
+        RdsConfigWithoutCluster rdsConfigWithoutCluster = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfigWithoutClusterService.findByClusterIdAndType(any(), eq(DatabaseType.CLOUDERA_MANAGER))).thenReturn(rdsConfigWithoutCluster);
+        when(rdsConfigWithoutCluster.getType()).thenReturn("asdf");
+        when(rdsConfigWithoutCluster.getConnectionURL()).thenReturn("jdbc:postgresql:subname://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger");
+        when(rdsConfigWithoutCluster.getConnectionUserName()).thenReturn(new Secret("username"));
+        when(rdsConfigWithoutCluster.getConnectionPassword()).thenReturn(new Secret("password"));
         when(loadBalancerSANProvider.getLoadBalancerSAN(stack)).thenReturn(Optional.empty());
         ClusterPreCreationApi clusterPreCreationApi = mock(ClusterPreCreationApi.class);
         when(clusterApiConnectors.getConnector(cluster)).thenReturn(clusterPreCreationApi);

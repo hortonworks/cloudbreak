@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -59,8 +60,10 @@ public class ClusterManagerUpscaleServiceTest {
 
     @Test
     public void testUpscaleIfTargetedUpscaleNotSupportedOrPrimaryGatewayChanged() throws ClusterClientInitException {
-        when(stackService.getByIdWithListsInTransaction(any())).thenReturn(getStack());
-        when(clusterHostServiceRunner.addClusterServices(any(), any(), anyBoolean())).thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
+        Stack stack = getStack();
+        when(stackService.getByIdWithListsInTransaction(any())).thenReturn(stack);
+        when(clusterService.findOneWithLists(1L)).thenReturn(Optional.of(stack.getCluster()));
+        when(clusterHostServiceRunner.addClusterServices(any(), any(), any(), anyBoolean())).thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
         doNothing().when(clusterServiceRunner).updateAmbariClientConfig(any(), any());
         doNothing().when(clusterService).updateInstancesToRunning(any(), any());
         when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
@@ -79,8 +82,10 @@ public class ClusterManagerUpscaleServiceTest {
 
     @Test
     public void testUpscaleIfTargetedUpscaleSupported() throws ClusterClientInitException {
-        when(stackService.getByIdWithListsInTransaction(any())).thenReturn(getStack());
-        when(clusterHostServiceRunner.addClusterServices(any(), any(), anyBoolean())).thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
+        Stack stack = getStack();
+        when(stackService.getByIdWithListsInTransaction(any())).thenReturn(stack);
+        when(clusterService.findOneWithLists(1L)).thenReturn(Optional.of(stack.getCluster()));
+        when(clusterHostServiceRunner.addClusterServices(any(), any(), any(), anyBoolean())).thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
         doNothing().when(clusterService).updateInstancesToRunning(any(), any());
         when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
         when(targetedUpscaleSupportService.targetedUpscaleOperationSupported(any())).thenReturn(Boolean.TRUE);
