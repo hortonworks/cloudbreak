@@ -41,6 +41,9 @@ public class StackToStackDetailsConverter {
     private ImageToImageDetailsConverter imageToImageDetailsConverter;
 
     @Inject
+    private CustomConfigurationsToCustomConfigurationsDetailsConverter customConfigurationsToCustomConfigurationsDetailsConverter;
+
+    @Inject
     private RedbeamsDbServerConfigurer dbServerConfigurer;
 
     @Inject
@@ -61,6 +64,10 @@ public class StackToStackDetailsConverter {
         stackDetails.setStatus(source.getStatus().name());
         if (source.getStackStatus() != null && source.getStackStatus().getDetailedStackStatus() != null) {
             stackDetails.setDetailedStatus(source.getStackStatus().getDetailedStackStatus().name());
+        }
+        if (source.getCluster() != null && source.getCluster().getCustomConfigurations() != null) {
+            stackDetails.setCustomConfigurations(
+                    customConfigurationsToCustomConfigurationsDetailsConverter.convert(source.getCluster().getCustomConfigurations()));
         }
         stackDetails.setStatusReason(source.getStatusReason());
         stackDetails.setInstanceGroups(

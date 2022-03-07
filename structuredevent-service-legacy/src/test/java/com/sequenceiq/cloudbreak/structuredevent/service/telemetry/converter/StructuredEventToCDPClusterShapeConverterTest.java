@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.CustomConfigurationsDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.InstanceGroupDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
@@ -78,6 +79,8 @@ class StructuredEventToCDPClusterShapeConverterTest {
         Assert.assertEquals(10, flowClusterShape.getNodes());
         Assert.assertEquals("compute=3, gw=4, master=1, worker=2", flowClusterShape.getHostGroupNodeCount());
         Assert.assertTrue(flowClusterShape.getTemporaryStorageUsed());
+        Assert.assertEquals("{\"services\":[\"service1\",\"service2\",\"service3\"]," +
+                        "\"roles\":[\"role1\",\"role2\"],\"runtimeVersion\":\"7.2.15\"}", flowClusterShape.getClusterTemplateOverridesDetails());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(createStackDetails());
@@ -91,6 +94,8 @@ class StructuredEventToCDPClusterShapeConverterTest {
         Assert.assertEquals(10, syncClusterShape.getNodes());
         Assert.assertEquals("compute=3, gw=4, master=1, worker=2", syncClusterShape.getHostGroupNodeCount());
         Assert.assertTrue(syncClusterShape.getTemporaryStorageUsed());
+        Assert.assertEquals("{\"services\":[\"service1\",\"service2\",\"service3\"]," +
+                "\"roles\":[\"role1\",\"role2\"],\"runtimeVersion\":\"7.2.15\"}", syncClusterShape.getClusterTemplateOverridesDetails());
     }
 
     @Test
@@ -183,6 +188,30 @@ class StructuredEventToCDPClusterShapeConverterTest {
     }
 
     @Test
+    public void testConversionWithoutCustomConfigurations() {
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        StackDetails stackDetails = new StackDetails();
+        InstanceGroupDetails master = createInstanceGroupDetails("master", 2, null);
+        stackDetails.setInstanceGroups(List.of(master));
+        structuredFlowEvent.setStack(stackDetails);
+
+        UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
+
+        Assert.assertEquals(2, flowClusterShape.getNodes());
+        Assert.assertEquals("master=2", flowClusterShape.getHostGroupNodeCount());
+        Assert.assertEquals("null", flowClusterShape.getClusterTemplateOverridesDetails());
+
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        structuredSyncEvent.setStack(stackDetails);
+
+        UsageProto.CDPClusterShape syncClusterShape = underTest.convert(structuredSyncEvent);
+
+        Assert.assertEquals(2, syncClusterShape.getNodes());
+        Assert.assertEquals("master=2", syncClusterShape.getHostGroupNodeCount());
+        Assert.assertEquals("null", syncClusterShape.getClusterTemplateOverridesDetails());
+    }
+
+    @Test
     public void testConversionWithoutTemporaryStorage() {
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         StackDetails stackDetails = new StackDetails();
@@ -249,6 +278,7 @@ class StructuredEventToCDPClusterShapeConverterTest {
         InstanceGroupDetails gw = createInstanceGroupDetails("gw", 4, TemporaryStorage.ATTACHED_VOLUMES.name());
 
         stackDetails.setInstanceGroups(List.of(master, worker, compute, gw));
+        stackDetails.setCustomConfigurations(createCustomConfigurationsDetails());
         return stackDetails;
     }
 
@@ -258,5 +288,13 @@ class StructuredEventToCDPClusterShapeConverterTest {
         ig.setNodeCount(nodeCount);
         ig.setTemporaryStorage(storage);
         return ig;
+    }
+
+    private CustomConfigurationsDetails createCustomConfigurationsDetails() {
+        CustomConfigurationsDetails customConfigurationsDetails = new CustomConfigurationsDetails();
+        customConfigurationsDetails.setServices(List.of("service1", "service2", "service3"));
+        customConfigurationsDetails.setRoles(List.of("role1", "role2"));
+        customConfigurationsDetails.setRuntimeVersion("7.2.15");
+        return customConfigurationsDetails;
     }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
+import static org.mockito.ArgumentMatchers.any;
+
 import java.util.HashSet;
 
 import org.junit.jupiter.api.Assertions;
@@ -13,12 +15,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
+import com.sequenceiq.cloudbreak.structuredevent.event.CustomConfigurationsDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.common.api.type.Tunnel;
 
@@ -29,6 +33,9 @@ public class StackToStackDetailsConverterTest {
 
     @Mock
     private InstanceGroupToInstanceGroupDetailsConverter instanceGroupToInstanceGroupDetailsConverter;
+
+    @Mock
+    private CustomConfigurationsToCustomConfigurationsDetailsConverter customConfigurationsToCustomConfigurationsDetailsConverter;
 
     @Mock
     private ImageToImageDetailsConverter imageToImageDetailsConverter;
@@ -86,6 +93,42 @@ public class StackToStackDetailsConverterTest {
         StackDetails actual = underTest.convert(stack);
         // THEN
         Assertions.assertEquals("UNKNOWN", actual.getDatabaseType());
+    }
+
+    @Test
+    public void testConversionWithCustomConfigsAndClusterInstalled() {
+        // GIVEN
+        Stack stack = createStack();
+        Cluster cluster = new Cluster();
+        CustomConfigurations customConfigurations = new CustomConfigurations();
+        cluster.setCustomConfigurations(customConfigurations);
+        stack.setCluster(cluster);
+
+        CustomConfigurationsDetails customConfigurationsDetails = new CustomConfigurationsDetails();
+
+        Mockito.when(customConfigurationsToCustomConfigurationsDetailsConverter.convert(any(CustomConfigurations.class)))
+                .thenReturn(customConfigurationsDetails);
+
+        // WHEN
+        StackDetails actual = underTest.convert(stack);
+
+        // THEN
+        Assertions.assertNotNull(actual.getCustomConfigurations());
+        Assertions.assertEquals(customConfigurationsDetails, actual.getCustomConfigurations());
+    }
+
+    @Test
+    public void testConversionWithoutCustomConfigsAndClusterInstalled() {
+        // GIVEN
+        Stack stack = createStack();
+        Cluster cluster = new Cluster();
+        stack.setCluster(cluster);
+
+        // WHEN
+        StackDetails actual = underTest.convert(stack);
+
+        // THEN
+        Assertions.assertNull(actual.getCustomConfigurations());
     }
 
     private Stack createStack() {
