@@ -43,6 +43,7 @@ auth:
       light.to.medium.migration.enable: true
       recovery.resize.enable: true
       multiaz.enable: true
+      select.instance.type.enable: true
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
     datahub:

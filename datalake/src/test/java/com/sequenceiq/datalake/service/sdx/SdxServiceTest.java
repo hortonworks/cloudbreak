@@ -1002,7 +1002,6 @@ class SdxServiceTest {
     @Test
     void testCreateSdxClusterWithCustomRequestContainsImageInfo() throws Exception {
         ImageV4Response imageResponse = getImageResponse();
-
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.7/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
@@ -1054,6 +1053,7 @@ class SdxServiceTest {
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
         when(entitlementService.microDutySdxEnabled(anyString())).thenReturn(true);
+        when(entitlementService.isDatalakeSelectInstanceTypeEnabled(anyString())).thenReturn(true);
 
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
