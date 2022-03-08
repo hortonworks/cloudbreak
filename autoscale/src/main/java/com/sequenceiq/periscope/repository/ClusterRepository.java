@@ -62,6 +62,12 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     List<Long> findClusterIdsByStackTypeAndPeriscopeNodeId(@Param("stackType") StackType stackType,
             @Param("periscopeNodeId") String periscopeNodeId);
 
+    @Query("SELECT distinct c.id FROM Cluster c WHERE c.stackType = :stackType " +
+            " and (:periscopeNodeId IS NULL or c.periscopeNodeId = :periscopeNodeId) " +
+            " and c.autoscalingEnabled = :autoscalingEnabled")
+    List<Long> findClusterIdsByStackTypeAndPeriscopeNodeIdAndAutoscalingEnabled(@Param("stackType") StackType stackType,
+            @Param("periscopeNodeId") String periscopeNodeId, @Param("autoscalingEnabled") Boolean autoscalingEnabled);
+
     List<Cluster> findByStateAndPeriscopeNodeId(ClusterState state, String nodeId);
 
     List<Cluster> findAllByPeriscopeNodeId(String nodeId);

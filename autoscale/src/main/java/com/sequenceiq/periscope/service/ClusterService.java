@@ -245,6 +245,11 @@ public class ClusterService {
         return clusterRepository.findClusterIdsByStackTypeAndPeriscopeNodeId(stackType, nodeId);
     }
 
+    public List<Long> findClusterIdsByStackTypeAndPeriscopeNodeIdAndAutoscalingEnabled(StackType stackType, String nodeId,
+            Boolean autoscalingEnabled) {
+        return clusterRepository.findClusterIdsByStackTypeAndPeriscopeNodeIdAndAutoscalingEnabled(stackType, nodeId, autoscalingEnabled);
+    }
+
     public void validateClusterUniqueness(MonitoredStack stack) {
         Iterable<Cluster> clusters = clusterRepository.findAll();
         boolean clusterForTheSameStackAndClusterManager = StreamSupport.stream(clusters.spliterator(), false)

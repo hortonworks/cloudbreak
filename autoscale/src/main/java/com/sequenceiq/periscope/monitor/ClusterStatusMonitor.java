@@ -31,8 +31,9 @@ public class ClusterStatusMonitor extends ClusterMonitor {
 
     @Override
     protected List<Cluster> getMonitored() {
-        return getClusterService().findClusterIdsByStackTypeAndPeriscopeNodeId(StackType.WORKLOAD, getPeriscopeNodeConfig().getId())
-                .stream().map(clusterId -> new Cluster(clusterId))
+        return getClusterService()
+                .findClusterIdsByStackTypeAndPeriscopeNodeIdAndAutoscalingEnabled(StackType.WORKLOAD, getPeriscopeNodeConfig().getId(), Boolean.TRUE)
+                .stream().map(Cluster::new)
                 .collect(Collectors.toList());
     }
 }
