@@ -4,6 +4,7 @@
 {% else %}
   {% set curl_cmd = 'curl --max-time 30 -s -k -f ' + telemetry.repoGpgKey %}
 {% endif %}
+{%- if telemetry.repoName %}
 /etc/yum.repos.d/cdp-infra-tools.repo:
   file.managed:
     - source: salt://telemetry/template/cdp-infra-tools.repo.j2
@@ -14,7 +15,7 @@
          repoBaseUrl: "{{ telemetry.repoBaseUrl }}"
          repoGpgKey: "{{ telemetry.repoGpgKey }}"
          repoGpgCheck: {{ telemetry.repoGpgCheck }}
-
+{%- endif %}
 /opt/salt/scripts/cdp-telemetry-deployer.sh:
     file.managed:
         - source: salt://telemetry/scripts/cdp-telemetry-deployer.sh
