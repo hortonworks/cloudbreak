@@ -14,6 +14,8 @@ public class AzureLoadBalancer {
 
     private final List<AzureLoadBalancingRule> rules;
 
+    private final List<AzureOutboundRule> outboundRules;
+
     private final Set<AzureLoadBalancerProbe> probes;
 
     private final String name;
@@ -26,6 +28,7 @@ public class AzureLoadBalancer {
 
     private AzureLoadBalancer(Builder builder) {
         this.rules = List.copyOf(builder.rules);
+        this.outboundRules = List.copyOf(builder.outboundRules);
         this.probes = Set.copyOf(builder.probes);
         this.name = getLoadBalancerName(builder.type, builder.stackName);
         this.type = builder.type;
@@ -61,6 +64,10 @@ public class AzureLoadBalancer {
         return sku;
     }
 
+    public List<AzureOutboundRule> getOutboundRules() {
+        return outboundRules;
+    }
+
     @Override
     public String toString() {
         return "AzureLoadBalancer{" +
@@ -76,6 +83,8 @@ public class AzureLoadBalancer {
     public static final class Builder {
         private List<AzureLoadBalancingRule> rules;
 
+        private List<AzureOutboundRule> outboundRules;
+
         private Set<AzureLoadBalancerProbe> probes;
 
         private String stackName;
@@ -88,6 +97,11 @@ public class AzureLoadBalancer {
 
         public Builder setRules(List<AzureLoadBalancingRule> rules) {
             this.rules = rules;
+            return this;
+        }
+
+        public Builder setOutboundRules(List<AzureOutboundRule> outboundRules) {
+            this.outboundRules = outboundRules;
             return this;
         }
 

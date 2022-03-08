@@ -203,12 +203,13 @@ public class LoadBalancerConfigService {
     }
 
     public boolean isLoadBalancerCreationConfigured(Stack stack, DetailedEnvironmentResponse environment) {
-        return !setupLoadBalancers(stack, environment, true, false).isEmpty();
+        return !setupLoadBalancers(stack, environment, true, false, null).isEmpty();
     }
 
     public Set<LoadBalancer> createLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, StackV4Request source) {
+        LoadBalancerSku sku = getLoadBalancerSku(source);
         boolean azureLoadBalancerDisabled = CloudPlatform.AZURE.toString().equalsIgnoreCase(stack.getCloudPlatform()) &&
-                getLoadBalancerSku(source) == LoadBalancerSku.NONE;
+                LoadBalancerSku.NONE.equals(sku);
         if (azureLoadBalancerDisabled) {
             Optional<TargetGroup> oozieTargetGroup = setupOozieHATargetGroup(stack, true);
             if (oozieTargetGroup.isPresent()) {
@@ -220,7 +221,7 @@ public class LoadBalancerConfigService {
         }
 
         boolean loadBalancerFlagEnabled = source != null && source.isEnableLoadBalancer();
-        Set<LoadBalancer> loadBalancers = setupLoadBalancers(stack, environment, false, loadBalancerFlagEnabled);
+        Set<LoadBalancer> loadBalancers = setupLoadBalancers(stack, environment, false, loadBalancerFlagEnabled, sku);
 
         if (stack.getCloudPlatform().equalsIgnoreCase(CloudPlatform.AZURE.toString())) {
             configureLoadBalancerAvailabilitySets(stack.getName(), loadBalancers);
@@ -286,7 +287,8 @@ public class LoadBalancerConfigService {
                 .orElse(LoadBalancerSku.getDefault());
     }
 
-    public Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, boolean loadBalancerFlagEnabled) {
+    public Set<LoadBalancer> setupLoadBalancers(Stack stack, DetailedEnvironmentResponse environment, boolean dryRun, boolean loadBalancerFlagEnabled,
+            LoadBalancerSku sku) {
         if (dryRun) {
             LOGGER.info("Checking if load balancers are enabled and configurable for stack {}", stack.getName());
         } else {
@@ -300,7 +302,7 @@ public class LoadBalancerConfigService {
             } else {
                 LOGGER.debug("Load balancer is explicitly defined for the stack.");
             }
-            setupKnoxLoadbalancing(stack, environment, dryRun, loadBalancers);
+            setupKnoxLoadbalancing(stack, environment, dryRun, loadBalancers, sku);
             setupOozieLoadbalancing(stack, dryRun, loadBalancers);
 
             // TODO CB-9368 - create target group for CM instances
@@ -320,15 +322,21 @@ public class LoadBalancerConfigService {
     }
 
     private void setupKnoxLoadbalancing(Stack stack, DetailedEnvironmentResponse environment,
-        boolean dryRun, Set<LoadBalancer> loadBalancers) {
+        boolean dryRun, Set<LoadBalancer> loadBalancers, LoadBalancerSku sku) {
         Optional<TargetGroup> knoxTargetGroup = setupKnoxTargetGroup(stack, dryRun);
-        if (knoxTargetGroup.isPresent()) {
-            if (environment != null && isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
+        if (knoxTargetGroup.isPresent() && environment != null) {
+            boolean createPublicLb = shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork(), stack.getCloudPlatform());
+
+            if (isNetworkUsingPrivateSubnet(stack.getNetwork(), environment.getNetwork())) {
                 setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PRIVATE);
+                if (!createPublicLb && AZURE.equalsIgnoreCase(stack.getCloudPlatform()) && LoadBalancerSku.STANDARD.equals(sku)) {
+                    LOGGER.debug("Found private only Azure load balancer configuration; creating outbound public load balancer for egress.");
+                    setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.OUTBOUND);
+                }
             } else {
                 LOGGER.debug("Private subnet is not available. The internal load balancer will not be created.");
             }
-            if (environment != null && shouldCreateExternalKnoxLoadBalancer(stack.getNetwork(), environment.getNetwork(), stack.getCloudPlatform())) {
+            if (createPublicLb) {
                 setupLoadBalancer(dryRun, stack, loadBalancers, knoxTargetGroup.get(), LoadBalancerType.PUBLIC);
             } else {
                 LOGGER.debug("External load balancer creation is disabled.");
