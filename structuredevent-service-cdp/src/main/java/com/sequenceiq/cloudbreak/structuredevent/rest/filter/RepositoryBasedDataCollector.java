@@ -17,7 +17,7 @@ import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.structuredevent.service.lookup.CDPAccountAwareRepositoryLookupService;
@@ -73,18 +73,17 @@ public class RepositoryBasedDataCollector {
             AccountAwareResourceRepository<?, ?> resourceRepository = pathRepositoryEntry.getValue();
             if (resourceCrn == null && resourceName != null) {
                 String accountId = ThreadBasedUserCrnProvider.getAccountId();
-                Optional<? extends AccountAwareResource> entity = resourceRepository.findByNameAndAccountId(resourceName, accountId);
+                Optional<ResourceBasicView> entity = resourceRepository.findResourceBasicViewByNameAndAccountId(resourceName, accountId);
                 if (entity.isPresent()) {
-                    AccountAwareResource resource = entity.get();
+                    ResourceBasicView resource = entity.get();
                     params.put(RESOURCE_ID, Long.toString(resource.getId()));
                     params.put(RESOURCE_CRN, resource.getResourceCrn());
                     break;
                 }
             } else if (resourceName == null) {
-                String accountId = ThreadBasedUserCrnProvider.getAccountId();
-                Optional<? extends AccountAwareResource> entity = resourceRepository.findByResourceCrnAndAccountId(resourceCrn, accountId);
+                Optional<ResourceBasicView> entity = resourceRepository.findResourceBasicViewByResourceCrn(resourceCrn);
                 if (entity.isPresent()) {
-                    AccountAwareResource resource = entity.get();
+                    ResourceBasicView resource = entity.get();
                     params.put(RESOURCE_ID, Long.toString(resource.getId()));
                     params.put(RESOURCE_NAME, resource.getName());
                     break;

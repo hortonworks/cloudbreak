@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -10,6 +11,7 @@ import javax.transaction.Transactional.TxType;
 import org.springframework.stereotype.Repository;
 
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.structuredevent.domain.CDPStructuredEventEntity;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
@@ -49,4 +51,21 @@ public interface CDPStructuredEventRepository extends AccountAwareResourceReposi
     default Set<CDPStructuredEventEntity> findByResourceCrnInAndAccountId(Set<String> crn, String accountId) {
         throw new UnsupportedOperationException();
     }
+
+    default Optional<ResourceBasicView> findResourceBasicViewByResourceCrn(String resourceCrn) {
+        throw new UnsupportedOperationException();
+    }
+
+    default List<ResourceBasicView> findAllResourceBasicViewByResourceCrns(Collection<String> resourceCrns) {
+        throw new UnsupportedOperationException();
+    }
+
+    default Optional<ResourceBasicView> findResourceBasicViewByNameAndAccountId(String name, String accountId) {
+        throw new UnsupportedOperationException();
+    }
+
+    default List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(Collection<String> names, String accountId) {
+        throw new UnsupportedOperationException();
+    }
+
 }

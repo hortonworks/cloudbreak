@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -997,5 +998,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     public JobResource getJobResource(Long resourceId) {
         return stackRepository.getJobResource(resourceId).orElseThrow(notFound("Stack", resourceId));
+    }
+
+    public Optional<ResourceBasicView> getResourceBasicViewByResourceCrn(String resourceCrn) {
+        return stackRepository.findResourceBasicViewByResourceCrn(resourceCrn);
     }
 }

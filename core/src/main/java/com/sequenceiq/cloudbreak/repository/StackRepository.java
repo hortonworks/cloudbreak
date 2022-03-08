@@ -18,6 +18,7 @@ import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
@@ -398,4 +399,36 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             "AND (s.type is not 'TEMPLATE' OR s.type is null) " +
             "AND ss.status not in (:notInStatuses)")
     List<JobResource> getJobResourcesNotIn(@Param("notInStatuses") Set<Status> notInStatuses);
+
+    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
+            "FROM Stack s " +
+            "WHERE s.terminated = null " +
+            "AND (s.type is not 'TEMPLATE' OR s.type is null) " +
+            "AND s.resourceCrn = :resourceCrn")
+    Optional<ResourceBasicView> findResourceBasicViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
+
+    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
+            "FROM Stack s " +
+            "WHERE s.terminated = null " +
+            "AND (s.type is not 'TEMPLATE' OR s.type is null) " +
+            "AND s.resourceCrn in (:resourceCrns)")
+    List<ResourceBasicView> findAllResourceBasicViewByResourceCrns(@Param("resourceCrns") Collection<String> resourceCrns);
+
+    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
+            "FROM Stack s " +
+            "LEFT JOIN s.workspace w " +
+            "WHERE s.terminated = null " +
+            "AND (s.type is not 'TEMPLATE' OR s.type is null) " +
+            "AND s.name = :name " +
+            "AND w.id = :workspaceId")
+    Optional<ResourceBasicView> findResourceBasicViewByNameAndWorkspaceId(@Param("name") String name, @Param("workspaceId") Long workspaceId);
+
+    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
+            "FROM Stack s " +
+            "LEFT JOIN s.workspace w " +
+            "WHERE s.terminated = null " +
+            "AND (s.type is not 'TEMPLATE' OR s.type is null) " +
+            "AND s.name in (:names) " +
+            "AND w.id = :workspaceId")
+    List<ResourceBasicView> findAllResourceBasicViewByNamesAndWorkspaceId(@Param("names") Collection<String> names, @Param("workspaceId") Long workspaceId);
 }

@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.sharedservice.SharedServiceV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -76,8 +78,9 @@ public class DatalakeServiceTest {
         Stack source = new Stack();
         source.setDatalakeCrn("crn");
         StackV4Request x = new StackV4Request();
+        lenient().when(stackService.getResourceBasicViewByResourceCrn(anyString())).thenReturn(Optional.empty());
         underTest.prepareDatalakeRequest(source, x);
-        verify(stackService, times(1)).getByCrn("crn");
+        verify(stackService, times(1)).getResourceBasicViewByResourceCrn("crn");
     }
 
     @Test
@@ -91,26 +94,27 @@ public class DatalakeServiceTest {
 
     @Test
     public void testAddSharedServiceResponseWhenDatalakeCrnIsNotNull() {
-        Stack resultStack = new Stack();
-        resultStack.setName("teststack");
-        resultStack.setId(1L);
-        lenient().when(stackService.getByCrnOrElseNull(anyString())).thenReturn(resultStack);
+        ResourceBasicView resourceBasicView = mock(ResourceBasicView.class);
+        when(resourceBasicView.getId()).thenReturn(1L);
+        when(resourceBasicView.getName()).thenReturn("teststack");
+        lenient().when(stackService.getResourceBasicViewByResourceCrn(anyString())).thenReturn(Optional.of(resourceBasicView));
         Stack source = new Stack();
         source.setDatalakeCrn("crn");
         StackV4Response x = new StackV4Response();
         underTest.addSharedServiceResponse(source, x);
-        verify(stackService, times(1)).getByCrnOrElseNull("crn");
+        verify(stackService, times(1)).getResourceBasicViewByResourceCrn("crn");
         assertEquals(1L, x.getSharedService().getSharedClusterId());
         assertEquals("teststack", x.getSharedService().getSharedClusterName());
     }
 
     @Test
     public void testAddSharedServiceResponseWhenDatalakeCrnIsNotNullAndDatalakeIsMissing() {
+        lenient().when(stackService.getResourceBasicViewByResourceCrn(anyString())).thenReturn(Optional.empty());
         Stack source = new Stack();
         source.setDatalakeCrn("crn");
         StackV4Response x = new StackV4Response();
         underTest.addSharedServiceResponse(source, x);
-        verify(stackService, times(1)).getByCrnOrElseNull("crn");
+        verify(stackService, times(1)).getResourceBasicViewByResourceCrn("crn");
         assertNull(x.getSharedService().getSharedClusterId());
         assertNull(x.getSharedService().getSharedClusterName());
     }

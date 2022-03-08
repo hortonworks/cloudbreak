@@ -21,6 +21,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 
@@ -63,35 +64,35 @@ public class DataCollectorComponentTest {
         Map<String, String> params = new HashMap<>();
         params.put(RESOURCE_CRN, null);
         params.put(RESOURCE_NAME, "name");
-        when(repo.findByNameAndAccountId("name", "acc")).thenReturn(Optional.empty());
+        when(repo.findResourceBasicViewByNameAndAccountId("name", "acc")).thenReturn(Optional.empty());
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.fetchDataFromDbIfNeed(params));
         Assertions.assertEquals("name", params.get(RESOURCE_NAME));
         Assertions.assertNull(params.get(RESOURCE_CRN));
         Assertions.assertNull(params.get(RESOURCE_ID));
 
-        verify(repo).findByNameAndAccountId("name", "acc");
+        verify(repo).findResourceBasicViewByNameAndAccountId("name", "acc");
     }
 
     @Test
     public void testFetchDataFromDbIfNeedWhenNameNotNullAndCrnIsNullAndFound() {
         AccountAwareResourceRepository<AccountAwareResource, Long> repo = mock(AccountAwareResourceRepository.class);
-        AccountAwareResource resource = mock(AccountAwareResource.class);
+        ResourceBasicView resource = mock(ResourceBasicView.class);
         pathRepositoryMap.put("key", repo);
         Map<String, String> params = new HashMap<>();
         params.put(RESOURCE_CRN, null);
         params.put(RESOURCE_NAME, "name");
-        Optional<AccountAwareResource> entityOpt = Optional.of(resource);
+        Optional<ResourceBasicView> entityOpt = Optional.of(resource);
 
         when(resource.getResourceCrn()).thenReturn("crn-ret");
         when(resource.getId()).thenReturn(342L);
-        when(repo.findByNameAndAccountId("name", "acc")).thenReturn(entityOpt);
+        when(repo.findResourceBasicViewByNameAndAccountId("name", "acc")).thenReturn(entityOpt);
 
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.fetchDataFromDbIfNeed(params));
         Assertions.assertEquals("name", params.get(RESOURCE_NAME));
         Assertions.assertEquals("crn-ret", params.get(RESOURCE_CRN));
         Assertions.assertEquals("342", params.get(RESOURCE_ID));
 
-        verify(repo).findByNameAndAccountId("name", "acc");
+        verify(repo).findResourceBasicViewByNameAndAccountId("name", "acc");
     }
 
     @Test
@@ -101,20 +102,20 @@ public class DataCollectorComponentTest {
         Map<String, String> params = new HashMap<>();
         params.put(RESOURCE_CRN, "crn");
         params.put(RESOURCE_NAME, null);
-        when(repo.findByResourceCrnAndAccountId("crn", "acc")).thenReturn(Optional.empty());
+        when(repo.findResourceBasicViewByResourceCrn("crn")).thenReturn(Optional.empty());
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.fetchDataFromDbIfNeed(params));
         Assertions.assertNull(params.get(RESOURCE_NAME));
         Assertions.assertEquals("crn", params.get(RESOURCE_CRN));
         Assertions.assertNull(params.get(RESOURCE_ID));
 
-        verify(repo).findByResourceCrnAndAccountId("crn", "acc");
+        verify(repo).findResourceBasicViewByResourceCrn("crn");
     }
 
     @Test
     public void testFetchDataFromDbIfNeedWhenCrnNotNullAndNameIsNullAndFound() {
         AccountAwareResourceRepository<AccountAwareResource, Long> repo = mock(AccountAwareResourceRepository.class);
-        AccountAwareResource resource = mock(AccountAwareResource.class);
-        Optional<AccountAwareResource> entityOpt = Optional.of(resource);
+        ResourceBasicView resource = mock(ResourceBasicView.class);
+        Optional<ResourceBasicView> entityOpt = Optional.of(resource);
         pathRepositoryMap.put("key", repo);
 
         Map<String, String> params = new HashMap<>();
@@ -123,13 +124,13 @@ public class DataCollectorComponentTest {
 
         when(resource.getName()).thenReturn("name-ret");
         when(resource.getId()).thenReturn(342L);
-        when(repo.findByResourceCrnAndAccountId("crn", "acc")).thenReturn(entityOpt);
+        when(repo.findResourceBasicViewByResourceCrn("crn")).thenReturn(entityOpt);
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.fetchDataFromDbIfNeed(params));
 
         Assertions.assertEquals("name-ret", params.get(RESOURCE_NAME));
         Assertions.assertEquals("crn", params.get(RESOURCE_CRN));
         Assertions.assertEquals("342", params.get(RESOURCE_ID));
 
-        verify(repo).findByResourceCrnAndAccountId("crn", "acc");
+        verify(repo).findResourceBasicViewByResourceCrn("crn");
     }
 }

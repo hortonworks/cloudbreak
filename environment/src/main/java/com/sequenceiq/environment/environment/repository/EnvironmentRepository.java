@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
@@ -125,4 +126,24 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
     @Query("SELECT e.resourceCrn as remoteResourceId, e.id as localId, e.name as name " +
             "FROM Environment e WHERE e.id = :resourceId")
     Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
+
+    @Query("SELECT e.resourceCrn as resourceCrn, e.id as id, e.name as name " +
+            "FROM Environment e WHERE e.resourceCrn = :resourceCrn")
+    Optional<ResourceBasicView> findResourceBasicViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
+
+    @Query("SELECT e.resourceCrn as resourceCrn, e.id as id, e.name as name " +
+            "FROM Environment e WHERE e.resourceCrn in (:resourceCrns)")
+    List<ResourceBasicView> findAllResourceBasicViewByResourceCrns(@Param("resourceCrns") Collection<String> resourceCrns);
+
+    @Query("SELECT e.resourceCrn as resourceCrn, e.id as id, e.name as name " +
+            "FROM Environment e " +
+            "WHERE e.name = :name " +
+            "AND e.accountId = :accountId")
+    Optional<ResourceBasicView> findResourceBasicViewByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
+
+    @Query("SELECT e.resourceCrn as resourceCrn, e.id as id, e.name as name " +
+            "FROM Environment e " +
+            "WHERE e.name in (:names) " +
+            "AND e.accountId = :accountId")
+    List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
 }
