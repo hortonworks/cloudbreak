@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
@@ -107,4 +108,24 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
             "FROM SdxCluster s " +
             "WHERE s.id = :resourceId")
     Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
+
+    @Query("SELECT s.resourceCrn as resourceCrn, s.id as id, s.name as name " +
+            "FROM SdxCluster s WHERE s.resourceCrn = :resourceCrn")
+    Optional<ResourceBasicView> findResourceBasicViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
+
+    @Query("SELECT s.resourceCrn as resourceCrn, s.id as id, s.name as name " +
+            "FROM SdxCluster s WHERE s.resourceCrn in (:resourceCrns)")
+    List<ResourceBasicView> findAllResourceBasicViewByResourceCrns(@Param("resourceCrns") Collection<String> resourceCrns);
+
+    @Query("SELECT s.resourceCrn as resourceCrn, s.id as id, s.name as name " +
+            "FROM SdxCluster s " +
+            "WHERE s.name = :name " +
+            "AND s.accountId = :accountId")
+    Optional<ResourceBasicView> findResourceBasicViewByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
+
+    @Query("SELECT s.resourceCrn as resourceCrn, s.id as id, s.name as name " +
+            "FROM SdxCluster s " +
+            "WHERE s.name in (:names) " +
+            "AND s.accountId = :accountId")
+    List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
 }

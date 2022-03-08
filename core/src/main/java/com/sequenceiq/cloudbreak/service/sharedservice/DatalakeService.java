@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Respo
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -69,8 +70,10 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
         if (!Strings.isNullOrEmpty(source.getDatalakeCrn())) {
             LOGGER.debug("Prepare datalake request by datalakecrn");
             SharedServiceV4Request sharedServiceRequest = new SharedServiceV4Request();
-            Stack datalakeStack = stackService.getByCrn(source.getDatalakeCrn());
-            sharedServiceRequest.setDatalakeName(datalakeStack.getName());
+            Optional<ResourceBasicView> datalakeStack = stackService.getResourceBasicViewByResourceCrn(source.getDatalakeCrn());
+            datalakeStack.ifPresent(s -> {
+                sharedServiceRequest.setDatalakeName(s.getName());
+            });
             stackRequest.setSharedService(sharedServiceRequest);
         }
     }
@@ -79,11 +82,11 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
         if (cluster.getStack().getDatalakeCrn() != null) {
             LOGGER.debug("Add shared service response by datalakeCrn");
-            Stack datalakeStack = stackService.getByCrnOrElseNull(cluster.getStack().getDatalakeCrn());
-            if (datalakeStack != null) {
-                sharedServiceResponse.setSharedClusterId(datalakeStack.getId());
-                sharedServiceResponse.setSharedClusterName(datalakeStack.getName());
-            }
+            Optional<ResourceBasicView> datalakeStack = stackService.getResourceBasicViewByResourceCrn(cluster.getStack().getDatalakeCrn());
+            datalakeStack.ifPresent(s -> {
+                sharedServiceResponse.setSharedClusterId(s.getId());
+                sharedServiceResponse.setSharedClusterName(s.getName());
+            });
         }
         clusterResponse.setSharedServiceResponse(sharedServiceResponse);
     }
@@ -92,12 +95,11 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
         if (!Strings.isNullOrEmpty(stack.getDatalakeCrn())) {
             LOGGER.debug("Checking datalake through the datalakeCrn.");
-            Stack datalakeStack = stackService.getByCrnOrElseNull(stack.getDatalakeCrn());
-            if (datalakeStack != null) {
-                LOGGER.debug("Datalake (stack id {}, name {}) has been found for stack: {}",
-                        datalakeStack.getId(), datalakeStack.getName(), stack.getResourceCrn());
-                sharedServiceResponse.setSharedClusterName(datalakeStack.getName());
-                sharedServiceResponse.setSharedClusterId(datalakeStack.getId());
+            Optional<ResourceBasicView> resourceBasicView = stackService.getResourceBasicViewByResourceCrn(stack.getDatalakeCrn());
+            if (resourceBasicView.isPresent()) {
+                ResourceBasicView s = resourceBasicView.get();
+                sharedServiceResponse.setSharedClusterId(s.getId());
+                sharedServiceResponse.setSharedClusterName(s.getName());
             } else {
                 LOGGER.debug("Unable to find datalake with CRN {}", stack.getDatalakeCrn());
             }

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
@@ -138,4 +139,31 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name FROM Stack s " +
             "WHERE s.id = :resourceId")
     Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
+
+    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
+            "FROM Stack s " +
+            "WHERE s.terminated = -1 " +
+            "AND s.resourceCrn = :resourceCrn")
+    Optional<ResourceBasicView> findResourceBasicViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
+
+    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
+            "FROM Stack s " +
+            "WHERE s.terminated = -1 " +
+            "AND s.resourceCrn in (:resourceCrns)")
+    List<ResourceBasicView> findAllResourceBasicViewByResourceCrns(@Param("resourceCrns") Collection<String> resourceCrns);
+
+    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
+            "FROM Stack s " +
+            "WHERE s.terminated = -1 " +
+            "AND s.name = :name " +
+            "AND s.accountId = :accountId")
+    Optional<ResourceBasicView> findResourceBasicViewByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
+
+    @Query("SELECT s.id as id, s.resourceCrn as resourceCrn, s.name as name " +
+            "FROM Stack s " +
+            "WHERE s.terminated = -1 " +
+            "AND s.name in (:names) " +
+            "AND s.accountId = :accountId")
+    List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
+
 }
