@@ -38,7 +38,7 @@ auth:
       efs.enable: false
       customimage.enable: true
       loadbalancer.enable: false
-      backup.on.upgrade.enable: false
+      backup.on.upgrade.enable: true
       backup.on.resize.enable: true
       light.to.medium.migration.enable: true
       recovery.resize.enable: true
