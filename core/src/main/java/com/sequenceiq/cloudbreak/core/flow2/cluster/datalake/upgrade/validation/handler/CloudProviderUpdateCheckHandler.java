@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckRequest;
@@ -33,19 +34,20 @@ public class CloudProviderUpdateCheckHandler extends ExceptionCatcherEventHandle
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeUpdateCheckRequest> event) {
         LOGGER.debug("Received event: {}", event);
         ClusterUpgradeUpdateCheckRequest request = event.getData();
-        CloudConnector<Object> connector = cloudPlatformConnectors.getDefault(request.getCloudContext().getPlatform());
+        CloudContext cloudContext = request.getCloudContext();
+        CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatform(), cloudContext.getVariant());
         AuthenticatedContext ac;
         StackEvent response;
         try {
-            ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
+            ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             connector.resources().checkUpdate(ac, request.getCloudStack(), request.getCloudResources());
             response = new ClusterUpgradeUpdateCheckFinishedEvent(request.getResourceId(), request.getCloudStack(), request.getCloudCredential(),
-                    request.getCloudContext());
+                    cloudContext);
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             LOGGER.error(errorMessage, e);
             response = new ClusterUpgradeUpdateCheckFailed(request.getResourceId(), request.getCloudStack(), request.getCloudCredential(),
-                    request.getCloudContext(), e);
+                    cloudContext, e);
         }
         LOGGER.debug("Cloud provider update check has finished");
         return response;
