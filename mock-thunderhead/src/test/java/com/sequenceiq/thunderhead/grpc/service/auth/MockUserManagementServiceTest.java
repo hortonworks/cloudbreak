@@ -271,6 +271,9 @@ public class MockUserManagementServiceTest {
 
                 {"enableGcpDiskEncryptionWithCMEK false", "enableGcpDiskEncryptionWithCMEK", false, "CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", false},
                 {"enableGcpDiskEncryptionWithCMEK true", "enableGcpDiskEncryptionWithCMEK", true, "CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", true},
+
+                {"enableDatalakeSelectInstanceType false", "enableDatalakeSelectInstanceType", false, "CDP_DATALAKE_SELECT_INSTANCE_TYPE", false},
+                {"enableDatalakeSelectInstanceType true", "enableDatalakeSelectInstanceType", true, "CDP_DATALAKE_SELECT_INSTANCE_TYPE", true},
         };
     }
 
