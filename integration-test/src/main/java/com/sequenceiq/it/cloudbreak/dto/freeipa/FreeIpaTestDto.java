@@ -326,8 +326,8 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return getResponse() != null && getResponse().getInstanceGroups() != null;
     }
 
-    private Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> getInstanceStatusMapIfAvailableInResponse(
-            Supplier<Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus>> instanceStatusMapSupplier) {
+    private Map<List<String>, InstanceStatus> getInstanceStatusMapIfAvailableInResponse(Supplier<Map<List<String>,
+            InstanceStatus>> instanceStatusMapSupplier) {
         if (checkResponseHasInstanceGroups()) {
             return instanceStatusMapSupplier.get();
         } else {
@@ -336,19 +336,23 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         }
     }
 
+    public FreeIpaTestDto awaitForHealthyInstances(RunningParameter runningParameter) {
+        Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
+                freeIpaInstanceUtil.getInstanceStatusMap(getResponse()));
+        return awaitForFreeIpaInstance(instanceStatusMap, runningParameter);
+    }
+
     public FreeIpaTestDto awaitForHealthyInstances() {
-        Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> instanceStatusMap =
-                getInstanceStatusMapIfAvailableInResponse(() -> freeIpaInstanceUtil.getInstanceStatusMap(getResponse()));
+        Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
+                freeIpaInstanceUtil.getInstanceStatusMap(getResponse()));
         return awaitForFreeIpaInstance(instanceStatusMap);
     }
 
-    public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>,
-            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses) {
+    public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, InstanceStatus> statuses) {
         return awaitForFreeIpaInstance(statuses, emptyRunningParameter());
     }
 
-    public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,
-            RunningParameter runningParameter) {
+    public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
     }
 

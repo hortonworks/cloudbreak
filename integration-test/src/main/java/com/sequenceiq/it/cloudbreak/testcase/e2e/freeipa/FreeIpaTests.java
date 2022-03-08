@@ -3,12 +3,15 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -54,11 +57,11 @@ public class FreeIpaTests extends AbstractE2ETest {
                 .await(Status.STOPPED)
                 .when(freeIpaTestClient.start())
                 .await(Status.AVAILABLE)
-                .awaitForHealthyInstances()
+                .awaitForHealthyInstances(key(freeIpa).withIgnoredStatues(Set.of(InstanceStatus.UNHEALTHY)))
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY_PRIMARY))
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .await(FREEIPA_AVAILABLE)
-                .awaitForHealthyInstances()
+                .awaitForHealthyInstances(key(freeIpa).withIgnoredStatues(Set.of(InstanceStatus.UNHEALTHY)))
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY))
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .await(FREEIPA_AVAILABLE)

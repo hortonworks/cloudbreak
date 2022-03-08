@@ -31,7 +31,8 @@ public class InstanceAwait {
             MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.setActingUser(runningParameter).getAccessKey());
 
             desiredStatuses.forEach((instanceIds, instanceStatus) -> {
-                InstanceWaitObject instanceWaitObject = client.waitInstancesObject(entity, testContext, instanceIds, instanceStatus);
+                InstanceWaitObject instanceWaitObject = client.waitInstancesObject(entity, testContext, instanceIds, instanceStatus,
+                        runningParameter.getIgnoredStatuses());
 
                 if (instanceWaitObject.isDeletionCheck()) {
                     client.<CloudbreakInstanceWaitObject>waiterService().waitObject(new InstanceTerminationChecker<>(), instanceWaitObject, testContext,

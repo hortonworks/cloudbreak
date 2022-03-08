@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,15 +36,19 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
 
     private final InstanceStatus desiredStatus;
 
+    private final Set<InstanceStatus> ignoredFailedStatuses;
+
     private final TestContext testContext;
 
     private List<InstanceGroupResponse> instanceGroups;
 
-    public FreeIpaInstanceWaitObject(TestContext testContext, String environmentCrn, List<String> instanceIds, InstanceStatus desiredStatus) {
+    public FreeIpaInstanceWaitObject(TestContext testContext, String environmentCrn, List<String> instanceIds, InstanceStatus desiredStatus,
+            Set<InstanceStatus> ignoredFailedStatuses) {
         this.testContext = testContext;
         this.environmentCrn = environmentCrn;
         this.instanceIds = instanceIds;
         this.desiredStatus = desiredStatus;
+        this.ignoredFailedStatuses = ignoredFailedStatuses;
     }
 
     @Override
@@ -65,8 +71,17 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public Map<String, String> actualStatusReason() {
-        return getInstanceMetaDatas().stream().collect(Collectors.toMap(InstanceMetaDataResponse::getInstanceId,
-                InstanceMetaDataResponse::getState));
+        return getInstanceMetaDatas().stream()
+                .collect(Collectors.toMap(InstanceMetaDataResponse::getInstanceId,
+                        instanceMetaDataV4Response -> {
+                                String instanceState = instanceMetaDataV4Response.getState();
+                                if (StringUtils.isBlank(instanceState)) {
+                                    return "Status reason is NOT available for FreeIPA instance!";
+                                } else {
+                                    return instanceState;
+                                }
+                        }
+                ));
     }
 
     @Override
@@ -87,7 +102,11 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public boolean isFailedButIgnored() {
-        return false;
+        if (CollectionUtils.isNotEmpty(ignoredFailedStatuses)) {
+            return CollectionUtils.containsAny(ignoredFailedStatuses, getInstanceStatuses().values());
+        } else {
+            return false;
+        }
     }
 
     @Override

@@ -17,7 +17,7 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
     public boolean checkStatus(T waitObject) {
         List<String> instanceIds = waitObject.getInstanceIds();
         Map<String, String> actualStatuses = waitObject.actualStatuses();
-        if (waitObject.getInstanceIds().size() > 0) {
+        if (!waitObject.getInstanceIds().isEmpty()) {
             if (actualStatuses.isEmpty()) {
                 throw new TestFailException(String.format("'%s' instance was not found.", instanceIds));
             }
@@ -29,20 +29,28 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
                 throw new TestFailException(String.format("Instance '%s' has been getting terminated, waiting is cancelled." +
                         " Status: '%s' statusReason: '%s'", instanceIds, actualStatuses));
             }
-            if (waitObject.isFailed()) {
-                Map<String, String> actualStatusReasons = waitObject.actualStatusReason();
-                LOGGER.error("Instance '{}' is in failed state (status:'{}'), waiting is cancelled.", instanceIds, actualStatuses);
-                throw new TestFailException(String.format("Instance '%s' is in failed state. Status: '%s' statusReason: '%s'",
-                        instanceIds, actualStatuses, actualStatusReasons));
-            }
             if (waitObject.isInDesiredStatus()) {
                 LOGGER.info("Instance '{}' is in desired state (status:'{}').", instanceIds, actualStatuses);
                 return true;
+            }
+            if (waitObject.isFailed()) {
+                handleFailedState(waitObject, instanceIds, actualStatuses);
             }
         } else {
             return true;
         }
         return waitObject.isInDesiredStatus();
+    }
+
+    private void handleFailedState(T waitObject, List<String> instanceIds, Map<String, String> actualStatuses) {
+        if (waitObject.isFailedButIgnored()) {
+            LOGGER.info("Instance '{}' is in a failed state but the test will ignore it (status:'{}').", instanceIds, actualStatuses);
+        } else {
+            Map<String, String> actualStatusReasons = waitObject.actualStatusReason();
+            LOGGER.error("Instance '{}' is in failed state (status:'{}'), waiting is cancelled.", instanceIds, actualStatuses);
+            throw new TestFailException(String.format("Instance '%s' is in failed state. Status: '%s' statusReason: '%s'",
+                    instanceIds, actualStatuses, actualStatusReasons));
+        }
     }
 
     @Override

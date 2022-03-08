@@ -139,9 +139,9 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
 
     @Override
     public <O extends Enum<O>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
-            List<String> instanceIds, O instanceStatus) {
+            List<String> instanceIds, O instanceStatus, Set<O> ignoredFailedStatuses) {
         return new FreeIpaInstanceWaitObject(testContext, ((FreeIpaTestDto) entity).getResponse().getEnvironmentCrn(), instanceIds,
-                (InstanceStatus) instanceStatus);
+                (InstanceStatus) instanceStatus, (Set<InstanceStatus>) ignoredFailedStatuses);
     }
 
 }

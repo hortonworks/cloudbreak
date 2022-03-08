@@ -53,7 +53,7 @@ public abstract class MicroserviceClient<C, I, E extends Enum<E>, W extends Wait
     }
 
     public <O extends Enum<O>>  InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
-            List<String> instanceIds, O instanceStatus) {
+            List<String> instanceIds, O instanceStatus, Set<O> ignoredFailedStatuses) {
         throw new TestFailException("Can't create waitInstanceWaitObject instances object");
     }
 

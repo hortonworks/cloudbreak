@@ -198,8 +198,9 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
 
     @Override
     public <O extends Enum<O>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
-            List<String> instanceIds, O instanceStatus) {
-        return new CloudbreakInstanceWaitObject(testContext, entity.getName(), instanceIds, (InstanceStatus) instanceStatus);
+            List<String> instanceIds, O instanceStatus, Set<O> ignoredFailedStatuses) {
+        return new CloudbreakInstanceWaitObject(testContext, entity.getName(), instanceIds, (InstanceStatus) instanceStatus,
+                (Set<InstanceStatus>) ignoredFailedStatuses);
     }
 }
 

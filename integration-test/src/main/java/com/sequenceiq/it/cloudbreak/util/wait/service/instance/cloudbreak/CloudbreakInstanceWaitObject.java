@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,15 +40,19 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
 
     private final InstanceStatus desiredStatus;
 
+    private final Set<InstanceStatus> ignoredFailedStatuses;
+
     private final TestContext testContext;
 
     private List<InstanceGroupV4Response> instanceGroups;
 
-    public CloudbreakInstanceWaitObject(TestContext testContext, String name, List<String> instanceIds, InstanceStatus desiredStatus) {
+    public CloudbreakInstanceWaitObject(TestContext testContext, String name, List<String> instanceIds, InstanceStatus desiredStatus,
+            Set<InstanceStatus> ignoredFailedStatuses) {
         this.testContext = testContext;
         this.name = name;
         this.instanceIds = instanceIds;
         this.desiredStatus = desiredStatus;
+        this.ignoredFailedStatuses = ignoredFailedStatuses;
     }
 
     @Override
@@ -94,7 +99,11 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public boolean isFailedButIgnored() {
-        return false;
+        if (CollectionUtils.isNotEmpty(ignoredFailedStatuses)) {
+            return CollectionUtils.containsAny(ignoredFailedStatuses, getInstanceStatuses().values());
+        } else {
+            return false;
+        }
     }
 
     @Override
