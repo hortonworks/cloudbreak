@@ -70,6 +70,12 @@ public class ResizeRecoveryService implements RecoveryService {
         switch (actualStatusForSdx.getStatus()) {
             case STOP_FAILED:
                 return new SdxRecoverableResponse("Resize can be recovered from a failed stop", RecoveryStatus.RECOVERABLE);
+            case STOPPED:
+                if (sdxCluster.isDetached()) {
+                    return new SdxRecoverableResponse("Resize can not yet reattach cluster", RecoveryStatus.NON_RECOVERABLE);
+                } else {
+                    return new SdxRecoverableResponse("Resize can restart cluster", RecoveryStatus.RECOVERABLE);
+                }
             case PROVISIONING_FAILED:
                 return new SdxRecoverableResponse("Failed to provision, recovery will restart original data lake, and delete the new one",
                         RecoveryStatus.RECOVERABLE);
@@ -90,6 +96,13 @@ public class ResizeRecoveryService implements RecoveryService {
             switch (actualStatusForSdx.getStatus()) {
                 case STOP_FAILED:
                     return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxStartFlow(sdxCluster));
+                case STOPPED:
+                    if (sdxCluster.isDetached()) {
+                        //TODO CB-14339 return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, null));
+                        throw new NotImplementedException("Cluster is currently in an unrecoverable state");
+                    } else {
+                        return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxStartFlow(sdxCluster));
+                    }
                 case PROVISIONING_FAILED:
                 case DATALAKE_RESTORE_FAILED:
                 default:
