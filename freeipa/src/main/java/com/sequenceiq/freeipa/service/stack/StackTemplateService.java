@@ -1,9 +1,5 @@
 package com.sequenceiq.freeipa.service.stack;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -15,7 +11,6 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.dto.Credential;
@@ -34,16 +29,9 @@ public class StackTemplateService {
     private CredentialToCloudCredentialConverter credentialConverter;
 
     public GetPlatformTemplateRequest triggerGetTemplate(Stack stack, Credential credential) {
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
-                .withId(stack.getId())
-                .withName(stack.getName())
-                .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformvariant())
-                .withLocation(location)
-                .withUserName(stack.getOwner())
-                .withAccountId(stack.getAccountId())
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);

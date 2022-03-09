@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -267,7 +268,8 @@ public class StackLoadBalancerUpdateActions {
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
                 .withUserName(stack.getCreator().getUserName())
-                .withAccountId(stack.getWorkspace().getId())
+                .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
+                .withTenantId(stack.getWorkspace().getId())
                 .build();
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
             CloudStack cloudStack = cloudStackConverter.convert(stack);

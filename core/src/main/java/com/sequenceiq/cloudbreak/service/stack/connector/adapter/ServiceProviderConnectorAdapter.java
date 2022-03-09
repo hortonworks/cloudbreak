@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
@@ -93,7 +94,8 @@ public class ServiceProviderConnectorAdapter {
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountId(stack.getTenant().getId())
+                .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
+                .withTenantId(stack.getTenant().getId())
                 .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
@@ -139,7 +141,8 @@ public class ServiceProviderConnectorAdapter {
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountId(stack.getTenant().getId())
+                .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
+                .withTenantId(stack.getTenant().getId())
                 .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
@@ -171,21 +174,10 @@ public class ServiceProviderConnectorAdapter {
         deleteStack(stack);
     }
 
-    public String getTemplate(Stack stack) {
-        return waitGetTemplate(stack, triggerGetTemplate(stack));
-    }
-
     public GetPlatformTemplateRequest triggerGetTemplate(Stack stack) {
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
-                .withId(stack.getId())
-                .withName(stack.getName())
-                .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
-                .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountId(stack.getTenant().getId())
                 .build();
         Credential credential = ThreadBasedUserCrnProvider
                 .doAsInternalActor(() -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
@@ -195,7 +187,7 @@ public class ServiceProviderConnectorAdapter {
         return getPlatformTemplateRequest;
     }
 
-    public String waitGetTemplate(Stack stack, GetPlatformTemplateRequest getPlatformTemplateRequest) {
+    public String waitGetTemplate(GetPlatformTemplateRequest getPlatformTemplateRequest) {
         try {
             GetPlatformTemplateResult res = getPlatformTemplateRequest.await();
             LOGGER.debug("Get template result: {}", res);
@@ -205,18 +197,7 @@ public class ServiceProviderConnectorAdapter {
             }
             return res.getTemplate();
         } catch (InterruptedException e) {
-            Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-            CloudContext cloudContext = CloudContext.Builder.builder()
-                    .withId(stack.getId())
-                    .withName(stack.getName())
-                    .withCrn(stack.getResourceCrn())
-                    .withPlatform(stack.getCloudPlatform())
-                    .withVariant(stack.getPlatformVariant())
-                    .withLocation(location)
-                    .withWorkspaceId(stack.getWorkspace().getId())
-                    .withAccountId(stack.getTenant().getId())
-                    .build();
-            LOGGER.error("Error while getting template: " + cloudContext, e);
+            LOGGER.error("Error while getting template: " + getPlatformTemplateRequest.getCloudContext(), e);
             throw new OperationException(e);
         }
     }
@@ -227,16 +208,9 @@ public class ServiceProviderConnectorAdapter {
 
     public PlatformParameters getPlatformParameters(Stack stack) {
         LOGGER.debug("Get platform parameters for: {}", stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
-                .withId(stack.getId())
-                .withName(stack.getName())
-                .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
-                .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountId(stack.getTenant().getId())
                 .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
@@ -258,16 +232,9 @@ public class ServiceProviderConnectorAdapter {
 
     public Variant checkAndGetPlatformVariant(Stack stack) {
         LOGGER.debug("Get platform variant for: {}", stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
-                .withId(stack.getId())
-                .withName(stack.getName())
-                .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
-                .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountId(stack.getTenant().getId())
                 .build();
         Credential credential = ThreadBasedUserCrnProvider
                 .doAsInternalActor(() -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
