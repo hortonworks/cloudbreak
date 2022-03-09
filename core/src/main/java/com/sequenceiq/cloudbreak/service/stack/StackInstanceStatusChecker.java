@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.handler.InstanceStateQuery;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -52,7 +53,8 @@ public class StackInstanceStatusChecker {
                     .withVariant(stack.getPlatformVariant())
                     .withLocation(location)
                     .withWorkspaceId(stack.getWorkspace().getId())
-                    .withAccountId(stack.getTenant().getId())
+                    .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
+                    .withTenantId(stack.getTenant().getId())
                     .build();
             CloudCredential cloudCredential = getCloudCredential(stack.getEnvironmentCrn());
             result = getCloudVmInstanceStatuses(cloudInstances, cloudContext, cloudCredential);

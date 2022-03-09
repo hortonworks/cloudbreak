@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 @Service
 public class GcpImageRegisterService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(GcpProvisionSetup.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpImageRegisterService.class);
 
     @Inject
     private GcpStackUtil gcpStackUtil;

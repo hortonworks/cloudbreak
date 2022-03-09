@@ -27,6 +27,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesResult;
@@ -315,7 +316,8 @@ public class StopStartUpscaleActions {
                     .withVariant(stack.getPlatformVariant())
                     .withLocation(location)
                     .withWorkspaceId(stack.getWorkspace().getId())
-                    .withAccountId(stack.getTenant().getId())
+                    .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
+                    .withTenantId(stack.getTenant().getId())
                     .build();
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
             CloudStack cloudStack = cloudStackConverter.convert(stack);

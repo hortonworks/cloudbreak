@@ -135,7 +135,7 @@ public class AzureCredentialConnector implements CredentialConnector {
                 azureCredential.getSecretKey(),
                 AzureEnvironment.AZURE);
 
-        String replyUrl = appCreationCommand.getRedirectURL(String.valueOf(cloudContext.getAccountId()), azureCredential.getDeploymentAddress());
+        String replyUrl = appCreationCommand.getRedirectURL(azureCredential.getDeploymentAddress());
         CbDelegatedTokenCredentials creds = new CbDelegatedTokenCredentials(applicationCredentials, replyUrl, authenticationContextProvider,
                 cbRefreshTokenClientProvider);
 

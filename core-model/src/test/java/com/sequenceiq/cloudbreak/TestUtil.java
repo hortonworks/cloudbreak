@@ -181,7 +181,7 @@ public class TestUtil {
         stack.setCloudPlatform(credential.cloudPlatform());
         stack.setOrchestrator(orchestrator());
         stack.setEnvironmentCrn("envCrn");
-        stack.setResourceCrn("crn:cdp:cloudbreak:us-west:someone:stack:12345");
+        stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
 
         switch (credential.cloudPlatform()) {
             case AWS:

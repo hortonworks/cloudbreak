@@ -619,7 +619,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             throw new CloudbreakApiException(e.getMessage(), e);
         }
 
-        measure(() -> addTemplateForStack(savedStack, connector.waitGetTemplate(stack, templateRequest)),
+        measure(() -> addTemplateForStack(savedStack, connector.waitGetTemplate(templateRequest)),
                 LOGGER, "Save cluster template took {} ms for stack {}", stackName);
 
         return savedStack;

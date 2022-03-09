@@ -135,7 +135,7 @@ public class AzureCredentialConnectorTest {
         parameters.put("azure", azureParams);
 
         CloudCredential cloudCredential = new CloudCredential("anId", "aName", parameters, "acc", false);
-        when(appCreationCommand.getRedirectURL(String.valueOf(WORKSPACE_ID), DEPLOYMENT_ADDRESS)).thenReturn(redirectUrl);
+        when(appCreationCommand.getRedirectURL(DEPLOYMENT_ADDRESS)).thenReturn(redirectUrl);
 
         Map<String, String> result = underTest.initCodeGrantFlow(TEST_CLOUD_CONTEXT, cloudCredential);
 
@@ -146,7 +146,7 @@ public class AzureCredentialConnectorTest {
         assertTrue(result.containsKey("codeGrantFlowState"));
         assertTrue(result.get("appLoginUrl").contains(result.get("codeGrantFlowState")));
         assertEquals(redirectUrl, result.get("appReplyUrl"));
-        verify(appCreationCommand, times(1)).getRedirectURL(String.valueOf(WORKSPACE_ID), DEPLOYMENT_ADDRESS);
+        verify(appCreationCommand, times(1)).getRedirectURL(DEPLOYMENT_ADDRESS);
     }
 
 }

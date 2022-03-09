@@ -195,7 +195,7 @@ public class ServiceProviderCredentialAdapter {
                 .withAccountId(accountId)
                 .build();
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
-        LOGGER.debug("Requesting interactive login cloudPlatform {} and creator {}.", credential.getCloudPlatform());
+        LOGGER.debug("Requesting interactive login cloudPlatform {}.", credential.getCloudPlatform());
         InteractiveLoginRequest request = requestProvider.getInteractiveLoginRequest(cloudContext, cloudCredential);
         LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
@@ -228,7 +228,7 @@ public class ServiceProviderCredentialAdapter {
                 .withAccountId(accountId)
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
-        LOGGER.debug("Requesting code grant flow cloudPlatform {} and creator {}.", credential.getCloudPlatform());
+        LOGGER.debug("Requesting code grant flow cloudPlatform {}.", credential.getCloudPlatform());
         InitCodeGrantFlowRequest request = requestProvider.getInitCodeGrantFlowRequest(cloudContext, cloudCredential);
         LOGGER.info("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
