@@ -41,6 +41,7 @@ createusername-cron:
   cron.present:
     - name: /opt/scripts/post-cluster-install/createuserhome.sh >> /var/log/createusername.log 2>&1
     - user: root
+    - minute: '*/5'
     - require:
         - file: /opt/scripts/post-cluster-install/createuserhome.sh
 {% endif %}
