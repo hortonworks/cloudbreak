@@ -6,7 +6,6 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.TERMINATED;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.UNHEALTHY;
 
 import java.util.List;
 import java.util.Map;
@@ -97,7 +96,7 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public boolean isFailed() {
-        Set<InstanceStatus> failedStatuses = Set.of(FAILED, UNHEALTHY);
+        Set<InstanceStatus> failedStatuses = Set.of(FAILED);
         return getInstanceStatuses().values().stream().anyMatch(failedStatuses::contains);
     }
 
@@ -119,7 +118,7 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public boolean isFailedCheck() {
-        Set<InstanceStatus> failedStatuses = Set.of(FAILED, UNHEALTHY);
+        Set<InstanceStatus> failedStatuses = Set.of(FAILED);
         return failedStatuses.contains(desiredStatus);
     }
 
