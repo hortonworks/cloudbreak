@@ -129,6 +129,7 @@ public class SigmaDatabusClient<D extends AbstractDatabusStreamConfiguration> im
     private SigmaDbusGrpc.SigmaDbusBlockingStub newStub(ManagedChannel channel, String requestId, String actorCrn) {
         checkNotNull(requestId, "requestId should not be null.");
         return SigmaDbusGrpc.newBlockingStub(channel)
+                .withInterceptors(GrpcUtil.getTimeoutInterceptor(sigmaDatabusConfig.getGrpcTimeoutSec().longValue()))
                 .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
                         new AltusMetadataInterceptor(requestId, actorCrn));
     }
