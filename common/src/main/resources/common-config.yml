@@ -17,6 +17,7 @@ altus:
       retry-max-time-seconds: 120
   sigmadbus:
     endpoint:
+    grpc-timeout-sec: 60
 telemetry:
   repo:
     name: cdp-infra-tools
