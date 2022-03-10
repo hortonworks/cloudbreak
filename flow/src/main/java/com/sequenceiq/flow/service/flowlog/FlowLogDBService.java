@@ -21,6 +21,10 @@ import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.google.common.base.Joiner;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -92,10 +96,25 @@ public class FlowLogDBService implements FlowLogService {
         try {
             objectAsString = JsonWriter.objectToJson(object, writeOptions);
         } catch (Exception e) {
-            LOGGER.debug("Somehow can not serialize object to string, try another method..", e);
+            LOGGER.debug("Somehow can not serialize object to string, try another method.", e);
             objectAsString = JsonUtil.writeValueAsStringSilent(object);
+            if (objectAsString == null) {
+                LOGGER.debug("Cannot serialize with JsonUtils, try with Gson");
+                objectAsString = getGsonWithExceptionSerializer().toJson(object);
+            }
+        }
+        if (objectAsString != null) {
+            LOGGER.debug("Serialize was succefully");
+        } else {
+            LOGGER.debug("Object couldn't be serialized with any method");
         }
         return objectAsString;
+    }
+
+    private Gson getGsonWithExceptionSerializer() {
+        return new GsonBuilder()
+                .registerTypeAdapter(Exception.class, (JsonSerializer<Exception>) (src, typeOfSrc, context) -> new JsonPrimitive(src.getMessage()))
+                .create();
     }
 
     @Override
