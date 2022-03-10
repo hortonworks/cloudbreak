@@ -17,6 +17,7 @@ altus:
       retry-max-time-seconds: 120
   sigmadbus:
     endpoint:
+    grpc-timeout-sec: 60
 telemetry:
   repo:
     name: cdp-infra-tools
@@ -66,4 +67,4 @@ telemetry:
       node-status-collect: 3
       diagnostics-collect: 360
       metering-upgrade: 5
-      telemetry-upgrade: 20
+      telemetry-upgrade: 50

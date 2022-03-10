@@ -15,7 +15,10 @@ public class SigmaDatabusConfig {
 
     private final Integer port;
 
-    public SigmaDatabusConfig(@Value("${altus.sigmadbus.endpoint:}") String endpoint) {
+    private final Integer grpcTimeoutSec;
+
+    public SigmaDatabusConfig(@Value("${altus.sigmadbus.endpoint:}") String endpoint, @Value("${altus.sigmadbus.grpc-timeout-sec:}") Integer grpcTimeoutSec) {
+        this.grpcTimeoutSec = grpcTimeoutSec;
         this.endpoint = endpoint;
         if (StringUtils.isNotBlank(this.endpoint)) {
             String[] parts = endpoint.split(":");
@@ -42,5 +45,9 @@ public class SigmaDatabusConfig {
 
     public Integer getPort() {
         return port;
+    }
+
+    public Integer getGrpcTimeoutSec() {
+        return grpcTimeoutSec;
     }
 }
