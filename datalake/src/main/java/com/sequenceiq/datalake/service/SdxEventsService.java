@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -117,6 +118,10 @@ public class SdxEventsService {
     }
 
     private List<CDPStructuredEvent> retrievePagedCloudbreakServiceEvents(SdxCluster sdxCluster, Integer page, Integer size) {
+        if (sdxCluster.getDeleted() != null) {
+            return Collections.emptyList();
+        }
+
         try {
             // Get and translate the cloudbreak events
             List<CloudbreakEventV4Response> cloudbreakEventV4Responses = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
@@ -130,6 +135,10 @@ public class SdxEventsService {
     }
 
     private List<CDPStructuredEvent> retrieveCloudbreakServiceEvents(SdxCluster sdxCluster) {
+        if (sdxCluster.getDeleted() != null) {
+            return Collections.emptyList();
+        }
+
         try {
             // Get and translate the cloudbreak events
             StructuredEventContainer structuredEventContainer = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
