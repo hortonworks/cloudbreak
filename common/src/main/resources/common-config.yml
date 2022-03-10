@@ -67,4 +67,4 @@ telemetry:
       node-status-collect: 3
       diagnostics-collect: 360
       metering-upgrade: 5
-      telemetry-upgrade: 20
+      telemetry-upgrade: 50
