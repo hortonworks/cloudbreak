@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
 
 import static java.util.Optional.ofNullable;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,9 +31,10 @@ public abstract class AbstractRoleConfigProvider implements CmTemplateComponentC
 
         Map<String, List<ApiClusterTemplateConfig>> configs = new HashMap<>();
 
-        for (ApiClusterTemplateRoleConfigGroup rcg : ofNullable(service.get().getRoleConfigGroups()).orElseGet(List::of)) {
-            if (getRoleTypes().contains(rcg.getRoleType())) {
-                configs.put(rcg.getRefName(), getRoleConfigs(rcg.getRoleType(), source));
+        for (ApiClusterTemplateRoleConfigGroup rcg : ofNullable(service.get().getRoleConfigGroups()).orElse(new ArrayList<>())) {
+            String roleType = rcg.getRoleType();
+            if (roleType != null && getRoleTypes().contains(roleType)) {
+                configs.put(rcg.getRefName(), getRoleConfigs(roleType, source));
             }
         }
 
