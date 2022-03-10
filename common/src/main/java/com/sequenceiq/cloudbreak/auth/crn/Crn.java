@@ -35,7 +35,7 @@ import com.google.common.collect.ImmutableMap;
 public class Crn {
 
     private static final Pattern CRN_PATTERN =
-            Pattern.compile("^crn:(\\w+):(\\w+):(\\S+):(\\S+):(\\w+):(\\S+)$");
+            Pattern.compile("^crn:([\\w\\-]+):(\\w+):([\\w\\-]+):([\\w\\-]+):(\\w+):(\\S+)$");
 
     private static final boolean ADMIN_SERVICE = true;
 
