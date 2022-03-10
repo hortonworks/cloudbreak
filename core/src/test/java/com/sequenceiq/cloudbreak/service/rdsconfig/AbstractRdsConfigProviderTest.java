@@ -6,6 +6,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
 import java.util.Map;
 
 import org.junit.Before;
@@ -70,6 +71,7 @@ public class AbstractRdsConfigProviderTest {
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().add(metaData);
         Cluster testCluster = TestUtil.cluster();
+        testCluster.setRdsConfigs(new HashSet<>());
 
         Map<String, Object> result = underTest.createServicePillarConfigMapIfNeeded(testStack, testCluster);
 
