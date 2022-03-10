@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataTyp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
@@ -53,6 +54,9 @@ public class UpdateNodeCountValidator {
 
     @Inject
     private InstanceGroupService instanceGroupService;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     public void validataHostMetadataStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         if (upscaleEvent(instanceGroupAdjustmentJson.getScalingAdjustment())) {
@@ -119,6 +123,7 @@ public class UpdateNodeCountValidator {
                 accountId,
                 stack.getCluster().getBlueprint(),
                 instanceGroupAdjustments,
+                clusterComponentConfigProvider.getCdhProduct(stack.getCluster().getId()),
                 instanceGroupService.findNotTerminatedByStackId(stack.getId()));
     }
 
@@ -128,6 +133,7 @@ public class UpdateNodeCountValidator {
             cmTemplateValidator.validateHostGroupScalingRequest(
                     accountId,
                     stack.getCluster().getBlueprint(),
+                    clusterComponentConfigProvider.getCdhProduct(stack.getCluster().getId()),
                     instanceGroup,
                     scalingAdjustment,
                     instanceGroupService.findNotTerminatedByStackId(stack.getId()));

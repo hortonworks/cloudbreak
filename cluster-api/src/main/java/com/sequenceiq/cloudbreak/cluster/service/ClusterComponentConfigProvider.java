@@ -80,6 +80,17 @@ public class ClusterComponentConfigProvider {
                 .collect(Collectors.toList());
     }
 
+    public Optional<ClouderaManagerProduct> getCdhProduct(Long clusterId) {
+        List<ClouderaManagerProduct> clouderaManagerProductDetails = getClouderaManagerProductDetails(clusterId);
+        if (clouderaManagerProductDetails != null) {
+            return clouderaManagerProductDetails
+                    .stream()
+                    .filter(p -> "CDH".equals(p.getName()))
+                    .findAny();
+        }
+        return Optional.empty();
+    }
+
     public byte[] getSaltStateComponent(Long clusterId) {
         byte[] result = null;
         ClusterComponent component = ofNullable(getComponent(clusterId, ComponentType.SALT_STATE)).orElse(null);
