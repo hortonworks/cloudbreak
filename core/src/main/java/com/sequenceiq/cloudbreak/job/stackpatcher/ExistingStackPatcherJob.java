@@ -86,7 +86,7 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
     }
 
     private void unscheduleJob(JobExecutionContext context, Stack stack, StackPatchType stackPatchType) {
-        LOGGER.info("Unscheduling stack patcher {} job for stack {}", stackPatchType, stack);
+        LOGGER.info("Unscheduling stack patcher {} job for stack {}", stackPatchType, stack.getResourceCrn());
         jobService.unschedule(context.getJobDetail().getKey());
     }
 
