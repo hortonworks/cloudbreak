@@ -137,8 +137,8 @@ public class SdxEventsServiceTests {
         assertNotNull(result);
         assertEquals(3, result.size());
         assertEquals(3, result.stream().filter(notification -> notification.getOperation().getEventType().equals(StructuredEventType.NOTIFICATION)).count());
-        assertTrue(result.get(0).getOperation().getTimestamp() < result.get(1).getOperation().getTimestamp());
-        assertTrue(result.get(1).getOperation().getTimestamp() < result.get(2).getOperation().getTimestamp());
+        assertTrue(result.get(0).getOperation().getTimestamp() > result.get(1).getOperation().getTimestamp());
+        assertTrue(result.get(1).getOperation().getTimestamp() > result.get(2).getOperation().getTimestamp());
     }
 
     private CloudbreakEventV4Response createCloudbreakEventV4Response() {
