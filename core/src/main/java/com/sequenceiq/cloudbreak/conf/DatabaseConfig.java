@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.env.Environment;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -88,8 +89,23 @@ public class DatabaseConfig {
     @Inject
     private Environment environment;
 
-    @Bean
-    public DataSource dataSource() throws SQLException {
+    @Bean(name = "defaultDataSource")
+    public DataSource defaultDataSource() throws SQLException {
+        return getDataSource();
+    }
+
+    @Bean(name = "quartzDataSource")
+    public DataSource quartzDataSource() throws SQLException {
+        return getDataSource();
+    }
+
+    @Primary
+    @Bean(name = "dataSource")
+    public DataSource dataSource() {
+        return new RoutingDataSource();
+    }
+
+    private HikariDataSource getDataSource() throws SQLException {
         DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
         HikariConfig config = new HikariConfig();
         if (ssl && Files.exists(Paths.get(certFile))) {
