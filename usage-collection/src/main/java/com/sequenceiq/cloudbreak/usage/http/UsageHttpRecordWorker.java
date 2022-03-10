@@ -44,8 +44,8 @@ public class UsageHttpRecordWorker extends RecordWorker<UsageHttpRecordProcessor
             }
             HttpRequest httpRequest = HttpRequest.newBuilder()
                     .uri(new URI(getConfiguration().getEndpoint()))
-                    .PUT(HttpRequest.BodyPublishers.ofString(payload.get()))
-                    .header("Accept", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(payload.get()))
+                    .header("Content-Type", "application/json")
                     .build();
             HttpResponse<String> response = getHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
             Response.Status.Family statusFamily = Response.Status.Family.familyOf(response.statusCode());
