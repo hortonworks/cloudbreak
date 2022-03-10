@@ -120,6 +120,7 @@ ipa-replica-install \
           --no-dnssec-validation \
 {%- endif %}
           --unattended \
+          --dirsrv-config-file /opt/salt/initial-ldap-conf.ldif \
           --no-ntp
 
 set +e
