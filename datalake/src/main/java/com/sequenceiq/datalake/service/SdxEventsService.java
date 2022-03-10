@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service;
 import static java.util.stream.Collectors.toList;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -143,8 +144,8 @@ public class SdxEventsService {
     }
 
     private List<CDPStructuredEvent> sortAndFilterBasedOnPageSize(List<CDPStructuredEvent> eventList, Integer size) {
-        return eventList.stream().sorted(Comparator.comparingLong(f -> f.getOperation().getTimestamp())).collect(toList())
-                .subList(0, (eventList.size() > size) ? size : eventList.size());
+        return eventList.stream().sorted(Collections.reverseOrder(Comparator.comparingLong(f -> f.getOperation().getTimestamp())))
+                .collect(toList()).subList(0, (eventList.size() > size) ? size : eventList.size());
     }
 
     private List<CDPStructuredEvent> getSortedEvents(List<CDPStructuredEvent> eventList) {
