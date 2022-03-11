@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_RESTARTING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATED_REMOTE_DATA_CONTEXT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATING_REMOTE_DATA_CONTEXT;
 
@@ -645,11 +646,16 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Deployed client configs and refreshed services in Cloudera Manager.");
     }
 
-    private void restartServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
-        doRestartServicesIfNeeded(clustersResourceApi, false);
+    private int restartServices() throws ApiException, CloudbreakException {
+        ClustersResourceApi apiInstance = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
+        return restartServices(apiInstance);
     }
 
-    private void doRestartServicesIfNeeded(ClustersResourceApi clustersResourceApi, boolean waitForCommandExecutionOnly)
+    private int restartServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
+        return doRestartServicesIfNeeded(clustersResourceApi, false);
+    }
+
+    private int doRestartServicesIfNeeded(ClustersResourceApi clustersResourceApi, boolean waitForCommandExecutionOnly)
             throws ApiException, CloudbreakException {
         ApiCommandList apiCommandList = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY);
         Optional<ApiCommand> optionalRestartCommand = apiCommandList.getItems().stream()
@@ -663,12 +669,14 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             ApiRestartClusterArgs restartClusterArgs = new ApiRestartClusterArgs();
             restartClusterArgs.setRedeployClientConfiguration(true);
             restartCommand = clustersResourceApi.restartCommand(stack.getName(), restartClusterArgs);
+            eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
         }
         if (restartCommand != null) {
             ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, restartCommand.getId());
             handlePollingResult(pollingResult, "Cluster was terminated while restarting services.",
                     "Timeout happened while restarting services.");
         }
+        return getCommandId(restartCommand);
     }
 
     private void restartClouderaManagementServices(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException, CloudbreakException {
@@ -859,9 +867,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Override
     public int deployConfigAndStartClusterServices() throws CloudbreakException {
         try {
-            LOGGER.info("Deploying configuration and starting services");
+            LOGGER.info("Deploying configuration and restarting services");
             deployConfig();
-            return startServices();
+            return restartServices();
         } catch (ApiException e) {
             LOGGER.info("Couldn't start Cloudera Manager services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
@@ -934,9 +942,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             handlePollingResult(pollingResult, "Cluster was terminated while waiting for Cloudera Runtime services to start",
                     "Timeout while stopping Cloudera Manager services.");
         }
-        eventService
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_STARTED);
-        return apiCommand == null ? 0 : apiCommand.getId().intValue();
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_STARTED);
+        return getCommandId(apiCommand);
     }
 
     private void startAgents() {
@@ -1003,5 +1010,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.debug("Failed to determine if {} service is present in cluster {}.", serviceType, stack.getCluster().getId());
         }
         return servicePresent;
+    }
+
+    private int getCommandId(ApiCommand command) {
+        return command == null ? 0 : command.getId().intValue();
     }
 }
