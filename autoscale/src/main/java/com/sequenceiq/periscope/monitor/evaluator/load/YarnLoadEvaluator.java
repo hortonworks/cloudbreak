@@ -114,9 +114,10 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
         StackV4Response stackV4Response = cloudbreakCommunicator.getByCrn(cluster.getStackCrn());
         Map<String, String> hostFqdnsToInstanceId = stackResponseUtils.getCloudInstanceIdsForHostGroup(stackV4Response, policyHostGroup);
 
-        int existingHostGroupSize = hostFqdnsToInstanceId.size();
+        int serviceHealthyHostGroupSize = stackResponseUtils.getCloudInstanceIdsWithServicesHealthyForHostGroup(stackV4Response, policyHostGroup);
+        int existingHostGroupSize = Boolean.TRUE.equals(cluster.isStopStartScalingEnabled()) ? serviceHealthyHostGroupSize : hostFqdnsToInstanceId.size();
         int configMaxNodeCount = loadAlertConfiguration.getMaxResourceValue() - existingHostGroupSize;
-        int configMinNodeCount = hostFqdnsToInstanceId.keySet().size() - loadAlertConfiguration.getMinResourceValue();
+        int configMinNodeCount = serviceHealthyHostGroupSize - loadAlertConfiguration.getMinResourceValue();
 
         int maxAllowedUpScale = configMaxNodeCount < 0 ? 0 : configMaxNodeCount;
         int maxAllowedDownScale = configMinNodeCount > 0 ? configMinNodeCount : 0;
@@ -151,7 +152,7 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
             }
         } else if (!yarnRecommendedDecommissionHosts.isEmpty() && isCoolDownTimeElapsed(cluster.getStackCrn(), "scaled-down",
                 loadAlertConfiguration.getScaleDownCoolDownMillis(), cluster.getLastScalingActivity()))  {
-            sendScaleDownEvent(existingHostGroupSize, yarnRecommendedDecommissionHosts);
+            sendScaleDownEvent(serviceHealthyHostGroupSize, yarnRecommendedDecommissionHosts);
         }
     }
 
