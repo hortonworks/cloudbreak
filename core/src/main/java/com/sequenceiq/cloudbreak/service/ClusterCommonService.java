@@ -105,14 +105,13 @@ public class ClusterCommonService {
     private InstanceGroupService instanceGroupService;
 
     public FlowIdentifier put(String crn, UpdateClusterV4Request updateJson) {
-        Stack stack = stackService.getByCrn(crn);
-        stack = stackService.getByIdWithLists(stack.getId());
+        Stack stack = stackService.getByCrnWithLists(crn);
         Long stackId = stack.getId();
         MDCBuilder.buildMdcContext(stack);
         UserNamePasswordV4Request userNamePasswordJson = updateJson.getUserNamePassword();
         FlowIdentifier flowIdentifier;
         if (userNamePasswordJson != null) {
-            flowIdentifier = clusterManagerUserNamePasswordChange(stackId, stack, userNamePasswordJson);
+            flowIdentifier = clusterManagerUserNamePasswordChange(stack, userNamePasswordJson);
         } else if (updateJson.getStatus() != null) {
             LOGGER.debug("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
             flowIdentifier = clusterOperationService.updateStatus(stackId, updateJson.getStatus());
@@ -168,20 +167,20 @@ public class ClusterCommonService {
         return clusterOperationService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint());
     }
 
-    private FlowIdentifier clusterManagerUserNamePasswordChange(Long stackId, Stack stack, UserNamePasswordV4Request userNamePasswordJson) {
+    private FlowIdentifier clusterManagerUserNamePasswordChange(Stack stack, UserNamePasswordV4Request userNamePasswordJson) {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format(
-                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
+                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stack.getId(),
                     stack.getStatus()));
         }
         if (!userNamePasswordJson.getOldPassword().equals(stack.getCluster().getPassword())) {
             throw new BadRequestException(String.format(
-                    "Cluster actual password does not match in the request, please pass the real password on Stack '%s' with status '%s'.", stackId,
+                    "Cluster actual password does not match in the request, please pass the real password on Stack '%s' with status '%s'.", stack.getId(),
                     stack.getStatus()));
         }
-        LOGGER.debug("Cluster username password update request received. Stack id:  {}, username: {}",
-                stackId, userNamePasswordJson.getUserName());
-        return clusterOperationService.updateUserNamePassword(stackId, userNamePasswordJson);
+        LOGGER.debug("Cluster username password update request received. Stack id: {}, name: {}, username: {}",
+                stack.getId(), stack.getName(), userNamePasswordJson.getUserName());
+        return clusterOperationService.updateUserNamePassword(stack.getId(), userNamePasswordJson);
     }
 
     public FlowIdentifier setMaintenanceMode(Stack stack, MaintenanceModeStatus maintenanceMode) {

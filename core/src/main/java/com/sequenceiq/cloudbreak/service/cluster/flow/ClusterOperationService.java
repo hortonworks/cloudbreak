@@ -544,7 +544,7 @@ public class ClusterOperationService {
         return transactionService.required(() -> {
             checkBlueprintIdAndHostGroups(blueprintName, hostGroups);
             Stack stackWithLists = stackService.getByIdWithListsInTransaction(stack.getId());
-            Cluster cluster = clusterService.getCluster(stackWithLists);
+            Cluster cluster = stackWithLists.getCluster();
             Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, stack.getWorkspace());
             if (!clusterService.withEmbeddedClusterManagerDB(cluster)) {
                 throw new BadRequestException("Cluster Manager doesn't support resetting external DB automatically. To reset Cluster Manager schema you "

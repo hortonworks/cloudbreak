@@ -136,7 +136,6 @@ public class DistroXUpgradeAvailabilityServiceTest {
     public void testWhenRangerRazEnabledAndEntitlementNotGrantedThenUpgradeNotAllowed() {
         Cluster datalakeCluster = TestUtil.cluster();
         datalakeCluster.setRangerRazEnabled(true);
-        Stack datalake = TestUtil.stack();
         stack.setDatalakeCrn(DATALAKE_CRN);
         UpgradeV4Request request = new UpgradeV4Request();
         UpgradeV4Response response = new UpgradeV4Response();
@@ -147,10 +146,9 @@ public class DistroXUpgradeAvailabilityServiceTest {
         response.setUpgradeCandidates(List.of(candidateImage1, candidateImage2));
         response.setCurrent(currentImage);
         when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
-        when(stackService.getByCrn(DATALAKE_CRN)).thenReturn(datalake);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request)).thenReturn(response);
-        when(clusterService.getCluster(datalake)).thenReturn(datalakeCluster);
+        when(clusterService.getClusterByStackResourceCrn(DATALAKE_CRN)).thenReturn(datalakeCluster);
         when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of("7.2.0"));
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN));
@@ -163,7 +161,6 @@ public class DistroXUpgradeAvailabilityServiceTest {
     public void testWhenRangerRazDisabledAndEntitlementNotGrantedThenUpgradeAllowed() {
         Cluster datalakeCluster = TestUtil.cluster();
         datalakeCluster.setRangerRazEnabled(false);
-        Stack datalake = TestUtil.stack();
         stack.setDatalakeCrn(DATALAKE_CRN);
         stack.setCluster(TestUtil.cluster());
         UpgradeV4Request request = new UpgradeV4Request();
@@ -177,12 +174,11 @@ public class DistroXUpgradeAvailabilityServiceTest {
         when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request)).thenReturn(response);
-        when(stackService.getByCrn(DATALAKE_CRN)).thenReturn(datalake);
-        when(clusterService.getCluster(any())).thenReturn(datalakeCluster);
+        when(clusterService.getClusterByStackResourceCrn(any())).thenReturn(datalakeCluster);
 
         assertDoesNotThrow(() -> underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN));
 
-        verify(clusterService, never()).getCluster(stack);
+        verify(clusterService, times(1)).getClusterByStackResourceCrn(DATALAKE_CRN);
     }
 
     @Test
@@ -201,7 +197,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
 
         assertDoesNotThrow(() -> underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN));
 
-        verify(clusterService, never()).getCluster(stack);
+        verify(clusterService, never()).getClusterByStackResourceCrn(DATALAKE_CRN);
     }
 
     @Test
@@ -366,7 +362,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ImageInfoV4Response image3 = createImageResponse(6L, "7.4.0");
         response.setUpgradeCandidates(List.of(image1, image2, image3));
         response.setCurrent(current);
-        when(clusterService.getCluster(any())).thenReturn(datalakeCluster);
+        when(clusterService.getClusterByStackResourceCrn(any())).thenReturn(datalakeCluster);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request)).thenReturn(response);
         when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
@@ -392,7 +388,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ImageInfoV4Response image3 = createImageResponse(6L, "7.3.0");
         response.setUpgradeCandidates(List.of(image1, image2, image3));
         response.setCurrent(current);
-        when(clusterService.getCluster(any())).thenReturn(datalakeCluster);
+        when(clusterService.getClusterByStackResourceCrn(any())).thenReturn(datalakeCluster);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request)).thenReturn(response);
         when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
@@ -424,7 +420,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ReflectionTestUtils.setField(stackView, "cluster", clusterView);
         stack.setCluster(TestUtil.cluster());
         when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of("C"));
-        when(clusterService.getCluster(any())).thenReturn(datalakeCluster);
+        when(clusterService.getClusterByStackResourceCrn(any())).thenReturn(datalakeCluster);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stack);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request)).thenReturn(response);
         when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);

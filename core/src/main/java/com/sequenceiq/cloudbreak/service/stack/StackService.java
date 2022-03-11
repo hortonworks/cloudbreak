@@ -822,7 +822,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id)));
     }
 
-    private Stack getByCrnWithLists(String crn) {
+    public Stack getByCrnWithLists(String crn) {
         return stackRepository.findOneByCrnWithLists(crn).orElseThrow(NotFoundException.notFound("Stack", crn));
     }
 

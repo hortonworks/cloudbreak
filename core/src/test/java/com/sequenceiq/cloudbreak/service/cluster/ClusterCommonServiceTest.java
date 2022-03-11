@@ -153,8 +153,7 @@ public class ClusterCommonServiceTest {
         stack.setId(9876L);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
 
-        when(stackService.getByCrn("crn")).thenReturn(stack);
-        when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
+        when(stackService.getByCrnWithLists("crn")).thenReturn(stack);
         doThrow(RuntimeException.class).when(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
 
         UpdateClusterV4Request update = new UpdateClusterV4Request();
