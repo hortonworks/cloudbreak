@@ -2610,6 +2610,12 @@ message CDPVMDiagnosticsFailureType {
     UPLOAD_FAILURE = 6;
     // Failure during cleaning up resources.
     CLEANUP_FAILURE = 7;
+    // Failure during salt pillar update.
+    SALT_PILLAR_UPDATE_FAILURE = 8;
+    // Failure during salt state update.
+    SALT_STATE_UPDATE_FAILURE = 9;
+    // Failure during telemetry upgrade.
+    TELEMETRY_UPGRADE_FAILURE = 10;
   }
 }
 
