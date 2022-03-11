@@ -74,3 +74,11 @@ disable_old_tls_for_ldap_server:
     - group: root
     - mode: 700
     - source: salt://freeipa/scripts/initdnarange.py
+
+/opt/salt/initial-ldap-conf.ldif:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 600
+    - source: salt://freeipa/templates/initial-ldap-conf.ldif

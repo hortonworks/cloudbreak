@@ -33,6 +33,11 @@
             "base": true,
             "refName": "solr-SOLR_SERVER-BASE",
             "roleType": "SOLR_SERVER"
+          },
+          {
+            "base": true,
+            "refName": "solr-GATEWAY-BASE",
+            "roleType": "GATEWAY"
           }
         ],
         "serviceConfigs": [
@@ -208,6 +213,7 @@
         "roleConfigGroupsRefNames": [
           "hdfs-GATEWAY-BASE",
           "yarn-GATEWAY-BASE",
+          "solr-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE"
         ]
       },
@@ -221,6 +227,7 @@
           "hdfs-NAMENODE-BASE",
           "zookeeper-SERVER-BASE",
           "yarn-GATEWAY-BASE",
+          "solr-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "hue-HUE_LOAD_BALANCER-BASE",
           "hue-HUE_SERVER-BASE"
@@ -235,6 +242,7 @@
           "yarn-JOBHISTORY-BASE",
           "yarn-RESOURCEMANAGER-BASE",
           "yarn-GATEWAY-BASE",
+          "solr-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE",
           "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE"
         ]
@@ -258,6 +266,7 @@
           "hdfs-GATEWAY-BASE",
           "yarn-NODEMANAGER-BASE",
           "yarn-GATEWAY-BASE",
+          "solr-GATEWAY-BASE",
           "spark_on_yarn-GATEWAY-BASE"
         ]
       }
