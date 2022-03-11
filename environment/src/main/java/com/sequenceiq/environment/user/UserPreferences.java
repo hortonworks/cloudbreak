@@ -68,4 +68,14 @@ public class UserPreferences implements Serializable {
     public void setAuditExternalId(String auditExternalId) {
         this.auditExternalId = auditExternalId;
     }
+
+    @Override
+    public String toString() {
+        return "UserPreferences{" +
+                "id=" + id +
+                ", externalId='" + externalId + '\'' +
+                ", auditExternalId='" + auditExternalId + '\'' +
+                ", userCrn='" + userCrn + '\'' +
+                '}';
+    }
 }

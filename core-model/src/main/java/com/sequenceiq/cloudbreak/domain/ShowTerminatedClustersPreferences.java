@@ -52,4 +52,13 @@ public class ShowTerminatedClustersPreferences {
     public Duration getTimeout() {
         return timeout != null ? timeout : Duration.ZERO;
     }
+
+    @Override
+    public String toString() {
+        return "ShowTerminatedClustersPreferences{" +
+                "id=" + id +
+                ", active=" + active +
+                ", timeout=" + timeout +
+                '}';
+    }
 }

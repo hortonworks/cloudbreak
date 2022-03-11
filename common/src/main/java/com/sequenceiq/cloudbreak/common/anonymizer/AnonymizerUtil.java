@@ -38,6 +38,10 @@ public class AnonymizerUtil {
     private AnonymizerUtil() {
     }
 
+    public static String anonymize(Object object) {
+        return object == null ? null : anonymize(object.toString());
+    }
+
     public static String anonymize(String content) {
         String ret = content;
         if (ret != null) {

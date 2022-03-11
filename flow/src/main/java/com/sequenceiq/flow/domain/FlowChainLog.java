@@ -109,4 +109,18 @@ public class FlowChainLog {
     public void setTriggerEvent(String triggerEvent) {
         this.triggerEvent = triggerEvent;
     }
+
+    @Override
+    public String toString() {
+        return "FlowChainLog{" +
+                "id=" + id +
+                ", created=" + created +
+                ", flowChainType='" + flowChainType + '\'' +
+                ", flowChainId='" + flowChainId + '\'' +
+                ", parentFlowChainId='" + parentFlowChainId + '\'' +
+                ", chain='" + chain + '\'' +
+                ", flowTriggerUserCrn='" + flowTriggerUserCrn + '\'' +
+                ", triggerEvent='" + triggerEvent + '\'' +
+                '}';
+    }
 }

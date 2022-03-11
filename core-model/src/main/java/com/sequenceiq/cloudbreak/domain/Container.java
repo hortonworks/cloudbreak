@@ -76,4 +76,14 @@ public class Container implements ProvisionEntity {
         this.cluster = cluster;
     }
 
+    @Override
+    public String toString() {
+        return "Container{" +
+                "id=" + id +
+                ", containerId='" + containerId + '\'' +
+                ", name='" + name + '\'' +
+                ", image='" + image + '\'' +
+                ", host='" + host + '\'' +
+                '}';
+    }
 }

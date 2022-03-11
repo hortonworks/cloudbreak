@@ -58,4 +58,13 @@ public class Orchestrator implements ProvisionEntity {
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
     }
+
+    @Override
+    public String toString() {
+        return "Orchestrator{" +
+                "id=" + id +
+                ", apiEndpoint='" + apiEndpoint + '\'' +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.domain.stack;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -89,6 +91,18 @@ public class DBResource {
 
     public void setResourceReference(String resourceReference) {
         this.resourceReference = resourceReference;
+    }
+
+    @Override
+    public String toString() {
+        return "DBResource{" +
+                "id=" + id +
+                ", dbStack=" + getIfNotNull(dbStack, DBStack::getResourceCrn) +
+                ", resourceName='" + resourceName + '\'' +
+                ", resourceReference='" + resourceReference + '\'' +
+                ", resourceType=" + resourceType +
+                ", resourceStatus=" + resourceStatus +
+                '}';
     }
 
     public static class Builder {

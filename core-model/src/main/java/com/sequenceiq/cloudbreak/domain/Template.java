@@ -198,4 +198,20 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
     public void setInstanceStorageCount(Integer instanceStorageCount) {
         this.instanceStorageCount = instanceStorageCount;
     }
+
+    @Override
+    public String toString() {
+        return "Template{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", instanceType='" + instanceType + '\'' +
+                ", rootVolumeSize=" + rootVolumeSize +
+                ", deleted=" + deleted +
+                ", status=" + status +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", topology=" + topology +
+                ", instanceStorageCount=" + instanceStorageCount +
+                '}';
+    }
 }

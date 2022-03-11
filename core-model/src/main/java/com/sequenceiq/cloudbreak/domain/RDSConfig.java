@@ -269,4 +269,18 @@ public class RDSConfig implements ProvisionEntity, WorkspaceAwareResource, Archi
     public boolean isArchived() {
         return archived;
     }
+
+    @Override
+    public String toString() {
+        return "RDSConfig{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", creationDate=" + creationDate +
+                ", stackVersion='" + stackVersion + '\'' +
+                ", status=" + status +
+                ", type='" + type + '\'' +
+                ", archived=" + archived +
+                ", deletionTimestamp=" + deletionTimestamp +
+                '}';
+    }
 }

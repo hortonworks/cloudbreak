@@ -55,4 +55,12 @@ public class HostGroupView implements ProvisionEntity {
     public void setInstanceGroup(InstanceGroupView instanceGroup) {
         this.instanceGroup = instanceGroup;
     }
+
+    @Override
+    public String toString() {
+        return "HostGroupView{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                '}';
+    }
 }

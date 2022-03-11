@@ -8,6 +8,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
+
 @Entity
 public class RootCert {
 
@@ -53,5 +55,14 @@ public class RootCert {
 
     public void setCert(String cert) {
         this.cert = cert;
+    }
+
+    @Override
+    public String toString() {
+        return "RootCert{" +
+                "id=" + id +
+                ", stack=" + DatabaseUtil.lazyLoadSafeToString(stack, Stack::getResourceCrn) +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                '}';
     }
 }

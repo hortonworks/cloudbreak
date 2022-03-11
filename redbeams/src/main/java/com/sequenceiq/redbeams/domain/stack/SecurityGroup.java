@@ -16,8 +16,6 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
-// import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-
 @Entity
 @Table
 public class SecurityGroup {
@@ -32,17 +30,9 @@ public class SecurityGroup {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    // @Enumerated(EnumType.STRING)
-    // private ResourceStatus status;
-
-    // @OneToMany(mappedBy = "securityGroup", cascade = {CascadeType.REMOVE, CascadeType.PERSIST}, orphanRemoval = true, fetch = FetchType.EAGER)
-    // private Set<SecurityRule> securityRules = new HashSet<>();
-
     @ElementCollection(fetch = FetchType.EAGER)
     @Column(name = "securitygroupid_value")
     private Set<String> securityGroupIds = new HashSet<>();
-
-    // private String cloudPlatform;
 
     public Long getId() {
         return id;
@@ -68,26 +58,6 @@ public class SecurityGroup {
         this.description = description;
     }
 
-    // public ResourceStatus getStatus() {
-    //     return status;
-    // }
-
-    // public void setStatus(ResourceStatus status) {
-    //     this.status = status;
-    // }
-
-    // public Set<SecurityRule> getSecurityRules() {
-    //     return securityRules;
-    // }
-
-    // public void setSecurityRules(Set<SecurityRule> securityRules) {
-    //     this.securityRules = securityRules;
-    // }
-
-    // public String getFirstSecurityGroupId() {
-    //     return securityGroupIds == null || securityGroupIds.isEmpty() ? null : securityGroupIds.iterator().next();
-    // }
-
     public Set<String> getSecurityGroupIds() {
         return securityGroupIds;
     }
@@ -96,11 +66,13 @@ public class SecurityGroup {
         this.securityGroupIds = securityGroupIds;
     }
 
-    // public String getCloudPlatform() {
-    //     return cloudPlatform;
-    // }
-
-    // public void setCloudPlatform(String cloudPlatform) {
-    //     this.cloudPlatform = cloudPlatform;
-    // }
+    @Override
+    public String toString() {
+        return "SecurityGroup{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", securityGroupIds=" + securityGroupIds +
+                '}';
+    }
 }

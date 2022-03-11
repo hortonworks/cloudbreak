@@ -64,4 +64,14 @@ public class FlowOperationStats implements Serializable {
     public void setDurationHistory(String durationHistory) {
         this.durationHistory = durationHistory;
     }
+
+    @Override
+    public String toString() {
+        return "FlowOperationStats{" +
+                "id=" + id +
+                ", operationType=" + operationType +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", durationHistory='" + durationHistory + '\'' +
+                '}';
+    }
 }

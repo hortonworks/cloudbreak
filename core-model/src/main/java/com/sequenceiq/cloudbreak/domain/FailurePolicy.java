@@ -46,4 +46,13 @@ public class FailurePolicy implements ProvisionEntity {
     public void setAdjustmentType(AdjustmentType adjustmentType) {
         this.adjustmentType = adjustmentType;
     }
+
+    @Override
+    public String toString() {
+        return "FailurePolicy{" +
+                "id=" + id +
+                ", threshold=" + threshold +
+                ", adjustmentType=" + adjustmentType +
+                '}';
+    }
 }

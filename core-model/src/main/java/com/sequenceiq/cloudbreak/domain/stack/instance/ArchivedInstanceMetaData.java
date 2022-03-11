@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceStatusConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.converter.InstanceLifeCycleConverter;
 import com.sequenceiq.cloudbreak.domain.converter.InstanceMetadataTypeConverter;
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 
 @Entity
 public class ArchivedInstanceMetaData implements ProvisionEntity {
@@ -295,7 +296,7 @@ public class ArchivedInstanceMetaData implements ProvisionEntity {
                 ", instanceStatus=" + instanceStatus +
                 ", instanceMetadataType=" + instanceMetadataType +
                 ", localityIndicator='" + localityIndicator + '\'' +
-                ", instanceGroup=" + instanceGroup +
+                ", instanceGroup=" + DatabaseUtil.lazyLoadSafeToString(instanceGroup) +
                 ", startDate=" + startDate +
                 ", terminationDate=" + terminationDate +
                 ", subnetId='" + subnetId + '\'' +

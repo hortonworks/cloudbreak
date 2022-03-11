@@ -100,4 +100,15 @@ public class UserProfile implements TenantAwareResource {
     public Tenant getTenant() {
         return user.getTenant();
     }
+
+    @Override
+    public String toString() {
+        return "UserProfile{" +
+                "id=" + id +
+                ", imageCatalog=" + imageCatalog +
+                ", userName='" + userName + '\'' +
+                ", user=" + user +
+                ", showTerminatedClustersPreferences=" + showTerminatedClustersPreferences +
+                '}';
+    }
 }

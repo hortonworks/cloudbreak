@@ -55,4 +55,12 @@ public class InstanceGroupNetwork implements ProvisionEntity {
     public String getCloudPlatform() {
         return cloudPlatform;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceGroupNetwork{" +
+                "id=" + id +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                '}';
+    }
 }

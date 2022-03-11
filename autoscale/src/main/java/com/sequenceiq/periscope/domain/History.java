@@ -218,4 +218,13 @@ public class History {
     public void setHostGroup(String hostGroup) {
         this.hostGroup = hostGroup;
     }
+
+    @Override
+    public String toString() {
+        return "History{" +
+                "id=" + id +
+                ", clusterId=" + clusterId +
+                ", stackCrn='" + stackCrn + '\'' +
+                '}';
+    }
 }

@@ -4,10 +4,10 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 
-import com.sequenceiq.cloudbreak.domain.converter.RecipeV4TypeConverter;
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
+import com.sequenceiq.cloudbreak.domain.converter.RecipeV4TypeConverter;
 
 @Entity
 @Where(clause = "archived = false")
@@ -45,5 +45,15 @@ public class RecipeView extends CompactView {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    @Override
+    public String toString() {
+        return "RecipeView{" +
+                "recipeType=" + recipeType +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", archived=" + archived +
+                ", created=" + created +
+                '}';
     }
 }

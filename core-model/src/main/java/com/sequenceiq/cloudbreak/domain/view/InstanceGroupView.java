@@ -54,4 +54,12 @@ public class InstanceGroupView implements ProvisionEntity {
         return instanceGroupType;
     }
 
+    @Override
+    public String toString() {
+        return "InstanceGroupView{" +
+                "id=" + id +
+                ", groupName='" + groupName + '\'' +
+                ", instanceGroupType=" + instanceGroupType +
+                '}';
+    }
 }

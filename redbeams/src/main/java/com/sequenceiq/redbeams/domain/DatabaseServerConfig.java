@@ -324,4 +324,16 @@ public class DatabaseServerConfig implements ArchivableResource, AccountIdAwareR
 
         return databaseConfig;
     }
+
+    @Override
+    public String toString() {
+        return "DatabaseServerConfig{" +
+                "id=" + id +
+                ", accountId='" + accountId + '\'' +
+                ", resourceCrn=" + resourceCrn +
+                ", workspaceId=" + workspaceId +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

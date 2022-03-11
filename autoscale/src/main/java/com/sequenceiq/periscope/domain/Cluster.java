@@ -361,6 +361,17 @@ public class Cluster implements Monitored, Clustered {
     public void setUpdateFailedDetails(UpdateFailedDetails updateFailedDetails) {
         this.updateFailedDetails = updateFailedDetails;
     }
+
+    @Override
+    public String toString() {
+        return "Cluster{" +
+                "id=" + id +
+                ", stackCrn='" + stackCrn + '\'' +
+                ", stackName='" + stackName + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", stackType=" + stackType +
+                '}';
+    }
 }
 
 

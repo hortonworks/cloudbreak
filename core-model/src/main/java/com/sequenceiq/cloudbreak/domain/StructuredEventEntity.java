@@ -133,4 +133,16 @@ public class StructuredEventEntity implements WorkspaceAwareResource {
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
     }
+
+    @Override
+    public String toString() {
+        return "StructuredEventEntity{" +
+                "id=" + id +
+                ", eventType=" + eventType +
+                ", resourceType='" + resourceType + '\'' +
+                ", resourceId=" + resourceId +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }

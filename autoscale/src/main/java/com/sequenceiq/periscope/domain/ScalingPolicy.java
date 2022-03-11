@@ -97,4 +97,16 @@ public class ScalingPolicy implements Clustered {
     public Cluster getCluster() {
         return alert.getCluster();
     }
+
+    @Override
+    public String toString() {
+        return "ScalingPolicy{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", adjustmentType=" + adjustmentType +
+                ", scalingAdjustment=" + scalingAdjustment +
+                ", alert=" + alert +
+                ", hostGroup='" + hostGroup + '\'' +
+                '}';
+    }
 }

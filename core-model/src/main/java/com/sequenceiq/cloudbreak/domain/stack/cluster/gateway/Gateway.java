@@ -214,4 +214,14 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
     public void setGatewayPort(Integer gatewayPort) {
         this.gatewayPort = gatewayPort;
     }
+
+    @Override
+    public String toString() {
+        return "Gateway{" +
+                "id=" + id +
+                ", gatewayType=" + gatewayType +
+                ", path='" + path + '\'' +
+                ", gatewayPort=" + gatewayPort +
+                '}';
+    }
 }

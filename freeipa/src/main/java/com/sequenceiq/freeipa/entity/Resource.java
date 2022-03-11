@@ -12,6 +12,7 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.converter.CommonStatusConverter;
 import com.sequenceiq.cloudbreak.converter.ResourceTypeConverter;
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -160,5 +161,20 @@ public class Resource {
 
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
+    }
+
+    @Override
+    public String toString() {
+        return "Resource{" +
+                "id=" + id +
+                ", instanceGroup='" + instanceGroup + '\'' +
+                ", resourceType=" + resourceType +
+                ", resourceStatus=" + resourceStatus +
+                ", resourceName='" + resourceName + '\'' +
+                ", resourceReference='" + resourceReference + '\'' +
+                ", stack=" + DatabaseUtil.lazyLoadSafeToString(stack, Stack::getResourceCrn) +
+                ", instanceId='" + instanceId + '\'' +
+                ", availabilityZone='" + availabilityZone + '\'' +
+                '}';
     }
 }

@@ -94,4 +94,14 @@ public class VolumeTemplate implements ProvisionEntity, WorkspaceAwareResource {
     public void setWorkspace(Workspace workspace) {
         template.setWorkspace(workspace);
     }
+
+    @Override
+    public String toString() {
+        return "VolumeTemplate{" +
+                "id=" + id +
+                ", volumeCount=" + volumeCount +
+                ", volumeSize=" + volumeSize +
+                ", volumeType='" + volumeType + '\'' +
+                '}';
+    }
 }

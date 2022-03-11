@@ -70,4 +70,13 @@ public class TimeAlert extends BaseAlert {
         parameters.put(ADJUSTMENT_TYPE, "" + getScalingPolicy().getAdjustmentType());
         return parameters;
     }
+
+    @Override
+    public String toString() {
+        return "TimeAlert{" +
+                "cluster=" + cluster +
+                ", timeZone='" + timeZone + '\'' +
+                ", cron='" + cron + '\'' +
+                '}';
+    }
 }

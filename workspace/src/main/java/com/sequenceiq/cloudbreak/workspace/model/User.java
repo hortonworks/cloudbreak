@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.google.common.base.Objects;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(columnNames = {"tenant_id", "username"}))
@@ -90,5 +91,16 @@ public class User implements TenantAwareResource, Serializable {
     @Override
     public int hashCode() {
         return Objects.hashCode(userId);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", userName='" + userName + '\'' +
+                ", userId='" + userId + '\'' +
+                ", userCrn='" + userCrn + '\'' +
+                ", tenant=" + NullUtil.getIfNotNull(tenant, Tenant::getId) +
+                '}';
     }
 }

@@ -102,7 +102,7 @@ public class Component implements ProvisionEntity {
                 + "id=" + id
                 + ", componentType=" + componentType
                 + ", name='" + name + '\''
-                + ", attributes=" + anonymize(attributes.toString())
+                + ", attributes=" + anonymize(attributes)
                 + '}';
     }
 }

@@ -68,4 +68,16 @@ public class SdxClusterView {
     public String getEnvName() {
         return envName;
     }
+
+    @Override
+    public String toString() {
+        return "SdxClusterView{" +
+                "id=" + id +
+                ", clusterName='" + clusterName + '\'' +
+                ", accountId='" + accountId + '\'' +
+                ", crn='" + crn + '\'' +
+                ", envCrn='" + envCrn + '\'' +
+                ", envName='" + envName + '\'' +
+                '}';
+    }
 }

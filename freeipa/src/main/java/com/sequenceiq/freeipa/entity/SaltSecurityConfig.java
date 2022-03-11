@@ -195,4 +195,12 @@ public class SaltSecurityConfig implements AccountIdAwareResource {
     public void setAccountId(String accountId) {
         this.accountId = accountId;
     }
+
+    @Override
+    public String toString() {
+        return "SaltSecurityConfig{" +
+                "id=" + id +
+                ", accountId='" + accountId + '\'' +
+                '}';
+    }
 }

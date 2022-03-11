@@ -85,4 +85,14 @@ public class ClusterTemplateStackApiView extends CompactView {
     public void setType(StackType type) {
         this.type = type;
     }
+
+    @Override
+    public String toString() {
+        return "ClusterTemplateStackApiView{" +
+                "cloudPlatform='" + cloudPlatform + '\'' +
+                ", type=" + type +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                '}';
+    }
 }

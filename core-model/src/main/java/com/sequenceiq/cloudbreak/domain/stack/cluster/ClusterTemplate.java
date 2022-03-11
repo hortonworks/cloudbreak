@@ -198,4 +198,21 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     public void setClouderaRuntimeVersion(String clouderaRuntimeVersion) {
         this.clouderaRuntimeVersion = clouderaRuntimeVersion;
     }
+
+    @Override
+    public String toString() {
+        return "ClusterTemplate{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", datalakeRequired=" + datalakeRequired +
+                ", featureState=" + featureState +
+                ", type=" + type +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", clouderaRuntimeVersion='" + clouderaRuntimeVersion + '\'' +
+                ", created=" + created +
+                '}';
+    }
 }

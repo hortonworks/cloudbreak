@@ -103,4 +103,12 @@ public class TargetGroup implements ProvisionEntity {
     public int hashCode() {
         return Objects.hash(type);
     }
+
+    @Override
+    public String toString() {
+        return "TargetGroup{" +
+                "id=" + id +
+                ", type=" + type +
+                '}';
+    }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.network.dao.domain;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -265,7 +267,7 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
         return "BaseNetwork{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", environment=" + environment.getName() +
+                ", environment=" + getIfNotNull(environment, EnvironmentView::getName) +
                 ", archived=" + archived +
                 ", deletionTimestamp=" + deletionTimestamp +
                 ", networkCidr='" + networkCidr + '\'' +

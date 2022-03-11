@@ -54,4 +54,14 @@ public class ParentEnvironmentView implements Serializable {
     public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
     }
+
+    @Override
+    public String toString() {
+        return "ParentEnvironmentView{" +
+                "id=" + id +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", name='" + name + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                '}';
+    }
 }

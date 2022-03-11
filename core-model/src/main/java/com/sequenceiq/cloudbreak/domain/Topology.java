@@ -124,4 +124,16 @@ public class Topology implements ProvisionEntity, WorkspaceAwareResource, Archiv
     public Long getDeletionTimestamp() {
         return deletionTimestamp;
     }
+
+    @Override
+    public String toString() {
+        return "Topology{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", deleted=" + deleted +
+                ", deletionTimestamp=" + deletionTimestamp +
+                '}';
+    }
 }

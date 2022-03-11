@@ -163,4 +163,17 @@ public class Resource implements ProvisionEntity {
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
     }
+
+    @Override
+    public String toString() {
+        return "Resource{" +
+                "id=" + id +
+                ", resourceType=" + resourceType +
+                ", resourceStatus=" + resourceStatus +
+                ", resourceName='" + resourceName + '\'' +
+                ", resourceReference='" + resourceReference + '\'' +
+                ", instanceId='" + instanceId + '\'' +
+                ", availabilityZone='" + availabilityZone + '\'' +
+                '}';
+    }
 }

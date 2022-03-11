@@ -40,7 +40,7 @@ dependencies {
   implementation group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   api group: 'net.jcip',                              name: 'jcip-annotations',               version: '1.0'
   api group: 'com.github.spotbugs',                   name: 'spotbugs-annotations',           version: '4.4.2'
-  api group: 'org.reflections',                       name: 'reflections',                    version: '0.9.11'
+  api group: 'org.reflections',                       name: 'reflections',                    version: reflectionsVersion
 
   implementation group: 'com.github.ben-manes.caffeine',         name: 'caffeine',                       version: caffeineVersion
   implementation group: 'org.glassfish.jersey.core',             name: 'jersey-client',                  version: jerseyCoreVersion

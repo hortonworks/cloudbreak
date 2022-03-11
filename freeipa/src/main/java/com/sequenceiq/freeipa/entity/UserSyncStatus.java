@@ -12,6 +12,7 @@ import javax.persistence.SequenceGenerator;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 
 @Entity
 public class UserSyncStatus implements AccountIdAwareResource {
@@ -84,5 +85,15 @@ public class UserSyncStatus implements AccountIdAwareResource {
     @Override
     public String getAccountId() {
         return stack.getAccountId();
+    }
+
+    @Override
+    public String toString() {
+        return "UserSyncStatus{" +
+                "id=" + id +
+                ", stack=" + DatabaseUtil.lazyLoadSafeToString(stack, Stack::getResourceCrn) +
+                ", lastStartedFullSync=" + lastStartedFullSync +
+                ", lastSuccessfulFullSync=" + lastSuccessfulFullSync +
+                '}';
     }
 }

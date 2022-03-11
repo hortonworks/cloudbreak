@@ -23,6 +23,7 @@ import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.entity.util.InstanceGroupTypeConverter;
 
@@ -203,5 +204,16 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
     @Override
     public int hashCode() {
         return Objects.hash(id, template, instanceGroupNetwork, groupName, instanceGroupType, attributes, nodeCount);
+    }
+
+    @Override
+    public String toString() {
+        return "InstanceGroup{" +
+                "id=" + id +
+                ", groupName='" + groupName + '\'' +
+                ", instanceGroupType=" + instanceGroupType +
+                ", stack=" + DatabaseUtil.lazyLoadSafeToString(stack, Stack::getResourceCrn) +
+                ", nodeCount=" + nodeCount +
+                '}';
     }
 }

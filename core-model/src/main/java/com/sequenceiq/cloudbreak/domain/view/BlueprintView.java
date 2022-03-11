@@ -99,4 +99,18 @@ public class BlueprintView extends CompactView {
     public void setBlueprintUpgradeOption(BlueprintUpgradeOption blueprintUpgradeOption) {
         this.blueprintUpgradeOption = blueprintUpgradeOption;
     }
+
+    @Override
+    public String toString() {
+        return "BlueprintView{" +
+                "stackType='" + stackType + '\'' +
+                ", stackVersion='" + stackVersion + '\'' +
+                ", hostGroupCount=" + hostGroupCount +
+                ", status=" + status +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", tags=" + tags +
+                ", created=" + created +
+                ", blueprintUpgradeOption=" + blueprintUpgradeOption +
+                '}';
+    }
 }

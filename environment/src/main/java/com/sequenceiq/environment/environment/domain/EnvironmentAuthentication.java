@@ -67,4 +67,11 @@ public class EnvironmentAuthentication implements Serializable {
     public void setManagedKey(boolean managedKey) {
         this.managedKey = managedKey;
     }
+
+    @Override
+    public String toString() {
+        return "EnvironmentAuthentication{" +
+                "id=" + id +
+                '}';
+    }
 }

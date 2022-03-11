@@ -73,4 +73,12 @@ public class GatewayTopology implements ProvisionEntity {
     public void setExposedServices(Json exposedServices) {
         this.exposedServices = exposedServices;
     }
+
+    @Override
+    public String toString() {
+        return "GatewayTopology{" +
+                "id=" + id +
+                ", topologyName='" + topologyName + '\'' +
+                '}';
+    }
 }

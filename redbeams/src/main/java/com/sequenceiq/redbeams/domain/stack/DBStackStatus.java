@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.domain.stack;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -99,5 +101,16 @@ public class DBStackStatus {
 
     public Long getCreated() {
         return created;
+    }
+
+    @Override
+    public String toString() {
+        return "DBStackStatus{" +
+                "id=" + id +
+                ", dbStack=" + getIfNotNull(dbStack, DBStack::getResourceCrn) +
+                ", status=" + status +
+                ", statusReason='" + statusReason + '\'' +
+                ", detailedDBStackStatus=" + detailedDBStackStatus +
+                '}';
     }
 }

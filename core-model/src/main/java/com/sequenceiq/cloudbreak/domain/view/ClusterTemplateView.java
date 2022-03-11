@@ -122,4 +122,18 @@ public class ClusterTemplateView extends CompactView {
     public void setClouderaRuntimeVersion(String clouderaRuntimeVersion) {
         this.clouderaRuntimeVersion = clouderaRuntimeVersion;
     }
+
+    @Override
+    public String toString() {
+        return "ClusterTemplateView{" +
+                "status=" + status +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", datalakeRequired=" + datalakeRequired +
+                ", type=" + type +
+                ", featureState=" + featureState +
+                ", created=" + created +
+                ", clouderaRuntimeVersion='" + clouderaRuntimeVersion + '\'' +
+                '}';
+    }
 }

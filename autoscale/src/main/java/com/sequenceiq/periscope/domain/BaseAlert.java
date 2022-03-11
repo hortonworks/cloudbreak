@@ -95,4 +95,16 @@ public abstract class BaseAlert implements Clustered {
     }
 
     public abstract Map<String, String> getTelemetryParameters();
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "id=" + id +
+                ", cluster=" + cluster +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", alertCrn='" + alertCrn + '\'' +
+                ", scalingPolicy=" + scalingPolicy +
+                '}';
+    }
 }

@@ -118,4 +118,10 @@ public class IdBroker implements ProvisionEntity, WorkspaceAwareResource {
         this.signCert = signCert;
     }
 
+    @Override
+    public String toString() {
+        return "IdBroker{" +
+                "id=" + id +
+                '}';
+    }
 }

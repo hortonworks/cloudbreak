@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,6 +15,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
+
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 
 @Entity
 public class Tenant implements Serializable {
@@ -92,5 +95,24 @@ public class Tenant implements Serializable {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "Tenant{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", users=" + DatabaseUtil.lazyLoadSafeToString(users, this::usersToString) +
+                ", workspaces=" + DatabaseUtil.lazyLoadSafeToString(workspaces, this::workspacesToString) +
+                '}';
+    }
+
+    private String usersToString() {
+        return users.stream().map(User::getUserCrn).collect(Collectors.toSet()).toString();
+    }
+
+    private String workspacesToString() {
+        return workspaces.stream().map(Workspace::getResourceCrn).collect(Collectors.toSet()).toString();
     }
 }

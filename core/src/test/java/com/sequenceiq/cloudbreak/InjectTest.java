@@ -1,5 +1,16 @@
 package com.sequenceiq.cloudbreak;
 
+import static java.lang.System.lineSeparator;
+
+import java.lang.reflect.Member;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
 import org.junit.Assert;
 import org.junit.Test;
 import org.reflections.Reflections;
@@ -7,15 +18,6 @@ import org.reflections.scanners.FieldAnnotationsScanner;
 import org.reflections.scanners.MemberUsageScanner;
 import org.reflections.scanners.SubTypesScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
-
-import javax.inject.Inject;
-import java.lang.reflect.Member;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
-import static java.lang.System.lineSeparator;
 
 public class InjectTest {
 
@@ -30,7 +32,7 @@ public class InjectTest {
         Map<String, Set<String>> unusedFields = new HashMap<>();
         reflections.getFieldsAnnotatedWith(Inject.class).forEach(field -> {
             try {
-                Set<Member> usages = reflections.getFieldUsage(field);
+                Collection<Member> usages = reflections.getFieldUsage(field);
                 if (usages.isEmpty()) {
                     String className = field.getDeclaringClass().getName();
                     unusedFields.computeIfAbsent(className, key -> new HashSet<>()).add(field.toString());

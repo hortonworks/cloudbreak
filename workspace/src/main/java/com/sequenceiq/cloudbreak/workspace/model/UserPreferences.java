@@ -57,4 +57,13 @@ public class UserPreferences implements Serializable {
     public void setUser(User user) {
         this.user = user;
     }
+
+    @Override
+    public String toString() {
+        return "UserPreferences{" +
+                "id=" + id +
+                ", externalId='" + externalId + '\'' +
+                ", user=" + user +
+                '}';
+    }
 }

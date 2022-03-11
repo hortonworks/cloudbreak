@@ -11,6 +11,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.converter.CommonStatusConverter;
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -110,4 +111,15 @@ public class Resource {
         this.resourceReference = resourceReference;
     }
 
+    @Override
+    public String toString() {
+        return "Resource{" +
+                "id=" + id +
+                ", environment=" + DatabaseUtil.lazyLoadSafeToString(environment, Environment::getResourceCrn) +
+                ", resourceType=" + resourceType +
+                ", resourceStatus=" + resourceStatus +
+                ", resourceName='" + resourceName + '\'' +
+                ", resourceReference='" + resourceReference + '\'' +
+                '}';
+    }
 }

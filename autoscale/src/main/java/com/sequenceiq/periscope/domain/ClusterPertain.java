@@ -71,4 +71,15 @@ public class ClusterPertain {
     public void setUserCrn(String userCrn) {
         this.userCrn = userCrn;
     }
+
+    @Override
+    public String toString() {
+        return "ClusterPertain{" +
+                "id=" + id +
+                ", tenant='" + tenant + '\'' +
+                ", workspaceId=" + workspaceId +
+                ", userId='" + userId + '\'' +
+                ", userCrn='" + userCrn + '\'' +
+                '}';
+    }
 }

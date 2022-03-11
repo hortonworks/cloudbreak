@@ -15,6 +15,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 
 @Entity
 @Table(
@@ -132,7 +133,7 @@ public class CustomConfigurations implements Serializable {
         return "CustomConfigs{" +
                 "name='" + name + '\'' +
                 ", crn='" + crn + '\'' +
-                ", configurations='" + configurations + '\'' +
+                ", configurations='" + DatabaseUtil.lazyLoadSafeToString(configurations) + '\'' +
                 ", runtimeVersion='" + runtimeVersion + '\'' +
                 ", created=" + created +
                 '}';

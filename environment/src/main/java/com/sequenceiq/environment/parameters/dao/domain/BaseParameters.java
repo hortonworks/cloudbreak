@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.parameters.dao.domain;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+
 import javax.persistence.Column;
 import javax.persistence.DiscriminatorColumn;
 import javax.persistence.Entity;
@@ -67,5 +69,15 @@ public abstract class BaseParameters {
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", environment=" + getIfNotNull(environment, EnvironmentView::getResourceCrn) +
+                ", accountId='" + accountId + '\'' +
+                '}';
     }
 }

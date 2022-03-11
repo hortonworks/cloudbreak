@@ -24,4 +24,11 @@ public class OrchestratorView implements ProvisionEntity {
         return type;
     }
 
+    @Override
+    public String toString() {
+        return "OrchestratorView{" +
+                "id=" + id +
+                ", type='" + type + '\'' +
+                '}';
+    }
 }

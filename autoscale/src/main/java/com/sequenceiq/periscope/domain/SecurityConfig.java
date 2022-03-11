@@ -11,6 +11,8 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
+
 @Entity
 @NamedQueries(@NamedQuery(name = "SecurityConfig.findByClusterId", query = "SELECT s FROM SecurityConfig s WHERE s.cluster.id= :id"))
 public class SecurityConfig implements Clustered {
@@ -83,5 +85,13 @@ public class SecurityConfig implements Clustered {
         clientCert = updatedConfig.clientCert;
         clientKey = updatedConfig.clientKey;
         serverCert = updatedConfig.serverCert;
+    }
+
+    @Override
+    public String toString() {
+        return "SecurityConfig{" +
+                "id=" + id +
+                ", cluster=" + DatabaseUtil.lazyLoadSafeToString(cluster, Cluster::getId) +
+                '}';
     }
 }

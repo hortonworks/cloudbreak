@@ -58,4 +58,14 @@ public class InstanceMetaDataView implements ProvisionEntity {
     public String getStatusReason() {
         return statusReason;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceMetaDataView{" +
+                "id=" + id +
+                ", instanceStatus=" + instanceStatus +
+                ", instanceName='" + instanceName + '\'' +
+                ", statusReason='" + statusReason + '\'' +
+                '}';
+    }
 }

@@ -12,19 +12,19 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.util.DatabaseVendorConverter;
-import com.sequenceiq.redbeams.repository.converter.ResourceStatusConverter;
 import org.hibernate.annotations.Where;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.util.DatabaseVendorConverter;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.archive.ArchivableResource;
-import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.converter.CrnConverter;
+import com.sequenceiq.redbeams.repository.converter.ResourceStatusConverter;
 
 @Entity
 @Where(clause = "archived = false")
@@ -229,5 +229,19 @@ public class DatabaseConfig implements ArchivableResource, AccountIdAwareResourc
 
     public void setServer(DatabaseServerConfig server) {
         this.server = server;
+    }
+
+    @Override
+    public String toString() {
+        return "DatabaseConfig{" +
+                "id=" + id +
+                ", accountId='" + accountId + '\'' +
+                ", resourceCrn=" + resourceCrn +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", databaseVendor='" + databaseVendor + '\'' +
+                ", status=" + status +
+                ", environmentId='" + environmentId + '\'' +
+                '}';
     }
 }

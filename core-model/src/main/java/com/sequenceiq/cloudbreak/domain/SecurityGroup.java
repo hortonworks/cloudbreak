@@ -119,4 +119,15 @@ public class SecurityGroup implements ProvisionEntity, WorkspaceAwareResource {
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }
+
+    @Override
+    public String toString() {
+        return "SecurityGroup{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                '}';
+    }
 }

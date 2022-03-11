@@ -134,4 +134,11 @@ public class SaltSecurityConfig implements ProvisionEntity, WorkspaceAwareResour
     public String getSaltSignPrivateKey() {
         return saltSignPrivateKey.getRaw();
     }
+
+    @Override
+    public String toString() {
+        return "SaltSecurityConfig{" +
+                "id=" + id +
+                '}';
+    }
 }

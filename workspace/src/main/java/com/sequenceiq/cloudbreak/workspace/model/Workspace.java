@@ -13,6 +13,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.cloudbreak.workspace.util.WorkspaceStatusConverter;
 
 @Entity
@@ -113,7 +114,7 @@ public class Workspace implements TenantAwareResource, Serializable {
                 .add("id=" + id)
                 .add("name='" + name + "'")
                 .add("description='" + description + "'")
-                .add("tenant=" + tenant)
+                .add("tenant=" + NullUtil.getIfNotNull(tenant, Tenant::getId))
                 .add("status=" + status)
                 .add("resourceCrn='" + resourceCrn + "'")
                 .add("deletionTimestamp=" + deletionTimestamp)

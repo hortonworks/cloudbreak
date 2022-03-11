@@ -89,4 +89,15 @@ public class SdxOperation {
         this.status = status;
     }
 
+    @Override
+    public String toString() {
+        return "SdxOperation{" +
+                "id=" + id +
+                ", operationType=" + operationType +
+                ", sdxClusterId=" + sdxClusterId +
+                ", operationId='" + operationId + '\'' +
+                ", statusReason='" + statusReason + '\'' +
+                ", status=" + status +
+                '}';
+    }
 }

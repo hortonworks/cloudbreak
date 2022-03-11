@@ -43,4 +43,12 @@ public class ClusterTemplateClusterApiView extends CompactView {
     public void setBlueprint(BlueprintView blueprint) {
         this.blueprint = blueprint;
     }
+
+    @Override
+    public String toString() {
+        return "ClusterTemplateClusterApiView{" +
+                ", blueprint=" + blueprint +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                '}';
+    }
 }

@@ -181,4 +181,16 @@ public class DatabaseServer implements AccountIdAwareResource {
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
     }
+
+    @Override
+    public String toString() {
+        return "DatabaseServer{" +
+                "id=" + id +
+                ", accountId='" + accountId + '\'' +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", instanceType='" + instanceType + '\'' +
+                ", databaseVendor=" + databaseVendor +
+                '}';
+    }
 }

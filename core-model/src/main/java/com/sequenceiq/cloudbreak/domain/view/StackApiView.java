@@ -191,4 +191,22 @@ public class StackApiView extends CompactView {
     public void setStackVersion(String stackVersion) {
         this.stackVersion = stackVersion;
     }
+
+    @Override
+    public String toString() {
+        return "StackApiView{" +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", platformVariant='" + platformVariant + '\'' +
+                ", stackStatus=" + stackStatus +
+                ", created=" + created +
+                ", terminated=" + terminated +
+                ", datalakeCrn='" + datalakeCrn + '\'' +
+                ", type=" + type +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", stackVersion='" + stackVersion + '\'' +
+                ", nodeCount=" + nodeCount +
+                ", tunnel=" + tunnel +
+                '}';
+    }
 }

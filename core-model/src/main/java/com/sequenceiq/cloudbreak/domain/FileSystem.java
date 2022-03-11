@@ -122,4 +122,14 @@ public class FileSystem implements ProvisionEntity, WorkspaceAwareResource {
             this.cloudStorage = new Json(cloudStorage);
         }
     }
+
+    @Override
+    public String toString() {
+        return "FileSystem{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", type=" + type +
+                ", description='" + description + '\'' +
+                '}';
+    }
 }

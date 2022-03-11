@@ -180,4 +180,20 @@ public class StackView extends CompactView {
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
     }
+
+    @Override
+    public String toString() {
+        return "StackView{" +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", platformVariant='" + platformVariant + '\'' +
+                ", stackStatus=" + stackStatus +
+                ", gatewayPort=" + gatewayPort +
+                ", created=" + created +
+                ", terminated=" + terminated +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", tunnel=" + tunnel +
+                ", type=" + type +
+                ", environmentCrn='" + environmentCrn + '\'' +
+                '}';
+    }
 }

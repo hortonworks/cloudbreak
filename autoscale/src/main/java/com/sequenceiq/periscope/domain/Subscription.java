@@ -49,4 +49,13 @@ public class Subscription {
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
     }
+
+    @Override
+    public String toString() {
+        return "Subscription{" +
+                "id=" + id +
+                ", clientId='" + clientId + '\'' +
+                ", endpoint='" + endpoint + '\'' +
+                '}';
+    }
 }

@@ -33,4 +33,12 @@ public class StackStatusView implements ProvisionEntity {
     public void setStatus(Status status) {
         this.status = status;
     }
+
+    @Override
+    public String toString() {
+        return "StackStatusView{" +
+                "id=" + id +
+                ", status=" + status +
+                '}';
+    }
 }

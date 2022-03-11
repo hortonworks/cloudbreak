@@ -122,4 +122,12 @@ public class HostGroup implements ProvisionEntity {
         this.generatedRecipes = generatedRecipes;
     }
 
+    @Override
+    public String toString() {
+        return "HostGroup{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", recoveryMode=" + recoveryMode +
+                '}';
+    }
 }

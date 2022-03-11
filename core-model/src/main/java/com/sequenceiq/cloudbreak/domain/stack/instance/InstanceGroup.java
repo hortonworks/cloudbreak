@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 import com.sequenceiq.common.model.CloudIdentityType;
@@ -310,7 +311,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
                 "id=" + id +
                 ", groupName='" + groupName + '\'' +
                 ", instanceGroupType=" + instanceGroupType +
-                ", stack=" + stack.getName() +
+                ", stack=" + DatabaseUtil.lazyLoadSafeToString(stack, Stack::getName) +
                 '}';
     }
 }

@@ -188,4 +188,23 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource, Archiva
     public void setDeletionTimestamp(Long deletionTimestamp) {
         this.deletionTimestamp = deletionTimestamp;
     }
+
+    @Override
+    public String toString() {
+        return "Network{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", subnetCIDR='" + subnetCIDR + '\'' +
+                ", description='" + description + '\'' +
+                ", status=" + status +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", attributes=" + attributes +
+                ", outboundInternetTraffic=" + outboundInternetTraffic +
+                ", networkCidrs='" + networkCidrs + '\'' +
+                ", topology=" + topology +
+                ", workspace=" + workspace +
+                ", archived=" + archived +
+                ", deletionTimestamp=" + deletionTimestamp +
+                '}';
+    }
 }

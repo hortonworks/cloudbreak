@@ -73,6 +73,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
@@ -975,10 +976,11 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", cluster=" + cluster +
                 ", stackStatus=" + stackStatus +
+                ", resources=" + DatabaseUtil.lazyLoadSafeToString(resources) +
                 ", onFailureActionAction=" + onFailureActionAction +
                 ", failurePolicy=" + failurePolicy +
-                ", securityConfig=" + securityConfig +
-                ", instanceGroups=" + instanceGroups.stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet()) +
+                ", securityConfig=" + DatabaseUtil.lazyLoadSafeToString(securityConfig) +
+                ", instanceGroups=" + DatabaseUtil.lazyLoadSafeToString(instanceGroups, this::instanceGroupsToString) +
                 ", version=" + version +
                 ", network=" + network +
                 ", stackAuthentication=" + stackAuthentication +
@@ -1000,6 +1002,10 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", externalDatabaseEngineVersion=" + externalDatabaseEngineVersion +
                 ", originalName=" + originalName +
                 '}';
+    }
+
+    private String instanceGroupsToString() {
+        return instanceGroups.stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet()).toString();
     }
 
     @Override

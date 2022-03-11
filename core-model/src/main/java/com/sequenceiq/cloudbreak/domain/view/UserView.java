@@ -58,4 +58,14 @@ public class UserView implements ProvisionEntity {
     public void setUserCrn(String userCrn) {
         this.userCrn = userCrn;
     }
+
+    @Override
+    public String toString() {
+        return "UserView{" +
+                "id=" + id +
+                ", userName='" + userName + '\'' +
+                ", userId='" + userId + '\'' +
+                ", userCrn='" + userCrn + '\'' +
+                '}';
+    }
 }

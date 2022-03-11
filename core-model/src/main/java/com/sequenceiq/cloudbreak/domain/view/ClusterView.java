@@ -39,4 +39,11 @@ public class ClusterView extends CompactView {
         return status;
     }
 
+    @Override
+    public String toString() {
+        return "ClusterView{" +
+                "clusterManagerIp='" + clusterManagerIp + '\'' +
+                ", status=" + status +
+                '}';
+    }
 }

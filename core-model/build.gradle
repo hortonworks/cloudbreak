@@ -25,7 +25,7 @@ dependencies {
     implementation group: 'net.jcip',                          name: 'jcip-annotations',       version: '1.0'
     implementation group: 'com.github.spotbugs',               name: 'spotbugs-annotations',   version: '4.4.2'
     testImplementation group: 'org.hamcrest',                  name: 'hamcrest',               version: hamcrestVersion
-    testImplementation group: 'org.reflections',               name: 'reflections',            version: '0.9.11'
+    testImplementation group: 'org.reflections',               name: 'reflections',            version: reflectionsVersion
     testImplementation group: 'org.assertj',                   name: 'assertj-core',           version: assertjVersion
     testImplementation project(path: ':common', configuration: 'tests')
 }

@@ -93,4 +93,14 @@ public class ClusterManager {
     public void setVariant(ClusterManagerVariant variant) {
         this.variant = variant;
     }
+
+    @Override
+    public String toString() {
+        return "ClusterManager{" +
+                "id=" + id +
+                ", host='" + host + '\'' +
+                ", port='" + port + '\'' +
+                ", variant=" + variant +
+                '}';
+    }
 }

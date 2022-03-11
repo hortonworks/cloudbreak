@@ -32,4 +32,12 @@ public class ClusterTemplateInstanceGroupView implements ProvisionEntity {
         return groupName;
     }
 
+    @Override
+    public String toString() {
+        return "ClusterTemplateInstanceGroupView{" +
+                "id=" + id +
+                ", groupName='" + groupName + '\'' +
+                ", initialNodeCount=" + initialNodeCount +
+                '}';
+    }
 }

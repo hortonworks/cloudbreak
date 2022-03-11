@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.entity;
 
-import com.sequenceiq.datalake.converter.DatalakeStatusEnumConverter;
-
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -13,6 +11,9 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+
+import com.sequenceiq.cloudbreak.util.DatabaseUtil;
+import com.sequenceiq.datalake.converter.DatalakeStatusEnumConverter;
 
 @Entity
 @Table(name = "sdxstatus")
@@ -73,5 +74,16 @@ public class SdxStatusEntity {
 
     public void setStatus(DatalakeStatusEnum status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "SdxStatusEntity{" +
+                "id=" + id +
+                ", datalake=" + DatabaseUtil.lazyLoadSafeToString(datalake, SdxCluster::getResourceCrn) +
+                ", created=" + created +
+                ", statusReason='" + statusReason + '\'' +
+                ", status=" + status +
+                '}';
     }
 }
