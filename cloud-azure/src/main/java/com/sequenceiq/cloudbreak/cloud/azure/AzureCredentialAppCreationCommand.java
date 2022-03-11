@@ -97,10 +97,9 @@ public class AzureCredentialAppCreationCommand {
         }
     }
 
-    String getRedirectURL(String workspaceId, String deploymentAddress) {
-        String cbAzAppAuthUri = String.format(CB_AZ_APP_REDIRECT_URI_PATTERN, workspaceId);
+    String getRedirectURL(String deploymentAddress) {
         String replyUrl = deploymentAddress.endsWith(DELIMITER) ? deploymentAddress : deploymentAddress + DELIMITER;
-        return replyUrl + cbAzAppAuthUri;
+        return replyUrl + CB_AZ_APP_REDIRECT_URI_PATTERN;
     }
 
     private Map<String, Object> buildModel(String deploymentAddress, String appIdentifierURI, String replyURL) {

@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.springframework.statemachine.StateContext;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -59,7 +60,8 @@ public abstract class AbstractClusterUpgradeValidationAction<P extends Payload>
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspace().getId())
                 .withUserName(stack.getCreator().getUserName())
-                .withAccountId(stack.getTenant().getId())
+                .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
+                .withTenantId(stack.getTenant().getId())
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
         CloudStack cloudStack = stackToCloudStackConverter.convert(stack, Collections.emptyList());

@@ -227,6 +227,7 @@ public class StackImageUpdateActionsTest {
         stack.setId(1L);
         stack.setRegion("region");
         stack.setAvailabilityZone("az");
+        stack.setResourceCrn("crn:cdp:datalake:us-west-1:tenant:cluster:1234");
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         when(stackService.getById(anyLong())).thenReturn(stack);
         when(stackUtil.getCloudCredential(stack)).thenReturn(cloudCredential);

@@ -46,7 +46,8 @@ public class DistroXScaleTest extends AbstractE2ETest {
         DistroXScaleTestParameters params = new DistroXScaleTestParameters(iTestContext.getCurrentXmlTest().getAllParameters());
         testContext.given(DistroXTestDto.class)
                 .when(distroXTestClient.create())
-                .await(STACK_AVAILABLE);
+                .await(STACK_AVAILABLE)
+                .validate();
         if (params.getTimes() < 1) {
             throw new TestFailException("Test should execute at least 1 round of scaling");
         }
@@ -69,13 +70,14 @@ public class DistroXScaleTest extends AbstractE2ETest {
                 .when(distroXTestClient.removeInstances())
                 .awaitForFlow()
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleDownTarget()))
-                .awaitForFlow();
+                .awaitForFlow()
+                .validate();
         IntStream.range(1, params.getTimes()).forEach(i -> testContext.given(DistroXTestDto.class)
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleUpTarget()))
                 .awaitForFlow()
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleDownTarget()))
-                .awaitForFlow());
-        testContext.given(DistroXTestDto.class).validate();
+                .awaitForFlow()
+                .validate());
     }
 
 }
