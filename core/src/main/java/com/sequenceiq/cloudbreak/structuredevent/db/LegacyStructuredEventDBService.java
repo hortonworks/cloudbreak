@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -146,6 +147,17 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
         return getEventsForUserWithResourceId(stackView.getType().getResourceType(), getStackIfAvailable(workspaceId, name, stackView.getType()).getId());
     }
 
+    @Override
+    public StructuredEventContainer getStructuredEventsForStackByCrn(String crn, Long workspaceId, boolean onlyAlive) {
+        Stack stack;
+        if (onlyAlive) {
+            stack = getStackIfAvailableByCrn(workspaceId, crn);
+        } else {
+            stack = getStackByCrn(workspaceId, crn);
+        }
+        return getEventsForUserWithResourceId(stack.getType().getResourceType(), stack.getId());
+    }
+
     public StructuredEventEntity findByWorkspaceIdAndId(Long workspaceId, Long id) {
         return legacyStructuredEventRepository.findByWorkspaceIdAndId(workspaceId, id);
     }
@@ -161,5 +173,15 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     private Stack getStackIfAvailable(Long workspaceId, String name, StackType stackType) {
         return Optional.ofNullable(stackService.getByNameInWorkspace(name, workspaceId))
                 .orElseThrow(notFound(stackType.getResourceType(), name));
+    }
+
+    private Stack getStackIfAvailableByCrn(Long workspaceId, String crn) {
+        return Optional.ofNullable(stackService.getNotTerminatedByCrnInWorkspace(crn, workspaceId))
+                .orElseThrow(notFound(Crn.safeFromString(crn).getResourceType().toString(), crn));
+    }
+
+    private Stack getStackByCrn(Long workspaceId, String crn) {
+        return Optional.ofNullable(stackService.getByCrnInWorkspace(crn, workspaceId))
+                .orElseThrow(notFound(Crn.safeFromString(crn).getResourceType().toString(), crn));
     }
 }
