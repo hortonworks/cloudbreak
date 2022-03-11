@@ -160,7 +160,9 @@ public class ExternalDatabaseService {
             Cluster cluster) {
         AllocateDatabaseServerV4Request req = new AllocateDatabaseServerV4Request();
         req.setEnvironmentCrn(environment.getCrn());
-        req.setDatabaseServer(getDatabaseServerStackRequest(CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.US)), externalDatabase));
+        CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform().toUpperCase(Locale.US));
+        String databaseEngineVersion = Optional.ofNullable(cluster).map(Cluster::getStack).map(Stack::getExternalDatabaseEngineVersion).orElse(null);
+        req.setDatabaseServer(getDatabaseServerStackRequest(cloudPlatform, externalDatabase, databaseEngineVersion));
         if (cluster.getStack() != null) {
             req.setClusterCrn(cluster.getStack().getResourceCrn());
             req.setTags(getUserDefinedTags(cluster.getStack()));
@@ -183,7 +185,8 @@ public class ExternalDatabaseService {
         return Objects.requireNonNullElse(userDefinedTags, new HashMap<>());
     }
 
-    private DatabaseServerV4StackRequest getDatabaseServerStackRequest(CloudPlatform cloudPlatform, DatabaseAvailabilityType externalDatabase) {
+    private DatabaseServerV4StackRequest getDatabaseServerStackRequest(CloudPlatform cloudPlatform, DatabaseAvailabilityType externalDatabase,
+            String databaseEngineVersion) {
         DatabaseStackConfig databaseStackConfig = dbConfigs.get(cloudPlatform);
         if (databaseStackConfig == null) {
             throw new BadRequestException("Database config for cloud platform " + cloudPlatform + " not found");
@@ -194,6 +197,7 @@ public class ExternalDatabaseService {
         request.setStorageSize(databaseStackConfig.getVolumeSize());
         DatabaseServerParameter serverParameter = DatabaseServerParameter.builder()
                 .withHighlyAvailable(DatabaseAvailabilityType.HA == externalDatabase)
+                .withEngineVersion(databaseEngineVersion)
                 .build();
         parameterDecoratorMap.get(cloudPlatform).setParameters(request, serverParameter);
         return request;

@@ -40,6 +40,8 @@ public class MessageCode {
 
     public static final String VALIDATION_LOAD_HOST_GROUP_DUPLICATE_CONFIG = "autoscale.validation.load.duplicate.config";
 
+    public static final String VALIDATION_TIME_STOP_START_UNSUPPORTED = "autoscale.validation.time.stopstart.not.allowed";
+
     public static final String CLUSTER_SCALING_FAILED = "autoscale.cluster.scaling.failed";
 
     public static final String CLUSTER_UPDATE_IN_PROGRESS = "autoscale.cluster.update.in.progress";

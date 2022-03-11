@@ -12,7 +12,7 @@ import "version.proto";
 service datalakeDR {
   // Get the service version.
   rpc GetVersion (version.VersionRequest)
-    returns (version.VersionResponse) {}
+      returns (version.VersionResponse) {}
 
   /**
    * Backup datalake
@@ -44,6 +44,60 @@ service datalakeDR {
   rpc ListDatalakeBackups (ListDatalakeBackupRequest) returns (ListDatalakeBackupResponse) {
   }
 
+  /**
+   * Cancel backup operation
+   */
+  rpc CancelDatalakeBackup (CancelDatalakeBackupRequest) returns (CancelDatalakeBackupResponse) {
+  }
+
+  /**
+   * Cancel restore operation
+   */
+  rpc CancelDatalakeRestore (CancelDatalakeRestoreRequest) returns (CancelDatalakeRestoreResponse) {
+  }
+}
+
+// BackupRestoreOperationStatus
+message BackupRestoreOperationStatus {
+  string status = 1; // The operation status
+  string failureReason = 2; // Reason for operation failure. Only set if operation fails.
+}
+
+// AdminOperationsBackupRestoreState
+message AdminOperationsBackupRestoreState {
+  BackupRestoreOperationStatus stopServices = 1; // Stopping services before a backup or restore.
+  BackupRestoreOperationStatus startServices = 2; // Restarting services after the backup or restore is complete.
+}
+
+// HbaseBackupRestoreState
+message HbaseBackupRestoreState {
+  BackupRestoreOperationStatus atlasEntityAuditEventTable = 1; // State of the ATLAS_ENTITY_AUDIT_EVENTS_TABLE backup.
+  BackupRestoreOperationStatus atlasJanusTable = 2; // State of the ATLAS_JANUS_TABLE backup.
+}
+
+// SolrBackupRestoreState
+message SolrBackupRestoreState {
+  BackupRestoreOperationStatus edgeIndexCollection = 1; // State of the EDGE_INDEX_COLLECTION backup.
+  BackupRestoreOperationStatus fulltextIndexCollection = 2; // State of the FULLTEXT_INDEX_COLLECTION backup.
+  BackupRestoreOperationStatus rangerAuditsCollection = 3; // State of the RANGER_AUDITS_COLLECTION backup.
+  BackupRestoreOperationStatus vertexIndexCollection = 4; // State of the VERTEX_INDEX_COLLECTION backup.
+  BackupRestoreOperationStatus edgeIndexCollectionDelete = 5; // State of the EDGE_INDEX_COLLECTION deletion operation, done before restore.
+  BackupRestoreOperationStatus fulltextIndexCollectionDelete = 6; // State of the FULLTEXT_INDEX_COLLECTION deletion operation, done before restore.
+  BackupRestoreOperationStatus rangerAuditsCollectionDelete = 7; // State of the RANGER_AUDITS_COLLECTION deletion operation, done before restore.
+  BackupRestoreOperationStatus vertexIndexCollectionDelete = 8; // State of the VERTEX_INDEX_COLLECTION deletion operation, done before restore.
+}
+
+// DatabaseBackupRestoreState
+message DatabaseBackupRestoreState {
+  BackupRestoreOperationStatus database = 1; // State of the database backup.
+}
+
+// InternalBackupRestoreState
+message InternalBackupRestoreState {
+  AdminOperationsBackupRestoreState adminOperations = 1; // Admin operations
+  HbaseBackupRestoreState hbase = 2; // Hbase backup or restore
+  SolrBackupRestoreState solr = 3; // Solr backup or restore
+  DatabaseBackupRestoreState database = 4; // Database backup or restore
 }
 
 /**
@@ -64,12 +118,14 @@ message BackupDatalakeResponse {
   string accountId = 2; // Account Id
   string userCrn = 3; // User who performed the back-up operation.
   string backupId = 4; // Unique identifier for the back-up.
-  string internalState = 5; // The current operation in progress.
+  string internalState = 5; // DEPRECATED - maintained for backwards compatibility
   string overallState = 6; // The final result of the backup operation.
   string startTimestamp = 7; // Timestamp when the operation is started.
   string endTimestamp = 8; // Timestamp when the operation is complete.
   string backupLocation = 9; // Location where back-up is exported.
-  string failureReason = 10; // Reason for the failure.
+  string failureReason = 10; // DEPRECATED - maintained for backwards compatibility
+  InternalBackupRestoreState operationStates = 11; // The status of each operation, including any failure reasons.
+  string runtimeVersion = 12; // The runtime version of the datalake when the backup was taken.
 }
 
 /**
@@ -92,12 +148,13 @@ message RestoreDatalakeResponse {
   string backupId = 2;
   string restoreId = 3; // Unique identifier for the restore.
   string userCrn = 4; // User who performed the back-up operation.
-  string internalState = 5; // The current operation in progress.
+  string internalState = 5; // DEPRECATED - maintained for backwards compatibility
   string overallState = 6; // The final result of the backup operation.
   string startTimestamp = 7; // Timestamp when the operation is started.
   string endTimestamp = 8; // Timestamp when the operation is complete.
   string backupLocation = 9; // Location where back-up is exported.
-  string failureReason = 10; // Reason for the failure.
+  string failureReason = 10; // DEPRECATED - maintained for backwards compatibility
+  InternalBackupRestoreState operationStates = 11; // The status of each operation, including any failure reasons.
 }
 
 /**
@@ -117,12 +174,14 @@ message BackupDatalakeStatusResponse {
   string accountId = 2; // Account Id
   string userCrn = 3; // User who performed the back-up operation.
   string backupId = 4; // Unique identifier for the back-up.
-  string internalState = 5; // The current operation in progress.
+  string internalState = 5; // DEPRECATED - maintained for backwards compatibility
   string overallState = 6; // The final result of the backup operation.
   string startTimestamp = 7; // Timestamp when the operation is started.
   string endTimestamp = 8; // Timestamp when the operation is complete.
   string backupLocation = 9; // Location where back-up is exported.
-  string failureReason = 10; // Reason for the failure.
+  string failureReason = 10; // DEPRECATED - maintained for backwards compatibility
+  InternalBackupRestoreState operationStates = 11; // The status of each operation, including any failure reasons.
+  string runtimeVersion = 12; // The runtime version of the datalake when the backup was taken.
 }
 
 /**
@@ -143,12 +202,13 @@ message RestoreDatalakeStatusResponse {
   string restoreId = 2; // Unique identifier for the restore.
   string backupId = 3; // Unique identifier of the back-up used to perform restore.
   string userCrn = 4; // User who performed the back-up operation.
-  string internalState = 5; // The current operation in progress.
+  string internalState = 5; // DEPRECATED - maintained for backwards compatibility
   string overallState = 6; // The final result of the backup operation.
   string startTimestamp = 7; // Timestamp when the operation is started.
   string endTimestamp = 8; // Timestamp when the operation is complete.
   string backupLocation = 9; // Location where back-up is exported.
-  string failureReason = 10; // Reason for the failure.
+  string failureReason = 10; // DEPRECATED - maintained for backwards compatibility
+  InternalBackupRestoreState operationStates = 11; // The status of each operation, including any failure reasons.
 }
 
 
@@ -160,12 +220,14 @@ message DatalakeBackupInfo {
   string accountId = 2; // Account Id
   string userCrn = 3; // User who performed the back-up operation.
   string backupId = 4; // Unique identifier for the back-up.
-  string internalState = 5; // The current operation in progress.
+  string internalState = 5; // DEPRECATED - maintained for backwards compatibility
   string overallState = 6; // The final result of the backup operation.
   string startTimestamp = 7; // Timestamp when the operation is started.
   string endTimestamp = 8; // Timestamp when the operation is complete.
   string backupLocation = 9; // Location where back-up is exported.
-  string failureReason = 10; // Reason for the failure.
+  string failureReason = 10; // DEPRECATED - maintained for backwards compatibility
+  InternalBackupRestoreState operationStates = 11; // The status of each operation, including any failure reasons.
+  string runtimeVersion = 12; // The runtime version of the datalake when the backup was taken.
 }
 
 /**
@@ -180,4 +242,32 @@ message ListDatalakeBackupRequest {
 */
 message ListDatalakeBackupResponse {
   repeated DatalakeBackupInfo datalake_info = 1; //
+}
+
+/**
+* Request to invalidate datalake backup status.
+*/
+message CancelDatalakeBackupRequest {
+  string backupId = 1; // Id of the backup operation performed.
+}
+
+/**
+* Response to invalidate datalake backup status request.
+*/
+message CancelDatalakeBackupResponse {
+  string result = 1; // result of the invalidation operation.
+}
+
+/**
+* Request to invalidate datalake backup status.
+*/
+message CancelDatalakeRestoreRequest {
+  string restoreId = 1; // Id of the backup operation performed.
+}
+
+/**
+* Response to invalidate datalake backup status request.
+*/
+message CancelDatalakeRestoreResponse {
+  string result = 1; // result of the invalidation operation.
 }

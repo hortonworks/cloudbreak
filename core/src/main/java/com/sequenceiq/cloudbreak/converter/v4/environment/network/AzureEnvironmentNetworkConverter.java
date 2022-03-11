@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.environment.network;
 
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -23,7 +24,13 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
         return Map.of(
                 "networkId", azure.getNetworkId(),
                 "resourceGroupName", azure.getResourceGroupName(),
-                "noPublicIp", azure.getNoPublicIp());
+                "noPublicIp", azure.getNoPublicIp(),
+                "privateDnsZoneId", getPrivateDnsZoneId(azure)
+        );
+    }
+
+    private String getPrivateDnsZoneId(EnvironmentNetworkAzureParams azure) {
+        return StringUtils.isNotEmpty(azure.getPrivateDnsZoneId()) ? azure.getPrivateDnsZoneId() : "";
     }
 
     @Override

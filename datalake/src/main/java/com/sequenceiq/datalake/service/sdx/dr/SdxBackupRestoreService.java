@@ -74,7 +74,7 @@ import com.sequenceiq.sdx.api.model.SdxRestoreStatusResponse;
 @Service
 public class SdxBackupRestoreService {
 
-    private static final int MAX_SIZE_OF_FAILURE_REASON = 254;
+    private static final int MAX_SIZE_OF_FAILURE_REASON = 1999;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxBackupRestoreService.class);
 
@@ -101,12 +101,12 @@ public class SdxBackupRestoreService {
 
     public SdxDatabaseBackupResponse triggerDatabaseBackup(SdxCluster sdxCluster, SdxDatabaseBackupRequest backupRequest) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        return triggerDatalakeDatabaseBackupFlow(sdxCluster.getId(), backupRequest);
+        return triggerDatalakeDatabaseBackupFlow(sdxCluster, backupRequest);
     }
 
     public SdxBackupResponse triggerDatalakeBackup(SdxCluster sdxCluster, String backupLocation, String backupName) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        return triggerDatalakeBackupFlow(sdxCluster.getId(), backupLocation, backupName);
+        return triggerDatalakeBackupFlow(sdxCluster, backupLocation, backupName);
     }
 
     public DatalakeBackupStatusResponse triggerDatalakeBackup(Long id, String backupLocation, String backupName, String userCrn) {
@@ -119,7 +119,7 @@ public class SdxBackupRestoreService {
 
     public SdxDatabaseRestoreResponse triggerDatabaseRestore(SdxCluster sdxCluster, String backupId, String restoreId, String backupLocation) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        return triggerDatalakeDatabaseRestoreFlow(sdxCluster.getId(), backupId, restoreId, backupLocation);
+        return triggerDatalakeDatabaseRestoreFlow(sdxCluster, backupId, restoreId, backupLocation);
     }
 
     public SdxRestoreResponse triggerDatalakeRestore(SdxCluster sdxCluster, String datalakeName, String backupId, String backupLocationOverride) {
@@ -142,41 +142,41 @@ public class SdxBackupRestoreService {
             backupId = lastSuccessBackupInfo.getBackupId();
             backupLocation = lastSuccessBackupInfo.getBackupLocation();
         }
-        return triggerDatalakeRestoreFlow(sdxCluster.getId(), backupId, backupLocation, backupLocationOverride);
+        return triggerDatalakeRestoreFlow(sdxCluster, backupId, backupLocation, backupLocationOverride);
     }
 
-    private SdxDatabaseBackupResponse triggerDatalakeDatabaseBackupFlow(Long clusterId, SdxDatabaseBackupRequest backupRequest) {
+    private SdxDatabaseBackupResponse triggerDatalakeDatabaseBackupFlow(SdxCluster cluster, SdxDatabaseBackupRequest backupRequest) {
         String selector = DATALAKE_DATABASE_BACKUP_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        DatalakeDatabaseBackupStartEvent startEvent = new DatalakeDatabaseBackupStartEvent(selector, clusterId, userId, backupRequest);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeDatabaseBackupFlow(startEvent);
+        DatalakeDatabaseBackupStartEvent startEvent = new DatalakeDatabaseBackupStartEvent(selector, cluster.getId(), userId, backupRequest);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeDatabaseBackupFlow(startEvent, cluster.getClusterName());
         return new SdxDatabaseBackupResponse(startEvent.getDrStatus().getOperationId(), flowIdentifier);
     }
 
-    private SdxBackupResponse triggerDatalakeBackupFlow(Long clusterId, String backupLocation, String backupName) {
+    private SdxBackupResponse triggerDatalakeBackupFlow(SdxCluster cluster, String backupLocation, String backupName) {
         String selector = DATALAKE_TRIGGER_BACKUP_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        DatalakeTriggerBackupEvent startEvent = new DatalakeTriggerBackupEvent(selector, clusterId, userId,
+        DatalakeTriggerBackupEvent startEvent = new DatalakeTriggerBackupEvent(selector, cluster.getId(), userId,
             backupLocation, backupName, DatalakeBackupFailureReason.USER_TRIGGERED);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeBackupFlow(startEvent);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeBackupFlow(startEvent, cluster.getClusterName());
         return new SdxBackupResponse(startEvent.getDrStatus().getOperationId(), flowIdentifier);
     }
 
-    private SdxDatabaseRestoreResponse triggerDatalakeDatabaseRestoreFlow(Long clusterId, String backupId, String restoreId, String backupLocation) {
+    private SdxDatabaseRestoreResponse triggerDatalakeDatabaseRestoreFlow(SdxCluster cluster, String backupId, String restoreId, String backupLocation) {
         String selector = DATALAKE_DATABASE_RESTORE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        DatalakeDatabaseRestoreStartEvent startEvent = new DatalakeDatabaseRestoreStartEvent(selector, clusterId,
+        DatalakeDatabaseRestoreStartEvent startEvent = new DatalakeDatabaseRestoreStartEvent(selector, cluster.getId(),
                 userId, backupId, restoreId, backupLocation);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeDatabaseRestoreFlow(startEvent);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeDatabaseRestoreFlow(startEvent, cluster.getClusterName());
         return new SdxDatabaseRestoreResponse(startEvent.getDrStatus().getOperationId(), flowIdentifier);
     }
 
-    private SdxRestoreResponse triggerDatalakeRestoreFlow(Long clusterId, String backupId, String backupLocation, String backupLocationOverride) {
+    private SdxRestoreResponse triggerDatalakeRestoreFlow(SdxCluster cluster, String backupId, String backupLocation, String backupLocationOverride) {
         String selector = DATALAKE_TRIGGER_RESTORE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        DatalakeTriggerRestoreEvent startEvent = new DatalakeTriggerRestoreEvent(selector, clusterId, null, userId,
+        DatalakeTriggerRestoreEvent startEvent = new DatalakeTriggerRestoreEvent(selector, cluster.getId(), null, userId,
                 backupId, backupLocation, backupLocationOverride, DatalakeRestoreFailureReason.USER_TRIGGERED);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRestoreFlow(startEvent);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRestoreFlow(startEvent, cluster.getClusterName());
         return new SdxRestoreResponse(startEvent.getDrStatus().getOperationId(), flowIdentifier);
     }
 

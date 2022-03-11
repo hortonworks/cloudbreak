@@ -37,6 +37,7 @@ public class EnvironmentModelDescription {
     public static final String GCP_NO_FIREWALL_RULES = "Gcp no firewall rules";
 
     public static final String AZURE_RESOURCE_GROUP_NAME = "Azure Resource Group Name of the specified network";
+    public static final String AZURE_PRIVATE_DNS_ZONE_ID = "Full resource id of an existing azure private DNS zone";
     public static final String AZURE_NETWORK_ID = "Azure Network ID of the specified network";
     public static final String AZURE_NO_PUBLIC_IP = "Azure Network is private if this flag is true";
 

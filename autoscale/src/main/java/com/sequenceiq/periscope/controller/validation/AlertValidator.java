@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertType;
+import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.LoadAlertRequest;
 import com.sequenceiq.periscope.api.model.ScalingPolicyBase;
@@ -127,6 +128,23 @@ public class AlertValidator {
         }
     }
 
+    public void validateScheduleWithStopStart(Cluster cluster, DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
+        if (autoscaleClusterRequest.getUseStopStartMechanism() == null) {
+            if (newOrPreExistingTimeAlerts(cluster, autoscaleClusterRequest) && Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
+                throw new BadRequestException(messagesService.getMessage(MessageCode.VALIDATION_TIME_STOP_START_UNSUPPORTED));
+            }
+        } else if (Boolean.TRUE.equals(autoscaleClusterRequest.getUseStopStartMechanism())
+                && newOrPreExistingTimeAlerts(cluster, autoscaleClusterRequest)) {
+            throw new BadRequestException(messagesService.getMessage(MessageCode.VALIDATION_TIME_STOP_START_UNSUPPORTED));
+        }
+    }
+
+    public void validateScheduleWithStopStart(Cluster cluster, AutoscaleClusterState autoscaleState) {
+        if (Boolean.TRUE.equals(autoscaleState.getUseStopStartMechanism()) && !cluster.getTimeAlerts().isEmpty()) {
+            throw new BadRequestException(messagesService.getMessage(MessageCode.VALIDATION_TIME_STOP_START_UNSUPPORTED));
+        }
+    }
+
     public void validateSchedule(TimeAlertRequest json) {
         try {
             dateService.validateTimeZone(json.getTimeZone());
@@ -134,6 +152,10 @@ public class AlertValidator {
         } catch (ParseException parseException) {
             throw new BadRequestException(parseException.getMessage(), parseException);
         }
+    }
+
+    private boolean newOrPreExistingTimeAlerts(Cluster cluster, DistroXAutoscaleClusterRequest distroXAutoscaleClusterRequest) {
+        return !(cluster.getTimeAlerts().isEmpty() && distroXAutoscaleClusterRequest.getTimeAlertRequests().isEmpty());
     }
 
     @VisibleForTesting

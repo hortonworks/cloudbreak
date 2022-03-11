@@ -67,7 +67,7 @@ public class DiagnosticsService {
         diagnosticsCollectionValidator.validate(request, stackV4Response);
         Map<String, Object> properties = diagnosticsParamsConverter.convertFromRequest(request);
         SdxDiagnosticsCollectionEvent event = new SdxDiagnosticsCollectionEvent(cluster.getId(), userId, properties, null);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDiagnosticsCollection(event);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDiagnosticsCollection(event, cluster.getClusterName());
         LOGGER.debug("Start diagnostics collection with flow pollable identifier: {}", flowIdentifier.getPollableId());
         return flowIdentifier;
     }
@@ -100,7 +100,7 @@ public class DiagnosticsService {
         diagnosticsCollectionValidator.validate(request, stackV4Response);
         Map<String, Object> properties = diagnosticsParamsConverter.convertFromCmRequest(request);
         SdxCmDiagnosticsCollectionEvent event = new SdxCmDiagnosticsCollectionEvent(cluster.getId(), userId, properties, null);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerCmDiagnosticsCollection(event);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerCmDiagnosticsCollection(event, cluster.getClusterName());
         LOGGER.debug("Start CM based diagnostics collection with flow pollable identifier: {}", flowIdentifier.getPollableId());
         return flowIdentifier;
     }

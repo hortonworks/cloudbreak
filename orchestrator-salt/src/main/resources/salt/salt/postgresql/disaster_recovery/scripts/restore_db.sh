@@ -5,7 +5,6 @@
 
 set -o nounset
 set -o pipefail
-set -o xtrace
 
 if [[ $# -lt 5 || $# -gt 6 || "$1" == "None" ]]; then
   echo "Invalid inputs provided"
@@ -28,6 +27,10 @@ DATABASENAME="${6-}"
 LOGFILE=/var/log/dl_postgres_restore.log
 echo "Logs at ${LOGFILE}"
 
+exec 3>&1 4>&2
+trap 'exec 2>&4 1>&3' 0 1 2 3
+exec 1> >(tee -a "${LOGFILE}") 2> >(tee -a "${LOGFILE}" >&2)
+
 BACKUPS_DIR="/var/tmp/postgres_restore_staging"
 
 {%- from 'postgresql/settings.sls' import postgresql with context %}
@@ -37,7 +40,6 @@ export PGSSLMODE=verify-full
 {%- endif %}
 
 doLog() {
-  set +x
   type_of_msg=$(echo "$@" | cut -d" " -f1)
   msg=$(echo "$*" | cut -d" " -f2-)
   [[ $type_of_msg == INFO ]] && type_of_msg="INFO   " # three space for aligning
@@ -47,7 +49,6 @@ doLog() {
   # print to the terminal if we have one
   test -t 1 && echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg"
   echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg" >>$LOGFILE
-  set -x
 }
 
 errorExit() {
@@ -152,11 +153,11 @@ run_restore() {
   then
     STRIPPED_S3_URL=$(echo "$BACKUP_LOCATION" | sed -e 's/[a-fA-F0-9]\{8\}-[a-fA-F0-9]\{4\}-[a-fA-F0-9]\{4\}-[a-fA-F0-9]\{4\}-[a-fA-F0-9]\{12\}_database_backup\/*\*\?$//g')
     doLog "Begining to perform s3guard import for ${STRIPPED_S3_URL}"
-    hadoop s3guard import "$STRIPPED_S3_URL" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || doLog "ERROR Unable to import S3Guard metadata."
+    hadoop --loglevel ERROR s3guard import "$STRIPPED_S3_URL" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || doLog "ERROR Unable to import S3Guard metadata."
     doLog "s3guard import is complete"
   fi
 
-  hdfs dfs -copyToLocal -f "$BACKUP_LOCATION" "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Could not copy backups from ${BACKUP_LOCATION}."
+  hdfs --loglevel ERROR dfs -copyToLocal -f "$BACKUP_LOCATION" "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Could not copy backups from ${BACKUP_LOCATION}."
 
   if [[ -z "$DATABASENAME" ]]; then
     echo "No database name provided. Will restore hive, ranger, profiler_agent and profiler_metric databases."

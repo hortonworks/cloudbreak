@@ -218,8 +218,10 @@ public class AzureNetworkConnector implements NetworkConnector {
 
     @Override
     public void createProviderSpecificNetworkResources(NetworkResourcesCreationRequest request) {
+        // TODO CB-16349 Currently the bring your own DNS zone is not yet ready: because of this, even if an existing DNS zone is provided,
+        //  CDP will create its own.
         if (request.isPrivateEndpointsEnabled()) {
-            LOGGER.debug("Private endpoints are enabled, checking the presence of DNS Zones and Network links..");
+            LOGGER.debug("Private endpoints are enabled, and DNS zone is managed by CDP. Checking the presence of DNS Zones and Network links..");
             AzureClient azureClient = azureClientService.getClient(request.getCloudCredential());
             String resourceGroup = request.getResourceGroup();
             AuthenticatedContext authenticatedContext = new AuthenticatedContext(request.getCloudContext(), request.getCloudCredential());
@@ -232,7 +234,11 @@ public class AzureNetworkConnector implements NetworkConnector {
             azureDnsZoneService.checkOrCreateDnsZones(authenticatedContext, azureClient, networkView, resourceGroup, tags);
             azureNetworkLinkService.checkOrCreateNetworkLinks(authenticatedContext, azureClient, networkView, resourceGroup, tags);
         } else {
-            LOGGER.debug("Private endpoints are disabled, nothing to do.");
+            if (request.isExistingPrivateDnsZone()) {
+                LOGGER.debug("The private DNS zone '{}' already exists, nothing to do. ", request.getExistingPrivateDnsZoneId());
+            } else {
+                LOGGER.debug("Private endpoints are disabled, nothing to do.");
+            }
         }
     }
 

@@ -198,10 +198,11 @@ public class CertRenewalServiceTest {
     @Test
     public void testCertRenewalTriggering() {
         when(sdxCluster.getId()).thenReturn(1L);
+        when(sdxCluster.getClusterName()).thenReturn("cluster");
 
         underTest.triggerRenewCertificate(sdxCluster, "userCrn");
 
-        verify(sdxReactorFlowManager).triggerCertRenewal(captor.capture());
+        verify(sdxReactorFlowManager).triggerCertRenewal(captor.capture(), anyString());
 
         SdxStartCertRenewalEvent renewalEvent = captor.getValue();
 
@@ -212,11 +213,12 @@ public class CertRenewalServiceTest {
     @Test
     public void testInternalCertRenewalTriggering() {
         when(sdxCluster.getId()).thenReturn(1L);
+        when(sdxCluster.getClusterName()).thenReturn("cluster");
         when(sdxCluster.getInitiatorUserCrn()).thenReturn("userCrn");
 
         underTest.triggerInternalRenewCertificate(sdxCluster);
 
-        verify(sdxReactorFlowManager).triggerCertRenewal(captor.capture());
+        verify(sdxReactorFlowManager).triggerCertRenewal(captor.capture(), anyString());
 
         SdxStartCertRenewalEvent renewalEvent = captor.getValue();
 

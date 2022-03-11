@@ -44,7 +44,6 @@ public class DatalakeResizeFlowEventChainTest {
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
         assertEquals(6, flowTriggerEventQueue.getQueue().size());
         assertTriggerBackupEvent(flowTriggerEventQueue);
-
     }
 
     private void assertTriggerBackupEvent(FlowTriggerEventQueue flowChainQueue) {

@@ -8,7 +8,6 @@ import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreFailedEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreWaitRequest;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeFullRestoreInProgressEvent;
-import com.sequenceiq.datalake.repository.SdxOperationRepository;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -39,9 +38,6 @@ public class DatalakeDatabaseRestoreWaitHandler extends ExceptionCatcherEventHan
 
     @Inject
     private SdxBackupRestoreService sdxBackupRestoreService;
-
-    @Inject
-    private SdxOperationRepository sdxOperationRepository;
 
     @Override
     public String selector() {

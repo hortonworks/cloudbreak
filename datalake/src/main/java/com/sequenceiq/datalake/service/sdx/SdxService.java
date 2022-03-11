@@ -309,7 +309,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public String getEnvCrnByCrn(String userCrn, String clusterCrn) {
         LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
         String accountIdFromCrn = getAccountIdFromCrn(userCrn);
-        Optional<String> envCrn = sdxClusterRepository.findEnvCrnByAccountIdAndCrnAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, clusterCrn);
+        Optional<String> envCrn = sdxClusterRepository.findEnvCrnByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (envCrn.isPresent()) {
             return envCrn.get();
         } else {
@@ -328,6 +328,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         } else {
             throw notFound("SDX cluster", name).get();
         }
+    }
+
+    public void delete(SdxCluster sdxCluster) {
+        sdxClusterRepository.delete(sdxCluster);
     }
 
     public UpdateRecipesV4Response refreshRecipes(SdxCluster sdxCluster, UpdateRecipesV4Request request) {
@@ -375,7 +379,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
             final StackV4Request internalStackV4Request, final ImageSettingsV4Request imageSettingsV4Request) {
         LOGGER.info("Creating SDX cluster with name {}", name);
-        validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
+        String accountId = getAccountIdFromCrn(userCrn);
+        validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, cloudPlatform);
@@ -410,7 +415,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
         StackV4Request stackRequest = getStackRequest(sdxClusterRequest.getClusterShape(), sdxClusterRequest.isEnableRangerRaz(),
                 internalStackV4Request, cloudPlatform, runtimeVersion, imageSettingsV4Request);
-        overrideDefaultTemplateValues(stackRequest, sdxClusterRequest.getCustomInstanceGroups());
+        overrideDefaultTemplateValues(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), accountId);
         validateRecipes(sdxClusterRequest, stackRequest, userCrn);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);
         prepareDefaultSecurityConfigs(internalStackV4Request, stackRequest, cloudPlatform);
@@ -436,7 +441,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return Pair.of(savedSdxCluster, flowIdentifier);
     }
 
-    private void overrideDefaultTemplateValues(StackV4Request defaultTemplate, List<SdxInstanceGroupRequest> customInstanceGroups) {
+    private void overrideDefaultTemplateValues(StackV4Request defaultTemplate, List<SdxInstanceGroupRequest> customInstanceGroups, String accountId) {
+        if (isCustomInstanceTypeSelected(customInstanceGroups) && !entitlementService.isDatalakeSelectInstanceTypeEnabled(accountId)) {
+            throw new BadRequestException("Datalake instance type selection is not enabled! " +
+                    "Contact Cloudera support to enable CDP_DATALAKE_SELECT_INSTANCE_TYPE entitlement for the account.");
+        }
         if (CollectionUtils.isNotEmpty(customInstanceGroups)) {
             LOGGER.debug("Override default template with custom instance groups from request.");
             customInstanceGroups.forEach(customInstanceGroup -> {
@@ -447,6 +456,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 overrideInstanceType(templateInstanceGroup, customInstanceGroup.getInstanceType());
             });
         }
+    }
+
+    private boolean isCustomInstanceTypeSelected(List<SdxInstanceGroupRequest> customInstanceGroups) {
+        return CollectionUtils.isNotEmpty(customInstanceGroups)
+                && customInstanceGroups.stream().anyMatch(customInstanceGroup -> StringUtils.isNotEmpty(customInstanceGroup.getInstanceType()));
     }
 
     private void overrideInstanceType(InstanceGroupV4Request templateGroup, String newInstanceType) {

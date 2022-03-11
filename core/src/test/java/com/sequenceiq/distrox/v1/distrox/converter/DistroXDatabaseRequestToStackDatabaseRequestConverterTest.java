@@ -1,11 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -35,25 +31,4 @@ class DistroXDatabaseRequestToStackDatabaseRequestConverterTest {
         DatabaseRequest result = underTest.convert(source);
         assertThat(result.getAvailabilityType().name()).isEqualTo(daType.name());
     }
-
-    @Test
-    void testConvertDistroXDatabaseRequestToDatabaseRequestWhenNullAvailabilityTypeProvidedThenIllegalArgumentExceptionHappens() {
-        DistroXDatabaseRequest input = new DistroXDatabaseRequest();
-
-        IllegalArgumentException expectedException = Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.convert(input));
-
-        assertNotNull(expectedException);
-        assertEquals("Unexpected database availability type: null", expectedException.getMessage());
-    }
-
-    @Test
-    void testConvertDatabaseRequestToDistroXDatabaseRequestWhenNullAvailabilityTypeProvidedThenIllegalArgumentExceptionHappens() {
-        DatabaseRequest input = new DatabaseRequest();
-
-        IllegalArgumentException expectedException = Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.convert(input));
-
-        assertNotNull(expectedException);
-        assertEquals("Unexpected database availability type: null", expectedException.getMessage());
-    }
-
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -11,11 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -31,7 +36,7 @@ public class SharedServiceConfigProvider {
     private RemoteDataContextWorkaroundService remoteDataContextWorkaroundService;
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
     public Cluster configureCluster(@Nonnull Cluster requestedCluster, User user, Workspace workspace) {
         Objects.requireNonNull(requestedCluster);
@@ -39,7 +44,9 @@ public class SharedServiceConfigProvider {
         if (!Strings.isNullOrEmpty(stack.getDatalakeCrn())) {
             Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
             if (datalakeStack != null) {
-                Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(datalakeStack.getCluster().getId());
+                List<RdsConfigWithoutCluster> rdsConfigs = rdsConfigWithoutClusterService.findByClusterIdAndStatusInAndTypeIn(datalakeStack.getCluster().getId(),
+                        Set.of(ResourceStatus.USER_MANAGED, ResourceStatus.DEFAULT),
+                        Set.of(DatabaseType.HIVE));
                 setupRds(requestedCluster, rdsConfigs);
                 setupStoragePath(requestedCluster, datalakeStack);
             }
@@ -47,9 +54,13 @@ public class SharedServiceConfigProvider {
         return requestedCluster;
     }
 
-    private void setupRds(Cluster requestedCluster, Set<RDSConfig> rdsConfigs) {
+    private void setupRds(Cluster requestedCluster, List<RdsConfigWithoutCluster> rdsConfigs) {
         if (requestedCluster.getRdsConfigs().isEmpty() && rdsConfigs != null) {
-            requestedCluster.setRdsConfigs(remoteDataContextWorkaroundService.prepareRdsConfigs(requestedCluster, rdsConfigs));
+            RDSConfig rdsConfig = new RDSConfig();
+            rdsConfig.setId(rdsConfigs.get(0).getId());
+            Set<RDSConfig> rdsConfigSet = new HashSet<>(requestedCluster.getRdsConfigs());
+            rdsConfigSet.add(rdsConfig);
+            requestedCluster.setRdsConfigs(rdsConfigSet);
         }
     }
 

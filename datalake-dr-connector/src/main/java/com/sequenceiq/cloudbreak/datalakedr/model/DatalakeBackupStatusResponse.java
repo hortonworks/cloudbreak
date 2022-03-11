@@ -39,7 +39,7 @@ public class DatalakeBackupStatusResponse {
     }
 
     public String getFailureReason() {
-        return failureReason.isPresent() ? failureReason.get() : NO_FAILURES;
+        return failureReason.orElse(NO_FAILURES);
     }
 
     public String getBackupId() {

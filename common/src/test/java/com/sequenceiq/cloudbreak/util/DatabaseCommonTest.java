@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.util;
 
+import static com.sequenceiq.cloudbreak.common.database.DatabaseCommon.POSTGRES_VERSION_REGEX;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -8,20 +11,21 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
-import com.sequenceiq.cloudbreak.common.database.DatabaseCommon.JdbcConnectionUrlFields;
-
-import java.util.List;
-import java.util.Optional;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Pattern;
 
-import org.mockito.InOrder;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.mockito.InOrder;
+
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
+import com.sequenceiq.cloudbreak.common.database.DatabaseCommon.JdbcConnectionUrlFields;
 
 public class DatabaseCommonTest {
     private static final String ORACLE_URL = "jdbc:oracle:@test.eu-west-1.rds.amazonaws.com:1521/hivedb";
@@ -264,5 +268,20 @@ public class DatabaseCommonTest {
             inOrder.verify(conn, never()).commit();
             inOrder.verify(conn).setAutoCommit(true);
         }
+    }
+
+    @Test
+    public void testDbMajorVersionRegexp() {
+        Pattern dbVersionPattern = Pattern.compile(POSTGRES_VERSION_REGEX);
+        assertFalse("empty string", dbVersionPattern.matcher("").matches());
+        assertFalse("not a version", dbVersionPattern.matcher("null").matches());
+        assertTrue("valid version: 9.6", dbVersionPattern.matcher("9.6").matches());
+        assertTrue("valid version: 10", dbVersionPattern.matcher("10").matches());
+        assertTrue("valid version: 11", dbVersionPattern.matcher("11").matches());
+        assertTrue("valid version: 12", dbVersionPattern.matcher("12").matches());
+        assertTrue("valid version: 13", dbVersionPattern.matcher("13").matches());
+        assertTrue("valid version: 14", dbVersionPattern.matcher("14").matches());
+        assertFalse("not a valid version", dbVersionPattern.matcher("141").matches());
+        assertFalse("valid version twice", dbVersionPattern.matcher("1111").matches());
     }
 }
