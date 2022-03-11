@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -96,10 +96,8 @@ public abstract class AbstractRdsConfigProvider {
      *                 this provider's database
      */
     public Set<RDSConfig> createPostgresRdsConfigIfNeeded(Stack stack, Cluster cluster) {
-        Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId());
-        rdsConfigs = rdsConfigs.stream().map(c -> rdsConfigService.resolveVaultValues(c)).collect(Collectors.toSet());
         if (isRdsConfigNeeded(cluster.getBlueprint(), cluster.hasGateway())
-                && rdsConfigs.stream().noneMatch(rdsConfig -> rdsConfig.getType().equalsIgnoreCase(getRdsType().name()))) {
+                && rdsConfigService.findByClusterIdAndType(cluster.getId(), getRdsType()) == null) {
             RDSConfig newRdsConfig;
             if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster)) {
                 newRdsConfig = dbServerConfigurer.createNewRdsConfig(stack, cluster, getDb(), getDbUser(), getRdsType());
@@ -107,18 +105,17 @@ public abstract class AbstractRdsConfigProvider {
                 LOGGER.debug("Creating postgres Database for {}", getRdsType().name());
                 newRdsConfig = createNewRdsConfig(stack, cluster, getDb(), getDbUser(), getDbPort());
             }
-            rdsConfigs = populateNewRdsConfig(rdsConfigs, stack, cluster, newRdsConfig);
+            populateNewRdsConfig(stack, cluster, newRdsConfig);
         }
-        return rdsConfigs;
+        return cluster.getRdsConfigs();
     }
 
-    private Set<RDSConfig> populateNewRdsConfig(Set<RDSConfig> rdsConfigs, Stack stack, Cluster cluster, RDSConfig rdsConfig) {
+    private void populateNewRdsConfig(Stack stack, Cluster cluster, RDSConfig rdsConfig) {
         rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getWorkspace().getId());
-        rdsConfigs.add(rdsConfig);
-        cluster.setRdsConfigs(rdsConfigs);
+        var rdsC = new HashSet<>(cluster.getRdsConfigs());
+        rdsC.add(rdsConfig);
+        cluster.setRdsConfigs(rdsC);
         clusterService.save(cluster);
-
-        return rdsConfigs;
     }
 
     /**

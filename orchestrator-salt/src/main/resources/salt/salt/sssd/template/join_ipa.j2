@@ -22,6 +22,9 @@ ipa-client-install \
   --unattended \
   --force-join \
   --ssh-trust-dns \
+  {%- if salt['pillar.get']('freeipa:host', None) != None %}
+  --server={{ pillar['freeipa']['host'] }} \
+  {%- endif %}
   --no-ntp
 
 echo "$PW" | kinit {{ pillar['sssd-ipa']['principal'] }}

@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.DatabaseAvailabilityTypeToExternalDatabaseRequestConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToExternalDatabaseRequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.network.InstanceGroupNetworkToInstanceGroupNetworkV4RequestConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -58,7 +58,7 @@ public class StackToStackV4RequestConverter {
     private TelemetryConverter telemetryConverter;
 
     @Inject
-    private DatabaseAvailabilityTypeToExternalDatabaseRequestConverter databaseAvailabilityTypeToExternalDatabaseRequestConverter;
+    private StackToExternalDatabaseRequestConverter stackToExternalDatabaseRequestConverter;
 
     @Inject
     private DatalakeService datalakeService;
@@ -87,8 +87,7 @@ public class StackToStackV4RequestConverter {
         stackV4Request.setAuthentication(stackAuthenticationToStackAuthenticationV4RequestConverter.convert(source.getStackAuthentication()));
         stackV4Request.setNetwork(networkToNetworkV4RequestConverter.convert(source.getNetwork()));
         stackV4Request.setCluster(clusterToClusterV4RequestConverter.convert(source.getCluster()));
-        stackV4Request.setExternalDatabase(getIfNotNull(source.getExternalDatabaseCreationType(),
-                databaseAvailabilityTypeToExternalDatabaseRequestConverter::convert));
+        stackV4Request.setExternalDatabase(getIfNotNull(source, stackToExternalDatabaseRequestConverter::convert));
         if (!source.getLoadBalancers().isEmpty()) {
             stackV4Request.setEnableLoadBalancer(true);
         }

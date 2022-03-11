@@ -13,9 +13,11 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
@@ -54,13 +56,17 @@ public class ClusterManagerUpscaleService {
     public void upscaleClusterManager(Long stackId, Map<String, Integer> hostGroupWithAdjustment, boolean primaryGatewayChanged, boolean repair)
             throws ClusterClientInitException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+
+        // we need to fetch the cluster with the details, to avoid the unnecessary DB querying later
+        Long clusterId = stack.getCluster().getId();
+        Cluster cluster = clusterService.findOneWithLists(clusterId).orElseThrow(NotFoundException.notFound("Cluster", clusterId));
         LOGGER.debug("Adding new nodes for host group {}", hostGroupWithAdjustment);
 
-        NodeReachabilityResult nodeReachabilityResult = hostRunner.addClusterServices(stackId, hostGroupWithAdjustment, repair);
+        NodeReachabilityResult nodeReachabilityResult = hostRunner.addClusterServices(stack, cluster, hostGroupWithAdjustment, repair);
         if (primaryGatewayChanged) {
-            clusterServiceRunner.updateAmbariClientConfig(stack, stack.getCluster());
+            clusterServiceRunner.updateAmbariClientConfig(stack, cluster);
         }
-        clusterService.updateInstancesToRunning(stack.getCluster().getId(), nodeReachabilityResult.getReachableNodes());
+        clusterService.updateInstancesToRunning(clusterId, nodeReachabilityResult.getReachableNodes());
         clusterService.updateInstancesToZombie(stackId, nodeReachabilityResult.getUnreachableNodes());
 
         ClusterApi connector = clusterApiConnectors.getConnector(stack);

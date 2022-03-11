@@ -68,7 +68,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.Postg
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
@@ -78,6 +77,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
@@ -108,7 +108,7 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaConfigProvider;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -175,7 +175,7 @@ public class ClusterHostServiceRunner {
     private ProxyConfigProvider proxyConfigProvider;
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
     @Inject
     private StackUtil stackUtil;
@@ -340,9 +340,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public NodeReachabilityResult addClusterServices(Long stackId, Map<String, Integer> hostGroupWithAdjustment, boolean repair) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Cluster cluster = stack.getCluster();
+    public NodeReachabilityResult addClusterServices(Stack stack, Cluster cluster, Map<String, Integer> hostGroupWithAdjustment, boolean repair) {
         Map<String, String> candidates = collectUpscaleCandidates(cluster.getId(), hostGroupWithAdjustment);
         Set<String> gatewayHosts = stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
                 .map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
@@ -550,11 +548,11 @@ public class ClusterHostServiceRunner {
 
     private void decoratePillarWithClouderaManagerDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
-        RDSConfig clouderaManagerRdsConfig = rdsConfigService.findByClusterIdAndType(cluster.getId(), DatabaseType.CLOUDERA_MANAGER);
+        RdsConfigWithoutCluster clouderaManagerRdsConfig = rdsConfigWithoutClusterService.findByClusterIdAndType(cluster.getId(), DatabaseType.CLOUDERA_MANAGER);
         if (clouderaManagerRdsConfig == null) {
             throw new CloudbreakOrchestratorFailedException("Cloudera Manager RDSConfig is missing for stack");
         }
-        RdsView rdsView = new RdsView(rdsConfigService.resolveVaultValues(clouderaManagerRdsConfig));
+        RdsView rdsView = new RdsView(clouderaManagerRdsConfig);
         servicePillar.put("cloudera-manager-database",
                 new SaltPillarProperties("/cloudera-manager/database.sls", singletonMap("cloudera-manager", singletonMap("database", rdsView))));
     }
@@ -892,7 +890,7 @@ public class ClusterHostServiceRunner {
     }
 
     private void decoratePillarWithJdbcConnectors(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
-        Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(cluster.getId());
+        Set<RdsConfigWithoutCluster> rdsConfigs = rdsConfigWithoutClusterService.findByClusterId(cluster.getId());
         Map<String, Object> connectorJarUrlsByVendor = new HashMap<>();
         rdsConfigs.stream()
                 .filter(rds -> isNotEmpty(rds.getConnectorJarUrl()))

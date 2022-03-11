@@ -2,15 +2,19 @@ package com.sequenceiq.cloudbreak.template.views;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 
 public class RdsViewTest {
 
@@ -249,6 +253,53 @@ public class RdsViewTest {
         assertThat(underTest.getSslCertificateFilePath()).isEqualTo(SSL_CERTS_FILE_PATH);
     }
 
+    @Test
+    public void testCreateRdsViewWithRdsViewWithoutCluster() {
+        RdsConfigWithoutCluster rdsView = Mockito.mock(RdsConfigWithoutCluster.class);
+        when(rdsView.isArchived()).thenReturn(true);
+        when(rdsView.getConnectionDriver()).thenReturn("driver");
+        when(rdsView.getConnectionURL()).thenReturn("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger");
+        when(rdsView.getConnectionPassword()).thenReturn(new Secret("pass"));
+        when(rdsView.getConnectionUserName()).thenReturn(new Secret("username"));
+        when(rdsView.getConnectorJarUrl()).thenReturn("jarurl");
+        when(rdsView.getCreationDate()).thenReturn(1L);
+        when(rdsView.getDatabaseEngine()).thenReturn(DatabaseVendor.MYSQL);
+        when(rdsView.getDeletionTimestamp()).thenReturn(2L);
+        when(rdsView.getDescription()).thenReturn("desc");
+        when(rdsView.getId()).thenReturn(-1L);
+        when(rdsView.getName()).thenReturn("name");
+        when(rdsView.getSslMode()).thenReturn(RdsSslMode.ENABLED);
+        when(rdsView.getType()).thenReturn("type");
+
+        RdsView underTest = new RdsView(rdsView, "ssl-path");
+        assertThat(underTest.getClusterManagerVendor()).isEqualTo("mysql");
+        assertThat(underTest.getConnectionString())
+                .isEqualTo("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger?sslmode=verify-full&sslrootcert=ssl-path");
+        assertThat(underTest.getConnectionUserName()).isEqualTo("username");
+        assertThat(underTest.getHostWithPortWithJdbc()).isEqualTo("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306");
+        assertThat(underTest.getHost()).isEqualTo("ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com");
+        assertThat(underTest.getConnectionDriver()).isEqualTo("driver");
+        assertThat(underTest.getConnectionPassword()).isEqualTo("pass");
+        assertThat(underTest.getConnectionURL())
+                .isEqualTo("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger?sslmode=verify-full&sslrootcert=ssl-path");
+        assertThat(underTest.getDatabaseEngine()).isEqualTo("mysql");
+        assertThat(underTest.getDatabaseType()).isEqualTo("mysql");
+        assertThat(underTest.getDatabaseVendor()).isEqualTo(DatabaseVendor.MYSQL);
+        assertThat(underTest.getDatabaseName()).isEqualTo("ranger");
+        assertThat(underTest.getFancyName()).isEqualTo("MySQL / MariaDB");
+        assertThat(underTest.getLowerCaseDatabaseEngine()).isEqualTo("mysql");
+        assertThat(underTest.getName()).isEqualTo("ranger");
+        assertThat(underTest.getPassword()).isEqualTo("pass");
+        assertThat(underTest.getPort()).isEqualTo("3306");
+        assertThat(underTest.getSslCertificateFilePath()).isEqualTo("ssl-path");
+        assertThat(underTest.getSubprotocol()).isEqualTo("mysql");
+        assertThat(underTest.getUserName()).isEqualTo("username");
+        assertThat(underTest.getVendor()).isEqualTo("mysql");
+        assertThat(underTest.getWithoutJDBCPrefix())
+                .isEqualTo("ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger?sslmode=verify-full&sslrootcert=ssl-path");
+        assertThat(underTest.isUseSsl()).isEqualTo(true);
+    }
+
     static Object[][] sslConnectionUrlDataProvider() {
         return new Object[][]{
                 // testCaseName connectionUrl connectionUrlExpected
@@ -289,5 +340,4 @@ public class RdsViewTest {
         rdsConfig.setType(databaseType.name());
         return rdsConfig;
     }
-
 }

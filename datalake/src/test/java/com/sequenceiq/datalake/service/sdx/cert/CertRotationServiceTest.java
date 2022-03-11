@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx.cert;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -69,10 +70,11 @@ class CertRotationServiceTest {
     public void testFlowTrigger() {
         SdxCluster cluster = new SdxCluster();
         cluster.setId(1L);
+        cluster.setClusterName("testclustername");
         CertificatesRotationV4Request request = new CertificatesRotationV4Request();
         ArgumentCaptor<SdxStartCertRotationEvent> eventArgumentCaptor = ArgumentCaptor.forClass(SdxStartCertRotationEvent.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollid");
-        when(flowManager.triggerCertRotation(eventArgumentCaptor.capture())).thenReturn(flowIdentifier);
+        when(flowManager.triggerCertRotation(eventArgumentCaptor.capture(), anyString())).thenReturn(flowIdentifier);
 
         FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.rotateAutoTlsCertificates(cluster, request));
 

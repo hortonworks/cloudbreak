@@ -142,6 +142,7 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
         if (Boolean.TRUE.equals(autoscaleState.getUseStopStartMechanism())) {
             alertValidator.validateStopStartEntitlementAndDisableIfNotEntitled(cluster);
         }
+        alertValidator.validateScheduleWithStopStart(cluster, autoscaleState);
         try {
             transactionService.required(() -> asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleState));
         } catch (TransactionService.TransactionExecutionException e) {
@@ -160,7 +161,7 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
         if (Boolean.TRUE.equals(autoscaleClusterRequest.getUseStopStartMechanism())) {
             alertValidator.validateStopStartEntitlementAndDisableIfNotEntitled(cluster);
         }
-
+        alertValidator.validateScheduleWithStopStart(cluster, autoscaleClusterRequest);
         try {
             transactionService.required(() -> {
                 clusterService.deleteAlertsForCluster(cluster.getId());

@@ -200,7 +200,10 @@ class EntitlementServiceTest {
                 {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, true},
 
                 {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, false},
-                {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, true}
+                {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, true},
+
+                {"CDP_DATALAKE_SELECT_INSTANCE_TYPE", (EntitlementCheckFunction) EntitlementService::isDatalakeSelectInstanceTypeEnabled, false},
+                {"CDP_DATALAKE_SELECT_INSTANCE_TYPE", (EntitlementCheckFunction) EntitlementService::isDatalakeSelectInstanceTypeEnabled, true}
         };
     }
 

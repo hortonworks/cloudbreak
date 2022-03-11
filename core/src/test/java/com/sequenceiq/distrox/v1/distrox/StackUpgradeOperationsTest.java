@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -274,6 +275,44 @@ class StackUpgradeOperationsTest {
         verify(stackOperations).listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any());
         verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack);
         verify(upgradePreconditionService).checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
+        verifyNoInteractions(clusterDBValidationService);
+    }
+
+    @Test
+    void testCheckForClusterUpgradeShouldNotValidateUpgradeableDataHubsWhenDataHubUpgradeEntitlementIsGranted() {
+        Stack stack = createStack(StackType.DATALAKE);
+        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses();
+        UpgradeV4Request request = createUpgradeRequest(null);
+        UpgradeV4Response upgradeResponseToReturn = createUpgradeResponse();
+        UpgradeV4Response expectedResponse = createUpgradeResponse();
+        expectedResponse.setReason("There are attached Data Hub clusters in incorrect state");
+        when(instanceGroupService.getByStackAndFetchTemplates(STACK_ID)).thenReturn(Collections.emptySet());
+        when(upgradeService.isOsUpgrade(request)).thenReturn(false);
+        StackInstanceCount instanceCount = mock(StackInstanceCount.class);
+        when(instanceCount.getInstanceCount()).thenReturn(INSTANCE_COUNT);
+        when(instanceMetaDataService.countByStackId(STACK_ID)).thenReturn(instanceCount);
+        when(limitConfiguration.getUpgradeNodeCountLimit()).thenReturn(NODE_LIMIT);
+        when(clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings()))
+                .thenReturn(upgradeResponseToReturn);
+        when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(stackOperations.listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any())).thenReturn(stackViewV4Responses);
+        when(upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, stack))
+                .thenReturn("There are attached Data Hub clusters in incorrect state");
+
+        UpgradeV4Response actual = underTest.checkForClusterUpgrade(ACCOUNT_ID, stack, WORKSPACE_ID, request);
+
+        assertEquals(expectedResponse, actual);
+        verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
+        verify(upgradeService).isOsUpgrade(request);
+        verify(instanceGroupService).getByStackAndFetchTemplates(STACK_ID);
+        verify(limitConfiguration).getUpgradeNodeCountLimit();
+        verify(clusterUpgradeAvailabilityService).checkForUpgradesByName(stack, false, true, request.getInternalUpgradeSettings());
+        verify(clusterUpgradeAvailabilityService).filterUpgradeOptions(ACCOUNT_ID, upgradeResponseToReturn, request, true);
+        verify(entitlementService).runtimeUpgradeEnabled(ACCOUNT_ID);
+        verify(stackOperations).listByEnvironmentCrn(eq(WORKSPACE_ID), eq(ENVIRONMENT_CRN), any());
+        verify(upgradePreconditionService).checkForRunningAttachedClusters(stackViewV4Responses, stack);
+        verify(upgradePreconditionService, times(0)).checkForNonUpgradeableAttachedClusters(stackViewV4Responses);
         verifyNoInteractions(clusterDBValidationService);
     }
 

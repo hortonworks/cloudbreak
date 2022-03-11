@@ -57,7 +57,7 @@ public class CertRotationService {
         MDCBuilder.buildMdcContext(sdxCluster);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxStartCertRotationEvent event = new SdxStartCertRotationEvent(sdxCluster.getId(), initiatorUserCrn, rotateCertificateRequest);
-        return flowManager.triggerCertRotation(event);
+        return flowManager.triggerCertRotation(event, sdxCluster.getClusterName());
     }
 
     public void startCertRotation(Long id, CertificatesRotationV4Request request) {

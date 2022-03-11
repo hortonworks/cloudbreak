@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ORCHESTRATION_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.TERMINATED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ZOMBIE;
 
@@ -104,7 +103,7 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public boolean isFailed() {
-        Set<InstanceStatus> failedStatuses = Set.of(FAILED, ORCHESTRATION_FAILED, DECOMMISSION_FAILED, ZOMBIE, SERVICES_UNHEALTHY);
+        Set<InstanceStatus> failedStatuses = Set.of(FAILED, ORCHESTRATION_FAILED, DECOMMISSION_FAILED, ZOMBIE);
         return getInstanceStatuses().values().stream().anyMatch(failedStatuses::contains);
     }
 
@@ -127,7 +126,7 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public boolean isFailedCheck() {
-        Set<InstanceStatus> failedStatuses = Set.of(FAILED, ORCHESTRATION_FAILED, DECOMMISSION_FAILED, ZOMBIE, SERVICES_UNHEALTHY);
+        Set<InstanceStatus> failedStatuses = Set.of(FAILED, ORCHESTRATION_FAILED, DECOMMISSION_FAILED, ZOMBIE);
         return failedStatuses.contains(desiredStatus);
     }
 

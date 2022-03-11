@@ -128,7 +128,9 @@ public class StackUpgradeOperations {
                     + "Data lake runtime upgrade is enabled in [{}] account on [{}] cluster.", accountId, stack.getName());
             StackViewV4Responses stackViewV4Responses = stackOperations.listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(),
                     List.of(StackType.WORKLOAD));
-            upgradeResponse.appendReason(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(stackViewV4Responses));
+            if (!entitlementService.datahubRuntimeUpgradeEnabled(accountId)) {
+                upgradeResponse.appendReason(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(stackViewV4Responses));
+            }
             upgradeResponse.appendReason(upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, stack));
         }
     }

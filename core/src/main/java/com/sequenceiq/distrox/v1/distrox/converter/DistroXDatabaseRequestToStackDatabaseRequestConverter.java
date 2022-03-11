@@ -22,14 +22,14 @@ public class DistroXDatabaseRequestToStackDatabaseRequestConverter {
 
     public DistroXDatabaseRequest convert(DatabaseRequest source) {
         DistroXDatabaseRequest request = new DistroXDatabaseRequest();
-        request.setAvailabilityType(convertAvailabilityType(source.getAvailabilityType()));
+        if (source.getAvailabilityType() != null) {
+            request.setAvailabilityType(convertAvailabilityType(source.getAvailabilityType()));
+        }
+        request.setDatabaseEngineVersion(source.getDatabaseEngineVersion());
         return request;
     }
 
     private DatabaseAvailabilityType convertAvailabilityType(DistroXDatabaseAvailabilityType availabilityType) {
-        if (availabilityType == null) {
-            throw new IllegalArgumentException(format(UNEXPECTED_AVAILABILITY_TYPE_MSG_FORMAT, "null"));
-        }
         switch (availabilityType) {
             case NONE:
                 return DatabaseAvailabilityType.NONE;

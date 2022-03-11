@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
@@ -44,11 +45,21 @@ public class FreeIpaConfigProvider {
     private Optional<InstanceMetaDataResponse> selectInstance(DescribeFreeIpaResponse freeIpaResponse) {
         List<InstanceMetaDataResponse> metaDataResponses = freeIpaResponse.getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetaData().stream()).collect(Collectors.toList());
+        Optional<InstanceMetaDataResponse> pgwInstance = selectPgwInstance(metaDataResponses);
         Optional<InstanceMetaDataResponse> instanceMetaDataResponse =
-                chooseFirstOrderedByFqdnAndByStateIfPresent(metaDataResponses, Optional.of(InstanceStatus.CREATED))
-                        .or(() -> chooseFirstOrderedByFqdnAndByStateIfPresent(metaDataResponses, Optional.empty()));
+                pgwInstance.or(() -> chooseFirstOrderedByFqdnAndByStateIfPresent(metaDataResponses, Optional.of(InstanceStatus.CREATED))
+                        .or(() -> chooseFirstOrderedByFqdnAndByStateIfPresent(metaDataResponses, Optional.empty())));
         LOGGER.info("Chosen instance for default FreeIPA server: {}", instanceMetaDataResponse);
         return instanceMetaDataResponse;
+    }
+
+    private Optional<InstanceMetaDataResponse> selectPgwInstance(List<InstanceMetaDataResponse> metaDataResponses) {
+        List<InstanceMetaDataResponse> pgwInstances = metaDataResponses.stream().
+                filter(im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceType()))
+                .collect(Collectors.toList());
+        Optional<InstanceMetaDataResponse> pgwInstance = chooseFirstOrderedByFqdnAndByStateIfPresent(pgwInstances, Optional.of(InstanceStatus.CREATED));
+        LOGGER.debug("Tried to select primary gateway instance [{}] with state [{}] from {}", pgwInstance, InstanceStatus.CREATED, pgwInstances);
+        return pgwInstance;
     }
 
     private Optional<InstanceMetaDataResponse> chooseFirstOrderedByFqdnAndByStateIfPresent(List<InstanceMetaDataResponse> metaDataResponses,

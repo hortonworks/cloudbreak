@@ -57,7 +57,7 @@ public class GatewayConfigService {
     }
 
     public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance, Boolean knoxGatewayEnabled) {
-        return tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance, stack.getGatewayPort(), getSaltClientConfig(stack), knoxGatewayEnabled);
+        return tlsSecurityService.buildGatewayConfig(stack, gatewayInstance, stack.getGatewayPort(), getSaltClientConfig(stack), knoxGatewayEnabled);
     }
 
     public String getPrimaryGatewayIp(Stack stack) {

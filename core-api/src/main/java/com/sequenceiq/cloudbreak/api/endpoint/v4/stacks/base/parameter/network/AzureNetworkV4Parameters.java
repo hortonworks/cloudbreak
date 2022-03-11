@@ -30,6 +30,9 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
     @ApiModelProperty
     private String subnetId;
 
+    @ApiModelProperty
+    private String privateDnsZoneId;
+
     public Boolean getNoPublicIp() {
         return noPublicIp;
     }
@@ -62,6 +65,14 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
         this.subnetId = subnetId;
     }
 
+    public String getPrivateDnsZoneId() {
+        return privateDnsZoneId;
+    }
+
+    public void setPrivateDnsZoneId(String privateDnsZoneId) {
+        this.privateDnsZoneId = privateDnsZoneId;
+    }
+
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
@@ -69,6 +80,7 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
         putIfValueNotNull(map, "resourceGroupName", resourceGroupName);
         putIfValueNotNull(map, "networkId", networkId);
         putIfValueNotNull(map, "subnetId", subnetId);
+        putIfValueNotNull(map, "privateDnsZoneId", privateDnsZoneId);
         return map;
     }
 
@@ -85,5 +97,6 @@ public class AzureNetworkV4Parameters extends MappableBase implements JsonEntity
         resourceGroupName = getParameterOrNull(parameters, "resourceGroupName");
         networkId = getParameterOrNull(parameters, "networkId");
         subnetId = getParameterOrNull(parameters, "subnetId");
+        privateDnsZoneId = getParameterOrNull(parameters, "privateDnsZoneId");
     }
 }

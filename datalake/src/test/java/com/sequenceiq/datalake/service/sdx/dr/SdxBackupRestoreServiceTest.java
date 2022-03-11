@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -82,7 +83,7 @@ public class SdxBackupRestoreServiceTest {
 
     @Test
     public void triggerDatabaseBackupSuccess() {
-        when(sdxReactorFlowManager.triggerDatalakeDatabaseBackupFlow(any(DatalakeDatabaseBackupStartEvent.class))).thenReturn(FLOW_IDENTIFIER);
+        when(sdxReactorFlowManager.triggerDatalakeDatabaseBackupFlow(any(DatalakeDatabaseBackupStartEvent.class), anyString())).thenReturn(FLOW_IDENTIFIER);
         SdxDatabaseBackupRequest backupRequest = new SdxDatabaseBackupRequest();
         backupRequest.setBackupId(BACKUP_ID);
         backupRequest.setBackupLocation(BACKUP_LOCATION);
@@ -91,7 +92,7 @@ public class SdxBackupRestoreServiceTest {
                 () -> sdxBackupRestoreService.triggerDatabaseBackup(sdxCluster, backupRequest));
         assertEquals(FLOW_IDENTIFIER, backupResponse.getFlowIdentifier());
         ArgumentCaptor<DatalakeDatabaseBackupStartEvent> eventArgumentCaptor = ArgumentCaptor.forClass(DatalakeDatabaseBackupStartEvent.class);
-        verify(sdxReactorFlowManager, times(1)).triggerDatalakeDatabaseBackupFlow(eventArgumentCaptor.capture());
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeDatabaseBackupFlow(eventArgumentCaptor.capture(), anyString());
         assertEquals(BACKUP_ID, eventArgumentCaptor.getValue().getBackupRequest().getBackupId());
         assertEquals(BACKUP_LOCATION, eventArgumentCaptor.getValue().getBackupRequest().getBackupLocation());
         assertEquals(USER_CRN, eventArgumentCaptor.getValue().getUserId());
@@ -139,12 +140,12 @@ public class SdxBackupRestoreServiceTest {
 
     @Test
     public void triggerDatabaseRestoreSuccess() {
-        when(sdxReactorFlowManager.triggerDatalakeDatabaseRestoreFlow(any(DatalakeDatabaseRestoreStartEvent.class))).thenReturn(FLOW_IDENTIFIER);
+        when(sdxReactorFlowManager.triggerDatalakeDatabaseRestoreFlow(any(DatalakeDatabaseRestoreStartEvent.class), anyString())).thenReturn(FLOW_IDENTIFIER);
         SdxDatabaseRestoreResponse restoreResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> sdxBackupRestoreService.triggerDatabaseRestore(sdxCluster, BACKUP_ID, RESTORE_ID, BACKUP_LOCATION));
         assertEquals(FLOW_IDENTIFIER, restoreResponse.getFlowIdentifier());
         ArgumentCaptor<DatalakeDatabaseRestoreStartEvent> eventArgumentCaptor = ArgumentCaptor.forClass(DatalakeDatabaseRestoreStartEvent.class);
-        verify(sdxReactorFlowManager, times(1)).triggerDatalakeDatabaseRestoreFlow(eventArgumentCaptor.capture());
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeDatabaseRestoreFlow(eventArgumentCaptor.capture(), anyString());
         assertEquals(BACKUP_ID, eventArgumentCaptor.getValue().getBackupId());
         assertEquals(RESTORE_ID, eventArgumentCaptor.getValue().getRestoreId());
         assertEquals(BACKUP_LOCATION, eventArgumentCaptor.getValue().getBackupLocation());
