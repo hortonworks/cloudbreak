@@ -508,4 +508,10 @@ public class StackV4Controller extends NotificationController implements StackV4
                 restRequestThreadLocalService.getRequestedWorkspaceId());
         return new GenerateImageCatalogV4Response(imageCatalog);
     }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier restartClusterServices(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperations.restartClusterServices(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+    }
 }

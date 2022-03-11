@@ -39,6 +39,7 @@ public class OperationDescriptions {
         public static final String RETRY_BY_NAME_IN_WORKSPACE = "retries the stack by name in workspace";
         public static final String STOP_BY_NAME_IN_WORKSPACE = "stops the stack by name in workspace";
         public static final String STOP_BY_NAME_IN_WORKSPACE_INTERNAL = "stops the stack by name in workspace, internal only";
+        public static final String RESTART_SERVICES_BY_NAME_IN_WORKSPACE_INTERNAL = "restarts services in the cluster, internal only";
         public static final String START_BY_NAME_IN_WORKSPACE = "starts the stack by name in workspace";
         public static final String START_BY_NAME_IN_WORKSPACE_INTERNAL = "starts the stack by name in workspace, internal only";
         public static final String SCALE_BY_NAME_IN_WORKSPACE = "scales the stack by name in workspace";

@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
@@ -136,6 +137,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private FlowLogService flowLogService;
+
+    @Inject
+    private ClusterOperationService clusterOperationService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -437,5 +441,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         LOGGER.info("Generate image catalog of stack '{}'", nameOrCrn);
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         return generateImageCatalogService.generateImageCatalogForStack(stack);
+    }
+
+    public FlowIdentifier restartClusterServices(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        return clusterOperationService.restartClusterServices(stack);
     }
 }

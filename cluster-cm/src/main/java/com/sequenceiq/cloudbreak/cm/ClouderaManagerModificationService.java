@@ -557,11 +557,16 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Deployed client configs and refreshed services in Cloudera Manager.");
     }
 
-    private void restartServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
-        doRestartServicesIfNeeded(clustersResourceApi, false);
+    private int restartServices() throws ApiException, CloudbreakException {
+        ClustersResourceApi apiInstance = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
+        return restartServices(apiInstance);
     }
 
-    private void doRestartServicesIfNeeded(ClustersResourceApi clustersResourceApi, boolean waitForCommandExecutionOnly)
+    private int restartServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
+        return doRestartServicesIfNeeded(clustersResourceApi, false);
+    }
+
+    private int doRestartServicesIfNeeded(ClustersResourceApi clustersResourceApi, boolean waitForCommandExecutionOnly)
             throws ApiException, CloudbreakException {
         ApiCommandList apiCommandList = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY);
         Optional<ApiCommand> optionalRestartCommand = apiCommandList.getItems().stream()
@@ -581,6 +586,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             handlePollingResult(pollingResult, "Cluster was terminated while restarting services.",
                     "Timeout happened while restarting services.");
         }
+        return restartCommand == null ? 0 : restartCommand.getId().intValue();
     }
 
     private void restartClouderaManagementServices(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException, CloudbreakException {
@@ -873,6 +879,17 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             if (withMgmtServices) {
                 restartClouderaManagementServices(clouderaManagerApiFactory.getMgmtServiceResourceApi(apiClient));
             }
+        } catch (ApiException | CloudbreakException e) {
+            LOGGER.info("Could not restart services", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public int restartClusterServices() {
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
+        try {
+            return restartServices(clustersResourceApi);
         } catch (ApiException | CloudbreakException e) {
             LOGGER.info("Could not restart services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);

@@ -53,6 +53,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_BY_NAME_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPDATE_LOAD_BALANCERS;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.UPGRADE_CLUSTER_IN_WORKSPACE;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.RESTART_SERVICES_BY_NAME_IN_WORKSPACE_INTERNAL;
 
 import java.util.List;
 import java.util.Set;
@@ -571,5 +572,13 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RANGER_RAZ_ENABLED, produces = MediaType.APPLICATION_JSON, nickname = "rangerRazEnabled")
     RangerRazEnabledV4Response rangerRazEnabledInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("internal/{name}/restartServices")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RESTART_SERVICES_BY_NAME_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "RestartServicesInCluster")
+    FlowIdentifier restartClusterServices(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

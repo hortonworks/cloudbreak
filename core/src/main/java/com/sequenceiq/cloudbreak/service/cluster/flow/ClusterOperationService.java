@@ -535,6 +535,24 @@ public class ClusterOperationService {
         return flowIdentifier;
     }
 
+    public FlowIdentifier restartClusterServices(Stack stack) {
+        Cluster cluster = stack.getCluster();
+        if (cluster == null) {
+            throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
+        }
+        FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
+        if (!stack.isAvailable()) {
+            throw NotAllowedStatusUpdate
+                    .cluster(stack)
+                    .to(STOPPED)
+                    .expectedIn(AVAILABLE)
+                    .badRequest();
+        } else {
+            flowManager.triggerClusterServicesRestart(stack.getId());
+        }
+        return flowIdentifier;
+    }
+
     private FlowIdentifier triggerClusterInstall(Stack stack) {
         return flowManager.triggerClusterReInstall(stack.getId());
     }
