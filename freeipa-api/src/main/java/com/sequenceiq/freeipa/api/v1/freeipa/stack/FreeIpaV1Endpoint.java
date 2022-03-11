@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.GET_RECOMMENDATION;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.LIST_RETRYABLE_FLOWS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.RETRY;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.UPDATE_SALT;
@@ -33,6 +34,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescripti
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageChangeRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.FreeIpaRecommendationResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
@@ -283,4 +285,13 @@ public interface FreeIpaV1Endpoint {
             notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "internalUpgradeCcmByEnvironmentV1")
     OperationStatus upgradeCcmInternal(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @ValidCrn(resource = CrnResourceDescriptor.USER) @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
+    @GET
+    @Path("get_recommendation")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = GET_RECOMMENDATION,  produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "getRecommendationV1")
+    FreeIpaRecommendationResponse getRecommendation(
+            @ValidCrn(resource = CrnResourceDescriptor.CREDENTIAL) @QueryParam("credentialCrn") @NotEmpty String credentialCrn,
+            @QueryParam("region") @NotEmpty String region,
+            @QueryParam("availabilityZone") String availabilityZone);
 }

@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
@@ -45,6 +46,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachCh
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageChangeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.FreeIpaRecommendationResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
@@ -79,12 +81,13 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaRecommendationService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaScalingService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStackHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStartService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStopService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
-import com.sequenceiq.freeipa.service.stack.FreeIpaScalingService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -167,6 +170,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private FreeIpaRecommendationService freeIpaRecommendationService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -410,4 +416,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
         return upgradeCcmService.upgradeCcm(environmentCrn, accountId);
     }
 
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
+    public FreeIpaRecommendationResponse getRecommendation(String credentialCrn, String region, String availabilityZone) {
+        return freeIpaRecommendationService.getRecommendation(credentialCrn, region, availabilityZone);
+    }
 }

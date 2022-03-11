@@ -40,6 +40,26 @@ public class CredentialService {
                 throw new CloudbreakServiceException(String.format("Failed to get credential: %s", errorMessage), e);
             }
         }
+        return convertToCredential(credentialResponse);
+    }
+
+    public Credential getCredentialByCredCrn(String credentialCrn) {
+        CredentialResponse credentialResponse = null;
+        try {
+            credentialResponse = credentialEndpoint.getByResourceCrn(credentialCrn);
+        } catch (ClientErrorException e) {
+            try (Response response = e.getResponse()) {
+                if (Response.Status.NOT_FOUND.getStatusCode() == response.getStatus()) {
+                    throw new BadRequestException(String.format("Credential not found by credential CRN: %s", credentialCrn), e);
+                }
+                String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+                throw new CloudbreakServiceException(String.format("Failed to get credential: %s", errorMessage), e);
+            }
+        }
+        return convertToCredential(credentialResponse);
+    }
+
+    private Credential convertToCredential(CredentialResponse credentialResponse) {
         SecretResponse secretResponse = credentialResponse.getAttributes();
         String attributes = secretService.getByResponse(secretResponse);
         return new Credential(
