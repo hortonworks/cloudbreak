@@ -59,11 +59,15 @@ webhdfs_command()   {
     fi
 }
 
+DELAY=$(( RANDOM % 180 ))
 ### BEGIN OF SCRIPT ###
-echo "Start time of script $0, PID $$: `date`"
+echo "Start time of script $0, PID $$: `date` Delay: $DELAY"
 
 # Simplest example is avoiding running multiple instances of script.
 exlock_now || exit 1
+
+# Random sleep to avoid all clusters trying to reach FreeIPA at the same time
+sleep $DELAY
 
 # the file where all known users yet would be stored. We don't want to unnecessarily invoke namenode ops
 # for users we already created dirs for
@@ -114,7 +118,7 @@ echo "Webhdfs url: $WEBHDFS_URL"
 
 WEBHDFS_COOKIE_JAR=/tmp/cloudbreak-webhdfs.cookies
 
-mapfile -t users < <((ipa user-find --sizelimit=0 --timelimit=0) | grep 'User login:' | awk '{ print $3}')
+mapfile -t users < <((ipa user-find --pkey-only --sizelimit=0 --timelimit=0) | grep 'User login:' | awk '{ print $3}')
 declare -a existingusers
 if test -f "$EXISTING_USERS_FILE"; then
   mapfile -t existingusers < <(cat $EXISTING_USERS_FILE)
