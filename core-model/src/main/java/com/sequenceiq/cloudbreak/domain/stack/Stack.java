@@ -946,7 +946,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", cluster=" + cluster +
                 ", stackStatus=" + stackStatus +
-                ", resources=" + resources +
                 ", onFailureActionAction=" + onFailureActionAction +
                 ", failurePolicy=" + failurePolicy +
                 ", securityConfig=" + securityConfig +

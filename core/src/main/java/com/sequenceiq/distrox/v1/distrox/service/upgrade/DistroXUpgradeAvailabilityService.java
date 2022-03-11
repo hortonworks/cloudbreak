@@ -100,8 +100,7 @@ public class DistroXUpgradeAvailabilityService {
             return filteredCandidates;
         }
 
-        Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
-        Cluster datalakeCluster = clusterService.getCluster(datalakeStack);
+        Cluster datalakeCluster = clusterService.getClusterByStackResourceCrn(stack.getDatalakeCrn());
         boolean rangerRazEnabled = datalakeCluster.isRangerRazEnabled();
         if (!rangerRazEnabled) {
             LOGGER.debug("Not a RAZ enabled cluster. Nothing to validate.");

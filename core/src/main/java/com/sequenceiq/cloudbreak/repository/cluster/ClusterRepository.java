@@ -12,13 +12,13 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.common.api.type.CertExpirationState;
 
 @Transactional(TxType.REQUIRED)
 @EntityType(entityClass = Cluster.class)
@@ -58,4 +58,9 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     @Modifying
     @Query("UPDATE Cluster c SET c.certExpirationState = :state WHERE c.id = :id")
     void updateCertExpirationState(@Param("id") Long id, @Param("state") CertExpirationState state);
+
+    @Query("SELECT c FROM Cluster c " +
+            "JOIN c.stack s " +
+            "WHERE s.resourceCrn = :stackResourceCrn")
+    Optional<Cluster> findByStackResourceCrn(@Param("stackResourceCrn") String stackResourceCrn);
 }
