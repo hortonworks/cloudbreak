@@ -62,11 +62,29 @@ public interface EventV4Endpoint {
             @AccountId @QueryParam("accountId") String accountId);
 
     @GET
+    @Path("crn/{crn}/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EventOpDescription.GET_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
+            nickname = "getCloudbreakEventsListByCrn")
+    List<CloudbreakEventV4Response> getPagedCloudbreakEventListByCrn(
+            @PathParam("crn") String crn,
+            @QueryParam("page") @DefaultValue("0") Integer page,
+            @QueryParam("size") @DefaultValue("100") Integer size,
+            @QueryParam("onlyAlive") @DefaultValue("true") boolean onlyAlive);
+
+    @GET
     @Path("{name}/structured")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EventOpDescription.GET_EVENTS_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
             nickname = "getStructuredEventsInWorkspace")
     StructuredEventContainer structured(@PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
+
+    @GET
+    @Path("crn/{crn}/structured")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EventOpDescription.GET_EVENTS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
+            nickname = "getStructuredEventsInWorkspaceByCrn")
+    StructuredEventContainer structuredByCrn(@PathParam("crn") String crn, @QueryParam("onlyAlive") @DefaultValue("true") boolean onlyAlive);
 
     @GET
     @Path("{name}/zip")

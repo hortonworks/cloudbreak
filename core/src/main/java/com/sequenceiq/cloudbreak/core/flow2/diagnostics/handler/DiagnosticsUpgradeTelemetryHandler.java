@@ -47,7 +47,7 @@ public class DiagnosticsUpgradeTelemetryHandler extends AbstractDiagnosticsOpera
 
     @Override
     public UsageProto.CDPVMDiagnosticsFailureType.Value getFailureType() {
-        return UsageProto.CDPVMDiagnosticsFailureType.Value.UNSET;
+        return UsageProto.CDPVMDiagnosticsFailureType.Value.TELEMETRY_UPGRADE_FAILURE;
     }
 
     @Override

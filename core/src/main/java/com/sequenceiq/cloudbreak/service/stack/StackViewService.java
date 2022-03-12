@@ -40,6 +40,10 @@ public class StackViewService {
     }
 
     public Optional<StackView> findNotTerminatedByCrn(String crn, Long workspaceId) {
+        return stackViewRepository.findNotTerminatedByWorkspaceIdAndCrn(workspaceId, crn);
+    }
+
+    public Optional<StackView> findByCrn(String crn, Long workspaceId) {
         return stackViewRepository.findByWorkspaceIdAndCrn(workspaceId, crn);
     }
 

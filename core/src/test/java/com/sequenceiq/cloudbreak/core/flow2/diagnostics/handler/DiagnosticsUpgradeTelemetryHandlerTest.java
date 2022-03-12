@@ -76,7 +76,7 @@ public class DiagnosticsUpgradeTelemetryHandlerTest {
 
     @Test
     public void testFailureType() {
-        assertEquals(UsageProto.CDPVMDiagnosticsFailureType.Value.UNSET, underTest.getFailureType());
+        assertEquals(UsageProto.CDPVMDiagnosticsFailureType.Value.TELEMETRY_UPGRADE_FAILURE, underTest.getFailureType());
     }
 
     @Test

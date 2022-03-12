@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -109,7 +110,7 @@ public class SdxEventsServiceTests {
         when(mockPage.getContent()).thenReturn(List.of(createTestCDPStructuredEvent(StructuredEventType.NOTIFICATION)));
         when(mockCdpStructuredEventDBService.getPagedEventsOfResources(eq(List.of(StructuredEventType.NOTIFICATION)), any(), any()))
                 .thenReturn(mockPage);
-        when(eventV4Endpoint.getPagedCloudbreakEventListByStack(any(), any(), any(), any()))
+        when(eventV4Endpoint.getPagedCloudbreakEventListByCrn(any(), any(), any(), anyBoolean()))
                 .thenReturn(List.of(createCloudbreakEventV4Response()));
 
         List<CDPStructuredEvent> result = sdxEventsService.getPagedDatalakeAuditEvents(DATALAKE_CRN,
@@ -128,7 +129,7 @@ public class SdxEventsServiceTests {
                 createTestCDPStructuredEvent(StructuredEventType.NOTIFICATION, 2L)));
         when(mockCdpStructuredEventDBService.getPagedEventsOfResources(eq(List.of(StructuredEventType.NOTIFICATION)), any(), any()))
                 .thenReturn(mockPage);
-        when(eventV4Endpoint.getPagedCloudbreakEventListByStack(any(), any(), any(), any()))
+        when(eventV4Endpoint.getPagedCloudbreakEventListByCrn(any(), any(), any(), anyBoolean()))
                 .thenReturn(List.of(createCloudbreakEventV4Response(1L)));
 
         List<CDPStructuredEvent> result = sdxEventsService.getPagedDatalakeAuditEvents(DATALAKE_CRN,

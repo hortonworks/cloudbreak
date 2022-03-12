@@ -40,7 +40,7 @@ public class DiagnosticsSaltStateUpdateHandler extends AbstractDiagnosticsOperat
 
     @Override
     public UsageProto.CDPVMDiagnosticsFailureType.Value getFailureType() {
-        return UsageProto.CDPVMDiagnosticsFailureType.Value.UNSET;
+        return UsageProto.CDPVMDiagnosticsFailureType.Value.SALT_STATE_UPDATE_FAILURE;
     }
 
     @Override
