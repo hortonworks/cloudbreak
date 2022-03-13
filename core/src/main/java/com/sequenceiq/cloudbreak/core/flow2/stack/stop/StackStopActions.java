@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
@@ -153,7 +154,8 @@ public class StackStopActions {
                     .withVariant(stack.getPlatformVariant())
                     .withLocation(location)
                     .withWorkspaceId(stack.getWorkspace().getId())
-                    .withAccountId(stack.getTenant().getId())
+                    .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
+                    .withTenantId(stack.getTenant().getId())
                     .build();
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
             return new StackStartStopContext(flowParameters, stack, instances, cloudContext, cloudCredential);

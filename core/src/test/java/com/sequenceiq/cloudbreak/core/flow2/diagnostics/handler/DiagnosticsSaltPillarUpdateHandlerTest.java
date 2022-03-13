@@ -76,7 +76,7 @@ public class DiagnosticsSaltPillarUpdateHandlerTest {
 
     @Test
     public void testFailureType() {
-        assertEquals(UsageProto.CDPVMDiagnosticsFailureType.Value.UNSET, underTest.getFailureType());
+        assertEquals(UsageProto.CDPVMDiagnosticsFailureType.Value.SALT_PILLAR_UPDATE_FAILURE, underTest.getFailureType());
     }
 
     @Test

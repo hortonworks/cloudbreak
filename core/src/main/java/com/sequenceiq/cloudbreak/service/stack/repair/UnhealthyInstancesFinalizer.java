@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.handler.InstanceStateQuery;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -48,7 +49,8 @@ public class UnhealthyInstancesFinalizer {
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspace().getId())
-                .withAccountId(stack.getTenant().getId())
+                .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
+                .withTenantId(stack.getTenant().getId())
                 .build();
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(candidateUnhealthyInstances, stack.getEnvironmentCrn(),

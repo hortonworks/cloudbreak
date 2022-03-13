@@ -1,9 +1,5 @@
 package com.sequenceiq.freeipa.service.cloud;
 
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -16,7 +12,6 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParameterResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
@@ -42,16 +37,9 @@ public class PlatformParameterService {
     public PlatformParameters getPlatformParameters(Stack stack, Credential credential) {
         MDCBuilder.getOrGenerateRequestId();
         LOGGER.debug("Get platform parameters for: {}", stack);
-        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
-                .withId(stack.getId())
-                .withName(stack.getName())
-                .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformvariant())
-                .withLocation(location)
-                .withUserName(stack.getOwner())
-                .withAccountId(stack.getAccountId())
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         PlatformParameterRequest parameterRequest = new PlatformParameterRequest(cloudContext, cloudCredential);

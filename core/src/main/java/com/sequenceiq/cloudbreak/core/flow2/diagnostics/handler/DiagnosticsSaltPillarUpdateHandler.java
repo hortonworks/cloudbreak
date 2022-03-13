@@ -40,7 +40,7 @@ public class DiagnosticsSaltPillarUpdateHandler extends AbstractDiagnosticsOpera
 
     @Override
     public UsageProto.CDPVMDiagnosticsFailureType.Value getFailureType() {
-        return UsageProto.CDPVMDiagnosticsFailureType.Value.UNSET;
+        return UsageProto.CDPVMDiagnosticsFailureType.Value.SALT_PILLAR_UPDATE_FAILURE;
     }
 
     @Override

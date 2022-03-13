@@ -127,7 +127,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public AutoscaleStackV4Response getAutoscaleClusterByCrn(@TenantAwareParam @ResourceCrn String crn) {
-        Stack stack = stackService.getByCrnInWorkspace(crn, restRequestThreadLocalService.getRequestedWorkspaceId());
+        Stack stack = stackService.getNotTerminatedByCrnInWorkspace(crn, restRequestThreadLocalService.getRequestedWorkspaceId());
         return stackToAutoscaleStackV4ResponseConverter.convert(stack);
     }
 

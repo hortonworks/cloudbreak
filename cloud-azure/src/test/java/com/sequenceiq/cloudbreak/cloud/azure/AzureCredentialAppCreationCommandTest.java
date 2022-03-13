@@ -376,7 +376,7 @@ public class AzureCredentialAppCreationCommandTest {
         String deploymentAddressWithoutDelimiterAtEnd = "https://192.168.99.100";
         String expected = format("%s/%s", deploymentAddressWithoutDelimiterAtEnd, format(CB_AZ_APP_REDIRECT_URI_PATTERN, WORKSPACE_ID));
 
-        String result = underTest.getRedirectURL(WORKSPACE_ID, deploymentAddressWithoutDelimiterAtEnd);
+        String result = underTest.getRedirectURL(deploymentAddressWithoutDelimiterAtEnd);
 
         Assert.assertEquals(expected, result);
     }
@@ -386,7 +386,7 @@ public class AzureCredentialAppCreationCommandTest {
         String deploymentAddressWithDelimiterAtEnd = "https://192.168.99.100/";
         String expected = format("%s%s", deploymentAddressWithDelimiterAtEnd, format(CB_AZ_APP_REDIRECT_URI_PATTERN, WORKSPACE_ID));
 
-        String result = underTest.getRedirectURL(WORKSPACE_ID, deploymentAddressWithDelimiterAtEnd);
+        String result = underTest.getRedirectURL(deploymentAddressWithDelimiterAtEnd);
 
         Assert.assertEquals(expected, result);
     }

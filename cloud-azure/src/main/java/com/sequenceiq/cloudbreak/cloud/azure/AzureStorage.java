@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -153,7 +154,8 @@ public class AzureStorage {
         name = name.length() > MAX_LENGTH_OF_NAME_SLICE ? name.substring(0, MAX_LENGTH_OF_NAME_SLICE) : name;
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            String storageAccountId = acv.getCredentialCrn() + "#" + cloudContext.getId() + '#' + cloudContext.getAccountId();
+            String storageAccountId = acv.getCredentialCrn() + '#' + cloudContext.getId() + '#' +
+                    Objects.requireNonNullElse(cloudContext.getTenantId(), cloudContext.getAccountId());
             LOGGER.debug("Storage account internal id: {}", storageAccountId);
             byte[] digest = messageDigest.digest(storageAccountId.getBytes());
             String paddedId = "";
@@ -162,7 +164,9 @@ public class AzureStorage {
             }
             result = name + storageType.getAbbreviation() + paddedId + new BigInteger(1, digest).toString(RADIX);
         } catch (NoSuchAlgorithmException ignored) {
-            result = name + acv.getCredentialCrn() + cloudContext.getId() + cloudContext.getAccountId();
+            LOGGER.debug("MD5 was not found among MessageDigest algorithms.");
+            result = name + acv.getCredentialCrn().replace(':', '-') + '-' + cloudContext.getId() + '-' +
+                    Objects.requireNonNullElse(cloudContext.getTenantId(), cloudContext.getAccountId());
         }
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
             result = result.substring(0, MAX_LENGTH_OF_RESOURCE_NAME);

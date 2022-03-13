@@ -57,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -513,13 +514,18 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     public Stack getByNameOrCrnInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
         Optional<Stack> foundStack = nameOrCrn.hasName()
                 ? stackRepository.findByNameAndWorkspaceId(nameOrCrn.getName(), workspaceId)
-                : stackRepository.findByCrnAndWorkspaceId(nameOrCrn.getCrn(), workspaceId);
+                : stackRepository.findNotTerminatedByCrnAndWorkspaceId(nameOrCrn.getCrn(), workspaceId);
         return foundStack.orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn)));
     }
 
     public Stack getByNameInWorkspace(String name, Long workspaceId) {
         return stackRepository.findByNameAndWorkspaceId(name, workspaceId)
                 .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
+    }
+
+    public Stack getNotTerminatedByCrnInWorkspace(String crn, Long workspaceId) {
+        return stackRepository.findNotTerminatedByCrnAndWorkspaceId(crn, workspaceId)
+                .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
     }
 
     public Stack getByCrnInWorkspace(String crn, Long workspaceId) {
@@ -532,8 +538,13 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                 .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
     }
 
-    public StackView getViewByCrnInWorkspace(String crn, Long workspaceId) {
+    public StackView getNotTerminatedViewByCrnInWorkspace(String crn, Long workspaceId) {
         return stackViewService.findNotTerminatedByCrn(crn, workspaceId)
+                .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
+    }
+
+    public StackView getViewByCrnInWorkspace(String crn, Long workspaceId) {
+        return stackViewService.findByCrn(crn, workspaceId)
                 .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
     }
 
@@ -619,7 +630,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             throw new CloudbreakApiException(e.getMessage(), e);
         }
 
-        measure(() -> addTemplateForStack(savedStack, connector.waitGetTemplate(stack, templateRequest)),
+        measure(() -> addTemplateForStack(savedStack, connector.waitGetTemplate(templateRequest)),
                 LOGGER, "Save cluster template took {} ms for stack {}", stackName);
 
         return savedStack;
@@ -997,5 +1008,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     public JobResource getJobResource(Long resourceId) {
         return stackRepository.getJobResource(resourceId).orElseThrow(notFound("Stack", resourceId));
+    }
+
+    public Optional<ResourceBasicView> getResourceBasicViewByResourceCrn(String resourceCrn) {
+        return stackRepository.findResourceBasicViewByResourceCrn(resourceCrn);
     }
 }

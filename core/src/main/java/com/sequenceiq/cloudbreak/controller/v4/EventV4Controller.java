@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Responses;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -61,7 +62,7 @@ public class EventV4Controller implements EventV4Endpoint {
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(String name, Integer page, Integer size, @AccountId String accountId) {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
-        StackView stackView = getStackViewIfAvailable(name);
+        StackView stackView = getStackViewByNameIfAvailable(name);
         return cloudbreakEventsFacade.retrieveEventsByStack(stackView.getId(), stackView.getType(), pageable);
     }
 
@@ -71,15 +72,44 @@ public class EventV4Controller implements EventV4Endpoint {
         return getCloudbreakEventsByStack(name, page, size, accountId).getContent();
     }
 
-    private StackView getStackViewIfAvailable(String name) {
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public List<CloudbreakEventV4Response> getPagedCloudbreakEventListByCrn(@TenantAwareParam String crn, Integer page, Integer size, boolean onlyAlive) {
+        PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
+        StackView stackView;
+        if (onlyAlive) {
+            stackView = getStackViewByCrnIfAvailable(crn);
+        } else {
+            stackView = getStackViewByCrn(crn);
+        }
+        return cloudbreakEventsFacade.retrieveEventsByStack(stackView.getId(), stackView.getType(), pageable).getContent();
+    }
+
+    private StackView getStackViewByNameIfAvailable(String name) {
         Long workspaceId = workspaceService.getForCurrentUser().getId();
         return Optional.ofNullable(stackService.getViewByNameInWorkspace(name, workspaceId)).orElseThrow(notFound("stack", name));
+    }
+
+    private StackView getStackViewByCrnIfAvailable(String crn) {
+        Long workspaceId = workspaceService.getForCurrentUser().getId();
+        return Optional.ofNullable(stackService.getNotTerminatedViewByCrnInWorkspace(crn, workspaceId)).orElseThrow(notFound("stack", crn));
+    }
+
+    private StackView getStackViewByCrn(String crn) {
+        Long workspaceId = workspaceService.getForCurrentUser().getId();
+        return Optional.ofNullable(stackService.getViewByCrnInWorkspace(crn, workspaceId)).orElseThrow(notFound("stack", crn));
     }
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public StructuredEventContainer structured(String name, @AccountId String accountId) {
         return legacyStructuredEventService.getStructuredEventsForStack(name, workspaceService.getForCurrentUser().getId());
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public StructuredEventContainer structuredByCrn(@TenantAwareParam String crn, boolean onlyAlive) {
+        return legacyStructuredEventService.getStructuredEventsForStackByCrn(crn, workspaceService.getForCurrentUser().getId(), onlyAlive);
     }
 
     @Override

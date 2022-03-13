@@ -26,25 +26,24 @@ public class CloudContext {
 
     private final String accountId;
 
+    /**
+     * This field is the result of a misconception in the code by using the TenantId (a sequence) as the AccountId (UUID)
+     * To keep already generated items with using the TenantId sequence backward compatible, this field must not be removed.
+     */
+    private final Long tenantId;
+
     private final String crn;
 
-    private CloudContext(
-            Long id,
-            String name,
-            String crn,
-            String platform,
-            String variant,
-            Location location,
-            String accountId,
-            String userName) {
-        this.id = id;
-        this.name = name;
-        this.crn = crn;
-        this.platform = Platform.platform(platform);
-        this.variant = Variant.variant(variant);
-        this.location = location;
-        this.accountId = accountId;
-        this.userName = userName;
+    private CloudContext(Builder builder) {
+        this.id = builder.id;
+        this.name = builder.name;
+        this.crn = builder.crn;
+        this.platform = Platform.platform(builder.platform);
+        this.variant = Variant.variant(builder.variant);
+        this.location = builder.location;
+        this.accountId = builder.accountId;
+        this.tenantId = builder.tenantId;
+        this.userName = builder.userName;
     }
 
     public Long getId() {
@@ -75,6 +74,10 @@ public class CloudContext {
         return accountId;
     }
 
+    public Long getTenantId() {
+        return tenantId;
+    }
+
     public String getUserName() {
         return userName;
     }
@@ -93,6 +96,7 @@ public class CloudContext {
                 ", location=" + location +
                 ", userName='" + userName + '\'' +
                 ", accountId='" + accountId + '\'' +
+                ", tenantId='" + tenantId + '\'' +
                 ", crn='" + crn + '\'' +
                 '}';
     }
@@ -111,6 +115,8 @@ public class CloudContext {
         private String userName;
 
         private String accountId;
+
+        private Long tenantId;
 
         private String crn;
 
@@ -149,8 +155,8 @@ public class CloudContext {
             return this;
         }
 
-        public Builder withAccountId(Long accountId) {
-            this.accountId = accountId == null ? null : accountId.toString();
+        public Builder withTenantId(Long tenantId) {
+            this.tenantId = tenantId;
             return this;
         }
 
@@ -169,16 +175,7 @@ public class CloudContext {
         }
 
         public CloudContext build() {
-            return new CloudContext(
-                    id,
-                    name,
-                    crn,
-                    platform,
-                    variant,
-                    location,
-                    accountId,
-                    userName
-            );
+            return new CloudContext(this);
         }
     }
 }

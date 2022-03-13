@@ -81,7 +81,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
-import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -391,9 +390,6 @@ class StackStatusIntegrationTest {
 
         @MockBean
         private CloudbreakEventService eventService;
-
-        @MockBean
-        private ServiceProviderMetadataAdapter metadata;
 
         @MockBean
         private ImageService imageService;
