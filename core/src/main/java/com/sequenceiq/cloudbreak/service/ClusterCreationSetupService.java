@@ -20,10 +20,10 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.environment.ClusterCreationEnvironmentValidator;
-import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConfigValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -33,13 +33,11 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.util.Benchmark.MultiCheckedSupplier;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -52,9 +50,6 @@ public class ClusterCreationSetupService {
 
     @Inject
     private ClouderaManagerClusterCreationSetupService clouderaManagerClusterCreationSetupService;
-
-    @Inject
-    private FileSystemValidator fileSystemValidator;
 
     @Inject
     private FileSystemConfigService fileSystemConfigService;
@@ -75,9 +70,6 @@ public class ClusterCreationSetupService {
     private ClusterCreationEnvironmentValidator environmentValidator;
 
     @Inject
-    private StackUtil stackUtil;
-
-    @Inject
     private CloudStorageConverter cloudStorageConverter;
 
     public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace,
@@ -89,12 +81,6 @@ public class ClusterCreationSetupService {
     public void validate(ClusterV4Request request, CloudCredential cloudCredential, Stack stack, User user,
             Workspace workspace, DetailedEnvironmentResponse environment) {
         MdcContext.builder().userCrn(user.getUserCrn()).tenant(user.getTenant().getName()).buildMdc();
-        CloudCredential credential = cloudCredential;
-        if (credential == null) {
-            credential = stackUtil.getCloudCredential(stack);
-        }
-        fileSystemValidator.validate(stack.cloudPlatform(), credential, request.getCloudStorage(),
-                stack.getWorkspace().getId());
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
 
