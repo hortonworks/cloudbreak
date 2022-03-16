@@ -117,6 +117,7 @@ dependencies {
   }
 
   implementation project(":structuredevent-service-cdp")
+  implementation project(':structuredevent-model')
   implementation project(':audit-connector')
   implementation project(':authorization-common')
   implementation project(':cloud-reactor-api')

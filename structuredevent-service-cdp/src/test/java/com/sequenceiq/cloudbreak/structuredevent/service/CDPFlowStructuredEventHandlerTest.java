@@ -38,13 +38,12 @@ public class CDPFlowStructuredEventHandlerTest {
     public void testTransitionWhenExceptionNullAndTransitionValueIsNull() {
         Transition<String, String> transition = mock(Transition.class);
         CDPStructuredFlowEvent event = new CDPStructuredFlowEvent();
-        when(cdpStructuredFlowEventFactory.createStructuredFlowEvent(any(), any(), any())).thenReturn(event);
+        when(cdpStructuredFlowEventFactory.createStructuredFlowEvent(any(), any())).thenReturn(event);
 
         underTest.transition(transition);
 
         ArgumentCaptor<FlowDetails> flowDetailsCaptor = ArgumentCaptor.forClass(FlowDetails.class);
-        ArgumentCaptor<Boolean> detailedCaptor = ArgumentCaptor.forClass(Boolean.class);
-        verify(cdpStructuredFlowEventFactory).createStructuredFlowEvent(any(), flowDetailsCaptor.capture(), detailedCaptor.capture());
+        verify(cdpStructuredFlowEventFactory).createStructuredFlowEvent(any(), flowDetailsCaptor.capture());
         verify(cdpDefaultStructuredEventClient).sendStructuredEvent(event);
 
         FlowDetails flowDetails = flowDetailsCaptor.getValue();
@@ -53,9 +52,6 @@ public class CDPFlowStructuredEventHandlerTest {
         Assertions.assertEquals(unknown, flowDetails.getNextFlowState());
         Assertions.assertEquals(unknown, flowDetails.getFlowEvent());
         Assertions.assertEquals(0L, flowDetails.getDuration());
-
-        Boolean detailed = detailedCaptor.getValue();
-        Assertions.assertFalse(detailed);
     }
 
     @Test
@@ -68,7 +64,7 @@ public class CDPFlowStructuredEventHandlerTest {
         State<String, String> target = mock(State.class);
         State<String, String> source = mock(State.class);
         CDPStructuredFlowEvent event = new CDPStructuredFlowEvent();
-        when(cdpStructuredFlowEventFactory.createStructuredFlowEvent(any(), any(), any(), eq(exception))).thenReturn(event);
+        when(cdpStructuredFlowEventFactory.createStructuredFlowEvent(any(), any(), eq(exception))).thenReturn(event);
         when(transition.getTrigger()).thenReturn(trigger);
         when(transition.getTarget()).thenReturn(target);
         when(transition.getSource()).thenReturn(source);
@@ -80,8 +76,7 @@ public class CDPFlowStructuredEventHandlerTest {
         underTest.transition(transition);
 
         ArgumentCaptor<FlowDetails> flowDetailsCaptor = ArgumentCaptor.forClass(FlowDetails.class);
-        ArgumentCaptor<Boolean> detailedCaptor = ArgumentCaptor.forClass(Boolean.class);
-        verify(cdpStructuredFlowEventFactory).createStructuredFlowEvent(any(), flowDetailsCaptor.capture(), detailedCaptor.capture(), eq(exception));
+        verify(cdpStructuredFlowEventFactory).createStructuredFlowEvent(any(), flowDetailsCaptor.capture(), eq(exception));
         verify(cdpDefaultStructuredEventClient).sendStructuredEvent(event);
 
         FlowDetails flowDetails = flowDetailsCaptor.getValue();
@@ -89,8 +84,6 @@ public class CDPFlowStructuredEventHandlerTest {
         Assertions.assertEquals("target", flowDetails.getNextFlowState());
         Assertions.assertEquals("event", flowDetails.getFlowEvent());
 
-        Boolean detailed = detailedCaptor.getValue();
-        Assertions.assertTrue(detailed);
         field = FieldUtils.readField(underTest, "exception", true);
         Assertions.assertNull(field);
     }

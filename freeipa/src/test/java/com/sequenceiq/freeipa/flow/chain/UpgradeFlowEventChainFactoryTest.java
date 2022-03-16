@@ -41,7 +41,7 @@ class UpgradeFlowEventChainFactoryTest {
 
         FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(event);
 
-        assertEquals("FreeIPA upgrade flow", eventQueue.getFlowChainName());
+        assertEquals("UpgradeFlowEventChainFactory", eventQueue.getFlowChainName());
         Queue<Selectable> queue = eventQueue.getQueue();
         assertEquals(10, queue.size());
 

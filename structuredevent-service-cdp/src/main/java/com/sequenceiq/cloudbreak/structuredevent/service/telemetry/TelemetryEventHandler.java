@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.CDPFreeIpaStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.CDPTelemetryEventLogger;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -35,6 +36,11 @@ public class TelemetryEventHandler<T extends CDPStructuredEvent> implements Even
 
             if (data instanceof CDPEnvironmentStructuredFlowEvent) {
                 CDPEnvironmentStructuredFlowEvent flowEvent = (CDPEnvironmentStructuredFlowEvent) data;
+                for (CDPTelemetryEventLogger cdpTelemetryEventLogger : cdpTelemetryEventLoggers) {
+                    cdpTelemetryEventLogger.log(flowEvent);
+                }
+            } else if (data instanceof CDPFreeIpaStructuredFlowEvent) {
+                CDPFreeIpaStructuredFlowEvent flowEvent = (CDPFreeIpaStructuredFlowEvent) data;
                 for (CDPTelemetryEventLogger cdpTelemetryEventLogger : cdpTelemetryEventLoggers) {
                     cdpTelemetryEventLogger.log(flowEvent);
                 }
