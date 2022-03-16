@@ -19,7 +19,7 @@ public interface UsageReporter {
      */
     int USAGE_VERSION = 3;
     /**
-     * Reports that an CDP Datahub cluster has been requested.
+     * Reports that a CDP Datahub cluster has been requested.
      * @param timestamp the cluster creation date which will be used as the
      * timestamp for the event
      * @param details the event details
@@ -29,14 +29,14 @@ public interface UsageReporter {
             UsageProto.CDPDatahubClusterRequested details);
 
     /**
-     * Reports that an CDP Datahub cluster's status has changed.
+     * Reports that a CDP Datahub cluster's status has changed.
      * @param details the event details
      */
     void cdpDatahubClusterStatusChanged(
             UsageProto.CDPDatahubClusterStatusChanged details);
 
     /**
-     * Reports that an CDP Datalake cluster has been requested.
+     * Reports that a CDP Datalake cluster has been requested.
      * @param timestamp the cluster creation date which will be used as the
      * timestamp for the event
      * @param details the event details
@@ -46,70 +46,77 @@ public interface UsageReporter {
             UsageProto.CDPDatalakeClusterRequested details);
 
     /**
-     * Reports that an CDP Datalake cluster's status has changed.
+     * Reports that a CDP Datalake cluster's status has changed.
      * @param details the event details
      */
     void cdpDatalakeClusterStatusChanged(
             UsageProto.CDPDatalakeClusterStatusChanged details);
 
     /**
-     * Reports that an CDP Environment has been requested.
+     * Reports that a CDP Environment has been requested.
      * @param details the event details
      */
     void cdpEnvironmentRequested(
             UsageProto.CDPEnvironmentRequested details);
 
     /**
-     * Reports that an CDP Environment status has been changed.
+     * Reports that a CDP Environment status has been changed.
      * @param details the event status details
      */
     void cdpEnvironmentStatusChanged(
             UsageProto.CDPEnvironmentStatusChanged details);
 
     /**
-     * Reports that an CDP Datalake has been requested.
+     * Reports that a CDP FreeIPA status has been changed.
+     * @param details the event status details
+     */
+    void cdpFreeIpaStatusChanged(
+            UsageProto.CDPFreeIPAStatusChanged details);
+
+    /**
+     * Reports that a CDP Datalake has been requested.
      * @param details the event details
      */
     void cdpDatalakeRequested(
             UsageProto.CDPDatalakeRequested details);
 
     /**
-     * Reports that an CDP Datalake status has been changed.
+     * Reports that a CDP Datalake status has been changed.
      * @param details the event status details
      */
     void cdpDatalakeStatusChanged(
             UsageProto.CDPDatalakeStatusChanged details);
 
     /**
-     * Reports that an CDP Datahub has been requested.
+     * Reports that a CDP Datahub has been requested.
      * @param details the event details
      */
     void cdpDatahubRequested(
             UsageProto.CDPDatahubRequested details);
 
     /**
-     * Reports that an CDP Datahub status has been changed.
+     * Reports that a CDP Datahub status has been changed.
      * @param details the event status details
      */
     void cdpDatahubStatusChanged(
             UsageProto.CDPDatahubStatusChanged details);
 
     /**
-     * Reports that an CDP Datalake has been periodically synced.
+     * Reports that a CDP Datalake has been periodically synced.
      * @param details the event details
      */
     void cdpDatalakeSync(
             UsageProto.CDPDatalakeSync details);
 
     /**
-     * Reports that an CDP Datahub has been periodically synced.
+     * Reports that a CDP Datahub has been periodically synced.
      * @param details the event details
      */
     void cdpDatahubSync(
             UsageProto.CDPDatahubSync details);
 
     /**
-     * Reports that an CDP Datahub Autoscale has been triggered.
+     * Reports that a CDP Datahub Autoscale has been triggered.
      * @param details the event details
      */
     void cdpDatahubAutoscaleTriggered(

@@ -10,9 +10,8 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
-import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentRequestProcessingStepMapper;
+import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.CDPRequestProcessingStepMapper;
 
 @Component
 public class CDPStructuredFlowEventToCDPOperationDetailsConverter {
@@ -21,9 +20,9 @@ public class CDPStructuredFlowEventToCDPOperationDetailsConverter {
     private String appVersion;
 
     @Inject
-    private EnvironmentRequestProcessingStepMapper environmentRequestProcessingStepMapper;
+    private CDPRequestProcessingStepMapper cdpRequestProcessingStepMapper;
 
-    public UsageProto.CDPOperationDetails convert(CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent) {
+    public UsageProto.CDPOperationDetails convert(CDPStructuredFlowEvent cdpStructuredFlowEvent, String cloudPlatform) {
         UsageProto.CDPOperationDetails.Builder cdpOperationDetails = UsageProto.CDPOperationDetails.newBuilder();
 
         if (cdpStructuredFlowEvent != null) {
@@ -36,10 +35,8 @@ public class CDPStructuredFlowEventToCDPOperationDetailsConverter {
                 cdpOperationDetails.setCorrelationId(defaultIfEmpty(structuredOperationDetails.getUuid(), ""));
             }
 
-            EnvironmentDetails environmentDetails = cdpStructuredFlowEvent.getPayload();
-            if (environmentDetails != null && environmentDetails.getCloudPlatform() != null) {
-                cdpOperationDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType
-                        .Value.valueOf(environmentDetails.getCloudPlatform()));
+            if (cloudPlatform != null) {
+                cdpOperationDetails.setEnvironmentType(UsageProto.CDPEnvironmentsEnvironmentType.Value.valueOf(cloudPlatform));
             }
 
             FlowDetails flowDetails = cdpStructuredFlowEvent.getFlow();
@@ -51,11 +48,11 @@ public class CDPStructuredFlowEventToCDPOperationDetailsConverter {
                 cdpOperationDetails.setFlowState(flowDetails.getFlowState() != null
                         && !"unknown".equals(flowDetails.getFlowState())
                         && flowDetails.getNextFlowState() != null
-                        && flowDetails.getNextFlowState().endsWith("_FAILED_STATE")
+                        && (flowDetails.getNextFlowState().endsWith("_FAILED_STATE") || flowDetails.getNextFlowState().endsWith("_FAIL_STATE"))
                         ? flowDetails.getFlowState() : "");
             }
 
-            cdpOperationDetails.setCdpRequestProcessingStep(environmentRequestProcessingStepMapper.mapIt(cdpStructuredFlowEvent.getFlow()));
+            cdpOperationDetails.setCdpRequestProcessingStep(cdpRequestProcessingStepMapper.mapIt(cdpStructuredFlowEvent.getFlow()));
         }
         cdpOperationDetails.setApplicationVersion(appVersion);
 

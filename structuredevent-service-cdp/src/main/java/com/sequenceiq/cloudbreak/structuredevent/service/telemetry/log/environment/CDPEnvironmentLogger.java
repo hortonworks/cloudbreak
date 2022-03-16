@@ -10,8 +10,8 @@ import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.CDPStructuredFlowEventToCDPEnvironmentRequestedConverter;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverter;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.CDPEnvironmentStructuredFlowEventToCDPEnvironmentRequestedConverter;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter.CDPEnvironmentStructuredFlowEventToCDPEnvironmentStatusChangedConverter;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.log.CDPTelemetryEventLogger;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentUseCaseMapper;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
@@ -28,10 +28,10 @@ public class CDPEnvironmentLogger implements CDPTelemetryEventLogger {
     private EnvironmentUseCaseMapper environmentUseCaseMapper;
 
     @Inject
-    private CDPStructuredFlowEventToCDPEnvironmentRequestedConverter environmentRequestedConverter;
+    private CDPEnvironmentStructuredFlowEventToCDPEnvironmentRequestedConverter environmentRequestedConverter;
 
     @Inject
-    private CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverter statusChangedConverter;
+    private CDPEnvironmentStructuredFlowEventToCDPEnvironmentStatusChangedConverter statusChangedConverter;
 
     @Override
     public void log(CDPStructuredFlowEvent cdpStructuredFlowEvent) {
