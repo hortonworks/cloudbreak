@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.connector.resource;
 
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
@@ -8,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.storage.StorageAccount;
@@ -22,6 +25,8 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 public class AzureStorageAccountBuilderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureStorageAccountBuilderService.class);
+
+    private static final Pattern POLICY_DEFINITION_NAME_PATTERN = Pattern.compile("\"policyDefinitionDisplayName\":\"(.*?)\"");
 
     @Inject
     private AzureStorageAccountTemplateBuilder azureStorageAccountTemplateBuilder;
@@ -46,9 +51,26 @@ public class AzureStorageAccountBuilderService {
         } catch (CloudException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Storage account creation");
         } catch (Exception e) {
-            String message = String.format("Could not create storage account %s in resource group %s", storageAccountName, resourceGroupName);
+            String message = String.format("Could not create storage account %s in resource group %s%s",
+                    storageAccountName, resourceGroupName, getDeniedPolicyReasonIfApplicable(e));
             LOGGER.warn(message, e);
             throw new CloudConnectorException(message);
         }
+    }
+
+    /**
+     * Workaround for
+     * <a href="https://github.com/Azure/autorest-clientruntime-for-java/commit/fcd2f69ac7c04ac50337b0c37fab7ac24d4cce09">azure-sdk bug</a>
+     */
+    private String getDeniedPolicyReasonIfApplicable(Exception e) {
+        if (e.getMessage().equals("Unknown error with status code 400") && e.getCause() instanceof MismatchedInputException) {
+            MismatchedInputException cause = (MismatchedInputException) e.getCause();
+            Matcher matcher = POLICY_DEFINITION_NAME_PATTERN.matcher(cause.getLocation().sourceDescription());
+            if (matcher.find()) {
+                String policyDefinitionDisplayName = matcher.group(1);
+                return String.format(", because it was denied by policy '%s'", policyDefinitionDisplayName);
+            }
+        }
+        return "";
     }
 }
