@@ -89,7 +89,7 @@ public class AzureSetup implements Setup {
                             "container of the storage account '%s' in resource group '%s'. Reason of failure: %s",
                     image.getImageName(), imageCopyDetails.getImageSource(), imageCopyDetails.getImageStorageName(),
                     imageCopyDetails.getImageResourceGroupName(), ExceptionUtils.getRootCause(ex).getMessage());
-            LOGGER.debug(message);
+            LOGGER.debug("Added details to exception: {}", message, ex);
             throw new CloudConnectorException(message, ex);
         } else {
             throw new CloudConnectorException(image.getImageName() + " image copy failed: " + ExceptionUtils.getRootCause(ex).getMessage(), ex);

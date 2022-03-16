@@ -30,6 +30,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Splitter;
 import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
+import com.microsoft.azure.PolicyViolation;
 import com.microsoft.azure.management.marketplaceordering.v2015_06_01.AgreementTerms;
 import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
@@ -729,11 +730,26 @@ public class AzureUtils {
     public CloudConnectorException convertToCloudConnectorException(CloudException e, String actionDescription) {
         LOGGER.warn(String.format("%s failed, cloud exception happened:", actionDescription), e);
         if (e.body() != null && e.body().details() != null) {
-            String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
+            String details = e.body().details().stream().map(this::getCloudErrorMessage).collect(Collectors.joining(", "));
             return new CloudConnectorException(String.format("%s failed, status code %s, error message: %s, details: %s",
-                    actionDescription, e.body().code(), e.body().message(), details), e);
+                    actionDescription, e.body().code(), e.body().message(), details));
         } else {
-            return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e), e);
+            return new CloudConnectorException(String.format("%s failed: '%s', please go to Azure Portal for detailed message", actionDescription, e));
+        }
+    }
+
+    private String getCloudErrorMessage(CloudError cloudError) {
+        switch (cloudError.code()) {
+            case "RequestDisallowedByPolicy":
+                String message = cloudError.message().replace("See error details for policy resource IDs.", "");
+                return message + cloudError.additionalInfo().stream()
+                        .filter(PolicyViolation.class::isInstance)
+                        .map(PolicyViolation.class::cast)
+                        .map(policyViolation -> policyViolation.policyErrorInfo().getPolicyDefinitionDisplayName())
+                        .map(policyDefinitionName -> "Policy definition name: " + policyDefinitionName)
+                        .collect(Collectors.joining(". "));
+            default:
+                return cloudError.message();
         }
     }
 
