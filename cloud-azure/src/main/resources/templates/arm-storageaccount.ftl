@@ -59,7 +59,8 @@
                     },
                     "keySource": "Microsoft.Storage"
                 },
-                "accessTier": "Hot"
+                "accessTier": "Hot",
+                "minimumTlsVersion": "TLS1_2"
             }
         },
         {
