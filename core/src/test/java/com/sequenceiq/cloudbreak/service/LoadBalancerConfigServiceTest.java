@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
+import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -194,6 +195,24 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
                 .filter(ig -> "master".equals(ig.getGroupName()))
                 .findFirst().get();
             assertEquals(1, masterInstanceGroup.getTargetGroups().size());
+        });
+    }
+
+    @Test
+    public void testDisableLoadBalancer() {
+        Stack stack = createAwsStack(StackType.DATALAKE, PUBLIC_ID_1);
+        CloudSubnet subnet = getPublicCloudSubnet(PUBLIC_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
+        environment.getNetwork().setLoadBalancerCreation(LoadBalancerCreation.DISABLED);
+        StackV4Request request = new StackV4Request();
+
+        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
+            assertEquals(0, loadBalancers.size());
         });
     }
 

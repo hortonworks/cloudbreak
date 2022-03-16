@@ -86,6 +86,7 @@ public class EnvironmentModelDescription {
     public static final String KNOX_SECURITY_GROUPS = "Security groups where Knox-enabled hosts are placed. Comma separated list.";
     public static final String DEFAULT_SECURITY_GROUPS = "Security groups where all other hosts are placed. Comma separated list.";
     public static final String SECURITY_CIDR = "CIDR range which is allowed for inbound traffic. Either IPv4 or IPv6 is allowed.";
+    public static final String LOADBALANCER_CREATION = "Flag that marks the request to create without loadbalancers";
 
     public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with CCM and cluster proxy.";
     public static final String OVERRIDE_TUNNEL = "Flag that marks that the request was intended to set the tunnel version by hand and it will not be " +
