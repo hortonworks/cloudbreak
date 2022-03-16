@@ -38,7 +38,8 @@ if [[ "$CIRCLECI" && "$CIRCLECI" == "true" ]]; then
        jshell /opt/analyse_postgres_stat.jsh > ./test-output/docker_stats/pg_stat_network_io_analysed.result;
 
       pg_res=$(cat ./test-output/docker_stats/pg_stat_network_io_analysed.result);
-      if [[ "$pg_res" == "POSTGRES>> OK" ]]; then
+      pg_ok="POSTGRES>> OK"
+      if [[ "$pg_res" == $pg_ok* ]]; then
         echo -e "\n\033[0;92m+++ POSTGRES TRAFFIC IS BELOW ${max_pg_network_output} LIMIT. +++\n";
       else
         echo -e "\033[0;91m--- !!! POSTGRES TRAFIC CHECK FAILED: ${pg_res} !!! ---\n";

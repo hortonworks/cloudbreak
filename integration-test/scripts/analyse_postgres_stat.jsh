@@ -67,11 +67,11 @@ try {
     Traffic actualPostgresNetworkOutput = new Traffic(networkOutput);
 
     if (actualPostgresNetworkOutput.isSmallerThan(maxAllowedPostgresNetworkOutput)) {
-        System.out.print("POSTGRES>> OK");
+         System.out.println("POSTGRES>> OK");
     } else {
         System.out.println("POSTGRES>> Max allowed postgres network output: " + maxAllowedPostgresNetworkOutput.getAsGigaBytes() + "GB");
-        System.out.println("POSTGRES>> Actual postgres network output: " + actualPostgresNetworkOutput.getAsGigaBytes() + "GB");
     }
+    System.out.println("POSTGRES>> Actual postgres network output: " + actualPostgresNetworkOutput.getAsGigaBytes() + "GB/" +  maxAllowedPostgresNetworkOutput.getAsGigaBytes() + "GB");
 } catch(Exception ex) {
     System.err.println("POSTGRES>> " + ex.getMessage());
 }
