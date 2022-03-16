@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.ServiceEndpointCreationToEndpointTypeConverter;
@@ -19,35 +18,26 @@ import com.sequenceiq.redbeams.exception.RedbeamsException;
 @Service
 public class NetworkParameterAdder {
 
-    // These constants must match those in AwsNetworkView
+    // These constants must match those in AwsNetworkView, AzureNetworkView and/or GcpDatabaseNetworkView
+    private static final String VPC_ID = "vpcId";
 
-    @VisibleForTesting
-    static final String VPC_ID = "vpcId";
+    private static final String VPC_CIDR = "vpcCidr";
 
-    @VisibleForTesting
-    static final String VPC_CIDR = "vpcCidr";
+    private static final String SHARED_PROJECT_ID = "sharedProjectId";
 
-    @VisibleForTesting
-    static final String SHARED_PROJECT_ID = "sharedProjectId";
+    private static final String VPC_CIDRS = "vpcCidrs";
 
-    @VisibleForTesting
-    static final String VPC_CIDRS = "vpcCidrs";
+    private static final String SUBNET_ID = "subnetId";
 
-    @VisibleForTesting
-    static final String SUBNET_ID = "subnetId";
+    private static final String AVAILABILITY_ZONE = "availabilityZone";
 
-    @VisibleForTesting
-    static final String ENDPOINT_TYPE = "endpointType";
+    private static final String ENDPOINT_TYPE = "endpointType";
 
-    @VisibleForTesting
-    static final String SUBNET_FOR_PRIVATE_ENDPOINT = "subnetForPrivateEndpoint";
+    private static final String SUBNET_FOR_PRIVATE_ENDPOINT = "subnetForPrivateEndpoint";
 
-    @VisibleForTesting
-    static final String AVAILABILITY_ZONE = "availabilityZone";
+    private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingPrivateDnsZoneId";
 
-    // These constants must match those in AzureNetworkView
-    @VisibleForTesting
-    static final String SUBNETS = "subnets";
+    private static final String SUBNETS = "subnets";
 
     @Inject
     private ServiceEndpointCreationToEndpointTypeConverter serviceEndpointCreationToEndpointTypeConverter;
@@ -90,6 +80,7 @@ public class NetworkParameterAdder {
                 parameters.put(ENDPOINT_TYPE, privateEndpointType);
                 if (PrivateEndpointType.USE_PRIVATE_ENDPOINT == privateEndpointType) {
                     parameters.put(SUBNET_FOR_PRIVATE_ENDPOINT, getAzureSubnetToUseWithPrivateEndpoint(environmentResponse, dbStack));
+                    parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, environmentResponse.getNetwork().getAzure().getPrivateDnsZoneId());
                 }
                 break;
             case GCP:
