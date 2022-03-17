@@ -166,7 +166,7 @@ public class CronTimeEvaluatorTest {
 
         TimeAlert alert = getAAlert(desiredNodeCount);
         StackV4Response stackV4Response = MockStackResponseGenerator
-                .getMockStackV4Response(clusterCrn, testHostGroup, "testFqdn" + testHostGroup, currentHostGroupCount, false);
+                .getMockStackV4Response(clusterCrn, testHostGroup, "testFqdn" + testHostGroup, currentHostGroupCount, 0);
 
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(stackV4Response);
         when(stackResponseUtils.getNodeCountForHostGroup(stackV4Response, testHostGroup)).thenCallRealMethod();
