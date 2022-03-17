@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -50,6 +49,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -85,6 +85,9 @@ public class ImageService {
     @Inject
     private ImageToClouderaManagerRepoConverter imageToClouderaManagerRepoConverter;
 
+    @Inject
+    private PlatformStringTransformer platformStringTransformer;
+
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProviderService.getImage(stackId);
     }
@@ -99,12 +102,14 @@ public class ImageService {
     }
 
     @Measure(ImageService.class)
-    public Set<Component> create(Stack stack, String platformString, StatedImage imgFromCatalog)
+    public Set<Component> create(Stack stack, StatedImage imgFromCatalog)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
 
         String region = stack.getRegion();
+        String cloudPlatform = stack.getCloudPlatform();
+        ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalog(cloudPlatform, stack.getPlatformVariant());
         LOGGER.debug("Determined image from catalog: {}", imgFromCatalog);
-        String imageName = determineImageName(platformString, region, imgFromCatalog.getImage());
+        String imageName = determineImageName(cloudPlatform, platformString, region, imgFromCatalog.getImage());
         LOGGER.debug("Selected VM image for CloudPlatform '{}' and region '{}' is: {} from: {} image catalog",
                 platformString, region, imageName, imgFromCatalog.getImageCatalogUrl());
 
@@ -116,9 +121,10 @@ public class ImageService {
     //CHECKSTYLE:OFF
     @Measure(ImageService.class)
     public StatedImage determineImageFromCatalog(Long workspaceId, ImageSettingsV4Request imageSettings, String platformString,
-            Blueprint blueprint, boolean useBaseImage, boolean baseImageEnabled,
+            String variant, Blueprint blueprint, boolean useBaseImage, boolean baseImageEnabled,
             User user, Predicate<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> imagePredicate)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        ImageCatalogPlatform platform = platformStringTransformer.getPlatformStringForImageCatalog(platformString, variant);
 
         if (imageSettings != null && StringUtils.isNotEmpty(imageSettings.getId())) {
             LOGGER.debug("Image id {} is specified for the stack.", imageSettings.getId());
@@ -136,13 +142,19 @@ public class ImageService {
 
         Set<String> operatingSystems;
         try {
-            operatingSystems = getSupportedOperatingSystems(workspaceId, imageSettings, clusterVersion, platformString);
+            operatingSystems = getSupportedOperatingSystems(workspaceId, imageSettings, clusterVersion, platform);
         } catch (Exception ex) {
             throw new CloudbreakImageCatalogException(ex);
         }
 
         ImageCatalog imageCatalog = getImageCatalogFromRequestOrDefault(workspaceId, imageSettings, user);
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, ImmutableSet.of(platformString), null, baseImageEnabled, operatingSystems, clusterVersion);
+        ImageFilter imageFilter = new ImageFilter(
+                imageCatalog,
+                Set.of(platform),
+                null,
+                baseImageEnabled,
+                operatingSystems,
+                clusterVersion);
         LOGGER.info("Image id is not specified for the stack.");
         if (baseImageEnabled && useBaseImage) {
             LOGGER.info("Trying to select a base image.");
@@ -174,7 +186,7 @@ public class ImageService {
         return image;
     }
 
-    private Set<String> getSupportedOperatingSystems(Long workspaceId, ImageSettingsV4Request imageSettings, String clusterVersion, String platform)
+    private Set<String> getSupportedOperatingSystems(Long workspaceId, ImageSettingsV4Request imageSettings, String clusterVersion, ImageCatalogPlatform platform)
             throws Exception {
         String imageCatalogName = imageSettings != null ? imageSettings.getCatalog() : null;
         Set<String> operatingSystems = stackMatrixService.getSupportedOperatingSystems(workspaceId, clusterVersion, platform, imageCatalogName);
@@ -202,10 +214,12 @@ public class ImageService {
         }
     }
 
-    public String determineImageName(String platformString, String region, com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog)
-            throws CloudbreakImageNotFoundException {
-        Optional<Map<String, String>> imagesForPlatform = findStringKeyWithEqualsIgnoreCase(platformString, imgFromCatalog.getImageSetsByProvider());
-        String translatedRegion = cloudPlatformConnectors.getDefault(platform(platformString.toUpperCase())).regionToDisplayName(region);
+    public String determineImageName(String cloudPlatform, ImageCatalogPlatform platformString, String region,
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image imgFromCatalog) throws CloudbreakImageNotFoundException {
+        Optional<Map<String, String>> imagesForPlatform = findStringKeyWithEqualsIgnoreCase(
+                platformString.nameToLowerCase(),
+                imgFromCatalog.getImageSetsByProvider());
+        String translatedRegion = cloudPlatformConnectors.getDefault(platform(cloudPlatform.toUpperCase())).regionToDisplayName(region);
         if (imagesForPlatform.isPresent()) {
             Map<String, String> imagesByRegion = imagesForPlatform.get();
             Optional<String> imageNameOpt = findStringKeyWithEqualsIgnoreCase(translatedRegion, imagesByRegion);
@@ -236,8 +250,14 @@ public class ImageService {
             throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Set<Component> components = new HashSet<>();
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage = statedImage.getImage();
+        String cloudPlatform = stack.getCloudPlatform();
         if (requestedComponents.contains(IMAGE)) {
-            String imageName = determineImageName(stack.cloudPlatform(), stack.getRegion(), statedImage.getImage());
+            String imageName = determineImageName(
+                    cloudPlatform,
+                    platformStringTransformer.getPlatformStringForImageCatalog(stack.cloudPlatform(), stack.getPlatformVariant()),
+                    stack.getRegion(),
+                    statedImage.getImage()
+            );
             addImage(stack, userData, statedImage, imageName, catalogBasedImage, components);
         }
         if (requestedComponents.contains(CDH_PRODUCT_DETAILS)) {
@@ -356,4 +376,5 @@ public class ImageService {
         Component imageComponent = new Component(IMAGE, IMAGE.name(), new Json(image), stack);
         componentConfigProviderService.replaceImageComponentWithNew(imageComponent);
     }
+
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -61,7 +62,7 @@ class CloudPlatformBasedUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams() {
-        return new ImageFilterParams(null, false, null, null, null, null, null, AWS.name());
+        return new ImageFilterParams(null, false, null, null, null, null, null, imageCatalogPlatform(AWS.name()));
     }
 
     private Image createImage(String imageId, String cloudPlatform) {

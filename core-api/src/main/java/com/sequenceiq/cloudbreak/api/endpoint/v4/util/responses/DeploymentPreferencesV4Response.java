@@ -18,6 +18,8 @@ public class DeploymentPreferencesV4Response {
 
     private Map<String, Boolean> platformEnablement = new HashMap<>();
 
+    private Map<String, Boolean> govPlatformEnablement = new HashMap<>();
+
     public Set<SupportedExternalDatabaseServiceEntryV4Response> getSupportedExternalDatabases() {
         return supportedExternalDatabases;
     }
@@ -48,5 +50,13 @@ public class DeploymentPreferencesV4Response {
 
     public void setPlatformEnablement(Map<String, Boolean> platformEnablement) {
         this.platformEnablement = platformEnablement;
+    }
+
+    public Map<String, Boolean> getGovPlatformEnablement() {
+        return govPlatformEnablement;
+    }
+
+    public void setGovPlatformEnablement(Map<String, Boolean> govPlatformEnablement) {
+        this.govPlatformEnablement = govPlatformEnablement;
     }
 }

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
@@ -15,7 +16,11 @@ public class StackMatrixAction implements Action<StackMatrixTestDto, CloudbreakC
 
     @Override
     public StackMatrixTestDto action(TestContext testContext, StackMatrixTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        testDto.setResponse(cloudbreakClient.getDefaultClient().utilV4Endpoint().getStackMatrix(null, testDto.getCloudPlatform().name()));
+        ImageCatalogTestDto imageCatalogTestDto = testContext.get(ImageCatalogTestDto.class);
+        testDto.setResponse(cloudbreakClient.getDefaultClient().utilV4Endpoint().getStackMatrix(
+                imageCatalogTestDto != null ? imageCatalogTestDto.getName() : null,
+                testDto.getCloudPlatform().name(),
+                false));
         Log.whenJson(LOGGER, "Obtaining stack matrix response:\n", testDto.getResponse());
 
         return testDto;

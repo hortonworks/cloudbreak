@@ -236,10 +236,11 @@ public class CredentialService extends AbstractCredentialService implements Comp
         }
     }
 
-    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress, String userCrn, CredentialType type) {
+    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, boolean govCloud,
+        String deploymentAddress, String userCrn, CredentialType type) {
         String cloudPlatformInUpperCase = cloudPlatform.toUpperCase();
         credentialValidator.validateCredentialCloudPlatform(cloudPlatformInUpperCase, userCrn, type);
-        return credentialPrerequisiteService.getPrerequisites(cloudPlatformInUpperCase, deploymentAddress, type);
+        return credentialPrerequisiteService.getPrerequisites(cloudPlatformInUpperCase, govCloud, deploymentAddress, type);
     }
 
     public String initCodeGrantFlow(String accountId, @Nonnull Credential credential, String creatorUserCrn) {

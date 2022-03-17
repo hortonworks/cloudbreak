@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
@@ -20,15 +21,15 @@ public class CloudPlatformBasedUpgradeImageFilter implements UpgradeImageFilter 
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
-        String cloudPlatform = imageFilterParams.getCloudPlatform();
-        List<Image> filteredImages = filterImages(imageFilterResult, cloudPlatform);
-        LOGGER.debug("After the filtering {} image found with {} cloud platform.", filteredImages.size(), cloudPlatform);
+        List<Image> filteredImages = filterImages(imageFilterResult, imageFilterParams.getCloudPlatform());
+        LOGGER.debug("After the filtering {} image found with {} cloud platform.", filteredImages.size(),
+                imageFilterParams.getCloudPlatform().nameToUpperCase());
         return new ImageFilterResult(filteredImages, getReason(filteredImages, imageFilterParams));
     }
 
     @Override
     public String getMessage(ImageFilterParams imageFilterParams) {
-        return String.format("There are no eligible images to upgrade for %s cloud platform.", imageFilterParams.getCloudPlatform());
+        return String.format("There are no eligible images to upgrade for %s cloud platform.", imageFilterParams.getCloudPlatform().nameToUpperCase());
     }
 
     @Override
@@ -36,10 +37,10 @@ public class CloudPlatformBasedUpgradeImageFilter implements UpgradeImageFilter 
         return ORDER_NUMBER;
     }
 
-    private List<Image> filterImages(ImageFilterResult imageFilterResult, String cloudPlatform) {
+    private List<Image> filterImages(ImageFilterResult imageFilterResult, ImageCatalogPlatform cloudPlatform) {
         return imageFilterResult.getImages()
                 .stream()
-                .filter(image -> image.getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(cloudPlatform)))
+                .filter(image -> image.getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(cloudPlatform.nameToLowerCase())))
                 .collect(Collectors.toList());
     }
 

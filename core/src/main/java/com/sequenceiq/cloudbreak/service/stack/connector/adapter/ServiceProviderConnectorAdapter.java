@@ -232,12 +232,17 @@ public class ServiceProviderConnectorAdapter {
 
     public Variant checkAndGetPlatformVariant(Stack stack) {
         LOGGER.debug("Get platform variant for: {}", stack);
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+        Credential credential = ThreadBasedUserCrnProvider
+                .doAsInternalActor(() -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
+                .withLocation(location)
+                .withWorkspaceId(stack.getWorkspace().getId())
+                .withAccountId(Crn.safeFromString(credential.getCrn()).getAccountId())
+                .withGovCloud(credential.isGovCloud())
                 .build();
-        Credential credential = ThreadBasedUserCrnProvider
-                .doAsInternalActor(() -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         CheckPlatformVariantRequest checkPlatformVariantRequest = new CheckPlatformVariantRequest(cloudContext, cloudCredential);
         eventBus.notify(checkPlatformVariantRequest.selector(), eventFactory.createEvent(checkPlatformVariantRequest));

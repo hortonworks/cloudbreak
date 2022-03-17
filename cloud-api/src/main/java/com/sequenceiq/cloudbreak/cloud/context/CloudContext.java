@@ -18,6 +18,8 @@ public class CloudContext {
 
     private final Platform platform;
 
+    private final boolean govCloud;
+
     private final Variant variant;
 
     private final Location location;
@@ -44,6 +46,7 @@ public class CloudContext {
         this.accountId = builder.accountId;
         this.tenantId = builder.tenantId;
         this.userName = builder.userName;
+        this.govCloud = builder.govCloud;
     }
 
     public Long getId() {
@@ -86,6 +89,10 @@ public class CloudContext {
         return crn;
     }
 
+    public boolean isGovCloud() {
+        return govCloud;
+    }
+
     @Override
     public String toString() {
         return "CloudContext{" +
@@ -98,6 +105,7 @@ public class CloudContext {
                 ", accountId='" + accountId + '\'' +
                 ", tenantId='" + tenantId + '\'' +
                 ", crn='" + crn + '\'' +
+                ", govCloud='" + govCloud + '\'' +
                 '}';
     }
 
@@ -119,6 +127,8 @@ public class CloudContext {
         private Long tenantId;
 
         private String crn;
+
+        private boolean govCloud;
 
         public Builder withId(Long id) {
             this.id = id;
@@ -167,6 +177,11 @@ public class CloudContext {
 
         public Builder withCrn(String crn) {
             this.crn = crn;
+            return this;
+        }
+
+        public Builder withGovCloud(boolean govCloud) {
+            this.govCloud = govCloud;
             return this;
         }
 

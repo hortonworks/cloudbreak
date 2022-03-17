@@ -444,6 +444,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         switch (platformVariant) {
             case CloudConstants.AWS:
             case CloudConstants.AWS_NATIVE:
+            case CloudConstants.AWS_NATIVE_GOV:
                 return getResourcesByType(ResourceType.AWS_VOLUMESET);
             case CloudConstants.GCP:
                 return getResourcesByType(ResourceType.GCP_ATTACHED_DISKSET);
@@ -457,7 +458,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     public ResourceType getDiskResourceType() {
         switch (platformVariant) {
             case CloudConstants.AWS:
-            case CloudConstants.AWS_NATIVE   :
+            case CloudConstants.AWS_NATIVE:
+            case CloudConstants.AWS_NATIVE_GOV:
                 return ResourceType.AWS_VOLUMESET;
             case CloudConstants.GCP:
                 return ResourceType.GCP_ATTACHED_DISKSET;

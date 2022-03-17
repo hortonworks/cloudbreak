@@ -81,6 +81,7 @@ public class CredentialToCredentialV1ResponseConverter {
         response.setCreated(source.getCreated());
         response.setDescription(source.getDescription() == null ? "" : source.getDescription());
         response.setType(source.getType());
+        response.setGovCloud(source.getGovCloud());
         response.setAccountId(source.getAccountId());
         return response;
     }

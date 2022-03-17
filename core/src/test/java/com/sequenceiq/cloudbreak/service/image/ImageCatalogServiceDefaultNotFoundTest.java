@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -97,7 +98,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
 
     @Test(expected = CloudbreakImageNotFoundException.class)
     public void testGetDefaultImageShouldThrowNotFoundException() throws Exception {
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("gcp"), null, true, Set.of("notimportant"), null);
+        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform("gcp")), null, true, Set.of("notimportant"), null);
         underTest.getImagePrewarmedDefaultPreferred(imageFilter, image -> true);
     }
 
@@ -109,7 +110,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(catalog.getVersions().getCloudbreakVersions());
         when(imageCatalog.getImageCatalogUrl()).thenReturn(DEFAULT_CDH_IMAGE_CATALOG);
 
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of("aws"), "2.6", true, Set.of("centos7", "amazonlinux2"), null);
+        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform("aws")), "2.6", true, Set.of("centos7", "amazonlinux2"), null);
         underTest.getImagePrewarmedDefaultPreferred(imageFilter, image -> true);
     }
 }

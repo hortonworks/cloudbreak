@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.common.api.type.ImageType;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -47,7 +48,7 @@ public class DefaultImageCatalogService {
         return statedImage;
     }
 
-    public StatedImage getImageFromDefaultCatalog(String type, String provider)
+    public StatedImage getImageFromDefaultCatalog(String type, ImageCatalogPlatform provider)
             throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         ImageType imageType = ImageType.valueOf(type);
         StatedImage statedImage;
@@ -55,7 +56,7 @@ public class DefaultImageCatalogService {
             case FREEIPA:
                 List<Image> images = imageCatalogProvider.getImageCatalogV3(defaultFreeIpaCatalogUrl).getImages().getFreeIpaImages();
                 Optional<Image> image = images.stream().filter(i -> i.getImageSetsByProvider()
-                        .keySet().stream().anyMatch(key -> key.equalsIgnoreCase(provider))).max(getImageComparing(images));
+                        .keySet().stream().anyMatch(key -> key.equalsIgnoreCase(provider.nameToLowerCase()))).max(getImageComparing(images));
                 statedImage = statedImage(image.orElseThrow(() ->
                                 new CloudbreakImageNotFoundException(String.format("Could not find any image with provider: '%s' in catalog: '%s'", provider,
                                         FREEIPA_DEFAULT_CATALOG_NAME))),
@@ -69,7 +70,7 @@ public class DefaultImageCatalogService {
         return statedImage;
     }
 
-    public StatedImage getImageFromDefaultCatalog(String type, String provider, String runtime)
+    public StatedImage getImageFromDefaultCatalog(String type, ImageCatalogPlatform provider, String runtime)
             throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         ImageType imageType = ImageType.valueOf(type);
         StatedImage statedImage;

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -113,7 +114,7 @@ class CmAndStackVersionUpgradeImageFilterTest {
 
     private ImageFilterParams createImageFilterParams(boolean lockComponents) {
         return new ImageFilterParams(currentImage, lockComponents, activatedParcels, StackType.DATALAKE, null, 1L, new InternalUpgradeSettings(false, true,
-                true), "AWS");
+                true), imageCatalogPlatform("AWS"));
     }
 
     private void assertLockedCommon(ImageFilterResult actual) {

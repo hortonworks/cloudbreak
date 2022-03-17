@@ -24,7 +24,7 @@ public class MultiAzDecorator {
 
     private static final Set<Tunnel> PUBLIC_SUBNET_SUPPORTED_TUNNEL = Set.of(Tunnel.DIRECT, Tunnel.CLUSTER_PROXY);
 
-    public void decorateStackRequestWithAwsNative(StackV4Request stackV4Request) {
+    public void decorateStackRequestWithAwsNative(StackV4Request stackV4Request, DetailedEnvironmentResponse environment) {
         stackV4Request.setVariant("AWS_NATIVE");
     }
 

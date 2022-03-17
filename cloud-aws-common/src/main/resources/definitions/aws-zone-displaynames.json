@@ -79,6 +79,14 @@
     {
       "name": "me-south-1",
       "displayName": "Middle East (Bahrain)"
+    },
+    {
+      "name": "us-gov-east-1",
+      "displayName": "AWS GovCloud (US-East)"
+    },
+    {
+      "name": "us-gov-west-1",
+      "displayName": "AWS GovCloud (US-West)"
     }
   ]
 }

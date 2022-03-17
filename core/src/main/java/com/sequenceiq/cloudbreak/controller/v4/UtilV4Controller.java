@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.cluster.RepositoryConfigValidationService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixService;
+import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.image.UsedImagesProvider;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
@@ -74,6 +75,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     @Inject
     private UsedImagesProvider usedImagesProvider;
 
+    @Inject
+    private PlatformStringTransformer platformStringTransformer;
+
     @Value("${info.app.version:}")
     private String cbVersion;
 
@@ -85,8 +89,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Override
     @DisableCheckPermissions
-    public StackMatrixV4Response getStackMatrix(String imageCatalogName, String platform) throws Exception {
-        return stackMatrixService.getStackMatrix(restRequestThreadLocalService.getRequestedWorkspaceId(), platform, imageCatalogName);
+    public StackMatrixV4Response getStackMatrix(String imageCatalogName, String platform, boolean govCloud) throws Exception {
+        return stackMatrixService.getStackMatrix(restRequestThreadLocalService.getRequestedWorkspaceId(),
+                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud), imageCatalogName);
     }
 
     @Override
@@ -119,6 +124,7 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
         response.setSupportedExternalDatabases(supportedExternalDatabases);
         response.setPlatformSelectionDisabled(preferencesService.isPlatformSelectionDisabled());
         response.setPlatformEnablement(preferencesService.platformEnablement());
+        response.setGovPlatformEnablement(preferencesService.govPlatformEnablement());
         return response;
     }
 

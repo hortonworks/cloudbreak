@@ -75,6 +75,7 @@ public interface AuditCredentialEndpoint {
     @ApiOperation(value = CredentialOpDescription.GET_PREREQUISTIES_BY_CLOUD_PROVIDER, produces = MediaType.APPLICATION_JSON,
             notes = CredentialDescriptor.CREDENTIAL_NOTES, nickname = "getAuditPrerequisitesForCloudPlatform", httpMethod = "GET")
     CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(@PathParam("cloudPlatform") String platform,
+        @QueryParam("govCloud") boolean govCloud,
         @QueryParam("deploymentAddress") String deploymentAddress);
 
     @DELETE

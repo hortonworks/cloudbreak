@@ -155,6 +155,22 @@
         "me-south-1b",
         "me-south-1c"
       ]
+    },
+    {
+      "name": "us-gov-west-1",
+      "zones": [
+        "us-gov-west-1a",
+        "us-gov-west-1b",
+        "us-gov-west-1c"
+      ]
+    },
+    {
+      "name": "us-gov-east-1",
+      "zones": [
+        "us-gov-east-1a",
+        "us-gov-east-1b",
+        "us-gov-east-1c"
+      ]
     }
   ]
 }

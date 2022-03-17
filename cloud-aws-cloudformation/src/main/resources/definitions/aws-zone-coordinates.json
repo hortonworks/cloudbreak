@@ -114,7 +114,14 @@
     },
     {
       "name": "us-gov-west-1",
-      "displayName": "GovCloud (US)",
+      "displayName": "AWS GovCloud (US-West)",
+      "latitude": "37.29998293",
+      "longitude": "-121.8499891",
+      "k8sSupported": false
+    },
+    {
+      "name": "us-gov-east-1",
+      "displayName": "AWS GovCloud (US-East)",
       "latitude": "37.29998293",
       "longitude": "-121.8499891",
       "k8sSupported": false

@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,7 +43,9 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,6 +83,9 @@ public class StackImageServiceTest {
     @Mock
     private InternalCrnModifier internalCrnModifier;
 
+    @Mock
+    private PlatformStringTransformer platformStringTransformer;
+
     @Captor
     private ArgumentCaptor<Component> componentArgumentCaptor;
 
@@ -110,7 +117,9 @@ public class StackImageServiceTest {
                 new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), image.getOs(), image.getOsType(),
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
-        when(imageService.determineImageName(anyString(), anyString(), eq(image))).thenReturn(IMAGE_NAME);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant()))
+                .thenReturn(imageCatalogPlatform(stack.getCloudPlatform()));
+        when(imageService.determineImageName(anyString(), any(), anyString(), eq(image))).thenReturn(IMAGE_NAME);
 
         victim.storeNewImageComponent(stack, statedImage);
 
@@ -125,6 +134,8 @@ public class StackImageServiceTest {
     @Test
     public void testChangeImageCatalogOutOfFlow() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException, IOException {
         ImageCatalog imageCatalog = mock(ImageCatalog.class);
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(stack.getCloudPlatform());
+
         Image targetImage = anImage(IMAGE_ID);
         StatedImage targetStatedImage = StatedImage.statedImage(targetImage, TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG);
 
@@ -133,7 +144,10 @@ public class StackImageServiceTest {
         when(imageCatalog.getName()).thenReturn(TARGET_IMAGE_CATALOG);
         when(imageCatalog.getImageCatalogUrl()).thenReturn(TARGET_IMAGE_CATALOG_URL);
         when(imageCatalogService.getImage(TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG, IMAGE_ID)).thenReturn(targetStatedImage);
-        when(imageService.determineImageName(stack.getCloudPlatform().toLowerCase(), stack.getRegion(), targetStatedImage.getImage())).thenReturn(IMAGE_NAME);
+        when(imageService.determineImageName(stack.getCloudPlatform().toLowerCase(), imageCatalogPlatform,
+                stack.getRegion(), targetStatedImage.getImage())).thenReturn(IMAGE_NAME);
+        when(platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant()))
+                .thenReturn(imageCatalogPlatform);
 
         victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG);
 

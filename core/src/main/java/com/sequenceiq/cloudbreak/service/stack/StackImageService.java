@@ -27,7 +27,9 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 @Service
 public class StackImageService {
@@ -46,6 +48,9 @@ public class StackImageService {
     @Inject
     private InternalCrnModifier internalCrnModifier;
 
+    @Inject
+    private PlatformStringTransformer platformStringTransformer;
+
     public void storeNewImageComponent(Stack stack, StatedImage targetImage) {
         try {
             replaceStackImageComponent(stack, targetImage);
@@ -57,8 +62,11 @@ public class StackImageService {
 
     public Image getImageModelFromStatedImage(Stack stack, Image currentImage, StatedImage targetImage) {
         try {
-            String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
-            String newImageName = imageService.determineImageName(platformString, stack.getRegion(), targetImage.getImage());
+            ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalog(
+                    stack.getCloudPlatform(),
+                    stack.getPlatformVariant());
+            String cloudPlatform = platform(stack.cloudPlatform()).value().toLowerCase();
+            String newImageName = imageService.determineImageName(cloudPlatform, platformString, stack.getRegion(), targetImage.getImage());
             return new Image(newImageName, currentImage.getUserdata(), targetImage.getImage().getOs(), targetImage.getImage().getOsType(),
                     targetImage.getImageCatalogUrl(), targetImage.getImageCatalogName(), targetImage.getImage().getUuid(),
                     targetImage.getImage().getPackageVersions());

@@ -226,7 +226,7 @@ public class StackServiceTest {
         String platformString = "AWS";
         doThrow(new CloudbreakImageNotFoundException("Image not found"))
                 .when(imageService)
-                .create(eq(stack), eq(platformString), nullable(StatedImage.class));
+                .create(eq(stack), nullable(StatedImage.class));
 
         try {
             stack = ThreadBasedUserCrnProvider.doAs(USER_CRN,

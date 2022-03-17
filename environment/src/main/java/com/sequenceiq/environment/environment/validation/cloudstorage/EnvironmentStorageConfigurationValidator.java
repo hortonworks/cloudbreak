@@ -38,8 +38,10 @@ public abstract class EnvironmentStorageConfigurationValidator {
 
     protected void validateS3Config(Environment environment, ValidationResult.ValidationResultBuilder resultBuilder, String instanceProfile) {
         if (StringUtils.isNotBlank(instanceProfile)) {
-            if (!instanceProfile.startsWith("arn:aws:iam::") || !(instanceProfile.contains(":instance-profile/"))) {
-                resultBuilder.error("Must be a full valid amazon instance profile in the format of arn:aws:iam::[account-id]:instance-profile/[role-name]." +
+            if ((!instanceProfile.startsWith("arn:aws:iam::") && !instanceProfile.startsWith("arn:aws-us-gov:iam::"))
+                    || !(instanceProfile.contains(":instance-profile/"))) {
+                resultBuilder.error("Must be a full valid Amazon instance profile in the format of " +
+                        "arn:(aws|aws-us-gov):iam::[account-id]:instance-profile/[role-name]." +
                         getDocLink(environment.getCloudPlatform()));
             }
         } else {

@@ -26,6 +26,8 @@ public class Credential implements Serializable {
 
     private final Json attributes;
 
+    private final boolean govCloud;
+
     private Credential(Builder builder) {
         crn = builder.crn;
         name = builder.name;
@@ -36,6 +38,7 @@ public class Credential implements Serializable {
         cloudPlatform = builder.cloudPlatform;
         creator = builder.creator;
         account = builder.account;
+        govCloud = builder.govCloud;
     }
 
     public String getCrn() {
@@ -74,6 +77,10 @@ public class Credential implements Serializable {
         return account;
     }
 
+    public boolean isGovCloud() {
+        return govCloud;
+    }
+
     public String cloudPlatform() {
         if (aws != null) {
             return "AWS";
@@ -101,6 +108,8 @@ public class Credential implements Serializable {
         private String creator;
 
         private String account;
+
+        private boolean govCloud;
 
         public Builder crn(String crn) {
             this.crn = crn;
@@ -144,6 +153,11 @@ public class Credential implements Serializable {
 
         public Builder cloudPlatform(String cloudPlatform) {
             this.cloudPlatform = cloudPlatform;
+            return this;
+        }
+
+        public Builder govCloud(boolean govCloud) {
+            this.govCloud = govCloud;
             return this;
         }
 
