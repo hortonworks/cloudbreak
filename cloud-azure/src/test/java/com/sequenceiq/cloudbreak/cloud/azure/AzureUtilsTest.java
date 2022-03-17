@@ -21,6 +21,7 @@ import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -545,5 +546,25 @@ public class AzureUtilsTest {
             }
         }
         return virtualMachineMap;
+    }
+
+    /**
+     * Expected outputs are copied from the <a href="https://md5calc.com/hash/adler32">online calculator</a> referenced in
+     * <a href="https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-adls-images.html">the docs</a>.
+     * Leading zeroes are trimmed to match the actual output.
+     */
+    @Test
+    void encodeString() {
+        Map<String, String> inputAndOutput = Map.of(
+                "062d53231d9c48449a2540abe7df2f61", "8301085c",
+                "cdppoc", "089d027a",
+                "a", "00620062"
+        );
+        SoftAssertions softly = new SoftAssertions();
+        inputAndOutput.forEach((input, output) ->
+                softly.assertThat(underTest.encodeString(input))
+                        .as(input)
+                        .isEqualTo(output.replaceAll("^0+", "")));
+        softly.assertAll();
     }
 }
