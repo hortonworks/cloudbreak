@@ -40,4 +40,13 @@ public class Pillar {
     public void setTargets(Set<String> targets) {
         this.targets = targets;
     }
+
+    @Override
+    public String toString() {
+        return "Pillar{" +
+                "path='" + path + '\'' +
+                ", json=" + json +
+                ", targets=" + targets +
+                '}';
+    }
 }

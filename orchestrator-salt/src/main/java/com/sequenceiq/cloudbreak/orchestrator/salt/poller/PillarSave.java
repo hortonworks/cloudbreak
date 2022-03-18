@@ -138,4 +138,13 @@ public class PillarSave implements OrchestratorBootstrap {
         LOGGER.debug("Pillar save has been completed on nodes: {}", originalTargets);
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "PillarSave{" +
+                "pillar=" + pillar +
+                ", targets=" + targets +
+                ", originalTargets=" + originalTargets +
+                '}';
+    }
 }
