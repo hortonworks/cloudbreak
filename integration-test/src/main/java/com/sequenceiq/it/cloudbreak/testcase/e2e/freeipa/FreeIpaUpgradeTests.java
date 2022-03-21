@@ -11,15 +11,16 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.polling.AbsolutTimeBasedTimeoutChecker;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
@@ -33,6 +34,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
+import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
@@ -170,7 +172,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 generateServiceKeytab(ipaClient, environmentCrn);
                 dnsLookups(testContext.given(SdxTestDto.class), testContext.getSdxClient());
                 cleanUp(testContext, ipaClient, environmentCrn);
-                kinit(testContext.given(SdxTestDto.class), testContext.getSdxClient());
+                kinit(testContext.given(SdxTestDto.class), testContext.getSdxClient(), ipaClient, environmentCrn);
                 syncUsers(testContext, ipaClient, environmentCrn, accountId);
             }
         } catch (TestFailException e) {
@@ -192,8 +194,16 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
             request.setAccountId(accountId);
             request.setEnvironments(Set.of(environmentCrn));
             request.setWorkloadCredentialsUpdateType(WorkloadCredentialsUpdateType.FORCE_UPDATE);
-            SyncOperationStatus syncOperationStatus = ipaClient.getUserV1Endpoint().synchronizeAllUsers(request);
-            waitToCompleted(testContext, syncOperationStatus.getOperationId(), "Full forced usersync");
+            try {
+                SyncOperationStatus syncOperationStatus = ipaClient.getUserV1Endpoint().synchronizeAllUsers(request);
+                waitToCompleted(testContext, syncOperationStatus.getOperationId(), "Full forced usersync");
+            } catch (WebApplicationException e) {
+                if (e.getResponse() != null && Response.Status.CONFLICT.getStatusCode() == e.getResponse().getStatus()) {
+                    logger.info("Usersync is already running");
+                } else {
+                    throw e;
+                }
+            }
         } catch (Exception e) {
             logger.error("Full forced usersync test failed during upgrade", e);
             throw new TestFailException("Full forced usersync test failed during upgrade with: " + e.getMessage(), e);
@@ -312,10 +322,15 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 .await(COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE).withTimeoutChecker(new AbsolutTimeBasedTimeoutChecker(FIVE_MINUTES_IN_SEC)));
     }
 
-    private void kinit(SdxTestDto sdxTestDto, SdxClient sdxClient) {
+    private void kinit(SdxTestDto sdxTestDto, SdxClient sdxClient, com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn) {
         try {
-            sshJClientActions.checkKinitDuringFreeipaUpgrade(sdxTestDto, getInstanceGroups(sdxTestDto, sdxClient),
-                    List.of(HostGroupType.MASTER.getName()));
+            SyncOperationStatus lastSyncOperationStatus = ipaClient.getUserV1Endpoint().getLastSyncOperationStatus(environmentCrn);
+            if (lastSyncOperationStatus.getStatus() == SynchronizationStatus.COMPLETED) {
+                sshJClientActions.checkKinitDuringFreeipaUpgrade(sdxTestDto, getInstanceGroups(sdxTestDto, sdxClient),
+                        List.of(HostGroupType.MASTER.getName()));
+            } else {
+                logger.debug("Skipping kinit test because usersync state is not COMPLETED: " + lastSyncOperationStatus);
+            }
         } catch (TestFailException e) {
             throw e;
         } catch (Exception e) {
