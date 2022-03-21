@@ -11,6 +11,7 @@ import org.testng.ITestContext;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.DistroxStopStartScaleDurationAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -30,11 +31,14 @@ public class DistroXStopStartScaleTest extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
+        // Azure and GCP are not supported right now.
+        // - GCP does not support stopping instances with ephemeral storage.
+        // - Azure starting/stopping nodes consume almost same time as adding/deleting nodes.
+        assertSupportedCloudPlatform(CloudPlatform.AWS);
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithFreeIpaAndDatalake(testContext);
         createDefaultDatahub(testContext);
     }
 

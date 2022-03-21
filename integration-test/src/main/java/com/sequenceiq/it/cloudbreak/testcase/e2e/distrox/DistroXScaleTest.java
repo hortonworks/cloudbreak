@@ -34,23 +34,25 @@ public class DistroXScaleTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithFreeIpaAndDatalake(testContext);
+        createDefaultDatahub(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT, description = "Resilient Scaling: " +
+            "UseCase1: " +
+            "- Start upscale on running cluster " +
+            "- Delete a non CM server host from provider other hostgroup during upscale " +
+            "- Upscale should complete ")
     @Description(
-            given = "there is a running cloudbreak",
-            when = "a valid DistroX create request is sent",
-            then = "DistroX cluster can be resiliently scaled up and down with higher node count")
+            given = "there is a running default Distrox cluster",
+            when = "deleted a Compute instance while cluster was upscaling (by Worker nodes)",
+            then = "cluster can be resiliently scaled up then down with higher node count")
     public void testCreateAndScaleDistroX(TestContext testContext, ITestContext iTestContext) {
         DistroXScaleTestParameters params = new DistroXScaleTestParameters(iTestContext.getCurrentXmlTest().getAllParameters());
-        testContext.given(DistroXTestDto.class)
-                .when(distroXTestClient.create())
-                .await(STACK_AVAILABLE)
-                .validate();
+
         if (params.getTimes() < 1) {
             throw new TestFailException("Test should execute at least 1 round of scaling");
         }
+
         testContext.given(DistroXTestDto.class)
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleUpTarget()))
                 .then((tc, testDto, client) -> {

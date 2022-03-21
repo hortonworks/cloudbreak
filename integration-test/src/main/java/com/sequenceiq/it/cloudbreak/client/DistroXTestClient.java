@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.CheckVariant;
@@ -76,7 +77,11 @@ public class DistroXTestClient {
     }
 
     public Action<DistroXTestDto, CloudbreakClient> scale(String hostGroup, Integer count) {
-        return new DistroXScaleAction(hostGroup, count);
+        return new DistroXScaleAction(hostGroup, count, AdjustmentType.EXACT, null);
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> scale(String hostGroup, Integer count, AdjustmentType adjustmentType, Long threshold) {
+        return new DistroXScaleAction(hostGroup, count, adjustmentType, threshold);
     }
 
     public Action<DistroXTestDto, CloudbreakClient> scaleStopInstances() {
