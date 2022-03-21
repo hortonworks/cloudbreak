@@ -62,6 +62,13 @@ public class SimpleOrchestratorBootstrapRunnerTest {
             }
         }
 
+        @Override
+        public String toString() {
+            return "MockBootstrapRunner{" +
+                    "count=" + count +
+                    ", retryOk=" + retryOk +
+                    '}';
+        }
     }
 
     private static class MockExitCriteriaModel extends ExitCriteriaModel {
