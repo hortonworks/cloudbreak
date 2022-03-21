@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -192,8 +194,16 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
             request.setAccountId(accountId);
             request.setEnvironments(Set.of(environmentCrn));
             request.setWorkloadCredentialsUpdateType(WorkloadCredentialsUpdateType.FORCE_UPDATE);
-            SyncOperationStatus syncOperationStatus = ipaClient.getUserV1Endpoint().synchronizeAllUsers(request);
-            waitToCompleted(testContext, syncOperationStatus.getOperationId(), "Full forced usersync");
+            try {
+                SyncOperationStatus syncOperationStatus = ipaClient.getUserV1Endpoint().synchronizeAllUsers(request);
+                waitToCompleted(testContext, syncOperationStatus.getOperationId(), "Full forced usersync");
+            } catch (WebApplicationException e) {
+                if (e.getResponse() != null && Response.Status.CONFLICT.getStatusCode() == e.getResponse().getStatus()) {
+                    logger.info("Usersync is already running");
+                } else {
+                    throw e;
+                }
+            }
         } catch (Exception e) {
             logger.error("Full forced usersync test failed during upgrade", e);
             throw new TestFailException("Full forced usersync test failed during upgrade with: " + e.getMessage(), e);
