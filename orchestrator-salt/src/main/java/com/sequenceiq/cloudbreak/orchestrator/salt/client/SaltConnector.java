@@ -111,6 +111,7 @@ public class SaltConnector implements Closeable {
 
     @Measure(SaltConnector.class)
     public GenericResponse health() {
+        LOGGER.debug("Sending request to salt endpoint {}", SaltEndpoint.BOOT_HEALTH.getContextPath());
         Response response = saltTarget.path(SaltEndpoint.BOOT_HEALTH.getContextPath()).request().get();
         GenericResponse responseEntity = JaxRSUtil.response(response, GenericResponse.class);
         LOGGER.debug("SaltBoot. Health response: {}", responseEntity);
@@ -119,15 +120,11 @@ public class SaltConnector implements Closeable {
 
     @Measure(SaltConnector.class)
     public GenericResponses pillar(Iterable<String> targets, Pillar pillar) {
-        Response distributeResponse = saltTarget.path(SaltEndpoint.BOOT_PILLAR_DISTRIBUTE.getContextPath()).request()
-                .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(pillar).getBytes()))
-                .post(Entity.json(pillar));
+        Response distributeResponse = postSignedJsonSaltRequest(SaltEndpoint.BOOT_PILLAR_DISTRIBUTE, pillar);
         if (distributeResponse.getStatus() == HttpStatus.SC_NOT_FOUND) {
             // simple pillar save for CB <= 1.14
             distributeResponse.close();
-            try (Response singleResponse = saltTarget.path(SaltEndpoint.BOOT_PILLAR_SAVE.getContextPath()).request()
-                    .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(pillar).getBytes()))
-                    .post(Entity.json(pillar))) {
+            try (Response singleResponse = postSignedJsonSaltRequest(SaltEndpoint.BOOT_PILLAR_SAVE, pillar)) {
                 GenericResponses genericResponses = new GenericResponses();
                 GenericResponse genericResponse = new GenericResponse();
                 genericResponse.setAddress(targets.iterator().next());
@@ -141,9 +138,7 @@ public class SaltConnector implements Closeable {
 
     @Measure(SaltConnector.class)
     public GenericResponses action(SaltAction saltAction) {
-        Response response = saltTarget.path(SaltEndpoint.BOOT_ACTION_DISTRIBUTE.getContextPath()).request()
-                .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(saltAction).getBytes()))
-                .post(Entity.json(saltAction));
+        Response response = postSignedJsonSaltRequest(SaltEndpoint.BOOT_ACTION_DISTRIBUTE, saltAction);
         GenericResponses responseEntity = JaxRSUtil.response(response, GenericResponses.class);
         LOGGER.debug("SaltBoot. SaltAction response: {}", responseEntity);
         return responseEntity;
@@ -184,8 +179,7 @@ public class SaltConnector implements Closeable {
                 }
             }
         }
-        Response response = saltTarget.path(SaltEndpoint.SALT_RUN.getContextPath()).request()
-                .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
+        Response response = endpointInvocation(SaltEndpoint.SALT_RUN.getContextPath(), toJson(form.asMap()).getBytes())
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
         try {
@@ -205,8 +199,7 @@ public class SaltConnector implements Closeable {
         if (match != null && !match.isEmpty()) {
             form.param("match", String.join(",", match));
         }
-        Response response = saltTarget.path(SaltEndpoint.SALT_RUN.getContextPath()).request()
-                .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
+        Response response = endpointInvocation(SaltEndpoint.SALT_RUN.getContextPath(), toJson(form.asMap()).getBytes())
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
         LOGGER.debug("Salt wheel has been executed. fun: {}", fun);
@@ -259,9 +252,16 @@ public class SaltConnector implements Closeable {
         }
     }
 
-    private Invocation.Builder endpointInvocation(String endpoint, byte[] content) throws IOException {
+    private Invocation.Builder endpointInvocation(String endpoint, byte[] content) {
+        LOGGER.debug("Sending request with generated signature to salt endpoint {}", endpoint);
         String signature = PkiUtil.generateSignature(signatureKey, content);
         return saltTarget.path(endpoint).request().header(SIGN_HEADER, signature);
+    }
+
+    private Response postSignedJsonSaltRequest(SaltEndpoint saltEndpoint, Object request) {
+        String requestJson = toJson(request);
+        return endpointInvocation(saltEndpoint.getContextPath(), requestJson.getBytes())
+                .post(Entity.json(requestJson));
     }
 
     private MultiPart addBodyPart(FormDataMultiPart parts, Iterable<String> targets, String path, String fileName, ByteArrayInputStream inputStream)
@@ -299,9 +299,7 @@ public class SaltConnector implements Closeable {
     @Measure(SaltConnector.class)
     public Map<String, String> members(List<String> privateIps) throws CloudbreakOrchestratorFailedException {
         Map<String, List<String>> clients = singletonMap("clients", privateIps);
-        Response response = saltTarget.path(BOOT_HOSTNAME_ENDPOINT.getContextPath()).request()
-                .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(clients).getBytes()))
-                .post(Entity.json(clients));
+        Response response = postSignedJsonSaltRequest(BOOT_HOSTNAME_ENDPOINT, clients);
         GenericResponses responses = JaxRSUtil.response(response, GenericResponses.class);
         List<GenericResponse> failedResponses = responses.getResponses().stream()
                 .filter(genericResponse -> !ACCEPTED_STATUSES.contains(genericResponse.getStatusCode())).collect(Collectors.toList());
@@ -314,9 +312,7 @@ public class SaltConnector implements Closeable {
     }
 
     public FingerprintsResponse collectFingerPrints(FingerprintRequest request) {
-        Response fingerprintResponse = saltTarget.path(BOOT_FINGERPRINT_DISTRIBUTE.getContextPath()).request()
-                .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(request).getBytes()))
-                .post(Entity.json(request));
+        Response fingerprintResponse = postSignedJsonSaltRequest(BOOT_FINGERPRINT_DISTRIBUTE, request);
         return JaxRSUtil.response(fingerprintResponse, FingerprintsResponse.class);
     }
 
