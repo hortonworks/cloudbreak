@@ -5,6 +5,7 @@ import static com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataEvents.UPDA
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -51,6 +52,8 @@ public class UserDataUpdateActions {
             protected void doExecute(StackContext context, UserDataUpdateRequest payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Recreate userdata for new freeipa instances");
                 setOperationId(variables, payload.getOperationId());
+                setChainedAction(variables, payload.isChained());
+                setFinalChain(variables, payload.isFinal());
                 sendEvent(context);
             }
 
@@ -102,6 +105,9 @@ public class UserDataUpdateActions {
         return new AbstractUserDataUpdateAction<>(UserDataUpdateOnProviderResult.class) {
             @Override
             protected void doExecute(StackContext context, UserDataUpdateOnProviderResult payload, Map<Object, Object> variables) {
+                if (isOperationIdSet(variables) && (!isChainedAction(variables) || isFinalChain(variables))) {
+                    operationService.completeOperation(context.getStack().getAccountId(), getOperationId(variables), Set.of(), Set.of());
+                }
                 sendEvent(context);
             }
 
