@@ -40,4 +40,15 @@ public class Pillar {
     public void setTargets(Set<String> targets) {
         this.targets = targets;
     }
+
+    /**
+     * Json can not be included in toString(), as it may contain secrets.
+     */
+    @Override
+    public String toString() {
+        return "Pillar{" +
+                "path='" + path + '\'' +
+                ", targets=" + targets +
+                '}';
+    }
 }
