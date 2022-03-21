@@ -96,7 +96,7 @@ public class UpdateNodeCountValidator {
     }
 
     public void validateStackStatus(Stack stack) {
-        if (!stack.isAvailable()) {
+        if (!stack.isAvailable() && !stack.hasNodeFailure()) {
             throw new BadRequestException(format("Data Hub '%s' is currently in '%s' state. Node count can only be updated if it's running.",
                     stack.getName(), stack.getStatus()));
         }
@@ -136,7 +136,7 @@ public class UpdateNodeCountValidator {
 
     public void validateClusterStatus(Stack stack) {
         Cluster cluster = stack.getCluster();
-        if (cluster != null && !stack.isAvailable()) {
+        if (cluster != null && !stack.isAvailable() && !stack.hasNodeFailure()) {
             throw new BadRequestException(format("Data Hub '%s' is currently in '%s' state. Node count can only be updated if it's available.",
                     cluster.getName(), stack.getStatus()));
         }
