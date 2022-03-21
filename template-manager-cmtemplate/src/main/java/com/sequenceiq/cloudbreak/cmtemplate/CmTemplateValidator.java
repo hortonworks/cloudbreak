@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -111,11 +112,20 @@ public class CmTemplateValidator implements BlueprintValidator {
                     .map(Entry::getKey)
                     .collect(Collectors.toSet());
             if (instanceGroupsWithRoles.contains(hostGroupName)) {
-                instanceGroups.stream()
+                List<InstanceGroup> filteredInstanceGroups = instanceGroups.stream()
                         .filter(instanceGroup -> instanceGroupsWithRoles.contains(instanceGroup.getGroupName()))
-                        .map(InstanceGroup::getNodeCount)
+                        .collect(Collectors.toList());
+                String groupNames = filteredInstanceGroups.stream().map(InstanceGroup::getGroupName).collect(Collectors.joining(","));
+                LOGGER.debug("Instance groups with role: {}", groupNames);
+                filteredInstanceGroups.stream()
+                        .map(instanceGroup -> {
+                            int nodeCount = instanceGroup.getNodeCount();
+                            LOGGER.debug("There are {} node(s) has in group of {} with role: {}", nodeCount, instanceGroup.getGroupName(), role);
+                            return nodeCount;
+                        })
                         .reduce(Integer::sum)
                         .ifPresent(roleCountInGroups -> {
+                            LOGGER.debug("{} remaining instances, required: {} in groups of {} for {}", roleCountInGroups, requiredCount, groupNames, role);
                             if (roleCountInGroups + adjustment < requiredCount) {
                                 throw new BadRequestException(String.format(
                                         "Scaling adjustment is not allowed, based on the template it would eliminate all the instances with "
@@ -137,16 +147,25 @@ public class CmTemplateValidator implements BlueprintValidator {
                     .filter(entry -> entry.getValue().contains(role))
                     .map(Entry::getKey)
                     .collect(Collectors.toSet());
-            instanceGroups.stream()
+            List<InstanceGroup> filteredInstanceGroups = instanceGroups.stream()
                     .filter(instanceGroup -> instanceGroupsWithRoles.contains(instanceGroup.getGroupName()))
-                    .map(instanceGroup ->
-                            instanceGroup.getNodeCount() + instanceGroupAdjustments.getOrDefault(instanceGroup.getGroupName(), 0))
+                    .collect(Collectors.toList());
+            String groupNames = filteredInstanceGroups.stream().map(InstanceGroup::getGroupName).collect(Collectors.joining(","));
+            LOGGER.debug("Instance groups with role: {}", groupNames);
+            filteredInstanceGroups.stream().map(instanceGroup -> {
+                        int nodeCount = instanceGroup.getNodeCount() + instanceGroupAdjustments.getOrDefault(instanceGroup.getGroupName(), 0);
+                        LOGGER.debug("There are {} node(s) has in group of {} with role: {}, adjusted node count: {}", instanceGroup.getNodeCount(),
+                                instanceGroup.getGroupName(), role, nodeCount);
+                        return nodeCount;
+                    })
                     .reduce(Integer::sum)
                     .ifPresent(remainingInstances -> {
+                        LOGGER.debug("{} remaining instances, required: {} in groups of {} for {}", remainingInstances, requiredCount, groupNames, role);
                         if (remainingInstances < requiredCount) {
                             throw new BadRequestException(String.format(
-                                    "Scaling adjustment is not allowed, based on the template it would eliminate all the instances with "
-                                            + "%s role which is not supported.", role));
+                                    "Scaling adjustment is not allowed in groups of %s, based on the template it would eliminate all the instances with "
+                                            + "%s role which is not supported. %s remaining instances but %s are required", groupNames, remainingInstances,
+                                    role, requiredCount));
                         }
                     });
         });
