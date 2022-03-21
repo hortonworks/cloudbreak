@@ -27,6 +27,8 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
@@ -54,6 +56,7 @@ import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.CcmUnregist
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.CcmUpgradePreparationHandler;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -81,6 +84,7 @@ import reactor.bus.EventBus;
 import reactor.bus.spec.EventBusSpec;
 import reactor.core.dispatch.MpscDispatcher;
 
+@ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
 class CcmUpgradeFlowIntegrationTest {
 
@@ -218,10 +222,12 @@ class CcmUpgradeFlowIntegrationTest {
                 () -> reactorNotifier.notify(STACK_ID, selector, new StackEvent(selector, STACK_ID)));
     }
 
+    @Profile("integration-test")
     @TestConfiguration
     @Import({
             TransactionService.class,
             TransactionMetricsService.class,
+            CloudbreakMetricService.class,
             Clock.class,
             CbEventParameterFactory.class,
             ReactorNotifier.class,

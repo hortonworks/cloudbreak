@@ -3,8 +3,8 @@ package com.sequenceiq.flow.reactor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.TestComponent;
-import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Profile;
 
 import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
@@ -15,10 +15,15 @@ import reactor.bus.EventBus;
 
 class ContextClosedEventHandlerTest {
 
+    public static final String TEST_PROFILE = "test";
+
     @Test
     public void testHandleContextClosedEventShouldStopExecutor() {
-        ConfigurableApplicationContext applicationContext = new AnnotationConfigApplicationContext(EventBusConfig.class, ContextClosedEventHandler.class,
+        AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext();
+        applicationContext.getEnvironment().setActiveProfiles(TEST_PROFILE);
+        applicationContext.register(EventBusConfig.class, ContextClosedEventHandler.class,
                 FlowRegister.class, TestMetricService.class);
+        applicationContext.refresh();
 
         MDCCleanerThreadPoolExecutor eventBusThreadPoolExecutor = applicationContext.getBean("eventBusThreadPoolExecutor", MDCCleanerThreadPoolExecutor.class);
         Assertions.assertFalse(eventBusThreadPoolExecutor.isShutdown());
@@ -32,7 +37,8 @@ class ContextClosedEventHandlerTest {
     }
 
     @TestComponent
-    public static class TestMetricService extends AbstractMetricService {
+    @Profile(TEST_PROFILE)
+    static class TestMetricService extends AbstractMetricService {
 
         @Override
         protected String getMetricPrefix() {

@@ -48,6 +48,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -126,6 +127,9 @@ public class FlowComponentTest {
 
     @MockBean
     private SleepTriggerCondition sleepTriggerCondition;
+
+    @MockBean
+    private MetricService metricService;
 
     @BeforeEach
     public void setUp() {
