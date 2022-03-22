@@ -781,6 +781,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @Override
     public Map<String, String> runCommandOnAllHosts(GatewayConfig gateway, String command) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
             return SaltStates.runCommand(retry, saltConnector, command);

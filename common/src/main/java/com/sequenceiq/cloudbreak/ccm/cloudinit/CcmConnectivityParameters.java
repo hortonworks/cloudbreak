@@ -1,9 +1,15 @@
 package com.sequenceiq.cloudbreak.ccm.cloudinit;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CcmConnectivityParameters {
 
+    @JsonIgnore
     private CcmParameters ccmParameters;
 
+    @JsonIgnore
     private CcmV2Parameters ccmV2Parameters;
 
     private CcmV2JumpgateParameters ccmV2JumpgateParameters;
@@ -47,6 +53,7 @@ public class CcmConnectivityParameters {
         this.ccmV2JumpgateParameters = ccmV2JumpgateParameters;
     }
 
+    @JsonIgnore
     public CcmConnectivityMode getConnectivityMode() {
         if (ccmParameters != null) {
             return CcmConnectivityMode.CCMV1;

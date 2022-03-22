@@ -15,6 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
+import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2JumpgateParameters;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -23,11 +25,20 @@ import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView;
 import com.sequenceiq.freeipa.service.proxy.ProxyConfigService;
 import com.sequenceiq.freeipa.service.tag.TagConfigService;
 import com.sequenceiq.freeipa.service.telemetry.TelemetryConfigService;
+import com.sequenceiq.freeipa.service.upgrade.ccm.CcmParametersConfigService;
 
 @ExtendWith(MockitoExtension.class)
-public class FreeIpaOrchestationConfigServiceTest {
+class SaltConfigProviderTest {
 
     private static final String CLOUD_PLATFORM = "AWS";
+
+    private static final String PILLARPATH = "pillarpath";
+
+    private static final String PILLARKEY = "pillarkey";
+
+    private static final String PILLARVALUE = "pillarvalue";
+
+    private static final String PILLAR = "pillar";
 
     @Mock
     private FreeIpaConfigService freeIpaConfigService;
@@ -41,12 +52,16 @@ public class FreeIpaOrchestationConfigServiceTest {
     @Mock
     private TagConfigService tagConfigService;
 
+    @Mock
+    private CcmParametersConfigService ccmParametersConfigService;
+
     @InjectMocks
-    private FreeIpaOrchestrationConfigService underTest;
+    private SaltConfigProvider underTest;
 
     @Test
     public void testGetSaltConfig() throws Exception {
         Stack stack = mock(Stack.class);
+        when(stack.getCcmParameters()).thenReturn(new CcmConnectivityParameters(new DefaultCcmV2JumpgateParameters()));
         FreeIpaConfigView freeIpaConfigView = mock(FreeIpaConfigView.class);
         Map freeIpaConfigViewMap = mock(Map.class);
         when(freeIpaConfigService.createFreeIpaConfigs(any(), any())).thenReturn(freeIpaConfigView);
@@ -55,7 +70,8 @@ public class FreeIpaOrchestationConfigServiceTest {
         when(telemetryConfigService.createTelemetryPillarConfig(any())).thenReturn(Map.of());
         when(proxyConfigService.createProxyPillarConfig(any())).thenReturn(Map.of());
         when(tagConfigService.createTagsPillarConfig(any())).thenReturn(Map.of());
-
+        when(ccmParametersConfigService.createCcmParametersPillarConfig(any(), any())).thenReturn(
+                Map.of(PILLAR, new SaltPillarProperties(PILLARPATH, Map.of(PILLARKEY, PILLARVALUE))));
         SaltConfig saltConfig = underTest.getSaltConfig(stack, Set.of());
 
         Map<String, SaltPillarProperties> servicePillarConfig = saltConfig.getServicePillarConfig();
@@ -70,5 +86,10 @@ public class FreeIpaOrchestationConfigServiceTest {
         assertNotNull(discoveryProperties);
         assertEquals("/discovery/init.sls", discoveryProperties.getPath());
         assertEquals(CLOUD_PLATFORM, discoveryProperties.getProperties().get("platform"));
+
+        SaltPillarProperties pillarProperties = servicePillarConfig.get(PILLAR);
+        assertNotNull(pillarProperties);
+        assertEquals(PILLARPATH, pillarProperties.getPath());
+        assertEquals(PILLARVALUE, pillarProperties.getProperties().get(PILLARKEY));
     }
 }
