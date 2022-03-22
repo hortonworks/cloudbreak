@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.cluster;
 
 import static java.lang.String.format;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +64,8 @@ public class ClusterUpscaleService {
         recipeEngine.uploadUpscaleRecipes(stack, targetHostGroups, hostGroups);
     }
 
-    public void installServicesOnNewHosts(Long stackId, Set<String> hostGroupNames, Boolean repair, Boolean restartServices) throws CloudbreakException {
+    public void installServicesOnNewHosts(Long stackId, Set<String> hostGroupNames, Boolean repair, Boolean restartServices,
+            Map<String, Set<String>> hostGroupsWithHostNames) throws CloudbreakException {
         Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
         LOGGER.debug("Start installing CM services");
         removeUnusedParcelComponents(stack);
@@ -79,7 +81,10 @@ public class ClusterUpscaleService {
                         .collect(Collectors.toSet());
         ClusterApi connector = getClusterConnector(stack);
         List<String> upscaledHosts = connector.upscaleCluster(instanceMetaDatasByHostGroup);
-        restartServicesIfNecessary(repair, restartServices, stack, connector);
+        if (Boolean.TRUE.equals(repair)) {
+            recommissionHostsIfNeeded(connector, hostGroupsWithHostNames);
+            restartServicesIfNecessary(restartServices, stack, connector);
+        }
         setInstanceStatus(runningInstanceMetaDataSet, upscaledHosts);
     }
 
@@ -100,8 +105,8 @@ public class ClusterUpscaleService {
                 });
     }
 
-    private void restartServicesIfNecessary(Boolean repair, Boolean restartServices, Stack stack, ClusterApi connector) throws CloudbreakException {
-        if (shouldRestartServices(repair, restartServices, stack)) {
+    private void restartServicesIfNecessary(Boolean restartServices, Stack stack, ClusterApi connector) throws CloudbreakException {
+        if (shouldRestartServices(restartServices, stack)) {
             try {
                 LOGGER.info("Trying to restart services");
                 connector.restartAll(false);
@@ -111,8 +116,8 @@ public class ClusterUpscaleService {
         }
     }
 
-    private boolean shouldRestartServices(Boolean repair, Boolean restartServices, Stack stack) {
-        return repair && restartServices && stack.getNotTerminatedAndNotZombieInstanceMetaDataList().size() == stack.getRunningInstanceMetaDataSet().size();
+    private boolean shouldRestartServices(Boolean restartServices, Stack stack) {
+        return restartServices && stack.getNotTerminatedAndNotZombieInstanceMetaDataList().size() == stack.getRunningInstanceMetaDataSet().size();
     }
 
     public void executePostRecipesOnNewHosts(Long stackId) throws CloudbreakException {
@@ -150,7 +155,7 @@ public class ClusterUpscaleService {
         getClusterConnector(stack).installComponents(components, hostname);
     }
 
-    public void regenerateKerberosKeytabs(Long stackId, String hostname) throws CloudbreakException {
+    public void regenerateKerberosKeytabs(Long stackId, String hostname) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         LOGGER.info("Start regenerate kerberos keytabs in ambari on host {}", hostname);
@@ -161,6 +166,21 @@ public class ClusterUpscaleService {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.info("Start components in ambari on host {}", hostname);
         getClusterConnector(stack).startComponents(components, hostname);
+    }
+
+    private void recommissionHostsIfNeeded(ClusterApi connector, Map<String, Set<String>> hostGroupsWithHostNames) {
+        Set<String> hosts = hostGroupsWithHostNames.values().stream().flatMap(Set::stream).collect(Collectors.toSet());
+        if (!hosts.isEmpty()) {
+            Set<String> decommissionedHosts = new HashSet<>(connector.clusterStatusService().getDecommissionedHostsFromCM());
+            List<String> hostsToCommission = hosts.stream()
+                    .filter(decommissionedHosts::contains)
+                    .collect(Collectors.toList());
+            if (!hostsToCommission.isEmpty()) {
+                LOGGER.info("The following hosts will be recommissioned since they are decommissioned and selected as repairable hosts. Hosts: {}",
+                        hostsToCommission);
+                connector.clusterCommissionService().recommissionHosts(hostsToCommission);
+            }
+        }
     }
 
     public void restartAll(Long stackId) throws CloudbreakException {
