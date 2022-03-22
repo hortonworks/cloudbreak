@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_HOST_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED_HOST_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -31,6 +30,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -259,9 +259,9 @@ public class ClusterOperationServiceTest {
         underTest.reportHealthChange(STACK_CRN, Map.of(), Set.of("host1"));
 
         verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT.getMessage()), any());
-        verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_RECOVERED_NODES_REPORTED_HOST_EVENT.getMessage()), any());
         verify(cloudbreakEventService).fireCloudbreakEvent(STACK_ID, "AVAILABLE", CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT, List.of("host1"));
         assertEquals(InstanceStatus.SERVICES_HEALTHY, host1.getInstanceStatus());
+        assertEquals(StringUtils.EMPTY, host1.getStatusReason());
     }
 
     @Test
