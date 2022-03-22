@@ -34,6 +34,7 @@ public class PlatformResourceModelDescription {
         public static final String GET_ENCRYPTIONKEYS = "retrieve encryption keys with properties";
         public static final String GET_NOSQL_TABLES = "retrieve nosql tables";
         public static final String GET_RESOURCE_GROUPS = "retrieve resource groups";
+        public static final String GET_PRIVATE_DNS_ZONES = "retrieve private DNS zones";
     }
 
     public static class OpEnvDescription {
@@ -51,6 +52,7 @@ public class PlatformResourceModelDescription {
         public static final String GET_ENCRYPTIONKEYS = "retrieve encryption keys with properties by environment";
         public static final String GET_NOSQL_TABLES = "retrieve nosql tables by environment";
         public static final String GET_RESOURCE_GROUPS = "retrieve resource groups by environment";
+        public static final String GET_PRIVATE_DNS_ZONES = "retrieve private DNS zones by environment";
     }
 
 }

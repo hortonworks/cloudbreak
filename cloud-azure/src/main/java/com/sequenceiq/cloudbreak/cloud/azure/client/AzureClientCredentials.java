@@ -63,6 +63,10 @@ public class AzureClientCredentials {
         return privatednsManager.authenticate(azureClientCredentials, credentialView.getSubscriptionId());
     }
 
+    public privatednsManager getPrivateDnsManagerWithAnotherSubscription(String subscriptionId) {
+        return privatednsManager.authenticate(azureClientCredentials, subscriptionId);
+    }
+
     public ComputeManager getComputeManager() {
         return ComputeManager.authenticate(azureClientCredentials, credentialView.getSubscriptionId());
     }
