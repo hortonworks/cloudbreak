@@ -72,7 +72,7 @@ public class ResizeRecoveryServiceTest {
     private final FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "FLOW_ID");
 
     private final List<DatalakeStatusEnum> knownRecoverableState = List.of(DatalakeStatusEnum.STOP_FAILED,
-            DatalakeStatusEnum.PROVISIONING_FAILED, DatalakeStatusEnum.DATALAKE_RESTORE_FAILED);
+            DatalakeStatusEnum.PROVISIONING_FAILED, DatalakeStatusEnum.DATALAKE_RESTORE_FAILED, DatalakeStatusEnum.STOPPED);
 
     @BeforeEach
     public void setup() {
@@ -98,6 +98,12 @@ public class ResizeRecoveryServiceTest {
         sdxStatusEntity.setStatus(status);
         SdxRecoverableResponse sdxRecoverableResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecovery(cluster));
         assertEquals(RecoveryStatus.RECOVERABLE, sdxRecoverableResponse.getStatus(), status + " should be recoverable");
+    }
+
+    @Test
+    public void testDetachedNotRecoverable() {
+        when(cluster.isDetached()).thenReturn(true);
+        testGetClusterRecoverableForStatusNotRecoverable(DatalakeStatusEnum.STOPPED);
     }
 
     @Test
