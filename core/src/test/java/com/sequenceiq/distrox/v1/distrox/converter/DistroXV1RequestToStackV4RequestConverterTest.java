@@ -102,10 +102,12 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         source.setEnvironmentName("envname");
         DistroXDatabaseRequest databaseRequest = new DistroXDatabaseRequest();
         databaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.HA);
+        databaseRequest.setDatabaseEngineVersion("13");
         source.setExternalDatabase(databaseRequest);
         StackV4Request convert = underTest.convert(source);
         assertThat(convert.getExternalDatabase()).isNotNull();
         assertThat(convert.getExternalDatabase().getAvailabilityType()).isEqualTo(DatabaseAvailabilityType.HA);
+        assertThat(convert.getExternalDatabase().getDatabaseEngineVersion()).isEqualTo("13");
     }
 
     @Test
@@ -430,6 +432,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
     private DatabaseRequest createDatabaseRequest() {
         DatabaseRequest request = new DatabaseRequest();
         request.setAvailabilityType(DatabaseAvailabilityType.HA);
+        request.setDatabaseEngineVersion("13");
         return request;
     }
 
