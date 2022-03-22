@@ -56,7 +56,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.authentication.StackAuthenticationToStackAuthenticationV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterToClusterV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.customdomains.StackToCustomDomainsSettingsV4Response;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.database.DatabaseAvailabilityTypeToDatabaseResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.database.ExternalDatabaseToDatabaseResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupToInstanceGroupV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.loadbalancer.LoadBalancerToLoadBalancerResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.network.NetworkToNetworkV4ResponseConverter;
@@ -141,7 +141,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     private StackAuthenticationToStackAuthenticationV4ResponseConverter stackAuthenticationToStackAuthenticationV4ResponseConverter;
 
     @Mock
-    private DatabaseAvailabilityTypeToDatabaseResponseConverter databaseAvailabilityTypeToDatabaseResponseConverter;
+    private ExternalDatabaseToDatabaseResponseConverter databaseAvailabilityTypeToDatabaseResponseConverter;
 
     @Mock
     private RecipeToRecipeV4ResponseConverter recipeToRecipeV4ResponseConverter;
@@ -189,7 +189,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(stackToPlacementSettingsV4ResponseConverter.convert(any())).willReturn(new PlacementSettingsV4Response());
         given(telemetryConverter.convert(any())).willReturn(new TelemetryResponse());
         given(instanceGroupToInstanceGroupV4ResponseConverter.convert(any())).willReturn(new InstanceGroupV4Response());
-        given(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any())).willReturn(new DatabaseResponse());
+        given(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any(), any())).willReturn(new DatabaseResponse());
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
@@ -214,7 +214,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(stackToPlacementSettingsV4ResponseConverter.convert(any())).willReturn(new PlacementSettingsV4Response());
         given(telemetryConverter.convert(any())).willReturn(new TelemetryResponse());
         given(instanceGroupToInstanceGroupV4ResponseConverter.convert(any())).willReturn(new InstanceGroupV4Response());
-        given(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any())).willReturn(new DatabaseResponse());
+        given(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any(), any())).willReturn(new DatabaseResponse());
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
@@ -241,7 +241,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(stackToPlacementSettingsV4ResponseConverter.convert(any())).willReturn(new PlacementSettingsV4Response());
         given(telemetryConverter.convert(any())).willReturn(new TelemetryResponse());
         given(instanceGroupToInstanceGroupV4ResponseConverter.convert(any())).willReturn(new InstanceGroupV4Response());
-        given(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any())).willReturn(new DatabaseResponse());
+        given(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any(), any())).willReturn(new DatabaseResponse());
         given(loadBalancerService.findByStackId(any())).willReturn(loadBalancers);
         // WHEN
         StackV4Response result = underTest.convert(source);
