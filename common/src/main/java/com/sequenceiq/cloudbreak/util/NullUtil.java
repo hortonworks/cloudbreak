@@ -51,9 +51,11 @@ public class NullUtil {
     }
 
     public static boolean allNull(Object... values) {
-        for (Object v : values) {
-            if (v != null) {
-                return false;
+        if (values != null) {
+            for (Object v : values) {
+                if (v != null) {
+                    return false;
+                }
             }
         }
         return true;
