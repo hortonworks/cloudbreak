@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Preconditions;
+import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.NetworkV4Base;
@@ -403,8 +404,13 @@ public class LoadBalancerConfigService {
     }
 
     private boolean isLoadBalancerEnabled(StackType type, String cloudPlatform, DetailedEnvironmentResponse environment, boolean flagEnabled) {
-        return getSupportedPlatforms().contains(cloudPlatform) &&
+        return getSupportedPlatforms().contains(cloudPlatform) && !isLoadBalancerDisabled(environment) &&
             (flagEnabled || isLoadBalancerEnabledForDatalake(type, environment) || isLoadBalancerEnabledForDatahub(type, environment));
+    }
+
+    private boolean isLoadBalancerDisabled(DetailedEnvironmentResponse environment) {
+        return environment != null && environment.getNetwork() != null &&
+                LoadBalancerCreation.DISABLED.equals(environment.getNetwork().getLoadBalancerCreation());
     }
 
     private boolean isLoadBalancerEnabledForDatalake(StackType type, DetailedEnvironmentResponse environment) {

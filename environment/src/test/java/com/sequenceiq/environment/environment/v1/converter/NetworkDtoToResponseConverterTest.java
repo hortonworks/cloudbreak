@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
@@ -88,6 +89,21 @@ public class NetworkDtoToResponseConverterTest {
         assertNull(actual.getAws());
         assertNull(actual.getYarn());
         assertNull(actual.getAzure());
+    }
+
+    @Test
+    void testConvertWithLoadBalancerEnabled() {
+        NetworkDto network = createNetworkDto().withAws(createAwsParams()).withLoadBalancerCreation(LoadBalancerCreation.ENABLED).build();
+        ProvidedSubnetIds providedSubnetIds = new ProvidedSubnetIds(PREFERRED_SUBNET_ID, Set.of(PREFERRED_SUBNET_ID));
+        when(subnetIdProvider.subnets(network, TUNNEL, network.getCloudPlatform(), true)).thenReturn(providedSubnetIds);
+
+        EnvironmentNetworkResponse actual = underTest.convert(network, TUNNEL, true);
+
+        assertEquals(network.getAws().getVpcId(), actual.getAws().getVpcId());
+        assertEquals(LoadBalancerCreation.ENABLED, actual.getLoadBalancerCreation());
+        assertNull(actual.getAzure());
+        assertNull(actual.getYarn());
+        assertNull(actual.getMock());
     }
 
     @Test
