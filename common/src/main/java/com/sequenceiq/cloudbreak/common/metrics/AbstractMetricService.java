@@ -97,6 +97,12 @@ public abstract class AbstractMetricService implements MetricService {
         Metrics.gauge(getMetricName(metric), tagList, object, valueFunction);
     }
 
+    @Override
+    public <T extends Number> T registerGaugeMetric(Metric metric, T number, Map<String, String> tags) {
+        List<Tag> tagList = getTagList(tags);
+        return Metrics.gauge(getMetricName(metric), tagList, number);
+    }
+
     private List<Tag> getTagList(Map<String, String> tags) {
         if (tags == null) {
             return Collections.emptyList();
