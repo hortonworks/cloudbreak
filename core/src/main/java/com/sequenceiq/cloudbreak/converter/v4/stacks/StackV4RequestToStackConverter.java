@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -65,6 +66,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.network.NetworkV4RequestToN
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -75,6 +77,7 @@ import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
+import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
@@ -154,6 +157,9 @@ public class StackV4RequestToStackConverter {
     @Inject
     private StackAuthenticationV4RequestToStackAuthenticationConverter stackAuthenticationV4RequestToStackAuthenticationConverter;
 
+    @Inject
+    private TargetedUpscaleSupportService targetedUpscaleSupportService;
+
     public Stack convert(StackV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
 
@@ -205,6 +211,8 @@ public class StackV4RequestToStackConverter {
         }
         stack.setExternalDatabaseCreationType(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getAvailabilityType));
         stack.setExternalDatabaseEngineVersion(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getDatabaseEngineVersion));
+        stack.setDomainDnsResolver(targetedUpscaleSupportService.isUnboundEliminationSupported(Crn.safeFromString(source.getEnvironmentCrn()).getAccountId()) ?
+                DnsResolverType.FREEIPA_FOR_ENV : DnsResolverType.LOCAL_UNBOUND);
         determineServiceTypeTag(stack, source.getTags());
         determineServiceFeatureTag(stack, source.getTags());
 
