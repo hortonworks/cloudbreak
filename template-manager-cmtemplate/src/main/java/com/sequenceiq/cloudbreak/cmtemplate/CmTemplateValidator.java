@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
@@ -58,19 +59,19 @@ public class CmTemplateValidator implements BlueprintValidator {
     }
 
     @Override
-    public void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, String hostGroupName, Integer adjustment,
-            Collection<InstanceGroup> instanceGroups) {
+    public void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, Optional<ClouderaManagerProduct> cdhProduct,
+        String hostGroupName, Integer adjustment, Collection<InstanceGroup> instanceGroups) {
         CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
         validateRequiredRoleCountInCluster(hostGroupName, adjustment, instanceGroups, templateProcessor);
-        validateBlackListedScalingRoles(accountId, templateProcessor, hostGroupName, adjustment);
+        validateBlackListedScalingRoles(accountId, templateProcessor, hostGroupName, adjustment, cdhProduct);
     }
 
     public void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, Map<String, Integer> instanceGroupAdjustments,
-            Collection<InstanceGroup> instanceGroups) {
+        Optional<ClouderaManagerProduct> cdhProduct, Collection<InstanceGroup> instanceGroups) {
         CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
         validateRequiredRoleCountInCluster(instanceGroupAdjustments, instanceGroups, templateProcessor);
         instanceGroupAdjustments.forEach((hostGroupName, adjustment) -> {
-            validateBlackListedScalingRoles(accountId, templateProcessor, hostGroupName, adjustment);
+            validateBlackListedScalingRoles(accountId, templateProcessor, hostGroupName, adjustment, cdhProduct);
         });
     }
 
@@ -79,20 +80,20 @@ public class CmTemplateValidator implements BlueprintValidator {
                 && isVersionNewerOrEqualThanLimited(blueprintVersion, role.getBlockedUntilCDPVersionAsVersion());
     }
 
-    private void validateBlackListedScalingRoles(String accountId, CmTemplateProcessor templateProcessor, String hostGroupName, Integer adjustment) {
-        Versioned blueprintVersion = () -> templateProcessor.getVersion().get();
+    private void validateBlackListedScalingRoles(String accountId, CmTemplateProcessor templateProcessor, String hostGroupName,
+        Integer adjustment, Optional<ClouderaManagerProduct> cdhProduct) {
         Set<String> services = templateProcessor.getComponentsByHostGroup().get(hostGroupName);
         if (adjustment < 0) {
             for (BlackListedDownScaleRole role : BlackListedDownScaleRole.values()) {
                 if (services.contains(role.name())) {
-                    validateRole(accountId, role, blueprintVersion, templateProcessor);
+                    validateRole(accountId, role, cdhProduct, templateProcessor);
                 }
             }
         }
         if (adjustment > 0) {
             for (BlackListedUpScaleRole role : BlackListedUpScaleRole.values()) {
                 if (services.contains(role.name())) {
-                    validateRole(accountId, role, blueprintVersion, templateProcessor);
+                    validateRole(accountId, role, cdhProduct, templateProcessor);
                 }
             }
         }
@@ -152,7 +153,9 @@ public class CmTemplateValidator implements BlueprintValidator {
         });
     }
 
-    private void validateRole(String accountId, EntitledForServiceScale role, Versioned blueprintVersion, CmTemplateProcessor templateProcessor) {
+    private void validateRole(String accountId, EntitledForServiceScale role, Optional<ClouderaManagerProduct> cdhProduct,
+        CmTemplateProcessor templateProcessor) {
+        Versioned blueprintVersion = () -> cdhProduct.isEmpty() ? "7.0.0" : cdhProduct.get().getVersion();
         boolean versionEnablesScaling = isVersionEnablesScaling(blueprintVersion, role);
         boolean entitledFor = entitlementService.isEntitledFor(accountId, role.getEntitledFor());
         if (role.getBlockedUntilCDPVersion().isPresent() && !versionEnablesScaling && !entitledFor) {

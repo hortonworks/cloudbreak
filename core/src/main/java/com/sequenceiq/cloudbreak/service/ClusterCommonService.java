@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -104,6 +105,9 @@ public class ClusterCommonService {
     @Inject
     private InstanceGroupService instanceGroupService;
 
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
     public FlowIdentifier put(String crn, UpdateClusterV4Request updateJson) {
         Stack stack = stackService.getByCrnWithLists(crn);
         Long stackId = stack.getId();
@@ -150,6 +154,7 @@ public class ClusterCommonService {
             cmTemplateValidator.validateHostGroupScalingRequest(
                     accountId,
                     blueprint,
+                    clusterComponentConfigProvider.getCdhProduct(stack.getCluster().getId()),
                     hostGroupName,
                     updateJson.getHostGroupAdjustment().getScalingAdjustment(),
                     instanceGroupService.findNotTerminatedByStackId(stack.getId()));
