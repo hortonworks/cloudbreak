@@ -12,11 +12,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityMode;
@@ -36,8 +36,8 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CcmUserDataServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CcmUserDataServiceTest {
 
     private static final String TEST_ACCOUNT_ID = "accid";
 
@@ -76,14 +76,14 @@ public class CcmUserDataServiceTest {
     private StackService stackService;
 
     @Test
-    public void testFetchAndSaveCcmParametersWhenCcmTunnelNotEnabled() {
+    void testFetchAndSaveCcmParametersWhenCcmTunnelNotEnabled() {
         Stack stack = getAStack();
         CcmConnectivityParameters ccmNotEnabled = underTest.fetchAndSaveCcmParameters(stack);
         assertEquals(CcmConnectivityMode.NONE, ccmNotEnabled.getConnectivityMode(), "CCM should not be enabled.");
     }
 
     @Test
-    public void testFetchAndSaveCcmParametersWhenCcmV1IsEnabled() {
+    void testFetchAndSaveCcmParametersWhenCcmV1IsEnabled() {
         Stack stack = getAStack();
         stack.setTunnel(Tunnel.CCM);
         DefaultCcmParameters defaultCcmParameters = mock(DefaultCcmParameters.class);
@@ -105,7 +105,7 @@ public class CcmUserDataServiceTest {
     }
 
     @Test
-    public void testFetchAndSaveCcmParametersWhenCcmV2IsEnabled() {
+    void testFetchAndSaveCcmParametersWhenCcmV2IsEnabled() {
         Stack stack = getAStack();
         stack.setTunnel(Tunnel.CCMV2);
         DefaultCcmV2Parameters defaultCcmV2Parameters = mock(DefaultCcmV2Parameters.class);
@@ -129,7 +129,7 @@ public class CcmUserDataServiceTest {
     }
 
     @Test
-    public void testFetchAndSaveCcmParametersWhenCcmV2JumpgateIsEnabled() {
+    void testFetchAndSaveCcmParametersWhenCcmV2JumpgateIsEnabled() {
         Stack stack = getAStack();
         stack.setTunnel(Tunnel.CCMV2_JUMPGATE);
         DefaultCcmV2JumpgateParameters defaultCcmV2JumpgateParameters = mock(DefaultCcmV2JumpgateParameters.class);
