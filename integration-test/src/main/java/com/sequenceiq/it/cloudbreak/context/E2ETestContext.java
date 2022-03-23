@@ -27,7 +27,6 @@ public class E2ETestContext extends TestContext {
 
     @Override
     public void cleanupTestContext() {
-        getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, this));
         super.cleanupTestContext();
     }
 }

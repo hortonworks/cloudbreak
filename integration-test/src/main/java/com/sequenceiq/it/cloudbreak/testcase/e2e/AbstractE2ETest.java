@@ -17,6 +17,7 @@ import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotRetryOnceTestListener;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotRetryUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.SpotUtil;
+import com.sequenceiq.it.util.TagsUtil;
 
 @Listeners(SpotRetryOnceTestListener.class)
 public abstract class AbstractE2ETest extends AbstractIntegrationTest {
@@ -26,6 +27,9 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
     @Inject
     private SpotRetryUtil spotRetryUtil;
+
+    @Inject
+    private TagsUtil tagsUtil;
 
     @Override
     protected void setupTest(ITestResult testResult) {
@@ -43,7 +47,8 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     }
 
     @AfterMethod
-    public void tearDownSpot() {
+    public void tearDownSpotValidateTags(Object[] data) {
+        ((TestContext) data[0]).getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, (TestContext) data[0]));
         spotUtil.setUseSpotInstances(Boolean.FALSE);
     }
 
