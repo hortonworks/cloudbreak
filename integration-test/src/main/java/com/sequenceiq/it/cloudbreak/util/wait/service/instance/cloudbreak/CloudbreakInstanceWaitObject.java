@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,8 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
 
     private List<InstanceGroupV4Response> instanceGroups;
 
+    private String instanceResourceType = "Data Lake";
+
     public CloudbreakInstanceWaitObject(TestContext testContext, String name, List<String> instanceIds, InstanceStatus desiredStatus) {
         this.testContext = testContext;
         this.name = name;
@@ -54,6 +57,7 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
         try {
             instanceGroups = testContext.getMicroserviceClient(CloudbreakClient.class)
                     .getDefaultClient().distroXV1Endpoint().getByName(name, Set.of()).getInstanceGroups();
+            instanceResourceType = "Data Hub";
         } catch (NotFoundException e) {
             LOGGER.info("SDX '{}' instance groups are present for validation.", getName());
             instanceGroups = testContext.getSdxClient().getDefaultClient().sdxEndpoint().getDetail(name, Set.of()).getStackV4Response().getInstanceGroups();
@@ -72,8 +76,17 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public Map<String, String> actualStatusReason() {
-        return getInstanceMetaDatas().stream().collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId,
-                InstanceMetaDataV4Response::getStatusReason));
+        return getInstanceMetaDatas().stream()
+                .collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId,
+                        instanceMetaData -> {
+                            String statusReason = instanceMetaData.getStatusReason();
+                            if (StringUtils.isBlank(statusReason)) {
+                                return String.format("Status reason is NOT available for '%s' instance!", instanceResourceType);
+                            } else {
+                                return statusReason;
+                            }
+                        }
+                ));
     }
 
     @Override
