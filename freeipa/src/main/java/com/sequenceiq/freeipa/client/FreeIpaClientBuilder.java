@@ -180,14 +180,14 @@ public class FreeIpaClientBuilder {
             }
         }
         try {
-            CookieAndStickyId cookieAndStickyId = connect(user, pass, clientConfig.getApiAddress(), port, stickyIdHeader, stickyId);
+            CookieAndStickyId cookieAndStickyId = connect(user, pass, clientConfig.getApiAddress(), port, stickyId);
             String sessionCookie = cookieAndStickyId.getCookie();
             stickyId = cookieAndStickyId.getStickyId();
 
             Map<String, String> headers = buildHeaders(sessionCookie, stickyId);
 
             JsonRpcHttpClient jsonRpcHttpClient = new JsonRpcHttpClient(ObjectMapperBuilder.getObjectMapper(),
-                    getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/json"), headers);
+                    getIpaUrl(clientConfig.getApiAddress(), port, basePath, "/session/json"), headers, false, true);
 
             if (sslContext != null) {
                 jsonRpcHttpClient.setSslContext(sslContext);
@@ -204,7 +204,7 @@ public class FreeIpaClientBuilder {
         }
     }
 
-    private CookieAndStickyId connect(String user, String pass, String apiAddress, int port, Optional<String> stickyIdHeader, Optional<String> stickyId)
+    private CookieAndStickyId connect(String user, String pass, String apiAddress, int port, Optional<String> stickyId)
             throws IOException, URISyntaxException, FreeIpaClientException {
 
         Map<String, String> stickyHeaders = createStickyHeaders(stickyId);
