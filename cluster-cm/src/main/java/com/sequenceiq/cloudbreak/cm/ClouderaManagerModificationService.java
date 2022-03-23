@@ -5,9 +5,9 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_RESTARTING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTING;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_RESTARTING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATED_REMOTE_DATA_CONTEXT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATING_REMOTE_DATA_CONTEXT;
 
@@ -17,6 +17,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -210,8 +211,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             clouderaManagerRoleRefreshService.refreshClusterRoles(apiClient, stack);
             LOGGER.debug("Cluster upscale completed.");
             return instanceMetaDatas.stream()
-                    .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                     .map(InstanceMetaData::getDiscoveryFQDN)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         } catch (ApiException e) {
             LOGGER.error(String.format("Failed to upscale. Response: %s", e.getResponseBody()), e);
@@ -824,25 +825,41 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         try {
             LOGGER.debug("Stopping all Cloudera Runtime services");
-            eventService
-                    .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPING);
-            disableKnoxAutorestart(disableKnoxAutorestart);
-            Collection<ApiService> apiServices = readServices(stack);
-            boolean anyServiceNotStopped = apiServices.stream()
-                    .anyMatch(service -> !ApiServiceState.STOPPED.equals(service.getServiceState())
-                            && !ApiServiceState.STOPPING.equals(service.getServiceState()));
-            if (anyServiceNotStopped) {
-                ApiCommand apiCommand = clustersResourceApi.stopCommand(cluster.getName());
-                ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmShutdown(stack, apiClient, apiCommand.getId());
-                handlePollingResult(pollingResult.getPollingResult(), "Cluster was terminated while waiting for Hadoop services to stop",
-                        "Timeout while stopping Cloudera Manager services.");
+
+            if (clouderaManagerPollingServiceProvider.checkCmStatus(stack, apiClient).isTimeout()) {
+                skipStopWithStoppedCm();
+            } else {
+                stopWithRunningCm(disableKnoxAutorestart, cluster, clustersResourceApi);
             }
-            eventService
-                    .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
         } catch (ApiException e) {
             LOGGER.info("Couldn't stop Cloudera Manager services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
+    }
+
+    private void skipStopWithStoppedCm() {
+        LOGGER.debug("No need to stop Cloudera Manager services as Cloudera Manager is already stopped");
+        eventService
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
+    }
+
+    private void stopWithRunningCm(boolean disableKnoxAutorestart, Cluster cluster, ClustersResourceApi clustersResourceApi)
+            throws ApiException, CloudbreakException {
+        eventService
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPING);
+        disableKnoxAutorestart(disableKnoxAutorestart);
+        Collection<ApiService> apiServices = readServices(stack);
+        boolean anyServiceNotStopped = apiServices.stream()
+                .anyMatch(service -> !ApiServiceState.STOPPED.equals(service.getServiceState())
+                        && !ApiServiceState.STOPPING.equals(service.getServiceState()));
+        if (anyServiceNotStopped) {
+            ApiCommand apiCommand = clustersResourceApi.stopCommand(cluster.getName());
+            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmShutdown(stack, apiClient, apiCommand.getId());
+            handlePollingResult(pollingResult.getPollingResult(), "Cluster was terminated while waiting for Hadoop services to stop",
+                    "Timeout while stopping Cloudera Manager services.");
+        }
+        eventService
+                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
     }
 
     private void disableKnoxAutorestart(boolean disableKnoxAutorestart) {
