@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionResult;
+import com.sequenceiq.cloudbreak.quartz.configuration.QuartzJobInitializer;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
@@ -73,6 +74,9 @@ public class AuditCredentialAuthorizationIntegrationTest {
 
     @MockBean
     private EntitlementService entitlementService;
+
+    @MockBean
+    private QuartzJobInitializer quartzJobInitializer;
 
     @Mock
     private ResourceDefinitionRequest resourceDefinitionRequest;

@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.quartz.configuration.QuartzJobInitializer;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
@@ -130,6 +131,9 @@ public class EnvironmentServiceIntegrationTest {
 
     @MockBean
     private GrpcUmsClient grpcUmsClient;
+
+    @MockBean
+    private QuartzJobInitializer quartzJobInitializer;
 
     @Inject
     private ProxyConfigRepository proxyConfigRepository;
