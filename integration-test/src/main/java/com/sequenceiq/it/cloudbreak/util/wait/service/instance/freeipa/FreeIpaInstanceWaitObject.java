@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,8 +65,17 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public Map<String, String> actualStatusReason() {
-        return getInstanceMetaDatas().stream().collect(Collectors.toMap(InstanceMetaDataResponse::getInstanceId,
-                InstanceMetaDataResponse::getState));
+        return getInstanceMetaDatas().stream()
+                .collect(Collectors.toMap(InstanceMetaDataResponse::getInstanceId,
+                        instanceMetaData -> {
+                            String statusReason = instanceMetaData.getState();
+                            if (StringUtils.isBlank(statusReason)) {
+                                return "Status reason is NOT available for FreeIPA instance!";
+                            } else {
+                                return statusReason;
+                            }
+                        }
+                ));
     }
 
     @Override
