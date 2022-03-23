@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairNod
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -64,6 +65,9 @@ public class SdxRepairService {
     @Inject
     private CloudbreakPoller cloudbreakPoller;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public FlowIdentifier triggerRepairByCrn(String userCrn, String clusterCrn, SdxRepairRequest clusterRepairRequest) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         MDCBuilder.buildMdcContext(cluster);
@@ -96,7 +100,9 @@ public class SdxRepairService {
         try {
             LOGGER.info("Triggering repair flow for cluster {} with hostgroups {}", sdxCluster.getClusterName(), repairRequest.getHostGroupNames());
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> stackV4Endpoint
                     .repairClusterInternal(0L, sdxCluster.getClusterName(), createRepairRequest(repairRequest), initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", sdxCluster);

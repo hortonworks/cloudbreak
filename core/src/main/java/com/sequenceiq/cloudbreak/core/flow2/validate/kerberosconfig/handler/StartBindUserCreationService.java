@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.PollBindUserCreationEvent;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -30,6 +31,9 @@ public class StartBindUserCreationService {
 
     @Inject
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     /**
      * In very rare cases it's possible the Operation will be rejected because there is another with the same parameters is running.
@@ -60,7 +64,9 @@ public class StartBindUserCreationService {
     private OperationStatus invokeCreateBindUser(StackView stackView) {
         BindUserCreateRequest request = createRequest(stackView);
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> freeIpaV1Endpoint.createBindUser(request, userCrn));
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> freeIpaV1Endpoint.createBindUser(request, userCrn));
     }
 
     private BindUserCreateRequest createRequest(StackView stackView) {

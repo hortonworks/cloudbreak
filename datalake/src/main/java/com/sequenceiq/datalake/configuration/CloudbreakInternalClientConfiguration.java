@@ -6,8 +6,8 @@ import javax.inject.Named;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
@@ -18,6 +18,9 @@ public class CloudbreakInternalClientConfiguration {
     @Inject
     @Named("cloudbreakUrl")
     private String cloudbreakUrl;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public CloudbreakServiceUserCrnClient cloudbreakClient() {
         return new CloudbreakUserCrnClientBuilder(cloudbreakUrl)
@@ -32,7 +35,7 @@ public class CloudbreakInternalClientConfiguration {
         return new CloudbreakInternalCrnClient(cloudbreakClient(), internalCrnBuilder());
     }
 
-    public InternalCrnBuilder internalCrnBuilder() {
-        return new InternalCrnBuilder(Crn.Service.SDXADMIN);
+    public RegionAwareInternalCrnGenerator internalCrnBuilder() {
+        return regionAwareInternalCrnGeneratorFactory.sdxAdmin();
     }
 }

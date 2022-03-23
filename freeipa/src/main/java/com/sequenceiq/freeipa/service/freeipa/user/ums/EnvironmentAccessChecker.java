@@ -10,9 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 
@@ -28,6 +29,8 @@ public class EnvironmentAccessChecker {
 
     private final List<RightCheck> rightChecks;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     /**
      * Creates an EnvironmentAccessChecker instance.
      *
@@ -37,11 +40,13 @@ public class EnvironmentAccessChecker {
      * @throws NullPointerException if the environmentCrn is null
      * @throws CrnParseException    if the environmentCrn does not match the CRN pattern or cannot be parsed
      */
-    public EnvironmentAccessChecker(GrpcUmsClient grpcUmsClient, String environmentCrn, List<RightCheck> rightChecks) {
+    public EnvironmentAccessChecker(GrpcUmsClient grpcUmsClient, String environmentCrn, List<RightCheck> rightChecks,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.grpcUmsClient = requireNonNull(grpcUmsClient, "grpcUmsClient is null");
         Crn.safeFromString(environmentCrn);
         this.environmentCrn = environmentCrn;
         this.rightChecks = requireNonNull(rightChecks);
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
         checkArgument(rightChecks.size() == UserSyncConstants.RIGHTS.size());
     }
 
@@ -50,7 +55,8 @@ public class EnvironmentAccessChecker {
         requireNonNull(requestId, "requestId is null");
 
         try {
-            List<Boolean> hasRights = grpcUmsClient.hasRightsNoCache(memberCrn, rightChecks, requestId);
+            List<Boolean> hasRights = grpcUmsClient.hasRightsNoCache(memberCrn, rightChecks, requestId,
+                    regionAwareInternalCrnGeneratorFactory);
             return new EnvironmentAccessRights(hasRights.get(0), hasRights.get(1));
         } catch (StatusRuntimeException e) {
             // NOT_FOUND errors indicate that a user/machineUser has been deleted after we have

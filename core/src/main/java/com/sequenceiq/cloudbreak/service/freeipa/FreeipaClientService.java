@@ -14,7 +14,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
@@ -34,6 +35,9 @@ public class FreeipaClientService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public DescribeFreeIpaResponse getByEnvironmentCrn(String environmentCrn) {
         try {
             return freeIpaV1Endpoint.describe(environmentCrn);
@@ -51,7 +55,7 @@ public class FreeipaClientService {
 
     public Optional<DescribeFreeIpaResponse> findByEnvironmentCrn(String environmentCrn) {
         try {
-            if (InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
+            if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
                 String accountId = Crn.fromString(environmentCrn).getAccountId();
                 return Optional.ofNullable(freeIpaV1Endpoint.describeInternal(environmentCrn, accountId));
             }
@@ -88,7 +92,9 @@ public class FreeipaClientService {
 
     public OperationStatus createBindUsers(BindUserCreateRequest request, String initiatorUserCrn) {
         try {
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> freeIpaV1Endpoint.createBindUser(request, initiatorUserCrn));
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> freeIpaV1Endpoint.createBindUser(request, initiatorUserCrn));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Failed to invoke bind user creation due to: %s. %s.", e.getMessage(), errorMessage);

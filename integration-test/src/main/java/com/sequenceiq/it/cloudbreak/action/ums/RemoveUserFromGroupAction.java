@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -21,9 +22,12 @@ public class RemoveUserFromGroupAction implements Action<UmsGroupTestDto, UmsCli
 
     private final String memberCrn;
 
-    public RemoveUserFromGroupAction(String groupName, String memberCrn) {
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    public RemoveUserFromGroupAction(String groupName, String memberCrn, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.groupName = groupName;
         this.memberCrn = memberCrn;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -33,7 +37,7 @@ public class RemoveUserFromGroupAction implements Action<UmsGroupTestDto, UmsCli
         testDto.withMember(memberCrn);
         Log.when(LOGGER, format(" Removing user '%s' from group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.whenJson(LOGGER, format(" Remove user from group request:%n "), testDto.getRequest());
-        client.getDefaultClient().removeMemberFromGroup(accountId, groupName, memberCrn, Optional.of(""));
+        client.getDefaultClient().removeMemberFromGroup(accountId, groupName, memberCrn, Optional.of(""), regionAwareInternalCrnGeneratorFactory);
         LOGGER.info(format(" User '%s' has been removed from group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.when(LOGGER, format(" User '%s' has been removed from group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         return testDto;

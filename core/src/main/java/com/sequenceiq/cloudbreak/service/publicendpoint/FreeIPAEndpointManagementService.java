@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
@@ -35,6 +36,9 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
 
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public void registerLoadBalancerDomainWithFreeIPA(Stack stack) {
         Optional<LoadBalancer> loadBalancerOptional = getLoadBalancer(stack.getId());
@@ -66,7 +70,9 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
         request.setEnvironmentCrn(stack.getEnvironmentCrn());
         LOGGER.debug("Registering load balancer with target FQDN {} in FreeIPA with CNAME {}", targetFQDN, endpoint);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        ThreadBasedUserCrnProvider.doAsInternalActor(() -> dnsV1Endpoint.addDnsCnameRecordInternal(accountId, request));
+        ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> dnsV1Endpoint.addDnsCnameRecordInternal(accountId, request));
     }
 
     private void sendAddDnsARecordRequest(Stack stack, LoadBalancer loadBalancer) {
@@ -80,7 +86,9 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
         request.setCreateReverse(true);
         LOGGER.debug("Registering load balancer with target IP {} in FreeIPA with A record {}", ip, endpoint);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        ThreadBasedUserCrnProvider.doAsInternalActor(() -> dnsV1Endpoint.addDnsARecordInternal(accountId, request));
+        ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> dnsV1Endpoint.addDnsARecordInternal(accountId, request));
     }
 
     public void deleteLoadBalancerDomainFromFreeIPA(Stack stack) {
@@ -106,13 +114,17 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
     private void sendDeleteDnsCnameRecordRequest(Stack stack, LoadBalancer loadBalancer) {
         String endpoint = loadBalancer.getEndpoint();
         LOGGER.debug("Deleting load balancer with CNAME  {} from FreeIPA", endpoint);
-        ThreadBasedUserCrnProvider.doAsInternalActor(() -> dnsV1Endpoint.deleteDnsCnameRecord(stack.getEnvironmentCrn(), null, endpoint));
+        ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> dnsV1Endpoint.deleteDnsCnameRecord(stack.getEnvironmentCrn(), null, endpoint));
     }
 
     private void sendDeleteDnsARecordRequest(Stack stack, LoadBalancer loadBalancer) {
         String endpoint = loadBalancer.getEndpoint();
         LOGGER.debug("Deleting load balancer with A record {} from FreeIPA", endpoint);
-        ThreadBasedUserCrnProvider.doAsInternalActor(() -> dnsV1Endpoint.deleteDnsARecord(stack.getEnvironmentCrn(), null, endpoint));
+        ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> dnsV1Endpoint.deleteDnsARecord(stack.getEnvironmentCrn(), null, endpoint));
     }
 
     private Optional<LoadBalancer> getLoadBalancer(Long stackId) {

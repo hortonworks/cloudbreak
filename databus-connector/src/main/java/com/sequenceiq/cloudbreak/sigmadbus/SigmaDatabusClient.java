@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.sigma.service.dbus.DbusProto;
 import com.cloudera.sigma.service.dbus.SigmaDbusGrpc;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
@@ -47,12 +47,16 @@ public class SigmaDatabusClient<D extends AbstractDatabusStreamConfiguration> im
 
     private ManagedChannelWrapper managedChannelWrapper;
 
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public SigmaDatabusClient(Tracer tracer,
             SigmaDatabusConfig sigmaDatabusConfig,
-            D databusStreamConfiguration) {
+            D databusStreamConfiguration,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.tracer = tracer;
         this.sigmaDatabusConfig = sigmaDatabusConfig;
         this.databusStreamConfiguration = databusStreamConfiguration;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     /**
@@ -67,7 +71,7 @@ public class SigmaDatabusClient<D extends AbstractDatabusStreamConfiguration> im
         LOGGER.debug("Creating databus request with request id: {}", requestId);
         buildMdcContext(request, requestId);
         DbusProto.PutRecordResponse recordResponse = newStub(channelWrapper.getChannel(),
-                requestId, ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN)
+                requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString())
                 .putRecord(recordRequest);
         DbusProto.Record.Reply.Status status = recordResponse.getRecord().getStatus();
         LOGGER.debug("Returned dbus record status is {}", status);

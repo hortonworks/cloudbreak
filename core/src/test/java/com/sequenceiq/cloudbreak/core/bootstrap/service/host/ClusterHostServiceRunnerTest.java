@@ -344,7 +344,7 @@ public class ClusterHostServiceRunnerTest {
     }
 
     private void setupMocksForRunClusterServices() throws NodesUnreachableException {
-        when(umsClient.getAccountDetails(any(), any())).thenReturn(UserManagementProto.Account.getDefaultInstance());
+        when(umsClient.getAccountDetails(any(), any(), any())).thenReturn(UserManagementProto.Account.getDefaultInstance());
         when(stackService.get(any())).thenReturn(stack);
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);

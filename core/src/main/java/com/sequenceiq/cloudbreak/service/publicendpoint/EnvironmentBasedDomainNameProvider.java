@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.dns.LegacyEnvironmentNameBasedDomainNameProvider;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
@@ -33,6 +34,9 @@ public class EnvironmentBasedDomainNameProvider {
 
     @Inject
     private LegacyEnvironmentNameBasedDomainNameProvider legacyEnvironmentNameBasedDomainNameProvider;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
@@ -76,7 +80,7 @@ public class EnvironmentBasedDomainNameProvider {
         //starting to use the CRN of the environment as the certificate renewal will be automatic and be triggered by PEM with internal user
         String accountId = Crn.safeFromString(environmentCrn).getAccountId();
         Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
-        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(accountId, requestIdOptional);
+        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(accountId, requestIdOptional, regionAwareInternalCrnGeneratorFactory);
         String accountSubdomain = account.getWorkloadSubdomain();
         if (accountSubdomain == null || accountSubdomain.isEmpty()) {
             accountSubdomain = FREEIPA_DEFAULT_ACCOUNT_DOMAIN;

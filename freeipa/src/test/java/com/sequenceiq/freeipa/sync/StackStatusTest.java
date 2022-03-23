@@ -25,6 +25,8 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.sigmadbus.processor.MetricsDatabusRecordProcessor;
@@ -94,6 +96,12 @@ class StackStatusTest {
     @MockBean
     private Tracer tracer;
 
+    @MockBean
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @Mock
     private FreeIpaClient freeIpaClient;
 
@@ -158,7 +166,9 @@ class StackStatusTest {
         when(stackInstanceProviderChecker.checkStatus(stack, notTerminatedInstances)).thenReturn(List.of(
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED)
         ));
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackStatus stackStatus = new StackStatus();
         stackStatus.setDetailedStackStatus(DetailedStackStatus.AVAILABLE);
         stack.setStackStatus(stackStatus);
@@ -180,7 +190,9 @@ class StackStatusTest {
         when(stackInstanceProviderChecker.checkStatus(stack, notTerminatedInstances)).thenReturn(List.of(
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER)
         ));
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.DELETED_ON_PROVIDER_SIDE), any());
@@ -198,7 +210,9 @@ class StackStatusTest {
         when(stackInstanceProviderChecker.checkStatus(stack, notTerminatedInstances)).thenReturn(List.of(
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED)
         ));
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.STOPPED), any());
@@ -217,7 +231,9 @@ class StackStatusTest {
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED),
                 createCloudVmInstanceStatus(INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED)
         ));
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.STOPPED), any());
@@ -236,7 +252,9 @@ class StackStatusTest {
                 createCloudVmInstanceStatus(INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED),
                 createCloudVmInstanceStatus(INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STOPPED)
         ));
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UNHEALTHY), any());
@@ -256,7 +274,9 @@ class StackStatusTest {
                 createCloudVmInstanceStatus(INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER),
                 createCloudVmInstanceStatus(INSTANCE_3, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED)
         ));
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UNHEALTHY), any());

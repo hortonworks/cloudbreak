@@ -11,6 +11,7 @@ import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
@@ -35,6 +36,9 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
     @Inject
     private ResourceCreator resourceCreator;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Override
     protected void setupTest(TestContext testContext) {
         useRealUmsUser(testContext, AuthUserKeys.USER_ACCOUNT_ADMIN);
@@ -46,7 +50,7 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
         testContext.given(UmsTestDto.class)
                 .assignTarget(ImageCatalogTestDto.class.getSimpleName())
                 .withSharedResourceUser()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .validate();
     }
 
@@ -66,9 +70,9 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
         testContext.given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withDatahubCreator()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .withEnvironmentUser()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, datahubA.getName());
@@ -85,7 +89,7 @@ public class DataHubListFilteringTest extends AbstractIntegrationTest {
         testContext.given(UmsTestDto.class)
                 .assignTarget(DistroXTestDto.class.getSimpleName())
                 .withDatahubAdmin()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, datahubA.getName(), dataHubB.getName());

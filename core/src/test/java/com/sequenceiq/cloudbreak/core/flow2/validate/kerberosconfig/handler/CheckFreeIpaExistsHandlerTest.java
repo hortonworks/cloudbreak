@@ -18,6 +18,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.config.KerberosConfigValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.CheckFreeIpaExistsEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.ValidateKerberosConfigEvent;
@@ -49,6 +51,12 @@ class CheckFreeIpaExistsHandlerTest {
     @InjectMocks
     private CheckFreeIpaExistsHandler underTest;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @BeforeEach
     public void init() {
         when(stackView.getEnvironmentCrn()).thenReturn(ENV_CRN);
@@ -75,7 +83,8 @@ class CheckFreeIpaExistsHandlerTest {
     @Test
     public void testFreeIpaExists() {
         Event<CheckFreeIpaExistsEvent> event = new Event<>(new CheckFreeIpaExistsEvent(1L));
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackEvent result = (StackEvent) ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.doAccept(new HandlerEvent<>(event)));
 
         assertEquals(KerberosConfigValidationEvent.FREEIPA_EXISTS_EVENT.event(), result.selector());
@@ -87,7 +96,8 @@ class CheckFreeIpaExistsHandlerTest {
     public void testFreeIpaDontExists() {
         Event<CheckFreeIpaExistsEvent> event = new Event<>(new CheckFreeIpaExistsEvent(1L));
         when(freeIpaV1Endpoint.describeInternal(ENV_CRN, "1234")).thenThrow(new NotFoundException());
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ValidateKerberosConfigEvent result = (ValidateKerberosConfigEvent) ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.doAccept(new HandlerEvent<>(event)));
 

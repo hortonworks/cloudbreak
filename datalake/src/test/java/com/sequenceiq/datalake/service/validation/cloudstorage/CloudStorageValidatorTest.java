@@ -15,6 +15,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -44,6 +46,12 @@ public class CloudStorageValidatorTest {
 
     @Mock
     private CloudProviderServicesV4Endopint cloudProviderServicesV4Endopint;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @InjectMocks
     private CloudStorageValidator underTest;
@@ -79,6 +87,8 @@ public class CloudStorageValidatorTest {
         when(environment.getCloudStorageValidation()).thenReturn(CloudStorageValidation.ENABLED);
         when(environment.getCredential()).thenReturn(new CredentialResponse());
         when(secretService.getByResponse(any())).thenReturn("secret");
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(credentialToCloudCredentialConverter.convert(any())).thenReturn(
                 new CloudCredential("id", "name", Map.of("secretKey", "thisshouldnotappearinlog"), "acc", false));
         when(entitlementService.cloudStorageValidationEnabled(any())).thenReturn(true);

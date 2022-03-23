@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -245,6 +246,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public NodeReachabilityResult runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, Map<String, String> candidateAddresses) {
         try {
@@ -584,7 +588,7 @@ public class ClusterHostServiceRunner {
 
     public Optional<String> decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
         String accountId = Crn.safeFromString(stackService.get(stackId).getResourceCrn()).getAccountId();
-        Account account = umsClient.getAccountDetails(accountId, MDCUtils.getRequestId());
+        Account account = umsClient.getAccountDetails(accountId, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
         Optional<String> licenseOpt = Optional.ofNullable(account.getClouderaManagerLicenseKey());
         if (licenseOpt.isPresent() && isNotEmpty(licenseOpt.get())) {
             String license = licenseOpt.get();
@@ -735,7 +739,7 @@ public class ClusterHostServiceRunner {
             if (SSOType.SSO_PROVIDER_FROM_UMS.equals(clusterGateway.getSsoType())) {
                 String accountId = ThreadBasedUserCrnProvider.getAccountId();
                 try {
-                    String metadataXml = umsClient.getIdentityProviderMetadataXml(accountId);
+                    String metadataXml = umsClient.getIdentityProviderMetadataXml(accountId, regionAwareInternalCrnGeneratorFactory);
                     gateway.put("saml", metadataXml);
                 } catch (Exception e) {
                     LOGGER.debug("Could not get SAML metadata file to set up IdP in KNOXSSO.", e);

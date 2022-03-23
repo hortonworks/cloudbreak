@@ -25,7 +25,7 @@ public class RepositoryConfigsTests extends CloudbreakTest {
 
     @Test
     public void testValidAmbariBaseUrl() throws Exception {
-        given(CloudbreakClient.created());
+        given(CloudbreakClient.created(null));
         given(RepositoryConfigs.request(createRepoConfigValidationReqest(VALID_AMBARI_BASE_URL, "", "", "", "",
                 "")));
         when(RepositoryConfigs.post());
@@ -36,7 +36,7 @@ public class RepositoryConfigsTests extends CloudbreakTest {
 
     @Test
     public void testValidAmbariGpgKeyUrl() throws Exception {
-        given(CloudbreakClient.created());
+        given(CloudbreakClient.created(null));
         given(RepositoryConfigs.request(createRepoConfigValidationReqest("", VALID_AMBARI_GPGKEY_URL, "", "", "",
                 "")));
         when(RepositoryConfigs.post());
@@ -47,7 +47,7 @@ public class RepositoryConfigsTests extends CloudbreakTest {
 
     @Test()
     public void testValidMpackUrl() throws Exception {
-        given(CloudbreakClient.created());
+        given(CloudbreakClient.created(null));
         given(RepositoryConfigs.request(createRepoConfigValidationReqest("", "", VALID_MPACK_URL, "", "", "")));
         when(RepositoryConfigs.post());
         then(RepositoryConfigs.assertThis(
@@ -57,7 +57,7 @@ public class RepositoryConfigsTests extends CloudbreakTest {
 
     @Test
     public void testValidStackBaseUrl() throws Exception {
-        given(CloudbreakClient.created());
+        given(CloudbreakClient.created(null));
         given(RepositoryConfigs.request(createRepoConfigValidationReqest("", "", "", VALID_STACK_BASE_URL, "",
                 "")));
         when(RepositoryConfigs.post());
@@ -68,7 +68,7 @@ public class RepositoryConfigsTests extends CloudbreakTest {
 
     @Test
     public void testValidUtilBaseUrl() throws Exception {
-        given(CloudbreakClient.created());
+        given(CloudbreakClient.created(null));
         given(RepositoryConfigs.request(createRepoConfigValidationReqest("", "", "", "", VALID_UTIL_BASE_URL,
                 "")));
         when(RepositoryConfigs.post());
@@ -79,7 +79,7 @@ public class RepositoryConfigsTests extends CloudbreakTest {
 
     @Test
     public void testValidVersionDefFileUrl() throws Exception {
-        given(CloudbreakClient.created());
+        given(CloudbreakClient.created(null));
         given(RepositoryConfigs.request(createRepoConfigValidationReqest("", "", "", "", "",
                 VALID_VERSION_DEF_FILE_URL)));
         when(RepositoryConfigs.post());
@@ -90,7 +90,7 @@ public class RepositoryConfigsTests extends CloudbreakTest {
 
     @Test
     public void testValidRepoConfigsAll() throws Exception {
-        given(CloudbreakClient.created());
+        given(CloudbreakClient.created(null));
         given(RepositoryConfigs.request(createRepoConfigValidationReqest(VALID_AMBARI_BASE_URL, VALID_AMBARI_GPGKEY_URL, VALID_MPACK_URL, VALID_STACK_BASE_URL,
                 VALID_UTIL_BASE_URL, VALID_VERSION_DEF_FILE_URL)));
         when(RepositoryConfigs.post());
@@ -99,7 +99,7 @@ public class RepositoryConfigsTests extends CloudbreakTest {
 
     @Test
     public void testInvalidRepoConfigsAllEmpty() throws Exception {
-        given(CloudbreakClient.created());
+        given(CloudbreakClient.created(null));
         given(RepositoryConfigs.request(createRepoConfigValidationReqest("", "", "", "", "",
                 "")));
         when(RepositoryConfigs.post());
@@ -108,7 +108,7 @@ public class RepositoryConfigsTests extends CloudbreakTest {
 
     @Test
     public void testInvalidRepoConfigsAllInvalid() throws Exception {
-        given(CloudbreakClient.created());
+        given(CloudbreakClient.created(null));
         given(RepositoryConfigs.request(createRepoConfigValidationReqest("a", "a", "a", "a", "a",
                 "a")));
         when(RepositoryConfigs.post());
@@ -117,7 +117,7 @@ public class RepositoryConfigsTests extends CloudbreakTest {
 
     @Test
     public void testInvalidRepoConfigsAllNotAvailable() throws Exception {
-        given(CloudbreakClient.created());
+        given(CloudbreakClient.created(null));
         given(RepositoryConfigs.request(createRepoConfigValidationReqest(INVALID_URL, INVALID_URL, INVALID_URL, INVALID_URL, INVALID_URL, INVALID_URL)));
         when(RepositoryConfigs.post());
         then(RepositoryConfigs.assertAllFalse());

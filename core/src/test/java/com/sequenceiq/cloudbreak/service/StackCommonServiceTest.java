@@ -35,6 +35,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChange
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -110,6 +112,12 @@ class StackCommonServiceTest {
 
     @Mock
     private ScalingHardLimitsService scalingHardLimitsService;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @InjectMocks
     private StackCommonService underTest;
@@ -267,7 +275,7 @@ class StackCommonServiceTest {
         instanceGroupAdjustmentV4Request.setInstanceGroup("instanceGroup");
         instanceGroupAdjustmentV4Request.setScalingAdjustment(5);
         updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustmentV4Request);
-
+        when(regionAwareInternalCrnGeneratorFactory.autoscale()).thenReturn(regionAwareInternalCrnGenerator);
         // Regular flow
         underTest.putStartInstancesInDefaultWorkspace(STACK_CRN, WORKSPACE_ID, updateStackV4Request, ScalingStrategy.STOPSTART_FALLBACK_TO_REGULAR);
         verify(stackOperationService).updateNodeCountStartInstances(stack, updateStackV4Request.getInstanceGroupAdjustment(),

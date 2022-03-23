@@ -31,7 +31,7 @@ import io.jaegertracing.spi.Reporter;
 import io.jaegertracing.spi.Sampler;
 
 @Configuration
-@ComponentScan(basePackages = { "com.sequenceiq.it", "com.sequenceiq.cloudbreak.cloud.gcp.util" })
+@ComponentScan(basePackages = { "com.sequenceiq.it", "com.sequenceiq.cloudbreak.cloud.gcp.util", "com.sequenceiq.cloudbreak.auth.crn" })
 @EnableConfigurationProperties
 @EnableRetry
 @EnableAspectJAutoProxy(proxyTargetClass = true)

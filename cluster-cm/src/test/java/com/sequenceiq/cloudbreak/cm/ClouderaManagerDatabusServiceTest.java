@@ -12,6 +12,8 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -25,6 +27,12 @@ public class ClouderaManagerDatabusServiceTest {
 
     @Mock
     private AltusIAMService iamService;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     private Stack stack;
 
@@ -46,6 +54,8 @@ public class ClouderaManagerDatabusServiceTest {
         // GIVEN
         AltusCredential credential = new AltusCredential("accessKey", "secretKey".toCharArray());
         when(iamService.generateMachineUserWithAccessKeyForLegacyCm(any(), any(), any())).thenReturn(credential);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         // WHEN
         AltusCredential result = underTest.getAltusCredential(stack);
         // THEN

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -54,6 +55,9 @@ public class SdxStartService {
     private CloudbreakFlowService cloudbreakFlowService;
 
     @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
     private CloudbreakPoller cloudbreakPoller;
 
     public FlowIdentifier triggerStartIfClusterNotRunning(SdxCluster cluster) {
@@ -67,8 +71,9 @@ public class SdxStartService {
         try {
             LOGGER.info("Triggering start flow for cluster {}", sdxCluster.getClusterName());
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    stackV4Endpoint.putStartInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn));
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> stackV4Endpoint.putStartInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.START_IN_PROGRESS, "Datalake start in progress", sdxCluster);
         } catch (NotFoundException e) {

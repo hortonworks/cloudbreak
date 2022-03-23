@@ -14,11 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 
 public class ThreadBasedUserCrnProvider {
-
-    public static final String INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.IAM).getInternalCrnForServiceAsString();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ThreadBasedUserCrnProvider.class);
 
@@ -97,12 +95,12 @@ public class ThreadBasedUserCrnProvider {
         }
     }
 
-    public static <T> T doAsInternalActor(Supplier<T> callable) {
+    public static <T> T doAsInternalActor(String internalCrn, Supplier<T> callable) {
         String originalUserCrn = getUserCrn();
-        if (originalUserCrn != null && InternalCrnBuilder.isInternalCrn(originalUserCrn)) {
+        if (originalUserCrn != null && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(originalUserCrn)) {
             return doAs(originalUserCrn, callable);
         }
-        return doAs(INTERNAL_ACTOR_CRN, callable);
+        return doAs(internalCrn, callable);
     }
 
     public static void doAs(String userCrn, Runnable runnable) {
@@ -119,12 +117,12 @@ public class ThreadBasedUserCrnProvider {
         }
     }
 
-    public static void doAsInternalActor(Runnable runnable) {
+    public static void doAsInternalActor(String internalCrn, Runnable runnable) {
         String originalUserCrn = getUserCrn();
-        if (originalUserCrn != null && InternalCrnBuilder.isInternalCrn(originalUserCrn)) {
+        if (originalUserCrn != null && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(originalUserCrn)) {
             doAs(originalUserCrn, runnable);
         } else {
-            doAs(INTERNAL_ACTOR_CRN, runnable);
+            doAs(internalCrn, runnable);
         }
     }
 }

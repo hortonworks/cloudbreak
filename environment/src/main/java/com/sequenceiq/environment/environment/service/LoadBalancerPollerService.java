@@ -18,6 +18,7 @@ import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 import com.sequenceiq.environment.environment.service.sdx.SdxService;
@@ -50,15 +51,19 @@ public class LoadBalancerPollerService {
     @Value("${env.loadbalancer.update.polling.sleep.time.seconds:30}")
     private Integer sleepTime;
 
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public LoadBalancerPollerService(
             DatahubService datahubService,
             SdxService sdxService,
             StackService stackService,
-            FlowEndpoint flowEndpoint) {
+            FlowEndpoint flowEndpoint,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.datahubService = datahubService;
         this.sdxService = sdxService;
         this.stackService = stackService;
         this.flowEndpoint = flowEndpoint;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public void updateStackWithLoadBalancer(Long environmentId, String environmentCrn, String environmentName,
@@ -106,7 +111,9 @@ public class LoadBalancerPollerService {
         try {
             boolean anyFlowsActive = false;
             for (FlowIdentifier flowIdentifier: flowIdentifiers) {
-                Boolean hasActiveFlow = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                Boolean hasActiveFlow = ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () ->
                     flowEndpoint.hasFlowRunningByFlowId(flowIdentifier.getPollableId()).getHasActiveFlow());
                 if (hasActiveFlow) {
                     LOGGER.debug("Flow {} is still running", flowIdentifier.getPollableId());
@@ -119,7 +126,9 @@ public class LoadBalancerPollerService {
                 return AttemptResults.justContinue();
             } else {
                 List<FlowIdentifier> failedFlows = flowIdentifiers.stream()
-                    .filter(flowId -> hasFlowFailed(ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                    .filter(flowId -> hasFlowFailed(ThreadBasedUserCrnProvider.doAsInternalActor(
+                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            () ->
                         flowEndpoint.getFlowLogsByFlowId(flowId.getPollableId()))))
                     .collect(Collectors.toList());
                 return AttemptResults.finishWith(failedFlows);

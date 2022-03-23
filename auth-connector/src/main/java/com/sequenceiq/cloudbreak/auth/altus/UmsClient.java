@@ -56,10 +56,10 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Remov
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RightsCheck;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
@@ -83,15 +83,19 @@ public class UmsClient {
 
     private final Tracer tracer;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     /**
      * Constructor.
      *  @param channel  the managed channel.
      * @param tracer tracer
      */
-    UmsClient(ManagedChannel channel, UmsClientConfig umsClientConfig, Tracer tracer) {
+    UmsClient(ManagedChannel channel, UmsClientConfig umsClientConfig, Tracer tracer,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.channel = checkNotNull(channel, "channel should not be null.");
         this.umsClientConfig = checkNotNull(umsClientConfig, "umsClientConfig should not be null.");
         this.tracer = tracer;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     /**
@@ -999,7 +1003,7 @@ public class UmsClient {
                 .withInterceptors(
                         GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcShortTimeoutSec()),
                         GrpcUtil.getTracingInterceptor(tracer),
-                        new AltusMetadataInterceptor(requestId, ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN),
+                        new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()),
                         new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName()));
     }
 
@@ -1015,7 +1019,7 @@ public class UmsClient {
                 .withInterceptors(
                         GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcTimeoutSec()),
                         GrpcUtil.getTracingInterceptor(tracer),
-                        new AltusMetadataInterceptor(requestId, ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN),
+                        new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()),
                         new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName()));
     }
 

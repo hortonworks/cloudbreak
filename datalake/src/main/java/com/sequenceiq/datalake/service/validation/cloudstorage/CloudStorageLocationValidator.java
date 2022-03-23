@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
@@ -24,11 +25,15 @@ public class CloudStorageLocationValidator {
 
     private final CloudProviderServicesV4Endopint cloudProviderServicesV4Endopint;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public CloudStorageLocationValidator(CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
-            SecretService secretService, CloudProviderServicesV4Endopint cloudProviderServicesV4Endopint) {
+            SecretService secretService, CloudProviderServicesV4Endopint cloudProviderServicesV4Endopint,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
         this.secretService = secretService;
         this.cloudProviderServicesV4Endopint = cloudProviderServicesV4Endopint;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public void validate(String storageLocation, FileSystemType fileSystemType, DetailedEnvironmentResponse environment, ValidationResultBuilder resultBuilder) {
@@ -36,7 +41,9 @@ public class CloudStorageLocationValidator {
         Credential credential = getCredential(environment);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
         ObjectStorageMetadataRequest request = createObjectStorageMetadataRequest(environment.getCloudPlatform(), cloudCredential, bucketName);
-        ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+        ObjectStorageMetadataResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () ->
                 cloudProviderServicesV4Endopint.getObjectStorageMetaData(request));
         resultBuilder.ifError(() -> response.getStatus() == ResponseStatus.OK && !environment.getLocation().getName().equals(response.getRegion()),
                 String.format("Object storage location [%s] of bucket '%s' must match environment location [%s]",

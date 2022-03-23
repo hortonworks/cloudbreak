@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -58,13 +59,18 @@ public class SdxRecoveryService {
     @Inject
     private AvailabilityChecker availabilityChecker;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public void recoverCluster(Long clusterId) {
         SdxCluster sdxCluster = sdxService.getById(clusterId);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RECOVERY_IN_PROGRESS, DATALAKE_RECOVERY_REQUESTED,
                 "Recovering datalake stack", sdxCluster);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () ->
                     stackV4Endpoint.recoverClusterByNameInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn)).getFlowIdentifier();
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {
@@ -105,7 +111,9 @@ public class SdxRecoveryService {
 
     private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster, String pollingMessage, FlowState flowState)
             throws JsonProcessingException {
-        StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+        StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () ->
                 stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();

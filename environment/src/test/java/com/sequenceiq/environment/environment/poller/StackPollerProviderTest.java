@@ -18,7 +18,6 @@ import org.mockito.Mockito;
 
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.environment.environment.flow.config.update.EnvStackConfigUpdatesState;
 import com.sequenceiq.environment.environment.flow.config.update.config.EnvStackConfigUpdatesFlowConfig;
 import com.sequenceiq.environment.environment.service.stack.StackService;
@@ -78,7 +77,7 @@ public class StackPollerProviderTest {
     private FlowLog getFlowLog(String state) {
         FlowLog flowLog = new FlowLog();
         flowLog.setId(1L);
-        flowLog.setFlowTriggerUserCrn(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
+        //flowLog.setFlowTriggerUserCrn(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
         flowLog.setCurrentState(state);
         flowLog.setCreated(1L);
         flowLog.setFlowId("1");

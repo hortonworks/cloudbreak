@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sigmadbus.SigmaDatabusClient;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRecordProcessingException;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
@@ -30,18 +31,22 @@ public class DatabusRecordWorker<C extends AbstractDatabusStreamConfiguration> e
 
     private SigmaDatabusClient<C> dataBusClient;
 
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public DatabusRecordWorker(String name, BlockingDeque<DatabusRequest> processingQueue,
-            AbstractDatabusRecordProcessor<C> databusRecordProcessor, Tracer tracer) {
+            AbstractDatabusRecordProcessor<C> databusRecordProcessor, Tracer tracer,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         super(name);
         this.tracer = tracer;
         this.processingQueue = processingQueue;
         this.databusRecordProcessor = databusRecordProcessor;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public SigmaDatabusClient<C> getClient() {
         if (dataBusClient == null) {
             dataBusClient = new SigmaDatabusClient<C>(tracer, databusRecordProcessor.getSigmaDatabusConfig(),
-                    databusRecordProcessor.getDatabusStreamConfiguration());
+                    databusRecordProcessor.getDatabusStreamConfiguration(), regionAwareInternalCrnGeneratorFactory);
         }
         return dataBusClient;
     }

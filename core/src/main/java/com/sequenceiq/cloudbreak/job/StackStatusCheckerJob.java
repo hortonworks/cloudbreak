@@ -29,8 +29,8 @@ import com.gs.collections.impl.factory.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
@@ -66,8 +66,6 @@ import io.opentracing.Tracer;
 @DisallowConcurrentExecution
 @Component
 public class StackStatusCheckerJob extends StatusCheckerJob {
-
-    private static final String DATAHUB_INTERNAL_ACTOR_CRN = new InternalCrnBuilder(Crn.Service.DATAHUB).getInternalCrnForServiceAsString();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStatusCheckerJob.class);
 
@@ -113,6 +111,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public StackStatusCheckerJob(Tracer tracer) {
         super(tracer, "Stack Status Checker Job");
     }
@@ -142,7 +143,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 } else if (null == stackStatus || ignoredStates().contains(stackStatus)) {
                     LOGGER.debug("Stack sync is skipped, stack state is {}", stackStatus);
                 } else if (syncableStates().contains(stackStatus)) {
-                    ThreadBasedUserCrnProvider.doAs(DATAHUB_INTERNAL_ACTOR_CRN, () -> doSync(stack));
+                    RegionAwareInternalCrnGenerator dataHub = regionAwareInternalCrnGeneratorFactory.datahub();
+                    ThreadBasedUserCrnProvider.doAs(dataHub.getInternalCrnForServiceAsString(), () -> doSync(stack));
                     switchToShortSyncIfNecessary(context);
                 } else {
                     LOGGER.warn("Unhandled stack status, {}", stackStatus);

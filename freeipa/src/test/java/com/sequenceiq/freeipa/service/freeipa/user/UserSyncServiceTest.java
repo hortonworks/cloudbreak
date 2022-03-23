@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,6 +36,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
@@ -55,7 +56,7 @@ import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
-class UserSyncServiceTest {
+public class UserSyncServiceTest {
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:"
@@ -83,6 +84,12 @@ class UserSyncServiceTest {
 
     @Mock
     FreeIpaClientFactory freeIpaClientFactory;
+
+    @Mock
+    RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @Mock
     FreeIpaClient freeIpaClient;
@@ -169,11 +176,13 @@ class UserSyncServiceTest {
         UserSyncStatus userSyncStatus = mock(UserSyncStatus.class);
         when(userSyncStatusService.getOrCreateForStack(any(Stack.class))).thenReturn(userSyncStatus);
         when(userSyncStatusService.save(userSyncStatus)).thenReturn(userSyncStatus);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserSyncService spyService = spy(underTest);
 
         doAnswer(invocation -> {
-            assertEquals(INTERNAL_ACTOR_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+            assertEquals("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__", ThreadBasedUserCrnProvider.getUserCrn());
             return null;
         }).when(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyList(), any(), any());
 

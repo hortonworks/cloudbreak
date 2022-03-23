@@ -28,6 +28,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.create.SdxCreateFlowConfig;
 import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFlowConfig;
@@ -45,6 +47,12 @@ public class SdxRetryServiceTest {
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @InjectMocks
     private SdxRetryService sdxRetryService;
@@ -102,6 +110,8 @@ public class SdxRetryServiceTest {
             return null;
         }).when(flow2Handler).retryLastFailedFlow(anyLong(), any());
         when(flow2Handler.getFirstRetryableStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         sdxRetryService.retrySdx(sdxCluster);
 
         verify(stackV4Endpoint, times(1)).retry(any(), eq("sdxclustername"), anyString());

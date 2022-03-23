@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
@@ -53,6 +55,12 @@ class DistroXClusterToClusterConverterTest {
     @Mock
     private ProxyEndpoint proxyEndpoint;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @InjectMocks
     private DistroXClusterToClusterConverter underTest;
 
@@ -73,7 +81,8 @@ class DistroXClusterToClusterConverterTest {
     void testConvertWithoutEnvWhenExposedServiceIsEmptyThenAllShouldBeConverted() {
         distroXV1RequestInput.getCluster().setExposedServices(new ArrayList<>(0));
         GatewayV4Request gr = new GatewayV4Request();
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(gatewayConverter.convert(List.of("ALL"))).thenReturn(gr);
 
         ClusterV4Request result = testConvertDistroXV1Request();
@@ -88,7 +97,8 @@ class DistroXClusterToClusterConverterTest {
     void testConvertWithoutEnvWhenExposedServiceIsNotEmptyThenItShouldBeConverted() {
         GatewayV4Request gr = new GatewayV4Request();
         when(gatewayConverter.convert(distroXV1RequestInput.getCluster().getExposedServices())).thenReturn(gr);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
@@ -99,6 +109,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheNameShouldBeSetToNull() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
@@ -107,6 +119,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheCustomContainerShouldBeSetToNull() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
@@ -115,6 +129,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheCustomQueueShouldBeSetToNull() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
@@ -123,6 +139,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheUsernameShouldBeSet() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvert();
 
         assertNotNull(result);
@@ -135,6 +153,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvThePasswordShouldBeSet() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
@@ -143,6 +163,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheValidateBlueprintShouldBeSet() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
@@ -151,6 +173,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheBlueprintNameShouldBeSet() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
@@ -159,6 +183,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheDatabasesShouldBeSet() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
@@ -169,7 +195,8 @@ class DistroXClusterToClusterConverterTest {
     void testConvertWithoutEnvCmConversionShouldHappenIfInputCmIsNotNull() {
         ClouderaManagerV4Request cmConversionResult = new ClouderaManagerV4Request();
         when(cmConverter.convert(distroXV1RequestInput.getCluster().getCm())).thenReturn(cmConversionResult);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
@@ -181,6 +208,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvCmConversionShouldNotHappenIfInputCmIsNull() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         distroXV1RequestInput.getCluster().setCm(null);
 
         ClusterV4Request result = testConvertDistroXV1Request();
@@ -193,6 +222,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheExecutionTypeShouldBeSetToDefault() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
@@ -208,7 +239,8 @@ class DistroXClusterToClusterConverterTest {
                 distroXV1RequestInput.getCluster().getCloudStorage(),
                 null
         )).thenReturn(decoratorResult);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
@@ -225,6 +257,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvWhenExposedServiceIsEmptyThenAllShouldBeConverted() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         distroXV1RequestInput.getCluster().setExposedServices(new ArrayList<>(0));
         GatewayV4Request gr = new GatewayV4Request();
 
@@ -242,7 +276,8 @@ class DistroXClusterToClusterConverterTest {
     void testConvertWithEnvWhenExposedServiceIsNotEmptyThenItShouldBeConverted() {
         GatewayV4Request gr = new GatewayV4Request();
         when(gatewayConverter.convert(distroXV1RequestInput.getCluster().getExposedServices())).thenReturn(gr);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
@@ -253,6 +288,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheNameShouldBeSetToNull() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
@@ -261,6 +298,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheCustomContainerShouldBeSetToNull() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
@@ -269,6 +308,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheCustomQueueShouldBeSetToNull() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
@@ -277,6 +318,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheUsernameShouldBeSet() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
@@ -285,6 +328,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvThePasswordShouldBeSet() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
@@ -293,6 +338,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheValidateBlueprintShouldBeSet() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
@@ -301,6 +348,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheBlueprintNameShouldBeSet() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
@@ -309,6 +358,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheDatabasesShouldBeSet() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
@@ -319,7 +370,8 @@ class DistroXClusterToClusterConverterTest {
     void testConvertWithEnvCmConversionShouldHappenIfInputCmIsNotNull() {
         ClouderaManagerV4Request cmConversionResult = new ClouderaManagerV4Request();
         when(cmConverter.convert(distroXV1RequestInput.getCluster().getCm())).thenReturn(cmConversionResult);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
@@ -332,7 +384,8 @@ class DistroXClusterToClusterConverterTest {
     @Test
     void testConvertWithEnvCmConversionShouldNotHappenIfInputCmIsNull() {
         distroXV1RequestInput.getCluster().setCm(null);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
@@ -343,6 +396,8 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheExecutionTypeShouldBeSetToDefault() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
@@ -358,7 +413,8 @@ class DistroXClusterToClusterConverterTest {
                 distroXV1RequestInput.getCluster().getCloudStorage(),
                 env
         )).thenReturn(decoratorResult);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);

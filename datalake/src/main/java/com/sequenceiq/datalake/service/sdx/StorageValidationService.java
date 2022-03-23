@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
@@ -42,6 +43,9 @@ public class StorageValidationService {
     @Inject
     private EnvironmentClientService environmentClientService;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public ObjectStorageValidateResponse validateObjectStorage(String credentialCrn, SdxCloudStorageRequest sdxCloudStorageRequest, String blueprintName,
             String clusterName, String dataAccessRole, String rangerAuditRole) {
         CredentialResponse credentialResponse = environmentClientService.getCredentialByCrn(credentialCrn);
@@ -59,8 +63,9 @@ public class StorageValidationService {
                 .withCredential(cloudCredential)
                 .withCloudStorageRequest(cloudStorageRequest)
                 .build();
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                cloudProviderServicesV4Endpoint.validateObjectStorage(objectStorageValidateRequest));
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> cloudProviderServicesV4Endpoint.validateObjectStorage(objectStorageValidateRequest));
     }
 
     public void validateCloudStorage(String cloudPlatform, SdxCloudStorageRequest cloudStorage) {

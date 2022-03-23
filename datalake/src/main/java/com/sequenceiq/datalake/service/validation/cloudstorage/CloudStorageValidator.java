@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
@@ -47,13 +48,17 @@ public class CloudStorageValidator {
 
     private final CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public CloudStorageValidator(CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
             EntitlementService entitlementService, SecretService secretService,
-            CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint) {
+            CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
         this.entitlementService = entitlementService;
         this.secretService = secretService;
         this.cloudProviderServicesV4Endpoint = cloudProviderServicesV4Endpoint;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public void validate(CloudStorageRequest cloudStorageRequest, DetailedEnvironmentResponse environment,
@@ -77,8 +82,9 @@ public class CloudStorageValidator {
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
             ObjectStorageValidateRequest request = createObjectStorageValidateRequest(cloudCredential, cloudStorageRequest, environment);
-            ObjectStorageValidateResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    cloudProviderServicesV4Endpoint.validateObjectStorage(request));
+            ObjectStorageValidateResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> cloudProviderServicesV4Endpoint.validateObjectStorage(request));
 
             LOGGER.info("ValidateObjectStorage: request: {}, response: {}", AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(request)),
                     JsonUtil.writeValueAsStringSilent(response));

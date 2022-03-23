@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -26,12 +27,16 @@ public class DistroXClusterToClusterConverter {
 
     private final ProxyEndpoint proxyEndpoint;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public DistroXClusterToClusterConverter(ClouderaManagerV1ToClouderaManagerV4Converter cmConverter, CloudStorageDecorator cloudStorageDecorator,
-            GatewayV1ToGatewayV4Converter gatewayConverter, ProxyEndpoint proxyEndpoint) {
+            GatewayV1ToGatewayV4Converter gatewayConverter, ProxyEndpoint proxyEndpoint,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.cmConverter = cmConverter;
         this.cloudStorageDecorator = cloudStorageDecorator;
         this.gatewayConverter = gatewayConverter;
         this.proxyEndpoint = proxyEndpoint;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public ClusterV4Request convert(DistroXV1Request request) {
@@ -80,7 +85,9 @@ public class DistroXClusterToClusterConverter {
     }
 
     private String getProxyCrnByName(String accountId, String proxyName) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> proxyEndpoint.getCrnByAccountIdAndName(accountId, proxyName));
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> proxyEndpoint.getCrnByAccountIdAndName(accountId, proxyName));
     }
 
 }

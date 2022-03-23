@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.flow.api.FlowEndpoint;
@@ -34,29 +35,37 @@ public class CloudbreakFlowService {
     @Inject
     private FlowCheckResponseToFlowStateConverter flowCheckResponseToFlowStateConverter;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public FlowLogResponse getLastCloudbreakFlowChainId(SdxCluster sdxCluster) {
-        FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                flowEndpoint.getLastFlowByResourceCrn(sdxCluster.getStackCrn()));
+        FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> flowEndpoint.getLastFlowByResourceCrn(sdxCluster.getStackCrn()));
         logFlowLogResponse(lastFlowByResourceName);
         return lastFlowByResourceName;
     }
 
     public List<FlowLogResponse> getFlowLogsByFlowId(String flowId) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                flowEndpoint.getFlowLogsByFlowId(flowId));
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> flowEndpoint.getFlowLogsByFlowId(flowId));
     }
 
     public FlowState getLastKnownFlowState(SdxCluster sdxCluster) {
         try {
             if (sdxCluster.getLastCbFlowChainId() != null) {
                 LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW_CHAIN, sdxCluster.getLastCbFlowChainId());
-                FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                        flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()));
+                FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()));
                 logCbFlowChainStatus(sdxCluster, flowCheckResponse.getHasActiveFlow());
                 return flowCheckResponseToFlowStateConverter.convert(flowCheckResponse);
             } else if (sdxCluster.getLastCbFlowId() != null) {
                 LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW, sdxCluster.getLastCbFlowId());
-                FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () ->
                         flowEndpoint.hasFlowRunningByFlowId(sdxCluster.getLastCbFlowId()));
                 logCbFlowStatus(sdxCluster, flowCheckResponse.getHasActiveFlow());
                 return flowCheckResponseToFlowStateConverter.convert(flowCheckResponse);
@@ -96,7 +105,9 @@ public class CloudbreakFlowService {
 
     private void trySaveLastCbFlowIdOrFlowChainId(SdxCluster sdxCluster) {
         try {
-            FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+            FlowLogResponse lastFlowByResourceName = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () ->
                     flowEndpoint.getLastFlowByResourceName(sdxCluster.getAccountId(), sdxCluster.getClusterName()));
             logFlowLogResponse(lastFlowByResourceName);
             if (StringUtils.isNotBlank(lastFlowByResourceName.getFlowChainId())) {

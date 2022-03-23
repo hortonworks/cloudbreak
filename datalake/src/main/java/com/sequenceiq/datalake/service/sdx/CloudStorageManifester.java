@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSyste
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
@@ -43,6 +44,9 @@ public class CloudStorageManifester {
 
     @Inject
     private StorageValidationService storageValidationService;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public CloudStorageRequest initCloudStorageRequest(DetailedEnvironmentResponse environment,
             ClusterV4Request clusterRequest, SdxCluster sdxCluster, SdxClusterRequest sdxClusterRequest) {
@@ -213,7 +217,9 @@ public class CloudStorageManifester {
     private FileSystemParameterV4Responses getFileSystemRecommendations(String blueprint,
             String clusterName, SdxCloudStorageRequest cloudStorageRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> fileSystemV4Endpoint.getFileSystemParametersInternal(0L,
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> fileSystemV4Endpoint.getFileSystemParametersInternal(0L,
                 blueprint,
                 clusterName,
                 "",

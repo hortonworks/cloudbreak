@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
@@ -18,6 +17,7 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.client.FreeIpaGroupType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,6 +158,9 @@ public class UserSyncService {
     @Inject
     private BatchPartitionSizeProperties batchPartitionSizeProperties;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public Operation synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter, WorkloadCredentialsUpdateType workloadCredentialsUpdateType) {
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(userCrnFilter, machineUserCrnFilter, Optional.empty());
@@ -200,7 +203,8 @@ public class UserSyncService {
 
         if (operationState == OperationState.RUNNING) {
             tryWithOperationCleanup(operationId, accountId, () ->
-                    ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> {
+                    ThreadBasedUserCrnProvider.doAs(
+                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), () -> {
                         boolean fullSync = userSyncFilter.isFullSync();
                         if (fullSync) {
                             stacks.forEach(stack -> {

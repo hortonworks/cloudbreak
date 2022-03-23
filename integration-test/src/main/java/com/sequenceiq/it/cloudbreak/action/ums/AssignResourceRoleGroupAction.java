@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
@@ -18,8 +19,11 @@ public class AssignResourceRoleGroupAction extends AbstractUmsAction<UmsTestDto>
 
     private final String groupCrn;
 
-    public AssignResourceRoleGroupAction(String groupCrn) {
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    public AssignResourceRoleGroupAction(String groupCrn, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.groupCrn = groupCrn;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -28,7 +32,7 @@ public class AssignResourceRoleGroupAction extends AbstractUmsAction<UmsTestDto>
         String resourceCrn = testDto.getRequest().getResourceCrn();
         Log.when(LOGGER, format(" Assigning resource role '%s' at resource '%s' for group '%s' ", resourceRole, resourceCrn, groupCrn));
         Log.whenJson(LOGGER, format(" Assign resource role request:%n "), testDto.getRequest());
-        client.getDefaultClient().assignResourceRole(groupCrn, resourceCrn, resourceRole, Optional.of(""));
+        client.getDefaultClient().assignResourceRole(groupCrn, resourceCrn, resourceRole, Optional.of(""), regionAwareInternalCrnGeneratorFactory);
         // wait for UmsRightsCache to expire
         Thread.sleep(7000);
         LOGGER.info(format(" Resource role '%s' has been assigned at resource '%s' for group '%s' ", resourceRole, resourceCrn, groupCrn));

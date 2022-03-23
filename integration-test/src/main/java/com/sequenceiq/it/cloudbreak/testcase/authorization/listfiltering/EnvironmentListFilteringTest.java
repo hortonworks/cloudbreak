@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -35,6 +36,9 @@ public class EnvironmentListFilteringTest extends AbstractIntegrationTest {
 
     @Inject
     private ResourceCreator resourceCreator;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -70,13 +74,13 @@ public class EnvironmentListFilteringTest extends AbstractIntegrationTest {
         testContext.given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
         testContext.given(UmsTestDto.class)
                 .assignTarget(environmentB.getName())
                 .withEnvironmentUser()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_A))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.USER_ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
         assertUserSeesAll(testContext, AuthUserKeys.USER_ENV_CREATOR_A, environmentA.getName(), environmentB.getName());

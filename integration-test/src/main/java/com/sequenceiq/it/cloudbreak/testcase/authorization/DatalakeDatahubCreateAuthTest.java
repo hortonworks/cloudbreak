@@ -10,6 +10,7 @@ import javax.ws.rs.ForbiddenException;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -48,6 +49,9 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
     @Inject
     private CloudbreakActor cloudbreakActor;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Override
     protected void setupTest(TestContext testContext) {
         useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN);
@@ -78,9 +82,9 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withDatahubCreator()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .withEnvironmentUser()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                 .withClouderaManager(clouderaManager)

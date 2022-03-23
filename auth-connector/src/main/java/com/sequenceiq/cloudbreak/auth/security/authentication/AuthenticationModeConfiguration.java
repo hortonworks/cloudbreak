@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 
 @Configuration
 public class AuthenticationModeConfiguration {
@@ -27,7 +28,8 @@ public class AuthenticationModeConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public AuthenticationService authenticationService(GrpcUmsClient grpcUmsClient) {
-        return new UmsAuthenticationService(grpcUmsClient);
+    public AuthenticationService authenticationService(GrpcUmsClient grpcUmsClient,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        return new UmsAuthenticationService(grpcUmsClient, regionAwareInternalCrnGeneratorFactory);
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
@@ -31,9 +32,14 @@ public class CloudStorageValidator {
 
     private final CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint;
 
-    public CloudStorageValidator(CredentialService credentialService, CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint) {
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    public CloudStorageValidator(CredentialService credentialService,
+        CloudProviderServicesV4Endopint cloudProviderServicesV4Endpoint,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.credentialService = credentialService;
         this.cloudProviderServicesV4Endpoint = cloudProviderServicesV4Endpoint;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public ObjectStorageValidateResponse validateCloudStorage(String accountId,
@@ -64,7 +70,9 @@ public class CloudStorageValidator {
             objectStorageValidateBuilder.withBackupLocationBase(environmentCloudStorageValidationRequest.getBackup().getStorageLocation());
         }
         ObjectStorageValidateRequest objectStorageValidateRequest = objectStorageValidateBuilder.build();
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () ->
                 cloudProviderServicesV4Endpoint.validateObjectStorage(objectStorageValidateRequest));
     }
 

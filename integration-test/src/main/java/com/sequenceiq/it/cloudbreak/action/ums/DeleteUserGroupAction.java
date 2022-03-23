@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -19,8 +20,11 @@ public class DeleteUserGroupAction implements Action<UmsGroupTestDto, UmsClient>
 
     private final String groupName;
 
-    public DeleteUserGroupAction(String groupName) {
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    public DeleteUserGroupAction(String groupName, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.groupName = groupName;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -29,7 +33,7 @@ public class DeleteUserGroupAction implements Action<UmsGroupTestDto, UmsClient>
         testDto.withName(groupName);
         Log.when(LOGGER, format(" Deleting user group '%s' at account '%s'. ", groupName, accountId));
         Log.whenJson(LOGGER, format(" Delete user group request:%n "), testDto.getRequest());
-        client.getDefaultClient().deleteGroup(accountId, groupName, Optional.of(""));
+        client.getDefaultClient().deleteGroup(accountId, groupName, Optional.of(""), regionAwareInternalCrnGeneratorFactory);
         LOGGER.info(format(" User group '%s' has been deleted at account '%s'. ", groupName, accountId));
         Log.when(LOGGER, format(" User group '%s' has been deleted at account '%s'. ", groupName, accountId));
         return testDto;
