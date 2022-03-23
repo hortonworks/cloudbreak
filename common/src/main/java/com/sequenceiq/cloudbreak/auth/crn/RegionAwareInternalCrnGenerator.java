@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.auth.crn;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil.INTERNAL_ACCOUNT;
+import static com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil.INTERNAL_USER_CRN;
+import static com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil.isInternalCrn;
 
-import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.crn.Crn.Service;
 
 /**
@@ -15,13 +17,13 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn.Service;
  * on this check (e.g. IDBMMS). Calls taking place among CB services may, of course, specify any {@link Service} constant as they see fit.
  * </p>
  */
-public class InternalCrnBuilder {
-
-    public static final String INTERNAL_ACCOUNT = "altus";
-
-    private static final String INTERNAL_USER_CRN = "__internal__actor__";
+public class RegionAwareInternalCrnGenerator {
 
     private final Service serviceType;
+
+    private final String partition;
+
+    private final String region;
 
     /**
      * Creates a new {@code InternalCrnBuilder} instance using the given {@code serviceType}. Please read the class javadoc for the implications of how this
@@ -30,39 +32,23 @@ public class InternalCrnBuilder {
      * @param serviceType service type to base the CRN on; must not be {@code null}
      * @throws NullPointerException if {@code serviceType == null}
      */
-    public InternalCrnBuilder(Service serviceType) {
+    private RegionAwareInternalCrnGenerator(Service serviceType, String partition, String region) {
         checkNotNull(serviceType, "serviceType should not be null.");
+        checkNotNull(partition, "partition should not be null.");
+        checkNotNull(region, "region should not be null.");
+
         this.serviceType = serviceType;
+        this.region = region;
+        this.partition = partition;
     }
 
-    public static boolean isInternalCrn(String crn) {
-        Crn c = Crn.fromString(crn);
-        return INTERNAL_USER_CRN.equals(c.getResource());
-    }
-
-    public static boolean isInternalCrnForService(String crn, Crn.Service serviceType) {
+    public boolean isInternalCrnForService(String crn) {
         Crn c = Crn.fromString(crn);
         return isInternalCrn(crn) && serviceType.equals(c.getService());
     }
 
-    public static boolean isInternalCrn(Crn crn) {
-        return INTERNAL_USER_CRN.equals(crn.getResource());
-    }
-
     public String getInternalCrnForServiceAsString() {
-        // Not sure if region and partition do matter or not in case of  internal actor
-        return getInternalCrnForService(Crn.Partition.CDP, Crn.Region.US_WEST_1).toString();
-    }
-
-    public static CrnUser createInternalCrnUser(Crn crn)  {
-        String service = crn.getService().toString().toUpperCase();
-        String role = "AUTOSCALE".equals(service) ? "ROLE_AUTOSCALE" : "ROLE_INTERNAL";
-        return new CrnUser(crn.getResource(),
-                crn.toString(),
-                crn.getResourceType().toString(),
-                crn.getResourceType().toString(),
-                crn.getAccountId(),
-                role);
+        return getInternalCrnForService(Crn.Partition.safeFromString(getPartition()), Crn.Region.safeFromString(getRegion())).toString();
     }
 
     private Crn getInternalCrnForService(Crn.Partition partition, Crn.Region region) {
@@ -76,4 +62,15 @@ public class InternalCrnBuilder {
                 .build();
     }
 
+    public String getPartition() {
+        return partition;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public static RegionAwareInternalCrnGenerator regionalAwareInternalCrnGenerator(Service serviceType, String partition, String region) {
+        return new RegionAwareInternalCrnGenerator(serviceType, partition, region);
+    }
 }

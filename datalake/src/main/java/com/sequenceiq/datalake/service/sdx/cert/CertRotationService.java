@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -51,6 +52,9 @@ public class CertRotationService {
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
     private CloudbreakPoller statusChecker;
 
     public FlowIdentifier rotateAutoTlsCertificates(SdxCluster sdxCluster, CertificatesRotationV4Request rotateCertificateRequest) {
@@ -64,8 +68,9 @@ public class CertRotationService {
         SdxCluster sdxCluster = sdxService.getById(id);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
-            CertificatesRotationV4Response response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    stackV4Endpoint.rotateAutoTlsCertificates(0L, sdxCluster.getClusterName(), initiatorUserCrn, request));
+            CertificatesRotationV4Response response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> stackV4Endpoint.rotateAutoTlsCertificates(0L, sdxCluster.getClusterName(), initiatorUserCrn, request));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, response.getFlowIdentifier());
             updateCertExpirationState(sdxCluster);
             sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_ROTATION_IN_PROGRESS, "Datalake cert rotation in progress", sdxCluster);

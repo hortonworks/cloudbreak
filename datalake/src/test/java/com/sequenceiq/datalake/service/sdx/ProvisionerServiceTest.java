@@ -41,6 +41,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -89,6 +91,12 @@ class ProvisionerServiceTest {
     @Mock
     private CloudbreakPoller cloudbreakPoller;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @InjectMocks
     private ProvisionerService underTest;
 
@@ -101,7 +109,8 @@ class ProvisionerServiceTest {
         when(stackV4Endpoint.getByCrn(anyLong(), nullable(String.class), nullable(Set.class))).thenThrow(new NotFoundException());
         when(stackV4Endpoint.postInternal(anyLong(), any(StackV4Request.class), nullable(String.class))).thenReturn(stackV4Response);
         when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startStackProvisioning(clusterId, getEnvironmentResponse()));
 
         verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, stackV4Response.getFlowIdentifier());
@@ -169,7 +178,8 @@ class ProvisionerServiceTest {
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString())).thenReturn(stackV4Response);
         when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 1000, TimeUnit.MILLISECONDS);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.waitCloudbreakClusterCreation(clusterId, pollingConfig);
 
         verify(sdxStatusService, times(1))
@@ -187,7 +197,8 @@ class ProvisionerServiceTest {
         stackV4Response.setStatus(Status.CREATE_FAILED);
         doThrow(new NotFoundException()).when(stackV4Endpoint).deleteInternal(anyLong(), eq(sdxCluster.getClusterName()), eq(Boolean.FALSE),
                 nullable(String.class));
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.startStackDeletion(clusterId, false);
 
         verify(stackV4Endpoint).deleteInternal(eq(0L), eq(null), eq(false), nullable(String.class));
@@ -200,7 +211,8 @@ class ProvisionerServiceTest {
         when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.CREATE_FAILED);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.startStackDeletion(clusterId, true);
 
         verify(stackV4Endpoint).deleteInternal(eq(0L), eq(null), eq(true), nullable(String.class));
@@ -217,7 +229,8 @@ class ProvisionerServiceTest {
         doThrow(webApplicationException).when(stackV4Endpoint).deleteInternal(anyLong(), eq(sdxCluster.getClusterName()),
                 eq(Boolean.FALSE), nullable(String.class));
         when(webApplicationExceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("web-error");
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         RuntimeException actual = Assertions.assertThrows(RuntimeException.class, () -> underTest.startStackDeletion(clusterId, false));
         Assertions.assertEquals("Cannot delete cluster, error happened during the operation: web-error", actual.getMessage());
 
@@ -232,6 +245,8 @@ class ProvisionerServiceTest {
         StackV4Response firstStackV4Response = new StackV4Response();
         firstStackV4Response.setStatus(Status.AVAILABLE);
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString())).thenReturn(firstStackV4Response);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
 
         Assertions.assertThrows(PollerStoppedException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig));
@@ -248,6 +263,8 @@ class ProvisionerServiceTest {
         secondStackV4Response.setStatus(Status.DELETE_FAILED);
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString())).thenReturn(firstStackV4Response)
                 .thenReturn(secondStackV4Response);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
 
         Assertions.assertThrows(UserBreakException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig));
@@ -260,7 +277,8 @@ class ProvisionerServiceTest {
         when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
         when(stackV4Endpoint.get(anyLong(), eq(sdxCluster.getClusterName()), anySet(), anyString())).thenThrow(new NotFoundException());
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 200, TimeUnit.MILLISECONDS);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig);
 
         verify(sdxStatusService, times(1))
@@ -299,7 +317,8 @@ class ProvisionerServiceTest {
                 .thenReturn(firstStackV4Response)
                 .thenReturn(secondStackV4Response)
                 .thenReturn(thirdStackV4Response);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         PollingConfig pollingConfig = new PollingConfig(10, TimeUnit.MILLISECONDS, 500, TimeUnit.MILLISECONDS);
 
         Assertions.assertThrows(UserBreakException.class, () -> underTest.waitCloudbreakClusterDeletion(clusterId, pollingConfig),
@@ -313,7 +332,8 @@ class ProvisionerServiceTest {
         SdxCluster sdxCluster = generateValidSdxCluster(clusterId);
         sdxCluster.setClusterName("sdxcluster1");
         when(sdxService.getById(clusterId)).thenReturn(sdxCluster);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackV4Response firstStackV4Response = new StackV4Response();
         firstStackV4Response.setStatus(Status.DELETE_FAILED);
         ClusterV4Response firstClusterResponse = new ClusterV4Response();

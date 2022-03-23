@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.Cluster
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -99,6 +100,9 @@ public class SdxBackupRestoreService {
 
     @Inject
     private DatalakeDrClient datalakeDrClient;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public SdxDatabaseBackupResponse triggerDatabaseBackup(SdxCluster sdxCluster, SdxDatabaseBackupRequest backupRequest) {
         MDCBuilder.buildMdcContext(sdxCluster);
@@ -191,8 +195,9 @@ public class SdxBackupRestoreService {
             sdxOperationRepository.save(drStatus);
             sdxClusterRepository.findById(clusterId).ifPresentOrElse(sdxCluster -> {
                 String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-                BackupV4Response backupV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                        stackV4Endpoint.backupDatabaseByNameInternal(0L, sdxCluster.getClusterName(),
+                BackupV4Response backupV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> stackV4Endpoint.backupDatabaseByNameInternal(0L, sdxCluster.getClusterName(),
                         backupRequest.getBackupId(), backupRequest.getBackupLocation(), backupRequest.getCloseConnections(), initiatorUserCrn));
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, backupV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
@@ -211,8 +216,9 @@ public class SdxBackupRestoreService {
             sdxOperationRepository.save(drStatus);
             sdxClusterRepository.findById(clusterId).ifPresentOrElse(sdxCluster -> {
                 String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-                RestoreV4Response restoreV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                        stackV4Endpoint.restoreDatabaseByNameInternal(0L, sdxCluster.getClusterName(),
+                RestoreV4Response restoreV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> stackV4Endpoint.restoreDatabaseByNameInternal(0L, sdxCluster.getClusterName(),
                         backupLocation, backupId, initiatorUserCrn));
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, restoreV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
@@ -257,8 +263,9 @@ public class SdxBackupRestoreService {
 
     private AttemptResult<StackV4Response> getStackResponseAttemptResult(SdxCluster sdxCluster, String pollingMessage, FlowState flowState)
             throws JsonProcessingException {
-        StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
+        StackV4Response stackV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> stackV4Endpoint.get(0L, sdxCluster.getClusterName(), Collections.emptySet(), sdxCluster.getAccountId()));
         LOGGER.info("Response from cloudbreak: {}", JsonUtil.writeValueAsString(stackV4Response));
         ClusterV4Response cluster = stackV4Response.getCluster();
         if (isStackOrClusterDrStatusComplete(stackV4Response.getStatus()) && isStackOrClusterDrStatusComplete(cluster.getStatus())) {

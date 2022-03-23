@@ -52,7 +52,7 @@ import com.sequenceiq.it.util.cleanup.CleanupUtil;
 
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, DataSourceTransactionManagerAutoConfiguration.class,
         HibernateJpaAutoConfiguration.class})
-@ComponentScan(basePackages = { "com.sequenceiq.it", "com.sequenceiq.cloudbreak.cloud.gcp.util" })
+@ComponentScan(basePackages = { "com.sequenceiq.it", "com.sequenceiq.cloudbreak.cloud.gcp.util", "com.sequenceiq.cloudbreak.auth.crn" })
 @EnableConfigurationProperties({ITProps.class, AwsProperties.class})
 public class IntegrationTestApp implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(IntegrationTestApp.class);

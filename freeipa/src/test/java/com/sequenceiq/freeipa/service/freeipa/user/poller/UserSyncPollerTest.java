@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user.poller;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,6 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -55,6 +56,12 @@ class UserSyncPollerTest {
     @Mock
     CooldownChecker cooldownChecker;
 
+    @Mock
+    RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @InjectMocks
     UserSyncPoller underTest;
 
@@ -66,20 +73,24 @@ class UserSyncPollerTest {
     @Test
     void testSyncStackWhenNotInSync() {
         UserSyncStatus userSyncStatus = setupMocks();
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(eventGenerationIdsChecker.isInSync(eq(userSyncStatus), any())).thenReturn(false);
         when(cooldownChecker.isCooldownExpired(eq(userSyncStatus), any())).thenReturn(true);
 
         underTest.syncAllFreeIpaStacks();
 
-        verify(userSyncService).synchronizeUsers(UserSyncTestUtils.ACCOUNT_ID, INTERNAL_ACTOR_CRN,
+        verify(userSyncService).synchronizeUsers(UserSyncTestUtils.ACCOUNT_ID, "crn:altus:iam:us-west-1:altus:user:__internal__actor__",
                 Set.of(UserSyncTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
     }
 
     @Test
     void testDontSyncStackWhenInSync() {
         UserSyncStatus userSyncStatus = setupMocks();
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(eventGenerationIdsChecker.isInSync(eq(userSyncStatus), any())).thenReturn(true);
 
         underTest.syncAllFreeIpaStacks();
@@ -91,20 +102,24 @@ class UserSyncPollerTest {
     @Test
     void testSyncStackWhenCool() {
         UserSyncStatus userSyncStatus = setupMocks();
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(eventGenerationIdsChecker.isInSync(eq(userSyncStatus), any())).thenReturn(false);
         when(cooldownChecker.isCooldownExpired(eq(userSyncStatus), any())).thenReturn(true);
 
         underTest.syncAllFreeIpaStacks();
 
-        verify(userSyncService).synchronizeUsers(UserSyncTestUtils.ACCOUNT_ID, INTERNAL_ACTOR_CRN,
+        verify(userSyncService).synchronizeUsers(UserSyncTestUtils.ACCOUNT_ID, "crn:altus:iam:us-west-1:altus:user:__internal__actor__",
                 Set.of(UserSyncTestUtils.ENVIRONMENT_CRN), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
     }
 
     @Test
     void testDontSyncStackWhenNotCool() {
         UserSyncStatus userSyncStatus = setupMocks();
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(eventGenerationIdsChecker.isInSync(eq(userSyncStatus), any())).thenReturn(false);
         when(cooldownChecker.isCooldownExpired(eq(userSyncStatus), any())).thenReturn(false);
 
@@ -117,6 +132,9 @@ class UserSyncPollerTest {
     @Test
     void testDontSyncStackWhenNotEntitled() {
         setupMockStackService(UserSyncTestUtils.createStack());
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(userSyncPollerEntitlementChecker.isAccountEntitled(anyString())).thenReturn(false);
 
         underTest.syncAllFreeIpaStacks();

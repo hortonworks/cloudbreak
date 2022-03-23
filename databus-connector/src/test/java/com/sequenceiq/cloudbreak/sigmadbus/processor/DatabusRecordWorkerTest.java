@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sigmadbus.SigmaDatabusClient;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRecordProcessingException;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
@@ -42,9 +43,13 @@ public class DatabusRecordWorkerTest {
     @Mock
     private SigmaDatabusClient<MonitoringConfiguration> dataBusClient;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @BeforeEach
     public void setUp() {
-        underTest = new DatabusRecordWorker<>("thread-name", processingQueue, databusRecordProcessor, tracer);
+        underTest = new DatabusRecordWorker<>("thread-name", processingQueue, databusRecordProcessor, tracer,
+                regionAwareInternalCrnGeneratorFactory);
     }
 
     @Test

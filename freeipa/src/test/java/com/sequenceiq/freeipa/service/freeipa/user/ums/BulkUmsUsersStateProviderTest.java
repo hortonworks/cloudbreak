@@ -134,7 +134,7 @@ public class BulkUmsUsersStateProviderTest  extends BaseUmsUsersStateProviderTes
                 .collect(Collectors.toList()));
 
         when(grpcUmsClient.getUserSyncStateModel(
-                eq(ACCOUNT_ID), eq(expectedRightsChecks), any(Optional.class)))
+                eq(ACCOUNT_ID), eq(expectedRightsChecks), any(Optional.class), any()))
                 .thenReturn(builder.build());
         setupServicePrincipals();
     }

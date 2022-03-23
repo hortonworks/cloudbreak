@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.freeipa;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 
 public class FreeIpaOperationPollerObject {
@@ -11,11 +12,15 @@ public class FreeIpaOperationPollerObject {
 
     private final OperationV1Endpoint operationV1Endpoint;
 
-    public FreeIpaOperationPollerObject(String operationId, String operationType, OperationV1Endpoint operationV1Endpoint, String accountId) {
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    public FreeIpaOperationPollerObject(String operationId, String operationType, OperationV1Endpoint operationV1Endpoint,
+        String accountId, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.operationId = operationId;
         this.operationType = operationType;
         this.operationV1Endpoint = operationV1Endpoint;
         this.accountId = accountId;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public String getOperationId() {
@@ -32,5 +37,9 @@ public class FreeIpaOperationPollerObject {
 
     public String getAccountId() {
         return accountId;
+    }
+
+    public RegionAwareInternalCrnGeneratorFactory getRegionalAwareInternalCrnGeneratorFactory() {
+        return regionAwareInternalCrnGeneratorFactory;
     }
 }

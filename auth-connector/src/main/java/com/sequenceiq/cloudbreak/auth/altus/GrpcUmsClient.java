@@ -49,7 +49,8 @@ import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -78,6 +79,9 @@ public class GrpcUmsClient {
     private UmsClientConfig umsClientConfig;
 
     @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
     private Tracer tracer;
 
     public static GrpcUmsClient createClient(ManagedChannelWrapper channelWrapper, UmsClientConfig clientConfig, Tracer tracer) {
@@ -96,8 +100,9 @@ public class GrpcUmsClient {
      * @param requestId          an optional request Id
      * @return                   the new or existing user group.
      */
-    public Group createGroup(String accountId, String groupName, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public Group createGroup(String accountId, String groupName, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Creating new user group '{}', for account '{}' using request ID '{}'...", groupName, accountId, requestId);
         Group newGroup = client.createGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName);
         LOGGER.debug("New user group '{}' has been created for account '{}'.", groupName, accountId);
@@ -111,8 +116,9 @@ public class GrpcUmsClient {
      * @param groupName          the newly created group name
      * @param requestId          an optional request Id
      */
-    public void deleteGroup(String accountId, String groupName, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public void deleteGroup(String accountId, String groupName, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Deleting user group '{}', from account '{}' using request ID '{}'...", groupName, accountId, requestId);
         client.deleteGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName);
         LOGGER.debug("User group '{}' has been deleted from account '{}'.", groupName, accountId);
@@ -126,8 +132,9 @@ public class GrpcUmsClient {
      * @param memberCrn          member (e.g., user) CRN
      * @param requestId          an optional request Id
      */
-    public void addMemberToGroup(String accountId, String groupName, String memberCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public void addMemberToGroup(String accountId, String groupName, String memberCrn, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Assigning user '{}' to '{}' group, at account '{}' using request ID '{}'...", memberCrn, groupName, accountId, requestId);
         client.addMemberToGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName, memberCrn);
         LOGGER.debug("User '{}' has been added to '{}' group successfully.", groupName, accountId);
@@ -141,8 +148,9 @@ public class GrpcUmsClient {
      * @param memberCrn          member (e.g., user) CRN
      * @param requestId          an optional request Id
      */
-    public void removeMemberFromGroup(String accountId, String groupName, String memberCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public void removeMemberFromGroup(String accountId, String groupName, String memberCrn, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Removing user '{}' from '{}' group, at account '{}' using request ID '{}'...", memberCrn, groupName, accountId, requestId);
         client.removeMemberFromGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName, memberCrn);
         LOGGER.debug("User '{}' has been removed from '{}' group successfully.", groupName, accountId);
@@ -156,8 +164,9 @@ public class GrpcUmsClient {
      * @param groupName          the group where user is going to be assigned
      * @return                   list of user group member CRNs or NULL if the user group does not exist.
      */
-    public List<String> listMembersFromGroup(String accountId, String groupName, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public List<String> listMembersFromGroup(String accountId, String groupName, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Listing members from '{}' group, at account '{}' using request ID '{}'...", groupName, accountId, requestId);
         List<String> members = client.listMembersFromGroup(RequestIdUtil.getOrGenerate(requestId), accountId, groupName);
         LOGGER.debug("User group '{}' contains [{}] members at account '{}'.", groupName, members, accountId);
@@ -171,8 +180,9 @@ public class GrpcUmsClient {
      * @param requestId an optional request Id
      * @return the list of groups associated with this account
      */
-    public List<Group> listAllGroups(String accountId, Optional<String> requestId) {
-        return listGroups(accountId, null, requestId);
+    public List<Group> listAllGroups(String accountId, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        return listGroups(accountId, null, requestId, regionAwareInternalCrnGeneratorFactory);
     }
 
     /**
@@ -183,8 +193,9 @@ public class GrpcUmsClient {
      * @param groupCrns the groups to list. if null or empty then all groups will be listed
      * @return the list of groups associated with this account
      */
-    public List<Group> listGroups(String accountId, List<String> groupCrns, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public List<Group> listGroups(String accountId, List<String> groupCrns, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Listing group information for account {} using request ID {}", accountId, requestId);
         List<Group> groups = client.listGroups(RequestIdUtil.getOrGenerate(requestId), accountId, groupCrns);
         LOGGER.debug("{} Groups found for account {}", groups.size(), accountId);
@@ -199,8 +210,9 @@ public class GrpcUmsClient {
      * @param memberCrn the member to list
      * @return the list of group crns associated with this member
      */
-    public List<String> listGroupsForMember(String accountId, String memberCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public List<String> listGroupsForMember(String accountId, String memberCrn, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Listing group information for member {} in account {} using request ID {}", memberCrn, accountId, requestId);
         List<String> groups = client.listGroupsForMembers(RequestIdUtil.getOrGenerate(requestId), accountId, memberCrn);
         LOGGER.debug("{} Groups found for member {} in account {}", groups.size(), memberCrn, accountId);
@@ -215,8 +227,9 @@ public class GrpcUmsClient {
      * @return the user associated with this user CRN
      */
     @Cacheable(cacheNames = "umsUserCache", key = "{ #userCrn }")
-    public User getUserDetails(String userCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public User getUserDetails(String userCrn, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Getting user information for {} using request ID {}", userCrn, requestId);
         User user = client.getUser(RequestIdUtil.getOrGenerate(requestId), userCrn);
         LOGGER.debug("User information retrieved for userCrn: {}", user.getCrn());
@@ -231,9 +244,9 @@ public class GrpcUmsClient {
      * @return the workload credentials associated with this user CRN
      */
     public UserManagementProto.SetActorWorkloadCredentialsResponse setActorWorkloadPassword(String userCrn, String password,
-            Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
-        String workloadUserName = getUserDetails(userCrn, requestId).getWorkloadUsername();
+            Optional<String> requestId, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
+        String workloadUserName = getUserDetails(userCrn, requestId, regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
         LOGGER.debug("Setting workload password for user {} with workload name {}", userCrn, workloadUserName);
         UserManagementProto.SetActorWorkloadCredentialsResponse response = client.setActorWorkloadPassword(RequestIdUtil.getOrGenerate(requestId), userCrn,
                 password);
@@ -248,8 +261,9 @@ public class GrpcUmsClient {
      * @param requestId an optional request Id
      * @return the workload credentials associated with this user CRN
      */
-    public UserManagementProto.GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String userCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public UserManagementProto.GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(String userCrn, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Getting workload credentials for user {}", userCrn);
         UserManagementProto.GetActorWorkloadCredentialsResponse response = client.getActorWorkloadCredentials(RequestIdUtil.getOrGenerate(requestId), userCrn);
         LOGGER.debug("Got workload credentials for user {}", userCrn);
@@ -263,8 +277,9 @@ public class GrpcUmsClient {
      * @param requestId an optional request Id
      * @return the list of users associated with this account
      */
-    public List<User> listAllUsers(String accountId, Optional<String> requestId) {
-        return listUsers(accountId, null, requestId);
+    public List<User> listAllUsers(String accountId, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        return listUsers(accountId, null, requestId, regionAwareInternalCrnGeneratorFactory);
     }
 
     /**
@@ -275,8 +290,9 @@ public class GrpcUmsClient {
      * @param userCrns  the users to list. if null or empty then all users will be listed
      * @return the list of users associated with this account
      */
-    public List<User> listUsers(String accountId, List<String> userCrns, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public List<User> listUsers(String accountId, List<String> userCrns, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Listing user information for account {} using request ID {}", accountId, requestId);
         List<User> users = client.listUsers(RequestIdUtil.getOrGenerate(requestId), accountId, userCrns);
         LOGGER.debug("{} Users found for account {}", users.size(), accountId);
@@ -291,8 +307,9 @@ public class GrpcUmsClient {
      * @return the user associated with this user CRN
      */
     @Cacheable(cacheNames = "umsMachineUserCache", key = "{ #userCrn, #accountId }")
-    public MachineUser getMachineUserDetails(String userCrn, String accountId, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public MachineUser getMachineUserDetails(String userCrn, String accountId, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Getting machine user information for {} using request ID {}", userCrn, requestId);
         MachineUser machineUser = client.getMachineUser(RequestIdUtil.getOrGenerate(requestId), userCrn, accountId);
         LOGGER.debug("MachineUser information retrieved for userCrn: {}", machineUser.getCrn());
@@ -309,10 +326,10 @@ public class GrpcUmsClient {
      * @return the user associated with this user CRN
      */
     public List<MachineUser> listAllMachineUsers(String accountId, boolean includeInternal, boolean includeWorkloadMachineUsers,
-            Optional<String> requestId) {
+            Optional<String> requestId, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         return listMachineUsers(accountId, null,
                 includeInternal, includeWorkloadMachineUsers,
-                requestId);
+                requestId, regionAwareInternalCrnGeneratorFactory);
     }
 
     /**
@@ -326,8 +343,9 @@ public class GrpcUmsClient {
      * @return the user associated with this user CRN
      */
     public List<MachineUser> listMachineUsers(String accountId, List<String> machineUserCrns,
-            boolean includeInternal, boolean includeWorkloadMachineUsers, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+            boolean includeInternal, boolean includeWorkloadMachineUsers, Optional<String> requestId,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Listing machine user information for account {} using request ID {}", accountId, requestId);
         List<MachineUser> machineUsers = client.listMachineUsers(RequestIdUtil.getOrGenerate(requestId),
                 accountId, machineUserCrns, includeInternal, includeWorkloadMachineUsers);
@@ -344,9 +362,10 @@ public class GrpcUmsClient {
      * @return the machine user crn
      */
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
-    public Optional<String> createMachineUser(String machineUserName, String userCrn, String accountId, Optional<String> requestId) {
+    public Optional<String> createMachineUser(String machineUserName, String userCrn, String accountId, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         try {
-            UmsClient client = makeClient(channelWrapper.getChannel());
+            UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
             String generatedRequestId = RequestIdUtil.getOrGenerate(requestId);
             LOGGER.debug("Creating machine user {} for {} using request ID {}", machineUserName, userCrn, generatedRequestId);
             Optional<String> machineUserCrn = client.createMachineUser(generatedRequestId, userCrn, accountId, machineUserName);
@@ -379,8 +398,9 @@ public class GrpcUmsClient {
      * @param userCrn         actor
      * @param requestId       request id for deleting machine user
      */
-    public void deleteMachineUser(String machineUserName, String userCrn, String accountId, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public void deleteMachineUser(String machineUserName, String userCrn, String accountId, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         String generatedRequestId = RequestIdUtil.getOrGenerate(requestId);
         LOGGER.debug("Deleting machine user {} by {} using request ID {} (for accountId: {})",
                 machineUserName, userCrn, generatedRequestId, accountId);
@@ -397,7 +417,7 @@ public class GrpcUmsClient {
      */
     public List<ServicePrincipalCloudIdentities> listServicePrincipalCloudIdentities(String accountId, String environmentCrn, Optional<String> requestId) {
         List<ServicePrincipalCloudIdentities> spCloudIds = new ArrayList<>();
-        UmsClient client = makeClient(channelWrapper.getChannel());
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Listing service principal cloud identities for account {} using request ID {}", accountId, requestId);
         ListServicePrincipalCloudIdentitiesResponse response;
         Optional<PageToken> pageToken = Optional.empty();
@@ -417,10 +437,11 @@ public class GrpcUmsClient {
      * @param requestId request id for getting rights
      * @return the workload administration groups associated with this user or machine user
      */
-    public List<String> listWorkloadAdministrationGroupsForMember(String memberCrn, Optional<String> requestId) {
+    public List<String> listWorkloadAdministrationGroupsForMember(String memberCrn, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         requireNonNull(memberCrn);
         List<String> wags = new ArrayList<>();
-        UmsClient client = makeClient(channelWrapper.getChannel());
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Getting workload administration groups for member {}", memberCrn);
         ListWorkloadAdministrationGroupsForMemberResponse response;
         Optional<PageToken> pageToken = Optional.empty();
@@ -441,24 +462,27 @@ public class GrpcUmsClient {
      * @return the account associated with this user CRN
      */
     @Cacheable(cacheNames = "umsAccountCache", key = "{ #accountId }")
-    public Account getAccountDetails(String accountId, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public Account getAccountDetails(String accountId, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Getting information for account ID {} using request ID {}", accountId, requestId);
         return client.getAccount(RequestIdUtil.getOrGenerate(requestId), accountId);
     }
 
     @Cacheable(cacheNames = "umsUserHasRightsForResourceCache", key = "{ #userCrn, #right, #resource }")
-    public boolean checkResourceRight(String userCrn, String right, String resource, Optional<String> requestId) {
-        if (InternalCrnBuilder.isInternalCrn(userCrn)) {
+    public boolean checkResourceRight(String userCrn, String right, String resource, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn)) {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
-        return makeCheckRightCall(userCrn, right, resource, requestId);
+        return makeCheckRightCall(userCrn, right, resource, requestId, regionAwareInternalCrnGeneratorFactory);
     }
 
     @Cacheable(cacheNames = "umsUserHasRightsForResourceCache", key = "{ #userCrn, #right, #resource }")
-    public boolean checkResourceRightLegacy(String userCrn, String right, String resource, Optional<String> requestId) {
-        if (InternalCrnBuilder.isInternalCrn(userCrn)) {
+    public boolean checkResourceRightLegacy(String userCrn, String right, String resource, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn)) {
             LOGGER.info("InternalCrn, allow right {} for user {}!", right, userCrn);
             return true;
         }
@@ -467,22 +491,24 @@ public class GrpcUmsClient {
                     ThreadBasedUserCrnProvider.getAccountId());
             return true;
         }
-        return makeCheckRightCall(userCrn, right, resource, requestId);
+        return makeCheckRightCall(userCrn, right, resource, requestId, regionAwareInternalCrnGeneratorFactory);
     }
 
     @Cacheable(cacheNames = "umsUserRightsCache", key = "{ #userCrn, #right }")
-    public boolean checkAccountRight(String userCrn, String right, Optional<String> requestId) {
-        if (InternalCrnBuilder.isInternalCrn(userCrn)) {
+    public boolean checkAccountRight(String userCrn, String right, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn)) {
             LOGGER.info("InternalCrn, allow account right {} for user {}!", right, userCrn);
             return true;
         }
-        return makeCheckRightCall(userCrn, right, null, requestId);
+        return makeCheckRightCall(userCrn, right, null, requestId, regionAwareInternalCrnGeneratorFactory);
     }
 
-    private boolean makeCheckRightCall(String userCrn, String right, String resource, Optional<String> requestId) {
+    private boolean makeCheckRightCall(String userCrn, String right, String resource, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         checkArgument(VALID_AUTHZ_RESOURCE.test(resource), String.format("Provided resource [%s] is not in CRN format", resource));
         try {
-            AuthorizationClient client = makeAuthorizationClient();
+            AuthorizationClient client = makeAuthorizationClient(regionAwareInternalCrnGeneratorFactory);
             LOGGER.info("Checking right {} for user {} on resource {}!", right, userCrn, resource != null ? resource : "account");
             client.checkRight(RequestIdUtil.getOrGenerate(requestId), userCrn, right, resource);
             LOGGER.info("User {} has right {} on resource {}!", userCrn, right, resource != null ? resource : "account");
@@ -516,8 +542,9 @@ public class GrpcUmsClient {
      * @return a list of booleans indicating whether the member has the specified rights
      */
     @Cacheable(cacheNames = "umsUserHasRightsCache", key = "{ #memberCrn, #rightChecks }")
-    public List<Boolean> hasRights(String memberCrn, List<RightCheck> rightChecks, Optional<String> requestId) {
-        return hasRightsNoCache(memberCrn, rightChecks, requestId);
+    public List<Boolean> hasRights(String memberCrn, List<RightCheck> rightChecks, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        return hasRightsNoCache(memberCrn, rightChecks, requestId, regionAwareInternalCrnGeneratorFactory);
     }
 
     /**
@@ -529,13 +556,14 @@ public class GrpcUmsClient {
      * @param requestId   an optional request id
      * @return a list of booleans indicating whether the member has the specified rights
      */
-    public List<Boolean> hasRightsNoCache(String memberCrn, List<RightCheck> rightChecks, Optional<String> requestId) {
+    public List<Boolean> hasRightsNoCache(String memberCrn, List<RightCheck> rightChecks, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         LOGGER.info("Checking whether member [{}] has rights [{}]", memberCrn,
                 rightChecks.stream().map(this::rightCheckToString).collect(Collectors.toList()));
         checkArgument(rightChecks.stream().map(RightCheck::getResource).allMatch(VALID_AUTHZ_RESOURCE),
                 String.format("Following resources are not provided in CRN format: %s.", Joiner.on(",").join(
                         rightChecks.stream().map(RightCheck::getResource).filter(Predicate.not(VALID_AUTHZ_RESOURCE)).collect(Collectors.toList()))));
-        if (InternalCrnBuilder.isInternalCrn(memberCrn)) {
+        if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(memberCrn)) {
             LOGGER.info("InternalCrn has all rights");
             return rightChecks.stream().map(rightCheck -> Boolean.TRUE).collect(Collectors.toList());
         }
@@ -543,10 +571,12 @@ public class GrpcUmsClient {
             List<Boolean> retVal;
             if (rightChecks.size() < CHECK_RIGHT_HAS_RIGHTS_TRESHOLD) {
                 retVal = rightChecks.stream()
-                        .map(check -> makeCheckRightCall(memberCrn, check.getRight(), check.getResource(), requestId))
+                        .map(check -> makeCheckRightCall(memberCrn, check.getRight(), check.getResource(),
+                                requestId,
+                                regionAwareInternalCrnGeneratorFactory))
                         .collect(Collectors.toList());
             } else {
-                AuthorizationClient client = makeAuthorizationClient();
+                AuthorizationClient client = makeAuthorizationClient(regionAwareInternalCrnGeneratorFactory);
                 retVal = client.hasRights(RequestIdUtil.getOrGenerate(requestId), memberCrn, rightChecks);
             }
             LOGGER.info("member {} has rights {}", memberCrn, retVal);
@@ -565,7 +595,8 @@ public class GrpcUmsClient {
     }
 
     @Cacheable(cacheNames = "umsUserHasRightsForResourceCache", key = "{ #memberCrn, #resources, #right }")
-    public Map<String, Boolean> hasRights(String memberCrn, List<String> resources, String right, Optional<String> requestId) {
+    public Map<String, Boolean> hasRights(String memberCrn, List<String> resources, String right, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         List<RightCheck> rightChecks = resources.stream()
                 .map(resource -> RightCheck.newBuilder()
                         .setResource(resource)
@@ -573,7 +604,7 @@ public class GrpcUmsClient {
                         .build())
                 .collect(Collectors.toList());
         LOGGER.debug("Check if {} has rights to resources {}", memberCrn, rightChecks);
-        List<Boolean> result = hasRights(memberCrn, rightChecks, requestId);
+        List<Boolean> result = hasRights(memberCrn, rightChecks, requestId, regionAwareInternalCrnGeneratorFactory);
         return resources.stream().collect(
                 Collectors.toMap(resource -> resource, resource -> result.get(resources.indexOf(resource))));
     }
@@ -585,7 +616,7 @@ public class GrpcUmsClient {
         if (CollectionUtils.isEmpty(resourceCrns)) {
             return List.of();
         }
-        if (InternalCrnBuilder.isInternalCrn(memberCrn)) {
+        if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(memberCrn)) {
             return resourceCrns.stream().map(r -> true).collect(Collectors.toList());
         }
         LOGGER.debug("Check if {} has rights on resources {}", memberCrn, resourceCrns);
@@ -604,9 +635,10 @@ public class GrpcUmsClient {
      * @param requestId      id for the request
      */
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
-    public void assignMachineUserRole(String userCrn, String accountId, String machineUserCrn, String roleCrn, Optional<String> requestId) {
+    public void assignMachineUserRole(String userCrn, String accountId, String machineUserCrn, String roleCrn, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         try {
-            UmsClient client = makeClient(channelWrapper.getChannel());
+            UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
             client.assignMachineUserRole(RequestIdUtil.getOrGenerate(requestId), userCrn, accountId, machineUserCrn, roleCrn);
         } catch (StatusRuntimeException ex) {
             if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
@@ -628,8 +660,9 @@ public class GrpcUmsClient {
      * @param requestId      id for the request
      */
     public void unassignMachineUserRole(String machineUserCrn,
-            String roleCrn, Optional<String> requestId, String accountId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+            String roleCrn, Optional<String> requestId, String accountId,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         client.unassignMachineUserRole(RequestIdUtil.getOrGenerate(requestId), machineUserCrn, roleCrn, accountId);
     }
 
@@ -644,9 +677,9 @@ public class GrpcUmsClient {
      */
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public AltusCredential generateAccessSecretKeyPair(String actorCrn, String accountId, String machineUserCrn,
-            Optional<String> requestId, AccessKeyType.Value accessKeyType) {
+            Optional<String> requestId, AccessKeyType.Value accessKeyType, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         try {
-            UmsClient client = makeClient(channelWrapper.getChannel());
+            UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
             LOGGER.info("Generating new access / secret key pair for {}", machineUserCrn);
             CreateAccessKeyResponse accessKeyResponse = client.createAccessPrivateKeyPair(
                     RequestIdUtil.getOrGenerate(requestId), actorCrn, accountId, machineUserCrn, accessKeyType);
@@ -672,8 +705,10 @@ public class GrpcUmsClient {
      * @param roleCrn         crn of the role
      * @return credential (access/secret keypair)
      */
-    public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn, String accountId, String roleCrn) {
-        return createMachineUserAndGenerateKeys(machineUserName, userCrn, accountId, roleCrn, AccessKeyType.Value.UNSET);
+    public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn, String accountId, String roleCrn,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        return createMachineUserAndGenerateKeys(machineUserName, userCrn, accountId, roleCrn, AccessKeyType.Value.UNSET,
+                regionAwareInternalCrnGeneratorFactory);
     }
 
     /**
@@ -688,12 +723,15 @@ public class GrpcUmsClient {
      */
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn, String accountId,
-            String roleCrn, AccessKeyType.Value accessKeyType) {
-        Optional<String> machineUserCrn = createMachineUser(machineUserName, userCrn, accountId, MDCUtils.getRequestId());
+            String roleCrn, AccessKeyType.Value accessKeyType, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        Optional<String> machineUserCrn = createMachineUser(machineUserName, userCrn, accountId,
+                MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
         if (StringUtils.isNotEmpty(roleCrn)) {
-            assignMachineUserRole(userCrn, accountId, machineUserCrn.orElse(null), roleCrn, MDCUtils.getRequestId());
+            assignMachineUserRole(userCrn, accountId, machineUserCrn.orElse(null), roleCrn,
+                    MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
         }
-        return generateAccessSecretKeyPair(userCrn, accountId, machineUserCrn.orElse(null), MDCUtils.getRequestId(), accessKeyType);
+        return generateAccessSecretKeyPair(userCrn, accountId, machineUserCrn.orElse(null),
+                MDCUtils.getRequestId(), accessKeyType, regionAwareInternalCrnGeneratorFactory);
     }
 
     /**
@@ -703,12 +741,15 @@ public class GrpcUmsClient {
      * @param userCrn         crn of the actor
      * @param roleCrn         crn of the role
      */
-    public void clearMachineUserWithAccessKeysAndRole(String machineUserName, String userCrn, String accountId, String roleCrn) {
+    public void clearMachineUserWithAccessKeysAndRole(String machineUserName, String userCrn, String accountId, String roleCrn,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         if (StringUtils.isNotEmpty(roleCrn)) {
-            unassignMachineUserRole(machineUserName, roleCrn, MDCUtils.getRequestId(), accountId);
+            unassignMachineUserRole(machineUserName, roleCrn, MDCUtils.getRequestId(),
+                    accountId, regionAwareInternalCrnGeneratorFactory);
         }
-        deleteMachineUserAccessKeys(userCrn, accountId, machineUserName, MDCUtils.getRequestId());
-        deleteMachineUser(machineUserName, userCrn, accountId, MDCUtils.getRequestId());
+        deleteMachineUserAccessKeys(userCrn, accountId, machineUserName, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
+        deleteMachineUser(machineUserName, userCrn, accountId,
+                MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
     }
 
     /**
@@ -718,8 +759,9 @@ public class GrpcUmsClient {
      * @param machineUserCrn machine user
      * @param requestId      id for the request
      */
-    public void deleteMachineUserAccessKeys(String actorCrn, String accountId, String machineUserCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public void deleteMachineUserAccessKeys(String actorCrn, String accountId, String machineUserCrn, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.info("Getting access keys for {}", machineUserCrn);
         List<String> accessKeys = client.listMachineUserAccessKeys(RequestIdUtil.getOrGenerate(requestId), actorCrn, accountId, machineUserCrn);
         LOGGER.info("Deleting access keys for {}", machineUserCrn);
@@ -736,8 +778,8 @@ public class GrpcUmsClient {
      * @return result that is true if the machine user has the queried access key in UMS
      */
     public boolean doesMachineUserHasAccessKey(String actorCrn, String accountId,
-            String machineUserCrn, String accessKeyId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+            String machineUserCrn, String accessKeyId, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         List<String> accessKeys = client.listMachineUserAccessKeys(MDCBuilder.getOrGenerateRequestId(), actorCrn, accountId, machineUserCrn, true);
         return accessKeys.contains(accessKeyId);
     }
@@ -756,13 +798,13 @@ public class GrpcUmsClient {
     }
 
     @VisibleForTesting
-    UmsClient makeClient(ManagedChannel channel) {
-        return new UmsClient(channel, umsClientConfig, tracer);
+    UmsClient makeClient(ManagedChannel channel, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        return new UmsClient(channel, umsClientConfig, tracer, regionAwareInternalCrnGeneratorFactory);
     }
 
     @VisibleForTesting
-    AuthorizationClient makeAuthorizationClient() {
-        return new AuthorizationClient(channelWrapper.getChannel(), umsClientConfig, tracer);
+    AuthorizationClient makeAuthorizationClient(RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        return new AuthorizationClient(channelWrapper.getChannel(), umsClientConfig, tracer, regionAwareInternalCrnGeneratorFactory);
     }
 
     /**
@@ -771,15 +813,16 @@ public class GrpcUmsClient {
      * @param accountId the account ID
      * @return metadata as string
      */
-    public String getIdentityProviderMetadataXml(String accountId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public String getIdentityProviderMetadataXml(String accountId, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         String requestId = MDCBuilder.getOrGenerateRequestId();
         LOGGER.debug("Getting IdP metadata through account ID: {}, request id: {}", accountId, requestId);
         return client.getIdentityProviderMetadataXml(requestId, accountId);
     }
 
-    public Multimap<String, String> listAssignedResourceRoles(String assigneeCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public Multimap<String, String> listAssignedResourceRoles(String assigneeCrn, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.info("List the assigned resource roles for {} assignee", assigneeCrn);
         UserManagementProto.ListAssignedResourceRolesResponse response =
                 client.listAssignedResourceRoles(RequestIdUtil.getOrGenerate(requestId), assigneeCrn);
@@ -793,26 +836,29 @@ public class GrpcUmsClient {
         return resourceRoleAssignments;
     }
 
-    public void assignResourceRole(String assigneeCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public void assignResourceRole(String assigneeCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.info("Assigning '{}' role at resource '{}' to assignee '{}'...", resourceRoleCrn, resourceCrn, assigneeCrn);
         client.assignResourceRole(RequestIdUtil.getOrGenerate(requestId), assigneeCrn, resourceCrn, resourceRoleCrn);
         LOGGER.info("Resource role assignment has been successfully done ::: Role: {} Resource: {} Assignee: {}",
                 resourceRoleCrn, resourceCrn, assigneeCrn);
     }
 
-    public void unassignResourceRole(String assigneeCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public void unassignResourceRole(String assigneeCrn, String resourceCrn, String resourceRoleCrn, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.info("Unassigning '{}' role at resource '{}' from assignee '{}'...", resourceRoleCrn, resourceCrn, assigneeCrn);
         client.unassignResourceRole(RequestIdUtil.getOrGenerate(requestId), assigneeCrn, resourceCrn, resourceRoleCrn);
         LOGGER.info("Resource role unassignment has been successfully done ::: Role: {} Resource: {} Assignee: {}",
                 resourceRoleCrn, resourceCrn, assigneeCrn);
     }
 
-    public void notifyResourceDeleted(String resourceCrn, Optional<String> requestId) {
+    public void notifyResourceDeleted(String resourceCrn, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         try {
             LOGGER.debug("Notify UMS about resource ('{}') was deleted", resourceCrn);
-            UmsClient client = makeClient(channelWrapper.getChannel());
+            UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
             client.notifyResourceDeleted(RequestIdUtil.getOrGenerate(requestId), resourceCrn);
             LOGGER.info("Notified UMS about deletion of resource {}", resourceCrn);
         } catch (Exception e) {
@@ -820,25 +866,29 @@ public class GrpcUmsClient {
         }
     }
 
-    public String setWorkloadAdministrationGroupName(String accountId, Optional<String> requestId, String right, String resource) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public String setWorkloadAdministrationGroupName(String accountId, Optional<String> requestId, String right, String resource,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         return client.setWorkloadAdministrationGroupName(RequestIdUtil.getOrGenerate(requestId),
                 accountId, right, resource).getWorkloadAdministrationGroupName();
     }
 
-    public String getWorkloadAdministrationGroupName(String accountId, Optional<String> requestId, String right, String resource) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public String getWorkloadAdministrationGroupName(String accountId, Optional<String> requestId, String right, String resource,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         return client.getWorkloadAdministrationGroupName(RequestIdUtil.getOrGenerate(requestId),
                 accountId, right, resource).getWorkloadAdministrationGroupName();
     }
 
-    public void deleteWorkloadAdministrationGroupName(String accountId, Optional<String> requestId, String right, String resource) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public void deleteWorkloadAdministrationGroupName(String accountId, Optional<String> requestId, String right, String resource,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         client.deleteWorkloadAdministrationGroupName(RequestIdUtil.getOrGenerate(requestId), accountId, right, resource);
     }
 
-    public List<WorkloadAdministrationGroup> listWorkloadAdministrationGroups(String accountId, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public List<WorkloadAdministrationGroup> listWorkloadAdministrationGroups(String accountId, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         return client.listWorkloadAdministrationGroups(RequestIdUtil.getOrGenerate(requestId), accountId);
     }
 
@@ -849,8 +899,9 @@ public class GrpcUmsClient {
      * @param requestId an optional request Id
      * @return the user associated with this user CRN
      */
-    public GetEventGenerationIdsResponse getEventGenerationIds(String accountId, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public GetEventGenerationIdsResponse getEventGenerationIds(String accountId, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         LOGGER.debug("Getting event generation ids for account {} using request ID {}", accountId, requestId);
         return client.getEventGenerationIds(RequestIdUtil.getOrGenerate(requestId), accountId);
     }
@@ -863,8 +914,9 @@ public class GrpcUmsClient {
      * @param rightsChecks list of rights checks for resources. a List is used to preserve order.
      * @return the user sync state for this account and rights checks
      */
-    public GetUserSyncStateModelResponse getUserSyncStateModel(String accountId, List<RightsCheck> rightsChecks, Optional<String> requestId) {
-        UmsClient client = makeClient(channelWrapper.getChannel());
+    public GetUserSyncStateModelResponse getUserSyncStateModel(String accountId, List<RightsCheck> rightsChecks, Optional<String> requestId,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         String generatedRequestId = RequestIdUtil.getOrGenerate(requestId);
         LOGGER.debug("Retrieving user sync state model for account {} using request ID {}", accountId, generatedRequestId);
         return client.getUserSyncStateModel(generatedRequestId, accountId, rightsChecks);

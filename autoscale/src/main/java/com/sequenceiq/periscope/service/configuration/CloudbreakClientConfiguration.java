@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn.Service;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakUserCrnClientBuilder;
@@ -29,6 +29,9 @@ public class CloudbreakClientConfiguration {
     @Inject
     private ClientTracingFeature clientTracingFeature;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Bean
     public CloudbreakServiceUserCrnClient cloudbreakClient() {
         CloudbreakServiceUserCrnClient client = new CloudbreakUserCrnClientBuilder(cloudbreakUrl + cbRootContextPath)
@@ -46,7 +49,7 @@ public class CloudbreakClientConfiguration {
     }
 
     @Bean
-    public InternalCrnBuilder internalCrnBuilder() {
-        return new InternalCrnBuilder(Service.AUTOSCALE);
+    public RegionAwareInternalCrnGenerator internalCrnBuilder() {
+        return regionAwareInternalCrnGeneratorFactory.autoscale();
     }
 }

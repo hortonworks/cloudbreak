@@ -26,6 +26,8 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 import com.sequenceiq.environment.environment.service.sdx.SdxService;
@@ -63,8 +65,14 @@ public class LoadBalancerPollerServiceTest {
 
     private final FlowEndpoint flowEndpoint = Mockito.mock(FlowEndpoint.class);
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory
+            = Mockito.mock(RegionAwareInternalCrnGeneratorFactory.class);
+
+    private final RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator
+            = Mockito.mock(RegionAwareInternalCrnGenerator.class);
+
     private final LoadBalancerPollerService underTest =
-        new LoadBalancerPollerService(datahubService, sdxService, stackService, flowEndpoint);
+        new LoadBalancerPollerService(datahubService, sdxService, stackService, flowEndpoint, regionAwareInternalCrnGeneratorFactory);
 
     @BeforeEach
     public void before() {
@@ -85,6 +93,8 @@ public class LoadBalancerPollerServiceTest {
     @Test
     public void testPollingForSingleDatalake() {
         setupDatalakeResponse();
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(datahubService.list(ENV_CRN)).thenReturn(new StackViewV4Responses());
         when(stackService.updateLoadBalancer(anySet())).thenReturn(setupFlowIdentifiers(1));
         when(flowEndpoint.hasFlowRunningByFlowId(anyString())).thenReturn(setupFinishedFlowCheckResponse());
@@ -101,6 +111,8 @@ public class LoadBalancerPollerServiceTest {
     public void testPollingForDatalakeAndDatahubs() {
         setupDatalakeResponse();
         setupDatahubResponse();
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackService.updateLoadBalancer(eq(Set.of(DL_NAME, DH_NAME1, DH_NAME2)))).thenReturn(setupFlowIdentifiers(3));
         when(flowEndpoint.hasFlowRunningByFlowId(anyString())).thenReturn(setupFinishedFlowCheckResponse());
         when(flowEndpoint.getFlowLogsByFlowId(anyString())).thenReturn(List.of(setupSuccessFlowLogResponse()));
@@ -116,6 +128,8 @@ public class LoadBalancerPollerServiceTest {
     public void testPollingForDatalakeOnly() {
         setupDatalakeResponse();
         setupDatahubResponse();
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackService.updateLoadBalancer(eq(Set.of(DL_NAME)))).thenReturn(setupFlowIdentifiers(1));
         when(flowEndpoint.hasFlowRunningByFlowId(anyString())).thenReturn(setupFinishedFlowCheckResponse());
         when(flowEndpoint.getFlowLogsByFlowId(anyString())).thenReturn(List.of(setupSuccessFlowLogResponse()));
@@ -138,6 +152,8 @@ public class LoadBalancerPollerServiceTest {
 
         setupDatalakeResponse();
         setupDatahubResponse();
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackService.updateLoadBalancer(eq(Set.of(DL_NAME, DH_NAME1, DH_NAME2)))).thenReturn(flowIdentifiers);
         when(flowEndpoint.hasFlowRunningByFlowId(anyString())).thenReturn(setupFinishedFlowCheckResponse());
         when(flowEndpoint.getFlowLogsByFlowId(failFlowId.getPollableId())).thenReturn(List.of(setupFailFlowLogResponse()));
@@ -158,6 +174,8 @@ public class LoadBalancerPollerServiceTest {
         ReflectionTestUtils.setField(underTest, "maxTime", 5);
         setupDatalakeResponse();
         setupDatahubResponse();
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(stackService.updateLoadBalancer(eq(Set.of(DL_NAME, DH_NAME1, DH_NAME2)))).thenReturn(setupFlowIdentifiers(3));
         when(flowEndpoint.hasFlowRunningByFlowId(anyString())).thenReturn(setupActiveFlowCheckResponse());
         String expectedError = "Stack update poller reached timeout.";

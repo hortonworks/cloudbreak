@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
@@ -84,6 +85,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     private final RoleCrnGenerator roleCrnGenerator;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public EnvironmentService(
             EnvironmentValidatorService validatorService,
             EnvironmentRepository environmentRepository,
@@ -92,7 +95,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             OwnerAssignmentService ownerAssignmentService,
             GrpcUmsClient grpcUmsClient,
             TransactionService transactionService,
-            RoleCrnGenerator roleCrnGenerator) {
+            RoleCrnGenerator roleCrnGenerator,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.platformParameterService = platformParameterService;
@@ -101,6 +105,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         this.grpcUmsClient = grpcUmsClient;
         this.transactionService = transactionService;
         this.roleCrnGenerator = roleCrnGenerator;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public Environment save(Environment environment) {
@@ -355,7 +360,11 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     public void assignEnvironmentAdminRole(String userCrn, String environmentCrn) {
         try {
-            grpcUmsClient.assignResourceRole(userCrn, environmentCrn, roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(), MDCUtils.getRequestId());
+            grpcUmsClient.assignResourceRole(userCrn,
+                    environmentCrn,
+                    roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(),
+                    MDCUtils.getRequestId(),
+                    regionAwareInternalCrnGeneratorFactory);
             LOGGER.debug("EnvironmentAdmin role of {} environemnt is successfully assigned to the {} user", environmentCrn, userCrn);
         } catch (StatusRuntimeException ex) {
             if (Code.ALREADY_EXISTS.equals(ex.getStatus().getCode())) {

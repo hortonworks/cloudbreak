@@ -33,8 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkS
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -140,6 +139,9 @@ public class StackCommonService {
 
     @Inject
     private StackUtil stackUtil;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
@@ -422,8 +424,8 @@ public class StackCommonService {
     }
 
     private void validateHardLimits(Integer scalingAdjustment) {
-        boolean forAutoscale = InternalCrnBuilder.isInternalCrnForService(restRequestThreadLocalService.getCloudbreakUser().getUserCrn(),
-                Crn.Service.AUTOSCALE);
+        boolean forAutoscale = regionAwareInternalCrnGeneratorFactory.autoscale()
+                .isInternalCrnForService(restRequestThreadLocalService.getCloudbreakUser().getUserCrn());
         boolean violatingMaxNodeCount = forAutoscale ?
                 scalingHardLimitsService.isViolatingAutoscaleMaxStepInNodeCount(scalingAdjustment) :
                 scalingHardLimitsService.isViolatingMaxUpscaleStepInNodeCount(scalingAdjustment);

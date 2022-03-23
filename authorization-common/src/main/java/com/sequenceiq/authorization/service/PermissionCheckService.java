@@ -1,7 +1,6 @@
 package com.sequenceiq.authorization.service;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder.INTERNAL_ACCOUNT;
 
 import java.lang.annotation.Annotation;
 import java.util.Optional;
@@ -23,7 +22,8 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;
@@ -52,13 +52,16 @@ public class PermissionCheckService {
     @Inject
     private ResourceAuthorizationService resourceAuthorizationService;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public Object hasPermission(ProceedingJoinPoint proceedingJoinPoint) {
         long startTime = System.currentTimeMillis();
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
         LOGGER.debug("Permission check started at {} (method: {})", startTime,
                 methodSignature.getMethod().getDeclaringClass().getSimpleName() + '#' + methodSignature.getMethod().getName());
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        boolean internalUser = userCrn != null && InternalCrnBuilder.isInternalCrn(userCrn);
+        boolean internalUser = userCrn != null && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn);
         Optional<String> initiatorUserCrnParameter = persistInitiatorUserIfParameterPresent(proceedingJoinPoint, methodSignature);
 
         if (!internalUser && !hasAnnotationOnClass(proceedingJoinPoint, DisableCheckPermissions.class)
@@ -76,7 +79,8 @@ public class PermissionCheckService {
             return ThreadBasedUserCrnProvider.doAs(initiatorUserCrnParameter.get(), () ->
                     commonPermissionCheckingUtils.proceed(proceedingJoinPoint, methodSignature, startTime));
         } else {
-            if (INTERNAL_ACCOUNT.equals(Crn.safeFromString(userCrn).getAccountId()) && accountIdNeeded(methodSignature)) {
+            if (regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()
+                    .equals(Crn.safeFromString(userCrn).getAccountId()) && accountIdNeeded(methodSignature)) {
                 LOGGER.error("Method {} is not prepared to call internally, please check readme in authorization module.",
                         methodSignature.getMethod().getDeclaringClass().getSimpleName() + '#' + methodSignature.getMethod().getName());
                 throw new AccessDeniedException("This API is not prepared to use it in service-to-service communication.");

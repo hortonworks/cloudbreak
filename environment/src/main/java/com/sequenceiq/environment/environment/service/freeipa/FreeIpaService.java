@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.flow.api.model.operation.OperationView;
@@ -41,14 +42,18 @@ public class FreeIpaService {
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public FreeIpaService(FreeIpaV1Endpoint freeIpaV1Endpoint,
             OperationV1Endpoint operationV1Endpoint,
             UserV1Endpoint userV1Endpoint,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
+            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
         this.operationV1Endpoint = operationV1Endpoint;
         this.userV1Endpoint = userV1Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public DescribeFreeIpaResponse create(CreateFreeIpaRequest createFreeIpaRequest) {
@@ -128,7 +133,9 @@ public class FreeIpaService {
 
     public SyncOperationStatus getSyncOperationStatus(String environmentCrn, String operationId) {
         try {
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () ->
                     userV1Endpoint.getSyncOperationStatusInternal(Crn.fromString(environmentCrn).getAccountId(), operationId));
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
 @Service
@@ -23,12 +24,16 @@ public class AltusIAMService {
 
     private final RoleCrnGenerator roleCrnGenerator;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public AltusIAMService(GrpcUmsClient umsClient,
             SharedAltusCredentialProvider sharedAltusCredentialProvider,
-            RoleCrnGenerator roleCrnGenerator) {
+            RoleCrnGenerator roleCrnGenerator,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.umsClient = umsClient;
         this.sharedAltusCredentialProvider = sharedAltusCredentialProvider;
         this.roleCrnGenerator = roleCrnGenerator;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     /**
@@ -39,7 +44,8 @@ public class AltusIAMService {
                 machineUserName,
                 actorCrn,
                 accountId,
-                roleCrnGenerator.getBuiltInDatabusRoleCrn());
+                roleCrnGenerator.getBuiltInDatabusRoleCrn(),
+                regionAwareInternalCrnGeneratorFactory);
     }
 
     /**
@@ -52,7 +58,8 @@ public class AltusIAMService {
                         actorCrn,
                         accountId,
                         roleCrnGenerator.getBuiltInDatabusRoleCrn(),
-                        UserManagementProto.AccessKeyType.Value.ED25519)));
+                        UserManagementProto.AccessKeyType.Value.ED25519,
+                        regionAwareInternalCrnGeneratorFactory)));
     }
 
     /**
@@ -66,9 +73,11 @@ public class AltusIAMService {
             result = true;
         } else {
             LOGGER.debug("Query (or create if needed) machine user with name {}", machineUserName);
-            Optional<String> machineUserCrn = umsClient.createMachineUser(machineUserName, actorCrn, accountId, Optional.empty());
+            Optional<String> machineUserCrn = umsClient.createMachineUser(machineUserName, actorCrn, accountId, Optional.empty(),
+                    regionAwareInternalCrnGeneratorFactory);
             if (machineUserCrn.isPresent()) {
-                return umsClient.doesMachineUserHasAccessKey(actorCrn, accountId, machineUserCrn.get(), accessKey);
+                return umsClient.doesMachineUserHasAccessKey(actorCrn, accountId, machineUserCrn.get(), accessKey,
+                        regionAwareInternalCrnGeneratorFactory);
             } else {
                 LOGGER.debug("Machine user ('{}') does not exist (even after the creation).", machineUserName);
             }
@@ -84,7 +93,8 @@ public class AltusIAMService {
             if (sharedAltusCredentialProvider.isSharedAltusCredentialInUse(useSharedCredential)) {
                 LOGGER.debug("Access and secret keys are set manually application wide for Databus, skip machine user cleanup.");
             } else {
-                umsClient.clearMachineUserWithAccessKeysAndRole(machineUserName, actorCrn, accountId, roleCrnGenerator.getBuiltInDatabusRoleCrn());
+                umsClient.clearMachineUserWithAccessKeysAndRole(machineUserName, actorCrn, accountId,
+                        roleCrnGenerator.getBuiltInDatabusRoleCrn(), regionAwareInternalCrnGeneratorFactory);
             }
         } catch (Exception e) {
             LOGGER.warn("Cluster Databus resource cleanup failed (fluent - databus user). It is not a fatal issue, "
@@ -108,6 +118,7 @@ public class AltusIAMService {
     }
 
     public List<UserManagementProto.MachineUser> getAllMachineUsersForAccount(String accountId) {
-        return umsClient.listAllMachineUsers(accountId, true, true, Optional.empty());
+        return umsClient.listAllMachineUsers(accountId, true, true,
+                Optional.empty(), regionAwareInternalCrnGeneratorFactory);
     }
 }

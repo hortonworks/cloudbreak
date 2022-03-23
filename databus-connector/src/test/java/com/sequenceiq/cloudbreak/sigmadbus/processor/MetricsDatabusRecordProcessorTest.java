@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sigmadbus.config.SigmaDatabusConfig;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequestContext;
@@ -38,10 +39,13 @@ public class MetricsDatabusRecordProcessorTest {
     @Mock
     private Tracer tracer;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @BeforeEach
     public void setUp() {
         underTest = new MetricsDatabusRecordProcessor(sigmaDatabusConfig,
-                monitoringConfiguration, 1, 1, tracer);
+                monitoringConfiguration, 1, 1, tracer, regionAwareInternalCrnGeneratorFactory);
         MockitoAnnotations.openMocks(this);
     }
 

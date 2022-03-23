@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 @Service
@@ -18,6 +19,9 @@ class ClouderaManagerLicenseService {
     @Inject
     private GrpcUmsClient umsClient;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     void validateClouderaManagerLicense(String accountId) {
         if (hasNoLicense(accountId)) {
             LOGGER.error("For tenant '{}' there is no valid cloudera manager license.", accountId);
@@ -26,7 +30,7 @@ class ClouderaManagerLicenseService {
     }
 
     private boolean hasNoLicense(String accountId) {
-        return StringUtils.isEmpty(umsClient.getAccountDetails(accountId, MDCUtils.getRequestId())
+        return StringUtils.isEmpty(umsClient.getAccountDetails(accountId, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory)
                 .getClouderaManagerLicenseKey());
     }
 

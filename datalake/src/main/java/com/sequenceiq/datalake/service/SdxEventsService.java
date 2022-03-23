@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEven
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -52,6 +53,9 @@ public class SdxEventsService {
 
     @Inject
     private EventV4Endpoint eventV4Endpoint;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public List<CDPStructuredEvent> getDatalakeAuditEvents(String environmentCrn, List<StructuredEventType> types) {
         List<CDPStructuredEvent> dlEvents;
@@ -124,7 +128,9 @@ public class SdxEventsService {
 
         try {
             // Get and translate the cloudbreak events
-            List<CloudbreakEventV4Response> cloudbreakEventV4Responses = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+            List<CloudbreakEventV4Response> cloudbreakEventV4Responses = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () ->
                     eventV4Endpoint.getPagedCloudbreakEventListByCrn(sdxCluster.getCrn(), page, size, false));
             return cloudbreakEventV4Responses.stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(toList());
         } catch (Exception exception) {
@@ -140,7 +146,9 @@ public class SdxEventsService {
 
         try {
             // Get and translate the cloudbreak events
-            StructuredEventContainer structuredEventContainer = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+            StructuredEventContainer structuredEventContainer = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () ->
                     eventV4Endpoint.structuredByCrn(sdxCluster.getCrn(), false));
             return structuredEventContainer.getNotification().stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(toList());
         } catch (Exception exception) {

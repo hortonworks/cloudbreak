@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -80,6 +81,9 @@ public class FreeIpaCleanupService {
     @Inject
     private InstanceMetadataProcessor instanceMetadataProcessor;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public void cleanupButIp(Stack stack) {
         Set<String> hostNames = instanceMetadataProcessor.extractFqdn(stack);
         Set<String> ips = Set.of();
@@ -122,7 +126,7 @@ public class FreeIpaCleanupService {
 
     private void pollCleanupOperation(OperationStatus operationStatus, String accountId) {
         FreeIpaOperationPollerObject opretaionPollerObject = new FreeIpaOperationPollerObject(operationStatus.getOperationId(),
-                operationStatus.getOperationType().name(), operationV1Endpoint, accountId);
+                operationStatus.getOperationType().name(), operationV1Endpoint, accountId, regionAwareInternalCrnGeneratorFactory);
         ExtendedPollingResult pollingResult = freeIpaOperationChecker
                 .pollWithAbsoluteTimeout(new FreeIpaOperationCheckerTask<>(), opretaionPollerObject, POLL_INTERVAL, WAIT_SEC, 1);
         if (!pollingResult.isSuccess()) {
@@ -137,7 +141,9 @@ public class FreeIpaCleanupService {
         try {
             CleanupRequest cleanupRequest = createCleanupRequest(stack, stepsToSkip, hostNames, ips);
             LOGGER.info("Sending cleanup request to FreeIPA: [{}]", cleanupRequest);
-            OperationStatus cleanup = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+            OperationStatus cleanup = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () ->
                     freeIpaV1Endpoint.internalCleanup(cleanupRequest, Crn.fromString(stack.getResourceCrn()).getAccountId()));
             LOGGER.info("Cleanup operation started: {}", cleanup);
             return cleanup;

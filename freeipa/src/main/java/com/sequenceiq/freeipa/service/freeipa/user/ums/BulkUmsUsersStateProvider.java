@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.WorkloadCredentialConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
@@ -38,6 +39,9 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     @Inject
     private WorkloadCredentialConverter workloadCredentialConverter;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public Map<String, UmsUsersState> get(
             String accountId, Collection<String> environmentCrns,
             Optional<String> requestIdOptional) {
@@ -45,7 +49,8 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
         UserManagementProto.GetUserSyncStateModelResponse userSyncStateModel = grpcUmsClient.getUserSyncStateModel(
                 accountId,
                 umsRightsChecksFactory.get(environmentCrnList),
-                requestIdOptional);
+                requestIdOptional,
+                regionAwareInternalCrnGeneratorFactory);
 
         Map<String, FmsGroup> groups = convertGroupsToFmsGroups(userSyncStateModel.getGroupList());
         Map<UserManagementProto.WorkloadAdministrationGroup, FmsGroup> wags =

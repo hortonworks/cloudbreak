@@ -35,6 +35,8 @@ import com.sequenceiq.authorization.service.list.AbstractAuthorizationFiltering;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalUserModifier;
@@ -64,6 +66,12 @@ public class PermissionCheckServiceTest {
     @Mock
     private ResourceAuthorizationService resourceAuthorizationService;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @InjectMocks
     private PermissionCheckService underTest;
 
@@ -84,6 +92,9 @@ public class PermissionCheckServiceTest {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("disabledAuthorization"));
         when(commonPermissionCheckingUtils.proceed(any(), any(), anyLong())).thenReturn(null);
 
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
@@ -97,6 +108,9 @@ public class PermissionCheckServiceTest {
     public void testDisableAnnotationCancelsOtherAnnotations() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("tooManyAnnotation"));
 
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
@@ -118,6 +132,9 @@ public class PermissionCheckServiceTest {
     public void testAccountAuthorization() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("accountBasedMethod"));
 
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(accountAuthorizationService).authorize(any(CheckPermissionByAccount.class), eq(USER_CRN));
@@ -131,6 +148,9 @@ public class PermissionCheckServiceTest {
     public void testAccountAndResourceBasedAuthorization() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("accountAndResourceBasedMethod", String.class));
 
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(accountAuthorizationService).authorize(any(CheckPermissionByAccount.class), eq(USER_CRN));
@@ -144,6 +164,9 @@ public class PermissionCheckServiceTest {
     public void testResourceBasedAuthorization() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("resourceBasedMethod", String.class));
 
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(resourceAuthorizationService).authorize(eq(USER_CRN), eq(proceedingJoinPoint), eq(methodSignature), any());
@@ -156,7 +179,9 @@ public class PermissionCheckServiceTest {
     @Test
     public void testList() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("listMethod"));
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
@@ -179,6 +204,9 @@ public class PermissionCheckServiceTest {
     public void testInternalOnlyMethodIfModifiedInternalActor() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
 
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(MODIFIED_INTERNAL_ACTOR, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
@@ -193,7 +221,8 @@ public class PermissionCheckServiceTest {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethod"));
 
         assertThrows(AccessDeniedException.class, () ->
-                ThreadBasedUserCrnProvider.doAs(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, () -> underTest.hasPermission(proceedingJoinPoint)),
+                ThreadBasedUserCrnProvider.doAs("crn:altus:iam:us-west-1:altus:user:__not_internal__actor__",
+                        () -> underTest.hasPermission(proceedingJoinPoint)),
                 "This API is not prepared to use it in service-to-service communication.");
 
         verifyNoInteractions(
@@ -206,7 +235,10 @@ public class PermissionCheckServiceTest {
     public void testInternalOnlyMethodIfOriginalInternalActorButAccountIdNotNeeded() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(ExampleClass.class.getMethod("internalOnlyMethodAccountIdNotNeeded"));
 
-        ThreadBasedUserCrnProvider.doAs(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        ThreadBasedUserCrnProvider.doAs("crn:altus:iam:us-west-1:altus:user:__internal__actor__", () -> underTest.hasPermission(proceedingJoinPoint));
 
         verifyNoInteractions(
                 internalUserModifier,
@@ -220,7 +252,7 @@ public class PermissionCheckServiceTest {
         when(reflectionUtil.getParameter(eq(proceedingJoinPoint), eq(methodSignature), eq(InitiatorUserCrn.class)))
                 .thenReturn(Optional.of(USER_CRN));
 
-        ThreadBasedUserCrnProvider.doAs(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
+        ThreadBasedUserCrnProvider.doAs("crn:altus:iam:us-west-1:altus:user:__internal__actor__", () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
         verify(internalUserModifier).persistModifiedInternalUser(any());
@@ -244,6 +276,9 @@ public class PermissionCheckServiceTest {
     public void testInternalOnlyClassIfModifiedInternalActor() throws NoSuchMethodException {
         when(methodSignature.getMethod()).thenReturn(InternalOnlyClassExample.class.getMethod("get"));
 
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(MODIFIED_INTERNAL_ACTOR, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());

@@ -4,8 +4,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequestContext;
 import com.sequenceiq.cloudbreak.usage.messagebroker.MessageBrokerDatabusRecordProcessor;
@@ -16,8 +16,12 @@ public class MessageBrokerUsageStrategy implements UsageProcessingStrategy {
 
     private final MessageBrokerDatabusRecordProcessor messageBrokerDatabusRecordProcessor;
 
-    public MessageBrokerUsageStrategy(MessageBrokerDatabusRecordProcessor messageBrokerDatabusRecordProcessor) {
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    public MessageBrokerUsageStrategy(MessageBrokerDatabusRecordProcessor messageBrokerDatabusRecordProcessor,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.messageBrokerDatabusRecordProcessor = messageBrokerDatabusRecordProcessor;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -37,7 +41,7 @@ public class MessageBrokerUsageStrategy implements UsageProcessingStrategy {
         if (context != null && StringUtils.isNotBlank(context.getAccountId())) {
             return context.getAccountId();
         } else {
-            return Crn.safeFromString(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN).getAccountId();
+            return Crn.safeFromString(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()).getAccountId();
         }
     }
 }

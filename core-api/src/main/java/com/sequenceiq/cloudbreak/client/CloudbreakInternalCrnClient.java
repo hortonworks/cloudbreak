@@ -1,19 +1,19 @@
 package com.sequenceiq.cloudbreak.client;
 
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 
 public class CloudbreakInternalCrnClient {
 
     private CloudbreakServiceUserCrnClient client;
 
-    private InternalCrnBuilder internalCrnBuilder;
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
-    public CloudbreakInternalCrnClient(CloudbreakServiceUserCrnClient crnClient, InternalCrnBuilder builder) {
+    public CloudbreakInternalCrnClient(CloudbreakServiceUserCrnClient crnClient, RegionAwareInternalCrnGenerator builder) {
         client = crnClient;
-        internalCrnBuilder = builder;
+        regionAwareInternalCrnGenerator = builder;
     }
 
     public CloudbreakServiceCrnEndpoints withInternalCrn() {
-        return client.withCrn(internalCrnBuilder.getInternalCrnForServiceAsString());
+        return client.withCrn(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString());
     }
 }

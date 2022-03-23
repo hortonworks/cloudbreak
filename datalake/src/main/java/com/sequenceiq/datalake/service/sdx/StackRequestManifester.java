@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -101,6 +100,9 @@ public class StackRequestManifester {
 
     @Inject
     private EventSenderService eventSenderService;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
     private MultiAzDecorator multiAzDecorator;
@@ -320,7 +322,9 @@ public class StackRequestManifester {
                 MappingsConfig mappingsConfig;
                 try {
                     // Must pass the internal actor here as this operation is internal-use only; requests with other actors will be always rejected.
-                    mappingsConfig = idbmmsClient.getMappingsConfig(INTERNAL_ACTOR_CRN, environmentCrn, Optional.empty());
+                    mappingsConfig = idbmmsClient.getMappingsConfig(
+                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            environmentCrn, Optional.empty());
                     validateMappingsConfig(mappingsConfig, stackRequest);
                 } catch (IdbmmsOperationException e) {
                     throw new BadRequestException(String.format("Unable to get mappings: %s", e.getMessage()), e);

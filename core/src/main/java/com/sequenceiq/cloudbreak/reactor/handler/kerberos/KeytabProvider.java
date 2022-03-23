@@ -9,7 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -30,13 +31,18 @@ public class KeytabProvider {
     private KerberosMgmtV1Endpoint kerberosMgmtV1Endpoint;
 
     @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
     public ServiceKeytabResponse getServiceKeytabResponse(Stack stack, GatewayConfig primaryGatewayConfig) {
         ServiceKeytabRequest request = cmServiceKeytabRequestFactory.create(stack, primaryGatewayConfig);
         try {
             String accountId = getAccountId(stack);
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> kerberosMgmtV1Endpoint.generateServiceKeytab(request, accountId));
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> kerberosMgmtV1Endpoint.generateServiceKeytab(request, accountId));
         } catch (WebApplicationException e) {
             String errorMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Failed to generate Keytab with FreeIpa service due to: '%s' ", errorMessage);
@@ -47,7 +53,7 @@ public class KeytabProvider {
 
     private String getAccountId(Stack stack) {
         String accountId;
-        if (InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
+        if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
             LOGGER.debug("Current user is internal, getting account id from requested stack crn");
             accountId = Crn.fromString(stack.getResourceCrn()).getAccountId();
         } else {

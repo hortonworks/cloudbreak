@@ -24,6 +24,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -60,6 +62,12 @@ class EnvironmentStatusTest {
     @MockBean
     private Tracer tracer;
 
+    @MockBean
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @Mock
     private JobExecutionContext jobExecutionContext;
 
@@ -88,7 +96,8 @@ class EnvironmentStatusTest {
     void available() throws JobExecutionException {
         environment.setStatus(EnvironmentStatus.AVAILABLE);
         setFreeIpaStatus(Status.AVAILABLE);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(environmentStatusUpdateService, never()).updateEnvironmentStatusAndNotify(eq(environment), any(), any());
@@ -103,7 +112,8 @@ class EnvironmentStatusTest {
     void deleted() throws JobExecutionException {
         environment.setStatus(EnvironmentStatus.AVAILABLE);
         setFreeIpaStatus(Status.DELETED_ON_PROVIDER_SIDE);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
