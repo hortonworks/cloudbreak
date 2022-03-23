@@ -105,7 +105,7 @@ public class UpdateNodeCountValidator {
 
     public void validateStackStatus(Stack stack, boolean upscale) {
         if (upscale &&
-                !(stack.isAvailable() || (stack.hasNodeFailure() && targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(stack)))) {
+                !(stack.isAvailable() || (stack.hasNodeFailure() && targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(stack.getResourceCrn())))) {
             throwBadRequest(stack);
         } else if (!upscale && !stack.isAvailable()) {
             throwBadRequest(stack);
@@ -115,7 +115,7 @@ public class UpdateNodeCountValidator {
     public void validateClusterStatus(Stack stack, boolean upscale) {
         Cluster cluster = stack.getCluster();
         if (upscale && cluster != null && !(stack.isAvailable()
-                || (stack.hasNodeFailure() && targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(stack)))) {
+                || (stack.hasNodeFailure() && targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(stack.getResourceCrn())))) {
             throwBadRequest(stack);
         } else if (!upscale && cluster != null && !stack.isAvailable()) {
             throwBadRequest(stack);
