@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.service.LockNumber;
+import com.sequenceiq.cloudbreak.common.service.LockService;
 import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
 
@@ -29,8 +31,15 @@ public class QuartzJobInitializer {
     @Inject
     private Scheduler scheduler;
 
+    @Inject
+    private LockService lockService;
+
     @PostConstruct
     private void init() {
+        lockService.lockAndRunIfLockWasSuccessful(this::initQuartz, LockNumber.QUARTZ);
+    }
+
+    private void initQuartz() {
         if (properties.isAutoSyncEnabled() && initJobDefinitions.isPresent()) {
             try {
                 LOGGER.info("AutoSync is enabled and there are job initializers, clearing the Quartz scheduler.");
