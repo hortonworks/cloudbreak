@@ -12,6 +12,7 @@
     {% set is_systemd = True %}
 {% endif %}
 
+{% set use_dev_stack = salt['pillar.get']('monitoring:useDevStack') %}
 {% set type = salt['pillar.get']('monitoring:type') %}
 {% set cm_username = salt['pillar.get']('monitoring:cmUsername') %}
 {% set cm_password = salt['pillar.get']('monitoring:cmPassword') %}
@@ -28,5 +29,6 @@
     "type": type,
     "cmUsername": cm_username,
     "cmPassword": cm_password,
-    "cmClusterType": cm_cluster_type
+    "cmClusterType": cm_cluster_type,
+    "useDevStack": use_dev_stack
 }) %}

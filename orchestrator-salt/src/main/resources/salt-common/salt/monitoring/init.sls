@@ -36,3 +36,8 @@ start_monitoring:
     - mode: 600
     - source: salt://monitoring/cron/cdp_resources_check
 
+{% if monitoring.useDevStack %}
+include:
+  - monitoring.dev-stack
+{% endif %}
+
