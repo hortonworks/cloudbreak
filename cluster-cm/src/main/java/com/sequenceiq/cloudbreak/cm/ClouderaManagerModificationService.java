@@ -288,6 +288,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 ClouderaManagerProduct cdhProduct = getCdhProducts(products);
                 upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi, true);
                 upgradeCdh(clustersResourceApi, parcelResourceApi, cdhProduct);
+                startServices();
                 deployConfigAndRefreshCMStaleServices(clustersResourceApi, false);
             }
             removeUnusedParcelVersions(parcelResourceApi, products);
