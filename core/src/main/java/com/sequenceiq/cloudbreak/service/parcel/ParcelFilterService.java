@@ -90,7 +90,7 @@ public class ParcelFilterService {
     }
 
     private boolean isCustomParcel(Long stackId, ClouderaManagerProduct parcel) {
-        Set<String> parcelNamesFromImage = imageReaderService.getParcelNames(stackId, false);
+        Set<String> parcelNamesFromImage = imageReaderService.getParcelNames(stackId);
         if (parcelNamesFromImage.stream().noneMatch(preWarmParcel -> preWarmParcel.equals(parcel.getName()))) {
             LOGGER.debug("Add custom parcel {}", parcel);
             return true;

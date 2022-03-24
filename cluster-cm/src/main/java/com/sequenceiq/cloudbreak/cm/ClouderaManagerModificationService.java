@@ -78,7 +78,6 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -286,7 +285,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 callPostClouderaRuntimeUpgradeCommandIfCMIsNewerThan751(clustersResourceApi);
                 restartServices(clustersResourceApi);
             } else {
-                ClouderaManagerProduct cdhProduct = getCdhProducts(products);
+                ClouderaManagerProduct cdhProduct = clouderaManagerProductsProvider.getCdhProducts(products);
                 upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi, true);
                 upgradeCdh(clustersResourceApi, parcelResourceApi, cdhProduct);
                 startServices();
@@ -392,7 +391,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 LOGGER.info("Downloading parcels for {} products...", products);
                 downloadAndActivateParcels(products, parcelResourceApi, false);
             } else {
-                ClouderaManagerProduct cdhProduct = getCdhProducts(products);
+                ClouderaManagerProduct cdhProduct = clouderaManagerProductsProvider.getCdhProducts(products);
                 upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi, false);
                 downloadAndActivateParcels(Collections.singleton(cdhProduct), parcelResourceApi, false);
             }
@@ -434,13 +433,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         } else {
             LOGGER.info("No parcel activation is necessary yet.");
         }
-    }
-
-    private ClouderaManagerProduct getCdhProducts(Set<ClouderaManagerProduct> products) {
-        return products.stream()
-                .filter(service -> service.getName().equals(com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH.name()))
-                .findFirst()
-                .orElseThrow(() -> new NotFoundException("Runtime component not found!"));
     }
 
     private Set<ClouderaManagerProduct> getNonCdhProducts(Set<ClouderaManagerProduct> products, String cdhProductName) {
