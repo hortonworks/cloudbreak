@@ -259,9 +259,9 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @AccountIdNotNeeded
     @DisableCheckPermissions
-    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider, boolean govCloud) throws Exception {
+    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider) throws Exception {
         StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type,
-                platformStringTransformer.getPlatformStringForImageCatalog(provider, govCloud));
+                platformStringTransformer.getPlatformStringForImageCatalog(provider, false));
         return imageToImageV4ResponseConverter.convert(statedImage.getImage());
     }
 

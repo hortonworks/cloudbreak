@@ -186,8 +186,7 @@ public interface ImageCatalogV4Endpoint {
             notes = IMAGE_CATALOG_NOTES, nickname = "getImageFromDefault")
     ImageV4Response getImageFromDefault(@PathParam("workspaceId") Long workspaceId,
             @PathParam("type") String type,
-            @PathParam("provider") String provider,
-            @PathParam("govCloud") boolean govCloud) throws Exception;
+            @PathParam("provider") String provider) throws Exception;
 
     @GET
     @Path("default_runtime_versions")
