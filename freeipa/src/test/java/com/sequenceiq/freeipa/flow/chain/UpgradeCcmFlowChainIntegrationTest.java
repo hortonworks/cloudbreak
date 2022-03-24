@@ -16,8 +16,8 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -148,20 +148,20 @@ class UpgradeCcmFlowChainIntegrationTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testCcmUpgradeFlowChainWhenSuccessful() throws Exception {
         testFlow(ALL_CALLED_ONCE, true, true);
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testUpdateUserDataFailsInChain() throws Exception {
         doThrow(new BadRequestException()).when(userDataService).createUserData(STACK_ID);
         testFlow(CALLED_ONCE_TILL_GENERATE_USERDATA, true, false);
     }
 
     @Test
-    @Ignore
+    @Disabled
     public void testCcmUpgradeWhenRemoveMinaFailsInChain() throws Exception {
         doThrow(new BadRequestException()).when(upgradeCcmService).removeMina(STACK_ID);
         testFlow(CALLED_ONCE_TILL_REMOVE_MINA, false, false);
