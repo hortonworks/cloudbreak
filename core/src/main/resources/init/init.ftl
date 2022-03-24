@@ -19,6 +19,7 @@ export CB_CERT=${cbCert}
 export IS_PROXY_ENABLED=true
 export PROXY_HOST=${proxyHost}
 export PROXY_PORT=${proxyPort}
+export PROXY_PROTOCOL=${proxyProtocol}
 <#if proxyUser??>
 export PROXY_USER="${proxyUser}"
 <#if proxyPassword??>

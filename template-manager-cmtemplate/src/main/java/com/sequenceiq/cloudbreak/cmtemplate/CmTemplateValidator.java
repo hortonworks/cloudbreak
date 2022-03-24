@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -11,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -60,14 +63,13 @@ public class CmTemplateValidator implements BlueprintValidator {
 
     @Override
     public void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, Optional<ClouderaManagerProduct> cdhProduct,
-        String hostGroupName, Integer adjustment, Collection<InstanceGroup> instanceGroups) {
-        CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
-        validateRequiredRoleCountInCluster(hostGroupName, adjustment, instanceGroups, templateProcessor);
-        validateBlackListedScalingRoles(accountId, templateProcessor, hostGroupName, adjustment, cdhProduct);
+            String hostGroupName, Integer adjustment,
+            Collection<InstanceGroup> instanceGroups) {
+        validateHostGroupScalingRequest(accountId, blueprint, Map.of(hostGroupName, adjustment), cdhProduct, instanceGroups);
     }
 
     public void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, Map<String, Integer> instanceGroupAdjustments,
-        Optional<ClouderaManagerProduct> cdhProduct, Collection<InstanceGroup> instanceGroups) {
+            Optional<ClouderaManagerProduct> cdhProduct, Collection<InstanceGroup> instanceGroups) {
         CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
         validateRequiredRoleCountInCluster(instanceGroupAdjustments, instanceGroups, templateProcessor);
         instanceGroupAdjustments.forEach((hostGroupName, adjustment) -> {
@@ -81,7 +83,7 @@ public class CmTemplateValidator implements BlueprintValidator {
     }
 
     private void validateBlackListedScalingRoles(String accountId, CmTemplateProcessor templateProcessor, String hostGroupName,
-        Integer adjustment, Optional<ClouderaManagerProduct> cdhProduct) {
+            Integer adjustment, Optional<ClouderaManagerProduct> cdhProduct) {
         Set<String> services = templateProcessor.getComponentsByHostGroup().get(hostGroupName);
         if (adjustment < 0) {
             for (BlackListedDownScaleRole role : BlackListedDownScaleRole.values()) {
@@ -99,62 +101,8 @@ public class CmTemplateValidator implements BlueprintValidator {
         }
     }
 
-    private void validateRequiredRoleCountInCluster(
-            String hostGroupName,
-            Integer adjustment,
-            Collection<InstanceGroup> instanceGroups,
-            CmTemplateProcessor templateProcessor) {
-        REQUIRED_ROLE_COUNT.forEach((role, requiredCount) -> {
-            Set<String> instanceGroupsWithRoles = templateProcessor.getComponentsByHostGroup()
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> entry.getValue().contains(role))
-                    .map(Entry::getKey)
-                    .collect(Collectors.toSet());
-            if (instanceGroupsWithRoles.contains(hostGroupName)) {
-                instanceGroups.stream()
-                        .filter(instanceGroup -> instanceGroupsWithRoles.contains(instanceGroup.getGroupName()))
-                        .map(InstanceGroup::getNodeCount)
-                        .reduce(Integer::sum)
-                        .ifPresent(roleCountInGroups -> {
-                            if (roleCountInGroups + adjustment < requiredCount) {
-                                throw new BadRequestException(String.format(
-                                        "Scaling adjustment is not allowed, based on the template it would eliminate all the instances with "
-                                                + "%s role which is not supported.", role));
-                            }
-                        });
-            }
-        });
-    }
-
-    private void validateRequiredRoleCountInCluster(
-            Map<String, Integer> instanceGroupAdjustments,
-            Collection<InstanceGroup> instanceGroups,
-            CmTemplateProcessor templateProcessor) {
-        REQUIRED_ROLE_COUNT.forEach((role, requiredCount) -> {
-            Set<String> instanceGroupsWithRoles = templateProcessor.getComponentsByHostGroup()
-                    .entrySet()
-                    .stream()
-                    .filter(entry -> entry.getValue().contains(role))
-                    .map(Entry::getKey)
-                    .collect(Collectors.toSet());
-            instanceGroups.stream()
-                    .filter(instanceGroup -> instanceGroupsWithRoles.contains(instanceGroup.getGroupName()))
-                    .map(instanceGroup ->
-                            instanceGroup.getNodeCount() + instanceGroupAdjustments.getOrDefault(instanceGroup.getGroupName(), 0))
-                    .reduce(Integer::sum)
-                    .ifPresent(remainingInstances -> {
-                        if (remainingInstances < requiredCount) {
-                            throw new BadRequestException(String.format(
-                                    "Scaling adjustment is not allowed, based on the template it would eliminate all the instances with "
-                                            + "%s role which is not supported.", role));
-                        }
-                    });
-        });
-    }
-
     private void validateRole(String accountId, EntitledForServiceScale role, Optional<ClouderaManagerProduct> cdhProduct,
-        CmTemplateProcessor templateProcessor) {
+            CmTemplateProcessor templateProcessor) {
         Versioned blueprintVersion = () -> cdhProduct.isEmpty() ? "7.0.0" : cdhProduct.get().getVersion();
         boolean versionEnablesScaling = isVersionEnablesScaling(blueprintVersion, role);
         boolean entitledFor = entitlementService.isEntitledFor(accountId, role.getEntitledFor());
@@ -176,5 +124,65 @@ public class CmTemplateValidator implements BlueprintValidator {
 
     private boolean isRequiredServicePresent(Optional<String> requiredService, CmTemplateProcessor templateProcessor) {
         return templateProcessor.getServiceByType(requiredService.get()).isPresent();
+    }
+
+    private void validateRequiredRoleCountInCluster(Map<String, Integer> instanceGroupAdjustments, Collection<InstanceGroup> instanceGroups,
+            CmTemplateProcessor templateProcessor) {
+        if (CollectionUtils.isNotEmpty(instanceGroups)) {
+            Set<String> targetGroups = instanceGroupAdjustments.keySet();
+            LOGGER.debug("Host group adjustments: {}", instanceGroupAdjustments);
+            REQUIRED_ROLE_COUNT.forEach((role, requiredCount) -> {
+                Set<String> groupsWithRoles = findGroupsWithRoles(role, templateProcessor);
+                if (hasCommonElement(targetGroups, groupsWithRoles)) {
+                    List<InstanceGroup> filteredInstanceGroups = instanceGroups.stream()
+                            .filter(instanceGroup -> groupsWithRoles.contains(instanceGroup.getGroupName()))
+                            .collect(Collectors.toList());
+                    String groupNames = filteredInstanceGroups.stream().map(InstanceGroup::getGroupName).collect(Collectors.joining(", "));
+                    LOGGER.debug("Host group(s) with {} role: {}", role, groupNames);
+                    filteredInstanceGroups.stream()
+                            .map(instanceGroup -> getAdjustedNodeCount(instanceGroupAdjustments, role, instanceGroup))
+                            .reduce(Integer::sum)
+                            .ifPresent(remainingInstances -> validateRemainingInstanceCount(role, requiredCount, groupNames, remainingInstances));
+                }
+            });
+        }
+    }
+
+    private Set<String> findGroupsWithRoles(String role, CmTemplateProcessor templateProcessor) {
+        return templateProcessor.getComponentsByHostGroup()
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue().contains(role))
+                .map(Entry::getKey)
+                .collect(Collectors.toSet());
+    }
+
+    private boolean hasCommonElement(Set<String> setA, Set<String> setB) {
+        return !Collections.disjoint(setA, setB);
+    }
+
+    private int getAdjustedNodeCount(Map<String, Integer> instanceGroupAdjustments, String role, InstanceGroup instanceGroup) {
+        if (instanceGroupAdjustments.containsKey(instanceGroup.getGroupName())) {
+            int adjustedNodeCount = instanceGroup.getNodeCount() +
+                    instanceGroupAdjustments.get(instanceGroup.getGroupName());
+            LOGGER.debug("{} host group with {} role has {} node(s). After the adjustment it will have {} node(s).",
+                    instanceGroup.getGroupName(), role, instanceGroup.getNodeCount(), adjustedNodeCount);
+            return adjustedNodeCount;
+        } else {
+            LOGGER.debug("{} host group with {} role has {} node(s).",
+                    instanceGroup.getGroupName(), role, instanceGroup.getNodeCount());
+            return instanceGroup.getNodeCount();
+        }
+    }
+
+    private void validateRemainingInstanceCount(String role, Integer requiredCount, String groupNames, Integer remainingInstances) {
+        LOGGER.debug("{} remaining instances, required: {} in groups of {} for {} role",
+                remainingInstances, requiredCount, groupNames, role);
+        if (remainingInstances < requiredCount) {
+            throw new BadRequestException(String.format(
+                    "Scaling adjustment is not allowed. %s role must be present on %s host(s) but after the scaling operation %s " +
+                            "host(s) would have this role. Based on the template this role is present on the %s " +
+                            "host group(s).", role, requiredCount, remainingInstances, groupNames));
+        }
     }
 }

@@ -162,6 +162,12 @@
       "longitude": "8.564572"
     },
     {
+      "name": "Switzerland West",
+      "latitude": "47.373878",
+      "longitude": "8.545094",
+      "entitlements": [ "CDP_AZURE_IMAGE_MARKETPLACE" ]
+    },
+    {
       "name": "Germany West Central",
       "latitude": "50.110924",
       "longitude": "8.682127"

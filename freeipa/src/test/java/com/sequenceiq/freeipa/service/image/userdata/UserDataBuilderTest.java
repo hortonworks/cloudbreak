@@ -40,6 +40,8 @@ import com.sequenceiq.cloudbreak.ccm.endpoint.KnownServiceIdentifier;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
+import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
+import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.type.CcmV2TlsType;
@@ -90,7 +92,17 @@ class UserDataBuilderTest {
         DefaultTunnelParameters nginxTunnel = new DefaultTunnelParameters(KnownServiceIdentifier.GATEWAY, 9443);
         CcmParameters ccmParameters = new DefaultCcmParameters(serverParameters, instanceParameters, List.of(nginxTunnel));
         CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmParameters);
-
+        ProxyAuthentication proxyAuthentication = ProxyAuthentication.builder()
+                .withUserName("user")
+                .withPassword("pwd")
+                .build();
+        ProxyConfig proxyConfig = ProxyConfig.builder()
+                .withServerHost("proxy.host")
+                .withServerPort(1234)
+                .withProxyAuthentication(proxyAuthentication)
+                .withNoProxyHosts("noproxy.com")
+                .withProtocol("https")
+                .build();
         PlatformParameters platformParameters = mock(PlatformParameters.class);
         ScriptParams scriptParams = mock(ScriptParams.class);
         when(scriptParams.getDiskPrefix()).thenReturn("sd");
@@ -98,7 +110,7 @@ class UserDataBuilderTest {
         when(platformParameters.scriptParams()).thenReturn(scriptParams);
 
         String userData = underTest.buildUserData(ACCOUNT_ID, environment, Platform.platform("AZURE"), "priv-key".getBytes(),
-                "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, null);
+                "cloudbreak", platformParameters, "pass", "cert", ccmConnectivityParameters, proxyConfig);
 
         String expectedUserData = FileReaderUtils.readFileFromClasspath("azure-ccm-init.sh");
         assertEquals(expectedUserData, userData);
@@ -174,4 +186,5 @@ class UserDataBuilderTest {
         String expectedUserData = FileReaderUtils.readFileFromClasspath("azure-init.sh");
         assertEquals(expectedUserData, userData);
     }
+
 }

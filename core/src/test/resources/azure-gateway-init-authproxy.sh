@@ -18,6 +18,7 @@ export CB_CERT=cert
 export IS_PROXY_ENABLED=true
 export PROXY_HOST=proxy.host
 export PROXY_PORT=1234
+export PROXY_PROTOCOL=https
 export PROXY_USER="user"
 export PROXY_PASSWORD="pwd"
 export PROXY_NO_PROXY_HOSTS="noproxy.com"

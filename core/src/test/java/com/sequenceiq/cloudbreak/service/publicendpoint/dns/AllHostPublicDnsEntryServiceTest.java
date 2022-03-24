@@ -31,6 +31,7 @@ class AllHostPublicDnsEntryServiceTest {
         InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         Assertions.assertFalse(result.containsKey(primaryGatewayInstance.getInstanceGroupName()), "Result should not contain primary gateway's group name");
         Assertions.assertFalse(resultContainsInstanceMetadata(primaryGatewayInstance, result), "Result should not contain primary gateway's instance metadata");
+        Assertions.assertEquals(2, result.size(), "Result should contain all non primary gateway instance group");
     }
 
     @Test
@@ -52,6 +53,7 @@ class AllHostPublicDnsEntryServiceTest {
         Assertions.assertTrue(result.containsKey(primaryGatewayInstance.getInstanceGroupName()), "Result should contain primary gateway's group name");
         Assertions.assertTrue(resultContainsInstanceMetadata(otherGatewayInstanceMetadata, result), "Result should contain other gateway's instance metadata");
         Assertions.assertFalse(resultContainsInstanceMetadata(primaryGatewayInstance, result), "Result should not contain primary gateway's instance metadata");
+        Assertions.assertEquals(3, result.size(), "Result should contain all instance group");
     }
 
     @Test
