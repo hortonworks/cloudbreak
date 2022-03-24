@@ -22,7 +22,7 @@ public class PaywallCredentialPopulator {
 
     public void populateWebTarget(String baseUrl, WebTarget target) {
         if (URL_PATTERN.matcher(baseUrl).find()) {
-            LOGGER.debug("Adding Paywall credential to request to access {}.", baseUrl);
+            LOGGER.debug("Adding Paywall credential to request.");
             String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
             JsonCMLicense license = clouderaManagerLicenseProvider.getLicense(userCrn);
             HttpAuthenticationFeature basicAuth = createAuthFeature(license);
