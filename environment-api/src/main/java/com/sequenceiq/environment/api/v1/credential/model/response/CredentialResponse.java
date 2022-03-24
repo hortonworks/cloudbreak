@@ -2,6 +2,7 @@ package com.sequenceiq.environment.api.v1.credential.model.response;
 
 import static com.sequenceiq.environment.api.doc.ModelDescriptions.CRN;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
@@ -17,6 +18,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(description = CredentialDescriptor.CREDENTIAL, parent = CredentialBase.class, value = "CredentialV1Response")
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CredentialResponse extends CredentialBase {
 
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true, allowableValues = "length range[5, 100]")
