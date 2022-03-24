@@ -341,10 +341,10 @@ public class CmTemplateValidatorTest {
         worker.setInstanceMetaData(Set.of());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
-                subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint,
-                        Optional.of(clouderaManagerRepo), hostGroup, -3, Set.of(compute, worker)));
-        assertEquals("Scaling adjustment is not allowed, based on the template it would eliminate all the instances with " +
-                "NODEMANAGER role which is not supported.", badRequestException.getMessage());
+                subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -3, List.of(compute, worker)));
+        assertEquals("Scaling adjustment is not allowed. NODEMANAGER role must be present on 1 host(s) but after the scaling operation 0 host(s) " +
+                        "would have this role. Based on the template this role is present on the compute, worker host group(s).",
+                badRequestException.getMessage());
     }
 
     private Blueprint readBlueprint(String file) {
