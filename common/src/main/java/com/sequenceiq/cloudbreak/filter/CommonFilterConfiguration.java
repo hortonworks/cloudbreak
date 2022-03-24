@@ -11,18 +11,13 @@ import com.sequenceiq.cloudbreak.auth.CrnFilter;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.metrics.RequestHeaderMetricFilter;
 import com.sequenceiq.cloudbreak.logger.MDCContextFilter;
+import com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter;
 import com.sequenceiq.cloudbreak.logger.RestLoggerFilter;
 
 import io.opentracing.contrib.jaxrs2.server.SpanFinishingFilter;
 
 @Configuration
 public class CommonFilterConfiguration {
-
-    private static final int CRN_FILTER_ORDER = 0;
-
-    private static final int MDC_FILTER_ORDER = 1;
-
-    private static final int REQUEST_RESPONSE_LOGGER_FILTER_ORDER = 2;
 
     @Value("${rest.logger.enabled:true}")
     private boolean restLoggerEnabled;
@@ -32,7 +27,7 @@ public class CommonFilterConfiguration {
         FilterRegistrationBean<CrnFilter> registrationBean = new FilterRegistrationBean<>();
         CrnFilter filter = new CrnFilter();
         registrationBean.setFilter(filter);
-        registrationBean.setOrder(CRN_FILTER_ORDER);
+        registrationBean.setOrder(FilterOrderConstants.CRN_FILTER_ORDER);
         return registrationBean;
     }
 
@@ -41,7 +36,16 @@ public class CommonFilterConfiguration {
         FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
         MDCContextFilter filter = new MDCContextFilter();
         registrationBean.setFilter(filter);
-        registrationBean.setOrder(MDC_FILTER_ORDER);
+        registrationBean.setOrder(FilterOrderConstants.MDC_FILTER_ORDER);
+        return registrationBean;
+    }
+
+    @Bean
+    public FilterRegistrationBean<MDCRequestIdOnlyFilter> mdcContextRequestIdFilterRegistrationBean() {
+        FilterRegistrationBean<MDCRequestIdOnlyFilter> registrationBean = new FilterRegistrationBean<>();
+        MDCRequestIdOnlyFilter filter = new MDCRequestIdOnlyFilter();
+        registrationBean.setFilter(filter);
+        registrationBean.setOrder(FilterOrderConstants.MDC_REQUEST_ID_FILTER_ORDER);
         return registrationBean;
     }
 
@@ -50,7 +54,7 @@ public class CommonFilterConfiguration {
         FilterRegistrationBean<RestLoggerFilter> registrationBean = new FilterRegistrationBean<>();
         RestLoggerFilter filter = new RestLoggerFilter(restLoggerEnabled);
         registrationBean.setFilter(filter);
-        registrationBean.setOrder(REQUEST_RESPONSE_LOGGER_FILTER_ORDER);
+        registrationBean.setOrder(FilterOrderConstants.REQUEST_RESPONSE_LOGGER_FILTER_ORDER);
         return registrationBean;
     }
 
@@ -59,7 +63,7 @@ public class CommonFilterConfiguration {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean();
         filterRegistrationBean.setFilter(new SpanFinishingFilter());
         filterRegistrationBean.setAsyncSupported(true);
-        filterRegistrationBean.setOrder(Integer.MIN_VALUE);
+        filterRegistrationBean.setOrder(FilterOrderConstants.SPAN_FINISHING_ORDER);
         filterRegistrationBean.setDispatcherTypes(DispatcherType.REQUEST);
         filterRegistrationBean.addUrlPatterns("*");
         return filterRegistrationBean;
