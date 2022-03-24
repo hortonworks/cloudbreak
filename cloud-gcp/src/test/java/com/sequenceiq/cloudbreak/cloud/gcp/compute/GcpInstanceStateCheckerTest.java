@@ -144,9 +144,11 @@ class GcpInstanceStateCheckerTest {
         return new Object[][]{
                 // operationStatus, operationType, operationFinished, expectedInstanceStatus
                 {"RUNNING", "start", Boolean.FALSE, InstanceStatus.IN_PROGRESS},
+                {"RUNNING", "startWithEncryptionKey", Boolean.FALSE, InstanceStatus.IN_PROGRESS},
                 {"RUNNING", "stop", Boolean.FALSE, InstanceStatus.IN_PROGRESS},
                 {"RUNNING", "delete", Boolean.FALSE, InstanceStatus.IN_PROGRESS},
                 {"DONE", "start", Boolean.TRUE, InstanceStatus.STARTED},
+                {"DONE", "startWithEncryptionKey", Boolean.TRUE, InstanceStatus.STARTED},
                 {"DONE", "stop", Boolean.TRUE, InstanceStatus.STOPPED},
                 {"DONE", "delete", Boolean.TRUE, InstanceStatus.TERMINATED},
         };
