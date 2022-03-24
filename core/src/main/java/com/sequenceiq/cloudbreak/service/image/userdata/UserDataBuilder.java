@@ -94,6 +94,7 @@ public class UserDataBuilder {
             model.put("proxyEnabled", Boolean.TRUE);
             model.put("proxyHost", proxyConfig.getServerHost());
             model.put("proxyPort", proxyConfig.getServerPort().toString());
+            model.put("proxyProtocol", proxyConfig.getProtocol());
             proxyConfig.getProxyAuthentication().ifPresent(auth -> {
                 model.put("proxyUser", auth.getUserName());
                 model.put("proxyPassword", auth.getPassword());
