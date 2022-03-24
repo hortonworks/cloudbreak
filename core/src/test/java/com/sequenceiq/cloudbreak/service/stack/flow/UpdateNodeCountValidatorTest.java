@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -15,6 +16,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -28,14 +30,17 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,6 +61,9 @@ public class UpdateNodeCountValidatorTest {
 
     @InjectMocks
     public UpdateNodeCountValidator underTest;
+
+    @Mock
+    private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
     @Mock
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
@@ -204,5 +212,139 @@ public class UpdateNodeCountValidatorTest {
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(Set.of(TEST_COMPUTE_GROUP));
+    }
+
+    @Test
+    void validateStackStatusUpscaleAvailable() {
+        Stack stack = new Stack();
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        underTest.validateStackStatus(stack, true);
+    }
+
+    @Test
+    void validateStackStatusDownscaleAvailable() {
+        Stack stack = new Stack();
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        underTest.validateStackStatus(stack, false);
+    }
+
+    @Test
+    void validateStackStatusUpscaleNodeFailureTargetedUpscaleSupported() {
+        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.TRUE);
+        Stack stack = new Stack();
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+        underTest.validateStackStatus(stack, true);
+    }
+
+    @Test
+    void validateStackStatusDownscaleNodeFailureTargetedUpscaleSupported() {
+        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.TRUE);
+        Stack stack = new Stack();
+        stack.setName("stack");
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+
+        BadRequestException e = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateStackStatus(stack, false));
+
+        assertEquals("Data Hub 'stack' is currently in 'NODE_FAILURE' state. Node count can only be updated if it's running.", e.getMessage());
+    }
+
+    @Test
+    void validateStackStatusUpscaleNodeFailureTargetedUpscaleNotSupported() throws Exception {
+        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.FALSE);
+        Stack stack = new Stack();
+        stack.setName("stack");
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+
+        BadRequestException e = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateStackStatus(stack, true));
+
+        assertEquals("Data Hub 'stack' is currently in 'NODE_FAILURE' state. Node count can only be updated if it's running.", e.getMessage());
+    }
+
+    @Test
+    void validateStackStatusDownscaleNodeFailureTargetedUpscaleNotSupported() throws Exception {
+        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.FALSE);
+        Stack stack = new Stack();
+        stack.setName("stack");
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+
+        BadRequestException e = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateStackStatus(stack, false));
+
+        assertEquals("Data Hub 'stack' is currently in 'NODE_FAILURE' state. Node count can only be updated if it's running.", e.getMessage());
+    }
+
+    @Test
+    void validateClusterStatusUpscaleAvailable() {
+        Stack stack = new Stack();
+        Cluster cluster = mock(Cluster.class);
+        stack.setCluster(cluster);
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        underTest.validateClusterStatus(stack, true);
+    }
+
+    @Test
+    void validateClusterStatusDownscaleAvailable() {
+        Stack stack = new Stack();
+        Cluster cluster = mock(Cluster.class);
+        stack.setCluster(cluster);
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        underTest.validateClusterStatus(stack, false);
+    }
+
+    @Test
+    void validateClusterStatusUpscaleNodeFailureTargetedUpscaleSupported() {
+        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.TRUE);
+        Stack stack = new Stack();
+        Cluster cluster = mock(Cluster.class);
+        stack.setCluster(cluster);
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+        underTest.validateClusterStatus(stack, true);
+    }
+
+    @Test
+    void validateClusterStatusDownscaleNodeFailureTargetedUpscaleSupported() {
+        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.TRUE);
+        Stack stack = new Stack();
+        stack.setName("stack");
+        Cluster cluster = mock(Cluster.class);
+        stack.setCluster(cluster);
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+
+        BadRequestException e = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateClusterStatus(stack, false));
+
+        assertEquals("Data Hub 'stack' is currently in 'NODE_FAILURE' state. Node count can only be updated if it's running.", e.getMessage());
+    }
+
+    @Test
+    void validateClusterStatusUpscaleNodeFailureTargetedUpscaleNotSupported() {
+        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.FALSE);
+        Stack stack = new Stack();
+        stack.setName("stack");
+        Cluster cluster = mock(Cluster.class);
+        stack.setCluster(cluster);
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+
+        BadRequestException e = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateClusterStatus(stack, false));
+
+        assertEquals("Data Hub 'stack' is currently in 'NODE_FAILURE' state. Node count can only be updated if it's running.", e.getMessage());
+    }
+
+    @Test
+    void validateClusterStatusDownscaleNodeFailureTargetedUpscaleNotSupported() {
+        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.FALSE);
+        Stack stack = new Stack();
+        stack.setName("stack");
+        Cluster cluster = mock(Cluster.class);
+        stack.setCluster(cluster);
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+
+        BadRequestException e = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateClusterStatus(stack, false));
+
+        assertEquals("Data Hub 'stack' is currently in 'NODE_FAILURE' state. Node count can only be updated if it's running.", e.getMessage());
     }
 }
