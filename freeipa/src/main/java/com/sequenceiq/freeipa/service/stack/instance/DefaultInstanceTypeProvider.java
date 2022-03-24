@@ -17,10 +17,10 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 /**
  * This class reads the environment properties of default instance type configurations for each cloud provider platform.
  * In order to configure a instance type for a platform, eg. AWS, one must specify a property like this:
- * -Dfreeipa.platform.default.instanceType.AWS=m5.xlarge
+ * -Dfreeipa.platform.default.instanceType.AWS=m5.large
  *
  * For Azure:
- * -Dfreeipa.platform.default.instanceType.AZURE=Standard_D3_v2
+ * -Dfreeipa.platform.default.instanceType.AZURE=Standard_DS3_v2
  *
  * etc.
  *
