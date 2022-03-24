@@ -90,7 +90,7 @@ public class ParcelFilterServiceTest {
         String parcelName = "NIFI";
         ClouderaManagerProduct parcel = new ClouderaManagerProduct().withParcel(parcelUrl).withName(parcelName);
         when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of(parcelName)));
-        when(imageReaderService.getParcelNames(STACK_ID, false)).thenReturn(Set.of(parcelName));
+        when(imageReaderService.getParcelNames(STACK_ID)).thenReturn(Set.of(parcelName));
         when(manifestRetrieverService.readRepoManifest(parcelUrl)).thenReturn(ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("otherService1")));
 
         assertEquals(0, underTest.filterParcelsByBlueprint(STACK_ID, Set.of(parcel), getBlueprint()).size());
@@ -102,7 +102,7 @@ public class ParcelFilterServiceTest {
         String parcelName = "CUSTOM";
         ClouderaManagerProduct parcel = new ClouderaManagerProduct().withParcel(parcelUrl).withName(parcelName);
         when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("NIFI")));
-        when(imageReaderService.getParcelNames(STACK_ID, false)).thenReturn(Set.of("NIFI"));
+        when(imageReaderService.getParcelNames(STACK_ID)).thenReturn(Set.of("NIFI"));
         when(manifestRetrieverService.readRepoManifest(parcelUrl)).thenReturn(ImmutablePair.of(ManifestStatus.SUCCESS, getManifest(parcelName)));
 
         assertEquals(1, underTest.filterParcelsByBlueprint(STACK_ID, Set.of(parcel), getBlueprint()).size());

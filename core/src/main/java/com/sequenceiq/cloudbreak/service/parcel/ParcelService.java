@@ -91,7 +91,7 @@ public class ParcelService {
 
     public ParcelOperationStatus removeUnusedParcelComponents(Stack stack, Set<ClusterComponent> clusterComponentsByBlueprint) throws CloudbreakException {
         LOGGER.debug("Starting to remove unused parcels from the cluster.");
-        Set<String> parcelsFromImage = imageReaderService.getParcelNames(stack.getId(), stack.isDatalake());
+        Set<String> parcelsFromImage = imageReaderService.getParcelNames(stack.getId());
         ParcelOperationStatus removalStatus = clusterApiConnectors.getConnector(stack).removeUnusedParcels(clusterComponentsByBlueprint, parcelsFromImage);
         clusterComponentUpdater.removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint, removalStatus);
         return removalStatus;
