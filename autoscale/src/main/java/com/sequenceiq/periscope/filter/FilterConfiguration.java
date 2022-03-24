@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.filter.FilterOrderConstants;
 import com.sequenceiq.periscope.service.AuditService;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
 
@@ -32,7 +33,7 @@ public class FilterConfiguration {
         CloudbreakUserConfiguratorFilter filter =
                 new CloudbreakUserConfiguratorFilter(restRequestThreadLocalService, authenticatedUserService);
         registrationBean.setFilter(filter);
-        registrationBean.setOrder(Integer.MAX_VALUE);
+        registrationBean.setOrder(FilterOrderConstants.CLOUDBREAK_USER_CONFIGURATOR_ORDER);
         return registrationBean;
     }
 
@@ -41,7 +42,7 @@ public class FilterConfiguration {
         FilterRegistrationBean<AuditFilter> registrationBean = new FilterRegistrationBean<>();
         AuditFilter filter = new AuditFilter(auditEnabled, auditService, authenticatedUserService);
         registrationBean.setFilter(filter);
-        registrationBean.setOrder(Integer.MAX_VALUE - 1);
+        registrationBean.setOrder(FilterOrderConstants.AUDIT_FILTER_ORDER);
         return registrationBean;
     }
 }

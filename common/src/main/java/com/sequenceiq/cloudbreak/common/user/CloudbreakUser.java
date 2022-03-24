@@ -57,4 +57,13 @@ public class CloudbreakUser {
     public int hashCode() {
         return Objects.hash(userId, tenant);
     }
+
+    @Override
+    public String toString() {
+        return "CloudbreakUser{" +
+                "userId='" + userId + '\'' +
+                ", userCrn='" + userCrn + '\'' +
+                ", tenant='" + tenant + '\'' +
+                '}';
+    }
 }
