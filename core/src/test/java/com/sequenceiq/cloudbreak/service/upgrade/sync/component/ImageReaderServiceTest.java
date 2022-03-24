@@ -106,7 +106,7 @@ public class ImageReaderServiceTest {
         when(imageService.getCurrentImage(STACK_ID)).thenReturn(StatedImage.statedImage(currentImage, null, null));
         when(clouderaManagerProductTransformer.transform(currentImage, true, true)).thenReturn(products);
 
-        Set<String> actual = underTest.getParcelNames(STACK_ID, false);
+        Set<String> actual = underTest.getParcelNames(STACK_ID);
 
         assertTrue(actual.contains(PARCEL_NAME));
         verify(imageService).getCurrentImage(STACK_ID);
@@ -117,7 +117,7 @@ public class ImageReaderServiceTest {
     public void testGetPreWarmParcelNamesFromImageShouldThrowException() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         when(imageService.getCurrentImage(STACK_ID)).thenThrow(new CloudbreakImageCatalogException("error"));
 
-        assertThrows(CloudbreakRuntimeException.class, () -> underTest.getParcelNames(STACK_ID, false));
+        assertThrows(CloudbreakRuntimeException.class, () -> underTest.getParcelNames(STACK_ID));
         verify(imageService).getCurrentImage(STACK_ID);
         verifyNoInteractions(clouderaManagerProductTransformer);
     }

@@ -226,10 +226,8 @@ public class ClusterBuilderService {
         clusterService.save(cluster);
     }
 
-    public void finalizeClusterInstall(Long stackId) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+    public void finalizeClusterInstall(Stack stack) throws CloudbreakException {
         Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
-
         try {
             transactionService.required(() -> {
                 Set<InstanceMetaData> instanceMetaDatas = loadInstanceMetadataForHostGroups(hostGroups).values()

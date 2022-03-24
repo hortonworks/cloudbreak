@@ -8,12 +8,15 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.FinalizeClusterInstallSuccess;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.recovery.RdsRecoverySetupService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -31,6 +34,12 @@ public class FinalizeClusterInstallHandler extends ExceptionCatcherEventHandler<
     @Inject
     private RdsRecoverySetupService rdsRecoverySetupService;
 
+    @Inject
+    private ParcelService parcelService;
+
+    @Inject
+    private StackService stackService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(FinalizeClusterInstallRequest.class);
@@ -47,10 +56,13 @@ public class FinalizeClusterInstallHandler extends ExceptionCatcherEventHandler<
         Long stackId = event.getData().getResourceId();
         Selectable response;
         try {
-            clusterBuilderService.finalizeClusterInstall(stackId);
+            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+            clusterBuilderService.finalizeClusterInstall(stack);
             if (event.getData().getProvisionType().isRecovery()) {
                 rdsRecoverySetupService.removeRecoverRole(stackId);
             }
+            LOGGER.debug("Removing unused parcels from CM after cluster install.");
+            parcelService.removeUnusedParcelComponents(stack);
             response = new FinalizeClusterInstallSuccess(stackId);
         } catch (RuntimeException | CloudbreakException | CloudbreakOrchestratorFailedException e) {
             LOGGER.error("ClusterInstallSuccessHandler step failed with the following message: {}", e.getMessage());

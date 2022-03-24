@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
@@ -34,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
+import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
@@ -71,6 +72,9 @@ public class ClouderaManagerClusterCreationSetupService {
 
     @Inject
     private PlatformStringTransformer platformStringTransformer;
+
+    @Inject
+    private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
     public List<ClusterComponent> prepareClouderaManagerCluster(ClusterV4Request request, Cluster cluster,
             Optional<Component> stackClouderaManagerRepoConfig,
@@ -207,40 +211,42 @@ public class ClouderaManagerClusterCreationSetupService {
     private Set<ClouderaManagerProduct> determineCdhRepoConfig(Cluster cluster, List<Component> stackCdhRepoConfig,
             String osType, String blueprintCdhVersion, String imageCatalogName) throws CloudbreakImageCatalogException {
         if (Objects.isNull(stackCdhRepoConfig) || stackCdhRepoConfig.isEmpty()) {
-            DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(cluster.getWorkspace().getId(), blueprintCdhVersion, osType,
-                    platformStringTransformer.getPlatformStringForImageCatalog(cluster.getStack().getCloudPlatform(), cluster.getStack().getPlatformVariant()),
-                    imageCatalogName);
+            DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(cluster, blueprintCdhVersion, osType, imageCatalogName);
             Map<String, String> stack = defaultCDHInfo.getRepo().getStack();
-            ClouderaManagerProduct cmProduct = new ClouderaManagerProduct()
+            Set<ClouderaManagerProduct> cdhProduct = Set.of(new ClouderaManagerProduct()
                     .withVersion(defaultCDHInfo.getVersion())
                     .withName(stack.get("repoid").split("-")[0])
-                    .withParcel(stack.get(osType));
-            Set<ClouderaManagerProduct> products = Sets.newHashSet(cmProduct);
-            LOGGER.info("Product list before filter out products by blueprint: {}", products);
-            Set<ClouderaManagerProduct> filteredProducts = parcelFilterService.filterParcelsByBlueprint(getStackId(cluster), products, cluster.getBlueprint());
-            LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
-            return filteredProducts;
+                    .withParcel(stack.get(osType)));
+            LOGGER.debug("Determined CDH product: {}", cdhProduct);
+            return cdhProduct;
         } else {
             Set<ClouderaManagerProduct> products = stackCdhRepoConfig.stream()
                     .map(Component::getAttributes)
                     .map(json -> json.getSilent(ClouderaManagerProduct.class))
                     .collect(Collectors.toSet());
+            return filterParcelsIfNecessary(cluster, products);
+        }
+    }
+
+    private Set<ClouderaManagerProduct> filterParcelsIfNecessary(Cluster cluster, Set<ClouderaManagerProduct> products) {
+        Stack stack = cluster.getStack();
+        if (stack.isDatalake()) {
+            return Set.of(clouderaManagerProductsProvider.getCdhProducts(products));
+        } else {
             LOGGER.info("Product list before filter out products by blueprint: {}", products);
-            Set<ClouderaManagerProduct> filteredProducts = parcelFilterService.filterParcelsByBlueprint(getStackId(cluster), products, cluster.getBlueprint());
+            Set<ClouderaManagerProduct> filteredProducts = parcelFilterService.filterParcelsByBlueprint(stack.getId(), products, cluster.getBlueprint());
             LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
             return filteredProducts;
         }
     }
 
-    private Long getStackId(Cluster cluster) {
-        return cluster.getStack().getId();
-    }
-
-    private DefaultCDHInfo getDefaultCDHInfo(Long workspaceId, String blueprintCdhVersion, String osType, ImageCatalogPlatform platformString,
-            String imageCatalogName) throws CloudbreakImageCatalogException {
+    private DefaultCDHInfo getDefaultCDHInfo(Cluster cluster, String blueprintCdhVersion, String osType, String imageCatalogName)
+            throws CloudbreakImageCatalogException {
         DefaultCDHInfo defaultCDHInfo = null;
-        Map<String, ImageBasedDefaultCDHInfo> entries = imageBasedDefaultCDHEntries.getEntries(workspaceId, platformString, imageCatalogName);
-
+        Stack stack = cluster.getStack();
+        ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant());
+        Map<String, ImageBasedDefaultCDHInfo> entries = imageBasedDefaultCDHEntries.getEntries(cluster.getWorkspace().getId(), platformString,
+                imageCatalogName);
         if (blueprintCdhVersion != null && entries.containsKey(blueprintCdhVersion)) {
             defaultCDHInfo = entries.get(blueprintCdhVersion).getDefaultCDHInfo();
         }
