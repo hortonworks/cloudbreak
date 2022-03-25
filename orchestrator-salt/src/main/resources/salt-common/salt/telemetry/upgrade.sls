@@ -1,6 +1,12 @@
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {% set test_cmd = 'test -f /etc/yum.repos.d/cdp-infra-tools.repo && (' + telemetry.testInfraRepoCurlCmd + ')' %}
 {% set test_delete_cmd = 'test -f /etc/yum.repos.d/cdp-infra-tools.repo && ! (' + telemetry.testInfraRepoCurlCmd + ')' %}
+/opt/cdp-telemetry/conf/proxy.env:
+  file.managed:
+    - source: salt://telemetry/template/proxy.env.j2
+    - template: jinja
+    - mode: 700
+
 {%- if telemetry.repoName and (telemetry.desiredCdpTelemetryVersion or telemetry.desiredCdpLoggingAgentVersion) %}
 /etc/yum.repos.d/cdp-infra-tools.repo:
   file.managed:
@@ -16,14 +22,7 @@
 delete_repo_file:
   file.absent:
     - name: /etc/yum.repos.d/cdp-infra-tools.repo
-    - onlyif: {{ test_delete_cmd }}
-    {%- if telemetry.proxyUrl %}
-    - env:
-       - https_proxy: {{ telemetry.proxyUrl }}
-       {%- if telemetry.noProxyHosts %}
-       - no_proxy: {{ telemetry.noProxyHosts }}
-       {%- endif %}
-    {%- endif %}
+    - onlyif: source /opt/cdp-telemetry/conf/proxy.env; {{ test_delete_cmd }}
 
 /opt/salt/scripts/cdp-telemetry-deployer.sh:
     file.managed:
@@ -35,17 +34,10 @@ upgrade_cdp_infra_tools_components:
     cmd.run:
         - names:
 {%- if telemetry.desiredCdpTelemetryVersion %}
-          - /bin/bash -c '/opt/salt/scripts/cdp-telemetry-deployer.sh upgrade -c cdp-telemetry -v {{ telemetry.desiredCdpTelemetryVersion }}';exit 0
+          - /bin/bash -c 'source /opt/cdp-telemetry/conf/proxy.env; /opt/salt/scripts/cdp-telemetry-deployer.sh upgrade -c cdp-telemetry -v {{ telemetry.desiredCdpTelemetryVersion }}';exit 0
 {%- endif %}
 {%- if telemetry.desiredCdpLoggingAgentVersion %}
-          - /bin/bash -c '/opt/salt/scripts/cdp-telemetry-deployer.sh upgrade -c cdp-logging-agent -v {{ telemetry.desiredCdpLoggingAgentVersion }}';exit 0
+          - /bin/bash -c 'source /opt/cdp-telemetry/conf/proxy.env; /opt/salt/scripts/cdp-telemetry-deployer.sh upgrade -c cdp-logging-agent -v {{ telemetry.desiredCdpLoggingAgentVersion }}';exit 0
 {%- endif %}
-        - onlyif: {{ test_cmd }}
-    {%- if telemetry.proxyUrl %}
-        - env:
-          - https_proxy: {{ telemetry.proxyUrl }}
-          {%- if telemetry.noProxyHosts %}
-          - no_proxy: {{ telemetry.noProxyHosts }}
-          {%- endif %}
-    {%- endif %}
+        - onlyif: source /opt/cdp-telemetry/conf/proxy.env; {{ test_cmd }}
 {%- endif %}
