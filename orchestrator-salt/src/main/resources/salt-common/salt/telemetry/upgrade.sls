@@ -1,10 +1,7 @@
 {%- from 'telemetry/settings.sls' import telemetry with context %}
-{% if salt['pillar.get']('cloudera-manager:paywall_username') %}
-  {% set curl_cmd = 'curl --max-time 30 -s -k -f -u $(grep username= /etc/yum.repos.d/cdp-infra-tools.repo | cut -d = -f2):$(grep password= /etc/yum.repos.d/cdp-infra-tools.repo | cut -d = -f2) ' + telemetry.repoGpgKey %}
-{% else %}
-  {% set curl_cmd = 'curl --max-time 30 -s -k -f ' + telemetry.repoGpgKey %}
-{% endif %}
-{%- if telemetry.repoName %}
+{% set test_cmd = 'test -f /etc/yum.repos.d/cdp-infra-tools.repo && (' + telemetry.testInfraRepoCurlCmd + ')' %}
+{% set test_delete_cmd = 'test -f /etc/yum.repos.d/cdp-infra-tools.repo && ! (' + telemetry.testInfraRepoCurlCmd + ')' %}
+{%- if telemetry.repoName and (telemetry.desiredCdpTelemetryVersion or telemetry.desiredCdpLoggingAgentVersion) %}
 /etc/yum.repos.d/cdp-infra-tools.repo:
   file.managed:
     - source: salt://telemetry/template/cdp-infra-tools.repo.j2
@@ -16,6 +13,18 @@
          repoGpgKey: "{{ telemetry.repoGpgKey }}"
          repoGpgCheck: {{ telemetry.repoGpgCheck }}
 {%- endif %}
+delete_repo_file:
+  file.absent:
+    - name: /etc/yum.repos.d/cdp-infra-tools.repo
+    - onlyif: {{ test_delete_cmd }}
+    {%- if telemetry.proxyUrl %}
+    - env:
+       - https_proxy: {{ telemetry.proxyUrl }}
+       {%- if telemetry.noProxyHosts %}
+       - no_proxy: {{ telemetry.noProxyHosts }}
+       {%- endif %}
+    {%- endif %}
+
 /opt/salt/scripts/cdp-telemetry-deployer.sh:
     file.managed:
         - source: salt://telemetry/scripts/cdp-telemetry-deployer.sh
@@ -31,7 +40,7 @@ upgrade_cdp_infra_tools_components:
 {%- if telemetry.desiredCdpLoggingAgentVersion %}
           - /bin/bash -c '/opt/salt/scripts/cdp-telemetry-deployer.sh upgrade -c cdp-logging-agent -v {{ telemetry.desiredCdpLoggingAgentVersion }}';exit 0
 {%- endif %}
-        - onlyif: "{{ curl_cmd }} > /dev/null"
+        - onlyif: {{ test_cmd }}
     {%- if telemetry.proxyUrl %}
         - env:
           - https_proxy: {{ telemetry.proxyUrl }}

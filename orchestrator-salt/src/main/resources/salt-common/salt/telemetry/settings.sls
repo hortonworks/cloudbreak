@@ -93,6 +93,11 @@
 {% set repo_base_url = salt['pillar.get']('telemetry:repoBaseUrl') %}
 {% set repo_gpg_key = salt['pillar.get']('telemetry:repoGpgKey') %}
 {% set repo_gpg_check = salt['pillar.get']('telemetry:repoGpgCheck') %}
+{% if salt['pillar.get']('cloudera-manager:paywall_username') %}
+  {% set test_infra_repo_curl_cmd = 'curl -o /dev/null -s -w "%{http_code}" --max-time 30 -s -k -L -f -u $(grep username= /etc/yum.repos.d/cdp-infra-tools.repo | cut -d = -f2):$(grep password= /etc/yum.repos.d/cdp-infra-tools.repo | cut -d = -f2) ' + repo_gpg_key + ' | grep 200' %}
+{% else %}
+  {% set test_infra_repo_curl_cmd = 'curl -o /dev/null -s -w "%{http_code}" --max-time 30 -s -k -L -f ' + repo_gpg_key + ' | grep 200' %}
+{% endif %}
 
 {% do telemetry.update({
     "platform": platform,
@@ -120,5 +125,6 @@
     "noProxyHosts": no_proxy_hosts,
     "logs": logs,
     "skipValidation": skip_validation,
-    "testCloudStorageUploadParams": test_cloud_storage_upload_params
+    "testCloudStorageUploadParams": test_cloud_storage_upload_params,
+    "testInfraRepoCurlCmd": test_infra_repo_curl_cmd
 }) %}
