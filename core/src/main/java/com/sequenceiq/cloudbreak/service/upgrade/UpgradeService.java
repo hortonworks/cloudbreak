@@ -190,6 +190,7 @@ public class UpgradeService {
                         workspaceId,
                         toImageSettingsRequest(image),
                         stack.getCloudPlatform().toLowerCase(),
+                        stack.getPlatformVariant(),
                         stack.getCluster().getBlueprint(),
                         false,
                         false,

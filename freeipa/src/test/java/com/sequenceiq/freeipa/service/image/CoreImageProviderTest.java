@@ -94,7 +94,7 @@ public class CoreImageProviderTest {
 
     @Test
     public void testGetImagesdReturnsEmptyListWhenFreeImagesNull() throws Exception {
-        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null))
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false))
                 .thenReturn(new ImagesV4Response());
 
         ImageSettingsRequest imageSettings = new ImageSettingsRequest();
@@ -106,7 +106,7 @@ public class CoreImageProviderTest {
 
     @Test
     public void testGetImagesdReturnsEmptyListWhenWebApplicationExceptionThrown() throws Exception {
-        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null))
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false))
                 .thenThrow(new WebApplicationException());
 
         ImageSettingsRequest imageSettings = new ImageSettingsRequest();
@@ -118,7 +118,7 @@ public class CoreImageProviderTest {
 
     @Test
     public void testGetImagesdReturnsEmptyListWhenExceptionThrown() throws Exception {
-        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null))
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false))
                 .thenThrow(new Exception());
 
         ImageSettingsRequest imageSettings = new ImageSettingsRequest();
@@ -132,7 +132,7 @@ public class CoreImageProviderTest {
     public void testGetImages() throws Exception {
         ImagesV4Response imagesV4Response = new ImagesV4Response();
         imagesV4Response.setFreeipaImages(List.of(anImageResponse()));
-        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null))
+        when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false))
                 .thenReturn(imagesV4Response);
 
         ImageSettingsRequest imageSettings = new ImageSettingsRequest();

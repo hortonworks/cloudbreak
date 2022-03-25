@@ -75,6 +75,7 @@ public class GcpInstanceStateChecker {
             String operationType = operation.getOperationType();
             switch (operationType) {
                 case "start":
+                case "startWithEncryptionKey":
                     status = InstanceStatus.STARTED;
                     break;
                 case "stop":

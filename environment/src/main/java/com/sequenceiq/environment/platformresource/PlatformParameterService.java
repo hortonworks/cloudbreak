@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
+import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
@@ -51,6 +52,41 @@ public class PlatformParameterService {
 
     @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
+
+    public PlatformResourceRequest getPlatformResourceRequestByEnvironment(
+            String accountId,
+            String environmentCrn,
+            String platformVariant,
+            String sharedProjectId) {
+        return getPlatformResourceRequestByEnvironment(
+                accountId,
+                environmentCrn,
+                null,
+                platformVariant,
+                null,
+                sharedProjectId,
+                null,
+                CdpResourceType.DEFAULT);
+    }
+
+    public PlatformResourceRequest getPlatformResourceRequest(
+            String accountId,
+            String credentialName,
+            String credentialCrn,
+            String platformVariant,
+            CdpResourceType cdpResourceType) {
+        return getPlatformResourceRequest(
+                accountId,
+                credentialName,
+                credentialCrn,
+                null,
+                platformVariant,
+                null,
+                null,
+                new HashMap<>(),
+                null,
+                cdpResourceType);
+    }
 
     public PlatformResourceRequest getPlatformResourceRequest(
             String accountId,
@@ -326,6 +362,11 @@ public class PlatformParameterService {
 
     public CloudResourceGroups getResourceGroups(PlatformResourceRequest request) {
         return cloudParameterService.getResourceGroups(extendedCloudCredentialConverter.convert(request.getCredential()), request.getRegion(),
+                request.getPlatformVariant(), request.getFilters());
+    }
+
+    public CloudPrivateDnsZones getPrivateDnsZones(PlatformResourceRequest request) {
+        return cloudParameterService.getPrivateDnsZones(extendedCloudCredentialConverter.convert(request.getCredential()),
                 request.getPlatformVariant(), request.getFilters());
     }
 

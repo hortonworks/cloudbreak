@@ -70,7 +70,8 @@ public class AwsCloudWatchService {
         }).forEach(instance -> {
             try {
                 PutMetricAlarmRequest metricAlarmRequest = new PutMetricAlarmRequest();
-                metricAlarmRequest.setAlarmActions(Arrays.asList("arn:aws:automate:" + regionName + ":ec2:recover"));
+                String segment =  credentialView.isGovernmentCloudEnabled() ? "aws-us-gov" : "aws";
+                metricAlarmRequest.setAlarmActions(Arrays.asList("arn:" + segment + ":automate:" + regionName + ":ec2:recover"));
                 metricAlarmRequest.setAlarmName(instance.getInstanceId() + alarmSuffix);
                 metricAlarmRequest.setMetricName("StatusCheckFailed_System");
                 metricAlarmRequest.setStatistic("Maximum");

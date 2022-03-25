@@ -121,7 +121,8 @@ public interface ImageCatalogV4Endpoint {
             @QueryParam("stackName") String stackName,
             @QueryParam("platform") String platform,
             @QueryParam("runtimeVersion") String runtimeVersion,
-            @QueryParam("imageType") String imageType) throws Exception;
+            @QueryParam("imageType") String imageType,
+            @QueryParam("govCloud") boolean govCloud) throws Exception;
 
     @GET
     @Path("{name}/images")
@@ -132,7 +133,8 @@ public interface ImageCatalogV4Endpoint {
             @QueryParam("stackName") String stackName,
             @QueryParam("platform") String platform,
             @QueryParam("runtimeVersion") String runtimeVersion,
-            @QueryParam("imageType") String imageType) throws Exception;
+            @QueryParam("imageType") String imageType,
+            @QueryParam("govCloud") boolean govCloud) throws Exception;
 
     @GET
     @Path("image")
@@ -174,7 +176,8 @@ public interface ImageCatalogV4Endpoint {
     ImageV4Response getImageFromDefault(@PathParam("workspaceId") Long workspaceId,
             @PathParam("type") String type,
             @PathParam("provider") String provider,
-            @PathParam("runtime") String runtime) throws Exception;
+            @PathParam("runtime") String runtime,
+            @PathParam("govCloud") boolean govCloud) throws Exception;
 
     @GET
     @Path("image/type/{type}/provider/{provider}")

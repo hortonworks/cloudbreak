@@ -44,7 +44,7 @@ public class AwsNativeCloudWatchService {
 
     private static final String DIMENSION_NAME_FOR_INSTANCE = "InstanceId";
 
-    private static final String ALARM_ACTION_PREFIX = "arn:aws:automate:";
+    private static final String ALARM_ACTION_PREFIX = "arn:%s:automate:";
 
     private static final String ALARM_ACTION_EC2_RECOVER_SUFFIX = ":ec2:recover";
 
@@ -72,7 +72,8 @@ public class AwsNativeCloudWatchService {
 
     public void addCloudWatchAlarmsForSystemFailures(CloudResource resource, String regionName, AwsCredentialView credentialView) {
         try {
-            PutMetricAlarmRequest metricAlarmRequest = createPutMetricAlarmRequest(resource.getInstanceId(), regionName);
+            PutMetricAlarmRequest metricAlarmRequest = createPutMetricAlarmRequest(resource.getInstanceId(), regionName,
+                    credentialView.isGovernmentCloudEnabled());
             LOGGER.debug("The following cloudwatch alarm - for instanceId: {} - has created and about to put it on AWS side: [{}]",
                     resource.getReference(), metricAlarmRequest);
             commonAwsClient.createCloudWatchClient(credentialView, regionName).putMetricAlarm(metricAlarmRequest);
@@ -188,14 +189,14 @@ public class AwsNativeCloudWatchService {
         }
     }
 
-    private PutMetricAlarmRequest createPutMetricAlarmRequest(String instanceId, String regionName) {
+    private PutMetricAlarmRequest createPutMetricAlarmRequest(String instanceId, String regionName, boolean govCloud) {
         return new PutMetricAlarmRequest()
                 .withPeriod(cloudwatchPeriod)
                 .withNamespace(EC2_NAMESPACE_VALUE)
                 .withMetricName(GENERAL_METRIC_NAME)
                 .withComparisonOperator(GREATER_THAN_OR_EQUAL_TO_THRESHOLD_COMPARISON_OPERATOR)
                 .withDimensions(createMetricAlarmDimensionWithInstanceId(instanceId))
-                .withAlarmActions(combineAlarmActionsValue(regionName))
+                .withAlarmActions(combineAlarmActionsValue(regionName, govCloud))
                 .withEvaluationPeriods(cloudwatchEvaluationPeriods)
                 .withAlarmName(instanceId + alarmSuffix)
                 .withThreshold(cloudwatchThreshhold)
@@ -206,8 +207,9 @@ public class AwsNativeCloudWatchService {
         return new Dimension().withName(DIMENSION_NAME_FOR_INSTANCE).withValue(instanceId);
     }
 
-    private String combineAlarmActionsValue(String regionName) {
-        return ALARM_ACTION_PREFIX + regionName + ALARM_ACTION_EC2_RECOVER_SUFFIX;
+    private String combineAlarmActionsValue(String regionName, boolean govCloud) {
+        String segment = govCloud ? "aws-us-gov" : "aws";
+        return String.format(ALARM_ACTION_PREFIX, segment) + regionName + ALARM_ACTION_EC2_RECOVER_SUFFIX;
     }
 
 }

@@ -8,6 +8,7 @@ import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_FAIL
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_STACK_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_STACK_SUCCESS_WITH_EXTERNAL_DB_EVENT;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -71,9 +72,13 @@ public class SdxDetachActions {
             protected void doExecute(SdxContext context, SdxStartDetachEvent payload,
                     Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Detaching of SDX with ID {} in progress.", payload.getResourceId());
+                SdxCluster detached = sdxDetachService.detachCluster(payload.getResourceId());
                 variables.put(RESIZED_SDX, payload.getSdxCluster());
-                variables.put(DETACHED_SDX, sdxDetachService.detachCluster(payload.getResourceId()));
-                eventSenderService.notifyEvent((SdxCluster) variables.get(DETACHED_SDX), context, ResourceEvent.SDX_DETACH_STARTED);
+                variables.put(DETACHED_SDX, detached);
+                eventSenderService.sendEventAndNotification(
+                        detached, context.getFlowTriggerUserCrn(), ResourceEvent.SDX_DETACH_STARTED,
+                        List.of(detached.getClusterName())
+                );
                 sendEvent(context, SDX_DETACH_CLUSTER_SUCCESS_EVENT.event(), payload);
             }
 

@@ -53,7 +53,8 @@ public class ResizeRecoveryService implements RecoveryService {
     @Inject
     private FlowChainLogService flowChainLogService;
 
-    public SdxRecoverableResponse validateRecovery(SdxCluster sdxCluster) {
+    @Override
+    public SdxRecoverableResponse validateRecovery(SdxCluster sdxCluster, SdxRecoveryRequest request) {
         Optional<FlowLog> flowLogOptional = flow2Handler.getFirstStateLogfromLatestFlow(sdxCluster.getId());
         if (flowLogOptional.isEmpty()) {
             return new SdxRecoverableResponse("No recent actions on this cluster", RecoveryStatus.NON_RECOVERABLE);
@@ -70,6 +71,12 @@ public class ResizeRecoveryService implements RecoveryService {
         switch (actualStatusForSdx.getStatus()) {
             case STOP_FAILED:
                 return new SdxRecoverableResponse("Resize can be recovered from a failed stop", RecoveryStatus.RECOVERABLE);
+            case STOPPED:
+                if (sdxCluster.isDetached()) {
+                    return new SdxRecoverableResponse("Resize can not yet reattach cluster", RecoveryStatus.NON_RECOVERABLE);
+                } else {
+                    return new SdxRecoverableResponse("Resize can restart cluster", RecoveryStatus.RECOVERABLE);
+                }
             case PROVISIONING_FAILED:
                 return new SdxRecoverableResponse("Failed to provision, recovery will restart original data lake, and delete the new one",
                         RecoveryStatus.RECOVERABLE);
@@ -84,12 +91,25 @@ public class ResizeRecoveryService implements RecoveryService {
         }
     }
 
+    @Override
+    public SdxRecoverableResponse validateRecovery(SdxCluster sdxCluster) {
+        return validateRecovery(sdxCluster, null);
+    }
+
+    @Override
     public SdxRecoveryResponse triggerRecovery(SdxCluster sdxCluster, SdxRecoveryRequest sdxRecoveryRequest) {
         SdxStatusEntity actualStatusForSdx = sdxStatusService.getActualStatusForSdx(sdxCluster);
         if (entitlementService.isDatalakeResizeRecoveryEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
             switch (actualStatusForSdx.getStatus()) {
                 case STOP_FAILED:
                     return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxStartFlow(sdxCluster));
+                case STOPPED:
+                    if (sdxCluster.isDetached()) {
+                        //TODO CB-14339 return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, null));
+                        throw new NotImplementedException("Cluster is currently in an unrecoverable state");
+                    } else {
+                        return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxStartFlow(sdxCluster));
+                    }
                 case PROVISIONING_FAILED:
                 case DATALAKE_RESTORE_FAILED:
                 default:

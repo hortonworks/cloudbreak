@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultCDHInfo;
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -132,12 +133,13 @@ public class ClusterCreationSetupServiceTest {
 
         DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(CDH_VERSION);
 
-        when(imageBasedDefaultCDHEntries.getEntries(workspace.getId(), PLATFORM, IMAGE_CATALOG_NAME)).thenReturn(Collections.singletonMap(CDH_VERSION,
+        when(imageBasedDefaultCDHEntries.getEntries(workspace.getId(), imageCatalogPlatform(PLATFORM), IMAGE_CATALOG_NAME))
+                .thenReturn(Collections.singletonMap(CDH_VERSION,
                 new ImageBasedDefaultCDHInfo(defaultCDHInfo, Mockito.mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class))));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         stackMatrixV4Response.setCdh(Collections.singletonMap(CDH_VERSION, null));
-        when(stackMatrixService.getStackMatrix(workspace.getId(), PLATFORM, IMAGE_CATALOG_NAME)).thenReturn(stackMatrixV4Response);
+        when(stackMatrixService.getStackMatrix(workspace.getId(), imageCatalogPlatform(PLATFORM), IMAGE_CATALOG_NAME)).thenReturn(stackMatrixV4Response);
         when(clouderaManagerClusterCreationSetupService.prepareClouderaManagerCluster(any(), any(), any(), any(), any())).
                 thenReturn(new ArrayList<>());
     }

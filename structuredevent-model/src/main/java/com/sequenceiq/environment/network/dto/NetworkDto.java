@@ -11,6 +11,7 @@ import org.apache.commons.collections4.MapUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
@@ -65,6 +66,8 @@ public class NetworkDto {
 
     private final CloudPlatform cloudPlatform;
 
+    private final LoadBalancerCreation loadBalancerCreation;
+
     private NetworkDto(Builder builder) {
         id = builder.id;
         resourceCrn = builder.resourceCrn;
@@ -90,6 +93,7 @@ public class NetworkDto {
         outboundInternetTraffic = builder.outboundInternetTraffic;
         registrationType = builder.registrationType;
         cloudPlatform = builder.cloudPlatform;
+        loadBalancerCreation = builder.loadBalancerCreation;
     }
 
     public static Builder builder() {
@@ -224,6 +228,10 @@ public class NetworkDto {
         return cloudPlatform;
     }
 
+    public LoadBalancerCreation getLoadBalancerCreation() {
+        return loadBalancerCreation;
+    }
+
     @Override
     public String toString() {
         return "NetworkDto{" +
@@ -246,6 +254,7 @@ public class NetworkDto {
                 ", outboundInternetTraffic=" + outboundInternetTraffic +
                 ", registrationType=" + registrationType +
                 ", cloudPlatform=" + cloudPlatform +
+                ", loadBalancerCreation=" + loadBalancerCreation +
                 '}';
     }
 
@@ -297,6 +306,8 @@ public class NetworkDto {
 
         private CloudPlatform cloudPlatform;
 
+        private LoadBalancerCreation loadBalancerCreation;
+
         private Builder() {
         }
 
@@ -324,6 +335,7 @@ public class NetworkDto {
             liftieSubnets = networkDto.liftieSubnets;
             networkCidrs = networkDto.networkCidrs;
             gcp = networkDto.gcp;
+            loadBalancerCreation = networkDto.loadBalancerCreation;
         }
 
         public Builder withId(Long id) {
@@ -438,6 +450,11 @@ public class NetworkDto {
 
         public Builder withNetworkCidrs(Set<String> networkCidrs) {
             this.networkCidrs = networkCidrs;
+            return this;
+        }
+
+        public Builder withLoadBalancerCreation(LoadBalancerCreation loadBalancerCreation) {
+            this.loadBalancerCreation = loadBalancerCreation;
             return this;
         }
 

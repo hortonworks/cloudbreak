@@ -1,0 +1,25 @@
+apply plugin: 'java'
+
+jar {
+    baseName = 'cloud-aws-gov'
+    archiveName = 'cloud-aws-gov.jar'
+}
+
+repositories {
+    maven { url = "$repoUrl" }
+    maven { url = "$springRepoUrl" }
+    mavenCentral()
+}
+
+dependencies {
+    implementation project(':common')
+    implementation project(':cloud-api')
+    implementation project(':cloud-aws-common')
+    implementation project(':cloud-reactor')
+    implementation project(':cloud-template')
+    implementation project(':cloud-aws-native')
+}
+
+test {
+    useJUnitPlatform()
+}

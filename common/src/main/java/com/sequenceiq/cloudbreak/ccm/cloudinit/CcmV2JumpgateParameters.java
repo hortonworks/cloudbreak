@@ -7,8 +7,10 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public interface CcmV2JumpgateParameters extends CcmV2Parameters {
     static void addToTemplateModel(InstanceGroupType type, @Nullable CcmV2JumpgateParameters ccmV2JumpgateParameters, @Nonnull Map<String, Object> model) {
         if (ccmV2JumpgateParameters == null || !isGateway(type)) {

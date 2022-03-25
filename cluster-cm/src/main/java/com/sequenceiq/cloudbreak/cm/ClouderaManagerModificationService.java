@@ -3,9 +3,11 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_RESTARTING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATED_REMOTE_DATA_CONTEXT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATING_REMOTE_DATA_CONTEXT;
 
@@ -17,6 +19,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -39,6 +42,7 @@ import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
+import com.cloudera.api.swagger.client.ApiCallback;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiBatchRequest;
@@ -47,6 +51,7 @@ import com.cloudera.api.swagger.model.ApiBatchResponse;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
+import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
@@ -78,6 +83,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
@@ -96,6 +102,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerModificationService.class);
 
     private static final Boolean START_ROLES_ON_UPSCALED_NODES = Boolean.TRUE;
+
+    private static final String HOST_TEMPLATE_NAME_TAG = "_cldr_cm_host_template_name";
 
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
@@ -141,6 +149,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Inject
     private ApplicationContext applicationContext;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentProvider;
 
     private final Stack stack;
 
@@ -259,6 +270,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
             startClouderaManager();
             startAgents();
+            tagHostsWithHostTemplateName();
             checkParcelApiAvailability();
 
             refreshRemoteDataContextFromDatalakeInCaseOfDatahub(remoteDataContext);
@@ -276,6 +288,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 ClouderaManagerProduct cdhProduct = getCdhProducts(products);
                 upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi, true);
                 upgradeCdh(clustersResourceApi, parcelResourceApi, cdhProduct);
+                startServices();
                 deployConfigAndRefreshCMStaleServices(clustersResourceApi, false);
             }
             removeUnusedParcelVersions(parcelResourceApi, products);
@@ -285,6 +298,83 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.info("Could not upgrade Cloudera Runtime services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
+    }
+
+    private void tagHostsWithHostTemplateName() throws ApiException, CloudbreakException {
+        ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
+        if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_6_0)) {
+            LOGGER.info("Tagging hosts after runtime upgrade.");
+            ApiClient v46Client = buildv46ApiClient();
+            HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(v46Client);
+            Set<String> hostnamesFromCM = fetchHostNamesFromCm(v46Client);
+            startAsyncTagCalls(hostsResourceApi, hostnamesFromCM);
+        } else {
+            LOGGER.info("Skipping host tagging. Cloudera Manager version needs to be equal or higher, than 7.6.0. Current version: [{}]",
+                    clouderaManagerRepoDetails.getVersion());
+        }
+    }
+
+    private void startAsyncTagCalls(HostsResourceApi hostsResourceApi, Set<String> hostnamesFromCM) {
+        Optional.of(stack).map(Stack::getInstanceGroups).stream()
+                .flatMap(Set::stream)
+                .forEach(asyncTagHostsInHostGroup(hostsResourceApi, hostnamesFromCM));
+    }
+
+    private Set<String> fetchHostNamesFromCm(ApiClient v46Client) throws ApiException {
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(v46Client);
+        String clusterName = stack.getName();
+        return getClusterHostnamesFromCM(clustersResourceApi, clusterName);
+    }
+
+    private ApiClient buildv46ApiClient() throws CloudbreakException {
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        try {
+            return clouderaManagerApiClientProvider.getV46Client(stack.getGatewayPort(), user, password, clientConfig);
+        } catch (ClouderaManagerClientInitException e) {
+            LOGGER.error("Failed to init V46 client.", e);
+            throw new CloudbreakException(e);
+        }
+    }
+
+    private Consumer<InstanceGroup> asyncTagHostsInHostGroup(HostsResourceApi hostsResourceApi, Set<String> hostnamesFromCM) {
+        return instanceGroup -> Optional.ofNullable(instanceGroup).map(InstanceGroup::getNotDeletedInstanceMetaDataSet)
+                .stream().flatMap(Set::stream)
+                .map(InstanceMetaData::getDiscoveryFQDN)
+                .filter(hostnamesFromCM::contains)
+                .forEach(hostname -> asyncTagHost(hostname, hostsResourceApi, instanceGroup));
+    }
+
+    private void asyncTagHost(String hostname, HostsResourceApi hostsResourceApi, InstanceGroup instanceGroup) {
+            ApiEntityTag tag = new ApiEntityTag().name(HOST_TEMPLATE_NAME_TAG).value(instanceGroup.getGroupName());
+            try {
+                ApiCallback<List<ApiEntityTag>> callback = new ApiCallback<>() {
+                    @Override
+                    public void onFailure(ApiException e, int i, Map<String, List<String>> map) {
+                        LOGGER.error("Tagging failed for host [{}]: {}. Response headers: {}", hostname, e.getMessage(), map, e);
+                        throw new ClouderaManagerOperationFailedException("Host tagging failed for host: " + hostname, e);
+                    }
+
+                    @Override
+                    public void onSuccess(List<ApiEntityTag> apiEntityTags, int i, Map<String, List<String>> map) {
+                        LOGGER.debug("Tagging successful for host: [{}]. Body: {}, headers: {}", hostname, apiEntityTags, map);
+                    }
+
+                    @Override
+                    public void onUploadProgress(long l, long l1, boolean b) {
+                    }
+
+                    @Override
+                    public void onDownloadProgress(long l, long l1, boolean b) {
+                    }
+                };
+                LOGGER.debug("Tagging host [{}] with [{}]", hostname, tag);
+                hostsResourceApi.addTagsAsync(hostname, List.of(tag), callback);
+            } catch (ApiException e) {
+                LOGGER.error("Error while tagging host: [{}]", hostname, e);
+                throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+            }
     }
 
     @Override
@@ -557,11 +647,16 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Deployed client configs and refreshed services in Cloudera Manager.");
     }
 
-    private void restartServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
-        doRestartServicesIfNeeded(clustersResourceApi, false);
+    private int restartServices() throws ApiException, CloudbreakException {
+        ClustersResourceApi apiInstance = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
+        return restartServices(apiInstance);
     }
 
-    private void doRestartServicesIfNeeded(ClustersResourceApi clustersResourceApi, boolean waitForCommandExecutionOnly)
+    private int restartServices(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
+        return doRestartServicesIfNeeded(clustersResourceApi, false);
+    }
+
+    private int doRestartServicesIfNeeded(ClustersResourceApi clustersResourceApi, boolean waitForCommandExecutionOnly)
             throws ApiException, CloudbreakException {
         ApiCommandList apiCommandList = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY);
         Optional<ApiCommand> optionalRestartCommand = apiCommandList.getItems().stream()
@@ -575,12 +670,14 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             ApiRestartClusterArgs restartClusterArgs = new ApiRestartClusterArgs();
             restartClusterArgs.setRedeployClientConfiguration(true);
             restartCommand = clustersResourceApi.restartCommand(stack.getName(), restartClusterArgs);
+            eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_RESTARTING);
         }
         if (restartCommand != null) {
             ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, restartCommand.getId());
             handlePollingResult(pollingResult, "Cluster was terminated while restarting services.",
                     "Timeout happened while restarting services.");
         }
+        return getCommandId(restartCommand);
     }
 
     private void restartClouderaManagementServices(MgmtServiceResourceApi mgmtServiceResourceApi) throws ApiException, CloudbreakException {
@@ -771,9 +868,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Override
     public int deployConfigAndStartClusterServices() throws CloudbreakException {
         try {
-            LOGGER.info("Deploying configuration and starting services");
+            LOGGER.info("Deploying configuration and restarting services");
             deployConfig();
-            return startServices();
+            return restartServices();
         } catch (ApiException e) {
             LOGGER.info("Couldn't start Cloudera Manager services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
@@ -846,9 +943,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             handlePollingResult(pollingResult, "Cluster was terminated while waiting for Cloudera Runtime services to start",
                     "Timeout while stopping Cloudera Manager services.");
         }
-        eventService
-                .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_STARTED);
-        return apiCommand == null ? 0 : apiCommand.getId().intValue();
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_STARTED);
+        return getCommandId(apiCommand);
     }
 
     private void startAgents() {
@@ -915,5 +1011,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.debug("Failed to determine if {} service is present in cluster {}.", serviceType, stack.getCluster().getId());
         }
         return servicePresent;
+    }
+
+    private int getCommandId(ApiCommand command) {
+        return command == null ? 0 : command.getId().intValue();
     }
 }

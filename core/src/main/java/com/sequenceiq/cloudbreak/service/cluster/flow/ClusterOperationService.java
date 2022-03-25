@@ -11,7 +11,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AUTORECOVERY
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_HOST_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED_HOST_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_IGNORED;
@@ -32,6 +31,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -353,7 +353,7 @@ public class ClusterOperationService {
             InstanceStatus newState = InstanceStatus.WAITING_FOR_REPAIR;
             ResourceEvent clusterEvent = CLUSTER_AUTORECOVERY_REQUESTED_CLUSTER_EVENT;
             ResourceEvent hostEvent = CLUSTER_AUTORECOVERY_REQUESTED_HOST_EVENT;
-            updateChangedHosts(cluster, hostNamesWithReason, expectedStates, newState, clusterEvent, hostEvent);
+            updateChangedHosts(cluster, hostNamesWithReason, expectedStates, newState, clusterEvent, Optional.of(hostEvent));
         }
     }
 
@@ -366,7 +366,7 @@ public class ClusterOperationService {
             InstanceStatus newState = SERVICES_UNHEALTHY;
             ResourceEvent clusterEvent = CLUSTER_FAILED_NODES_REPORTED_CLUSTER_EVENT;
             ResourceEvent hostEvent = CLUSTER_FAILED_NODES_REPORTED_HOST_EVENT;
-            updateChangedHosts(cluster, hostNamesWithReason, expectedStates, newState, clusterEvent, hostEvent);
+            updateChangedHosts(cluster, hostNamesWithReason, expectedStates, newState, clusterEvent, Optional.of(hostEvent));
         }
     }
 
@@ -376,13 +376,12 @@ public class ClusterOperationService {
             Set<InstanceStatus> expectedStates = Set.of(SERVICES_UNHEALTHY, SERVICES_RUNNING);
             InstanceStatus newState = SERVICES_HEALTHY;
             ResourceEvent clusterEvent = CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT;
-            ResourceEvent hostEvent = CLUSTER_RECOVERED_NODES_REPORTED_HOST_EVENT;
-            updateChangedHosts(cluster, hostNamesWithReason, expectedStates, newState, clusterEvent, hostEvent);
+            updateChangedHosts(cluster, hostNamesWithReason, expectedStates, newState, clusterEvent, Optional.empty());
         }
     }
 
     private void updateChangedHosts(Cluster cluster, Map<String, Optional<String>> hostNamesWithReason, Set<InstanceStatus> expectedState,
-            InstanceStatus newState, ResourceEvent clusterEvent, ResourceEvent hostEvent) throws TransactionService.TransactionExecutionException {
+            InstanceStatus newState, ResourceEvent clusterEvent, Optional<ResourceEvent> hostEvent) throws TransactionService.TransactionExecutionException {
         transactionService.required(() -> {
             Collection<InstanceMetaData> changedHosts = collectChangedHosts(cluster, hostNamesWithReason, expectedState, newState, hostEvent);
             updateChangedHostsInstanceMetadata(cluster, hostNamesWithReason, newState, clusterEvent, changedHosts);
@@ -391,7 +390,7 @@ public class ClusterOperationService {
     }
 
     private Collection<InstanceMetaData> collectChangedHosts(Cluster cluster, Map<String, Optional<String>> hostNamesWithReason,
-            Set<InstanceStatus> expectedState, InstanceStatus newState, ResourceEvent hostEvent) {
+            Set<InstanceStatus> expectedState, InstanceStatus newState, Optional<ResourceEvent> hostEvent) {
         return instanceMetaDataService.findNotTerminatedAndNotZombieForStack(cluster.getStack().getId()).stream()
                 .filter(host -> expectedState.contains(host.getInstanceStatus()) && hostNamesWithReason.containsKey(host.getDiscoveryFQDN()))
                 .map(host -> updateHostStatus(hostNamesWithReason, newState, hostEvent, host))
@@ -399,13 +398,15 @@ public class ClusterOperationService {
     }
 
     private InstanceMetaData updateHostStatus(Map<String, Optional<String>> hostNamesWithReason, InstanceStatus newState,
-            ResourceEvent hostEvent, InstanceMetaData host) {
+            Optional<ResourceEvent> hostEvent, InstanceMetaData host) {
         host.setInstanceStatus(newState);
         if (hostNamesWithReason.containsKey(host.getDiscoveryFQDN()) && hostNamesWithReason.get(host.getDiscoveryFQDN()).isPresent()) {
             host.setStatusReason(hostNamesWithReason.get(host.getDiscoveryFQDN()).get());
-        } else {
-            String hostMessage = cloudbreakMessagesService.getMessage(hostEvent.getMessage(), Collections.singletonList(host.getDiscoveryFQDN()));
+        } else if (hostEvent.isPresent()) {
+            String hostMessage = cloudbreakMessagesService.getMessage(hostEvent.get().getMessage(), Collections.singletonList(host.getDiscoveryFQDN()));
             host.setStatusReason(hostMessage);
+        } else {
+            host.setStatusReason(StringUtils.EMPTY);
         }
         return host;
     }
@@ -544,7 +545,7 @@ public class ClusterOperationService {
         return transactionService.required(() -> {
             checkBlueprintIdAndHostGroups(blueprintName, hostGroups);
             Stack stackWithLists = stackService.getByIdWithListsInTransaction(stack.getId());
-            Cluster cluster = clusterService.getCluster(stackWithLists);
+            Cluster cluster = stackWithLists.getCluster();
             Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, stack.getWorkspace());
             if (!clusterService.withEmbeddedClusterManagerDB(cluster)) {
                 throw new BadRequestException("Cluster Manager doesn't support resetting external DB automatically. To reset Cluster Manager schema you "

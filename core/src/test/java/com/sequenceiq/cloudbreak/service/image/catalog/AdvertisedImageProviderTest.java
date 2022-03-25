@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
@@ -168,7 +169,7 @@ public class AdvertisedImageProviderTest {
     }
 
     private ImageFilter createImageFilter(boolean enableBaseImages) {
-        return new ImageFilter(anImageCatalog(), Collections.singleton(PLATFORM_AWS), "CB version", enableBaseImages, null, null);
+        return new ImageFilter(anImageCatalog(), Collections.singleton(imageCatalogPlatform(PLATFORM_AWS)), "CB version", enableBaseImages, null, null);
     }
 
     private ImageCatalog anImageCatalog() {

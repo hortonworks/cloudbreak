@@ -27,8 +27,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.converter.LoadBalancerCreationConverter;
 import com.sequenceiq.cloudbreak.converter.OutboundInternetTrafficConverter;
 import com.sequenceiq.cloudbreak.converter.PublicEndpointAccessGatewayConverter;
+import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
@@ -83,6 +85,9 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
 
     @Convert(converter = PublicEndpointAccessGatewayConverter.class)
     private PublicEndpointAccessGateway publicEndpointAccessGateway;
+
+    @Convert(converter = LoadBalancerCreationConverter.class)
+    private LoadBalancerCreation loadBalancerCreation = LoadBalancerCreation.ENABLED;
 
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
@@ -237,6 +242,14 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
         this.outboundInternetTraffic = outboundInternetTraffic;
     }
 
+    public LoadBalancerCreation getLoadBalancerCreation() {
+        return loadBalancerCreation;
+    }
+
+    public void setLoadBalancerCreation(LoadBalancerCreation loadBalancerCreation) {
+        this.loadBalancerCreation = loadBalancerCreation;
+    }
+
     @Override
     public String getResourceCrn() {
         return resourceCrn;
@@ -262,6 +275,7 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
                 ", privateSubnetCreation=" + privateSubnetCreation +
                 ", serviceEndpointCreation=" + serviceEndpointCreation +
                 ", publicEndpointAccessGateway=" + publicEndpointAccessGateway +
+                ", loadBalancerCreation=" + loadBalancerCreation +
                 ", endpointGatewaySubnetMetas=" + endpointGatewaySubnetMetas +
                 ", outboundInternetTraffic=" + outboundInternetTraffic +
                 ", accountId='" + accountId + '\'' +

@@ -16,7 +16,13 @@ export SSH_USER=cloudbreak
 export SALT_BOOT_PASSWORD=pass
 export SALT_BOOT_SIGN_KEY=cHJpdi1rZXk=
 export CB_CERT=cert
-export IS_PROXY_ENABLED=false
+export IS_PROXY_ENABLED=true
+export PROXY_HOST=proxy.host
+export PROXY_PORT=1234
+export PROXY_PROTOCOL=https
+export PROXY_USER="user"
+export PROXY_PASSWORD="pwd"
+export PROXY_NO_PROXY_HOSTS="noproxy.com"
 export IS_CCM_ENABLED=true
 export CCM_HOST=ccm.cloudera.com
 export CCM_SSH_PORT=8990

@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.azure.view;
 
-import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView.ENDPOINT_TYPE;
-import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView.SUBNETS;
-import static com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView.SUBNET_FOR_PRIVATE_ENDPOINT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -15,6 +12,14 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.common.model.PrivateEndpointType;
 
 public class AzureNetworkViewTest {
+
+    private static final String SUBNETS = "subnets";
+
+    private static final String SUBNET_FOR_PRIVATE_ENDPOINT = "subnetForPrivateEndpoint";
+
+    private static final String ENDPOINT_TYPE = "endpointType";
+
+    private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingPrivateDnsZoneId";
 
     @Mock
     private Network network;
@@ -44,5 +49,11 @@ public class AzureNetworkViewTest {
     public void testGetEndpointType() {
         when(network.getStringParameter(ENDPOINT_TYPE)).thenReturn("USE_PRIVATE_ENDPOINT");
         assertThat(underTest.getEndpointType()).isEqualTo(PrivateEndpointType.USE_PRIVATE_ENDPOINT);
+    }
+
+    @Test
+    public void testGetPrivateDnsZoneId() {
+        when(network.getStringParameter(EXISTING_PRIVATE_DNS_ZONE_ID)).thenReturn("privateDnsZoneId-a");
+        assertThat(underTest.getExistingPrivateDnsZoneId()).isEqualTo("privateDnsZoneId-a");
     }
 }

@@ -12,6 +12,8 @@ import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseReque
 
 class DistroXDatabaseRequestToStackDatabaseRequestConverterTest {
 
+    private static final String DB_VERSION = "13";
+
     private final DistroXDatabaseRequestToStackDatabaseRequestConverter underTest = new DistroXDatabaseRequestToStackDatabaseRequestConverter();
 
     @ParameterizedTest
@@ -30,5 +32,19 @@ class DistroXDatabaseRequestToStackDatabaseRequestConverterTest {
         source.setAvailabilityType(daType);
         DatabaseRequest result = underTest.convert(source);
         assertThat(result.getAvailabilityType().name()).isEqualTo(daType.name());
+    }
+
+    void convertDatabaseEngineVersion() {
+        DatabaseRequest source = new DatabaseRequest();
+        source.setDatabaseEngineVersion(DB_VERSION);
+        DistroXDatabaseRequest result = underTest.convert(source);
+        assertThat(result.getDatabaseEngineVersion()).isEqualTo(DB_VERSION);
+    }
+
+    void convertDistroXDatabaseEngineVersion() {
+        DistroXDatabaseRequest source = new DistroXDatabaseRequest();
+        source.setDatabaseEngineVersion(DB_VERSION);
+        DatabaseRequest result = underTest.convert(source);
+        assertThat(result.getDatabaseEngineVersion()).isEqualTo(DB_VERSION);
     }
 }

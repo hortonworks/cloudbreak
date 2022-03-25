@@ -13,6 +13,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ import java.util.UUID;
 import javax.validation.constraints.NotNull;
 
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,9 +35,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.util.ReflectionUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
+import com.microsoft.azure.PolicyViolation;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzurePremiumValidatorService;
@@ -454,20 +460,55 @@ public class AzureUtilsTest {
         CloudError cloudError = new CloudError()
                 .withCode("123")
                 .withMessage("foobar");
-        cloudError.details().add(new CloudError().withMessage("detail1"));
-        cloudError.details().add(new CloudError().withMessage("detail2"));
+        cloudError.details().add(new CloudError().withCode("123").withMessage("detail1"));
+        cloudError.details().add(new CloudError().withCode("123").withMessage("detail2"));
         CloudException e = new CloudException("Serious problem", null, cloudError);
 
         CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
 
-        verifyCloudConnectorException(result, e,
+        verifyCloudConnectorException(result,
                 "Checking resources failed, status code 123, error message: foobar, details: detail1, detail2");
     }
 
-    private void verifyCloudConnectorException(CloudConnectorException cloudConnectorException, Throwable causeExpected, String messageExpected) {
+    @Test
+    void convertToCloudConnectorExceptionTestWhenDetailCloudErrorsHaveRequestDisallowedByPolicyCode() throws IOException, NoSuchFieldException {
+        CloudError cloudError = new CloudError()
+                .withCode("InvalidTemplateDeployment")
+                .withMessage("The template deployment failed with multiple errors. Please see details for more information.");
+
+        PolicyViolation policyViolation = new PolicyViolation("PolicyViolation",
+                new ObjectMapper().createObjectNode().put("policyDefinitionDisplayName", "dbajzath-azure-restricted-policy"));
+        CloudError detail1 = new CloudError()
+                .withCode("RequestDisallowedByPolicy")
+                .withMessage("Resource 'cbimgwu29d62091481040a03' was disallowed by policy. Reasons: 'West US 2 location is disabled'. " +
+                        "See error details for policy resource IDs.");
+        Field field = CloudError.class.getDeclaredField("additionalInfo");
+        field.setAccessible(true);
+        ReflectionUtils.setField(field, detail1, List.of(policyViolation));
+        cloudError.details().add(detail1);
+        CloudError detail2 = new CloudError()
+                .withCode("RequestDisallowedByPolicy")
+                .withMessage("Resource 'cbimgwu29d62091481040a03/default' was disallowed by policy. Reasons: 'West US 2 location is disabled'. " +
+                        "See error details for policy resource IDs.");
+        ReflectionUtils.setField(field, detail2, List.of(policyViolation));
+        cloudError.details().add(detail2);
+
+        CloudException e = new CloudException("The template deployment failed with multiple errors. Please see details for more information.", null, cloudError);
+
+        CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Storage account creation");
+
+        verifyCloudConnectorException(result,
+                "Storage account creation failed, status code InvalidTemplateDeployment, error message: The template deployment failed with multiple errors. " +
+                        "Please see details for more information., details: Resource 'cbimgwu29d62091481040a03' was disallowed by policy. " +
+                        "Reasons: 'West US 2 location is disabled'. Policy definition name: dbajzath-azure-restricted-policy, " +
+                        "Resource 'cbimgwu29d62091481040a03/default' was disallowed by policy. Reasons: 'West US 2 location is disabled'. " +
+                        "Policy definition name: dbajzath-azure-restricted-policy");
+    }
+
+    private void verifyCloudConnectorException(CloudConnectorException cloudConnectorException, String messageExpected) {
         assertThat(cloudConnectorException).isNotNull();
         assertThat(cloudConnectorException).hasMessage(messageExpected);
-        assertThat(cloudConnectorException).hasCauseReference(causeExpected);
+        assertThat(cloudConnectorException).hasNoCause();
     }
 
     private static CloudException createCloudExceptionWithNoDetails(boolean withBody) {
@@ -495,7 +536,7 @@ public class AzureUtilsTest {
     void convertToCloudConnectorExceptionTestWhenCloudExceptionAndNoDetails(String testCaseName, CloudException e) {
         CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
 
-        verifyCloudConnectorException(result, e,
+        verifyCloudConnectorException(result,
                 "Checking resources failed: 'com.microsoft.azure.CloudException: Serious problem', please go to Azure Portal for detailed message");
     }
 
@@ -505,7 +546,7 @@ public class AzureUtilsTest {
 
         CloudConnectorException result = underTest.convertToCloudConnectorException(e, "Checking resources");
 
-        verifyCloudConnectorException(result, e,
+        verifyCloudConnectorException(result,
                 "Checking resources failed: 'com.microsoft.azure.CloudException: Serious problem', please go to Azure Portal for detailed message");
     }
 
@@ -545,5 +586,25 @@ public class AzureUtilsTest {
             }
         }
         return virtualMachineMap;
+    }
+
+    /**
+     * Expected outputs are copied from the <a href="https://md5calc.com/hash/adler32">online calculator</a> referenced in
+     * <a href="https://docs.cloudera.com/cdp/latest/requirements-azure/topics/mc-azure-adls-images.html">the docs</a>.
+     * Leading zeroes are trimmed to match the actual output.
+     */
+    @Test
+    void encodeString() {
+        Map<String, String> inputAndOutput = Map.of(
+                "062d53231d9c48449a2540abe7df2f61", "8301085c",
+                "cdppoc", "089d027a",
+                "a", "00620062"
+        );
+        SoftAssertions softly = new SoftAssertions();
+        inputAndOutput.forEach((input, output) ->
+                softly.assertThat(underTest.encodeString(input))
+                        .as(input)
+                        .isEqualTo(output.replaceAll("^0+", "")));
+        softly.assertAll();
     }
 }

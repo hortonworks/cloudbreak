@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserDataSuccess;
+import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -29,6 +30,9 @@ public class CreateUserDataHandler implements EventHandler<CreateUserDataRequest
     @Inject
     private UserDataService userDataService;
 
+    @Inject
+    private IdBrokerService idBrokerService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(CreateUserDataRequest.class);
@@ -39,6 +43,7 @@ public class CreateUserDataHandler implements EventHandler<CreateUserDataRequest
         StackEvent request = event.getData();
         Selectable response;
         try {
+            idBrokerService.generateIdBrokerSignKey(request.getResourceId());
             userDataService.createUserData(request.getResourceId());
             response = new CreateUserDataSuccess(request.getResourceId());
         } catch (Exception e) {

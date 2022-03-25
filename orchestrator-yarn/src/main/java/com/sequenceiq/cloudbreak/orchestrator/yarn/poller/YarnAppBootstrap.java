@@ -75,4 +75,12 @@ public class YarnAppBootstrap implements OrchestratorBootstrap {
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "YarnAppBootstrap{" +
+                "appName='" + appName + '\'' +
+                ", apiEndpoint='" + apiEndpoint + '\'' +
+                '}';
+    }
 }

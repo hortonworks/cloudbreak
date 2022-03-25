@@ -30,6 +30,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -38,7 +40,6 @@ import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
-import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.model.Backup;
@@ -141,6 +142,10 @@ public class Stack implements AccountAwareResource, OrchestratorAware {
 
     @Version
     private Long version;
+
+    @Convert(converter = SecretToString.class)
+    @SecretValue
+    private Secret ccmParameters = Secret.EMPTY;
 
     public Long getId() {
         return id;
@@ -467,6 +472,17 @@ public class Stack implements AccountAwareResource, OrchestratorAware {
         this.ccmV2AgentCrn = ccmV2AgentCrn;
     }
 
+    public CcmConnectivityParameters getCcmParameters() {
+        if (ccmParameters != null && ccmParameters.getRaw() != null) {
+            return JsonUtil.readValueOpt(ccmParameters.getRaw(), CcmConnectivityParameters.class).orElse(null);
+        }
+        return null;
+    }
+
+    public void setCcmParameters(CcmConnectivityParameters ccmParameters) {
+        this.ccmParameters = new Secret(JsonUtil.writeValueAsStringSilent(ccmParameters));
+    }
+
     @Override
     public String toString() {
         return "Stack{" +
@@ -530,7 +546,8 @@ public class Stack implements AccountAwareResource, OrchestratorAware {
                     && Objects.equals(appVersion, stack.appVersion)
                     && Objects.equals(minaSshdServiceId, stack.minaSshdServiceId)
                     && Objects.equals(ccmV2AgentCrn, stack.ccmV2AgentCrn)
-                    && Objects.equals(version, stack.version);
+                    && Objects.equals(version, stack.version)
+                    && Objects.equals(ccmParameters, stack.ccmParameters);
         }
     }
 
@@ -538,7 +555,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware {
     public int hashCode() {
         return Objects.hash(id, resourceCrn, name, environmentCrn, accountId, region, created, platformvariant, availabilityZone, cloudPlatform, gatewayport,
                 useCcm, tunnel, clusterProxyRegistered, terminated, tags, telemetry, backup, template, owner, appVersion, minaSshdServiceId, ccmV2AgentCrn,
-                version);
+                version, ccmParameters);
     }
 
     @Override

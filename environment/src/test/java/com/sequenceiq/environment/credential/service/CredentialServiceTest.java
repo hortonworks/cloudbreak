@@ -445,16 +445,16 @@ class CredentialServiceTest {
 
     @Test
     void testGetPrerequisitesAndEnvironmentCredential() {
-        credentialServiceUnderTest.getPrerequisites(PLATFORM, DEPLOYMENT_ADDRESS, USER_ID, ENVIRONMENT);
+        credentialServiceUnderTest.getPrerequisites(PLATFORM, false, DEPLOYMENT_ADDRESS, USER_ID, ENVIRONMENT);
         verify(credentialValidator).validateCredentialCloudPlatform(PLATFORM, USER_ID, ENVIRONMENT);
-        verify(credentialPrerequisiteService).getPrerequisites(PLATFORM, DEPLOYMENT_ADDRESS, ENVIRONMENT);
+        verify(credentialPrerequisiteService).getPrerequisites(PLATFORM, false, DEPLOYMENT_ADDRESS, ENVIRONMENT);
     }
 
     @Test
     void testGetPrerequisitesAndAuditCredential() {
-        credentialServiceUnderTest.getPrerequisites(PLATFORM, DEPLOYMENT_ADDRESS, USER_ID, AUDIT);
+        credentialServiceUnderTest.getPrerequisites(PLATFORM, false, DEPLOYMENT_ADDRESS, USER_ID, AUDIT);
         verify(credentialValidator).validateCredentialCloudPlatform(PLATFORM, USER_ID, AUDIT);
-        verify(credentialPrerequisiteService).getPrerequisites(PLATFORM, DEPLOYMENT_ADDRESS, AUDIT);
+        verify(credentialPrerequisiteService).getPrerequisites(PLATFORM, false, DEPLOYMENT_ADDRESS, AUDIT);
     }
 
     @Test

@@ -1,6 +1,8 @@
 package com.sequenceiq.datalake.service.sdx.dr;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
@@ -58,6 +61,10 @@ public class SdxBackupRestoreServiceTest {
     private static final String POLLABLE_ID = "datalake-dr-flow";
 
     private static final FlowIdentifier FLOW_IDENTIFIER = new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
+
+    private static final String CLUSTER_NAME = "test-sdx-cluster";
+
+    private static final String RUNTIME = "7.2.2";
 
     @Mock
     private SdxReactorFlowManager sdxReactorFlowManager;
@@ -107,7 +114,7 @@ public class SdxBackupRestoreServiceTest {
                 .thenReturn(new DatalakeBackupStatusResponse(drOperationId, DatalakeBackupStatusResponse.State.IN_PROGRESS, Optional.empty()));
         when(sdxClusterRepository.findById(sdxCluster.getId())).thenReturn(Optional.of(sdxCluster));
         DatalakeBackupStatusResponse backupResponse = sdxBackupRestoreService.triggerDatalakeBackup(sdxCluster.getId(), BACKUP_LOCATION, BACKUP_NAME, USER_CRN);
-        assertTrue(backupResponse != null);
+        assertNotNull(backupResponse);
         assertEquals(drOperationId, backupResponse.getBackupId());
         assertTrue(isUUID(backupResponse.getBackupId()));
     }
@@ -154,9 +161,30 @@ public class SdxBackupRestoreServiceTest {
         assertTrue(isUUID(eventArgumentCaptor.getValue().getDrStatus().getOperationId()));
     }
 
+    @Test
+    public void testWhenSuccessfulBackupExistsThenItIsReturned() {
+        datalakeDRProto.DatalakeBackupInfo datalakeBackupInfo = datalakeDRProto.DatalakeBackupInfo
+                .newBuilder()
+                .setRuntimeVersion(RUNTIME)
+                .setOverallState("SUCCESSFUL")
+                .build();
+
+        when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.empty())).thenReturn(datalakeBackupInfo);
+        datalakeDRProto.DatalakeBackupInfo backupInfo = sdxBackupRestoreService.getLastSuccessfulBackupInfo(CLUSTER_NAME, USER_CRN);
+        assertEquals(datalakeBackupInfo, backupInfo);
+    }
+
+    @Test
+    public void testWhenSuccessfulBackupDoesNotExistThenThrowError() {
+
+        when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.empty())).thenReturn(null);
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> sdxBackupRestoreService.getLastSuccessfulBackupInfo(CLUSTER_NAME, USER_CRN));
+        assertEquals("No successful backup found for data lake: " + CLUSTER_NAME, exception.getMessage());
+    }
+
     private SdxCluster getValidSdxCluster() {
         sdxCluster = new SdxCluster();
-        sdxCluster.setClusterName("test-sdx-cluster");
+        sdxCluster.setClusterName(CLUSTER_NAME);
         sdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");

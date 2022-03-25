@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
 @Component
@@ -25,6 +27,9 @@ public class UpgradeOptionsResponseFactory {
 
     @Inject
     private ComponentVersionProvider componentVersionProvider;
+
+    @Inject
+    private PlatformStringTransformer platformStringTransformer;
 
     public UpgradeV4Response createV4Response(Image currentImage, ImageFilterResult filteredImages, String cloudPlatform, String region,
             String imageCatalogName) {
@@ -57,7 +62,8 @@ public class UpgradeOptionsResponseFactory {
     private String getImageName(Image image, String cloudPlatform, String region) {
         String imageName;
         try {
-            imageName = imageService.determineImageName(cloudPlatform, region, image);
+            ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalogByRegion(cloudPlatform, region);
+            imageName = imageService.determineImageName(cloudPlatform, platformString, region, image);
         } catch (CloudbreakImageNotFoundException e) {
             throw new NotFoundException(String.format("Image (%s) name not found", image.getUuid()), e);
         }

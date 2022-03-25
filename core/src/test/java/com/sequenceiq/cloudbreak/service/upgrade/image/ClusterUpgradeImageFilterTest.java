@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -115,7 +116,7 @@ public class ClusterUpgradeImageFilterTest {
 
     private ImageFilterParams createImageFilterParams() {
         return new ImageFilterParams(image, false, Collections.emptyMap(), StackType.DATALAKE, new Blueprint(), STACK_ID,
-                new InternalUpgradeSettings(false, true, true), CLOUD_PLATFORM);
+                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM));
     }
 
 }

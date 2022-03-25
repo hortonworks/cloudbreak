@@ -15,13 +15,14 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.service.image.ImageFilter;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 @Component
 public class RawImageProvider {
 
     public StatedImages getImages(CloudbreakImageCatalogV3 imageCatalogV3, ImageFilter imageFilter) {
         Images catalogImages = imageCatalogV3.getImages();
-        Set<String> platforms = imageFilter.getPlatforms();
+        Set<ImageCatalogPlatform> platforms = imageFilter.getPlatforms();
         List<Image> baseImages = filterImagesByPlatforms(platforms, catalogImages.getBaseImages());
         List<Image> cdhImages = filterImagesByPlatforms(platforms, catalogImages.getCdhImages());
         List<Image> freeipaImages = filterImagesByPlatforms(platforms, catalogImages.getFreeIpaImages());
@@ -32,14 +33,16 @@ public class RawImageProvider {
                 imageFilter.getImageCatalog().getName());
     }
 
-    List<Image> filterImagesByPlatforms(Collection<String> platforms, Collection<Image> images) {
+    List<Image> filterImagesByPlatforms(Collection<ImageCatalogPlatform> platforms, Collection<Image> images) {
         return images.stream()
                 .filter(isPlatformMatching(platforms))
                 .collect(toList());
     }
 
-    private static Predicate<Image> isPlatformMatching(Collection<String> platforms) {
-        return img -> img.getImageSetsByProvider().keySet().stream().anyMatch(p -> platforms.stream().anyMatch(platform -> platform.equalsIgnoreCase(p)));
+    private static Predicate<Image> isPlatformMatching(Collection<ImageCatalogPlatform> platforms) {
+        return img -> img.getImageSetsByProvider().keySet()
+                .stream()
+                .anyMatch(p -> platforms.stream().anyMatch(platform -> platform.nameToLowerCase().equalsIgnoreCase(p)));
     }
 
 }

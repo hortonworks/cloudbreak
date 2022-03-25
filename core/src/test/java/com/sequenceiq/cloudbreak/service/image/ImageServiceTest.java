@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.cloudbreak.service.image.ImageTestUtil.PLATFORM;
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -64,6 +65,9 @@ public class ImageServiceTest {
     private CloudConnector cloudConnector;
 
     @Mock
+    private PlatformStringTransformer platformStringTransformer;
+
+    @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Mock
@@ -105,6 +109,7 @@ public class ImageServiceTest {
                         WORKSPACE_ID,
                         imageSettingsV4Request,
                         PLATFORM,
+                        PLATFORM,
                         TestUtil.blueprint(),
                         true,
                         false,
@@ -124,6 +129,7 @@ public class ImageServiceTest {
                         WORKSPACE_ID,
                         imageSettingsV4Request,
                         PLATFORM,
+                        PLATFORM,
                         TestUtil.blueprint(),
                         useBaseImage,
                         baseImageEnabled,
@@ -142,6 +148,7 @@ public class ImageServiceTest {
                 underTest.determineImageFromCatalog(
                         WORKSPACE_ID,
                         imageSettingsV4Request,
+                        PLATFORM,
                         PLATFORM,
                         TestUtil.blueprint(),
                         true,
@@ -165,6 +172,7 @@ public class ImageServiceTest {
                         WORKSPACE_ID,
                         imageRequest,
                         PLATFORM,
+                        PLATFORM,
                         TestUtil.blueprint(),
                         true,
                         true,
@@ -183,6 +191,7 @@ public class ImageServiceTest {
                         WORKSPACE_ID,
                         imageSettingsV4Request,
                         PLATFORM,
+                        PLATFORM,
                         TestUtil.blueprint(),
                         false,
                         false,
@@ -198,6 +207,7 @@ public class ImageServiceTest {
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
+                PLATFORM,
                 PLATFORM,
                 TestUtil.blueprint(),
                 false,
@@ -216,6 +226,7 @@ public class ImageServiceTest {
                 WORKSPACE_ID,
                 imageSettingsV4Request,
                 PLATFORM,
+                PLATFORM,
                 TestUtil.blueprint(),
                 false,
                 true,
@@ -233,6 +244,7 @@ public class ImageServiceTest {
                 WORKSPACE_ID,
                 imageSettingsV4Request,
                 PLATFORM,
+                PLATFORM,
                 TestUtil.blueprint(),
                 false,
                 true,
@@ -247,9 +259,11 @@ public class ImageServiceTest {
         imageSettingsV4Request.setId(null);
         when(imageCatalogService.getLatestBaseImageDefaultPreferred(any(), any()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(PLATFORM));
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
+                PLATFORM,
                 PLATFORM,
                 TestUtil.blueprint(),
                 true,
@@ -265,9 +279,11 @@ public class ImageServiceTest {
         imageSettingsV4Request.setId(null);
         when(imageCatalogService.getImagePrewarmedDefaultPreferred(any(), any()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(false, "uuid", STACK_VERSION));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(PLATFORM));
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
+                PLATFORM,
                 PLATFORM,
                 TestUtil.blueprint(),
                 false,
@@ -283,9 +299,11 @@ public class ImageServiceTest {
         imageSettingsV4Request.setId(null);
         when(imageCatalogService.getImagePrewarmedDefaultPreferred(any(), any()))
                 .thenReturn(ImageTestUtil.getImageFromCatalog(true, "uuid", STACK_VERSION));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(PLATFORM));
         StatedImage statedImage = underTest.determineImageFromCatalog(
                 WORKSPACE_ID,
                 imageSettingsV4Request,
+                PLATFORM,
                 PLATFORM,
                 TestUtil.blueprint(),
                 false,

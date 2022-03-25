@@ -33,7 +33,7 @@ public class SdxRestoreInternalAction implements Action<SdxInternalTestDto, SdxC
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         String sdxName = testDto.getName();
 
-        testContext.waitingFor(Duration.ofMinutes(5), "Waiting for CM services to be synchronized has been interrupted");
+        testContext.waitingFor(Duration.ofMinutes(2), "Waiting for CM services to be synchronized has been interrupted");
 
         Log.when(LOGGER, format(" Internal SDX '%s' restore has been started to '%s' ", sdxName, backupLocation));
         Log.whenJson(LOGGER, " Internal SDX restore request: ", testDto.getRequest());

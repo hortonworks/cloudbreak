@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 public class ImageFilterParams {
 
@@ -24,10 +25,10 @@ public class ImageFilterParams {
 
     private final InternalUpgradeSettings internalUpgradeSettings;
 
-    private final String cloudPlatform;
+    private final ImageCatalogPlatform cloudPlatform;
 
     public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType, Blueprint blueprint,
-            Long stackId, InternalUpgradeSettings internalUpgradeSettings, String cloudPlatform) {
+            Long stackId, InternalUpgradeSettings internalUpgradeSettings, ImageCatalogPlatform cloudPlatform) {
         this.currentImage = currentImage;
         this.lockComponents = lockComponents;
         this.stackRelatedParcels = stackRelatedParcels;
@@ -70,7 +71,7 @@ public class ImageFilterParams {
         return internalUpgradeSettings != null && internalUpgradeSettings.isDataHubRuntimeUpgradeEntitled();
     }
 
-    public String getCloudPlatform() {
+    public ImageCatalogPlatform getCloudPlatform() {
         return cloudPlatform;
     }
 

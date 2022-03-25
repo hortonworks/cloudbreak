@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -104,15 +105,17 @@ public class ClusterCommonService {
     @Inject
     private InstanceGroupService instanceGroupService;
 
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
     public FlowIdentifier put(String crn, UpdateClusterV4Request updateJson) {
-        Stack stack = stackService.getByCrn(crn);
-        stack = stackService.getByIdWithLists(stack.getId());
+        Stack stack = stackService.getByCrnWithLists(crn);
         Long stackId = stack.getId();
         MDCBuilder.buildMdcContext(stack);
         UserNamePasswordV4Request userNamePasswordJson = updateJson.getUserNamePassword();
         FlowIdentifier flowIdentifier;
         if (userNamePasswordJson != null) {
-            flowIdentifier = clusterManagerUserNamePasswordChange(stackId, stack, userNamePasswordJson);
+            flowIdentifier = clusterManagerUserNamePasswordChange(stack, userNamePasswordJson);
         } else if (updateJson.getStatus() != null) {
             LOGGER.debug("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
             flowIdentifier = clusterOperationService.updateStatus(stackId, updateJson.getStatus());
@@ -151,6 +154,7 @@ public class ClusterCommonService {
             cmTemplateValidator.validateHostGroupScalingRequest(
                     accountId,
                     blueprint,
+                    clusterComponentConfigProvider.getCdhProduct(stack.getCluster().getId()),
                     hostGroupName,
                     updateJson.getHostGroupAdjustment().getScalingAdjustment(),
                     instanceGroupService.findNotTerminatedByStackId(stack.getId()));
@@ -168,20 +172,20 @@ public class ClusterCommonService {
         return clusterOperationService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint());
     }
 
-    private FlowIdentifier clusterManagerUserNamePasswordChange(Long stackId, Stack stack, UserNamePasswordV4Request userNamePasswordJson) {
+    private FlowIdentifier clusterManagerUserNamePasswordChange(Stack stack, UserNamePasswordV4Request userNamePasswordJson) {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format(
-                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
+                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stack.getId(),
                     stack.getStatus()));
         }
         if (!userNamePasswordJson.getOldPassword().equals(stack.getCluster().getPassword())) {
             throw new BadRequestException(String.format(
-                    "Cluster actual password does not match in the request, please pass the real password on Stack '%s' with status '%s'.", stackId,
+                    "Cluster actual password does not match in the request, please pass the real password on Stack '%s' with status '%s'.", stack.getId(),
                     stack.getStatus()));
         }
-        LOGGER.debug("Cluster username password update request received. Stack id:  {}, username: {}",
-                stackId, userNamePasswordJson.getUserName());
-        return clusterOperationService.updateUserNamePassword(stackId, userNamePasswordJson);
+        LOGGER.debug("Cluster username password update request received. Stack id: {}, name: {}, username: {}",
+                stack.getId(), stack.getName(), userNamePasswordJson.getUserName());
+        return clusterOperationService.updateUserNamePassword(stack.getId(), userNamePasswordJson);
     }
 
     public FlowIdentifier setMaintenanceMode(Stack stack, MaintenanceModeStatus maintenanceMode) {

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.image.catalog;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -73,7 +74,7 @@ public class RawImageProviderTest {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setImageCatalogUrl(IMAGE_CATALOG_URL);
         imageCatalog.setName(IMAGE_CATALOG_NAME);
-        return new ImageFilter(imageCatalog, Collections.singleton(AWS.name()), null);
+        return new ImageFilter(imageCatalog, Collections.singleton(imageCatalogPlatform(AWS.name())), null);
     }
 
     private Image createImage(String imageId, String cloudPlatform) {

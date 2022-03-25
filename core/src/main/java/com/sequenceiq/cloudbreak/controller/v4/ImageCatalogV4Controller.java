@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.converter.v4.imagecatalog.ImagesToImagesV4Respo
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.service.image.DefaultImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
@@ -90,6 +91,9 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     @Inject
     private UpdateImageCatalogRequestToImageCatalogConverter updateImageCatalogRequestToImageCatalogConverter;
+
+    @Inject
+    private PlatformStringTransformer platformStringTransformer;
 
     @Override
     @FilterListBasedOnPermissions
@@ -196,17 +200,18 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @DisableCheckPermissions
     public ImagesV4Response getImages(Long workspaceId, String stackName, String platform,
-            String runtimeVersion, String imageType) throws Exception {
+            String runtimeVersion, String imageType, boolean govCloud) throws Exception {
         Images images = imageCatalogService.getImagesFromDefault(restRequestThreadLocalService.getRequestedWorkspaceId(), stackName,
-                platform, Collections.emptySet());
+                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud), Collections.emptySet(), govCloud);
         return imagesToImagesV4ResponseConverter.convert(images);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImagesV4Response getImagesByName(Long workspaceId, @ResourceName String name, String stackName, String platform,
-        String runtimeVersion, String imageType) throws Exception {
-        Images images = imageCatalogService.getImagesByCatalogName(restRequestThreadLocalService.getRequestedWorkspaceId(), name, stackName, platform);
+        String runtimeVersion, String imageType, boolean govCloud) throws Exception {
+        Images images = imageCatalogService.getImagesByCatalogName(restRequestThreadLocalService.getRequestedWorkspaceId(), name, stackName,
+                platformStringTransformer.getPlatformStringForImageCatalog(platform, govCloud), govCloud);
         return imagesToImagesV4ResponseConverter.convert(images);
     }
 
@@ -245,8 +250,9 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @AccountIdNotNeeded
     @DisableCheckPermissions
-    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider, String runtime) throws Exception {
-        StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type, provider, runtime);
+    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider, String runtime, boolean govCloud) throws Exception {
+        StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type,
+                platformStringTransformer.getPlatformStringForImageCatalog(provider, govCloud), runtime);
         return imageToImageV4ResponseConverter.convert(statedImage.getImage());
     }
 
@@ -254,7 +260,8 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @AccountIdNotNeeded
     @DisableCheckPermissions
     public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider) throws Exception {
-        StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type, provider);
+        StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type,
+                platformStringTransformer.getPlatformStringForImageCatalog(provider, false));
         return imageToImageV4ResponseConverter.convert(statedImage.getImage());
     }
 

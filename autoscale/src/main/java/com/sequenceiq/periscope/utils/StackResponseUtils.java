@@ -33,9 +33,18 @@ public class StackResponseUtils {
                 .filter(instanceGroupV4Response -> instanceGroupV4Response.getName().equalsIgnoreCase(hostGroup))
                 .flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
-                .filter(instanceMetaData -> InstanceStatus.SERVICES_HEALTHY.equals(instanceMetaData.getInstanceStatus()))
                 .collect(Collectors.toMap(InstanceMetaDataV4Response::getDiscoveryFQDN,
                         InstanceMetaDataV4Response::getInstanceId));
+    }
+
+    public Integer getCloudInstanceIdsWithServicesHealthyForHostGroup(StackV4Response stackResponse, String hostGroup) {
+        return stackResponse.getInstanceGroups().stream()
+                .filter(instanceGroupV4Response -> instanceGroupV4Response.getName().equalsIgnoreCase(hostGroup))
+                .flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
+                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                .filter(instanceMetaData -> InstanceStatus.SERVICES_HEALTHY.equals(instanceMetaData.getInstanceStatus()))
+                .collect(Collectors.counting())
+                .intValue();
     }
 
     public Integer getStoppedInstanceCountInHostGroup(StackV4Response stackV4Response, String policyHostGroup) {

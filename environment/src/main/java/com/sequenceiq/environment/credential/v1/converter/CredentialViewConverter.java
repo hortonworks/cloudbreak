@@ -18,18 +18,20 @@ public class CredentialViewConverter {
         response.setDescription(credentialView.getDescription());
         response.setVerificationStatusText(credentialView.getVerificationStatusText());
         response.setType(credentialView.getType());
+        response.setGovCloud(credentialView.getGovCloud());
         return response;
     }
 
-    public CredentialViewResponse convertResponse(Credential credentialView) {
+    public CredentialViewResponse convertResponse(Credential credential) {
         CredentialViewResponse response = new CredentialViewResponse();
-        response.setName(credentialView.getName());
-        response.setCloudPlatform(credentialView.getCloudPlatform());
-        response.setCreator(credentialView.getCreator());
-        response.setCrn(credentialView.getResourceCrn());
-        response.setDescription(credentialView.getDescription());
-        response.setVerificationStatusText(credentialView.getVerificationStatusText());
-        response.setType(credentialView.getType());
+        response.setName(credential.getName());
+        response.setCloudPlatform(credential.getCloudPlatform());
+        response.setCreator(credential.getCreator());
+        response.setCrn(credential.getResourceCrn());
+        response.setDescription(credential.getDescription());
+        response.setVerificationStatusText(credential.getVerificationStatusText());
+        response.setType(credential.getType());
+        response.setGovCloud(credential.getGovCloud());
         return response;
     }
 

@@ -82,6 +82,10 @@ public class StructuredEventToCDPClusterShapeConverter {
             Collections.sort(hostGroupNodeCount);
             cdpClusterShape.setHostGroupNodeCount(String.join(", ", hostGroupNodeCount));
             cdpClusterShape.setTemporaryStorageUsed(hostGroupTemporaryStorage.contains(TemporaryStorage.EPHEMERAL_VOLUMES.name()));
+            String customConfigurationsDetails = JsonUtil.writeValueAsStringSilentSafe(stackDetails.getCustomConfigurations());
+            if (StringUtils.length(customConfigurationsDetails) <= MAX_STRING_LENGTH) {
+                cdpClusterShape.setClusterTemplateOverridesDetails(customConfigurationsDetails);
+            }
             String definitionDetailsJsonString = JsonUtil.writeValueAsStringSilentSafe(stackDetails.getInstanceGroups());
             if (StringUtils.length(definitionDetailsJsonString) <= MAX_STRING_LENGTH) {
                 cdpClusterShape.setDefinitionDetails(definitionDetailsJsonString);

@@ -127,8 +127,13 @@ import com.sequenceiq.flow.core.ResourceIdProvider;
 @Service
 public class StackService implements ResourceIdProvider, AuthorizationResourceNamesProvider, PayloadContextProvider {
 
-    public static final Set<String> REATTACH_COMPATIBLE_PLATFORMS = Set.of(CloudConstants.AWS, CloudConstants.AZURE, CloudConstants.GCP, CloudConstants.MOCK,
-            CloudConstants.AWS_NATIVE);
+    public static final Set<String> REATTACH_COMPATIBLE_PLATFORMS = Set.of(
+            CloudConstants.AWS,
+            CloudConstants.AZURE,
+            CloudConstants.GCP,
+            CloudConstants.MOCK,
+            CloudConstants.AWS_NATIVE,
+            CloudConstants.AWS_NATIVE_GOV);
 
     private static final String STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE = "Stack not found by id '%d'";
 
@@ -620,7 +625,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                 LOGGER, "Target groups saved in {} ms for stack {}", stackName);
 
         try {
-            Set<Component> components = imageService.create(stack, platformString, imgFromCatalog);
+            Set<Component> components = imageService.create(stack, imgFromCatalog);
             setRuntime(stack, components);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Cloudbreak Image not found", e);
@@ -822,7 +827,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.findOneWithLists(id).orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_ID_EXCEPTION_MESSAGE, id)));
     }
 
-    private Stack getByCrnWithLists(String crn) {
+    public Stack getByCrnWithLists(String crn) {
         return stackRepository.findOneByCrnWithLists(crn).orElseThrow(NotFoundException.notFound("Stack", crn));
     }
 

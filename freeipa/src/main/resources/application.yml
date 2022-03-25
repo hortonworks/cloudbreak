@@ -262,6 +262,7 @@ cb:
 
   platform.default:
     variants: AWS:AWS
+    govVariants: AWS:AWS_NATIVE_GOV
     regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1,YARN:default,MOCK:USA
 
   gcp:

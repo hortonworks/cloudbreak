@@ -105,6 +105,8 @@ public class StackDetails implements Serializable {
 
     private boolean multiAz;
 
+    private CustomConfigurationsDetails customConfigurations;
+
     public Long getId() {
         return id;
     }
@@ -327,5 +329,13 @@ public class StackDetails implements Serializable {
 
     public void setMultiAz(boolean multiAz) {
         this.multiAz = multiAz;
+    }
+
+    public CustomConfigurationsDetails getCustomConfigurations() {
+        return customConfigurations;
+    }
+
+    public void setCustomConfigurations(CustomConfigurationsDetails customConfigurations) {
+        this.customConfigurations = customConfigurations;
     }
 }

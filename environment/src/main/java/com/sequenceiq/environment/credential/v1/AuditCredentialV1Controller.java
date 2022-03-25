@@ -104,9 +104,9 @@ public class AuditCredentialV1Controller extends NotificationController implemen
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_AUDIT_CREDENTIAL)
-    public CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(String platform, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(String platform, boolean govCloud, String deploymentAddress) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return credentialService.getPrerequisites(platform, deploymentAddress, userCrn, AUDIT);
+        return credentialService.getPrerequisites(platform, govCloud, deploymentAddress, userCrn, AUDIT);
     }
 
     @Override

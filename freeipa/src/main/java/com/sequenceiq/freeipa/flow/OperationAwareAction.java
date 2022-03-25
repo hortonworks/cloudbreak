@@ -9,8 +9,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 public interface OperationAwareAction {
     String OPERATION_ID = "OPERATION_ID";
 
-    default void addMdcOperationIdIfPresent(Map<Object, Object> varialbes) {
-        String operationId = getOperationId(varialbes);
+    default void addMdcOperationIdIfPresent(Map<Object, Object> variables) {
+        String operationId = getOperationId(variables);
         if (StringUtils.isNotBlank(operationId)) {
             MDCBuilder.addOperationId(operationId);
         }

@@ -141,6 +141,26 @@ public class YarnLoadEvaluatorTest {
         testUpScaleBasedOnYarnResponse(currentHostGroupCount, yarnRecommendedUpScaleCount, expectedUpScaleCount);
     }
 
+    public static Stream<Arguments> dataUpScalingWithUnhealthyInstances() {
+        return Stream.of(
+                // TestCase, HealthyHostGroupNodeCount, UnhealthyHostGroupNodeCount, YarnRecommendedUpScaleCount, ExpectedDesiredNodeCount
+                Arguments.of("SCALE_UP_ALLOWED", 3, 2, 2, 7),
+                Arguments.of("SCALE_UP_ALLOWED_2", 5, 2, 3, 10),
+                Arguments.of("SCALE_UP_ALLOWED_AT_LIMIT", TEST_HOSTGROUP_MAX_SIZE - 15, 10, 5, TEST_HOSTGROUP_MAX_SIZE),
+                Arguments.of("SCALE_UP_BEYOND_MAX_LIMIT", TEST_HOSTGROUP_MAX_SIZE - 20, 15, 10, TEST_HOSTGROUP_MAX_SIZE),
+                Arguments.of("SCALE_UP_WHEN_SIZE_BELOW_MIN", 2, 1, 3, 6)
+        );
+    }
+
+    @ParameterizedTest(name = "{0}: With healthyHostGroupNodeCount={1}, unhealthyHostGroupNodeCount={2}, yarnRecommendedUpScaleCount={3}, " +
+            "expectedUpScaledCount={4} ")
+    @MethodSource("dataUpScalingWithUnhealthyInstances")
+    public void testLoadBasedScalingWithUnhealthyInstances(String testType, int healthyHostGroupNodeCount, int unhealthyHostGroupNodeCount,
+            int yarnRecommendedUpScaleCount, int expectedUpScaledCount) throws Exception {
+        testUpScaleWithUnhealthyInstancesBasedOnYarnResponse(healthyHostGroupNodeCount, unhealthyHostGroupNodeCount, yarnRecommendedUpScaleCount,
+                expectedUpScaledCount);
+    }
+
     // TODO CB-15142: Add more scenarios for this parameterized test
     public static Stream<Arguments> dataUpScalingForStopStart() {
         return Stream.of(
@@ -185,7 +205,7 @@ public class YarnLoadEvaluatorTest {
     private void testDownScaleBasedOnYarnResponse(int currentHostGroupCount, int yarnDecommissionCount,
             int expectedDownScaleCount, boolean forcedDownScale) throws Exception {
         boolean scalingEventExpected = expectedDownScaleCount != 0 ? true : false;
-        Optional<ScalingEvent> scalingEvent = captureScalingEvent(currentHostGroupCount, 0, yarnDecommissionCount, scalingEventExpected);
+        Optional<ScalingEvent> scalingEvent = captureScalingEvent(currentHostGroupCount, 0, yarnDecommissionCount, scalingEventExpected, 0);
 
         if (scalingEventExpected) {
             int actualDownScaleCount = scalingEvent.get().getDecommissionNodeIds().size();
@@ -196,10 +216,24 @@ public class YarnLoadEvaluatorTest {
     private void testUpScaleBasedOnYarnResponse(int currentHostGroupCount, int yarnUpScaleCount, int expectedUpscaleCount) throws Exception {
         boolean scalingEventExpected = expectedUpscaleCount != 0 ? true : false;
 
-        Optional<ScalingEvent> scalingEvent = captureScalingEvent(currentHostGroupCount, yarnUpScaleCount, 0, scalingEventExpected);
+        Optional<ScalingEvent> scalingEvent = captureScalingEvent(currentHostGroupCount, yarnUpScaleCount, 0, scalingEventExpected, 0);
         if (scalingEventExpected) {
             assertEquals("ScaleUp Node Count should match.", expectedUpscaleCount,
                     scalingEvent.get().getDesiredAbsoluteHostGroupNodeCount().intValue());
+        }
+    }
+
+    private void testUpScaleWithUnhealthyInstancesBasedOnYarnResponse(int healthyHostGroupNodeCount, int unhealthyHostGroupNodeCount,
+            int yarnRecommendedUpScaleCount, int expectedUpScaledCount) throws Exception {
+        boolean scalingEventExpected = expectedUpScaledCount != 0;
+
+        Optional<ScalingEvent> scalingEvent = captureScalingEvent(healthyHostGroupNodeCount + unhealthyHostGroupNodeCount, yarnRecommendedUpScaleCount, 0,
+                scalingEventExpected, unhealthyHostGroupNodeCount);
+        if (scalingEventExpected) {
+            assertEquals("ScaleUp Node Count should match.", expectedUpScaledCount,
+                    scalingEvent.get().getDesiredAbsoluteHostGroupNodeCount().intValue());
+            assertEquals("Existing host group node count must recognise and include unhealthy instances",
+                    healthyHostGroupNodeCount + unhealthyHostGroupNodeCount, scalingEvent.get().getExistingHostGroupNodeCount().intValue());
         }
     }
 
@@ -217,12 +251,12 @@ public class YarnLoadEvaluatorTest {
     }
 
     private Optional<ScalingEvent> captureScalingEvent(int currentHostGroupCount, int yarnUpScaleCount,
-            int yarnDownScaleCount, boolean scalingEventExpected) throws Exception {
+            int yarnDownScaleCount, boolean scalingEventExpected, int unHealthyInstancesCount) throws Exception {
         MockitoAnnotations.initMocks(this);
         Cluster cluster = getARunningCluster();
         String hostGroup = "compute";
         StackV4Response stackV4Response = MockStackResponseGenerator
-                .getMockStackV4Response(CLOUDBREAK_STACK_CRN, hostGroup, fqdnBase, currentHostGroupCount, false);
+                .getMockStackV4Response(CLOUDBREAK_STACK_CRN, hostGroup, fqdnBase, currentHostGroupCount, unHealthyInstancesCount);
 
         YarnScalingServiceV1Response upScale = getMockYarnScalingResponse(hostGroup, yarnUpScaleCount, yarnDownScaleCount);
 
@@ -246,8 +280,9 @@ public class YarnLoadEvaluatorTest {
         Cluster cluster = getARunningCluster();
         cluster.setStopStartScalingEnabled(true);
         String hostGroup = "compute";
-        StackV4Response stackV4Response = MockStackResponseGenerator.getMockStackV4Response(CLOUDBREAK_STACK_CRN, hostGroup, fqdnBase,
-                runningNodeHostGroupCount, stoppedNodeHostGroupCount);
+        StackV4Response stackV4Response = MockStackResponseGenerator
+                .getMockStackV4ResponseWithStoppedAndRunningNodes(CLOUDBREAK_STACK_CRN, hostGroup, fqdnBase, runningNodeHostGroupCount,
+                        stoppedNodeHostGroupCount);
 
         YarnScalingServiceV1Response upScale = getMockYarnScalingResponse(hostGroup, yarnUpscaleCount, yarnDownscaleCount);
 
@@ -321,6 +356,7 @@ public class YarnLoadEvaluatorTest {
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(stackV4Response);
         when(stackResponseUtils.getCloudInstanceIdsForHostGroup(any(), any())).thenCallRealMethod();
+        when(stackResponseUtils.getCloudInstanceIdsWithServicesHealthyForHostGroup(any(), any())).thenCallRealMethod();
         lenient().when(stackResponseUtils.getStoppedInstanceCountInHostGroup(any(), any())).thenCallRealMethod();
         when(yarnMetricsClient.getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), any(Optional.class)))
                 .thenReturn(upScale);

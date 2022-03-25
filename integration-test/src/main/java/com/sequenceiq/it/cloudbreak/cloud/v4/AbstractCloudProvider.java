@@ -275,13 +275,13 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     protected abstract DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster);
 
-    public String getLatestBaseImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform) {
+    public String getLatestBaseImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform, boolean govCloud) {
         try {
             List<BaseImageV4Response> images = cloudbreakClient
                     .getDefaultClient()
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                            platform, null, null).getBaseImages();
+                            platform, null, null, govCloud).getBaseImages();
 
             if (images.size() == 0) {
                 throw new IllegalStateException("Images are empty, there is not any base image on provider " + platform);

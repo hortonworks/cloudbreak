@@ -82,3 +82,4 @@ disable_old_tls_for_ldap_server:
     - group: root
     - mode: 600
     - source: salt://freeipa/templates/initial-ldap-conf.ldif
+    - template: jinja

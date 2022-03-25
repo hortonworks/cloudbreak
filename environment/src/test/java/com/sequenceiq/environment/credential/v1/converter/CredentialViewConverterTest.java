@@ -1,14 +1,16 @@
 package com.sequenceiq.environment.credential.v1.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.domain.CredentialView;
 
-public class CredentialViewConverterTest {
+class CredentialViewConverterTest {
 
     private static final String CRED_NAME = "cred-name";
 
@@ -25,7 +27,7 @@ public class CredentialViewConverterTest {
     private final CredentialViewConverter underTest = new CredentialViewConverter();
 
     @Test
-    public void testConvertCredentialView() {
+    void testConvertCredentialView() {
         CredentialView credentialView = new CredentialView();
         credentialView.setName(CRED_NAME);
         credentialView.setCloudPlatform(CLOUD_PLATFORM);
@@ -33,6 +35,8 @@ public class CredentialViewConverterTest {
         credentialView.setResourceCrn(CRN);
         credentialView.setDescription(DESCRIPTION);
         credentialView.setVerificationStatusText(VERIFICATION_STATUS_TEXT);
+        credentialView.setType(CredentialType.ENVIRONMENT);
+        credentialView.setGovCloud(true);
 
         CredentialViewResponse result = underTest.convert(credentialView);
 
@@ -42,10 +46,12 @@ public class CredentialViewConverterTest {
         assertEquals(CRN, result.getCrn());
         assertEquals(DESCRIPTION, result.getDescription());
         assertEquals(VERIFICATION_STATUS_TEXT, result.getVerificationStatusText());
+        assertEquals(CredentialType.ENVIRONMENT, result.getType());
+        assertTrue(result.getGovCloud());
     }
 
     @Test
-    public void testConvertCredential() {
+    void testConvertCredential() {
         Credential credential = new Credential();
         credential.setName(CRED_NAME);
         credential.setCloudPlatform(CLOUD_PLATFORM);
@@ -53,6 +59,8 @@ public class CredentialViewConverterTest {
         credential.setResourceCrn(CRN);
         credential.setDescription(DESCRIPTION);
         credential.setVerificationStatusText(VERIFICATION_STATUS_TEXT);
+        credential.setType(CredentialType.ENVIRONMENT);
+        credential.setGovCloud(true);
 
         CredentialView result = underTest.convert(credential);
 
@@ -62,5 +70,31 @@ public class CredentialViewConverterTest {
         assertEquals(CRN, result.getResourceCrn());
         assertEquals(DESCRIPTION, result.getDescription());
         assertEquals(VERIFICATION_STATUS_TEXT, result.getVerificationStatusText());
+        assertEquals(CredentialType.ENVIRONMENT, result.getType());
+        assertTrue(result.getGovCloud());
+    }
+
+    @Test
+    void testConvertToCredentialViewResponse() {
+        Credential credential = new Credential();
+        credential.setName(CRED_NAME);
+        credential.setCloudPlatform(CLOUD_PLATFORM);
+        credential.setCreator(CREATOR);
+        credential.setResourceCrn(CRN);
+        credential.setDescription(DESCRIPTION);
+        credential.setVerificationStatusText(VERIFICATION_STATUS_TEXT);
+        credential.setType(CredentialType.ENVIRONMENT);
+        credential.setGovCloud(true);
+
+        CredentialViewResponse result = underTest.convertResponse(credential);
+
+        assertEquals(CRED_NAME, result.getName());
+        assertEquals(CLOUD_PLATFORM, result.getCloudPlatform());
+        assertEquals(CREATOR, result.getCreator());
+        assertEquals(CRN, result.getCrn());
+        assertEquals(DESCRIPTION, result.getDescription());
+        assertEquals(VERIFICATION_STATUS_TEXT, result.getVerificationStatusText());
+        assertEquals(CredentialType.ENVIRONMENT, result.getType());
+        assertTrue(result.getGovCloud());
     }
 }

@@ -231,8 +231,8 @@ public class AzureUpscaleServiceTest {
         List<Group> scaledGroups = createScaledGroups();
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
-        CloudError cloudError = new CloudError().withMessage("Error happened");
-        cloudError.details().add(new CloudError().withMessage("Please check the power state later"));
+        CloudError cloudError = new CloudError().withCode("code").withMessage("Error happened");
+        cloudError.details().add(new CloudError().withCode("code").withMessage("Please check the power state later"));
         when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
                 .thenThrow(new Retry.ActionFailedException("VMs not started in time.", new CloudException("Error", null, cloudError)));
         when(azureUtils.convertToCloudConnectorException(any(CloudException.class), anyString())).thenCallRealMethod();
@@ -242,7 +242,7 @@ public class AzureUpscaleServiceTest {
         );
 
         assertThat(cloudConnectorException.getMessage())
-                .contains("Stack upscale failed, status code null, error message: Error happened, details: Please check the power state later");
+                .contains("Stack upscale failed, status code code, error message: Error happened, details: Please check the power state later");
     }
 
     private List<Group> createScaledGroups() {

@@ -56,7 +56,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRuntimeVersionValidator;
-import com.sequenceiq.cloudbreak.converter.IdBrokerConverterUtil;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToStackConverter;
@@ -67,7 +66,6 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -80,7 +78,6 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
-import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -164,12 +161,6 @@ public class StackCreatorService {
 
     @Inject
     private HueWorkaroundValidatorService hueWorkaroundValidatorService;
-
-    @Inject
-    private IdBrokerConverterUtil idBrokerConverterUtil;
-
-    @Inject
-    private IdBrokerService idBrokerService;
 
     @Inject
     private NodeCountLimitValidator nodeCountLimitValidator;
@@ -272,11 +263,6 @@ public class StackCreatorService {
                 } catch (CloudbreakImageCatalogException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
-
-                measure(() -> {
-                    IdBroker idBroker = idBrokerConverterUtil.generateIdBrokerSignKeys(newStack.getCluster());
-                    idBrokerService.save(idBroker);
-                }, LOGGER, "Generate id broker sign keys and save");
 
                 measure(() -> assignOwnerRoleOnDataHub(user, stackRequest, newStack),
                         LOGGER,
@@ -474,6 +460,7 @@ public class StackCreatorService {
                             workspace.getId(),
                             stackRequest.getImage(),
                             platformString,
+                            stackRequest.getVariant(),
                             blueprint,
                             shouldUseBaseCMImage,
                             baseImageEnabled,

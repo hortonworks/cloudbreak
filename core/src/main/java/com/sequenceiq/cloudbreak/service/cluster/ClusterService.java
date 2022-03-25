@@ -394,8 +394,9 @@ public class ClusterService {
         return cluster;
     }
 
-    public Cluster getCluster(Stack stack) {
-        return getCluster(stack.getCluster().getId());
+    public Cluster getClusterByStackResourceCrn(String stackResourceCrn) {
+        return repository.findByStackResourceCrn(stackResourceCrn).orElseThrow(notFound("Cluster by stack resource CRN",
+                stackResourceCrn));
     }
 
     private Cluster getCluster(Long clusterId) {
@@ -426,6 +427,10 @@ public class ClusterService {
 
     public Optional<Cluster> findOneByStackId(Long stackId) {
         return repository.findOneByStackId(stackId);
+    }
+
+    public Cluster findOneByStackIdOrNotFoundError(Long stackId) {
+        return repository.findOneByStackId(stackId).orElseThrow(notFound("Cluster by stack ID", stackId));
     }
 
     public Optional<Cluster> findOneWithLists(Long id) {

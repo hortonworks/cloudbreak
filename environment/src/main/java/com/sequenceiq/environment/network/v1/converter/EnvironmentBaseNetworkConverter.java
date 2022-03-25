@@ -42,6 +42,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
         setRegistrationType(result, creationDto);
         result.setSubnetMetas(subnetMetas);
         result.setPublicEndpointAccessGateway(creationDto.getPublicEndpointAccessGateway());
+        result.setLoadBalancerCreation(creationDto.getLoadBalancerCreation());
         result.setEndpointGatewaySubnetMetas(gatewayEndpointSubnetMetas);
         return result;
     }
@@ -61,6 +62,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
                 .withRegistrationType(source.getRegistrationType())
                 .withNetworkId(source.getNetworkId())
                 .withUsePublicEndpointAccessGateway(source.getPublicEndpointAccessGateway())
+                .withLoadBalancerCreation(source.getLoadBalancerCreation())
                 .withEndpointGatewaySubnetMetas(source.getEndpointGatewaySubnetMetas());
 
         convertSubnets(source, builder);

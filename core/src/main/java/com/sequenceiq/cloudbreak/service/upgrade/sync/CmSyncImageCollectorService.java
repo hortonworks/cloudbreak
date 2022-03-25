@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 
 @Service
 public class CmSyncImageCollectorService {
@@ -29,6 +30,9 @@ public class CmSyncImageCollectorService {
 
     @Inject
     private ImageService imageService;
+
+    @Inject
+    private PlatformStringTransformer platformStringTransformer;
 
     /**
      * Will collect all images using the stack's image catalog.
@@ -62,7 +66,8 @@ public class CmSyncImageCollectorService {
     }
 
     private Set<Image> getAllImagesFromCatalog(String userCrn, Stack stack, String imageCatalogName, Long workspaceId) throws CloudbreakImageCatalogException {
-        List<Image> allCdhImages = imageCatalogService.getAllCdhImages(userCrn, workspaceId, imageCatalogName, stack.cloudPlatform());
+        List<Image> allCdhImages = imageCatalogService.getAllCdhImages(userCrn, workspaceId, imageCatalogName,
+                platformStringTransformer.getPlatformStringForImageCatalogSet(stack.getCloudPlatform(), stack.getPlatformVariant()));
         return new HashSet<>(allCdhImages);
     }
 

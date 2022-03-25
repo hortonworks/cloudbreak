@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.image.userdata;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -63,7 +64,18 @@ public class UserDataService {
     private CachedEnvironmentClientService environmentClientService;
 
     public void createUserData(Long stackId) {
-        Stack stack = stackService.getStackById(stackId);
+        Stack stack = getStack(stackId);
+        LOGGER.debug("Creating user data for stack {}", stack.getResourceName());
+        createUserData(stack, () -> ccmUserDataService.fetchAndSaveCcmParameters(stack));
+    }
+
+    public void regenerateUserData(Long stackId) {
+        Stack stack = getStack(stackId);
+        LOGGER.debug("Regenerating user data for stack {}", stack.getResourceName());
+        createUserData(stack, stack::getCcmParameters);
+    }
+
+    private void createUserData(Stack stack, Supplier<CcmConnectivityParameters> ccmParametersSupplier) {
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
         Credential credential = credentialService.getCredentialByEnvCrn(stack.getEnvironmentCrn());
         Future<PlatformParameters> platformParametersFuture =
@@ -77,14 +89,19 @@ public class UserDataService {
         String saltBootPassword = saltSecurityConfig.getSaltBootPassword();
         try {
             PlatformParameters platformParameters = platformParametersFuture.get();
-            CcmConnectivityParameters ccmParameters = ccmUserDataService.fetchAndSaveCcmParameters(stack);
+            CcmConnectivityParameters ccmParameters = ccmParametersSupplier.get();
             Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             String userData = userDataBuilder.buildUserData(stack.getAccountId(), environment, Platform.platform(stack.getCloudPlatform()),
                     cbSshKeyDer, sshUser, platformParameters, saltBootPassword, cbCert, ccmParameters, proxyConfig.orElse(null));
             imageService.decorateImageWithUserDataForStack(stack, userData);
         } catch (InterruptedException | ExecutionException e) {
-            LOGGER.error("Failed to get Platform parmaters", e);
-            throw new GetCloudParameterException("Failed to get Platform parmaters", e);
+            LOGGER.error("Failed to get Platform parameters", e);
+            throw new GetCloudParameterException("Failed to get Platform parameters", e);
         }
+    }
+
+    private Stack getStack(Long stackId) {
+        Stack stack = stackService.getStackById(stackId);
+        return stack;
     }
 }

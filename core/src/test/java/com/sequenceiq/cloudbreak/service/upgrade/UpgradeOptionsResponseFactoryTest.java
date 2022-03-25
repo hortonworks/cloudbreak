@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.when;
@@ -19,6 +21,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,17 +51,24 @@ public class UpgradeOptionsResponseFactoryTest {
     private ImageService imageService;
 
     @Mock
+    private PlatformStringTransformer platformStringTransformer;
+
+    @Mock
     private ComponentVersionProvider componentVersionProvider;
 
     @Test
     public void testCreateV4ResponseShouldReturnTheUpgradeOptionsFromTheGivenParameters() throws CloudbreakImageNotFoundException {
+        ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform(CLOUD_PLATFORM);
         Map<String, String> packageVersions = createPackageVersions();
         ImageComponentVersions expectedPackageVersions = creatExpectedPackageVersions();
         Image currentImage = createImage(packageVersions);
         ImageFilterResult availableImages = createAvailableImages(packageVersions);
 
-        when(imageService.determineImageName(CLOUD_PLATFORM, REGION, currentImage)).thenReturn(IMAGE_NAME);
-        when(imageService.determineImageName(CLOUD_PLATFORM, REGION, availableImages.getImages().get(0))).thenReturn(IMAGE_NAME);
+        when(platformStringTransformer.getPlatformStringForImageCatalogByRegion(anyString(), anyString())).thenReturn(imageCatalogPlatform);
+        when(imageService.determineImageName(CLOUD_PLATFORM, imageCatalogPlatform, REGION, currentImage))
+                .thenReturn(IMAGE_NAME);
+        when(imageService.determineImageName(CLOUD_PLATFORM, imageCatalogPlatform, REGION, availableImages.getImages().get(0)))
+                .thenReturn(IMAGE_NAME);
         when(componentVersionProvider.getComponentVersions(eq(packageVersions), any(), any())).thenReturn(expectedPackageVersions);
 
         UpgradeV4Response actual = underTest.createV4Response(currentImage, availableImages, CLOUD_PLATFORM, REGION, IMAGE_CATALOG_NAME);
@@ -79,7 +90,8 @@ public class UpgradeOptionsResponseFactoryTest {
     }
 
     private Image createImage(Map<String, String> packageVersions) {
-        return new Image(null, CREATION_DATE, null, null, null, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, Map.of(REGION, IMAGE_NAME)), null, null,
+        return new Image(null, CREATION_DATE, null, null, null, IMAGE_ID, null, null,
+                Map.of(CLOUD_PLATFORM, Map.of(REGION, IMAGE_NAME)), null, null,
                 packageVersions,  null, null, null, true, null, null);
     }
 

@@ -17,14 +17,13 @@ import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sequenceiq.freeipa.client.operation.UserDisableOperation;
-import com.sequenceiq.freeipa.client.operation.UserEnableOperation;
 import org.apache.commons.lang3.reflect.TypeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.googlecode.jsonrpc4j.JsonRpcHttpClient;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
@@ -40,7 +39,6 @@ import com.sequenceiq.freeipa.client.model.Keytab;
 import com.sequenceiq.freeipa.client.model.PasswordPolicy;
 import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.Privilege;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.client.model.Role;
 import com.sequenceiq.freeipa.client.model.Service;
 import com.sequenceiq.freeipa.client.model.TopologySegment;
@@ -48,6 +46,8 @@ import com.sequenceiq.freeipa.client.model.TopologySuffix;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.client.operation.BatchOperation;
 import com.sequenceiq.freeipa.client.operation.UserAddOperation;
+import com.sequenceiq.freeipa.client.operation.UserDisableOperation;
+import com.sequenceiq.freeipa.client.operation.UserEnableOperation;
 import com.sequenceiq.freeipa.client.operation.UserModOperation;
 import com.sequenceiq.freeipa.client.operation.UserRemoveOperation;
 
@@ -58,8 +58,6 @@ import io.opentracing.Tracer;
 public class FreeIpaClient {
 
     public static final String MAX_PASSWORD_EXPIRATION_DATETIME = "20380101000000Z";
-
-    public static final Integer DEFAULT_BATCH_CALL_PARTITION_SIZE = 100;
 
     private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssVV");
 

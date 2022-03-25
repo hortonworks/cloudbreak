@@ -5,20 +5,18 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.common.model.PrivateEndpointType;
 
 public class AzureNetworkView {
 
-    @VisibleForTesting
-    static final String SUBNETS = "subnets";
+    private static final String SUBNETS = "subnets";
 
-    @VisibleForTesting
-    static final String SUBNET_FOR_PRIVATE_ENDPOINT = "subnetForPrivateEndpoint";
+    private static final String SUBNET_FOR_PRIVATE_ENDPOINT = "subnetForPrivateEndpoint";
 
-    @VisibleForTesting
-    static final String ENDPOINT_TYPE = "endpointType";
+    private static final String ENDPOINT_TYPE = "endpointType";
+
+    private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingPrivateDnsZoneId";
 
     private String networkId;
 
@@ -103,5 +101,9 @@ public class AzureNetworkView {
 
     public String getSubnetIdForPrivateEndpoint() {
         return network.getStringParameter(SUBNET_FOR_PRIVATE_ENDPOINT);
+    }
+
+    public String getExistingPrivateDnsZoneId() {
+        return network.getStringParameter(EXISTING_PRIVATE_DNS_ZONE_ID);
     }
 }

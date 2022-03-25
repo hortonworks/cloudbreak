@@ -23,7 +23,7 @@ public class SdxSyncAction implements Action<SdxTestDto, SdxClient> {
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         String sdxName = testDto.getName();
 
-        testContext.waitingFor(Duration.ofMinutes(4), "Waiting for CM services to be synchronized has been interrupted");
+        testContext.waitingFor(Duration.ofMinutes(1), "Waiting for CM services to be synchronized has been interrupted");
 
         Log.when(LOGGER, format(" SDX '%s' sync has been started... ", sdxName));
         Log.whenJson(LOGGER, " SDX sync request: ", testDto.getRequest());

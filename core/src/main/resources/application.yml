@@ -109,6 +109,7 @@ altus:
 
 cb:
   enabledplatforms: AZURE,AWS,GCP
+  enabledgovplatforms: AWS
   platform.default.rootVolumeSize:
     AWS: 100
     AZURE: 100
@@ -552,6 +553,7 @@ cb:
           7.2.15 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
           7.2.15 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.2.15 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
+          7.2.15 - Streams Messaging High Availability: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-ha;
           7.2.15 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming;
           7.2.15 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-small;
           7.2.15 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
@@ -610,6 +612,7 @@ cb:
 
   platform.default:
     variants: AWS:AWS
+    govVariants: AWS:AWS_NATIVE_GOV
     regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1,YARN:default,MOCK:USA
 
   gcp:

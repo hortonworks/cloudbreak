@@ -19,7 +19,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -80,22 +82,22 @@ public class DefaultImageCatalogServiceTest {
 
     @Test
     public void testGetImageFromDefaultCatalogWithoutRuntimeThrowsBadRequestInCaseOfNonFreeIpaImageType() {
-        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), "aws"));
+        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), imageCatalogPlatform("aws")));
     }
 
     @Test
     public void testGetImageFromDefaultCatalogWithoutRuntimeThrowsBadRequestInCaseOfNotSupportedImageType() {
-        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.UNKNOWN.name(), "aws"));
+        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.UNKNOWN.name(), imageCatalogPlatform("aws")));
     }
 
     @Test
     public void testGetImageFromDefaultCatalogWithRuntimeThrowsBadRequestInCaseOfFreeIpaImageType() {
-        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), "aws", "7.2.10"));
+        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), imageCatalogPlatform("aws"), "7.2.10"));
     }
 
     @Test
     public void testGetImageFromDefaultCatalogWithRuntimeThrowsBadRequestInCaseOfNotSupportedImageType() {
-        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.UNKNOWN.name(), "aws", "7.2.10"));
+        assertThrows(BadRequestException.class, () -> victim.getImageFromDefaultCatalog(ImageType.UNKNOWN.name(), imageCatalogPlatform("aws"), "7.2.10"));
     }
 
     @Test
@@ -121,7 +123,7 @@ public class DefaultImageCatalogServiceTest {
         when(notExpectedByProvider.getImageSetsByProvider()).thenReturn(notExpectedImageSetByProvider);
         when(notExpectedByProvider.getCreated()).thenReturn(0L);
 
-        StatedImage actual = victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), "aws");
+        StatedImage actual = victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), imageCatalogPlatform("aws"));
 
         assertEquals(expected, actual.getImage());
     }
@@ -146,7 +148,7 @@ public class DefaultImageCatalogServiceTest {
         when(notExpected.getImageSetsByProvider()).thenReturn(imageSetByProvider);
         when(notExpected.getCreated()).thenReturn(1L);
 
-        assertThrows(CloudbreakImageNotFoundException.class, () -> victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), "aws"));
+        assertThrows(CloudbreakImageNotFoundException.class, () -> victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), imageCatalogPlatform("aws")));
     }
 
     @Test
@@ -154,10 +156,11 @@ public class DefaultImageCatalogServiceTest {
         ArgumentCaptor<ImageFilter> imageFilterArgumentCaptor = ArgumentCaptor.forClass(ImageFilter.class);
         when(imageCatalogService.getImagePrewarmedDefaultPreferred(imageFilterArgumentCaptor.capture(), Mockito.any())).thenReturn(mock(StatedImage.class));
 
-        StatedImage actual = victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), "aws", "7.2.10");
+        StatedImage actual = victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), imageCatalogPlatform("aws"), "7.2.10");
 
         assertNotNull(actual);
         assertEquals(imageFilterArgumentCaptor.getValue().getClusterVersion(), "7.2.10");
-        assertTrue(imageFilterArgumentCaptor.getValue().getPlatforms().contains("aws"));
+        assertTrue(imageFilterArgumentCaptor.getValue().getPlatforms().stream().map(e -> e.nameToLowerCase()).collect(Collectors.toList())
+                .contains("aws"));
     }
 }

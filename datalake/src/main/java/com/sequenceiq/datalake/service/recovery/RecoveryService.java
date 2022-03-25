@@ -15,6 +15,7 @@ import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
  *
  */
 public interface RecoveryService {
+
     /**
      * Starts recovery of the CB infrastructure related to the recovery request.
      *
@@ -23,6 +24,7 @@ public interface RecoveryService {
      *
      * Validation should have already been performed before calling
      *
+     * @param sdxCluster affected cluster to be recovered
      * @param recoveryRequest detailed information about the recovery
      * @return a response containing the identifier of the triggered recovery Flow
      */
@@ -31,8 +33,17 @@ public interface RecoveryService {
     /**
      * Validates that triggering a recovery is allowed.
      *
+     * @param sdxCluster affected cluster to be validated for recovery
      * @return a message detailing if recovery is allowed and the reason why
      */
     SdxRecoverableResponse validateRecovery(SdxCluster sdxCluster);
 
+    /**
+     * Validates that triggering a recovery is allowed.
+     *
+     * @param sdxCluster affected cluster to be validated for recovery
+     * @param recoveryRequest detailed information about the recovery
+     * @return a message detailing if recovery is allowed and the reason why
+     */
+    SdxRecoverableResponse validateRecovery(SdxCluster sdxCluster, SdxRecoveryRequest recoveryRequest);
 }

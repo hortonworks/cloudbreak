@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +34,7 @@ import com.sequenceiq.cloudbreak.converter.v4.recipes.RecipeToRecipeV4ResponseCo
 import com.sequenceiq.cloudbreak.converter.v4.stacks.authentication.StackAuthenticationToStackAuthenticationV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterToClusterV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.customdomains.StackToCustomDomainsSettingsV4Response;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.database.DatabaseAvailabilityTypeToDatabaseResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.database.ExternalDatabaseToDatabaseResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupToInstanceGroupV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.network.InstanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.loadbalancer.LoadBalancerToLoadBalancerResponseConverter;
@@ -116,7 +114,7 @@ public class StackToStackV4ResponseConverter {
     private StackAuthenticationToStackAuthenticationV4ResponseConverter stackAuthenticationToStackAuthenticationV4ResponseConverter;
 
     @Inject
-    private DatabaseAvailabilityTypeToDatabaseResponseConverter databaseAvailabilityTypeToDatabaseResponseConverter;
+    private ExternalDatabaseToDatabaseResponseConverter externalDatabaseToDatabaseResponseConverter;
 
     @Inject
     private RecipeToRecipeV4ResponseConverter recipeToRecipeV4ResponseConverter;
@@ -165,8 +163,8 @@ public class StackToStackV4ResponseConverter {
         response.setTags(getTags(source.getTags()));
         response.setTimeToLive(getStackTimeToLive(source));
         response.setVariant(Strings.isNullOrEmpty(source.getPlatformVariant()) ? source.getCloudPlatform() : source.getPlatformVariant());
-        response.setExternalDatabase(getIfNotNull(source.getExternalDatabaseCreationType(),
-                ed -> databaseAvailabilityTypeToDatabaseResponseConverter.convert(ed)));
+        response.setExternalDatabase(externalDatabaseToDatabaseResponseConverter
+                .convert(source.getExternalDatabaseCreationType(), source.getExternalDatabaseEngineVersion()));
         datalakeService.addSharedServiceResponse(source, response);
         filterExposedServicesByType(source.getType(), response.getCluster());
         response.setLoadBalancers(convertLoadBalancers(source.getId()));

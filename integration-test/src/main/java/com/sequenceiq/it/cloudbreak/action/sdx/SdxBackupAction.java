@@ -33,7 +33,7 @@ public class SdxBackupAction implements Action<SdxTestDto, SdxClient> {
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         String sdxName = testDto.getName();
 
-        testContext.waitingFor(Duration.ofMinutes(5), "Waiting for CM services to be synchronized has been interrupted");
+        testContext.waitingFor(Duration.ofMinutes(2), "Waiting for CM services to be synchronized has been interrupted");
 
         Log.when(LOGGER, format(" SDX '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
         Log.whenJson(LOGGER, " SDX backup request: ", testDto.getRequest());
