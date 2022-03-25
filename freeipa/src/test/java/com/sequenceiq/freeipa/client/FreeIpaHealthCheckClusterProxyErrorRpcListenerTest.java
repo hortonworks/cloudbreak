@@ -21,7 +21,7 @@ public class FreeIpaHealthCheckClusterProxyErrorRpcListenerTest {
 
     @Test
     public void testClusterProxyError() throws IOException {
-        ClusterProxyError clusterProxyError = new ClusterProxyError("status", "cluster-proxy.proxy.timeout", "message");
+        ClusterProxyError clusterProxyError = new ClusterProxyError("status", "cluster-proxy.proxy.timeout", "message", true);
         Response response = mock(Response.class);
         when(response.readEntity(any(Class.class))).thenReturn(clusterProxyError);
         assertThrows(ClusterProxyException.class, () -> {
@@ -31,7 +31,7 @@ public class FreeIpaHealthCheckClusterProxyErrorRpcListenerTest {
 
     @Test
     public void testClusterProxyNotAClusterProxyError() throws IOException {
-        ClusterProxyError clusterProxyError = new ClusterProxyError("status", "error from something other than cluster proxy", "message");
+        ClusterProxyError clusterProxyError = new ClusterProxyError("status", "error from something other than cluster proxy", "message", true);
         Response response = mock(Response.class);
         when(response.readEntity(any(Class.class))).thenReturn(clusterProxyError);
         assertDoesNotThrow(() -> {

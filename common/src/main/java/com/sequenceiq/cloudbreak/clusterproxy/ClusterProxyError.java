@@ -11,11 +11,15 @@ public class ClusterProxyError {
 
     private final String message;
 
+    private final boolean retryable;
+
     @JsonCreator
-    public ClusterProxyError(@JsonProperty("status") String status, @JsonProperty("code") String code, @JsonProperty("message") String message) {
+    public ClusterProxyError(@JsonProperty("status") String status, @JsonProperty("code") String code, @JsonProperty("message") String message,
+            @JsonProperty("retryable") boolean retryable) {
         this.status = status;
         this.code = code;
         this.message = message;
+        this.retryable = retryable;
     }
 
     public String getStatus() {
@@ -30,12 +34,17 @@ public class ClusterProxyError {
         return message;
     }
 
+    public boolean getRetryable() {
+        return retryable;
+    }
+
     @Override
     public String toString() {
         return "ClusterProxyError{" +
                 "status='" + status + '\'' +
                 ", code='" + code + '\'' +
                 ", message='" + message + '\'' +
+                ", retryable='" + retryable + '\'' +
                 '}';
     }
 }
