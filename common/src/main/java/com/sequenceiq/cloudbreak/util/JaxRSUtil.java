@@ -15,8 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyErrorTypeReference;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyWebApplicationException;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 public class JaxRSUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(JaxRSUtil.class);
@@ -71,6 +75,17 @@ public class JaxRSUtil {
         String errorMessage = transformErrorMessage(textResponse);
         String errormsg = "Status: " + response.getStatusInfo().getStatusCode() + ' ' + response.getStatusInfo().getReasonPhrase()
                 + " Response: " + errorMessage;
+
+        try {
+            if (JsonUtil.isValid(errorMessage)) {
+                ClusterProxyError clusterProxyError = JsonUtil.jsonToType(errorMessage, ClusterProxyErrorTypeReference.get());
+                if (clusterProxyError.getRetryable()) {
+                    return new ClusterProxyWebApplicationException(errormsg, clusterProxyError);
+                }
+            }
+        } catch (IllegalArgumentException e) {
+            LOGGER.trace("Error message is not a json or not a cluster proxy error, thus we cannot parse it.", e);
+        }
         return new WebApplicationException(errormsg);
     }
 

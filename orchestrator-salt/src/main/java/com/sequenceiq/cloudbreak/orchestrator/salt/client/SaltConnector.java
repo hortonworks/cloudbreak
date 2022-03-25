@@ -31,6 +31,8 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,6 +41,7 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.DisableProxyAuthFeature;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.client.SetProxyTimeoutFeature;
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyWebApplicationException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -110,6 +113,7 @@ public class SaltConnector implements Closeable {
     }
 
     @Measure(SaltConnector.class)
+    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public GenericResponse health() {
         LOGGER.debug("Sending request to salt endpoint {}", SaltEndpoint.BOOT_HEALTH.getContextPath());
         Response response = saltTarget.path(SaltEndpoint.BOOT_HEALTH.getContextPath()).request().get();
@@ -119,6 +123,7 @@ public class SaltConnector implements Closeable {
     }
 
     @Measure(SaltConnector.class)
+    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public GenericResponses pillar(Iterable<String> targets, Pillar pillar) {
         Response distributeResponse = postSignedJsonSaltRequest(SaltEndpoint.BOOT_PILLAR_DISTRIBUTE, pillar);
         if (distributeResponse.getStatus() == HttpStatus.SC_NOT_FOUND) {
@@ -137,6 +142,7 @@ public class SaltConnector implements Closeable {
     }
 
     @Measure(SaltConnector.class)
+    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public GenericResponses action(SaltAction saltAction) {
         Response response = postSignedJsonSaltRequest(SaltEndpoint.BOOT_ACTION_DISTRIBUTE, saltAction);
         GenericResponses responseEntity = JaxRSUtil.response(response, GenericResponses.class);
@@ -144,15 +150,18 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
+    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public <T> T run(String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
         return run(null, fun, clientType, clazz, arg);
     }
 
+    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
         return run(target, fun, clientType, clazz, null, arg);
     }
 
     @Measure(SaltConnector.class)
+    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, Long timeout, String... arg) {
         Form form = new Form();
         form = addAuth(form)
@@ -191,6 +200,7 @@ public class SaltConnector implements Closeable {
     }
 
     @Measure(SaltConnector.class)
+    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public <T> T wheel(String fun, Collection<String> match, Class<T> clazz) {
         Form form = new Form();
         form = addAuth(form)
@@ -207,12 +217,14 @@ public class SaltConnector implements Closeable {
     }
 
     @Measure(SaltConnector.class)
+    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public GenericResponses upload(Iterable<String> targets, String path, String fileName, byte[] content) throws IOException {
         Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, content);
         return getGenericResponses(targets, path, fileName, content, distributeResponse);
     }
 
     @Measure(SaltConnector.class)
+    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public GenericResponses upload(Iterable<String> targets, String path, String fileName, String permission, byte[] content) throws IOException {
         Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, permission, content);
         return getGenericResponses(targets, path, fileName, content, distributeResponse);
@@ -297,6 +309,7 @@ public class SaltConnector implements Closeable {
     }
 
     @Measure(SaltConnector.class)
+    @Retryable(value = ClusterProxyWebApplicationException.class, backoff = @Backoff(delay = 1000))
     public Map<String, String> members(List<String> privateIps) throws CloudbreakOrchestratorFailedException {
         Map<String, List<String>> clients = singletonMap("clients", privateIps);
         Response response = postSignedJsonSaltRequest(BOOT_HOSTNAME_ENDPOINT, clients);
