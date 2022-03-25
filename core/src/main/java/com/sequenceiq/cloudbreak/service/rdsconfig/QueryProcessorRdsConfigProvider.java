@@ -15,30 +15,30 @@ public class QueryProcessorRdsConfigProvider extends AbstractRdsConfigProvider {
     private static final String PILLAR_KEY = "query_processor";
 
     @Value("${cb.query_processor.database.user:query_processor}")
-    private String dasDbUser;
+    private String qpDbUser;
 
     @Value("${cb.query_processor.database.db:query_processor}")
-    private String dasDb;
+    private String qpDb;
 
     @Value("${cb.query_processor.database.port:5432}")
-    private String dasDbPort;
+    private String qpDbPort;
 
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Override
     protected String getDbUser() {
-        return dasDbUser;
+        return qpDbUser;
     }
 
     @Override
     protected String getDb() {
-        return dasDb;
+        return qpDb;
     }
 
     @Override
     protected String getDbPort() {
-        return dasDbPort;
+        return qpDbPort;
     }
 
     @Override
