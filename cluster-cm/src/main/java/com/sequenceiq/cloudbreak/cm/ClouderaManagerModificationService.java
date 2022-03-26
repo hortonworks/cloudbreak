@@ -975,6 +975,17 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
+    @Override
+    public int restartClusterServices() {
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
+        try {
+            return restartServices(clustersResourceApi);
+        } catch (ApiException | CloudbreakException e) {
+            LOGGER.info("Could not restart services", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
     private void handlePollingResult(PollingResult pollingResult, String cancellationMessage, String timeoutMessage) throws CloudbreakException {
         pollingResultErrorHandler.handlePollingResult(pollingResult, cancellationMessage, timeoutMessage);
     }

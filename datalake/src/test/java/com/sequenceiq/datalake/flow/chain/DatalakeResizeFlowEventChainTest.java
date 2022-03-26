@@ -42,7 +42,7 @@ public class DatalakeResizeFlowEventChainTest {
     public void chainCreationTest() {
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(sdxCluster.getId(), sdxCluster, USER_CRN, BACKUP_LOCATION, true);
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
-        assertEquals(6, flowTriggerEventQueue.getQueue().size());
+        assertEquals(7, flowTriggerEventQueue.getQueue().size());
         assertTriggerBackupEvent(flowTriggerEventQueue);
     }
 

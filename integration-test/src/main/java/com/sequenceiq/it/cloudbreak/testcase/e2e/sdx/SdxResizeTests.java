@@ -28,6 +28,8 @@ public class SdxResizeTests extends PreconditionSdxE2ETest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxResizeTests.class);
 
+    private static final String MOCK_UMS_PASSWORD = "Password123!";
+
     @Inject
     private SdxTestClient sdxTestClient;
 

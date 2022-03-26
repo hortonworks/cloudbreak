@@ -28,6 +28,9 @@ public class SdxStopFlowConfig extends AbstractFlowConfiguration<SdxStopState, S
             .from(SDX_STOP_START_STATE).to(SDX_STOP_ALL_DATAHUBS_STATE)
             .event(SdxStopEvent.SDX_STOP_ALL_DATAHUB_EVENT).failureEvent(SdxStopEvent.SDX_STOP_FAILED_EVENT)
 
+            .from(SDX_STOP_START_STATE).to(SDX_STOP_IN_PROGRESS_STATE)
+            .event(SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT).failureEvent(SdxStopEvent.SDX_STOP_FAILED_EVENT)
+
             .from(SDX_STOP_ALL_DATAHUBS_STATE).to(SDX_STOP_IN_PROGRESS_STATE)
             .event(SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT).defaultFailureEvent()
 
