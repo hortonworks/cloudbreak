@@ -318,7 +318,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
-    public UpgradeV4Response checkForClusterUpgradeByName(Long workspaceId, String name, UpgradeV4Request request,
+    public UpgradeV4Response checkForClusterUpgradeByName(Long workspaceId, String name, @NotNull UpgradeV4Request request,
             @AccountId String accountId) {
         return stackUpgradeOperations.checkForClusterUpgrade(accountId, NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(),
                 request);
