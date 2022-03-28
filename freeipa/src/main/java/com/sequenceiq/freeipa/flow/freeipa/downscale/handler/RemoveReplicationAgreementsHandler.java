@@ -53,19 +53,16 @@ public class RemoveReplicationAgreementsHandler extends ExceptionCatcherEventHan
     @Override
     protected Selectable doAccept(HandlerEvent<RemoveReplicationAgreementsRequest> event) {
         RemoveReplicationAgreementsRequest request = event.getData();
-        Selectable result;
         try {
             Long stackId = request.getResourceId();
             Stack stack = stackService.getStackById(stackId);
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
             freeIpaTopologyService.updateReplicationTopology(stackId, request.getHosts(), freeIpaClient);
-
-            result = new RemoveReplicationAgreementsResponse(request.getResourceId());
+            return new RemoveReplicationAgreementsResponse(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Downscale removing replication agreements failed", e);
-            result = new DownscaleFailureEvent(REMOVE_REPLICATION_AGREEMENTS_FAILED_EVENT.event(),
+            return new DownscaleFailureEvent(REMOVE_REPLICATION_AGREEMENTS_FAILED_EVENT.event(),
                     request.getResourceId(), "Downscale Remove Replication Agreements", Set.of(), Map.of(), e);
         }
-        return result;
     }
 }
