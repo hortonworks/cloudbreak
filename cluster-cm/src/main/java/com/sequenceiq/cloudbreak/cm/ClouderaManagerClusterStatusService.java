@@ -288,7 +288,11 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         try {
             ApiHostList apiHostList = api.readHosts(null, null, SUMMARY);
             LOGGER.trace("Response from CM for readHosts call: {}", apiHostList);
-            return apiHostList.getItems().stream().filter(ApiHost::getMaintenanceMode).map(ApiHost::getHostname).collect(toList());
+            return apiHostList.getItems()
+                    .stream()
+                    .filter(host -> Boolean.TRUE.equals(host.getMaintenanceMode()))
+                    .map(ApiHost::getHostname)
+                    .collect(toList());
         } catch (ApiException e) {
             LOGGER.info("Failed to get hosts from CM", e);
             throw new RuntimeException("Failed to get hosts from CM due to: " + e.getMessage(), e);
