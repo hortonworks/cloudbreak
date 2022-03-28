@@ -3,9 +3,12 @@ package com.sequenceiq.freeipa.flow.chain;
 import static com.sequenceiq.freeipa.flow.chain.FlowChainTriggers.UPGRADE_CCM_CHAIN_TRIGGER_EVENT;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,7 +20,6 @@ import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -25,6 +27,7 @@ import org.mockito.Mock;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.MockReset;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 import org.springframework.test.context.ActiveProfiles;
@@ -38,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
@@ -125,6 +129,9 @@ class UpgradeCcmFlowChainIntegrationTest {
     @MockBean
     private CredentialService credentialService;
 
+    @SpyBean
+    private FlowChains flowChains;
+
     @Mock
     private ResourceConnector<Object> resourcesApi;
 
@@ -148,28 +155,25 @@ class UpgradeCcmFlowChainIntegrationTest {
     }
 
     @Test
-    @Disabled
     public void testCcmUpgradeFlowChainWhenSuccessful() throws Exception {
         testFlow(ALL_CALLED_ONCE, true, true);
     }
 
     @Test
-    @Disabled
     public void testUpdateUserDataFailsInChain() throws Exception {
         doThrow(new BadRequestException()).when(userDataService).createUserData(STACK_ID);
         testFlow(CALLED_ONCE_TILL_GENERATE_USERDATA, true, false);
     }
 
     @Test
-    @Disabled
     public void testCcmUpgradeWhenRemoveMinaFailsInChain() throws Exception {
         doThrow(new BadRequestException()).when(upgradeCcmService).removeMina(STACK_ID);
         testFlow(CALLED_ONCE_TILL_REMOVE_MINA, false, false);
     }
 
     private void testFlow(int calledOnce, boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess) throws Exception {
-        FlowIdentifier flowIdentifier = triggerFlow();
-        letItFlow(flowIdentifier);
+        triggerFlow();
+        letItFlow();
 
         flowFinishedSuccessfully(ccmUpgradeSuccess ? 2 : 1);
         verifyServiceCalls(calledOnce);
@@ -225,15 +229,8 @@ class UpgradeCcmFlowChainIntegrationTest {
                         new UpgradeCcmFlowChainTriggerEvent(selector, "opi", STACK_ID)));
     }
 
-    private void letItFlow(FlowIdentifier flowIdentifier) {
-        int i = 0;
-        do {
-            i++;
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-            }
-        } while (flowRegister.get(flowIdentifier.getPollableId()) != null && i < 10);
+    private void letItFlow() {
+        verify(flowChains, timeout(50000).atLeastOnce()).removeFlowChain(anyString(), anyBoolean());
     }
 
     @Profile("integration-test")
