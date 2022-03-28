@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
@@ -128,7 +129,7 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
                 clusterBuilderService.configureManagementServices(stack.getId());
                 if (shouldReloadDatabaseConfig(blueprintProcessor)) {
                     //Update Hive service database configuration
-                    updateDatabaseConfiguration(datalakeStack, stack, HIVE_SERVICE, DatabaseType.HIVE);
+                    updateDatabaseConfiguration(datalakeStack.get(), stack, HIVE_SERVICE, DatabaseType.HIVE);
                 } else {
                     LOGGER.info("Database configuration is not refreshed");
                 }
@@ -170,9 +171,10 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
         }
     }
 
-    private void updateDatabaseConfiguration(Optional<Stack> datalakeStack, Stack dataHubStack, String service, DatabaseType databaseType) {
-        Cluster cluster = clusterService.getById(datalakeStack.get().getCluster().getId());
-        Optional<RDSConfig> rdsConfig = postgresConfigService.createRdsConfigIfNeeded(datalakeStack.get(), cluster, databaseType)
+    private void updateDatabaseConfiguration(Stack datalakeStack, Stack dataHubStack, String service, DatabaseType databaseType) {
+        Long clusterId = datalakeStack.getCluster().getId();
+        Cluster cluster = clusterService.findOneWithLists(clusterId).orElseThrow(NotFoundException.notFound("Cluster", clusterId));
+        Optional<RDSConfig> rdsConfig = postgresConfigService.createRdsConfigIfNeeded(datalakeStack, cluster, databaseType)
                 .stream().filter(config -> config.getType().toLowerCase().equals(databaseType.toString().toLowerCase()))
                 .findFirst();
         try {

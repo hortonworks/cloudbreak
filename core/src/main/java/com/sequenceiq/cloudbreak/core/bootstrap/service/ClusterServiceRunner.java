@@ -87,8 +87,8 @@ public class ClusterServiceRunner {
 
     public void redeployGatewayCertificate(Long stackId) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId())
-                .orElseThrow(NotFoundException.notFound("cluster", stack.getId()));
+        Long clusterId = stack.getCluster().getId();
+        Cluster cluster = clusterService.findOneWithLists(clusterId).orElseThrow(NotFoundException.notFound("Cluster", clusterId));
         hostRunner.redeployGatewayCertificate(stack, cluster);
     }
 
