@@ -4,12 +4,14 @@ import java.io.Serializable;
 
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "AttachedFreeIpaRequestAwsParameters")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AwsFreeIpaParameters implements Serializable {
 
     @Valid

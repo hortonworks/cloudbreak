@@ -2,12 +2,14 @@ package com.sequenceiq.environment.api.v1.environment.model.request.aws;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "UpdateAwsDiskEncryptionParametersV1Request")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class UpdateAwsDiskEncryptionParametersRequest implements Serializable {
 
     @ApiModelProperty(EnvironmentModelDescription.AWS_DISK_ENCRYPTION_PARAMETERS)

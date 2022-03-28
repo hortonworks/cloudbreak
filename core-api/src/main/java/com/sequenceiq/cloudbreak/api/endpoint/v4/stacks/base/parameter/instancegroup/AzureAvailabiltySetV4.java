@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AzureAvailabiltySetV4 implements JsonEntity {
 
     @ApiModelProperty

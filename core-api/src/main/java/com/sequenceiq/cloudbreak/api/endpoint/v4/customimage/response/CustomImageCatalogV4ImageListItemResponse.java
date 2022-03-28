@@ -2,9 +2,11 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.response;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.model.JsonEntity;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CustomImageCatalogV4ImageListItemResponse implements JsonEntity {
 
     @JsonProperty

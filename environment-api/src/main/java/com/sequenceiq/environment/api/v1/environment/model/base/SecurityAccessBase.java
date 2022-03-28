@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.validator.cidr.ValidCidrList;
@@ -13,6 +14,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @MutuallyExclusiveNotNull(fieldGroups = {"securityGroupIdForKnox,defaultSecurityGroupId", "cidr"},
         message = "Please set either only the CIDR field or both security group id fields")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class SecurityAccessBase implements Serializable {
 
     @Size(min = 1, max = 4000, message = "The length of the security group ID can be minimum 1 and maximum 4000 characters.")

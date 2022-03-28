@@ -2,6 +2,7 @@ package com.sequenceiq.environment.api.v1.environment.model.request;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
@@ -9,6 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "EnvironmentLoadBalancerUpdateRequest")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentLoadBalancerUpdateRequest {
 
     @ApiModelProperty(EnvironmentModelDescription.PUBLIC_ENDPOINT_ACCESS_GATEWAY)

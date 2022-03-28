@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RecipeModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WorkspaceResourceV4Response implements JsonEntity {
 
     @ApiModelProperty(RecipeModelDescription.WORKSPACE_ID)

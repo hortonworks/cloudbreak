@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.YarnComponent;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CreateApplicationRequest implements JsonEntity {
 
     private String name;

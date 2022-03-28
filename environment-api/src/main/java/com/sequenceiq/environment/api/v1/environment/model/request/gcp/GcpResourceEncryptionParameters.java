@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import javax.validation.constraints.Pattern;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
@@ -11,6 +12,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "GcpResourceEncryptionV1Parameters")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GcpResourceEncryptionParameters implements Serializable {
 
     @VisibleForTesting

@@ -6,6 +6,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.AwsInstanceGroupV4Parameters;
@@ -21,6 +22,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InstanceGroupV4Base extends ProviderParametersBase implements JsonEntity {
 
     @Min(value = 0, message = "The node count has to be greater or equals than 0")

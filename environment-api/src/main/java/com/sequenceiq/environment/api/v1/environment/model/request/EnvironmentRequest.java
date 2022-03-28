@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.validation.ValidEnvironmentName;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
@@ -27,6 +28,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "EnvironmentV1Request")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentRequest extends EnvironmentBaseRequest implements CredentialAwareEnvRequest, TaggableRequest {
 
     static final String LENGHT_INVALID_MSG = "The length of the environments's name has to be in range of 5 to 28";

@@ -3,6 +3,7 @@ package com.sequenceiq.distrox.api.v1.distrox.model;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
@@ -10,6 +11,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DistroXImageChangeV1Request implements JsonEntity {
 
     @ApiModelProperty(value = StackModelDescription.IMAGE_ID, required = true)

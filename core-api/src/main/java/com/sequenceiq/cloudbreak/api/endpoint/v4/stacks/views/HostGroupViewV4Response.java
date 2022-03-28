@@ -8,10 +8,12 @@ import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.NAME;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HostGroupViewV4Response implements JsonEntity {
     @ApiModelProperty(ID)
     private Long id;
