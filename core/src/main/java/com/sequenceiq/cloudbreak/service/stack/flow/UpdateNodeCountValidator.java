@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDownscaleValidatorService;
+import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 
 @Component
 public class UpdateNodeCountValidator {
@@ -57,6 +58,9 @@ public class UpdateNodeCountValidator {
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Inject
+    private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
     public void validataHostMetadataStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         if (upscaleEvent(instanceGroupAdjustmentJson.getScalingAdjustment())) {
@@ -87,8 +91,8 @@ public class UpdateNodeCountValidator {
         List<InstanceMetaData> instanceMetaDataAsList = stack.getInstanceMetaDataAsList();
         List<InstanceMetaData> unhealthyCM = instanceMetaDataAsList.stream()
                 .filter(instanceMetaData -> (instanceMetaData.getInstanceMetadataType().equals(InstanceMetadataType.GATEWAY) ||
-                                                instanceMetaData.getInstanceMetadataType().equals(InstanceMetadataType.GATEWAY_PRIMARY))
-                                                && !InstanceStatus.SERVICES_HEALTHY.equals(instanceMetaData.getInstanceStatus()))
+                        instanceMetaData.getInstanceMetadataType().equals(InstanceMetadataType.GATEWAY_PRIMARY))
+                        && !InstanceStatus.SERVICES_HEALTHY.equals(instanceMetaData.getInstanceStatus()))
                 .collect(Collectors.toList());
         if (!unhealthyCM.isEmpty()) {
             String notHealthyInstances = unhealthyCM.stream()
@@ -99,11 +103,28 @@ public class UpdateNodeCountValidator {
         }
     }
 
-    public void validateStackStatus(Stack stack) {
-        if (!stack.isAvailable() && !stack.hasNodeFailure()) {
-            throw new BadRequestException(format("Data Hub '%s' is currently in '%s' state. Node count can only be updated if it's running.",
-                    stack.getName(), stack.getStatus()));
+    public void validateStackStatus(Stack stack, boolean upscale) {
+        if (upscale &&
+                !(stack.isAvailable() || (stack.hasNodeFailure() && targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(stack)))) {
+            throwBadRequest(stack);
+        } else if (!upscale && !stack.isAvailable()) {
+            throwBadRequest(stack);
         }
+    }
+
+    public void validateClusterStatus(Stack stack, boolean upscale) {
+        Cluster cluster = stack.getCluster();
+        if (upscale && cluster != null && !(stack.isAvailable()
+                || (stack.hasNodeFailure() && targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(stack)))) {
+            throwBadRequest(stack);
+        } else if (!upscale && cluster != null && !stack.isAvailable()) {
+            throwBadRequest(stack);
+        }
+    }
+
+    private void throwBadRequest(Stack stack) {
+        throw new BadRequestException(format("Data Hub '%s' is currently in '%s' state. Node count can only be updated if it's running.",
+                stack.getName(), stack.getStatus()));
     }
 
     public void validateStackStatusForStartHostGroup(Stack stack) {
@@ -137,14 +158,6 @@ public class UpdateNodeCountValidator {
                     instanceGroup,
                     scalingAdjustment,
                     instanceGroupService.findNotTerminatedByStackId(stack.getId()));
-        }
-    }
-
-    public void validateClusterStatus(Stack stack) {
-        Cluster cluster = stack.getCluster();
-        if (cluster != null && !stack.isAvailable() && !stack.hasNodeFailure()) {
-            throw new BadRequestException(format("Data Hub '%s' is currently in '%s' state. Node count can only be updated if it's available.",
-                    cluster.getName(), stack.getStatus()));
         }
     }
 
