@@ -147,6 +147,10 @@
                  <name>{{ aclsauthz_prefix ~ "kafka_connect.acl" }}</name>
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
+            <param>
+                 <name>{{ aclsauthz_prefix ~ "opdb_agent.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
         </provider>
 {%- endif %}
 
@@ -271,6 +275,12 @@
             {% if 'KAFKA_CONNECT' in exposed and 'KAFKA_CONNECT' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>KAFKA_CONNECT</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'OPDB_AGENT' in exposed and 'OPDB_AGENT' in salt['pillar.get']('gateway:location') -%}
+            <param>
+                <name>OPDB_AGENT</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
             </param>
             {%- endif %}
@@ -588,6 +598,17 @@
         <role>SSB-SSE-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_ENGINE'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-SSE-API'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'OPDB_AGENT' in salt['pillar.get']('gateway:location') -%}
+    {% if 'OPDB_AGENT' in exposed -%}
+    <service>
+        <role>OPDB_AGENT</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['OPDB_AGENT'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['OPDB_AGENT'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
