@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialViewResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 
@@ -42,7 +44,9 @@ public class EnvironmentServiceDecorator {
                         .filter(x -> x.getCrn().equals(stackViewResponse.getEnvironmentCrn()))
                         .findFirst();
                 if (first.isPresent()) {
-                    stackViewResponse.setCredentialName(first.get().getCredential().getName());
+                    CredentialViewResponse credential = first.get().getCredential();
+                    stackViewResponse.setCredentialName(credential.getName());
+                    stackViewResponse.setGovCloud(credential.getGovCloud() == null ? false : credential.getGovCloud());
                     stackViewResponse.setEnvironmentName(first.get().getName());
                 }
             }
@@ -54,7 +58,9 @@ public class EnvironmentServiceDecorator {
         DetailedEnvironmentResponse detailedEnvironmentResponse) {
         for (StackViewV4Response stackViewResponse : stackViewResponses) {
             if (detailedEnvironmentResponse != null) {
-                stackViewResponse.setCredentialName(detailedEnvironmentResponse.getCredential().getName());
+                CredentialResponse credential = detailedEnvironmentResponse.getCredential();
+                stackViewResponse.setGovCloud(credential.getGovCloud() == null ? false : credential.getGovCloud());
+                stackViewResponse.setCredentialName(credential.getName());
                 stackViewResponse.setEnvironmentName(detailedEnvironmentResponse.getName());
             }
         }
@@ -64,8 +70,10 @@ public class EnvironmentServiceDecorator {
         try {
             DetailedEnvironmentResponse byCrn = environmentClientService.getByCrn(stackResponse.getEnvironmentCrn());
             stackResponse.setEnvironmentName(byCrn.getName());
-            stackResponse.setCredentialName(byCrn.getCredential().getName());
-            stackResponse.setCredentialCrn(byCrn.getCredential().getCrn());
+            CredentialResponse credential = byCrn.getCredential();
+            stackResponse.setGovCloud(credential.getGovCloud() == null ? false : credential.getGovCloud());
+            stackResponse.setCredentialName(credential.getName());
+            stackResponse.setCredentialCrn(credential.getCrn());
         } catch (Exception e) {
             LOGGER.warn("Environment deleted which had crn: {}.", stackResponse.getEnvironmentCrn());
         }

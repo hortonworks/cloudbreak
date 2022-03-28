@@ -58,6 +58,8 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     private String credentialCrn;
 
+    private boolean govCloud;
+
     @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status status;
 
@@ -402,12 +404,21 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.loadBalancers = loadBalancers;
     }
 
+    public boolean isGovCloud() {
+        return govCloud;
+    }
+
+    public void setGovCloud(boolean govCloud) {
+        this.govCloud = govCloud;
+    }
+
     @Override
     public String toString() {
         return "StackV4Response{ " +
                 super.toString() +
                 " id=" + id +
                 ", crn='" + crn + '\'' +
+                ", govCloud='" + govCloud + '\'' +
                 ", environmentCrn='" + environmentCrn + '\'' +
                 ", environmentName='" + environmentName + '\'' +
                 ", credentialName='" + credentialName + '\'' +
