@@ -4,12 +4,14 @@ import java.io.Serializable;
 
 import javax.validation.constraints.Pattern;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "S3GuardV1Parameters")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class S3GuardRequestParameters implements Serializable {
 
     @Pattern(regexp = "^[a-zA-Z0-9\\.\\-_]{3,255}$",

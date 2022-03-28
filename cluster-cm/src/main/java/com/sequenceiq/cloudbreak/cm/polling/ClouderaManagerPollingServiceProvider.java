@@ -10,12 +10,13 @@ import javax.inject.Inject;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
@@ -27,8 +28,8 @@ import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandC
 import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandListCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerBatchCommandsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDefaultListenerTask;
-import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostStatusChecker;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostHealthyStatusChecker;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostStatusChecker;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelActivationListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelDeletedListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelStatusListenerTask;
@@ -64,9 +65,6 @@ public class ClouderaManagerPollingServiceProvider {
 
     private static final long POLL_FOR_TWO_HOURS = TimeUnit.HOURS.toSeconds(2);
 
-    @Value("${poller.resilient.enabled:false}")
-    private boolean resilientPollerEnabled;
-
     @Inject
     private ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
@@ -78,6 +76,9 @@ public class ClouderaManagerPollingServiceProvider {
 
     @Inject
     private PollingService<ClouderaManagerCommandListPollerObject> clouderaManagerCommandListPollerObjectPollingService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Inject
     private ClusterEventService clusterEventService;
@@ -97,15 +98,19 @@ public class ClouderaManagerPollingServiceProvider {
 
     public ExtendedPollingResult startPollingCmHostStatus(Stack stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager hosts to connect. [Server address: {}]", stack.getClusterManagerIp());
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         return pollApiWithTimeListener(stack, apiClient, POLL_FOR_ONE_HOUR,
-                new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, resilientPollerEnabled));
+                new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService,
+                        entitlementService.targetedUpscaleSupported(accountId)));
     }
 
     public ExtendedPollingResult startPollingCmHostStatus(Stack stack, ApiClient apiClient, List<String> targets) {
         LOGGER.debug("Waiting for Cloudera Manager hosts to connect. [Server address: {}, target hosts: {}]",
                 stack.getClusterManagerIp(), Joiner.on(",").join(CollectionUtils.emptyIfNull(targets)));
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         return pollApiWithTimeListener(stack, apiClient, POLL_FOR_ONE_HOUR,
-                new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, targets, resilientPollerEnabled));
+                new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, targets,
+                        entitlementService.targetedUpscaleSupported(accountId)));
     }
 
     public ExtendedPollingResult startPollingCmTemplateInstallation(Stack stack, ApiClient apiClient, BigDecimal commandId) {

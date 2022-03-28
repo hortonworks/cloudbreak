@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -12,6 +13,7 @@ import com.sequenceiq.common.model.JsonEntity;
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonInclude(Include.NON_NULL)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StackViewV4Response implements JsonEntity {
 
     @ApiModelProperty(StackModelDescription.CRN)
@@ -47,6 +49,8 @@ public class StackViewV4Response implements JsonEntity {
     private String environmentName;
 
     private String credentialName;
+
+    private boolean govCloud;
 
     @ApiModelProperty(StackModelDescription.CLOUD_PLATFORM)
     private String cloudPlatform;
@@ -198,11 +202,20 @@ public class StackViewV4Response implements JsonEntity {
         this.upgradeable = upgradeable;
     }
 
+    public boolean isGovCloud() {
+        return govCloud;
+    }
+
+    public void setGovCloud(boolean govCloud) {
+        this.govCloud = govCloud;
+    }
+
     @Override
     public String toString() {
         return "StackViewV4Response{" +
                 "crn='" + crn + '\'' +
                 ", name='" + name + '\'' +
+                ", govCloud='" + govCloud + '\'' +
                 ", hdpVersion='" + hdpVersion + '\'' +
                 ", cluster=" + cluster +
                 ", status=" + status +

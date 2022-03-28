@@ -2,12 +2,14 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import java.util.Collection;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.collect.Sets;
 import com.sequenceiq.environment.api.GeneralCollectionV1Response;
 
 import io.swagger.annotations.ApiModel;
 
 @ApiModel("PolicyValidationErrorResponses")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PolicyValidationErrorResponses extends GeneralCollectionV1Response<PolicyValidationErrorResponse> {
 
     public PolicyValidationErrorResponses(Collection<PolicyValidationErrorResponse> responses) {

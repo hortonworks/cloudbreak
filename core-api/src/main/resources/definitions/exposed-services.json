@@ -773,6 +773,21 @@
       "visibleForDatahub": true,
       "withoutProxyPath": true,
       "minVersion": "7.2.9"
+    },
+    {
+      "name": "OPDB_AGENT",
+      "displayName": "OpDB Agent",
+      "serviceName": "OPDB_AGENT",
+      "knoxService": "OPDB-AGENT",
+      "knoxUrl": "/opdb-agent/",
+      "ssoSupported": true,
+      "port": 8181,
+      "tlsPort": 8181,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": false,
+      "visibleForDatahub": true,
+      "minVersion": "7.2.15"
     }
   ]
 }

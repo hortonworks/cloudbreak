@@ -4,23 +4,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -55,81 +60,154 @@ class ClusterUpscaleServiceTest {
     @InjectMocks
     private ClusterUpscaleService underTest;
 
-    @Test
-    public void testInstallServicesOnNewHostWithRestart() throws CloudbreakException {
-        Stack stack = new Stack();
+    @Mock
+    private ClusterApi clusterApi;
+
+    @Mock
+    private ClusterStatusService clusterStatusService;
+
+    @Mock
+    private ClusterCommissionService clusterCommissionService;
+
+    private InOrder inOrder;
+
+    private Stack stack;
+
+    @BeforeEach
+    public void setUp() {
+        stack = new Stack();
         stack.setId(1L);
         Cluster cluster = new Cluster();
         cluster.setId(2L);
         stack.setCluster(cluster);
         when(stackService.getByIdWithClusterInTransaction(eq(1L))).thenReturn(stack);
-        ClusterApi clusterApi = mock(ClusterApi.class);
-        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
-        HostGroup hostGroup = new HostGroup();
-        InstanceGroup instanceGroup = new InstanceGroup();
-        InstanceMetaData im1 = new InstanceMetaData();
-        im1.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
-        InstanceMetaData im2 = new InstanceMetaData();
-        im2.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
-        InstanceMetaData im3 = new InstanceMetaData();
-        im3.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
-        instanceGroup.setInstanceMetaData(Set.of(im1, im2, im3));
-        hostGroup.setInstanceGroup(instanceGroup);
-        when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
-        when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Collections.emptyMap(), Collections.emptyMap()));
-
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true);
-
-        verify(clusterApi, times(1)).upscaleCluster(any());
-        verify(clusterApi, times(1)).restartAll(false);
-        verify(parcelService).removeUnusedParcelComponents(stack);
+        inOrder = Mockito.inOrder(parcelService, recipeEngine, clusterStatusService, clusterCommissionService, clusterApi);
     }
 
     @Test
-    public void testInstallServicesOnNewHostWithRestartButThereIsAnUnhealthyNode() throws CloudbreakException {
-        Stack stack = new Stack();
-        stack.setId(1L);
-        Cluster cluster = new Cluster();
-        cluster.setId(2L);
-        stack.setCluster(cluster);
-        when(stackService.getByIdWithClusterInTransaction(eq(1L))).thenReturn(stack);
-        ClusterApi clusterApi = mock(ClusterApi.class);
-        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
-        HostGroup hostGroup = new HostGroup();
-        InstanceGroup instanceGroup = new InstanceGroup();
-        InstanceMetaData im1 = new InstanceMetaData();
-        im1.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
-        InstanceMetaData im2 = new InstanceMetaData();
-        im2.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
-        InstanceMetaData im3 = new InstanceMetaData();
-        im3.setInstanceStatus(InstanceStatus.DELETED_BY_PROVIDER);
-        stack.setInstanceGroups(Set.of(instanceGroup));
-        instanceGroup.setInstanceMetaData(Set.of(im1, im2, im3));
-        hostGroup.setInstanceGroup(instanceGroup);
+    public void testInstallServicesWithRepairAndServiceRestart() throws CloudbreakException {
+        HostGroup hostGroup = newHostGroup(
+                "master",
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.SERVICES_HEALTHY));
         when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
-        when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Collections.emptyMap(), Collections.emptyMap()));
+        when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
+        when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true);
+        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
+        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(List.of());
 
-        verify(clusterApi, times(1)).upscaleCluster(any());
-        verify(clusterApi, times(0)).restartAll(false);
-        verify(parcelService).removeUnusedParcelComponents(stack);
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")));
+
+        inOrder.verify(parcelService).removeUnusedParcelComponents(stack);
+        inOrder.verify(recipeEngine, times(1)).executePostAmbariStartRecipes(stack, Set.of(hostGroup));
+        inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
+        inOrder.verify(clusterStatusService, times(1)).getDecommissionedHostsFromCM();
+        inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
+        inOrder.verify(clusterApi, times(1)).restartAll(false);
+    }
+
+    @Test
+    public void testInstallServicesWithRepairAndServiceRestartWhenOneHostIsDecommissioned() throws CloudbreakException {
+        HostGroup hostGroup = newHostGroup(
+                "master",
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.SERVICES_HEALTHY));
+        when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
+        when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
+        when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
+
+        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
+        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        when(clusterApi.clusterCommissionService()).thenReturn(clusterCommissionService);
+        when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(List.of("master-2"));
+
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")));
+
+        inOrder.verify(parcelService).removeUnusedParcelComponents(stack);
+        inOrder.verify(recipeEngine, times(1)).executePostAmbariStartRecipes(stack, Set.of(hostGroup));
+        inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
+        inOrder.verify(clusterStatusService, times(1)).getDecommissionedHostsFromCM();
+        inOrder.verify(clusterCommissionService, times(1)).recommissionHosts(List.of("master-2"));
+        inOrder.verify(clusterApi, times(1)).restartAll(false);
+    }
+
+    @Test
+    public void testInstallServicesWithRepairAndServiceRestartWhenOneHostIsUnhealthy() throws CloudbreakException {
+        HostGroup hostGroup = newHostGroup(
+                "master",
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.DELETED_BY_PROVIDER));
+        stack.setInstanceGroups(Set.of(hostGroup.getInstanceGroup()));
+        when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
+        when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
+        when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
+
+        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
+        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(List.of());
+
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")));
+
+        inOrder.verify(parcelService).removeUnusedParcelComponents(stack);
+        inOrder.verify(recipeEngine, times(1)).executePostAmbariStartRecipes(stack, Set.of(hostGroup));
+        inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
+        inOrder.verify(clusterApi, times(0)).restartAll(false);
+        inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
+    }
+
+    @Test
+    public void testInstallServicesWithoutRepairAndServiceRestart() throws CloudbreakException {
+        HostGroup hostGroup = newHostGroup(
+                "master",
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.SERVICES_HEALTHY),
+                newInstance(InstanceStatus.DELETED_BY_PROVIDER));
+        stack.setInstanceGroups(Set.of(hostGroup.getInstanceGroup()));
+        when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
+        when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
+        when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
+
+        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
+
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), false, false, Map.of("master", Set.of("master-1", "master-2", "master-3")));
+
+        inOrder.verify(parcelService).removeUnusedParcelComponents(stack);
+        inOrder.verify(recipeEngine, times(1)).executePostAmbariStartRecipes(stack, Set.of(hostGroup));
+        inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
+        inOrder.verify(clusterApi, times(0)).restartAll(false);
+        inOrder.verify(clusterStatusService, times(0)).getDecommissionedHostsFromCM();
+        inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
     }
 
     @Test
     public void testInstallServicesShouldThrowExceptionWhenFailedToRemoveUnusedParcels() throws CloudbreakException {
-        Stack stack = new Stack();
-        stack.setId(1L);
-        Cluster cluster = new Cluster();
-        cluster.setId(2L);
-        stack.setCluster(cluster);
-        when(stackService.getByIdWithClusterInTransaction(eq(1L))).thenReturn(stack);
-        when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Collections.emptyMap(), Map.of("parcel", "parcel")));
+        when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of("parcel", "parcel")));
 
-        CloudbreakException exception = assertThrows(CloudbreakException.class, () -> underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true));
+        CloudbreakException exception = assertThrows(CloudbreakException.class,
+                () -> underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, new HashMap<>()));
 
         assertEquals("Failed to remove the following parcels: {parcel=[parcel]}", exception.getMessage());
         verify(parcelService).removeUnusedParcelComponents(stack);
+    }
+
+    private HostGroup newHostGroup(String name, InstanceMetaData... instances) {
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName(name);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setInstanceMetaData(Set.of(instances));
+        hostGroup.setInstanceGroup(instanceGroup);
+        return hostGroup;
+    }
+
+    private InstanceMetaData newInstance(InstanceStatus status) {
+        InstanceMetaData instance = new InstanceMetaData();
+        instance.setInstanceStatus(status);
+        return instance;
     }
 
 }

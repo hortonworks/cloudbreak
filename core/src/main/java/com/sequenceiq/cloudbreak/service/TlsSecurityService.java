@@ -167,7 +167,7 @@ public class TlsSecurityService {
     public HttpClientConfig buildTLSClientConfig(Long stackId, String cloudPlatform, String apiAddress, InstanceMetaData gateway) {
         Optional<SecurityConfig> securityConfig = securityConfigService.findOneByStackId(stackId);
         if (securityConfig.isEmpty()) {
-            return decorateWithCLusterProxyConfig(stackId, cloudPlatform, new HttpClientConfig(apiAddress));
+            return decorateWithClusterProxyConfig(stackId, cloudPlatform, new HttpClientConfig(apiAddress));
         } else {
             LOGGER.info("Security config is not empty");
             String serverCert = gateway == null ? null : gateway.getServerCert() == null ? null : new String(decodeBase64(gateway.getServerCert()));
@@ -175,11 +175,11 @@ public class TlsSecurityService {
             String clientKeyB64 = securityConfig.get().getClientKey();
             HttpClientConfig httpClientConfig = new HttpClientConfig(apiAddress, serverCert,
                     new String(decodeBase64(clientCertB64)), new String(decodeBase64(clientKeyB64)));
-            return decorateWithCLusterProxyConfig(stackId, cloudPlatform, httpClientConfig);
+            return decorateWithClusterProxyConfig(stackId, cloudPlatform, httpClientConfig);
         }
     }
 
-    private HttpClientConfig decorateWithCLusterProxyConfig(Long stackId, String cloudPlatform, HttpClientConfig httpClientConfig) {
+    private HttpClientConfig decorateWithClusterProxyConfig(Long stackId, String cloudPlatform, HttpClientConfig httpClientConfig) {
         LOGGER.info("Decorate with cluster proxy config");
         if (clusterProxyEnablementService.isClusterProxyApplicable(cloudPlatform)) {
             LOGGER.info("Cluster proxy is applicable");

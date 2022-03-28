@@ -53,6 +53,7 @@ public class EnvironmentServiceDecoratorTest {
         verify(environmentClientService, times(1)).getByCrn(any());
         assertEquals(stackViewResponses.iterator().next().getEnvironmentName(), "env-name");
         assertEquals(stackViewResponses.iterator().next().getCredentialName(), "credential-name");
+        assertEquals(stackViewResponses.iterator().next().isGovCloud(), false);
     }
 
     @Test
@@ -76,6 +77,7 @@ public class EnvironmentServiceDecoratorTest {
         verify(environmentClientService, times(1)).getByName(any());
         assertEquals(stackViewResponses.iterator().next().getEnvironmentName(), "env-name");
         assertEquals(stackViewResponses.iterator().next().getCredentialName(), "credential-name");
+        assertEquals(stackViewResponses.iterator().next().isGovCloud(), false);
     }
 
     @Test
@@ -102,6 +104,7 @@ public class EnvironmentServiceDecoratorTest {
         verify(environmentClientService, times(1)).list();
         assertEquals(stackViewResponses.iterator().next().getEnvironmentName(), "env-name");
         assertEquals(stackViewResponses.iterator().next().getCredentialName(), "credential-name");
+        assertEquals(stackViewResponses.iterator().next().isGovCloud(), false);
     }
 
 }

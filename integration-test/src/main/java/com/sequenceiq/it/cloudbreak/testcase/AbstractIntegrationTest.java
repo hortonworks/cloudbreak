@@ -175,6 +175,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void createDefaultDatahub(TestContext testContext) {
+        createEnvironmentWithFreeIpaAndDatalake(testContext);
         initiateDefaultDatahubCreation(testContext);
         waitForDefaultDatahubCreation(testContext);
     }

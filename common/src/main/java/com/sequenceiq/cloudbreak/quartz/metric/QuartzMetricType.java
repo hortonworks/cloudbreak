@@ -7,10 +7,13 @@ public enum QuartzMetricType implements Metric {
     JOB_FINISHED("quartz.job.finished"),
     JOB_FAILED("quartz.job.failed"),
     JOB_COUNT("quartz.job.count"),
+    JOB_CREATED_COUNT("quartz.job.created.count"),
     TRIGGER_FIRED("quartz.trigger.fired"),
     TRIGGER_MISFIRED("quartz.trigger.misfired"),
     TRIGGER_COMPLETED("quartz.trigger.completed"),
-    TRIGGER_DELAYED("quartz.trigger.delayed");
+    TRIGGER_DELAYED("quartz.trigger.delayed"),
+    TRIGGER_SCHEDULED_COUNT("quartz.trigger.scheduled.count"),
+    SCHEDULER_ERROR("quartz.scheduler.error");
 
     private final String metricName;
 

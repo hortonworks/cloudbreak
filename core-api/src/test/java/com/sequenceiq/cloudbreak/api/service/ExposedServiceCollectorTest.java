@@ -33,6 +33,8 @@ class ExposedServiceCollectorTest {
 
     private static final Optional<String> CDH_7_2_14 = Optional.of("7.2.14");
 
+    private static final Optional<String> CDH_7_2_15 = Optional.of("7.2.15");
+
     @InjectMocks
     private ExposedServiceCollector underTest;
 
@@ -114,6 +116,7 @@ class ExposedServiceCollectorTest {
                 "NAMENODE",
                 "NIFI_NODE",
                 "NIFI_REGISTRY_SERVER",
+                "OPDB_AGENT",
                 "OOZIE_SERVER",
                 "PHOENIX_QUERY_SERVER",
                 "DATA_DISCOVERY_SERVICE_AGENT",
@@ -168,6 +171,7 @@ class ExposedServiceCollectorTest {
                 "NIFI-REGISTRY",
                 "NIFI_REST",
                 "NIFI-REGISTRY-REST",
+                "OPDB-AGENT",
                 "OOZIE",
                 "DATA-DISCOVERY-SERVICE-API",
                 "PROFILER-ADMIN-API",
@@ -194,7 +198,7 @@ class ExposedServiceCollectorTest {
     }
 
     @Test
-    void getKnoxExposedServicesNamesWiht7211() {
+    void getKnoxExposedServicesNamesWith7211() {
         underTest.init();
         assertThat(underTest.getAllKnoxExposed(Optional.of("7.2.11"))).containsExactlyInAnyOrder(
                 "ATLAS",
@@ -250,7 +254,7 @@ class ExposedServiceCollectorTest {
     }
 
     @Test
-    void getKnoxExposedServicesNamesWiht7214() {
+    void getKnoxExposedServicesNamesWith7214() {
         underTest.init();
         assertThat(underTest.getAllKnoxExposed(Optional.of("7.2.14"))).containsExactlyInAnyOrder(
                 "ATLAS",
@@ -305,6 +309,65 @@ class ExposedServiceCollectorTest {
                 "KNOX_TOKEN_INTEGRATOR",
                 "KAFKA_CONNECT",
                 "SSB-SSE-API");
+    }
+
+    @Test
+    void getKnoxExposedServicesNamesWith7215() {
+        underTest.init();
+        assertThat(underTest.getAllKnoxExposed(Optional.of("7.2.15"))).containsExactlyInAnyOrder(
+            "ATLAS",
+            "ATLAS_API",
+            "AVATICA",
+            "CM-API",
+            "CM-UI",
+            "CRUISE-CONTROL",
+            "DAS",
+            "FLINK",
+            "HBASEJARS",
+            "HBASEUI",
+            "HDFSUI",
+            "HIVE",
+            "HUE",
+            "IMPALA",
+            "IMPALA_DEBUG_UI",
+            "JOBHISTORYUI",
+            "JOBTRACKER",
+            "RESOURCEMANAGERAPI",
+            "KUDUUI",
+            "LIVYSERVER1",
+            "LIVYSERVER_API",
+            "LIVY_FOR_SPARK3",
+            "LIVY_FOR_SPARK3_API",
+            "NAMENODE",
+            "NIFI",
+            "NIFI-REGISTRY",
+            "NIFI_REST",
+            "NIFI-REGISTRY-REST",
+            "OOZIE",
+            "OPDB-AGENT",
+            "DATA-DISCOVERY-SERVICE-API",
+            "PROFILER-ADMIN-API",
+            "PROFILER-METRICS-API",
+            "PROFILER-SCHEDULER-API",
+            "RANGER",
+            "SCHEMA-REGISTRY",
+            "SCHEMA-REGISTRY-API",
+            "SMM-API",
+            "SMM-UI",
+            "SOLR",
+            "SPARKHISTORYUI",
+            "SPARK3HISTORYUI",
+            "SSB-MVE-API",
+            "SSB-SSC-UI",
+            "SSB-SSC-WS",
+            "WEBHBASE",
+            "WEBHDFS",
+            "YARNUIV2",
+            "ZEPPELIN",
+            "QUEUEMANAGER_WEBAPP",
+            "KNOX_TOKEN_INTEGRATOR",
+            "KAFKA_CONNECT",
+            "SSB-SSE-API");
     }
 
     @Test
@@ -416,7 +479,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getNonTLSServicePorts() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_14, false)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_15, false)).containsOnly(
                 Map.entry("ATLAS", 21000),
                 Map.entry("ATLAS_API", 21000),
                 Map.entry("AVATICA", 8765),
@@ -447,6 +510,7 @@ class ExposedServiceCollectorTest {
                 Map.entry("NIFI_REST", 8080),
                 Map.entry("NIFI-REGISTRY-REST", 18080),
                 Map.entry("OOZIE", 11000),
+                Map.entry("OPDB-AGENT", 8181),
                 Map.entry("DATA-DISCOVERY-SERVICE-API", 21600),
                 Map.entry("PROFILER-ADMIN-API", 21700),
                 Map.entry("PROFILER-METRICS-API", 21800),
@@ -579,7 +643,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePorts() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_14, true)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_15, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
@@ -610,6 +674,7 @@ class ExposedServiceCollectorTest {
                 Map.entry("NIFI_REST", 8443),
                 Map.entry("NIFI-REGISTRY-REST", 18433),
                 Map.entry("OOZIE", 11443),
+                Map.entry("OPDB-AGENT", 8181),
                 Map.entry("DATA-DISCOVERY-SERVICE-API", 21600),
                 Map.entry("PROFILER-ADMIN-API", 21700),
                 Map.entry("PROFILER-METRICS-API", 21800),

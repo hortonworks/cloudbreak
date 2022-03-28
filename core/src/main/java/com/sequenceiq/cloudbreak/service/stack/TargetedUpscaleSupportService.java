@@ -48,6 +48,16 @@ public class TargetedUpscaleSupportService {
         }
     }
 
+    public boolean isTargetedUpscaleAndUnboundEliminationSupported(Stack stack) {
+        try {
+            String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+            return entitlementService.targetedUpscaleSupported(accountId) && isUnboundEliminationSupported(accountId);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during checking if targeted upscale supported, thus assuming it is not enabled, cause: ", e);
+            return false;
+        }
+    }
+
     private boolean isUnboundClusterConfigRemoved(Stack stack) {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         Set<Node> reachableNodes = stackUtil.collectReachableNodes(stack);

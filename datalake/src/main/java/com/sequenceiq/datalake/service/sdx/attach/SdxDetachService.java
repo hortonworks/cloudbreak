@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.job.SdxClusterJobAdapter;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 
@@ -39,26 +41,31 @@ public class SdxDetachService {
     @Inject
     private SdxAttachDetachUtils sdxAttachDetachUtils;
 
+    @Inject
+    private StatusCheckerJobService jobService;
+
     /**
      * Detaches the internal SDX cluster by assigning it a new "detached" name and CRN.
      */
-    public SdxCluster detachCluster(Long sdxID) {
+    public SdxCluster detachCluster(Long sdxID, boolean detachDuringRecovery) {
         LOGGER.info("Started detaching SDX cluster with ID: {}.", sdxID);
         sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Datalake detach in progress.", sdxID);
 
         SdxCluster cluster = sdxService.getById(sdxID);
-
         String originalName = cluster.getClusterName();
         sdxAttachDetachUtils.updateClusterNameAndCrn(
                 cluster, sdxDetachNameGenerator.generateDetachedClusterName(originalName),
                 regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.DATALAKE, cluster.getAccountId())
         );
-        cluster.setDetached(true);
-        SdxCluster saved = sdxService.save(cluster);
+
+        if (!detachDuringRecovery) {
+            cluster.setDetached(true);
+        }
+        cluster = sdxService.save(cluster);
 
         LOGGER.info("Finished detaching SDX cluster with ID: {}. Modified name from {} to {} and crn from {} to {}.",
-                saved.getId(), originalName, saved.getClusterName(), saved.getOriginalCrn(), saved.getCrn());
-        return saved;
+                cluster.getId(), originalName, cluster.getClusterName(), cluster.getOriginalCrn(), cluster.getCrn());
+        return cluster;
     }
 
     /**
@@ -69,7 +76,8 @@ public class SdxDetachService {
      */
     public void detachStack(SdxCluster cluster, String originalName) {
         LOGGER.info("Started detaching stack of SDX cluster with ID: {}.", cluster.getId());
-        sdxAttachDetachUtils.updateStack(cluster, originalName);
+        sdxAttachDetachUtils.updateStack(originalName, cluster.getClusterName(), cluster.getCrn());
+        jobService.schedule(cluster.getId(), SdxClusterJobAdapter.class);
         LOGGER.info("Finished detaching stack of SDX cluster with ID: {}.", cluster.getId());
     }
 

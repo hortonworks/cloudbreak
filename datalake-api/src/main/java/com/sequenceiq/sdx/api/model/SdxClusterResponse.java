@@ -2,6 +2,7 @@ package com.sequenceiq.sdx.api.model;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
@@ -9,6 +10,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SdxClusterResponse {
 
     private String crn;

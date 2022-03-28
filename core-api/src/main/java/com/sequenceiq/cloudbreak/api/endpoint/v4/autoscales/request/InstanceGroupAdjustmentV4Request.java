@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -13,6 +14,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InstanceGroupAdjustmentV4Request implements JsonEntity {
 
     public static final long HUNDRED_PERCENT = 100L;

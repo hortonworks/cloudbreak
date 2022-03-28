@@ -26,6 +26,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
+import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -60,6 +61,9 @@ public class ResizeRecoveryServiceTest {
     @Mock
     private FlowChainLogService flowChainLogService;
 
+    @Mock
+    private SdxClusterRepository sdxClusterRepository;
+
     @InjectMocks
     private ResizeRecoveryService underTest;
 
@@ -72,7 +76,7 @@ public class ResizeRecoveryServiceTest {
     private final FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "FLOW_ID");
 
     private final List<DatalakeStatusEnum> knownRecoverableState = List.of(DatalakeStatusEnum.STOP_FAILED,
-            DatalakeStatusEnum.PROVISIONING_FAILED, DatalakeStatusEnum.DATALAKE_RESTORE_FAILED, DatalakeStatusEnum.STOPPED);
+            DatalakeStatusEnum.PROVISIONING_FAILED, DatalakeStatusEnum.STOPPED);
 
     @BeforeEach
     public void setup() {
@@ -86,6 +90,7 @@ public class ResizeRecoveryServiceTest {
         flowLog.setFlowChainId(flowChainId);
         lenient().when(flow2Handler.getFirstStateLogfromLatestFlow(cluster.getId())).thenReturn(Optional.of(flowLog));
         lenient().when(flowChainLogService.getFlowChainType(flowChainId)).thenReturn(DatalakeResizeFlowEventChainFactory.class.getSimpleName());
+        sdxStatusEntity.setStatusReason("");
     }
 
     public void testGetClusterRecoverableForStatusNotRecoverable(DatalakeStatusEnum status) {
@@ -101,9 +106,15 @@ public class ResizeRecoveryServiceTest {
     }
 
     @Test
-    public void testDetachedNotRecoverable() {
-        when(cluster.isDetached()).thenReturn(true);
-        testGetClusterRecoverableForStatusNotRecoverable(DatalakeStatusEnum.STOPPED);
+    public void testRestoreFailedAndRunningRecoverable() {
+        sdxStatusEntity.setStatusReason("Datalake is running, Datalake restore failed");
+        testGetClusterRecoverableForStatusRecoverable(DatalakeStatusEnum.RUNNING);
+    }
+
+    @Test
+    public void testRestoreNotFailedAndRunningNotRecoverable() {
+        sdxStatusEntity.setStatusReason("Datalake is running");
+        testGetClusterRecoverableForStatusNotRecoverable(DatalakeStatusEnum.RUNNING);
     }
 
     @Test
@@ -115,7 +126,6 @@ public class ResizeRecoveryServiceTest {
 
     @Test
     public void testKnownNonRecoverableStates() {
-
         for (DatalakeStatusEnum datalakeStatusEnum : DatalakeStatusEnum.values()) {
             if (!knownRecoverableState.contains(datalakeStatusEnum)) {
                 testGetClusterRecoverableForStatusNotRecoverable(datalakeStatusEnum);
@@ -124,7 +134,7 @@ public class ResizeRecoveryServiceTest {
     }
 
     @Test
-    public void testTriggerRecovertShouldStartFlow() {
+    public void testTriggerRecoveryShouldStartFlow() {
         sdxStatusEntity.setStatus(DatalakeStatusEnum.STOP_FAILED);
 
         SdxRecoveryResponse sdxRecoveryResponse =
@@ -154,6 +164,7 @@ public class ResizeRecoveryServiceTest {
         assertEquals("Resize Recovery entitlement not enabled", sdxRecoverableResponse.getReason());
     }
 
+    @Test
     public void testNoEntitlementTrigger() {
         when(entitlementService.isDatalakeResizeRecoveryEnabled(anyString())).thenReturn(false);
 

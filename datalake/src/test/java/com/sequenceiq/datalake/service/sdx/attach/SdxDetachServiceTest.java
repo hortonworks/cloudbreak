@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.attach;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -16,6 +17,7 @@ import org.mockito.Mock;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -55,6 +57,9 @@ public class SdxDetachServiceTest {
     @Mock
     private DatabaseServerV4Endpoint mockRedbeamsServerEndpoint;
 
+    @Mock
+    private StatusCheckerJobService mockJobService;
+
     @InjectMocks
     private SdxAttachDetachUtils mockSdxAttachDetachUtils = spy(SdxAttachDetachUtils.class);
 
@@ -79,12 +84,31 @@ public class SdxDetachServiceTest {
         when(mockSdxDetachNameGenerator.generateDetachedClusterName(any())).thenReturn(NEW_TEST_CLUSTER_NAME);
         when(mockSdxService.save(any())).thenReturn(testCluster);
 
-        SdxCluster detachClusterResult = sdxDetachService.detachCluster(testCluster.getId());
+        SdxCluster detachClusterResult = sdxDetachService.detachCluster(testCluster.getId(), false);
 
         assertEquals(detachClusterResult.getCrn(), NEW_TEST_CLUSTER_CRN);
         assertEquals(detachClusterResult.getOriginalCrn(), TEST_CLUSTER_CRN);
         assertEquals(detachClusterResult.getClusterName(), NEW_TEST_CLUSTER_NAME);
         assertTrue(detachClusterResult.isDetached());
+
+        verify(mockSdxStatusService).setStatusForDatalakeAndNotify(
+                eq(DatalakeStatusEnum.STOPPED), eq("Datalake detach in progress."), eq(TEST_CLUSTER_ID)
+        );
+    }
+
+    @Test
+    void testDetachClusterDuringRecovery() {
+        when(mockSdxService.getById(eq(TEST_CLUSTER_ID))).thenReturn(testCluster);
+        when(mockRegionAwareCrnGenerator.generateCrnStringWithUuid(any(), any())).thenReturn(NEW_TEST_CLUSTER_CRN);
+        when(mockSdxDetachNameGenerator.generateDetachedClusterName(any())).thenReturn(NEW_TEST_CLUSTER_NAME);
+        when(mockSdxService.save(any())).thenReturn(testCluster);
+
+        SdxCluster detachClusterResult = sdxDetachService.detachCluster(testCluster.getId(), true);
+
+        assertEquals(detachClusterResult.getCrn(), NEW_TEST_CLUSTER_CRN);
+        assertEquals(detachClusterResult.getOriginalCrn(), TEST_CLUSTER_CRN);
+        assertEquals(detachClusterResult.getClusterName(), NEW_TEST_CLUSTER_NAME);
+        assertFalse(detachClusterResult.isDetached());
 
         verify(mockSdxStatusService).setStatusForDatalakeAndNotify(
                 eq(DatalakeStatusEnum.STOPPED), eq("Datalake detach in progress."), eq(TEST_CLUSTER_ID)

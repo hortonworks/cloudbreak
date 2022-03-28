@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.FINALIZED_EVENT;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
@@ -65,8 +65,6 @@ import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class ClusterUpscaleActions {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpscaleActions.class);
-
     @Inject
     private ClusterUpscaleFlowService clusterUpscaleFlowService;
 
@@ -87,6 +85,7 @@ public class ClusterUpscaleActions {
                 variables.put(SINGLE_NODE_CLUSTER, payload.isSingleNodeCluster());
                 variables.put(CLUSTER_MANAGER_TYPE, payload.getClusterManagerType());
                 variables.put(RESTART_SERVICES, payload.isRestartServices());
+                variables.put(HOST_NAMES_BY_HOST_GROUP, payload.getHostGroupsWithHostNames());
                 if (payload.isSinglePrimaryGateway()) {
                     variables.put(HOST_NAME, getMasterHostname(payload));
                 }
@@ -169,8 +168,10 @@ public class ClusterUpscaleActions {
                             new AmbariRepairSingleMasterStartResult(context.getStackId(), context.getHostGroups());
                     sendEvent(context, result.selector(), result);
                 } else {
+                    Map<String, Set<String>> hostGroupsWithHostNames =
+                            (Map<String, Set<String>>) variables.getOrDefault(HOST_NAMES_BY_HOST_GROUP, new HashMap<>());
                     UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroups(),
-                            context.isRepair(), context.isRestartServices());
+                            context.isRepair(), context.isRestartServices(), hostGroupsWithHostNames);
                     sendEvent(context, request.selector(), request);
                 }
             }
@@ -194,7 +195,6 @@ public class ClusterUpscaleActions {
     }
 
     @Bean(name = "CLUSTER_MANAGER_STOP_COMPONENTS_STATE")
-
     public Action<?, ?> clusterManagerStopComponentsAction() {
         return new AbstractClusterUpscaleAction<>(AmbariGatherInstalledComponentsResult.class) {
 
@@ -441,6 +441,8 @@ public class ClusterUpscaleActions {
         static final String CLUSTER_MANAGER_TYPE = "CLUSTER_MANAGER_TYPE";
 
         static final String RESTART_SERVICES = "RESTART_SERVICES";
+
+        static final String HOST_NAMES_BY_HOST_GROUP = "HOST_NAMES_BY_HOST_GROUP";
 
         static final String REPAIR = "REPAIR";
 

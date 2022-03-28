@@ -3,11 +3,13 @@ package com.sequenceiq.distrox.api.v1.distrox.model.tags;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TagsV1Request implements JsonEntity {
 
     @ApiModelProperty(StackModelDescription.APPLICATION_TAGS)

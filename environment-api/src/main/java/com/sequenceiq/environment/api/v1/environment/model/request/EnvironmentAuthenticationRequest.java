@@ -7,12 +7,14 @@ import javax.validation.constraints.Size;
 
 import org.apache.commons.lang3.ObjectUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("EnvironmentAuthenticationV1Request")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentAuthenticationRequest implements Serializable {
 
     public static final String DEFAULT_USER_NAME = "cloudbreak";

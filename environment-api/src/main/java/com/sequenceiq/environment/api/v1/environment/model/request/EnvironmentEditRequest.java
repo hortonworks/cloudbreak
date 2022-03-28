@@ -5,6 +5,7 @@ import java.io.Serializable;
 import javax.validation.Valid;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
@@ -19,6 +20,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "EnvironmentEditV1Request")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentEditRequest implements Serializable {
 
     @Size(max = 1000)

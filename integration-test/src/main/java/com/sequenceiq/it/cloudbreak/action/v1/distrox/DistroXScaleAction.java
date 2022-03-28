@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXScaleV1Request;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -19,22 +20,30 @@ public class DistroXScaleAction implements Action<DistroXTestDto, CloudbreakClie
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXScaleAction.class);
 
-    private final Integer count;
+    private final Integer desiredCount;
 
     private final String hostGroup;
 
-    public DistroXScaleAction(String hostGroup, Integer count) {
-        this.count = count;
+    private final AdjustmentType adjustmentType;
+
+    private final Long threshold;
+
+    public DistroXScaleAction(String hostGroup, Integer desiredCount, AdjustmentType adjustmentType, Long threshold) {
+        this.desiredCount = desiredCount;
         this.hostGroup = hostGroup;
+        this.adjustmentType = adjustmentType;
+        this.threshold = threshold;
     }
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.when(LOGGER, String.format("Distrox scale request on: %s. Hostgroup: %s, desiredCount: %d", testDto.getName(), hostGroup, count));
+        Log.when(LOGGER, String.format("Distrox scale request on: %s. Hostgroup: %s, desiredCount: %d", testDto.getName(), hostGroup, desiredCount));
         Log.whenJson(LOGGER, " Distrox scale request: ", testDto.getRequest());
         DistroXScaleV1Request scaleRequest = new DistroXScaleV1Request();
         scaleRequest.setGroup(hostGroup);
-        scaleRequest.setDesiredCount(count);
+        scaleRequest.setDesiredCount(desiredCount);
+        scaleRequest.setAdjustmentType(adjustmentType);
+        scaleRequest.setThreshold(threshold);
         FlowIdentifier flowIdentifier = client.getDefaultClient()
                 .distroXV1Endpoint()
                 .putScalingByName(testDto.getName(), scaleRequest);

@@ -3,11 +3,13 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.common;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CompactViewV4Response implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;

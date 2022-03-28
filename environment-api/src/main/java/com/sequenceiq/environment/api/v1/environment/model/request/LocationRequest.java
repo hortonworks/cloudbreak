@@ -5,12 +5,14 @@ import java.io.Serializable;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "LocationV1Request")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LocationRequest implements Serializable {
 
     @Size(max = 100)

@@ -330,7 +330,7 @@ public class StackOperationService {
                 boolean upscale = instanceGroupAdjustmentJson.getScalingAdjustment() > 0;
                 Stack stackWithLists = stackService.getByIdWithLists(stack.getId());
                 updateNodeCountValidator.validateServiceRoles(stackWithLists, instanceGroupAdjustmentJson);
-                updateNodeCountValidator.validateStackStatus(stackWithLists);
+                updateNodeCountValidator.validateStackStatus(stackWithLists, upscale);
                 updateNodeCountValidator.validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
                 updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackWithLists, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
@@ -339,7 +339,7 @@ public class StackOperationService {
                     updateNodeCountValidator.validateInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
                 }
                 if (withClusterEvent) {
-                    updateNodeCountValidator.validateClusterStatus(stackWithLists);
+                    updateNodeCountValidator.validateClusterStatus(stackWithLists, upscale);
                     updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackWithLists);
                     if (instanceStatusValidationNeeded) {
                         updateNodeCountValidator.validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);

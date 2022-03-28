@@ -1,0 +1,13 @@
+name: "distrox-resilient-scale-tests"
+tests:
+  - name: "distrox_resilient_scale_tests"
+    parameters: {
+      host_group: compute,
+      scale_up_target: 10,
+      scale_down_target: 5,
+      adjustment_type: PERCENTAGE,
+      threshold: 90,
+      times: 1
+    }
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXResilientScaleTests

@@ -38,9 +38,8 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
     public FlowTriggerEventQueue createFlowTriggerEventQueue(DatalakeResizeFlowChainStartEvent event) {
         Queue<Selectable> chain = new ConcurrentLinkedQueue<>();
 
-
         if (event.shouldTakeBackup()) {
-            //take a backup
+            // Take a backup
             chain.add(new DatalakeTriggerBackupEvent(DATALAKE_TRIGGER_BACKUP_EVENT.event(),
                     event.getResourceId(), event.getUserId(), event.getBackupLocation(), "resize" + System.currentTimeMillis(),
                     DatalakeBackupFailureReason.BACKUP_ON_RESIZE, event.accepted()));

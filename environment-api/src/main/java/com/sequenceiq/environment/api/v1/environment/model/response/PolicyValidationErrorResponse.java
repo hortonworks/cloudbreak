@@ -1,11 +1,13 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("PolicyValidationErrorResponse")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PolicyValidationErrorResponse {
 
     @ApiModelProperty(EnvironmentModelDescription.POLICY_VALIDATION_ERROR_SERVICE)

@@ -1,10 +1,12 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.v1.environment.model.base.SecurityAccessBase;
 
 import io.swagger.annotations.ApiModel;
 
 @ApiModel("SecurityAccessV1Request")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityAccessRequest extends SecurityAccessBase {
 
     public static Builder<SecurityAccessRequest> builder() {

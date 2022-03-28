@@ -3,9 +3,11 @@ package com.sequenceiq.cloudbreak.orchestrator.yarn.model.core;
 import java.util.Collection;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.model.JsonEntity;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class YarnComponent implements JsonEntity {
 
     private String name;

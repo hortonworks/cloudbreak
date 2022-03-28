@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ParcelInfoResponse implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.ImageModelDescription.PARCEL_NAME)
