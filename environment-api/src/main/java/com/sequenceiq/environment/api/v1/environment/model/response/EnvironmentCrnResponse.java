@@ -2,9 +2,12 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import io.swagger.annotations.ApiModel;
 
 @ApiModel(value = "EnvironmentCrnV1Response")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentCrnResponse implements Serializable {
 
     private String environmentName;

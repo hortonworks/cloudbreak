@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.EventModelDescription;
@@ -8,6 +9,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CloudbreakEventBaseV4 implements JsonEntity {
 
     @ApiModelProperty(EventModelDescription.TYPE)

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AzureStackV4Parameters;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.validation.ValidStackNameLength;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class StackV4Base extends ProviderParametersBase implements JsonEntity {
 
     @ValidStackNameFormat

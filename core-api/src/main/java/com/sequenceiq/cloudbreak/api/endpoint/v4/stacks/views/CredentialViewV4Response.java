@@ -4,6 +4,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
@@ -11,6 +12,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class CredentialViewV4Response implements JsonEntity {
     @Size(max = 100, min = 5, message = "The length of the credential's name has to be in range of 5 to 100")
     @Pattern(regexp = "(^[a-z][-a-z0-9]*[a-z0-9]$)",

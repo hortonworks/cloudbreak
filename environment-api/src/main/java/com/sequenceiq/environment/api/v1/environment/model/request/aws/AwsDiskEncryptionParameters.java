@@ -3,6 +3,8 @@ package com.sequenceiq.environment.api.v1.environment.model.request.aws;
 import java.io.Serializable;
 
 import javax.validation.constraints.Pattern;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.google.common.annotations.VisibleForTesting;
 
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
@@ -11,6 +13,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "AwsDiskEncryptionV1Parameters")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AwsDiskEncryptionParameters implements Serializable {
 
     @VisibleForTesting

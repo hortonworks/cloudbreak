@@ -4,12 +4,14 @@ import java.io.Serializable;
 
 import javax.validation.Valid;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "AzureEnvironmentV1Parameters")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AzureEnvironmentParameters implements Serializable {
 
     @Valid

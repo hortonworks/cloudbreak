@@ -2,6 +2,7 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.environment.model.base.SecurityAccessBase;
 
@@ -9,6 +10,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("SecurityAccessV1Response")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityAccessResponse extends SecurityAccessBase {
 
     @ApiModelProperty(EnvironmentModelDescription.KNOX_SECURITY_GROUPS)

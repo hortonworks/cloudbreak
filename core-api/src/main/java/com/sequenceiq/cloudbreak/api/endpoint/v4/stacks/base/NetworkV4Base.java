@@ -7,6 +7,7 @@ import static java.util.Objects.nonNull;
 import java.lang.reflect.Field;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
@@ -21,6 +22,7 @@ import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class NetworkV4Base extends ProviderParametersBase implements JsonEntity {
 
     @ApiModelProperty(NetworkModelDescription.SUBNET_CIDR)

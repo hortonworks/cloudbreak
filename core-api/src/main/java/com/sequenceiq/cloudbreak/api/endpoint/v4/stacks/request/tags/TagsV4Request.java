@@ -3,11 +3,13 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TagsV4Request implements JsonEntity {
 
     @ApiModelProperty(StackModelDescription.APPLICATION_TAGS)

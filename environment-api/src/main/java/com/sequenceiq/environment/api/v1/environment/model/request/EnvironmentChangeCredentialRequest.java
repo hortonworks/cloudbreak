@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 
@@ -7,6 +8,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "EnvironmentChangeCredentialV1Request")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentChangeCredentialRequest implements CredentialAwareEnvRequest {
 
     @ApiModelProperty(EnvironmentModelDescription.CREDENTIAL_NAME_REQUEST)

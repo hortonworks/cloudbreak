@@ -4,6 +4,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SupportedDatabaseModelDescription;
 
@@ -11,6 +12,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SupportedExternalDatabaseServiceEntryV4Response implements JsonEntity {
 
     @ApiModelProperty(SupportedDatabaseModelDescription.NAME)

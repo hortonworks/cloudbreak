@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupAdjustmentModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
@@ -10,6 +11,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class HostGroupAdjustmentV4Request implements JsonEntity {
 
     @NotNull

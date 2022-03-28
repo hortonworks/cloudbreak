@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.Database;
 
@@ -10,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @NotNull
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DatabaseTestV4Response implements JsonEntity {
 
     @ApiModelProperty(value = Database.DATABASE_CONNECTION_TEST_RESULT, required = true)

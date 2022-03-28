@@ -7,12 +7,14 @@ import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "AttachedFreeIpaRequestAwsSpotParameters")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AwsFreeIpaSpotParameters implements Serializable {
 
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_SPOT_PERCENTAGE)

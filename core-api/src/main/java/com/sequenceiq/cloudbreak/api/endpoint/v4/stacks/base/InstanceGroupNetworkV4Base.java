@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.aws.InstanceGroupAwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.azure.InstanceGroupAzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.gcp.InstanceGroupGcpNetworkV4Parameters;
@@ -12,6 +13,7 @@ import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class InstanceGroupNetworkV4Base extends ProviderParametersBase implements JsonEntity {
 
     @ApiModelProperty(NetworkModelDescription.AWS_PARAMETERS)

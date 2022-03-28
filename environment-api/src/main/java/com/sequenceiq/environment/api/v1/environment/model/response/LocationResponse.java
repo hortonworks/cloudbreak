@@ -2,12 +2,14 @@ package com.sequenceiq.environment.api.v1.environment.model.response;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel(value = "LocationV1Response")
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LocationResponse implements Serializable {
 
     @ApiModelProperty(EnvironmentModelDescription.LOCATION)
