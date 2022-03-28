@@ -47,7 +47,8 @@ class ClusterServiceRunnerTest {
     @Test
     public void testRedeployGatewayCertificateWhenClusterCouldNotBeFoundByStackId() {
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        when(clusterService.retrieveClusterByStackIdWithoutAuth(anyLong())).thenThrow(new NotFoundException("Cluster could not be found"));
+        when(stack.getCluster()).thenReturn(cluster);
+        when(clusterService.findOneWithLists(anyLong())).thenThrow(new NotFoundException("Cluster could not be found"));
 
         Assertions.assertThrows(NotFoundException.class, () -> underTest.redeployGatewayCertificate(0L));
     }
@@ -55,7 +56,8 @@ class ClusterServiceRunnerTest {
     @Test
     public void testRedeployGatewayCertificateWhenRedeployOnHostRunnerThrowRuntimeException() {
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        when(clusterService.retrieveClusterByStackIdWithoutAuth(anyLong())).thenReturn(Optional.of(cluster));
+        when(stack.getCluster()).thenReturn(cluster);
+        when(clusterService.findOneWithLists(anyLong())).thenReturn(Optional.of(cluster));
         doThrow(new RuntimeException("Stg. failed")).when(hostRunner).redeployGatewayCertificate(any(), any());
 
         Assertions.assertThrows(RuntimeException.class, () -> underTest.redeployGatewayCertificate(0L));
@@ -64,7 +66,8 @@ class ClusterServiceRunnerTest {
     @Test
     public void testRedeployGatewayCertificateHappyFlow() {
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        when(clusterService.retrieveClusterByStackIdWithoutAuth(anyLong())).thenReturn(Optional.of(cluster));
+        when(stack.getCluster()).thenReturn(cluster);
+        when(clusterService.findOneWithLists(anyLong())).thenReturn(Optional.of(cluster));
 
         underTest.redeployGatewayCertificate(0L);
 
