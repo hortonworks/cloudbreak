@@ -9,19 +9,19 @@ import org.powermock.reflect.Whitebox;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnvironmentStructuredFlowEvent;
-import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.EnvironmentRequestProcessingStepMapper;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.CDPRequestProcessingStepMapper;
 
 @ExtendWith(MockitoExtension.class)
-public class CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverterTest {
+public class CDPEnvironmentStructuredFlowEventToCDPEnvironmentStatusChangedConverterTest {
 
-    private CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverter underTest;
+    private CDPEnvironmentStructuredFlowEventToCDPEnvironmentStatusChangedConverter underTest;
 
     @BeforeEach()
     public void setUp() {
-        underTest = new CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverter();
+        underTest = new CDPEnvironmentStructuredFlowEventToCDPEnvironmentStatusChangedConverter();
         CDPStructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter = new CDPStructuredFlowEventToCDPOperationDetailsConverter();
         Whitebox.setInternalState(operationDetailsConverter, "appVersion", "version-1234");
-        Whitebox.setInternalState(operationDetailsConverter, "environmentRequestProcessingStepMapper", new EnvironmentRequestProcessingStepMapper());
+        Whitebox.setInternalState(operationDetailsConverter, "cdpRequestProcessingStepMapper", new CDPRequestProcessingStepMapper());
         Whitebox.setInternalState(underTest, "operationDetailsConverter", operationDetailsConverter);
         Whitebox.setInternalState(underTest, "environmentDetailsConverter", new EnvironmentDetailsToCDPEnvironmentDetailsConverter());
         Whitebox.setInternalState(underTest, "freeIPADetailsConverter", new EnvironmentDetailsToCDPFreeIPADetailsConverter());

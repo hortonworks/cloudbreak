@@ -13,9 +13,9 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnviro
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 
 @Component
-public class CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverter {
+public class CDPEnvironmentStructuredFlowEventToCDPEnvironmentStatusChangedConverter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CDPEnvironmentStructuredFlowEventToCDPEnvironmentStatusChangedConverter.class);
 
     @Inject
     private CDPStructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter;
@@ -33,11 +33,12 @@ public class CDPStructuredFlowEventToCDPEnvironmentStatusChangedConverter {
             UsageProto.CDPEnvironmentStatus.Value status) {
         UsageProto.CDPEnvironmentStatusChanged.Builder cdpEnvironmentStatusChangedBuilder = UsageProto.CDPEnvironmentStatusChanged.newBuilder();
 
-        cdpEnvironmentStatusChangedBuilder.setOperationDetails(operationDetailsConverter.convert(cdpStructuredFlowEvent));
-
         cdpEnvironmentStatusChangedBuilder.setNewStatus(status);
 
         if (cdpStructuredFlowEvent != null) {
+            String cloudProvider = cdpStructuredFlowEvent.getPayload() != null ? cdpStructuredFlowEvent.getPayload().getCloudPlatform() : null;
+            cdpEnvironmentStatusChangedBuilder.setOperationDetails(operationDetailsConverter.convert(cdpStructuredFlowEvent, cloudProvider));
+
             cdpEnvironmentStatusChangedBuilder.setFailureReason(defaultIfEmpty(cdpStructuredFlowEvent.getStatusReason(), ""));
 
             EnvironmentDetails environmentDetails = cdpStructuredFlowEvent.getPayload();

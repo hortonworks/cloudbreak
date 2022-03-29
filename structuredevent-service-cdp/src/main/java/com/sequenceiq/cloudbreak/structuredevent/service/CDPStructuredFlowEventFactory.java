@@ -5,8 +5,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEven
 
 public interface CDPStructuredFlowEventFactory {
 
-    CDPStructuredFlowEvent createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails, Boolean detailed);
+    CDPStructuredFlowEvent createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails);
 
-    CDPStructuredFlowEvent createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails, Boolean detailed, Exception exception);
+    CDPStructuredFlowEvent createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails, Exception exception);
 
 }

@@ -15,17 +15,17 @@ public class EnvironmentUseCaseMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentUseCaseMapper.class);
 
     @Inject
-    private EnvironmentRequestProcessingStepMapper environmentRequestProcessingStepMapper;
+    private CDPRequestProcessingStepMapper cdpRequestProcessingStepMapper;
 
     // At the moment we need to introduce a complex logic to figure out the use case
     public UsageProto.CDPEnvironmentStatus.Value useCase(FlowDetails flow) {
         UsageProto.CDPEnvironmentStatus.Value useCase = UsageProto.CDPEnvironmentStatus.Value.UNSET;
         if (flow != null) {
-            if (environmentRequestProcessingStepMapper.isFirstStep(flow)) {
+            if (cdpRequestProcessingStepMapper.isFirstStep(flow)) {
                 if (flow.getFlowType() != null) {
                     useCase = firstStepToUseCaseMapping(flow.getFlowType());
                 }
-            } else if (environmentRequestProcessingStepMapper.isLastStep(flow)) {
+            } else if (cdpRequestProcessingStepMapper.isLastStep(flow)) {
                 useCase = lastStepToUseCaseMapping(flow.getNextFlowState());
             }
         }
