@@ -6,9 +6,9 @@ import org.junit.jupiter.api.Test;
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 
-public class EnvironmentRequestProcessingStepMapperTest {
+public class CDPRequestProcessingStepMapperTest {
 
-    private EnvironmentRequestProcessingStepMapper underTest = new EnvironmentRequestProcessingStepMapper();
+    private CDPRequestProcessingStepMapper underTest = new CDPRequestProcessingStepMapper();
 
     @Test
     public void testInitNextFlowStateMappedCorrectlyToInit() {
@@ -19,6 +19,7 @@ public class EnvironmentRequestProcessingStepMapperTest {
     public void testFinishedOrFailedNextFlowStateMappedCorrectlyToFinal() {
         Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, mapNextFlowStateToProcessingStep("SOMETHING_FINISHED_STATE"));
         Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, mapNextFlowStateToProcessingStep("SOMETHING_FAILED_STATE"));
+        Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, mapNextFlowStateToProcessingStep("SOMETHING_FAIL_STATE"));
     }
 
     @Test

@@ -55,12 +55,12 @@ public class DatalakeStructuredFlowEventFactory implements CDPStructuredFlowEven
     private String serviceVersion;
 
     @Override
-    public CDPStructuredFlowEvent<SdxClusterDto> createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails, Boolean detailed) {
-        return createStructuredFlowEvent(resourceId, flowDetails, detailed, null);
+    public CDPStructuredFlowEvent<SdxClusterDto> createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails) {
+        return createStructuredFlowEvent(resourceId, flowDetails, null);
     }
 
     @Override
-    public CDPStructuredFlowEvent<SdxClusterDto> createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
+    public CDPStructuredFlowEvent<SdxClusterDto> createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails, Exception exception) {
         SdxCluster sdxCluster = sdxService.getById(resourceId);
         CDPOperationDetails operationDetails = makeCdpOperationDetails(resourceId, sdxCluster);
         SdxClusterDto sdxClusterDto = sdxClusterDtoConverter.sdxClusterToDto(sdxCluster);

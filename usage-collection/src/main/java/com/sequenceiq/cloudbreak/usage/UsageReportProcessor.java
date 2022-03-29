@@ -115,6 +115,21 @@ public class UsageReportProcessor implements UsageReporter {
     }
 
     @Override
+    public void cdpFreeIpaStatusChanged(UsageProto.CDPFreeIPAStatusChanged details) {
+        try {
+            checkNotNull(details);
+            usageProcessingStrategy.processUsage(eventBuilder()
+                    .setCdpFreeIPAStatusChanged(details)
+                    .build(), UsageContext.Builder.newBuilder()
+                    .accountId(getAccountId(details.getOperationDetails()))
+                    .build());
+            LOGGER.info("Logged binary format for the following usage event: {}", details);
+        } catch (Exception e) {
+            LOGGER.warn("Could not log binary format for the following usage event: {}! Cause: {}", details, e.getMessage());
+        }
+    }
+
+    @Override
     public void cdpDatalakeRequested(UsageProto.CDPDatalakeRequested details) {
         try {
             checkNotNull(details);

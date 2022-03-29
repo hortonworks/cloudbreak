@@ -42,12 +42,12 @@ public class EnvironmentStructuredFlowEventFactory implements CDPStructuredFlowE
     private String serviceVersion;
 
     @Override
-    public CDPStructuredFlowEvent createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails, Boolean detailed) {
-        return createStructuredFlowEvent(resourceId, flowDetails, detailed, null);
+    public CDPStructuredFlowEvent createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails) {
+        return createStructuredFlowEvent(resourceId, flowDetails, null);
     }
 
     @Override
-    public CDPStructuredFlowEvent createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
+    public CDPStructuredFlowEvent createStructuredFlowEvent(Long resourceId, FlowDetails flowDetails, Exception exception) {
         Environment environment = environmentService.findEnvironmentByIdOrThrow(resourceId);
         String resourceType = CloudbreakEventService.ENVIRONMENT_RESOURCE_TYPE;
         CDPOperationDetails operationDetails = new CDPOperationDetails(clock.getCurrentTimeMillis(), FLOW, resourceType, environment.getId(),

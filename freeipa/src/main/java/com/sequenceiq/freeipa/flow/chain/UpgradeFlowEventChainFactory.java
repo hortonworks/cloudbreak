@@ -85,9 +85,4 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         }
         return events;
     }
-
-    @Override
-    public String getName() {
-        return "FreeIPA upgrade flow";
-    }
 }

@@ -192,6 +192,8 @@ message Event {
     CDPCMLWorkspaceBackupRequested cdpCMLWorkspaceBackupRequested = 89;
     // A CDP CML Workspace Backup status changed
     CDPCMLWorkspaceBackupStatusChanged cdpCMLWorkspaceBackupStatusChanged = 90;
+    // A CDP FreeIPA's status changed
+    CDPFreeIPAStatusChanged cdpFreeIPAStatusChanged = 93;
   }
 }
 
@@ -1206,6 +1208,27 @@ message CDPEnvironmentStatus {
   }
 }
 
+// The status of a CDP FreeIPA
+message CDPFreeIPAStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // The status when CDP FreeIPA upscale is initiated.
+    UPSCALE_STARTED = 1;
+    // The status when CDP FreeIPA upscale has successfully finished.
+    UPSCALE_FINISHED = 2;
+    // The status when CDP FreeIPA upscale has failed.
+    UPSCALE_FAILED = 3;
+
+    // The status when CDP FreeIPA downscale is initiated.
+    DOWNSCALE_STARTED = 4;
+    // The status when CDP FreeIPA downscale has successfully finished.
+    DOWNSCALE_FINISHED = 5;
+    // The status when CDP FreeIPA downscale has failed.
+    DOWNSCALE_FAILED = 6;
+  }
+}
+
 // The status of a CDP Cluster
 message CDPClusterStatus {
   enum Value {
@@ -1345,6 +1368,7 @@ message CDPEnvironmentDetails {
   CDPEnvironmentGcpDetails gcpDetails = 9;
 }
 
+// CDP FreeIPA details closely related to the CDP Environment
 message CDPFreeIPADetails {
   // Number of nodes
   int32 nodes = 1;
@@ -1441,6 +1465,44 @@ message CDPEnvironmentStatusChanged {
   CDPEnvironmentTelemetryFeatureDetails telemetryFeatureDetails = 6;
   // FreeIPA metadata
   CDPFreeIPADetails freeIPA = 7;
+}
+
+message CDPFreeIPAShape {
+  // Number of nodes
+  int32 nodes = 1;
+  // Detailed node count per host group
+  string hostGroupNodeCount = 2;
+}
+
+message CDPFreeIPAStatusDetails {
+  // Status of the stack
+  string stackStatus = 1;
+  // Detailed status of the stack
+  string stackDetailedStatus = 2;
+  // Status reason of the stack
+  string stackStatusReason = 3;
+}
+
+// Extended details of a CDP FreeIPA
+message CDPFreeIPAExtendedDetails {
+  // Shape of the freeIPA
+  CDPFreeIPAShape freeIPAShape = 1;
+  // Image details
+  CDPImageDetails imageDetails = 2;
+}
+
+// Generated when FreeIPA status has changed
+message CDPFreeIPAStatusChanged {
+  // Operation metadata
+  CDPOperationDetails operationDetails = 1;
+  // FreeIPA extended details
+  CDPFreeIPAExtendedDetails freeIPADetails = 2;
+  // Image details
+  CDPFreeIPAStatusDetails statusDetails = 3;
+  // Environment Crn
+  string environmentCrn = 4;
+  // The environment's status after the change.
+  CDPFreeIPAStatus.Value newStatus = 5;
 }
 
 message CDPImageDetails {
@@ -2964,10 +3026,10 @@ message CDPStackPatchEvent {
 // Type of stack patch event.
 message CDPStackPatchEventType {
   enum Value {
-      UNSET = 0;
-      AFFECTED = 1;
-      SUCCESS = 2;
-      FAILURE = 3;
+    UNSET = 0;
+    AFFECTED = 1;
+    SUCCESS = 2;
+    FAILURE = 3;
   }
 }
 

@@ -11,9 +11,9 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.CDPEnviro
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 
 @Component
-public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
+public class CDPEnvironmentStructuredFlowEventToCDPEnvironmentRequestedConverter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CDPStructuredFlowEventToCDPEnvironmentRequestedConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CDPEnvironmentStructuredFlowEventToCDPEnvironmentRequestedConverter.class);
 
     @Inject
     private CDPStructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter;
@@ -30,9 +30,10 @@ public class CDPStructuredFlowEventToCDPEnvironmentRequestedConverter {
     public UsageProto.CDPEnvironmentRequested convert(CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent) {
         UsageProto.CDPEnvironmentRequested.Builder cdpEnvironmentRequestedBuilder = UsageProto.CDPEnvironmentRequested.newBuilder();
 
-        cdpEnvironmentRequestedBuilder.setOperationDetails(operationDetailsConverter.convert(cdpStructuredFlowEvent));
-
         if (cdpStructuredFlowEvent != null) {
+            String cloudProvider = cdpStructuredFlowEvent.getPayload() != null ? cdpStructuredFlowEvent.getPayload().getCloudPlatform() : null;
+            cdpEnvironmentRequestedBuilder.setOperationDetails(operationDetailsConverter.convert(cdpStructuredFlowEvent, cloudProvider));
+
             EnvironmentDetails environmentDetails = cdpStructuredFlowEvent.getPayload();
             cdpEnvironmentRequestedBuilder.setEnvironmentDetails(environmentDetailsConverter.convert(environmentDetails));
             cdpEnvironmentRequestedBuilder.setTelemetryFeatureDetails(telemetryFeatureDetailsConverter.convert(environmentDetails));

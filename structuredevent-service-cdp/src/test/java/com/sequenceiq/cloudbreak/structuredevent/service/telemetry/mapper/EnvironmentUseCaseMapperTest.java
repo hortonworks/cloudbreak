@@ -15,7 +15,7 @@ public class EnvironmentUseCaseMapperTest {
     @BeforeEach()
     public void setUp() {
         underTest = new EnvironmentUseCaseMapper();
-        Whitebox.setInternalState(underTest, "environmentRequestProcessingStepMapper", new EnvironmentRequestProcessingStepMapper());
+        Whitebox.setInternalState(underTest, "cdpRequestProcessingStepMapper", new CDPRequestProcessingStepMapper());
     }
 
     @Test
