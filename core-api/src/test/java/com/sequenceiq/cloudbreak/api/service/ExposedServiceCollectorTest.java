@@ -195,7 +195,8 @@ class ExposedServiceCollectorTest {
                 "YARNUIV2",
                 "ZEPPELIN",
                 "QUEUEMANAGER_WEBAPP",
-                "KNOX_TOKEN_INTEGRATOR");
+                "KNOX_TOKEN_INTEGRATOR",
+                "QUERY_PROCESSOR");
     }
 
     @Test
