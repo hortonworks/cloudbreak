@@ -57,11 +57,11 @@ public class QueryProcessorConfigProviderTest {
         Map<String, String> paramToVariable =
                 result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getValue));
         assertThat(paramToVariable).containsOnly(
-            new SimpleEntry<>("data_analytics_studio_database_host", HOST),
-            new SimpleEntry<>("data_analytics_studio_database_port", PORT),
-            new SimpleEntry<>("data_analytics_studio_database_name", DB_NAME),
-            new SimpleEntry<>("data_analytics_studio_database_username", USER_NAME),
-            new SimpleEntry<>("data_analytics_studio_database_password", PASSWORD));
+            new SimpleEntry<>("query_processor_database_host", HOST),
+            new SimpleEntry<>("query_processor_database_port", PORT),
+            new SimpleEntry<>("query_processor_database_name", DB_NAME),
+            new SimpleEntry<>("query_processor_database_username", USER_NAME),
+            new SimpleEntry<>("query_processor_database_password", PASSWORD));
     }
 
     @Test
