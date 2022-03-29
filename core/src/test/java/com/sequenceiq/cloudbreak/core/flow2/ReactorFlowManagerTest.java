@@ -153,6 +153,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerDatalakeClusterRecovery(STACK_ID);
         underTest.triggerStopStartStackUpscale(STACK_ID, instanceGroupAdjustment, true);
         underTest.triggerStopStartStackDownscale(STACK_ID, instanceIdsByHostgroup, false);
+        underTest.triggerClusterServicesRestart(STACK_ID);
+
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

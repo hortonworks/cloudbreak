@@ -59,6 +59,21 @@ public class DistroxService {
         }
     }
 
+    public void restartAttachedDistroxClusters(String envCrn) {
+        Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envCrn);
+        Collection<StackViewV4Response> availableClusters = attachedDistroXClusters.stream()
+                .filter(cluster -> cluster.getStatus() == Status.AVAILABLE)
+                .collect(Collectors.toList());
+        ArrayList<String> pollingCrnList = availableClusters.stream().map(StackViewV4Response::getCrn).collect(Collectors.toCollection(ArrayList::new));
+        if (!pollingCrnList.isEmpty()) {
+            distroXV1Endpoint.restartClusterServicesByCrns(pollingCrnList);
+            Polling.stopAfterAttempt(attempt)
+                    .stopIfException(true)
+                    .waitPeriodly(sleeptime, TimeUnit.SECONDS)
+                    .run(checkDistroxStatus(pollingCrnList, Type.START, this::stackAndClusterStarted));
+        }
+    }
+
     public void stopAttachedDistrox(String envCrn) {
         Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envCrn);
         ArrayList<String> pollingCrn = attachedDistroXClusters.stream().map(StackViewV4Response::getCrn).collect(Collectors.toCollection(ArrayList::new));

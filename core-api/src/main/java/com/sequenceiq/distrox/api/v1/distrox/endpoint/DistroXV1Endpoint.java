@@ -40,6 +40,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RET
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SCALE_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SCALE_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.START_BY_CRN;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RESTART_CLUSTER_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.START_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.STOP_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.STOP_BY_NAME;
@@ -244,6 +245,12 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = START_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "startDistroXV1ByCrns")
     void putStartByCrns(@QueryParam("crns") List<String> crns);
+
+    @PUT
+    @Path("crn/restartCluster")
+    @ApiOperation(value = RESTART_CLUSTER_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "restartDistroXClusterByCrns")
+    void restartClusterServicesByCrns(@QueryParam("crns") List<String> crns);
 
     @PUT
     @Path("name/{name}/scaling")
