@@ -26,6 +26,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
     private String name;
 
+    private String originalName;
+
     private String description;
 
     private String cloudPlatform;
@@ -360,10 +362,19 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.domain = domain;
     }
 
+    public String getOriginalName() {
+        return originalName;
+    }
+
+    public void setOriginalName(String originalName) {
+        this.originalName = originalName;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentDtoBase{"
                 + "name='" + name + '\''
+                + "originalName='" + originalName + '\''
                 + ", cloudPlatform='" + cloudPlatform + '\''
                 + ", resourceCrn='" + resourceCrn + '\''
                 + ", status='" + status + '\''
@@ -377,6 +388,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         private LocationDto locationDto;
 
         private String name;
+
+        private String originalName;
 
         private String description;
 
@@ -447,6 +460,11 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
 
         public B withName(String name) {
             this.name = name;
+            return (B) this;
+        }
+
+        public B withOriginalName(String originalName) {
+            this.originalName = originalName;
             return (B) this;
         }
 
@@ -589,6 +607,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setId(id);
             environmentDto.setLocation(locationDto);
             environmentDto.setName(name);
+            environmentDto.setOriginalName(originalName);
             environmentDto.setDescription(description);
             environmentDto.setCloudPlatform(cloudPlatform);
             environmentDto.setTelemetry(telemetry);
@@ -616,7 +635,6 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
             environmentDto.setEnvironmentServiceVersion(environmentServiceVersion);
             environmentDto.setDeletionType(deletionType);
             environmentDto.setDomain(domain);
-//            return environmentDto;
         }
 
         public abstract T build();

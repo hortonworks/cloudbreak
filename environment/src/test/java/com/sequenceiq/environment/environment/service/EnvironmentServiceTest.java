@@ -21,6 +21,7 @@ import java.util.Set;
 
 import javax.ws.rs.BadRequestException;
 
+import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,6 +88,17 @@ class EnvironmentServiceTest {
                 .thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> environmentServiceUnderTest
                 .getByNameAndAccountId(EnvironmentTestData.ENVIRONMENT_NAME, TestConstants.ACCOUNT_ID));
+    }
+
+    @Test
+    public void testListByCrnInternal() {
+        when(environmentRepository.findOneByResourceCrnEvenIfDeleted(anyString())).thenReturn(
+                Optional.of(new Environment())
+        );
+        when(environmentDtoConverter.environmentToDto(any())).thenReturn(new EnvironmentDto());
+
+        EnvironmentDto environmentDto = environmentServiceUnderTest.internalGetByCrn("crn");
+        Assert.assertNotNull(environmentDto);
     }
 
     @Test

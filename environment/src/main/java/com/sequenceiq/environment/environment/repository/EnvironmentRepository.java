@@ -135,6 +135,9 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             "FROM Environment e WHERE e.resourceCrn in (:resourceCrns)")
     List<ResourceBasicView> findAllResourceBasicViewByResourceCrns(@Param("resourceCrns") Collection<String> resourceCrns);
 
+    @Query("SELECT e FROM Environment e WHERE e.resourceCrn = :resourceCrn")
+    Optional<Environment> findOneByResourceCrnEvenIfDeleted(@Param("resourceCrn") String resourceCrn);
+
     @Query("SELECT e.resourceCrn as resourceCrn, e.id as id, e.name as name " +
             "FROM Environment e " +
             "WHERE e.name = :name " +

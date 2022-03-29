@@ -32,6 +32,9 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @ApiModelProperty(ModelDescriptions.NAME)
     private String name;
 
+    @ApiModelProperty(ModelDescriptions.ORIGINAL_NAME)
+    private String originalName;
+
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
@@ -144,6 +147,14 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getOriginalName() {
+        return originalName;
+    }
+
+    public void setOriginalName(String originalName) {
+        this.originalName = originalName;
     }
 
     public String getDescription() {
@@ -414,6 +425,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         return "EnvironmentBaseResponse{" +
                 "crn='" + crn + '\'' +
                 ", name='" + name + '\'' +
+                ", originalName='" + originalName + '\'' +
                 ", description='" + description + '\'' +
                 ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", creator='" + creator + '\'' +
