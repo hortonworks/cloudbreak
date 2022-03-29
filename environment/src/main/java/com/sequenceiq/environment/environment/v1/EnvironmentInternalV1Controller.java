@@ -6,12 +6,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentInternalEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValidationErrorResponses;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.credential.service.CredentialService;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 import com.sequenceiq.notification.NotificationController;
 
 @Controller
@@ -21,9 +26,17 @@ public class EnvironmentInternalV1Controller extends NotificationController impl
 
     private final CredentialService credentialService;
 
+    private final EnvironmentService environmentService;
+
+    private final EnvironmentResponseConverter environmentResponseConverter;
+
     public EnvironmentInternalV1Controller(
-            CredentialService credentialService) {
+            CredentialService credentialService,
+            EnvironmentService environmentService,
+            EnvironmentResponseConverter environmentResponseConverter) {
         this.credentialService = credentialService;
+        this.environmentService = environmentService;
+        this.environmentResponseConverter = environmentResponseConverter;
     }
 
     @Override
@@ -32,4 +45,13 @@ public class EnvironmentInternalV1Controller extends NotificationController impl
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return credentialService.validatePolicy(accountId, crn, services);
     }
+
+    @Override
+    @AccountIdNotNeeded
+    @InternalOnly
+    public SimpleEnvironmentResponse internalGetByCrn(String crn, boolean withNetwork) {
+        EnvironmentDto environmentDtos = environmentService.internalGetByCrn(crn);
+        return environmentResponseConverter.dtoToSimpleResponse(environmentDtos, withNetwork, false);
+    }
+
 }

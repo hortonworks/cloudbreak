@@ -127,6 +127,7 @@ public class EnvironmentResponseConverterTest {
 
         assertEquals(environment.getResourceCrn(), actual.getCrn());
         assertEquals(environment.getName(), actual.getName());
+        assertEquals(environment.getOriginalName(), actual.getOriginalName());
         assertEquals(environment.getDescription(), actual.getDescription());
         assertEquals(environment.getCloudPlatform(), actual.getCloudPlatform());
         assertEquals(credentialResponse, actual.getCredential());
@@ -182,10 +183,11 @@ public class EnvironmentResponseConverterTest {
         when(networkDtoToResponseConverter.convert(environmentDto.getNetwork(), environmentDto.getExperimentalFeatures().getTunnel(), false))
                 .thenReturn(environmentNetworkResponse);
 
-        SimpleEnvironmentResponse actual = underTest.dtoToSimpleResponse(environmentDto);
+        SimpleEnvironmentResponse actual = underTest.dtoToSimpleResponse(environmentDto, true, true);
 
         assertEquals(environmentDto.getResourceCrn(), actual.getCrn());
         assertEquals(environmentDto.getName(), actual.getName());
+        assertEquals(environmentDto.getOriginalName(), actual.getOriginalName());
         assertEquals(environmentDto.getDescription(), actual.getDescription());
         assertEquals(environmentDto.getCloudPlatform(), actual.getCloudPlatform());
         assertEquals(credentialResponse, actual.getCredential());
@@ -268,6 +270,7 @@ public class EnvironmentResponseConverterTest {
                 .withCredential(new Credential())
                 .withResourceCrn("resource-crn")
                 .withName("my-env")
+                .withOriginalName("my-env")
                 .withDescription("Test environment.")
                 .withCloudPlatform("AWS")
                 .withEnvironmentStatus(EnvironmentStatus.AVAILABLE)

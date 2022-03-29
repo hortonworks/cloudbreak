@@ -254,7 +254,7 @@ public class EnvDeleteActions {
                             env.setProxyConfig(null);
                             Environment result = environmentService.save(env);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
-                            SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
+                            SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto, true, true);
                             simpleResponse.setName(originalName);
                             metricService.incrementMetricCounter(MetricType.ENV_DELETION_FINISHED, environmentDto);
                             eventService.sendEventAndNotificationWithPayload(environmentDto, context.getFlowTriggerUserCrn(),

@@ -55,6 +55,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String name;
 
+        private String originalName;
+
         private String description;
 
         private String creator;
@@ -114,6 +116,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         public Builder withCrn(String crn) {
             this.crn = crn;
+            return this;
+        }
+
+        public Builder withOriginalName(String originalName) {
+            this.originalName = originalName;
             return this;
         }
 
@@ -261,6 +268,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
             simpleEnvironmentResponse.setName(name);
+            simpleEnvironmentResponse.setOriginalName(originalName);
             simpleEnvironmentResponse.setCreator(creator);
             simpleEnvironmentResponse.setDescription(description);
             simpleEnvironmentResponse.setRegions(regions);

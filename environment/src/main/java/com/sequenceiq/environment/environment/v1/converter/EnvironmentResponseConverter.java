@@ -89,6 +89,7 @@ public class EnvironmentResponseConverter {
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
         DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.builder()
                 .withCrn(environmentDto.getResourceCrn())
+                .withOriginalName(environmentDto.getOriginalName())
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())
                 .withCloudPlatform(environmentDto.getCloudPlatform())
@@ -137,6 +138,7 @@ public class EnvironmentResponseConverter {
     public SimpleEnvironmentResponse dtoToSimpleResponse(EnvironmentViewDto environmentViewDto) {
         SimpleEnvironmentResponse.Builder builder = SimpleEnvironmentResponse.builder()
                 .withCrn(environmentViewDto.getResourceCrn())
+                .withOriginalName(environmentViewDto.getOriginalName())
                 .withName(environmentViewDto.getName())
                 .withDescription(environmentViewDto.getDescription())
                 .withCloudPlatform(environmentViewDto.getCloudPlatform())
@@ -170,9 +172,10 @@ public class EnvironmentResponseConverter {
         return builder.build();
     }
 
-    public SimpleEnvironmentResponse dtoToSimpleResponse(EnvironmentDto environmentDto) {
+    public SimpleEnvironmentResponse dtoToSimpleResponse(EnvironmentDto environmentDto, boolean withNetwork, boolean withFreeIPA) {
         SimpleEnvironmentResponse.Builder builder = SimpleEnvironmentResponse.builder()
                 .withCrn(environmentDto.getResourceCrn())
+                .withOriginalName(environmentDto.getOriginalName())
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())
                 .withCloudPlatform(environmentDto.getCloudPlatform())
@@ -181,7 +184,6 @@ public class EnvironmentResponseConverter {
                 .withCreator(environmentDto.getCreator())
                 .withLocation(locationDtoToResponse(environmentDto.getLocation()))
                 .withCreateFreeIpa(environmentDto.getFreeIpaCreation().getCreate())
-                .withFreeIpa(freeIpaConverter.convert(environmentDto.getFreeIpaCreation()))
                 .withStatusReason(environmentDto.getStatusReason())
                 .withCreated(environmentDto.getCreated())
                 .withTunnel(environmentDto.getExperimentalFeatures().getTunnel())
@@ -201,8 +203,13 @@ public class EnvironmentResponseConverter {
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convertToView(environmentDto.getProxyConfig())));
-        NullUtil.doIfNotNull(environmentDto.getNetwork(),
-                network -> builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel(), false)));
+        if (withNetwork) {
+            NullUtil.doIfNotNull(environmentDto.getNetwork(),
+                    network -> builder.withNetwork(networkDtoToResponse(network, environmentDto.getExperimentalFeatures().getTunnel(), false)));
+        }
+        if (withFreeIPA) {
+            builder.withFreeIpa(freeIpaConverter.convert(environmentDto.getFreeIpaCreation()));
+        }
         return builder.build();
     }
 
