@@ -135,7 +135,8 @@ class ExposedServiceCollectorTest {
                 "STREAMS_MESSAGING_MANAGER_UI",
                 "ZEPPELIN_SERVER",
                 "QUEUEMANAGER_WEBAPP",
-                "KNOX");
+                "KNOX",
+                "QUERY_PROCESSOR");
     }
 
     @Test
@@ -250,7 +251,8 @@ class ExposedServiceCollectorTest {
                 "YARNUIV2",
                 "ZEPPELIN",
                 "QUEUEMANAGER_WEBAPP",
-                "KNOX_TOKEN_INTEGRATOR");
+                "KNOX_TOKEN_INTEGRATOR",
+                "QUERY_PROCESSOR");
     }
 
     @Test
@@ -308,7 +310,8 @@ class ExposedServiceCollectorTest {
                 "QUEUEMANAGER_WEBAPP",
                 "KNOX_TOKEN_INTEGRATOR",
                 "KAFKA_CONNECT",
-                "SSB-SSE-API");
+                "SSB-SSE-API",
+                "QUERY_PROCESSOR");
     }
 
     @Test
@@ -367,7 +370,8 @@ class ExposedServiceCollectorTest {
             "QUEUEMANAGER_WEBAPP",
             "KNOX_TOKEN_INTEGRATOR",
             "KAFKA_CONNECT",
-            "SSB-SSE-API");
+            "SSB-SSE-API",
+                "QUERY_PROCESSOR");
     }
 
     @Test
@@ -417,7 +421,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHBASE", 20550),
                 Map.entry("WEBHDFS", 9870),
                 Map.entry("YARNUIV2", 8088),
-                Map.entry("ZEPPELIN", 8885)
+                Map.entry("ZEPPELIN", 8885),
+                Map.entry("QUERY_PROCESSOR", 30700)
         );
     }
 
@@ -472,7 +477,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHBASE", 20550),
                 Map.entry("WEBHDFS", 9870),
                 Map.entry("YARNUIV2", 8088),
-                Map.entry("ZEPPELIN", 8885)
+                Map.entry("ZEPPELIN", 8885),
+                Map.entry("QUERY_PROCESSOR", 30700)
         );
     }
 
@@ -530,7 +536,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHBASE", 20550),
                 Map.entry("WEBHDFS", 9870),
                 Map.entry("YARNUIV2", 8088),
-                Map.entry("ZEPPELIN", 8885)
+                Map.entry("ZEPPELIN", 8885),
+                Map.entry("QUERY_PROCESSOR", 30700)
         );
     }
 
@@ -581,7 +588,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHBASE", 20550),
                 Map.entry("WEBHDFS", 9871),
                 Map.entry("YARNUIV2", 8090),
-                Map.entry("ZEPPELIN", 8886)
+                Map.entry("ZEPPELIN", 8886),
+                Map.entry("QUERY_PROCESSOR", 30700)
         );
     }
 
@@ -636,7 +644,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHBASE", 20550),
                 Map.entry("WEBHDFS", 9871),
                 Map.entry("YARNUIV2", 8090),
-                Map.entry("ZEPPELIN", 8886)
+                Map.entry("ZEPPELIN", 8886),
+                Map.entry("QUERY_PROCESSOR", 30700)
         );
     }
 
@@ -694,7 +703,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("WEBHBASE", 20550),
                 Map.entry("WEBHDFS", 9871),
                 Map.entry("YARNUIV2", 8090),
-                Map.entry("ZEPPELIN", 8886)
+                Map.entry("ZEPPELIN", 8886),
+                Map.entry("QUERY_PROCESSOR", 30700)
         );
     }
 
