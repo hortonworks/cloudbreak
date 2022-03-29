@@ -622,6 +622,64 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"tier\": \"Regional\""));
     }
 
+    @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndOutboundLoadBalancer {0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildWithGatewayInstanceGroupTypeAndOutboundLoadBalancer(String templatePath) {
+        assumeTrue(isTemplateVersionGreaterOrEqualThan(templatePath, "2.7.3.0"));
+        //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
+        Network network = new Network(new Subnet(SUBNET_CIDR));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        groups.add(new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap()));
+
+        List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
+        CloudLoadBalancer privateLb = new CloudLoadBalancer(LoadBalancerType.PRIVATE);
+        privateLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(privateLb);
+        CloudLoadBalancer outboundLb = new CloudLoadBalancer(LoadBalancerType.OUTBOUND);
+        outboundLb.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), new HashSet<>(groups));
+        loadBalancers.add(outboundLb);
+
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION, null);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertTrue(templateString.contains("\"type\": \"Microsoft.Network/loadBalancers\","));
+        assertTrue(templateString.contains("\"frontendPort\": 443,"));
+        assertTrue(templateString.contains("\"backendPort\": 443,"));
+        assertEquals(1, StringUtils.countMatches(templateString, "\"name\": \"port-443-rule\","));
+        assertEquals(1, StringUtils.countMatches(templateString, "\"name\": \"group-gateway-group-outbound-rule\","));
+        assertTrue(templateString.contains("\"name\": \"port-8443-probe\","));
+        assertTrue(templateString.contains("\"name\": \"" + LoadBalancerSku.getDefault().getTemplateName() + "\""));
+        assertEquals(2, StringUtils.countMatches(templateString,
+                "\"[resourceId('Microsoft.Network/loadBalancers'"));
+        assertEquals(2, StringUtils.countMatches(templateString,
+                "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackOUTBOUND', 'gateway-group-pool')]"));
+        assertEquals(2, StringUtils.countMatches(templateString,
+                "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', 'LoadBalancertestStackPRIVATE', 'gateway-group-pool')]"));
+        assertEquals(2, StringUtils.countMatches(templateString,
+                "\"type\": \"Microsoft.Network/loadBalancers\","));
+        assertEquals(1, StringUtils.countMatches(templateString,
+                "\"id\": \"[resourceId('Microsoft.Network/publicIPAddresses', 'LoadBalancertestStackOUTBOUND-publicIp')]\""));
+    }
+
     @ParameterizedTest(name = "buildWithStandardLoadBalancerOnlyTargetGroupsUpdated {0}")
     @MethodSource("templatesPathDataProvider")
     public void buildWithStandardLoadBalancerOnlyTargetGroupsUpdated(String templatePath) {
@@ -724,10 +782,10 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/loadBalancers\","));
         assertTrue(templateString.contains("\"frontendPort\": 443,"));
         assertTrue(templateString.contains("\"backendPort\": 443,"));
-        assertTrue(templateString.contains("\"name\": \"port-443-rule\","));
+        assertEquals(2, StringUtils.countMatches(templateString, "\"name\": \"port-443-rule\","));
         assertTrue(templateString.contains("\"name\": \"port-8443-probe\","));
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
-        assertTrue(templateString.contains("\"name\": \"Basic\""));
+        assertTrue(templateString.contains("\"name\": \"" + LoadBalancerSku.getDefault().getTemplateName() + "\""));
         assertEquals(2, StringUtils.countMatches(templateString,
             "\"[resourceId('Microsoft.Network/loadBalancers'"));
         assertEquals(2, StringUtils.countMatches(templateString,
@@ -738,6 +796,7 @@ public class AzureTemplateBuilderTest {
             "\"type\": \"Microsoft.Network/loadBalancers\","));
         assertEquals(1, StringUtils.countMatches(templateString,
             "\"id\": \"[resourceId('Microsoft.Network/publicIPAddresses', 'LoadBalancertestStackPUBLIC-publicIp')]\""));
+        assertFalse(StringUtils.contains(templateString, "\"name\": \"group-gateway-group-outbound-rule\","));
     }
 
     @ParameterizedTest(name = "testNicDependenciesAreValidJson {0}")

@@ -134,6 +134,26 @@ class AzureLoadBalancerModelBuilderTest {
         assertEquals(LoadBalancerSku.STANDARD, lb.getSku());
     }
 
+    @Test
+    void testGetModelWithOutboundLoadBalancer() {
+        CloudStack mockCloudStack = mock(CloudStack.class);
+        CloudLoadBalancer privateLoadBalancer = createCloudLoadBalancer(LoadBalancerSku.STANDARD);
+        CloudLoadBalancer outboundLoadBalancer = createOutboundCloudLoadBalancer();
+        when(mockCloudStack.getLoadBalancers()).thenReturn(List.of(privateLoadBalancer, outboundLoadBalancer));
+
+        underTest = new AzureLoadBalancerModelBuilder(mockCloudStack, STACK_NAME);
+
+        Map<String, Object> result = underTest.buildModel();
+
+        assertTrue(result.containsKey(LOAD_BALANCERS_KEY));
+        assertTrue(result.get(LOAD_BALANCERS_KEY) instanceof List);
+        List<AzureLoadBalancer> loadBalancers = (List<AzureLoadBalancer>) result.get(LOAD_BALANCERS_KEY);
+        assertEquals(2, loadBalancers.size());
+        assertTrue(loadBalancers.stream().allMatch(lb -> LoadBalancerSku.STANDARD.equals(lb.getSku())));
+        assertTrue(loadBalancers.stream().anyMatch(lb -> LoadBalancerType.PRIVATE.equals(lb.getType())));
+        assertTrue(loadBalancers.stream().anyMatch(lb -> LoadBalancerType.OUTBOUND.equals(lb.getType())));
+    }
+
     private GroupNetwork createGroupNetwork() {
         return new GroupNetwork(OutboundInternetTraffic.DISABLED, new HashSet<>(), new HashMap<>());
     }
@@ -142,7 +162,15 @@ class AzureLoadBalancerModelBuilderTest {
         return createCloudLoadBalancer(null);
     }
 
+    private CloudLoadBalancer createOutboundCloudLoadBalancer() {
+        return createCloudLoadBalancer(LoadBalancerSku.STANDARD, LoadBalancerType.OUTBOUND);
+    }
+
     private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerSku sku) {
+        return createCloudLoadBalancer(sku, LoadBalancerType.PRIVATE);
+    }
+
+    private CloudLoadBalancer createCloudLoadBalancer(LoadBalancerSku sku, LoadBalancerType type) {
         Group targetGroup = new Group(INSTANCE_GROUP_NAME,
                 InstanceGroupType.GATEWAY,
                 List.of(new CloudInstance(INSTANCE_NAME, null, null, "subnet-1", "az1")),
@@ -155,7 +183,7 @@ class AzureLoadBalancerModelBuilderTest {
                 null,
                 createGroupNetwork(),
                 emptyMap());
-        CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(LoadBalancerType.PRIVATE, sku);
+        CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(type, sku);
         cloudLoadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 443), Set.of(targetGroup));
         return cloudLoadBalancer;
     }

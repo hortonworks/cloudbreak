@@ -19,7 +19,7 @@ public enum LoadBalancerSku {
     }
 
     public static LoadBalancerSku getDefault() {
-        return BASIC;
+        return STANDARD;
     }
 
     public static LoadBalancerSku getValueOrDefault(LoadBalancerSku sku) {
