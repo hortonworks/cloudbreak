@@ -65,18 +65,6 @@ public class QueryProcessorConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigs() {
-        TemplatePreparationObject tpo = new Builder().build();
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(QueryStoreRoles.QUERYPROCESSOR, tpo);
-        Map<String, String> paramToVariable =
-                result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getValue));
-        assertThat(paramToVariable).containsOnly(
-            new SimpleEntry<>("data_analytics_studio_user_authentication", "KNOX_PROXY"));
-        result = underTest.getRoleConfigs(QueryStoreRoles.QUERYPROCESSOR, tpo);
-        assertThat(result.isEmpty()).isTrue();
-    }
-
-    @Test
     public void getServiceType() {
         assertThat(underTest.getServiceType()).isEqualTo(QueryStoreRoles.QUERY_PROCESSOR);
     }
