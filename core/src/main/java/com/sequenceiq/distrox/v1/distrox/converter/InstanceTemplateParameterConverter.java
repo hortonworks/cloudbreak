@@ -56,7 +56,8 @@ public class InstanceTemplateParameterConverter {
     private AwsEncryptionV4Parameters convert(AwsEncryptionV1Parameters source, DetailedEnvironmentResponse environment) {
         AwsEncryptionV4Parameters response = new AwsEncryptionV4Parameters();
         EncryptionType dataHubEncryptionKeyType = source.getType();
-        if (EncryptionType.CUSTOM.equals(dataHubEncryptionKeyType)) {
+        if (EncryptionType.CUSTOM.equals(dataHubEncryptionKeyType) ||
+                (EncryptionType.DEFAULT).equals(dataHubEncryptionKeyType)) {
             response.setKey(source.getKey());
             response.setType(source.getType());
         } else {
