@@ -33,7 +33,7 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
     @Value("${sdx.stack.backup.status.sleeptime_sec:20}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.stack.backup.status.duration_min:90}")
+    @Value("${sdx.stack.backup.status.duration_min:600}")
     private int durationInMinutes;
 
     @Inject
