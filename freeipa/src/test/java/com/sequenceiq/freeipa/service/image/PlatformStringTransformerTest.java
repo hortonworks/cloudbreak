@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.image;
+package com.sequenceiq.freeipa.service.image;
 
 import java.util.stream.Stream;
 
@@ -14,12 +14,13 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureConstants;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpConstants;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
+import com.sequenceiq.freeipa.entity.Stack;
 
 @ExtendWith(MockitoExtension.class)
 class PlatformStringTransformerTest {
 
     @InjectMocks
-    private PlatformStringTransformer platformStringTransformer;
+    private ImageService imageService;
 
     private static Stream<Arguments> variantFlags() {
         return Stream.of(
@@ -48,7 +49,10 @@ class PlatformStringTransformerTest {
     @ParameterizedTest
     @MethodSource("variantFlags")
     public void testUseBaseImageAndDisabledBaseImageShouldReturnError(String platform, String variant, String expected) {
-        Assert.assertEquals(expected.toLowerCase(), platformStringTransformer.getPlatformStringForImageCatalog(platform, variant).nameToLowerCase());
+        Stack stack = new Stack();
+        stack.setCloudPlatform(platform);
+        stack.setPlatformvariant(variant);
+        Assert.assertEquals(expected.toLowerCase(), imageService.getPlatformString(stack).toLowerCase());
     }
 
 }
