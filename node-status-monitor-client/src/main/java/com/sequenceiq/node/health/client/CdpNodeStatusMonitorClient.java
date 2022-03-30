@@ -141,8 +141,9 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
             if (acceptNotFound) {
                 LOGGER.debug("Get 404 from node status response for {}, but it is accepted as an empty response.", path);
                 return null;
+            } else {
+                throw e;
             }
-            throw e;
         } catch (Throwable throwable) {
             String message = String.format("Invoke node status check failed: %s", throwable.getLocalizedMessage());
             LOGGER.warn(message);
@@ -196,9 +197,8 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
                         .merge(message, builder);
                 return builder.build();
             } catch (InvalidProtocolBufferException e) {
-                // skip
+                return null;
             }
-            return null;
         };
     }
 
@@ -212,13 +212,12 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
                         .merge(message, builder);
                 return builder.build();
             } catch (InvalidProtocolBufferException e) {
-                // skip
+                return null;
             }
-            return null;
         };
     }
 
-    private  Function<String, NodeStatusProto.CmMetricsReport> cmMetricsReportBuilderFunction() {
+    private Function<String, NodeStatusProto.CmMetricsReport> cmMetricsReportBuilderFunction() {
         return message -> {
             NodeStatusProto.CmMetricsReport.Builder builder =
                     NodeStatusProto.CmMetricsReport.newBuilder();
@@ -228,9 +227,8 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
                         .merge(message, builder);
                 return builder.build();
             } catch (InvalidProtocolBufferException e) {
-                // skip
+                return null;
             }
-            return null;
         };
     }
 }

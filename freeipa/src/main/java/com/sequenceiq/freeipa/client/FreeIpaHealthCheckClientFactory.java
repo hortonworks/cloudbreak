@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.client.RpcListener;
 
 @Component
-public class FreeIpaHealthCheckClientFactory extends FreeIpaClientFactory<FreeIpaHealthCheckClient> {
+public class FreeIpaHealthCheckClientFactory extends AbstractFreeIpaHttpClientFactory<FreeIpaHealthCheckClient> {
 
     protected static final String DEFAULT_BASE_PATH = "/freeipahealthcheck";
 
@@ -24,7 +24,7 @@ public class FreeIpaHealthCheckClientFactory extends FreeIpaClientFactory<FreeIp
     private int readTimeoutMillis;
 
     @Override
-    protected FreeIpaHealthCheckClient instantiateClient(Map<String, String>  headers, RpcListener listener, Client restClient,
+    protected FreeIpaHealthCheckClient instantiateClient(Map<String, String> headers, RpcListener listener, Client restClient,
             URL freeIpaHealthCheckUrl) {
         return new FreeIpaHealthCheckClient(restClient, freeIpaHealthCheckUrl, headers, listener);
     }
