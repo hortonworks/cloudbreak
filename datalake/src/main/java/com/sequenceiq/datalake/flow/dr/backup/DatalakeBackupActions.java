@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -343,7 +344,11 @@ public class DatalakeBackupActions {
         if (variables.containsKey(REASON) && variables.get(REASON).equals(DatalakeBackupFailureReason.BACKUP_ON_UPGRADE.name())) {
             reason.append("Upgrade not started, datalake backup failed.");
         } else {
-            reason.append("Backup failed, returning datalake to running state.");
+            if (exception instanceof PollerStoppedException) {
+                reason.append("Backup timed out, see the backup status using cdp-cli for the latest.");
+            } else {
+                reason.append("Backup failed, returning datalake to running state.");
+            }
         }
         if (exception != null && StringUtils.isNotEmpty(exception.getMessage())) {
             reason.append(" Failure message: ").append(exception.getMessage());
