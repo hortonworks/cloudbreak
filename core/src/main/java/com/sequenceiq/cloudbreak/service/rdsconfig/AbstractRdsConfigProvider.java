@@ -110,11 +110,11 @@ public abstract class AbstractRdsConfigProvider {
         return cluster.getRdsConfigs();
     }
 
-    private void populateNewRdsConfig(Stack stack, Cluster cluster, RDSConfig rdsConfig) {
-        rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), rdsConfig, stack.getWorkspace().getId());
-        var rdsC = new HashSet<>(cluster.getRdsConfigs());
-        rdsC.add(rdsConfig);
-        cluster.setRdsConfigs(rdsC);
+    private void populateNewRdsConfig(Stack stack, Cluster cluster, RDSConfig newRdsConfig) {
+        RDSConfig rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), newRdsConfig, stack.getWorkspace().getId());
+        Set<RDSConfig> rdsConfigs = new HashSet<>(cluster.getRdsConfigs());
+        rdsConfigs.add(rdsConfig);
+        cluster.setRdsConfigs(rdsConfigs);
         clusterService.save(cluster);
     }
 
