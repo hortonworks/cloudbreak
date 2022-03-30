@@ -21,7 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -112,7 +112,7 @@ class EnvironmentInitHandlerTest {
         when(environmentNetworkConverter.convertToNetwork(environment.getNetwork())).thenReturn(network);
         when(environmentNetworkService.getNetworkCidr(any(), anyString(), any())).thenReturn(new NetworkCidr(cidr));
         when(environmentService.findEnvironmentById(dto.getId())).thenReturn(Optional.of(environment));
-        Map<UmsRight, String> virtualGroups = Map.of(UmsRight.HBASE_ADMIN, "apple1", UmsRight.ENVIRONMENT_ACCESS, "apple2");
+        Map<UmsVirtualGroupRight, String> virtualGroups = Map.of(UmsVirtualGroupRight.HBASE_ADMIN, "apple1", UmsVirtualGroupRight.ENVIRONMENT_ACCESS, "apple2");
         when(virtualGroupService.createVirtualGroups(ACCOUNT_ID, CRN)).thenReturn(virtualGroups);
         CloudRegions cloudRegions = new CloudRegions(Collections.emptyMap(), Collections.emptyMap(),
                 Collections.emptyMap(), "apple", true);

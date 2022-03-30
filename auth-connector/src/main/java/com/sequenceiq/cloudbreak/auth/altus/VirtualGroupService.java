@@ -26,9 +26,9 @@ public class VirtualGroupService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public Map<UmsRight, String> createVirtualGroups(String accountId, String environmentCrn) {
-        Map<UmsRight, String> virtualGroups = new HashMap<>();
-        for (UmsRight right : UmsRight.values()) {
+    public Map<UmsVirtualGroupRight, String> createVirtualGroups(String accountId, String environmentCrn) {
+        Map<UmsVirtualGroupRight, String> virtualGroups = new HashMap<>();
+        for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
             virtualGroups.put(right, createOrGetVirtualGroup(accountId, environmentCrn, right.getRight()));
         }
         return virtualGroups;
@@ -47,7 +47,7 @@ public class VirtualGroupService {
     }
 
     public void cleanupVirtualGroups(String accountId, String environmentCrn) {
-        for (UmsRight right : UmsRight.values()) {
+        for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
             try {
                 LOGGER.debug("Start deleting virtual groups from UMS for environment '{}'", environmentCrn);
                 grpcUmsClient.deleteWorkloadAdministrationGroupName(accountId,

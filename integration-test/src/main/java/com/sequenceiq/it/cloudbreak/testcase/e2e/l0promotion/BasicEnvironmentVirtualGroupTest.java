@@ -21,7 +21,7 @@ import org.springframework.util.StringUtils;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Multimap;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -88,7 +88,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
             when = "assign then unassigned Environment Admin and Environment User",
             then = "FreeIPA should be successfully synced with new users and theirs resource roles.")
     public void testAddUsersToEnvironment(TestContext testContext) {
-        AtomicReference<Map<UmsRight, String>> environmentVirtualGroups = new AtomicReference<>();
+        AtomicReference<Map<UmsVirtualGroupRight, String>> environmentVirtualGroups = new AtomicReference<>();
         String workloadUsernameEnvAdminA = testContext.getRealUmsUserByKey(L0UserKeys.ENV_ADMIN_A).getWorkloadUserName();
         String workloadUsernameEnvCreatorB =  testContext.getRealUmsUserByKey(L0UserKeys.ENV_CREATOR_B).getWorkloadUserName();
 
@@ -155,7 +155,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
             when = "add then remove admin and user groups to Environment",
             then = "FreeIPA should be successfully synced with new groups and theirs resource roles.")
     public void testAddGroupsToEnvironment(TestContext testContext) {
-        AtomicReference<Map<UmsRight, String>> environmentVirtualGroups = new AtomicReference<>();
+        AtomicReference<Map<UmsVirtualGroupRight, String>> environmentVirtualGroups = new AtomicReference<>();
         CloudbreakUser userEnvAdminA = testContext.getRealUmsUserByKey(L0UserKeys.ENV_ADMIN_A);
         CloudbreakUser userEnvCreatorB =  testContext.getRealUmsUserByKey(L0UserKeys.ENV_CREATOR_B);
         CloudbreakUser userEnvCreatorA =  testContext.getRealUmsUserByKey(L0UserKeys.ENV_CREATOR_A);
@@ -237,13 +237,13 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .validate();
     }
 
-    private Map<UmsRight, String> getEnvironmentVirtualGroups(TestContext testContext, UmsClient client) {
+    private Map<UmsVirtualGroupRight, String> getEnvironmentVirtualGroups(TestContext testContext, UmsClient client) {
         String accountId = testContext.getActingUserCrn().getAccountId();
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
-        Map<UmsRight, String> virtualGroups = new HashMap<>();
+        Map<UmsVirtualGroupRight, String> virtualGroups = new HashMap<>();
         String virtualGroup = null;
 
-        for (UmsRight right : UmsRight.values()) {
+        for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
             try {
                 virtualGroup = client.getDefaultClient().getWorkloadAdministrationGroupName(accountId, MDCUtils.getRequestId(),
                         right.getRight(), environmentCrn, regionAwareInternalCrnGeneratorFactory);
@@ -267,8 +267,8 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
         return virtualGroups;
     }
 
-    private FreeIpaTestDto validateAdminVirtualGroupMembership(TestContext testContext, FreeIpaTestDto testDto, Map<UmsRight, String> environmentVirtualGroups,
-            Set<String> adminUsers, boolean expectedPresence) {
+    private FreeIpaTestDto validateAdminVirtualGroupMembership(TestContext testContext, FreeIpaTestDto testDto,
+            Map<UmsVirtualGroupRight, String> environmentVirtualGroups, Set<String> adminUsers, boolean expectedPresence) {
 
         List<String> adminGroups = environmentVirtualGroups
                 .entrySet().stream()
@@ -281,8 +281,8 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
         return testDto;
     }
 
-    private FreeIpaTestDto validateUserVirtualGroupMembership(TestContext testContext, FreeIpaTestDto testDto, Map<UmsRight, String> environmentVirtualGroups,
-            Set<String> environmentUsers, boolean expectedPresence) {
+    private FreeIpaTestDto validateUserVirtualGroupMembership(TestContext testContext, FreeIpaTestDto testDto,
+            Map<UmsVirtualGroupRight, String> environmentVirtualGroups, Set<String> environmentUsers, boolean expectedPresence) {
 
         List<String> userGroups = environmentVirtualGroups
                 .entrySet().stream()

@@ -210,7 +210,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.io.Resources;
 import com.google.protobuf.util.JsonFormat;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
@@ -637,7 +637,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         LOGGER.info("List workload administration groups: {}", accountId);
 
         ListWorkloadAdministrationGroupsResponse.Builder responseBuilder = ListWorkloadAdministrationGroupsResponse.newBuilder();
-        for (UmsRight right : UmsRight.values()) {
+        for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
             Group group = mockGroupManagementService.createGroup(accountId, mockGroupManagementService.generateWorkloadGroupName(right.getRight()));
             responseBuilder.addWorkloadAdministrationGroup(
                     WorkloadAdministrationGroup.newBuilder()

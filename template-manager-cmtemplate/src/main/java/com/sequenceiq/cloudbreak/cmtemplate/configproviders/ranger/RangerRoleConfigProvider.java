@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -96,12 +96,12 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
                 VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
 
                 if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_1)) {
-                    String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.RANGER_ADMIN.getRight());
+                    String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.RANGER_ADMIN.getRight());
                     configList.add(config(RANGER_DEFAULT_POLICY_GROUPS, adminGroup));
                 }
 
                 if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_6_0)) {
-                    String hbaseAdminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.HBASE_ADMIN.getRight());
+                    String hbaseAdminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.HBASE_ADMIN.getRight());
                     configList.add(config(RANGER_HBASE_ADMIN_VIRTUAL_GROUPS, hbaseAdminGroup));
                 }
                 return configList;

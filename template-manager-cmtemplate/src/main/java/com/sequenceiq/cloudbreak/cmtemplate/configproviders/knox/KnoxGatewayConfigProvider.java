@@ -23,7 +23,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -103,7 +103,7 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
         String masterSecret = gateway != null ? gateway.getMasterSecret() : generalClusterConfigs.getPassword();
         String topologyName = gateway != null && gateway.getExposedServices() != null ? gateway.getTopologyName() : DEFAULT_TOPOLOGY;
         VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
-        String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.KNOX_ADMIN.getRight());
+        String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.KNOX_ADMIN.getRight());
 
         switch (roleType) {
             case KnoxRoles.KNOX_GATEWAY:

@@ -24,7 +24,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -175,7 +175,7 @@ public class KnoxGatewayConfigProviderTest {
                         .withName("CDH")))
                 .withIdBroker(idBroker)
                 .build();
-        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
+        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN.getRight())).thenReturn("");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(true);
 
         assertEquals(
@@ -236,7 +236,7 @@ public class KnoxGatewayConfigProviderTest {
                         .withName("CDH")))
                 .withIdBroker(idBroker)
                 .build();
-        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
+        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN.getRight())).thenReturn("");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(false);
 
         assertEquals(
@@ -288,7 +288,7 @@ public class KnoxGatewayConfigProviderTest {
                         .withVersion("7.2.10")
                         .withName("CDH")))
                 .build();
-        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
+        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN.getRight())).thenReturn("");
         assertEquals(
                 List.of(
                         config("idbroker_master_secret", "supersecret"),
@@ -338,7 +338,7 @@ public class KnoxGatewayConfigProviderTest {
                         .withName("CDH")))
                 .withIdBroker(idBroker)
                 .build();
-        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
+        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(true);
 
         assertEquals(
@@ -395,7 +395,7 @@ public class KnoxGatewayConfigProviderTest {
                         .withName("CDH")))
                 .withIdBroker(idBroker)
                 .build();
-        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
+        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(false);
 
         assertEquals(

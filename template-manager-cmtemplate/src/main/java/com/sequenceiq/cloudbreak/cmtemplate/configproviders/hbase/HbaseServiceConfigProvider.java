@@ -12,7 +12,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateComponentConfigProvider;
@@ -32,7 +32,7 @@ public class HbaseServiceConfigProvider implements CmTemplateComponentConfigProv
         String cmVersion = templateProcessor.getCmVersion().orElse("");
         if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_0)) {
             VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
-            String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.HBASE_ADMIN.getRight());
+            String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.HBASE_ADMIN.getRight());
             configList.add(config(SPNEGO_ADMIN_GROUP, adminGroup));
         }
         return configList;
