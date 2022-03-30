@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
+import static com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -38,7 +39,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -588,7 +588,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testMockAccountMappings() {
-        when(virtualGroupService.getVirtualGroup(any(VirtualGroupRequest.class), eq(UmsRight.CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
+        when(virtualGroupService.getVirtualGroup(any(VirtualGroupRequest.class), eq(CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
         when(stackMock.getCluster().getFileSystem()).thenReturn(new FileSystem());
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
 
@@ -602,7 +602,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testMockAccountMappingsWhenNoFileSystemShouldReturnEmptyList() {
-        when(virtualGroupService.getVirtualGroup(any(VirtualGroupRequest.class), eq(UmsRight.CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
+        when(virtualGroupService.getVirtualGroup(any(VirtualGroupRequest.class), eq(CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
         when(stackMock.getCluster().getFileSystem()).thenReturn(null);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
 

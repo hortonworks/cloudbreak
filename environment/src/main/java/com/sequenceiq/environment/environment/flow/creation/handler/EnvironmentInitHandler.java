@@ -11,7 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -125,7 +125,7 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
     private boolean createVirtualGroups(Environment environment, String envCrn) {
         boolean result = false;
         if (StringUtils.isEmpty(environment.getAdminGroupName())) {
-            Map<UmsRight, String> virtualGroups = virtualGroupService.createVirtualGroups(environment.getAccountId(), envCrn);
+            Map<UmsVirtualGroupRight, String> virtualGroups = virtualGroupService.createVirtualGroups(environment.getAccountId(), envCrn);
             LOGGER.info("The virtualgroups for [{}] environment are created: {}", environment.getName(), virtualGroups);
             result = true;
         }

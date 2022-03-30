@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
-public enum UmsRight {
+public enum UmsVirtualGroupRight {
     ENVIRONMENT_ACCESS("environments/accessEnvironment"),
     CLOUDER_MANAGER_ADMIN("environments/adminClouderaManager"),
     RANGER_ADMIN("environments/adminRanger"),
@@ -12,7 +12,7 @@ public enum UmsRight {
 
     private final String right;
 
-    UmsRight(String right) {
+    UmsVirtualGroupRight(String right) {
         this.right = right;
     }
 

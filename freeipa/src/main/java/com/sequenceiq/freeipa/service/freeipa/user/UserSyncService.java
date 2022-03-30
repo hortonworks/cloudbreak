@@ -161,6 +161,9 @@ public class UserSyncService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private UmsVirtualGroupCreateService umsVirtualGroupCreateService;
+
     public Operation synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter, WorkloadCredentialsUpdateType workloadCredentialsUpdateType) {
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(userCrnFilter, machineUserCrnFilter, Optional.empty());
@@ -284,6 +287,10 @@ public class UserSyncService {
 
             LogEvent logUserSyncEvent = options.isFullSync() ? LogEvent.FULL_USER_SYNC : LogEvent.PARTIAL_USER_SYNC;
             LOGGER.info("Starting {} for environments {} with operationId {} ...", logUserSyncEvent, environmentCrns, operationId);
+
+            if (options.isFullSync()) {
+                umsVirtualGroupCreateService.createVirtualGroups(accountId, environmentCrns);
+            }
 
             Map<String, Future<SyncStatusDetail>> statusFutures;
 

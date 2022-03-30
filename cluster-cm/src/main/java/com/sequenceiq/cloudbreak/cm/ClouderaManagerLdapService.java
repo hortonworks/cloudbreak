@@ -21,7 +21,7 @@ import com.cloudera.api.swagger.model.ApiAuthRoleRef;
 import com.cloudera.api.swagger.model.ApiExternalUserMapping;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingType;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -74,7 +74,7 @@ public class ClouderaManagerLdapService {
                 Optional<ApiAuthRoleMetadata> limitedAdminRoleOpt = findRole(roleMetadataList, limitedAdminRole);
                 Optional<ApiAuthRoleMetadata> role = limitedAdminRoleOpt.isPresent() ? limitedAdminRoleOpt : findRole(roleMetadataList, adminRole);
                 if (role.isPresent()) {
-                    String virtualGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.CLOUDER_MANAGER_ADMIN.getRight());
+                    String virtualGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN.getRight());
                     addGroupMapping(externalUserMappingsResourceApi, role.get(), dashboardUserRoleOpt, virtualGroup);
                 } else {
                     LOGGER.info("Cannot setup admin group mapping. Admin roles ({}, {}) are not found", adminRole, limitedAdminRole);

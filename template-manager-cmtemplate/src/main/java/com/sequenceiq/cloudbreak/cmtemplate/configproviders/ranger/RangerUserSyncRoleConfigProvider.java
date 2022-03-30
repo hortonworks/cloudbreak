@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
@@ -41,7 +41,7 @@ public class RangerUserSyncRoleConfigProvider extends AbstractRoleConfigProvider
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
-        String adminGroup = virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.RANGER_ADMIN.getRight());
+        String adminGroup = virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.RANGER_ADMIN.getRight());
         String rangerAdminAsSysAdminConfigProvider = rangerAdminAsSysAdminConfigProvider(source);
         if (CloudPlatform.AZURE.equals(source.getCloudPlatform()) && source.getGeneralClusterConfigs().isEnableRangerRaz()
                 && source.getServicePrincipals() != null) {
