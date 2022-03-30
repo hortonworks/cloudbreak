@@ -144,6 +144,8 @@ dependencies {
   implementation project(':cloud-aws-cloudformation')
   implementation project(':cloud-aws-native')
   implementation project(':cloud-aws-gov')
+  implementation project(':cloud-azure')
+  implementation project(':cloud-gcp')
 
   runtimeOnly project(':orchestrator-salt')
   runtimeOnly project(':cloud-mock')

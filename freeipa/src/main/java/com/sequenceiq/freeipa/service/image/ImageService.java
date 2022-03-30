@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
@@ -32,6 +33,8 @@ public class ImageService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
 
     private static final String DEFAULT_REGION = "default";
+
+    private static final String GOV = "_gov";
 
     @Inject
     private ImageToImageEntityConverter imageConverter;
@@ -86,13 +89,14 @@ public class ImageService {
         return Pair.of(imageWrapper, imageName);
     }
 
-    private String getPlatformString(Stack stack) {
+    @VisibleForTesting
+    String getPlatformString(Stack stack) {
         String platformVariant = stack.getPlatformvariant();
         String platform = stack.getCloudPlatform().toLowerCase();
         if (Strings.isNullOrEmpty(platformVariant)) {
             return platform;
-        } else if (platformVariant.toLowerCase().endsWith("_gov")) {
-            return platformVariant.toLowerCase();
+        } else if (platformVariant.toLowerCase().endsWith(GOV)) {
+            return platform.concat(GOV).toLowerCase();
         } else {
             return platform;
         }
