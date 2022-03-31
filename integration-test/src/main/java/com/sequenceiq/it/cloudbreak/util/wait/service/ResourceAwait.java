@@ -21,10 +21,10 @@ public class ResourceAwait {
 
     public <E extends Enum<E>> CloudbreakTestDto await(CloudbreakTestDto entity, Map<String, E> desiredStatuses,
             TestContext testContext, RunningParameter runningParameter, Duration pollingInterval, int maxRetry, int maxRetryCount, MicroserviceClient client) {
+        if (entity == null) {
+            throw new RuntimeException("Cloudbreak key has been provided but no result in resource map!");
+        }
         try {
-            if (entity == null) {
-                throw new RuntimeException("Cloudbreak key has been provided but no result in resource map!");
-            }
             Log.await(LOGGER, String.format("%s for %s", entity.getName(), desiredStatuses));
             String name = entity.getName();
             WaitObject waitObject = client.waitObject(entity, name, desiredStatuses, testContext, runningParameter.getIgnoredStatuses());

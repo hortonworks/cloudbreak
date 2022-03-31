@@ -59,7 +59,7 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
                     .getDefaultClient().distroXV1Endpoint().getByName(name, Set.of()).getInstanceGroups();
             instanceResourceType = "Data Hub";
         } catch (NotFoundException e) {
-            LOGGER.info("SDX '{}' instance groups are present for validation.", getName());
+            LOGGER.info("SDX '{}' instance groups are present for validation.", name);
             instanceGroups = testContext.getSdxClient().getDefaultClient().sdxEndpoint().getDetail(name, Set.of()).getStackV4Response().getInstanceGroups();
         } catch (Exception e) {
             LOGGER.error("Instance groups cannot be determined, because of: {}", e.getMessage(), e);
@@ -71,7 +71,7 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
     public Map<String, String> actualStatuses() {
         return getInstanceMetaDatas().stream()
                 .collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId,
-                        instanceMetaDataV4Response -> instanceMetaDataV4Response.getInstanceStatus().name()));
+                        instanceMetaData -> instanceMetaData.getInstanceStatus().name()));
     }
 
     @Override
@@ -150,7 +150,7 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
     @Override
     public Map<String, String> getFetchedInstanceStatuses() {
         return getInstanceMetaDatas().stream().collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId,
-                instanceMetaDataV4Response -> instanceMetaDataV4Response.getInstanceStatus().name()));
+                instanceMetaData -> instanceMetaData.getInstanceStatus().name()));
     }
 
     public Map<String, InstanceStatus> getInstanceStatuses() {
