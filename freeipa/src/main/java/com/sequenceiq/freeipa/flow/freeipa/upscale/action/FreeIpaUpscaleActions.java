@@ -246,11 +246,23 @@ public class FreeIpaUpscaleActions {
                     LOGGER.info(format("Failed to upscale stack: %s", context.getCloudContext()), exception);
                     throw new OperationException(exception);
                 }
-                List<CloudResourceStatus> templates = results.stream().filter(result -> CommonResourceType.TEMPLATE == result.getCloudResource().getType()
-                        .getCommonResourceType()).collect(Collectors.toList());
-                if (!templates.isEmpty() && (templates.get(0).isFailed() || templates.get(0).isDeleted())) {
-                    throw new OperationException(format("Failed to upscale the stack for %s due to: %s",
-                            context.getCloudContext(), templates.get(0).getStatusReason()));
+                List<CloudResourceStatus> missingResources = results.stream()
+                        .filter(result -> CommonResourceType.TEMPLATE == result.getCloudResource().getType().getCommonResourceType())
+                        .filter(status -> status.isFailed() || status.isDeleted())
+                        .collect(Collectors.toList());
+
+                if (!missingResources.isEmpty()) {
+                    StringBuilder message = new StringBuilder("Failed to upscale the stack for ")
+                            .append(context.getCloudContext())
+                            .append(" due to: ");
+                    missingResources.forEach(res ->
+                            message.append("[privateId: ")
+                                    .append(res.getPrivateId())
+                                    .append(", statusReason: ")
+                                    .append(res.getStatusReason())
+                                    .append("] "));
+                    LOGGER.warn(message.toString());
+                    throw new OperationException(message.toString());
                 }
             }
 
