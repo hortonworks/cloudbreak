@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.parcel;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
@@ -8,6 +9,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -18,18 +21,25 @@ import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
 @Component
 public class ClouderaManagerProductTransformer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerProductTransformer.class);
+
     @Inject
     private PreWarmParcelParser preWarmParcelParser;
 
     public Set<ClouderaManagerProduct> transform(Image image, boolean getCdhParcel, boolean getPreWarmParcels) {
-        Set<ClouderaManagerProduct> products = new HashSet<>();
-        if (getCdhParcel) {
-            products.add(getCdhParcel(image));
+        if (image.isPrewarmed()) {
+            Set<ClouderaManagerProduct> products = new HashSet<>();
+            if (getCdhParcel) {
+                products.add(getCdhParcel(image));
+            }
+            if (getPreWarmParcels) {
+                products.addAll(getPreWarmParcels(image));
+            }
+            return products;
+        } else {
+            LOGGER.debug("Not possible to get the products from the image because this is not a pre warmed image. ImageId: {}", image.getUuid());
+            return Collections.emptySet();
         }
-        if (getPreWarmParcels) {
-            products.addAll(getPreWarmParcels(image));
-        }
-        return products;
     }
 
     public Map<String, String> transformToMap(Image image, boolean getCdhParcel, boolean getPreWarmParcels) {
