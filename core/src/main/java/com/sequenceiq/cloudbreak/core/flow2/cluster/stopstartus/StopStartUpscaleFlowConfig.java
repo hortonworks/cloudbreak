@@ -21,10 +21,10 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 
 @Component
-public class StopStartUpscaleFlowConfig extends AbstractFlowConfiguration<StopStartUpscaleState, StopStartUpscaleEvent> {
+public class StopStartUpscaleFlowConfig extends StackStatusFinalizerAbstractFlowConfig<StopStartUpscaleState, StopStartUpscaleEvent> {
 
     private static final List<Transition<StopStartUpscaleState, StopStartUpscaleEvent>> TRANSITIONS =
             new Transition.Builder<StopStartUpscaleState, StopStartUpscaleEvent>()

@@ -11,18 +11,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.validate.cloud.config.CloudCo
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class CloudConfigValidationFlowConfig extends AbstractFlowConfiguration<CloudConfigValidationState, CloudConfigValidationEvent>
+public class CloudConfigValidationFlowConfig extends StackStatusFinalizerAbstractFlowConfig<CloudConfigValidationState, CloudConfigValidationEvent>
         implements RetryableFlowConfiguration<CloudConfigValidationEvent> {
 
     private static final List<Transition<CloudConfigValidationState, CloudConfigValidationEvent>> TRANSITIONS =
@@ -34,9 +30,6 @@ public class CloudConfigValidationFlowConfig extends AbstractFlowConfiguration<C
 
     private static final FlowEdgeConfig<CloudConfigValidationState, CloudConfigValidationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, VALIDATE_CLOUD_CONFIG_FAILED_STATE, VALIDATE_CLOUD_CONFIG_FAILURE_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public CloudConfigValidationFlowConfig() {
         super(CloudConfigValidationState.class, CloudConfigValidationEvent.class);
@@ -72,10 +65,5 @@ public class CloudConfigValidationFlowConfig extends AbstractFlowConfiguration<C
     @Override
     public CloudConfigValidationEvent getRetryableEvent() {
         return VALIDATE_CLOUD_CONFIG_FAILURE_HANDLED_EVENT;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

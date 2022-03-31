@@ -16,17 +16,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.Chan
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent> {
+public class ChangePrimaryGatewayFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent> {
 
     private static final List<Transition<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent>> TRANSITIONS =
             new Builder<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent>()
@@ -43,9 +39,6 @@ public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<Ch
 
     private static final FlowEdgeConfig<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CHANGE_PRIMARY_GATEWAY_FAILED_STATE, CHANGE_PRIMARY_GATEWAY_FAILURE_HANDLED);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public ChangePrimaryGatewayFlowConfig() {
         super(ChangePrimaryGatewayState.class, ChangePrimaryGatewayEvent.class);
@@ -74,10 +67,5 @@ public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<Ch
     @Override
     public String getDisplayName() {
         return "Change primary gateway";
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

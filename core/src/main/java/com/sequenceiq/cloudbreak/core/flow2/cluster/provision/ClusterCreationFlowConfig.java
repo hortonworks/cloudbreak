@@ -46,12 +46,12 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_EXTENDED_TEMPLATE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_PROXY_CONFIG_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.PREPARE_PROXY_CONFIG_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_RECOVERY_CONFIG_FAILED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_RECOVERY_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.REFRESH_PARCEL_REPOS_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.REFRESH_PARCEL_REPOS_SUCCESS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_MONITORING_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_MONITORING_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_RECOVERY_CONFIG_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.SETUP_RECOVERY_CONFIG_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_SERVICES_FAILED_EVENT;
@@ -108,18 +108,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<ClusterCreationState, ClusterCreationEvent>
+public class ClusterCreationFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ClusterCreationState, ClusterCreationEvent>
         implements RetryableFlowConfiguration<ClusterCreationEvent> {
     private static final List<Transition<ClusterCreationState, ClusterCreationEvent>> TRANSITIONS =
             new Builder<ClusterCreationState, ClusterCreationEvent>().defaultFailureEvent(CLUSTER_CREATION_FAILED_EVENT)
@@ -272,9 +268,6 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
     private static final FlowEdgeConfig<ClusterCreationState, ClusterCreationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CLUSTER_CREATION_FAILED_STATE, CLUSTER_CREATION_FAILURE_HANDLED_EVENT);
 
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
-
     public ClusterCreationFlowConfig() {
         super(ClusterCreationState.class, ClusterCreationEvent.class);
     }
@@ -315,10 +308,5 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
     @Override
     public ClusterCreationEvent getRetryableEvent() {
         return CLUSTER_CREATION_FAILURE_HANDLED_EVENT;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

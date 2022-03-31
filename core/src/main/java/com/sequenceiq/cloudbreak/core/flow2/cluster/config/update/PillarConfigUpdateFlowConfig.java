@@ -14,18 +14,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarC
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class PillarConfigUpdateFlowConfig extends
-    AbstractFlowConfiguration<PillarConfigUpdateState, PillarConfigurationUpdateEvent> {
+public class PillarConfigUpdateFlowConfig extends StackStatusFinalizerAbstractFlowConfig<PillarConfigUpdateState, PillarConfigurationUpdateEvent> {
 
     private static final List<Transition<PillarConfigUpdateState, PillarConfigurationUpdateEvent>> TRANSITIONS =
         new Builder<PillarConfigUpdateState, PillarConfigurationUpdateEvent>()
@@ -39,9 +34,6 @@ public class PillarConfigUpdateFlowConfig extends
             PILLAR_CONFIG_UPDATE_FINALIZE_EVENT)
             .noFailureEvent()
             .build();
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public PillarConfigUpdateFlowConfig() {
         super(PillarConfigUpdateState.class, PillarConfigurationUpdateEvent.class);
@@ -71,10 +63,5 @@ public class PillarConfigUpdateFlowConfig extends
     @Override
     public String getDisplayName() {
         return "Pillar configuration update";
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

@@ -26,18 +26,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImage
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class StackImageUpdateFlowConfig extends AbstractFlowConfiguration<StackImageUpdateState, StackImageUpdateEvent> {
+public class StackImageUpdateFlowConfig extends StackStatusFinalizerAbstractFlowConfig<StackImageUpdateState, StackImageUpdateEvent> {
 
     private static final List<Transition<StackImageUpdateState, StackImageUpdateEvent>> TRANSITIONS =
             new Builder<StackImageUpdateState, StackImageUpdateEvent>().defaultFailureEvent(STACK_IMAGE_UPDATE_FAILED_EVENT)
@@ -54,9 +50,6 @@ public class StackImageUpdateFlowConfig extends AbstractFlowConfiguration<StackI
 
     private static final FlowEdgeConfig<StackImageUpdateState, StackImageUpdateEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STACK_IMAGE_UPDATE_FAILED_STATE, STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public StackImageUpdateFlowConfig() {
         super(StackImageUpdateState.class, StackImageUpdateEvent.class);
@@ -90,10 +83,5 @@ public class StackImageUpdateFlowConfig extends AbstractFlowConfiguration<StackI
     @Override
     public String getDisplayName() {
         return "Update stack image";
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

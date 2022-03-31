@@ -19,17 +19,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance.Maintenan
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class MaintenanceModeValidationFlowConfig extends AbstractFlowConfiguration<MaintenanceModeValidationState, MaintenanceModeValidationEvent> {
+public class MaintenanceModeValidationFlowConfig
+        extends StackStatusFinalizerAbstractFlowConfig<MaintenanceModeValidationState, MaintenanceModeValidationEvent> {
     private static final List<Transition<MaintenanceModeValidationState, MaintenanceModeValidationEvent>> TRANSITIONS = new
             Builder<MaintenanceModeValidationState, MaintenanceModeValidationEvent>()
             .defaultFailureEvent(VALIDATION_FLOW_FAILED_EVENT)
@@ -43,9 +40,6 @@ public class MaintenanceModeValidationFlowConfig extends AbstractFlowConfigurati
 
     private static final FlowEdgeConfig<MaintenanceModeValidationState, MaintenanceModeValidationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, VALIDATION_FAILED_STATE, VALIDATION_FAIL_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public MaintenanceModeValidationFlowConfig() {
         super(MaintenanceModeValidationState.class, MaintenanceModeValidationEvent.class);
@@ -76,10 +70,5 @@ public class MaintenanceModeValidationFlowConfig extends AbstractFlowConfigurati
     @Override
     protected FlowEdgeConfig<MaintenanceModeValidationState, MaintenanceModeValidationEvent> getEdgeConfig() {
         return EDGE_CONFIG;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

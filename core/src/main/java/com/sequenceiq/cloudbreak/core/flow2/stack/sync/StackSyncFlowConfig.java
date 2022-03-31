@@ -12,17 +12,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncState.SYN
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncState, StackSyncEvent> {
+public class StackSyncFlowConfig extends StackStatusFinalizerAbstractFlowConfig<StackSyncState, StackSyncEvent> {
     private static final List<Transition<StackSyncState, StackSyncEvent>> TRANSITIONS = new Builder<StackSyncState, StackSyncEvent>()
             .defaultFailureEvent(StackSyncEvent.SYNC_FAILURE_EVENT)
             .from(INIT_STATE).to(SYNC_STATE).event(STACK_SYNC_EVENT).noFailureEvent()
@@ -32,9 +28,6 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
 
     private static final FlowEdgeConfig<StackSyncState, StackSyncEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SYNC_FAILED_STATE, SYNC_FAIL_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public StackSyncFlowConfig() {
         super(StackSyncState.class, StackSyncEvent.class);
@@ -65,10 +58,5 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
     @Override
     protected FlowEdgeConfig<StackSyncState, StackSyncEvent> getEdgeConfig() {
         return EDGE_CONFIG;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }
