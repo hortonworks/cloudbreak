@@ -13,17 +13,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.cmsync.CmSyncState.IN
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class CmSyncFlowConfig extends AbstractFlowConfiguration<CmSyncState, CmSyncEvent> {
+public class CmSyncFlowConfig extends StackStatusFinalizerAbstractFlowConfig<CmSyncState, CmSyncEvent> {
     private static final List<Transition<CmSyncState, CmSyncEvent>> TRANSITIONS =
             new Builder<CmSyncState, CmSyncEvent>()
                     .defaultFailureEvent(CM_SYNC_FAILURE_EVENT)
@@ -37,9 +33,6 @@ public class CmSyncFlowConfig extends AbstractFlowConfiguration<CmSyncState, CmS
 
     private static final FlowEdgeConfig<CmSyncState, CmSyncEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CM_SYNC_FAILED_STATE, CM_SYNC_FAIL_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public CmSyncFlowConfig() {
         super(CmSyncState.class, CmSyncEvent.class);
@@ -70,10 +63,5 @@ public class CmSyncFlowConfig extends AbstractFlowConfiguration<CmSyncState, CmS
     @Override
     public String getDisplayName() {
         return "Sync cluster";
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

@@ -15,18 +15,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.Clus
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class ClusterServicesRestartFlowConfig extends AbstractFlowConfiguration<ClusterServicesRestartState, ClusterServicesRestartEvent>
+public class ClusterServicesRestartFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ClusterServicesRestartState, ClusterServicesRestartEvent>
         implements RetryableFlowConfiguration<ClusterServicesRestartEvent> {
 
     private static final List<Transition<ClusterServicesRestartState, ClusterServicesRestartEvent>> TRANSITIONS =
@@ -51,9 +47,6 @@ public class ClusterServicesRestartFlowConfig extends AbstractFlowConfiguration<
 
     private static final FlowEdgeConfig<ClusterServicesRestartState, ClusterServicesRestartEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_SERVICE_RESTART_FAILED_STATE, FAIL_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public ClusterServicesRestartFlowConfig() {
         super(ClusterServicesRestartState.class, ClusterServicesRestartEvent.class);
@@ -89,10 +82,5 @@ public class ClusterServicesRestartFlowConfig extends AbstractFlowConfiguration<
     @Override
     public ClusterServicesRestartEvent getRetryableEvent() {
         return FAIL_HANDLED_EVENT;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

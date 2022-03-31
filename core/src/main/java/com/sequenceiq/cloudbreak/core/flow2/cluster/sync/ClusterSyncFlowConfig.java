@@ -11,17 +11,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncState
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class ClusterSyncFlowConfig extends AbstractFlowConfiguration<ClusterSyncState, ClusterSyncEvent> {
+public class ClusterSyncFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ClusterSyncState, ClusterSyncEvent> {
     private static final List<Transition<ClusterSyncState, ClusterSyncEvent>> TRANSITIONS =
             new Builder<ClusterSyncState, ClusterSyncEvent>()
                     .from(INIT_STATE).to(CLUSTER_SYNC_STATE).event(CLUSTER_SYNC_EVENT).noFailureEvent()
@@ -32,9 +28,6 @@ public class ClusterSyncFlowConfig extends AbstractFlowConfiguration<ClusterSync
 
     private static final FlowEdgeConfig<ClusterSyncState, ClusterSyncEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_SYNC_FAILED_STATE, FAIL_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public ClusterSyncFlowConfig() {
         super(ClusterSyncState.class, ClusterSyncEvent.class);
@@ -65,10 +58,5 @@ public class ClusterSyncFlowConfig extends AbstractFlowConfiguration<ClusterSync
     @Override
     public String getDisplayName() {
         return "Sync cluster";
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

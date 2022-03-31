@@ -17,18 +17,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.Clus
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterUpgradeState, ClusterUpgradeEvent>
+public class ClusterUpgradeFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ClusterUpgradeState, ClusterUpgradeEvent>
     implements RetryableFlowConfiguration<ClusterUpgradeEvent> {
 
     private static final List<Transition<ClusterUpgradeState, ClusterUpgradeEvent>> TRANSITIONS =
@@ -54,9 +50,6 @@ public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterU
 
     private static final FlowEdgeConfig<ClusterUpgradeState, ClusterUpgradeEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_UPGRADE_FAILED_STATE, CLUSTER_UPGRADE_FAIL_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public ClusterUpgradeFlowConfig() {
         super(ClusterUpgradeState.class, ClusterUpgradeEvent.class);
@@ -92,10 +85,5 @@ public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterU
     @Override
     public ClusterUpgradeEvent getRetryableEvent() {
         return CLUSTER_UPGRADE_FAIL_HANDLED_EVENT;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

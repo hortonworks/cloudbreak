@@ -13,18 +13,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.co
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class ExternalDatabaseCreationFlowConfig extends AbstractFlowConfiguration<ExternalDatabaseCreationState, ExternalDatabaseCreationEvent>
+public class ExternalDatabaseCreationFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ExternalDatabaseCreationState, ExternalDatabaseCreationEvent>
         implements RetryableFlowConfiguration<ExternalDatabaseCreationEvent> {
 
     private static final List<Transition<ExternalDatabaseCreationState, ExternalDatabaseCreationEvent>> TRANSITIONS =
@@ -43,9 +39,6 @@ public class ExternalDatabaseCreationFlowConfig extends AbstractFlowConfiguratio
 
     private static final FlowEdgeConfig<ExternalDatabaseCreationState, ExternalDatabaseCreationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, EXTERNAL_DATABASE_CREATION_FAILED_STATE, EXTERNAL_DATABASE_CREATION_FAILURE_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public ExternalDatabaseCreationFlowConfig() {
         super(ExternalDatabaseCreationState.class, ExternalDatabaseCreationEvent.class);
@@ -81,10 +74,5 @@ public class ExternalDatabaseCreationFlowConfig extends AbstractFlowConfiguratio
     @Override
     public ExternalDatabaseCreationEvent getRetryableEvent() {
         return EXTERNAL_DATABASE_CREATION_FAILURE_HANDLED_EVENT;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }
