@@ -262,6 +262,7 @@ message AltusIamUserCreated {
   // Whether the uer was created by an explicit call to createUser IAM API or
   // implicitly when the user logged in interactively.
   bool explicitlyCreated = 12;
+  string random = 13;
 }
 
 // Generated when an Altus user record has been updated. This event is only
