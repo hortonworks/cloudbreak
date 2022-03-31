@@ -29,7 +29,7 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final int TWO_CERTS = 2;
 
-    private static final int FIVE_CERTS = 5;
+    private static final int FIVE_CERTS = 7;
 
     private static final int VERSION_0 = 0;
 
@@ -68,6 +68,10 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     private static final String REGION_MES1 = "me-south-1";
 
+    private static final String REGION_USGE1 = "us-gov-east-1";
+
+    private static final String REGION_USGW1 = "us-gov-west-1";
+
     private static final String REGION_DUMMY = "dummy";
 
     @Inject
@@ -105,8 +109,17 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
     @Test
     void getSupportedPlatformsForCertsTest() {
-        assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of("aws", "aws." + REGION_EUS1, "aws." + REGION_AFS1, "aws." + REGION_MES1,
-                "azure"));
+        assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(
+                Set.of(
+                    "aws",
+                    "aws." + REGION_EUS1,
+                    "aws." + REGION_USGE1,
+                    "aws." + REGION_AFS1,
+                    "aws." + REGION_MES1,
+                    "aws." + REGION_USGW1,
+                    "azure"
+                )
+        );
     }
 
     @Test
