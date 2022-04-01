@@ -25,7 +25,7 @@ public interface ClusterDecomissionService {
 
     Set<String> decommissionClusterNodesStopStart(Map<String, InstanceMetaData> hostsToRemove, long pollingTimeout);
 
-    void enterMaintenanceMode(Stack stack, Set<String> hostFqdnList);
+    void enterMaintenanceMode(Set<String> hostFqdnList);
 
     void removeManagementServices();
 

@@ -81,7 +81,7 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
         LOGGER.info("StopStartDownscaleDecommissionViaCMHandler for: {}, {}", event.getData().getResourceId(), event.getData());
 
         try {
-            Stack stack = request.getStack();
+            Stack stack = stackService.getByIdWithLists(request.getResourceId());
             Cluster cluster = stack.getCluster();
             ClusterDecomissionService clusterDecomissionService = clusterApiConnectors.getConnector(stack).clusterDecomissionService();
 
@@ -137,7 +137,7 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
                 flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTERINGCMMAINTMODE,
                         String.valueOf(decommissionedHostNames.size()));
 
-                clusterDecomissionService.enterMaintenanceMode(stack, decommissionedHostNames);
+                clusterDecomissionService.enterMaintenanceMode(decommissionedHostNames);
 
                 flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTEREDCMMAINTMODE,
                         String.valueOf(decommissionedHostNames.size()));
