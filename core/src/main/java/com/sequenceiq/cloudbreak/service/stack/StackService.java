@@ -458,7 +458,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         }
     }
 
-    public List<StackStatusView> getByEnvironmentCrnAndStackType(String environmentCrn, StackType stackType) {
+    public List<StackIdView> getByEnvironmentCrnAndStackType(String environmentCrn, StackType stackType) {
         return stackRepository.findByEnvironmentCrnAndStackType(environmentCrn, stackType);
     }
 
