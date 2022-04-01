@@ -1,26 +1,30 @@
 package com.sequenceiq.sdx.api.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiModelProperty;
-
-import javax.validation.constraints.NotNull;
 import java.util.Map;
 import java.util.Objects;
 
+import javax.validation.constraints.NotNull;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SetRangerCloudIdentityMappingRequest {
 
-    @ApiModelProperty
+    @ApiModelProperty(ModelDescriptions.AZURE_USER_MAPPING)
     @NotNull
     private Map<String, String> azureUserMapping;
 
     /**
-     * @deprecated azureGroupMapping is not unsupported
+     * @deprecated azureGroupMapping is not supported
      */
     @Deprecated
-    @ApiModelProperty
+    @ApiModelProperty(ModelDescriptions.AZURE_GROUP_MAPPING)
     private Map<String, String> azureGroupMapping;
 
     public Map<String, String> getAzureUserMapping() {

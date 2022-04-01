@@ -2,25 +2,38 @@ package com.sequenceiq.sdx.api.model;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.sdx.validation.ValidUpgradeRequest;
 
+import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+@ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @ValidUpgradeRequest
 public class SdxUpgradeRequest {
 
+    @ApiModelProperty(ModelDescriptions.IMAGE_ID)
     private String imageId;
 
+    @ApiModelProperty(ModelDescriptions.RUNTIME_VERSION)
     private String runtime;
 
+    @ApiModelProperty(ModelDescriptions.LOCK_COMPONENTS)
     private Boolean lockComponents;
 
+    @ApiModelProperty(ModelDescriptions.DRY_RUN)
     private Boolean dryRun;
 
+    @ApiModelProperty(ModelDescriptions.SKIP_BACKUP)
     private Boolean skipBackup;
 
+    @ApiModelProperty(ModelDescriptions.SHOW_AVAILABLE_IMAGES)
     private SdxUpgradeShowAvailableImages showAvailableImages;
 
+    @ApiModelProperty(ModelDescriptions.REPLACE_VMS)
     private SdxUpgradeReplaceVms replaceVms;
 
     public String getImageId() {

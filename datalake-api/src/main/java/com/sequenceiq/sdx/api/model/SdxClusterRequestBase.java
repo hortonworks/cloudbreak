@@ -7,31 +7,49 @@ import java.util.Map;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxClusterRequestBase implements TaggableRequest {
 
+    @ApiModelProperty(ModelDescriptions.ENVIRONMENT_NAME)
     @NotNull
     private String environment;
 
+    @ApiModelProperty(ModelDescriptions.CLUSTER_SHAPE)
     @NotNull
     private SdxClusterShape clusterShape;
 
+    @ApiModelProperty(ModelDescriptions.CLOUD_STORAGE_DETAILS)
     private SdxCloudStorageRequest cloudStorage;
 
+    @ApiModelProperty(ModelDescriptions.EXTERNAL_DATABASE_OPTIONS)
     private SdxDatabaseRequest externalDatabase;
 
+    @ApiModelProperty(ModelDescriptions.AWS_OPTIONS)
     @Valid
     private SdxAwsRequest aws;
 
+    @ApiModelProperty(ModelDescriptions.AZURE_OPTIONS)
     private SdxAzureRequest azure;
 
+    @ApiModelProperty(ModelDescriptions.TAGS)
     private Map<String, String> tags;
 
+    @ApiModelProperty(ModelDescriptions.RANGER_RAZ_ENABLED)
     private boolean enableRangerRaz;
 
+    @ApiModelProperty(ModelDescriptions.MULTI_AZ_ENABLED)
     private boolean enableMultiAz;
 
+    @ApiModelProperty(ModelDescriptions.CUSTOM_INSTANCE_GROUP_OPTIONS)
     @Valid
     private List<SdxInstanceGroupRequest> customInstanceGroups;
 

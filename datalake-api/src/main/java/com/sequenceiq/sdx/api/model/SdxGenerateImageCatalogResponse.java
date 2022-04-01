@@ -7,12 +7,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 
 import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxGenerateImageCatalogResponse {
 
+    @ApiModelProperty(ModelDescriptions.IMAGE_CATALOG)
     @NotNull
     private CloudbreakImageCatalogV3 imageCatalog;
 

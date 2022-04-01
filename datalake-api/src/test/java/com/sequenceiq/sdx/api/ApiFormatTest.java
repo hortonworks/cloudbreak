@@ -1,0 +1,26 @@
+package com.sequenceiq.sdx.api;
+
+import org.junit.jupiter.api.Test;
+
+import com.sequenceiq.sdx.api.model.ModelDescriptions;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponseTest;
+import com.sequenceiq.sdx.api.model.diagnostics.docs.DiagnosticsOperationDescriptions;
+import com.sequenceiq.cloudbreak.apiformat.ApiFormatValidator;
+
+public class ApiFormatTest {
+
+    @Test
+    public void testApiFormat() {
+        ApiFormatValidator.builder()
+                .modelPackage("com.sequenceiq.sdx.api.model")
+                .excludedClasses(
+                        SdxClusterDetailResponseTest.class,
+                        SdxClusterDetailResponse.Builder.class,
+                        ModelDescriptions.class,
+                        DiagnosticsOperationDescriptions.class
+                )
+                .build()
+                .validate();
+    }
+}

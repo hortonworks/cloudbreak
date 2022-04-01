@@ -10,6 +10,144 @@ public class ModelDescriptions {
 
     public static final String CLOSE_CONNECTIONS = "The conditional parameter for whether connections to the database will be closed during backup or not.";
 
+    public static final String ENVIRONMENT_CRN = "Environment crn.";
+
+    public static final String ENVIRONMENT_NAME = "The name of the environment.";
+
+    public static final String CLUSTER_SHAPE = "The shape of the cluster such as Micro Duty, Light Duty, Medium Duty...";
+
+    public static final String DATA_ACCESS_ROLE = "The role used for cloud storage access.";
+
+    public static final String RANGER_AUDIT_ROLE = "The role used by Ranger for cloud storage access.";
+
+    public static final String CREDENTIAL_CRN = "The crn of the credential used for the cloud provider.";
+
+    public static final String CLOUD_STORAGE_DETAILS = "Details about the cloud storage type and location.";
+
+    public static final String CLOUD_STORAGE_BASE_LOCATION = "Cloud storage base location.";
+
+    public static final String CLOUD_STORAGE_FILE_SYSTEM_TYPE = "Cloud storage file system type.";
+
+    public static final String CLUSTER_TEMPLATE_NAME = "The name of the cluster template used for Data Lake creation.";
+
+    public static final String FLOW_IDENTIFIER = "The id of the flow or flow chain that was triggered as part of the process.";
+
+    public static final String CCM_UPGRADE_RESPONSE_TYPE = "Information about the CCM upgrade process.";
+
+    public static final String CCM_UPGRADE_ERROR_REASON = "Reason of the error if CCM upgrade could not be started.";
+
+    public static final String TEMPLATE_DETAILS = "Template details.";
+
+    public static final String OPERATION_STATUS = "Operation status.";
+
+    public static final String OPERATION_STATUS_REASON = "Operation status reason.";
+
+    public static final String STACK_REQUEST = "Stack request.";
+
+    public static final String STACK_RESPONSE = "Stack response.";
+
+    public static final String OPERATION_ID = "Operation id.";
+
+    public static final String COMMAND_ID = "Command id.";
+
+    public static final String RECOVERABLE_STATUS_REASON = "Description about why the cluster is recoverable or not recoverable.";
+
+    public static final String RECOVERABLE_STATUS = "Status that indicates whether the cluster is recoverable or not recoverable.";
+
+    public static final String INSTANCE_GROUP_NAME = "Instance group name.";
+
+    public static final String INSTANCE_TYPE = "Instance type.";
+
+    public static final String IMAGE_CATALOG = "Image catalog.";
+
+    public static final String IMAGE_ID = "Image id.";
+
+    public static final String HOST_GROUP_NAME = "Host group name.";
+
+    public static final String HOST_GROUP_NAMES = "Host group names.";
+
+    public static final String NODE_IDS = "Node ids.";
+
+    public static final String DATA_LAKE_CRN = "Data Lake crn.";
+
+    public static final String DATA_LAKE_NAME = "Data Lake name.";
+
+    public static final String DATA_LAKE_STATUS = "Data Lake status.";
+
+    public static final String DATA_LAKE_STATUS_REASON = "Data Lake status reason.";
+
+    public static final String DATABASE_SERVER_CRN = "Database server crn.";
+
+    public static final String STACK_CRN = "Stack crn.";
+
+    public static final String CREATED = "Timestamp when the resource was created.";
+
+    public static final String RUNTIME_VERSION = "Runtime version.";
+
+    public static final String DEFAULT_RUNTIME_VERSION = "Default runtime version.";
+
+    public static final String LOCK_COMPONENTS = "Option to lock components during the upgrade.";
+
+    public static final String DRY_RUN = "Doesn't perform the actual operation just validates if all preconditions are met.";
+
+    public static final String SKIP_BACKUP = "Option to skip the backup before the upgrade.";
+
+    public static final String SHOW_AVAILABLE_IMAGES = "Option to show available images.";
+
+    public static final String REPLACE_VMS = "Option to replace virtual machines  during the upgrade.";
+
+    public static final String LOAD_BALANCER_SKU = "Load balancer SKU type.";
+
+    public static final String CURRENT_IMAGE = "Information about the image that the Data Lake cluster is using currently.";
+
+    public static final String UPGRADE_CANDIDATE_IMAGES = "Images that the Data Lake cluster can be upgraded to.";
+
+    public static final String UPGRADE_ERROR_REASON = "Error reason why the Data Lake cluster can't be upgraded.";
+
+    public static final String RANGER_RAZ_ENABLED = "Option to enable ranger raz.";
+
+    public static final String MULTI_AZ_ENABLED = "Option to enable multi AZ.";
+
+    public static final String TAGS = "Tags.";
+
+    public static final String DATA_LAKE_CLUSTER_SERVICE_VERSION = "Data Lake cluster service version.";
+
+    public static final String DETACHED = "Shows whether the cluster is in detached state.";
+
+    public static final String DATABASE_ENGINE_VERSION = "Database engine version.";
+
+    public static final String EXTERNAL_DATABASE_OPTIONS = "External database options.";
+
+    public static final String AWS_OPTIONS = "AWS options.";
+
+    public static final String AZURE_OPTIONS = "Azure options.";
+
+    public static final String CUSTOM_INSTANCE_GROUP_OPTIONS = "Custom instance group options.";
+
+    public static final String RECIPES = "Recipes.";
+
+    public static final String RECIPE_NAME = "Recipe name.";
+
+    public static final String SPOT_PARAMETERS = "Spot parameters.";
+
+    public static final String IMAGE_SETTINGS = "Image settings.";
+
+    public static final String RECENT_FLOW_OPERATIONS = "Recent flow operations.";
+
+    public static final String RECENT_INTERNAL_FLOW_OPERATIONS = "Recent internal flow operations.";
+
+    public static final String LAST_FLOW_OPERATION = "Last flow operations.";
+
+    public static final String LAST_INTERNAL_FLOW_OPERATION = "Last internal flow operations.";
+
+    public static final String CREATE_DATABASE_OPTION = "Option to create external database.";
+
+    public static final String DATABASE_AVAILABILITY_TYPE = "Database availability type.";
+
+    public static final String AZURE_USER_MAPPING = "Azure user mapping.";
+
+    public static final String AZURE_GROUP_MAPPING = "Deprecated. Azure group mapping.";
+
     private ModelDescriptions() {
     }
 }
