@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -68,9 +69,7 @@ public class FreeIpaDescribeService {
         MDCBuilder.buildMdcContext(stack);
         ImageEntity image = imageService.getByStack(stack);
         FreeIpa freeIpa = freeIpaService.findByStackId(stack.getId());
-        UserSyncStatus userSyncStatus = userSyncStatusService.findByStack(stack);
-        DescribeFreeIpaResponse response =
-                stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, userSyncStatus, includeAllInstances);
-        return response;
+        Optional<UserSyncStatus> userSyncStatus = userSyncStatusService.findByStack(stack);
+        return stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, userSyncStatus, includeAllInstances);
     }
 }

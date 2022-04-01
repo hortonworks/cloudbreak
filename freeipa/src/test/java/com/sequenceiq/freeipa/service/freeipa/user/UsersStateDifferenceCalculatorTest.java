@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.freeipa.user.model;
+package com.sequenceiq.freeipa.service.freeipa.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -14,10 +14,13 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.freeipa.client.FreeIpaChecks;
-import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
-import com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils;
+import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
+import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 
-class UsersStateDifferenceTest {
+class UsersStateDifferenceCalculatorTest {
 
     @Test
     void testCalculateUsersToAdd() {
@@ -55,7 +58,7 @@ class UsersStateDifferenceTest {
                 .addUser(userDifferentStateIpa)
                 .build();
 
-        ImmutableSet<FmsUser> usersToAdd = UsersStateDifference.calculateUsersToAdd(umsUsersState, ipaUsersState);
+        ImmutableSet<FmsUser> usersToAdd = new UserStateDifferenceCalculator().calculateUsersToAdd(umsUsersState, ipaUsersState);
 
         // the user that exists only in the UMS will be added
         assertTrue(usersToAdd.contains(userUms));
@@ -96,7 +99,7 @@ class UsersStateDifferenceTest {
                 .addMemberToGroup(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, userProtected.getName())
                 .build();
 
-        ImmutableSet<String> usersToRemove = UsersStateDifference.calculateUsersToRemove(umsUsersState, ipaUsersState);
+        ImmutableSet<String> usersToRemove = new UserStateDifferenceCalculator().calculateUsersToRemove(umsUsersState, ipaUsersState);
 
         // the users that exists only in IPA that are members of the CDP_USERSYNC_INTERNAL_GROUP will be removed
         assertTrue(usersToRemove.contains(userIPA.getName()));
@@ -130,7 +133,7 @@ class UsersStateDifferenceTest {
                 .addGroup(groupIPA)
                 .build();
 
-        ImmutableSet<FmsGroup> groupsToAdd = UsersStateDifference.calculateGroupsToAdd(umsUsersState, ipaUsersState);
+        ImmutableSet<FmsGroup> groupsToAdd = new UserStateDifferenceCalculator().calculateGroupsToAdd(umsUsersState, ipaUsersState);
 
         // group that exists only in UMS will be added
         assertTrue(groupsToAdd.contains(groupUms));
@@ -166,7 +169,7 @@ class UsersStateDifferenceTest {
                 .addGroup(groupProtected)
                 .build();
 
-        ImmutableSet<FmsGroup> groupsToRemove = UsersStateDifference.calculateGroupsToRemove(umsUsersState, ipaUsersState);
+        ImmutableSet<FmsGroup> groupsToRemove = new UserStateDifferenceCalculator().calculateGroupsToRemove(umsUsersState, ipaUsersState);
 
         // group that exists only in IPA will be removed
         assertTrue(groupsToRemove.contains(groupIPA));
@@ -202,7 +205,8 @@ class UsersStateDifferenceTest {
                 .addMemberToGroup(group, userIPA)
                 .build();
 
-        ImmutableMultimap<String, String> groupMembershipsToAdd = UsersStateDifference.calculateGroupMembershipToAdd(umsUsersState, ipaUsersState);
+        ImmutableMultimap<String, String> groupMembershipsToAdd = new UserStateDifferenceCalculator()
+                .calculateGroupMembershipToAdd(umsUsersState, ipaUsersState);
 
         // group that exists only in UMS will be added
         assertTrue(groupMembershipsToAdd.get(group).contains(userUms));
@@ -235,7 +239,8 @@ class UsersStateDifferenceTest {
                 .addMemberToGroup(unmanagedGroup, userUms)
                 .build();
 
-        ImmutableMultimap<String, String> groupMembershipsToRemove = UsersStateDifference.calculateGroupMembershipToRemove(umsUsersState, ipaUsersState);
+        ImmutableMultimap<String, String> groupMembershipsToRemove = new UserStateDifferenceCalculator()
+                .calculateGroupMembershipToRemove(umsUsersState, ipaUsersState);
 
         // group that exists only in IPA will be removed
         assertTrue(groupMembershipsToRemove.get(group).contains(userIPA));
@@ -273,7 +278,7 @@ class UsersStateDifferenceTest {
 
         UsersState ipaUsersState = ipaUsersStateBuilder.build();
 
-        ImmutableSet<String> usersToEnable = UsersStateDifference.calculateUsersToEnable(umsUsersState, ipaUsersState);
+        ImmutableSet<String> usersToEnable = new UserStateDifferenceCalculator().calculateUsersToEnable(umsUsersState, ipaUsersState);
 
         // the users that are enabled in UMS but disabled in IPA are enabled
         // new users added to IPA do not need to be enabled
@@ -315,7 +320,7 @@ class UsersStateDifferenceTest {
 
         UsersState ipaUsersState = ipaUsersStateBuilder.build();
 
-        ImmutableSet<String> usersToDisable = UsersStateDifference.calculateUsersToDisable(umsUsersState, ipaUsersState);
+        ImmutableSet<String> usersToDisable = new UserStateDifferenceCalculator().calculateUsersToDisable(umsUsersState, ipaUsersState);
 
         // the users that are disabled in UMS but enabled in IPA are disabled
         // new disabled users added to IPA need to be disabled
@@ -368,7 +373,7 @@ class UsersStateDifferenceTest {
         UmsUsersState umsUsersState = umsUsersStateBuilder.setUsersState(usersStateBuilderForUms.build()).build();
         UsersState ipaUsersState = usersStateBuilderForIpa.build();
 
-        ImmutableSet<String> usersWithCredentialsToUpdate = UsersStateDifference.calculateUsersWithCredentialsToUpdate(
+        ImmutableSet<String> usersWithCredentialsToUpdate = new UserStateDifferenceCalculator().calculateUsersWithCredentialsToUpdate(
                 umsUsersState, ipaUsersState, updatedOptimizationEnabled);
 
         // User that exists only in UMS requires credentials update

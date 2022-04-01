@@ -19,11 +19,11 @@ public class GroupAddMemberOperation extends AbstractFreeipaOperation<Group> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GroupAddMemberOperation.class);
 
-    private String group;
+    private final String group;
 
-    private Collection<String> users;
+    private final Collection<String> users;
 
-    private BiConsumer<String, String> warnings;
+    private final BiConsumer<String, String> warnings;
 
     private GroupAddMemberOperation(String group, Collection<String> users, BiConsumer<String, String> warnings) {
         this.group = group;

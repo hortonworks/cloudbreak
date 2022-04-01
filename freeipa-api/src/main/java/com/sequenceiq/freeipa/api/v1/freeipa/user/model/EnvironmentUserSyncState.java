@@ -33,4 +33,12 @@ public class EnvironmentUserSyncState {
     public void setLastUserSyncOperationId(String lastUserSyncOperationId) {
         this.lastUserSyncOperationId = lastUserSyncOperationId;
     }
+
+    @Override
+    public String toString() {
+        return "EnvironmentUserSyncState{" +
+                "state=" + state +
+                ", lastUserSyncOperationId='" + lastUserSyncOperationId + '\'' +
+                '}';
+    }
 }

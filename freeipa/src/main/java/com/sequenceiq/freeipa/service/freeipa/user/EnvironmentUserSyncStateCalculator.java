@@ -2,9 +2,10 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
-import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsEventGenerationIdsProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
+import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsEventGenerationIdsProvider;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -44,50 +46,42 @@ public class EnvironmentUserSyncStateCalculator {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(envCrnString, accountId);
         MDCBuilder.buildMdcContext(stack);
 
-        UserSyncStatus userSyncStatus = userSyncStatusService.findByStack(stack);
-
+        Optional<UserSyncStatus> userSyncStatus = userSyncStatusService.findByStack(stack);
         return internalCalculateEnvironmentUserSyncState(accountId, envCrnString, userSyncStatus);
     }
 
     @VisibleForTesting
-    EnvironmentUserSyncState internalCalculateEnvironmentUserSyncState(String accountId, String envCrnString, UserSyncStatus userSyncStatus) {
+    EnvironmentUserSyncState internalCalculateEnvironmentUserSyncState(String accountId, String envCrnString, Optional<UserSyncStatus> userSyncStatus) {
         EnvironmentUserSyncState environmentUserSyncState = new EnvironmentUserSyncState();
-        if (null == userSyncStatus || null == userSyncStatus.getLastStartedFullSync()) {
+        if (userSyncStatus.isEmpty() || userSyncStatus.get().getLastStartedFullSync() == null) {
             environmentUserSyncState.setState(UserSyncState.STALE);
         } else {
-            environmentUserSyncState.setLastUserSyncOperationId(userSyncStatus.getLastStartedFullSync().getOperationId());
-            environmentUserSyncState.setState(calculateUserSyncState(accountId, envCrnString, userSyncStatus));
+            environmentUserSyncState.setLastUserSyncOperationId(userSyncStatus.get().getLastStartedFullSync().getOperationId());
+            environmentUserSyncState.setState(calculateUserSyncState(accountId, envCrnString, userSyncStatus.get()));
         }
-
+        LOGGER.debug("Calculated usr sync state: [{}]", environmentUserSyncState);
         return environmentUserSyncState;
     }
 
     private UserSyncState calculateUserSyncState(String accountId, String envCrnString, UserSyncStatus userSyncStatus) {
         Operation lastSync = userSyncStatus.getLastStartedFullSync();
-        UserSyncState state;
         switch (lastSync.getStatus()) {
             case RUNNING:
-                state = UserSyncState.SYNC_IN_PROGRESS;
-                break;
+                return UserSyncState.SYNC_IN_PROGRESS;
             case COMPLETED:
-                state = calculateStateForCompletedOperation(accountId, envCrnString, userSyncStatus);
-                break;
+                return calculateStateForCompletedOperation(accountId, envCrnString, userSyncStatus);
             case REQUESTED:
             case REJECTED:
                 // REQUESTED or REJECTED operations will never be saved as part of the UserSyncStatus
                 throw createExceptionForUnexpectedOperationStatus(envCrnString, userSyncStatus);
             case TIMEDOUT:
                 LOGGER.warn("UserSyncStatus.lastStartedFullSync '{}' is timed out for environment '{}'", lastSync.getOperationId(), envCrnString);
-                state  = UserSyncState.SYNC_FAILED;
-                break;
+                return UserSyncState.SYNC_FAILED;
             case FAILED:
-                state  = UserSyncState.SYNC_FAILED;
-                break;
+                return UserSyncState.SYNC_FAILED;
             default:
-                state  = UserSyncState.STALE;
-                break;
+                return UserSyncState.STALE;
         }
-        return state;
     }
 
     private UserSyncState calculateStateForCompletedOperation(String accountId, String envCrnString, UserSyncStatus userSyncStatus) {
@@ -99,8 +93,9 @@ public class EnvironmentUserSyncStateCalculator {
             } else {
                 return UserSyncState.STALE;
             }
+        } else {
+            return UserSyncState.SYNC_FAILED;
         }
-        return UserSyncState.SYNC_FAILED;
     }
 
     private IllegalStateException createExceptionForUnexpectedOperationStatus(String envCrnString, UserSyncStatus userSyncStatus) {

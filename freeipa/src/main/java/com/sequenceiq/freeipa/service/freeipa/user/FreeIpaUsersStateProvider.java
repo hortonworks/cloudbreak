@@ -6,8 +6,8 @@ import static com.sequenceiq.freeipa.client.FreeIpaChecks.IPA_UNMANAGED_GROUPS;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
-import com.sequenceiq.freeipa.client.model.User;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -15,12 +15,12 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
+import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
-
-import javax.inject.Inject;
 
 @Service
 public class FreeIpaUsersStateProvider {
@@ -59,7 +59,6 @@ public class FreeIpaUsersStateProvider {
         LOGGER.debug("Retrieving users with user names [{}] from FreeIPA", userNames);
         UsersState.Builder builder = new UsersState.Builder();
 
-        // get all groups from IPA
         freeIpaClient.groupFindAll().stream()
                 .filter(group -> !IPA_UNMANAGED_GROUPS.contains(group.getCn()))
                 .forEach(group -> builder.addGroup(fromIpaGroup(group)));
