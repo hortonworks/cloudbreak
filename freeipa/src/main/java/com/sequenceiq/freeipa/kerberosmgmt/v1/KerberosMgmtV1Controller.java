@@ -71,6 +71,9 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     @Inject
     private RetryableFreeIpaClientService retryableFreeIpaClientService;
 
+    @Inject
+    private CustomCheckUtil customCheckUtil;
+
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
     public ServiceKeytabResponse generateServiceKeytab(@RequestObject @Valid ServiceKeytabRequest request, @AccountId String accountIdForInternalUsage) {
         return retryableWithKeytabCreationException((Void v) -> {
@@ -138,7 +141,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
         String actorCrn = checkActorCrn();
         LOGGER.debug("getUserKeytab() request for environmentCrn={} for targetUserCrn={} as actorCrn={}",
                 environmentCrn, actorCrn, targetUserCrn);
-        CustomCheckUtil.run(() -> umsAccountAuthorizationService.
+        customCheckUtil.run(() -> umsAccountAuthorizationService.
                 checkCallerIsSelfOrHasRight(actorCrn, targetUserCrn, AuthorizationResourceAction.GET_KEYTAB));
         return userKeytabService.getKeytabBase64(targetUserCrn, environmentCrn);
     }

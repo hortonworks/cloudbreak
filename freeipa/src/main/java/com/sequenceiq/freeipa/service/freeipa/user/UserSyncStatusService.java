@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -21,16 +23,18 @@ public class UserSyncStatusService {
     }
 
     public UserSyncStatus getOrCreateForStack(Stack stack) {
-        return userSyncStatusRepository.getByStack(stack).orElseGet(() -> {
-            UserSyncStatus userSyncStatus = new UserSyncStatus();
-            userSyncStatus.setStack(stack);
-            userSyncStatus.setUmsEventGenerationIds(new Json(new UmsEventGenerationIds()));
-            return userSyncStatusRepository.save(userSyncStatus);
-        });
+        return userSyncStatusRepository.getByStack(stack).orElseGet(() -> createNewUserSyncStatusForStack(stack));
     }
 
-    public UserSyncStatus findByStack(Stack stack) {
-        return userSyncStatusRepository.getByStack(stack).orElse(null);
+    private UserSyncStatus createNewUserSyncStatusForStack(Stack stack) {
+        UserSyncStatus userSyncStatus = new UserSyncStatus();
+        userSyncStatus.setStack(stack);
+        userSyncStatus.setUmsEventGenerationIds(new Json(new UmsEventGenerationIds()));
+        return userSyncStatusRepository.save(userSyncStatus);
+    }
+
+    public Optional<UserSyncStatus> findByStack(Stack stack) {
+        return userSyncStatusRepository.getByStack(stack);
     }
 
 }
