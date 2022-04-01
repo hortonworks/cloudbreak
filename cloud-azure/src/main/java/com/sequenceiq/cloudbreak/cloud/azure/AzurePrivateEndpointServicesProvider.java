@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -16,11 +17,20 @@ public class AzurePrivateEndpointServicesProvider {
     @Value("${cb.arm.privateendpoint.services:}")
     private List<String> privateEndpointServices;
 
-    public List<AzurePrivateDnsZoneServiceEnum> getEnabledPrivateEndpointServices() {
+    public List<AzurePrivateDnsZoneServiceEnum> getCdpManagedDnsZones(Set<AzurePrivateDnsZoneServiceEnum> servicesWithExistingPrivateDnsZone) {
+        List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices = getEnabledPrivateEndpointServices();
+        enabledPrivateEndpointServices.removeAll(servicesWithExistingPrivateDnsZone);
+        LOGGER.debug("Services with existing private dns zones: {}, services where new private DNS zone needs to be created: {}",
+                servicesWithExistingPrivateDnsZone, enabledPrivateEndpointServices);
+        return enabledPrivateEndpointServices;
+    }
+
+    private List<AzurePrivateDnsZoneServiceEnum> getEnabledPrivateEndpointServices() {
         List<AzurePrivateDnsZoneServiceEnum> serviceEnumList = privateEndpointServices.stream()
                 .map(AzurePrivateDnsZoneServiceEnum::getBySubResource)
                 .collect(Collectors.toList());
         LOGGER.debug("Enabled private endpoint services: {}", serviceEnumList);
         return serviceEnumList;
     }
+
 }

@@ -2,8 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model.network;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -27,7 +26,7 @@ public class NetworkResourcesCreationRequest {
 
     private final boolean privateEndpointsEnabled;
 
-    private final String existingPrivateDnsZoneId;
+    private final Set<String> servicesWithExistingPrivateDnsZone;
 
     private final Map<String, String> tags;
 
@@ -40,7 +39,7 @@ public class NetworkResourcesCreationRequest {
         region = builder.region;
         resourceGroup = builder.resourceGroup;
         privateEndpointsEnabled = builder.privateEndpointsEnabled;
-        existingPrivateDnsZoneId = builder.existingPrivateDnsZoneId;
+        servicesWithExistingPrivateDnsZone = builder.servicesWithExistingPrivateDnsZones;
         tags = builder.tags;
     }
 
@@ -76,12 +75,8 @@ public class NetworkResourcesCreationRequest {
         return privateEndpointsEnabled;
     }
 
-    public String getExistingPrivateDnsZoneId() {
-        return existingPrivateDnsZoneId;
-    }
-
-    public boolean isExistingPrivateDnsZone() {
-        return StringUtils.isNotEmpty(existingPrivateDnsZoneId);
+    public Set<String> getServicesWithExistingPrivateDnsZone() {
+        return servicesWithExistingPrivateDnsZone;
     }
 
     public Map<String, String> getTags() {
@@ -106,7 +101,7 @@ public class NetworkResourcesCreationRequest {
 
         private boolean privateEndpointsEnabled;
 
-        private String existingPrivateDnsZoneId;
+        private Set<String> servicesWithExistingPrivateDnsZones;
 
         private Map<String, String> tags = new HashMap<>();
 
@@ -155,8 +150,8 @@ public class NetworkResourcesCreationRequest {
             return this;
         }
 
-        public Builder withExistingPrivateDnsZone(String existingPrivateDnsZoneId) {
-            this.existingPrivateDnsZoneId = existingPrivateDnsZoneId;
+        public Builder withServicesWithExistingPrivateDnsZones(Set<String> servicesWithExistingPrivateDnsZones) {
+            this.servicesWithExistingPrivateDnsZones = servicesWithExistingPrivateDnsZones;
             return this;
         }
 

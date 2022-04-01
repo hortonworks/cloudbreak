@@ -14,8 +14,8 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
-import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
+import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 
 public class NetworkDto {
@@ -214,6 +214,16 @@ public class NetworkDto {
 
     public ServiceEndpointCreation getServiceEndpointCreation() {
         return serviceEndpointCreation;
+    }
+
+    public boolean isPrivateEndpointEnabled(CloudPlatform cloudPlatform) {
+        if (CloudPlatform.AWS == cloudPlatform) {
+            return serviceEndpointCreation == ServiceEndpointCreation.ENABLED;
+        } else if (CloudPlatform.AZURE == cloudPlatform) {
+            return serviceEndpointCreation == ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT;
+        } else {
+            return false;
+        }
     }
 
     public OutboundInternetTraffic getOutboundInternetTraffic() {
