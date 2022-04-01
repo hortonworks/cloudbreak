@@ -2,12 +2,24 @@ package com.sequenceiq.sdx.api.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxRepairRequest {
 
+    @ApiModelProperty(ModelDescriptions.HOST_GROUP_NAME)
     private String hostGroupName;
 
+    @ApiModelProperty(ModelDescriptions.HOST_GROUP_NAMES)
     private List<String> hostGroupNames;
 
+    @ApiModelProperty(ModelDescriptions.NODE_IDS)
     private List<String> nodesIds;
 
     public String getHostGroupName() {

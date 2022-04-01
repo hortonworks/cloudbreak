@@ -1,19 +1,26 @@
 package com.sequenceiq.sdx.api.model;
 
-import io.swagger.annotations.ApiModelProperty;
-
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class RangerCloudIdentitySyncStatus {
 
-    @ApiModelProperty
+    @ApiModelProperty(ModelDescriptions.COMMAND_ID)
     private Long commandId;
 
-    @ApiModelProperty
+    @ApiModelProperty(ModelDescriptions.OPERATION_STATUS)
     @NotNull
     private RangerCloudIdentitySyncState state;
 
-    @ApiModelProperty
+    @ApiModelProperty(ModelDescriptions.OPERATION_STATUS_REASON)
     private String statusReason;
 
     public Long getCommandId() {
