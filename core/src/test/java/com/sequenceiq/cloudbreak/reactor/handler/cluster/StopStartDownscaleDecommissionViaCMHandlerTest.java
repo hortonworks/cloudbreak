@@ -93,6 +93,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
     @BeforeEach
     void setUp() {
         setupBasicMocks();
+        when(stackService.getByIdWithLists(any())).thenReturn(stack);
     }
 
     @Test
@@ -134,7 +135,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
         Set<String> hostnamesToDecommission = instancesToDecommission.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toUnmodifiableSet());
 
         StopStartDownscaleDecommissionViaCMRequest request =
-                new StopStartDownscaleDecommissionViaCMRequest(stack, INSTANCE_GROUP_NAME, instanceIdsToDecommission);
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, instanceIdsToDecommission);
         HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
 
@@ -170,7 +171,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
         Set<String> hostnamesToDecommission = instancesToDecommission.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toUnmodifiableSet());
 
         StopStartDownscaleDecommissionViaCMRequest request =
-                new StopStartDownscaleDecommissionViaCMRequest(stack, INSTANCE_GROUP_NAME, instanceIdsToDecommission);
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, instanceIdsToDecommission);
         HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
 
@@ -207,7 +208,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
         Set<String> hostnamesToDecommission = instancesToDecommission.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toUnmodifiableSet());
 
         StopStartDownscaleDecommissionViaCMRequest request =
-                new StopStartDownscaleDecommissionViaCMRequest(stack, INSTANCE_GROUP_NAME, instanceIdsToDecommission);
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, instanceIdsToDecommission);
         HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
 
@@ -244,7 +245,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
                 .thenThrow(new RuntimeException("collectHostsToDecommissionError"));
 
         StopStartDownscaleDecommissionViaCMRequest request =
-                new StopStartDownscaleDecommissionViaCMRequest(stack, INSTANCE_GROUP_NAME, instanceIdsToDecommission);
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, instanceIdsToDecommission);
         HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
         verify(clusterDecomissionService).collectHostsToRemove(eq(hostGroup), eq(hostnamesToDecommission));
@@ -284,7 +285,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
                 .thenThrow(new RuntimeException("decommissionHostsError"));
 
         StopStartDownscaleDecommissionViaCMRequest request =
-                new StopStartDownscaleDecommissionViaCMRequest(stack, INSTANCE_GROUP_NAME, instanceIdsToDecommission);
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, instanceIdsToDecommission);
         HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
         verify(clusterDecomissionService).collectHostsToRemove(eq(hostGroup), eq(hostnamesToDecommission));
@@ -320,7 +321,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
         Set<String> hostnamesToDecommission = instancesToDecommission.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toUnmodifiableSet());
 
         StopStartDownscaleDecommissionViaCMRequest request =
-                new StopStartDownscaleDecommissionViaCMRequest(stack, INSTANCE_GROUP_NAME, instanceIdsToDecommission);
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME, instanceIdsToDecommission);
         HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
 
@@ -340,7 +341,7 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
 
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
                 eq(CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTERINGCMMAINTMODE), eq(String.valueOf(fqdnsDecommissioned.size())));
-        verify(clusterDecomissionService).enterMaintenanceMode(eq(stack), eq(fqdnsDecommissioned));
+        verify(clusterDecomissionService).enterMaintenanceMode(eq(fqdnsDecommissioned));
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
                 eq(CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTEREDCMMAINTMODE), eq(String.valueOf(fqdnsDecommissioned.size())));
         verifyNoMoreInteractions(flowMessageService);

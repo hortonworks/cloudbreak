@@ -94,7 +94,7 @@ public class StopStartDownscaleActions {
 
             @Override
             protected Selectable createRequest(StopStartDownscaleContext context) {
-                return new StopStartDownscaleDecommissionViaCMRequest(context.getStack(), context.getHostGroupName(), context.getHostIdsToRemove());
+                return new StopStartDownscaleDecommissionViaCMRequest(context.getStack().getId(), context.getHostGroupName(), context.getHostIdsToRemove());
             }
         };
     }

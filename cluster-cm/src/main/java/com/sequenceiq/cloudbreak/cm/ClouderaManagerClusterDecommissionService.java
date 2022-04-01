@@ -104,8 +104,8 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
     }
 
     @Override
-    public void enterMaintenanceMode(Stack stack, Set<String> hostFqdnList) {
-        clouderaManagerDecomissioner.enterMaintenanceMode(stack, hostFqdnList, v31Client);
+    public void enterMaintenanceMode(Set<String> hostFqdnList) {
+        clouderaManagerDecomissioner.enterMaintenanceMode(hostFqdnList, v31Client);
     }
 
     @Override
