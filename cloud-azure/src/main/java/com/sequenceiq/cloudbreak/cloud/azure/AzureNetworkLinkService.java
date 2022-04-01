@@ -4,6 +4,7 @@ import static com.sequenceiq.common.api.type.ResourceType.AZURE_VIRTUAL_NETWORK_
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -22,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.task.dnszone.AzureDnsZoneCreationCh
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.type.CommonStatus;
 
 @Service
@@ -44,40 +44,36 @@ public class AzureNetworkLinkService {
     @Inject
     private AzureResourceIdProviderService azureResourceIdProviderService;
 
-    public ValidationResult validateExistingNetworkLink(AzureClient azureClient, String networkId, String resourceGroupName) {
-        List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices = azurePrivateEndpointServicesProvider.getEnabledPrivateEndpointServices();
-        return azureClient.validateNetworkLinkExistenceForDnsZones(networkId, enabledPrivateEndpointServices, resourceGroupName);
-    }
-
     public void checkOrCreateNetworkLinks(AuthenticatedContext authenticatedContext, AzureClient azureClient, AzureNetworkView networkView,
-            String resourceGroup, Map<String, String> tags) {
+            String resourceGroup, Map<String, String> tags, Set<AzurePrivateDnsZoneServiceEnum> servicesWithExistingPrivateDnsZone) {
 
         String networkId = networkView.getNetworkId();
         String networkResourceGroup = networkView.getResourceGroupName();
-        List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices = azurePrivateEndpointServicesProvider.getEnabledPrivateEndpointServices();
+        List<AzurePrivateDnsZoneServiceEnum> cdpManagedDnsZones = azurePrivateEndpointServicesProvider
+                .getCdpManagedDnsZones(servicesWithExistingPrivateDnsZone);
 
-        boolean networkLinksDeployed = azureClient.checkIfNetworkLinksDeployed(resourceGroup, networkId, enabledPrivateEndpointServices);
+        boolean networkLinksDeployed = azureClient.checkIfNetworkLinksDeployed(resourceGroup, networkId, cdpManagedDnsZones);
 
         if (!networkLinksDeployed) {
             LOGGER.debug("Deploying network links that are not deployed yet!");
             String deploymentName = azureResourceDeploymentHelperService.
-                    generateDeploymentName(enabledPrivateEndpointServices, "-" + networkId + NETWORK_LINKS);
+                    generateDeploymentName(cdpManagedDnsZones, "-" + networkId + NETWORK_LINKS);
             String networkLinkDeploymentId = azureResourceIdProviderService.generateDeploymentId(azureClient.getCurrentSubscription().subscriptionId(),
                     resourceGroup, deploymentName);
             AzureDnsZoneCreationCheckerContext checkerContext = new AzureDnsZoneCreationCheckerContext(
-                    azureClient, resourceGroup, deploymentName, networkLinkDeploymentId, networkId, enabledPrivateEndpointServices);
+                    azureClient, resourceGroup, deploymentName, networkLinkDeploymentId, networkId, cdpManagedDnsZones);
 
             try {
                 if (azureResourcePersistenceHelperService.isRequested(networkLinkDeploymentId, AZURE_VIRTUAL_NETWORK_LINK)) {
-                    LOGGER.debug("Network links ({}) already requested in resource group {}", enabledPrivateEndpointServices, resourceGroup);
+                    LOGGER.debug("Network links ({}) already requested in resource group {}", cdpManagedDnsZones, resourceGroup);
 
                     azureResourceDeploymentHelperService.pollForCreation(authenticatedContext, checkerContext);
                 } else {
-                    LOGGER.debug("Network links ({}) are not requested yet in resource group {}", enabledPrivateEndpointServices, resourceGroup);
+                    LOGGER.debug("Network links ({}) are not requested yet in resource group {}", cdpManagedDnsZones, resourceGroup);
 
                     persistResource(authenticatedContext, deploymentName, networkLinkDeploymentId);
                     String azureNetworkId = azureResourceDeploymentHelperService.getAzureNetwork(azureClient, networkId, networkResourceGroup).id();
-                    createMissingNetworkLinks(azureClient, azureNetworkId, resourceGroup, tags, enabledPrivateEndpointServices);
+                    createMissingNetworkLinks(azureClient, azureNetworkId, resourceGroup, tags, cdpManagedDnsZones);
                     azureResourcePersistenceHelperService.updateCloudResource(
                             authenticatedContext, deploymentName, networkLinkDeploymentId, CommonStatus.CREATED, AZURE_VIRTUAL_NETWORK_LINK);
                 }
@@ -93,7 +89,7 @@ public class AzureNetworkLinkService {
                 azureResourceDeploymentHelperService.pollForCreation(authenticatedContext, checkerContext);
             }
         } else {
-            LOGGER.debug("Dns zones ({}) and network links already deployed in resource group {}", enabledPrivateEndpointServices, resourceGroup);
+            LOGGER.debug("Dns zones ({}) and network links already deployed in resource group {}", cdpManagedDnsZones, resourceGroup);
         }
     }
 

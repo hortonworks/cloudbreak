@@ -177,8 +177,8 @@ public class AzureNetworkConnectorTest {
     }
 
     @Test
-    public void testCreateProviderSpecificNetworkResourcesShouldRun() {
-        NetworkResourcesCreationRequest request = createProviderSpecificNetworkResources();
+    public void testCreateProviderSpecificNetworkResourcesWhenPrivateEndpoint() {
+        NetworkResourcesCreationRequest request = createProviderSpecificNetworkResources(true);
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(request.getCloudContext(), request.getCloudCredential());
 
         when(azureClientService.getClient(request.getCloudCredential())).thenReturn(azureClient);
@@ -190,16 +190,29 @@ public class AzureNetworkConnectorTest {
                 azureClient,
                 getNetworkView(),
                 RESOURCE_GROUP,
-                getTags()
+                getTags(),
+                Set.of(AzurePrivateDnsZoneServiceEnum.POSTGRES)
         );
         verify(azureNetworkLinkService).checkOrCreateNetworkLinks(
                 authenticatedContext,
                 azureClient,
                 getNetworkView(),
                 RESOURCE_GROUP,
-                getTags()
+                getTags(),
+                Set.of(AzurePrivateDnsZoneServiceEnum.POSTGRES)
         );
 
+    }
+
+    @Test
+    public void testCreateProviderSpecificNetworkResourcesWhenNotPrivateEndpoint() {
+        NetworkResourcesCreationRequest request = createProviderSpecificNetworkResources(false);
+
+        underTest.createProviderSpecificNetworkResources(request);
+
+        verify(azureClientService, never()).getClient(any());
+        verify(azureDnsZoneService, never()).checkOrCreateDnsZones(any(), any(), any(), any(), any(), any());
+        verify(azureNetworkLinkService, never()).checkOrCreateNetworkLinks(any(), any(), any(), any(), any(), any());
     }
 
     @Test
@@ -416,15 +429,16 @@ public class AzureNetworkConnectorTest {
                 .build();
     }
 
-    private NetworkResourcesCreationRequest createProviderSpecificNetworkResources() {
+    private NetworkResourcesCreationRequest createProviderSpecificNetworkResources(boolean usePrivateEndpoint) {
         return new NetworkResourcesCreationRequest.Builder()
                 .withNetworkId(NETWORK_ID)
                 .withNetworkResourceGroup(NETWORK_RG)
                 .withCloudCredential(getCredential())
                 .withCloudContext(createCloudContext())
                 .withRegion(REGION)
-                .withPrivateEndpointsEnabled(true)
+                .withPrivateEndpointsEnabled(usePrivateEndpoint)
                 .withTags(getTags())
+                .withServicesWithExistingPrivateDnsZones(Set.of("POSTGRES"))
                 .withResourceGroup(RESOURCE_GROUP).build();
     }
 

@@ -23,6 +23,7 @@ import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCre
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentTagProvider;
+import com.sequenceiq.environment.environment.validation.network.azure.AzureExistingPrivateDnsZonesService;
 import com.sequenceiq.environment.network.dao.domain.AzureNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -45,16 +46,20 @@ public class NetworkCreationRequestFactory {
 
     private final ServiceEndpointCreationToEndpointTypeConverter serviceEndpointCreationToEndpointTypeConverter;
 
+    private final AzureExistingPrivateDnsZonesService azureExistingPrivateDnsZonesService;
+
     public NetworkCreationRequestFactory(Collection<SubnetCidrProvider> subnetCidrProviders,
             CredentialToCloudCredentialConverter credentialToCloudCredentialConverter,
             DefaultSubnetCidrProvider defaultSubnetCidrProvider,
             EnvironmentTagProvider environmentTagProvider,
-            ServiceEndpointCreationToEndpointTypeConverter serviceEndpointCreationToEndpointTypeConverter) {
+            ServiceEndpointCreationToEndpointTypeConverter serviceEndpointCreationToEndpointTypeConverter,
+            AzureExistingPrivateDnsZonesService azureExistingPrivateDnsZonesService) {
         this.subnetCidrProviders = subnetCidrProviders.stream().collect(Collectors.toMap(SubnetCidrProvider::cloudPlatform, s -> s));
         this.credentialToCloudCredentialConverter = credentialToCloudCredentialConverter;
         this.defaultSubnetCidrProvider = defaultSubnetCidrProvider;
         this.environmentTagProvider = environmentTagProvider;
         this.serviceEndpointCreationToEndpointTypeConverter = serviceEndpointCreationToEndpointTypeConverter;
+        this.azureExistingPrivateDnsZonesService = azureExistingPrivateDnsZonesService;
     }
 
     public NetworkCreationRequest create(EnvironmentDto environment) {
@@ -97,7 +102,7 @@ public class NetworkCreationRequestFactory {
                 .withCloudContext(getCloudContext(environment))
                 .withRegion(Region.region(environment.getLocation().getName()))
                 .withPrivateEndpointsEnabled(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT == networkDto.getServiceEndpointCreation())
-                .withExistingPrivateDnsZone(networkDto.getAzure().getPrivateDnsZoneId())
+                .withServicesWithExistingPrivateDnsZones(azureExistingPrivateDnsZonesService.getServiceNamesWithExistingZones(networkDto))
                 .withTags(environmentTagProvider.getTags(environment, environment.getNetwork().getResourceCrn()));
                 getResourceGroupName(environment).ifPresent(builder::withResourceGroup);
         return builder.build();
