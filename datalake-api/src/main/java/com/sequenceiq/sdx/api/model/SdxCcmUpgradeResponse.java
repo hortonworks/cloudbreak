@@ -2,14 +2,25 @@ package com.sequenceiq.sdx.api.model;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxCcmUpgradeResponse {
 
+    @ApiModelProperty(ModelDescriptions.FLOW_IDENTIFIER)
     private FlowIdentifier flowIdentifier;
 
+    @ApiModelProperty(ModelDescriptions.CCM_UPGRADE_RESPONSE_TYPE)
     private CcmUpgradeResponseType responseType;
 
+    @ApiModelProperty(ModelDescriptions.CCM_UPGRADE_ERROR_REASON)
     private String reason;
 
     public SdxCcmUpgradeResponse() {

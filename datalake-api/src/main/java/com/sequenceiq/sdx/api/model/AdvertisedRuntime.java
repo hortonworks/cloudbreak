@@ -2,10 +2,21 @@ package com.sequenceiq.sdx.api.model;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AdvertisedRuntime {
 
+    @ApiModelProperty(ModelDescriptions.RUNTIME_VERSION)
     private String runtimeVersion;
 
+    @ApiModelProperty(ModelDescriptions.DEFAULT_RUNTIME_VERSION)
     private boolean defaultRuntimeVersion;
 
     public String getRuntimeVersion() {

@@ -4,14 +4,23 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxClusterDetailResponse extends SdxClusterResponse implements TaggedResponse {
 
+    @ApiModelProperty(ModelDescriptions.STACK_RESPONSE)
     private StackV4Response stackV4Response;
 
     public static SdxClusterDetailResponse create(SdxClusterResponse sdxClusterResponse, StackV4Response stackV4Response) {
