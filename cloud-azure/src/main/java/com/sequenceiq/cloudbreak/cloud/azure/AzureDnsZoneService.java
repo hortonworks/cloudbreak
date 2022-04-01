@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_PRIVATE_DNS_ZONE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -41,10 +43,14 @@ public class AzureDnsZoneService {
     private AzurePrivateEndpointServicesProvider azurePrivateEndpointServicesProvider;
 
     public void checkOrCreateDnsZones(AuthenticatedContext authenticatedContext, AzureClient azureClient, AzureNetworkView networkView,
-            String resourceGroup, Map<String, String> tags) {
+            String resourceGroup, Map<String, String> tags, Set<AzurePrivateDnsZoneServiceEnum> servicesWithExistingPrivateDnsZone) {
 
         String networkId = networkView.getNetworkId();
-        List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices = azurePrivateEndpointServicesProvider.getEnabledPrivateEndpointServices();
+        List<AzurePrivateDnsZoneServiceEnum> enabledPrivateEndpointServices =
+                new ArrayList<>(azurePrivateEndpointServicesProvider.getEnabledPrivateEndpointServices());
+        enabledPrivateEndpointServices.removeAll(servicesWithExistingPrivateDnsZone);
+        LOGGER.debug("Services with existing private dns zones: {}, services where new private DNS zone needs to be created: {}",
+                servicesWithExistingPrivateDnsZone, enabledPrivateEndpointServices);
         boolean dnsZonesDeployed = azureClient.checkIfDnsZonesDeployed(resourceGroup, enabledPrivateEndpointServices);
 
         if (!dnsZonesDeployed) {

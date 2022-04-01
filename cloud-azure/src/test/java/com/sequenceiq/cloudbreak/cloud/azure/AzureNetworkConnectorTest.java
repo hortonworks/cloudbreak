@@ -190,14 +190,16 @@ public class AzureNetworkConnectorTest {
                 azureClient,
                 getNetworkView(),
                 RESOURCE_GROUP,
-                getTags()
+                getTags(),
+                Set.of(AzurePrivateDnsZoneServiceEnum.POSTGRES)
         );
         verify(azureNetworkLinkService).checkOrCreateNetworkLinks(
                 authenticatedContext,
                 azureClient,
                 getNetworkView(),
                 RESOURCE_GROUP,
-                getTags()
+                getTags(),
+                Set.of(AzurePrivateDnsZoneServiceEnum.POSTGRES)
         );
 
     }
@@ -425,6 +427,7 @@ public class AzureNetworkConnectorTest {
                 .withRegion(REGION)
                 .withPrivateEndpointsEnabled(true)
                 .withTags(getTags())
+                .withServicesWithExistingPrivateDnsZones(Set.of("POSTGRES"))
                 .withResourceGroup(RESOURCE_GROUP).build();
     }
 

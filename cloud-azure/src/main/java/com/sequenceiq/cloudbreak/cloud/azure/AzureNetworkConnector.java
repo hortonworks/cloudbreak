@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -218,8 +219,6 @@ public class AzureNetworkConnector implements NetworkConnector {
 
     @Override
     public void createProviderSpecificNetworkResources(NetworkResourcesCreationRequest request) {
-        // TODO CB-16349 Currently the bring your own DNS zone is not yet ready: because of this, even if an existing DNS zone is provided,
-        //  CDP will create its own.
         if (request.isPrivateEndpointsEnabled()) {
             LOGGER.debug("Private endpoints are enabled, and DNS zone is managed by CDP. Checking the presence of DNS Zones and Network links..");
             AzureClient azureClient = azureClientService.getClient(request.getCloudCredential());
@@ -231,15 +230,18 @@ public class AzureNetworkConnector implements NetworkConnector {
             networkView.setExistingNetwork(request.isExistingNetwork());
             networkView.setNetworkId(request.getNetworkId());
             networkView.setResourceGroupName(request.getNetworkResourceGroup());
-            azureDnsZoneService.checkOrCreateDnsZones(authenticatedContext, azureClient, networkView, resourceGroup, tags);
-            azureNetworkLinkService.checkOrCreateNetworkLinks(authenticatedContext, azureClient, networkView, resourceGroup, tags);
+            Set<AzurePrivateDnsZoneServiceEnum> servicesWithExistingDnsZone = getServicesWithExistingDnsZone(request);
+            azureDnsZoneService.checkOrCreateDnsZones(authenticatedContext, azureClient, networkView, resourceGroup, tags, servicesWithExistingDnsZone);
+            azureNetworkLinkService.checkOrCreateNetworkLinks(authenticatedContext, azureClient, networkView, resourceGroup, tags, servicesWithExistingDnsZone);
         } else {
-            if (request.isExistingPrivateDnsZone()) {
-                LOGGER.debug("The private DNS zone '{}' already exists, nothing to do. ", request.getExistingPrivateDnsZoneId());
-            } else {
-                LOGGER.debug("Private endpoints are disabled, nothing to do.");
-            }
+            LOGGER.debug("Private endpoints are disabled, nothing to do.");
         }
+    }
+
+    private Set<AzurePrivateDnsZoneServiceEnum> getServicesWithExistingDnsZone(NetworkResourcesCreationRequest request) {
+        return request.getServicesWithExistingPrivateDnsZone().stream()
+                .map(AzurePrivateDnsZoneServiceEnum::valueOf)
+                .collect(Collectors.toSet());
     }
 
     @Override

@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
-import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.validation.ValidationType;
@@ -50,10 +49,10 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         Map<String, CloudSubnet> cloudNetworks = cloudNetworkService.retrieveSubnetMetadata(environmentDto, networkDto);
         checkSubnetsProvidedWhenExistingNetwork(resultBuilder, networkDto, networkDto.getAzure(), cloudNetworks);
         if (environmentValidationDto.getValidationType() == ValidationType.ENVIRONMENT_CREATION) {
-            checkPrivateEndpointNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
-            checkPrivateEndpointsWhenMultipleResourceGroup(resultBuilder, environmentDto, networkDto.getServiceEndpointCreation());
-            checkExistingPrivateDnsZoneWhenNotPrivateEndpoint(resultBuilder, networkDto);
-            checkPrivateEndpointForExistingNetworkLink(resultBuilder, environmentDto, networkDto);
+            azurePrivateEndpointValidator.checkNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
+            azurePrivateEndpointValidator.checkMultipleResourceGroup(resultBuilder, environmentDto, networkDto.getServiceEndpointCreation());
+            azurePrivateEndpointValidator.checkExistingPrivateDnsZone(resultBuilder, environmentDto, networkDto);
+            azurePrivateEndpointValidator.checkNewPrivateDnsZone(resultBuilder, environmentDto, networkDto);
         } else {
             LOGGER.debug("Skipping Private Endpoint related validations as they have been validated before during env creation");
         }
@@ -106,15 +105,6 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
         }
     }
 
-    private void checkPrivateEndpointNetworkPoliciesWhenExistingNetwork(
-            NetworkDto networkDto, Map<String, CloudSubnet> cloudNetworks, ValidationResultBuilder resultBuilder) {
-        azurePrivateEndpointValidator.checkPrivateEndpointNetworkPoliciesWhenExistingNetwork(networkDto, cloudNetworks, resultBuilder);
-    }
-
-    private void checkPrivateEndpointForExistingNetworkLink(ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto, NetworkDto networkDto) {
-        azurePrivateEndpointValidator.checkPrivateEndpointForExistingNetworkLink(resultBuilder, environmentDto, networkDto);
-    }
-
     private void checkResourceGroupNameWhenExistingNetwork(ValidationResultBuilder resultBuilder, AzureParams azureParams) {
         if (StringUtils.isNotEmpty(azureParams.getNetworkId()) && StringUtils.isEmpty(azureParams.getResourceGroupName())) {
             resultBuilder.error("If networkId is specified, then resourceGroupName must be specified too.");
@@ -154,15 +144,6 @@ public class AzureEnvironmentNetworkValidator implements EnvironmentNetworkValid
             LOGGER.info(message);
             resultBuilder.error(message);
         }
-    }
-
-    private void checkPrivateEndpointsWhenMultipleResourceGroup(ValidationResultBuilder resultBuilder, EnvironmentDto environmentDto,
-            ServiceEndpointCreation serviceEndpointCreation) {
-        azurePrivateEndpointValidator.checkPrivateEndpointsWhenMultipleResourceGroup(resultBuilder, environmentDto, serviceEndpointCreation);
-    }
-
-    private void checkExistingPrivateDnsZoneWhenNotPrivateEndpoint(ValidationResultBuilder resultBuilder, NetworkDto networkDto) {
-        azurePrivateEndpointValidator.checkExistingPrivateDnsZoneWhenNotPrivateEndpoint(resultBuilder, networkDto);
     }
 
     @Override

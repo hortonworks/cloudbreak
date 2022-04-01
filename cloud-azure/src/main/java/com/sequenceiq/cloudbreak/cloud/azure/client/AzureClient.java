@@ -112,8 +112,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -863,6 +861,13 @@ public class AzureClient {
         return privatednsManager.privateZones().list();
     }
 
+    public PagedList<PrivateZone> getPrivateDnsZonesByResourceGroup(String subscriptionId, String resourceGroupName) {
+        privatednsManager dnsManager = azureClientCredentials.getPrivateDnsManagerWithAnotherSubscription(subscriptionId);
+        PagedList<PrivateZone> privateDnsZones = dnsManager.privateZones().listByResourceGroup(resourceGroupName);
+        privateDnsZones.loadAll();
+        return privateDnsZones;
+    }
+
     public List<PrivateZone> getPrivateDnsZoneListFromAllSubscriptions() {
         PagedList<Subscription> subscriptions = azure.subscriptions().list();
         subscriptions.loadAll();
@@ -910,7 +915,12 @@ public class AzureClient {
         return privatednsManager.virtualNetworkLinks().inner().list(resourceGroupName, dnsZoneName);
     }
 
-    private VirtualNetworkLinkInner getNetworkLinkByPrivateDnsZone(String resourceGroupName, String dnsZoneName, String virtualNetworkLinkName) {
+    public PagedList<VirtualNetworkLinkInner> listNetworkLinksByPrivateDnsZoneName(String subscriptionId, String resourceGroupName, String dnsZoneName) {
+        privatednsManager dnsManager = azureClientCredentials.getPrivateDnsManagerWithAnotherSubscription(subscriptionId);
+        return dnsManager.virtualNetworkLinks().inner().list(resourceGroupName, dnsZoneName);
+    }
+
+    public VirtualNetworkLinkInner getNetworkLinkByPrivateDnsZone(String resourceGroupName, String dnsZoneName, String virtualNetworkLinkName) {
         return virtualNetworkLinkName == null ? null
                 : privatednsManager.virtualNetworkLinks().inner().get(resourceGroupName, dnsZoneName, virtualNetworkLinkName);
     }

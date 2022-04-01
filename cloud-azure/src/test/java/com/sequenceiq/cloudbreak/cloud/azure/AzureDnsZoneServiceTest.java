@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -87,7 +88,7 @@ public class AzureDnsZoneServiceTest {
     public void testCheckOrCreateWhenAllResourceExists() {
 
         when(client.checkIfDnsZonesDeployed(any(), any())).thenReturn(true);
-        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap());
+        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
 
         verify(azureResourcePersistenceHelperService, times(0)).persistCloudResource(any(), any(), any(), any());
         verify(azureResourcePersistenceHelperService, times(0)).updateCloudResource(any(), any(), any(), any(), any());
@@ -103,7 +104,7 @@ public class AzureDnsZoneServiceTest {
         when(client.checkIfDnsZonesDeployed(any(), any())).thenReturn(false);
         when(azureResourcePersistenceHelperService.isRequested(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(true);
 
-        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap());
+        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
 
         verify(azureResourcePersistenceHelperService, times(0)).persistCloudResource(any(), any(), any(), any());
         verify(azureResourcePersistenceHelperService, times(0)).updateCloudResource(any(), any(), any(), any(), any());
@@ -119,7 +120,7 @@ public class AzureDnsZoneServiceTest {
         when(azureResourcePersistenceHelperService.isRequested(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(false);
         when(azureResourcePersistenceHelperService.isCreated(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(true);
 
-        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap());
+        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
 
         verify(azureResourcePersistenceHelperService, times(0)).persistCloudResource(any(), any(), any(), any());
         verify(azureResourcePersistenceHelperService, times(2)).updateCloudResource(any(), any(), any(), any(), any());
@@ -135,7 +136,7 @@ public class AzureDnsZoneServiceTest {
         when(azureResourcePersistenceHelperService.isRequested(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(false);
         when(azureResourcePersistenceHelperService.isCreated(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(false);
 
-        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap());
+        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
 
         verify(azureResourcePersistenceHelperService, times(1)).persistCloudResource(any(), any(), any(), any());
         verify(azureResourcePersistenceHelperService, times(1)).updateCloudResource(any(), any(), any(), any(), any());
@@ -152,7 +153,7 @@ public class AzureDnsZoneServiceTest {
         when(azureResourcePersistenceHelperService.isCreated(DEPLOYMENT_ID, AZURE_PRIVATE_DNS_ZONE)).thenReturn(false);
         doThrow(new CloudConnectorException("", null)).when(azureResourceDeploymentHelperService).deployTemplate(any(), any());
 
-        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap());
+        underTest.checkOrCreateDnsZones(ac, client, getNetworkView(), RESOURCE_GROUP, Collections.emptyMap(), Set.of());
 
         verify(azureResourcePersistenceHelperService, times(1)).persistCloudResource(any(), any(), any(), any());
         verify(azureResourcePersistenceHelperService, times(0)).updateCloudResource(any(), any(), any(), any(), any());
