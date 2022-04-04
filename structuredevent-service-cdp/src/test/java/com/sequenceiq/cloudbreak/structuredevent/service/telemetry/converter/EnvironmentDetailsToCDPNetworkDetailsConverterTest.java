@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
 import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +25,7 @@ import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
+import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 
 @ExtendWith(MockitoExtension.class)
@@ -170,16 +174,16 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
     public void testConvertingEmptyEnvironmentDetails() {
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals("", networkDetails.getNetworkType());
-        Assertions.assertEquals("", networkDetails.getServiceEndpointCreation());
-        Assertions.assertEquals("", networkDetails.getConnectivity());
-        Assertions.assertEquals(-1, networkDetails.getNumberPrivateSubnets());
-        Assertions.assertEquals(-1, networkDetails.getNumberPublicSubnets());
-        Assertions.assertEquals("", networkDetails.getPublicEndpointAccessGateway());
-        Assertions.assertEquals("", networkDetails.getSecurityAccessType());
-        Assertions.assertFalse(networkDetails.getProxyDetails().getProxy());
-        Assertions.assertEquals("", networkDetails.getProxyDetails().getProtocol());
-        Assertions.assertEquals("", networkDetails.getProxyDetails().getAuthentication());
+        assertEquals("", networkDetails.getNetworkType());
+        assertEquals("", networkDetails.getServiceEndpointCreation());
+        assertEquals("", networkDetails.getConnectivity());
+        assertEquals(-1, networkDetails.getNumberPrivateSubnets());
+        assertEquals(-1, networkDetails.getNumberPublicSubnets());
+        assertEquals("", networkDetails.getPublicEndpointAccessGateway());
+        assertEquals("", networkDetails.getSecurityAccessType());
+        assertFalse(networkDetails.getProxyDetails().getProxy());
+        assertEquals("", networkDetails.getProxyDetails().getProtocol());
+        assertEquals("", networkDetails.getProxyDetails().getAuthentication());
     }
 
     @Test
@@ -188,8 +192,8 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals(-1, networkDetails.getNumberPrivateSubnets());
-        Assertions.assertEquals(-1, networkDetails.getNumberPublicSubnets());
+        assertEquals(-1, networkDetails.getNumberPrivateSubnets());
+        assertEquals(-1, networkDetails.getNumberPublicSubnets());
     }
 
     @Test
@@ -203,8 +207,8 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals(-1, networkDetails.getNumberPrivateSubnets());
-        Assertions.assertEquals(-1, networkDetails.getNumberPublicSubnets());
+        assertEquals(-1, networkDetails.getNumberPrivateSubnets());
+        assertEquals(-1, networkDetails.getNumberPublicSubnets());
     }
 
     @Test
@@ -218,8 +222,8 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals(0, networkDetails.getNumberPrivateSubnets());
-        Assertions.assertEquals(0, networkDetails.getNumberPublicSubnets());
+        assertEquals(0, networkDetails.getNumberPrivateSubnets());
+        assertEquals(0, networkDetails.getNumberPublicSubnets());
     }
 
     @Test
@@ -234,8 +238,8 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals(-1, networkDetails.getNumberPrivateSubnets());
-        Assertions.assertEquals(-1, networkDetails.getNumberPublicSubnets());
+        assertEquals(-1, networkDetails.getNumberPrivateSubnets());
+        assertEquals(-1, networkDetails.getNumberPublicSubnets());
     }
 
     @Test
@@ -251,7 +255,92 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals(0, networkDetails.getNumberPrivateSubnets());
-        Assertions.assertEquals(1, networkDetails.getNumberPublicSubnets());
+        assertEquals(0, networkDetails.getNumberPrivateSubnets());
+        assertEquals(1, networkDetails.getNumberPublicSubnets());
     }
+
+    @Test
+    public void testSetOwnDnsZoneWhenAzurePrivateDnsZonePresent() {
+        NetworkDto networkDto = NetworkDto.builder()
+                .withAzure(AzureParams.builder()
+                        .withPrivateDnsZoneId("privateDnsZoneId")
+                        .build()
+                )
+                .withRegistrationType(RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT)
+                .build();
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+        when(environmentDetails.getCloudPlatform()).thenReturn("AZURE");
+
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        assertNotNull(networkDetails.getOwnDnsZones());
+        assertTrue(networkDetails.getOwnDnsZones().getPostgres());
+    }
+
+    @Test
+    public void testSetOwnDnsZoneWhenAzurePrivateDnsZoneNull() {
+        NetworkDto networkDto = NetworkDto.builder()
+                .withAzure(AzureParams.builder()
+                        .withPrivateDnsZoneId(null)
+                        .build()
+                )
+                .withRegistrationType(RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT)
+                .build();
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+        when(environmentDetails.getCloudPlatform()).thenReturn("AZURE");
+
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        assertNotNull(networkDetails.getOwnDnsZones());
+        assertFalse(networkDetails.getOwnDnsZones().getPostgres());
+    }
+
+    @Test
+    public void testSetOwnDnsZoneWhenAzureParamsNull() {
+        NetworkDto networkDto = NetworkDto.builder()
+                .withAzure(null)
+                .withRegistrationType(RegistrationType.EXISTING)
+                .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT)
+                .build();
+        when(environmentDetails.getNetwork()).thenReturn(networkDto);
+        when(environmentDetails.getCloudPlatform()).thenReturn("AZURE");
+
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        assertNotNull(networkDetails.getOwnDnsZones());
+        assertFalse(networkDetails.getOwnDnsZones().getPostgres());
+    }
+
+    @Test
+    public void testSetOwnDnsZoneWhenNotAzure() {
+        when(environmentDetails.getCloudPlatform()).thenReturn("someOtherPlatform");
+
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        assertNotNull(networkDetails.getOwnDnsZones());
+        assertFalse(networkDetails.getOwnDnsZones().getPostgres());
+    }
+
+    @Test
+    public void testSetOwnDnsZoneWhenCloudPlatformNull() {
+        when(environmentDetails.getCloudPlatform()).thenReturn(null);
+
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        assertNotNull(networkDetails.getOwnDnsZones());
+        assertFalse(networkDetails.getOwnDnsZones().getPostgres());
+    }
+
+    @Test
+    public void testSetOwnDnsZoneWhenNetworkDtoNull() {
+        when(environmentDetails.getCloudPlatform()).thenReturn("AZURE");
+
+        UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
+
+        assertNotNull(networkDetails.getOwnDnsZones());
+        assertFalse(networkDetails.getOwnDnsZones().getPostgres());
+    }
+
 }
