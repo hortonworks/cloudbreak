@@ -958,10 +958,6 @@ public abstract class TestContext implements ApplicationContextAware {
     private <T extends CloudbreakTestDto, E extends Enum<E>> T awaitWithClient(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
             MicroserviceClient client) {
         checkShutdown();
-        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
-            Log.await(LOGGER, String.format("Cloudbreak await should be skipped because of previous error. await [%s]", desiredStatuses));
-            return entity;
-        }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         CloudbreakTestDto awaitEntity = get(key);
         if (awaitEntity == null) {
@@ -978,8 +974,12 @@ public abstract class TestContext implements ApplicationContextAware {
             LOGGER.info("Resource Crn is not available for: {}", awaitEntity.getName());
         }
 
-        resourceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter,
-                flowUtilSingleStatus.getPollingDurationOrTheDefault(runningParameter), maxRetry, maxRetryCount, client);
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
+            Log.await(LOGGER, String.format("Cloudbreak await should be skipped because of previous error. await [%s]", desiredStatuses));
+        } else {
+            resourceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter,
+                    flowUtilSingleStatus.getPollingDurationOrTheDefault(runningParameter), maxRetry, maxRetryCount, client);
+        }
         return entity;
     }
 
@@ -1015,18 +1015,10 @@ public abstract class TestContext implements ApplicationContextAware {
                     Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
             Log.await(LOGGER, String.format(" Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
                     Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
-            try {
-                MicroserviceClient msClient = getAdminMicroserviceClient(awaitEntity.getClass(), Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn()))
-                        .getAccountId());
-                flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, msClient, runningParameter);
-            } catch (Exception e) {
-                if (runningParameter.isLogError()) {
-                    LOGGER.error("Cloudbreak await for flow '{}' is failed for: '{}', because of {}", awaitEntity, awaitEntity.getName(), e.getMessage(), e);
-                    Log.await(LOGGER, String.format(" Cloudbreak await for flow '%s' is failed for '%s', because of %s",
-                            awaitEntity, awaitEntity.getName(), e.getMessage()));
-                }
-                getExceptionMap().put(String.format("Cloudbreak await for flow %s", awaitEntity), e);
-            }
+
+            MicroserviceClient msClient = getAdminMicroserviceClient(awaitEntity.getClass(), Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn()))
+                    .getAccountId());
+            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, msClient, getTestContext(), runningParameter);
         }
         entity.setLastKnownFlowId(null);
         return entity;
