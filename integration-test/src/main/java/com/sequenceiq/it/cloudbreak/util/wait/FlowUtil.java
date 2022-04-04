@@ -17,8 +17,10 @@ import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 
 @Component
 public class FlowUtil {
@@ -55,10 +57,25 @@ public class FlowUtil {
         return maxRetry;
     }
 
-    public <T extends CloudbreakTestDto> T waitBasedOnLastKnownFlow(T testDto, MicroserviceClient msClient, RunningParameter runningParameter) {
+    public <T extends CloudbreakTestDto> T waitBasedOnLastKnownFlow(T testDto, MicroserviceClient msClient, TestContext testContext,
+            RunningParameter runningParameter) {
         FlowPublicEndpoint flowEndpoint = msClient.flowPublicEndpoint();
         if (flowEndpoint != null) {
-            waitForFlow(flowEndpoint, testDto.getCrn(), testDto.getLastKnownFlowChainId(), testDto.getLastKnownFlowId(), runningParameter);
+            if (testDto == null) {
+                throw new RuntimeException("Cloudbreak key has been provided but no result in resource map!");
+            }
+            String name = testDto.getName();
+            try {
+                Log.await(LOGGER, String.format(" Cloudbreak await for flow '%s' for '%s'", testDto, name));
+                waitForFlow(flowEndpoint, testDto.getCrn(), testDto.getLastKnownFlowChainId(), testDto.getLastKnownFlowId(), runningParameter);
+            } catch (Exception e) {
+                if (runningParameter.isLogError()) {
+                    LOGGER.error("Cloudbreak await for flow '{}' is failed for: '{}', because of {}", testDto, name, e.getMessage(), e);
+                    Log.await(LOGGER, String.format(" Cloudbreak await for flow '%s' is failed for '%s', because of %s",
+                            testDto, name, e.getMessage()));
+                }
+                testContext.getExceptionMap().put(String.format("Cloudbreak await for flow %s", testDto), e);
+            }
         }
         return testDto;
     }

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -44,15 +45,15 @@ public class GcpUtil {
     }
 
     public void cloudStorageListContainer(String baseLocation, String selectedObject, boolean zeroContent) {
-        listSelectedObject(baseLocation + selectedObject, zeroContent);
+        listSelectedObject(StringUtils.join(List.of(baseLocation, selectedObject), "/"), zeroContent);
     }
 
     public void cloudStorageListContainerFreeIpa(String baseLocation, String clusterName, String crn) {
-        listSelectedObject(baseLocation + "/cluster-logs/freeipa");
+        listSelectedObject(StringUtils.join(List.of(baseLocation, "cluster-logs", "freeipa"), "/"));
     }
 
     public void cloudStorageListContainerDataLake(String baseLocation, String clusterName, String crn) {
-        listSelectedObject(baseLocation + "/cluster-logs/datalake");
+        listSelectedObject(StringUtils.join(List.of(baseLocation, "cluster-logs", "datalake"), "/"));
     }
 
     public void cloudStorageDeleteContainer(String baseLocation) {
