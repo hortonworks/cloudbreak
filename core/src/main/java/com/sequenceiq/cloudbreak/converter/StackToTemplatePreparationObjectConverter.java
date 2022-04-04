@@ -388,7 +388,7 @@ public class StackToTemplatePreparationObjectConverter {
     }
 
     private String getMockVirtualGroup(VirtualGroupRequest virtualGroupRequest) {
-        return virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN.getRight());
+        return virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN.getRight());
     }
 
     private boolean isCloudStorageConfigured(Stack source) {

@@ -96,12 +96,12 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
                 VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
 
                 if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_1)) {
-                    String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.RANGER_ADMIN.getRight());
+                    String adminGroup = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.RANGER_ADMIN.getRight());
                     configList.add(config(RANGER_DEFAULT_POLICY_GROUPS, adminGroup));
                 }
 
                 if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_6_0)) {
-                    String hbaseAdminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.HBASE_ADMIN.getRight());
+                    String hbaseAdminGroup = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.HBASE_ADMIN.getRight());
                     configList.add(config(RANGER_HBASE_ADMIN_VIRTUAL_GROUPS, hbaseAdminGroup));
                 }
                 return configList;

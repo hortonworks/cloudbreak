@@ -120,11 +120,11 @@ public class RangerRoleConfigProviderTest {
                 .withProductDetails(generateCmRepo(() -> cdhVersion), null)
                 .build();
         if (expectedRoleConfigCount == 6) {
-            when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
+            when(virtualGroupService.createOrGetVirtualGroup(preparationObject.getVirtualGroupRequest(), RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
         }
         if ("7.6.0".equals(cdhVersion)) {
-            when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
-            when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), HBASE_ADMIN.getRight())).thenReturn(HBASE_ADMIN_GROUP);
+            when(virtualGroupService.createOrGetVirtualGroup(preparationObject.getVirtualGroupRequest(), RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
+            when(virtualGroupService.createOrGetVirtualGroup(preparationObject.getVirtualGroupRequest(), HBASE_ADMIN.getRight())).thenReturn(HBASE_ADMIN_GROUP);
         }
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -257,7 +257,7 @@ public class RangerRoleConfigProviderTest {
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
 
-        when(virtualGroupService.getVirtualGroup(tpo.getVirtualGroupRequest(), RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
+        when(virtualGroupService.createOrGetVirtualGroup(tpo.getVirtualGroupRequest(), RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(RangerRoles.RANGER_ADMIN, tpo);
 

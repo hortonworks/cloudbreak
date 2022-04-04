@@ -48,7 +48,7 @@ public class RangerVirtualGroupServiceTest {
 
     @Test
     public void getRangerVirtualGroupTestSuccess() {
-        Mockito.when(virtualGroupService.getVirtualGroup(
+        Mockito.when(virtualGroupService.createOrGetVirtualGroup(
                 any(), any()))
                 .thenReturn("_c_environments_adminranger");
         LdapView ldapView = LdapView.LdapViewBuilder.aLdapView().withProtocol("")

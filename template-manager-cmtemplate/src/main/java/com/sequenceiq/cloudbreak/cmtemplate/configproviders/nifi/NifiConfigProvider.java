@@ -34,7 +34,7 @@ public class NifiConfigProvider implements CmTemplateComponentConfigProvider {
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_1_0)) {
             VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
-            String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.NIFI_ADMIN.getRight());
+            String adminGroup = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.NIFI_ADMIN.getRight());
             configList.add(config("nifi.initial.admin.groups", adminGroup));
             rangerAutoCompleteConfigProvider.extendServiceConfigs(source, configList);
         }

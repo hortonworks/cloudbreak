@@ -74,7 +74,8 @@ public class ClouderaManagerLdapService {
                 Optional<ApiAuthRoleMetadata> limitedAdminRoleOpt = findRole(roleMetadataList, limitedAdminRole);
                 Optional<ApiAuthRoleMetadata> role = limitedAdminRoleOpt.isPresent() ? limitedAdminRoleOpt : findRole(roleMetadataList, adminRole);
                 if (role.isPresent()) {
-                    String virtualGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN.getRight());
+                    String virtualGroup = virtualGroupService
+                            .createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN.getRight());
                     addGroupMapping(externalUserMappingsResourceApi, role.get(), dashboardUserRoleOpt, virtualGroup);
                 } else {
                     LOGGER.info("Cannot setup admin group mapping. Admin roles ({}, {}) are not found", adminRole, limitedAdminRole);

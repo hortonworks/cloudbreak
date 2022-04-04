@@ -19,5 +19,6 @@ public enum UserSyncLogEvent {
     REMOVE_USERS,
     REMOVE_GROUPS,
     DISABLE_USERS,
-    ENABLE_USERS
+    ENABLE_USERS,
+    ADD_SUDO_RULES
 }

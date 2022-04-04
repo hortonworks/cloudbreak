@@ -588,7 +588,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testMockAccountMappings() {
-        when(virtualGroupService.getVirtualGroup(any(VirtualGroupRequest.class), eq(CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
+        when(virtualGroupService.createOrGetVirtualGroup(any(VirtualGroupRequest.class), eq(CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
         when(stackMock.getCluster().getFileSystem()).thenReturn(new FileSystem());
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
 
@@ -602,7 +602,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testMockAccountMappingsWhenNoFileSystemShouldReturnEmptyList() {
-        when(virtualGroupService.getVirtualGroup(any(VirtualGroupRequest.class), eq(CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
+        when(virtualGroupService.createOrGetVirtualGroup(any(VirtualGroupRequest.class), eq(CLOUDER_MANAGER_ADMIN.getRight()))).thenReturn("mockAdmins");
         when(stackMock.getCluster().getFileSystem()).thenReturn(null);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
 

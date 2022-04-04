@@ -5,10 +5,10 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
@@ -34,7 +34,7 @@ public class VirtualGroupService {
         return virtualGroups;
     }
 
-    public String getVirtualGroup(VirtualGroupRequest virtualGroupRequest, String right) {
+    public String createOrGetVirtualGroup(VirtualGroupRequest virtualGroupRequest, String right) {
         String virtualGroup;
         String adminGroup = virtualGroupRequest.getAdminGroup();
         if (StringUtils.isEmpty(adminGroup)) {
@@ -44,6 +44,10 @@ public class VirtualGroupService {
             LOGGER.info("Admingroup [{}] given by the user is used for {} right on {} environment", adminGroup, right, virtualGroupRequest.getEnvironmentCrn());
         }
         return virtualGroup;
+    }
+
+    public String getVirtualGroup(VirtualGroupRequest virtualGroupRequest, String right) {
+        return getVirtualGroupFromUms(virtualGroupRequest.getAccountId(), virtualGroupRequest.getEnvironmentCrn(), right);
     }
 
     public void cleanupVirtualGroups(String accountId, String environmentCrn) {
@@ -61,6 +65,18 @@ public class VirtualGroupService {
     }
 
     private String createOrGetVirtualGroup(String accountId, String environmentCrn, String right) {
+        String virtualGroup = getVirtualGroupFromUms(accountId, environmentCrn, right);
+        if (StringUtils.isEmpty(virtualGroup)) {
+            virtualGroup = grpcUmsClient.setWorkloadAdministrationGroupName(accountId,
+                    MDCUtils.getRequestId(), right, environmentCrn, regionAwareInternalCrnGeneratorFactory);
+            LOGGER.info("{} workloadAdministrationGroup is created for {} right on {} environment", virtualGroup, right, environmentCrn);
+        } else {
+            LOGGER.info("{} workloadAdministrationGroup is used for {} right on {} environment", virtualGroup, right, environmentCrn);
+        }
+        return virtualGroup;
+    }
+
+    private String getVirtualGroupFromUms(String accountId, String environmentCrn, String right) {
         String virtualGroup = "";
         try {
             virtualGroup = grpcUmsClient.getWorkloadAdministrationGroupName(accountId, MDCUtils.getRequestId(), right, environmentCrn,
@@ -69,13 +85,6 @@ public class VirtualGroupService {
             if (Code.NOT_FOUND != ex.getStatus().getCode()) {
                 throw ex;
             }
-        }
-        if (StringUtils.isEmpty(virtualGroup)) {
-            virtualGroup = grpcUmsClient.setWorkloadAdministrationGroupName(accountId,
-                    MDCUtils.getRequestId(), right, environmentCrn, regionAwareInternalCrnGeneratorFactory);
-            LOGGER.info("{} workloadAdministrationGroup is created for {} right on {} environment", virtualGroup, right, environmentCrn);
-        } else {
-            LOGGER.info("{} workloadAdministrationGroup is used for {} right on {} environment", virtualGroup, right, environmentCrn);
         }
         return virtualGroup;
     }

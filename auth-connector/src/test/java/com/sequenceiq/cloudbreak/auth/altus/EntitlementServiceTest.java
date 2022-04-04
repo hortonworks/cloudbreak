@@ -206,7 +206,10 @@ class EntitlementServiceTest {
                 {"CDP_DATALAKE_SELECT_INSTANCE_TYPE", (EntitlementCheckFunction) EntitlementService::isDatalakeSelectInstanceTypeEnabled, true},
 
                 {"CDP_DATALAKE_ZDU_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatalakeZduOSUpgradeEnabled, false},
-                {"CDP_DATALAKE_ZDU_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatalakeZduOSUpgradeEnabled, true}
+                {"CDP_DATALAKE_ZDU_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatalakeZduOSUpgradeEnabled, true},
+
+                {"CDP_ENVIRONMENT_PRIVILEGED_USER", (EntitlementCheckFunction) EntitlementService::isEnvironmentPrivilegedUserEnabled, false},
+                {"CDP_ENVIRONMENT_PRIVILEGED_USER", (EntitlementCheckFunction) EntitlementService::isEnvironmentPrivilegedUserEnabled, true}
         };
     }
 

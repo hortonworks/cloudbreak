@@ -83,7 +83,7 @@ public class VirtualGroupServiceTest {
                 any(), anyString(), eq(ENV_CRN), any())).thenReturn(MOCK_VIRTUAL_GROUP);
 
         VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(ENV_CRN, null);
-        String result = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.ENVIRONMENT_ACCESS.getRight());
+        String result = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.ENVIRONMENT_ACCESS.getRight());
 
         verify(grpcUmsClient, times(1)).setWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 any(), rightCaptor.capture(), eq(ENV_CRN), any());
@@ -99,7 +99,7 @@ public class VirtualGroupServiceTest {
                 any(), anyString(), eq(ENV_CRN), any())).thenReturn(MOCK_VIRTUAL_GROUP);
 
         VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(ENV_CRN, "");
-        String result = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.ENVIRONMENT_ACCESS.getRight());
+        String result = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.ENVIRONMENT_ACCESS.getRight());
 
         verify(grpcUmsClient, times(1)).setWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 any(), rightCaptor.capture(), eq(ENV_CRN), any());
@@ -110,7 +110,7 @@ public class VirtualGroupServiceTest {
     @Test
     public void testGetVirtualGroupWenAdminGroupIsProvided() {
         VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(ENV_CRN, "mockgroup");
-        String result = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.ENVIRONMENT_ACCESS.getRight());
+        String result = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.ENVIRONMENT_ACCESS.getRight());
 
         verify(grpcUmsClient, times(0)).getWorkloadAdministrationGroupName(eq(ACCOUNT_ID),
                 eq(Optional.empty()), anyString(), eq(ENV_CRN), any());

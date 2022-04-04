@@ -50,6 +50,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
@@ -463,6 +464,10 @@ public class EntitlementService {
 
     public boolean isDatalakeZduOSUpgradeEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATALAKE_ZDU_OS_UPGRADE);
+    }
+
+    public boolean isEnvironmentPrivilegedUserEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_ENVIRONMENT_PRIVILEGED_USER);
     }
 
     public List<String> getEntitlements(String accountId) {

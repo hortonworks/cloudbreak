@@ -41,10 +41,18 @@ import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.Privilege;
 import com.sequenceiq.freeipa.client.model.Role;
 import com.sequenceiq.freeipa.client.model.Service;
+import com.sequenceiq.freeipa.client.model.SudoCommand;
+import com.sequenceiq.freeipa.client.model.SudoRule;
 import com.sequenceiq.freeipa.client.model.TopologySegment;
 import com.sequenceiq.freeipa.client.model.TopologySuffix;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.client.operation.BatchOperation;
+import com.sequenceiq.freeipa.client.operation.SudoCommandAddOperation;
+import com.sequenceiq.freeipa.client.operation.SudoRuleAddAllowCommandOperation;
+import com.sequenceiq.freeipa.client.operation.SudoRuleAddDenyCommandOperation;
+import com.sequenceiq.freeipa.client.operation.SudoRuleAddGroupOperation;
+import com.sequenceiq.freeipa.client.operation.SudoRuleAddOperation;
+import com.sequenceiq.freeipa.client.operation.SudoRuleShowOperation;
 import com.sequenceiq.freeipa.client.operation.UserAddOperation;
 import com.sequenceiq.freeipa.client.operation.UserDisableOperation;
 import com.sequenceiq.freeipa.client.operation.UserEnableOperation;
@@ -690,4 +698,37 @@ public class FreeIpaClient {
         return Map.of("__dns_name__", name);
     }
 
+    public Set<SudoCommand> sudoCommandFindAll() throws FreeIpaClientException {
+        List<Object> flags = List.of();
+        Map<String, Object> params = Map.of(
+                "sizelimit", 0,
+                "timelimit", 0);
+        ParameterizedType type = TypeUtils.parameterize(Set.class, SudoCommand.class);
+        return (Set<SudoCommand>) invoke("sudocmd_find", flags, params, type).getResult();
+    }
+
+    public Optional<SudoCommand> sudoCommandAdd(String sudoCommand) throws FreeIpaClientException {
+        return SudoCommandAddOperation.create(sudoCommand).invoke(this);
+    }
+
+    public Optional<SudoRule> sudoRuleShow(String ruleName) throws FreeIpaClientException {
+        return SudoRuleShowOperation.create(ruleName).invoke(this);
+    }
+
+    public SudoRule sudoRuleAdd(String sudoRuleName, boolean hostCategoryAll) throws FreeIpaClientException {
+        return SudoRuleAddOperation.create(sudoRuleName, hostCategoryAll, SudoRuleShowOperation.create(sudoRuleName)).invoke(this).orElseThrow(() ->
+                new FreeIpaClientException("Failed to create sudo rule"));
+    }
+
+    public void sudoRuleAddAllowCommand(String ruleName, String sudoCommand) throws FreeIpaClientException {
+        SudoRuleAddAllowCommandOperation.create(ruleName, sudoCommand).invoke(this);
+    }
+
+    public void sudoRuleAddDenyCommand(String ruleName, String sudoCommand) throws FreeIpaClientException {
+        SudoRuleAddDenyCommandOperation.create(ruleName, sudoCommand).invoke(this);
+    }
+
+    public void sudoRuleAddGroup(String ruleName, String group) throws FreeIpaClientException {
+        SudoRuleAddGroupOperation.create(ruleName, group).invoke(this);
+    }
 }
