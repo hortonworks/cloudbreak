@@ -41,7 +41,7 @@ public class RangerUserSyncRoleConfigProvider extends AbstractRoleConfigProvider
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
-        String adminGroup = virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.RANGER_ADMIN.getRight());
+        String adminGroup = virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.RANGER_ADMIN.getRight());
         String rangerAdminAsSysAdminConfigProvider = rangerAdminAsSysAdminConfigProvider(source);
         if (CloudPlatform.AZURE.equals(source.getCloudPlatform()) && source.getGeneralClusterConfigs().isEnableRangerRaz()
                 && source.getServicePrincipals() != null) {

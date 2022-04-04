@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.ADD_SUDO_RULES;
 import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.APPLY_DIFFERENCE_TO_IPA;
 import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.CALCULATE_UMS_IPA_DIFFERENCE;
 import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.RETRIEVE_FULL_IPA_STATE;
@@ -51,6 +52,9 @@ public class UserSyncForStackService {
     private EntitlementService entitlementService;
 
     @Inject
+    private SudoRuleService sudoRuleService;
+
+    @Inject
     private UserStateDifferenceCalculator userStateDifferenceCalculator;
 
     public SyncStatusDetail synchronizeStack(Stack stack, UmsUsersState umsUsersState, UserSyncOptions options) {
@@ -64,11 +68,24 @@ public class UserSyncForStackService {
 
             retrySyncIfBatchCallHasWarnings(stack, umsUsersState, warnings, options, freeIpaClient, usersStateDifferenceBeforeSync);
 
-            // TODO For now we only sync cloud ids during full sync. We should eventually allow more granular syncs (actor level and group level sync).
-            if (options.isFullSync() && entitlementService.cloudIdentityMappingEnabled(stack.getAccountId())) {
-                LOGGER.debug("Starting {} ...", SYNC_CLOUD_IDENTITIES);
-                cloudIdentitySyncService.syncCloudIdentities(stack, umsUsersState, warnings::put);
-                LOGGER.debug("Finished {}.", SYNC_CLOUD_IDENTITIES);
+            if (options.isFullSync()) {
+                // TODO For now we only sync cloud ids during full sync. We should eventually allow more granular syncs (actor level and group level sync).
+                if (entitlementService.cloudIdentityMappingEnabled(stack.getAccountId())) {
+                    LOGGER.debug("Starting {} ...", SYNC_CLOUD_IDENTITIES);
+                    cloudIdentitySyncService.syncCloudIdentities(stack, umsUsersState, warnings::put);
+                    LOGGER.debug("Finished {}.", SYNC_CLOUD_IDENTITIES);
+                }
+
+                if (entitlementService.isEnvironmentPrivilegedUserEnabled(stack.getAccountId())) {
+                    LOGGER.debug("Starting {} ...", ADD_SUDO_RULES);
+                    try {
+                        sudoRuleService.setupSudoRule(stack, freeIpaClient);
+                    } catch (Exception e) {
+                        warnings.put(stack.getEnvironmentCrn(), e.getMessage());
+                        LOGGER.error("{} failed for environment '{}'.", ADD_SUDO_RULES, stack.getEnvironmentCrn(), e);
+                    }
+                    LOGGER.debug("Finished {}.", ADD_SUDO_RULES);
+                }
             }
 
             return toSyncStatusDetail(environmentCrn, warnings);

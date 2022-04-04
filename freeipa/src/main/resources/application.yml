@@ -139,7 +139,12 @@ freeipa:
         - HA
       HA:
         - TWO_NODE_BASED
-
+  sudo:
+    ruleName: cb-sudo-rule
+    allowCommands: >
+      /**/*
+    denyCommands: >
+      /bin/su
 info:
   app:
     capabilities:

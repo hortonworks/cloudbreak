@@ -37,7 +37,7 @@ public class RangerUserSyncRoleConfigProviderTest {
 
     @Before
     public void setup() {
-        when(virtualGroupService.getVirtualGroup(any(), anyString())).thenReturn("mockAdmin");
+        when(virtualGroupService.createOrGetVirtualGroup(any(), anyString())).thenReturn("mockAdmin");
     }
 
     @Test

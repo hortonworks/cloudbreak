@@ -42,6 +42,6 @@ public class RangerVirtualGroupService {
 
         LOGGER.debug("Admin Group:", adminGroup);
         VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(virtualGroupsEnvironmentCrn, adminGroup);
-        return virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.RANGER_ADMIN.getRight());
+        return virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.RANGER_ADMIN.getRight());
     }
 }
