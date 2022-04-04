@@ -59,4 +59,9 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
             @Param("resourceType") ResourceType resourceType,
             @Param("stackId") Long stackId,
             @Param("instanceGroup") String instanceGroup);
+
+    List<Resource> findAllByResourceStatusAndResourceTypeAndStackId(
+            @Param("resourceStatus") CommonStatus status,
+            @Param("resourceType") ResourceType resourceType,
+            @Param("stackId") Long stackId);
 }

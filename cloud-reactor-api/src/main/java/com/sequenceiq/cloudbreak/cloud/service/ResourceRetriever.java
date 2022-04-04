@@ -24,4 +24,8 @@ public interface ResourceRetriever {
             String instanceGroup) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
+
+    default List<CloudResource> findAllByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 }
