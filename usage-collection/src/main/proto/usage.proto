@@ -101,10 +101,6 @@ message Event {
     CDPDFServiceRequested cdpDFServiceRequested = 44;
     // A CDP DataFlow Service's status changed.
     CDPDFServiceStatusChanged cdpDFServiceStatusChanged = 45;
-    // A CDP DataFlow Service was requested to be upgraded.
-    CDPDFServiceUpgradeRequested cdpDFServiceUpgradeRequested = 91;
-    // A CDP DataFlow Service's upgrade status changed.
-    CDPDFServiceUpgradeStatusChanged cdpDFServiceUpgradeStatusChanged = 92;
     // A CDP UDX Bundle was initiated
     CDPUDXBundleInitiated cdpUDXBundleInitiated = 46;
     // A CDP UDX Bundle was received
@@ -182,16 +178,6 @@ message Event {
     CDPDatalakeBackupRestoreRequested cdpDatalakeBackupRestoreRequested = 84;
     // A CDP Data lake operation is completed.
     CDPDatalakeBackupRestoreComplete cdpDatalakeBackupRestoreComplete = 85;
-    // CDP PEM service created a certificate
-    CDPPEMCertificateCreated cdpPEMCertificateCreated = 86;
-    // CDP PEM service renewed a certificate
-    CDPPEMCertificateRenewed cdpPEMCertificateRenewed = 87;
-    // CDP PEM service revoked a certificate
-    CDPPEMCertificateRevoked cdpPEMCertificateRevoked = 88;
-    // A CDP CML Workspace Backup is created
-    CDPCMLWorkspaceBackupRequested cdpCMLWorkspaceBackupRequested = 89;
-    // A CDP CML Workspace Backup status changed
-    CDPCMLWorkspaceBackupStatusChanged cdpCMLWorkspaceBackupStatusChanged = 90;
   }
 }
 
@@ -395,10 +381,8 @@ message CDPCloudProviderVariantType {
     YARN = 5;
     // Mock
     MOCK = 6;
-    // AWS_GOV Deprecated/Renamed fields
+    // AWS_GOV
     AWS_GOV = 7;
-    // AWS_NATIVE_GOV
-    AWS_NATIVE_GOV = 8;
   }
 }
 
@@ -750,19 +734,6 @@ message CDPCMLWorkspaceStatus {
   }
 }
 
-message CDPCMLWorkspaceBackupStatus {
-  enum Value {
-    // The status when workspace is trying to create a backup
-    BACKUP_STARTED = 0;
-    // The status when workpsace has finsihed creating a backup
-    BACKUP_FINSHED = 1;
-    // The status when backup for a workspace has been deleted
-    BACKUP_DELETED = 2;
-    // The status when backup creation for a workspace has failed
-    BACKUP_FAILED = 3;
-  }
-}
-
 // AWS metadata about the workspace when it was created or updated.
 message CDPCMLAWSWorkspaceMetadata {
   // Requested min workers for the auto scaling workers group.
@@ -793,20 +764,6 @@ message CDPCMLAzureWorkspaceMetadata {
   string workerInstanceType = 5;
   // The instance type selected for the gpu auto scaling group.
   string gpuInstanceType = 6;
-}
-
-// Backup Metadata about the workspace
-message CDPCMLWorkspaceBackupMetadata {
-  // The CDP workspace backup crn of the backup
-  string backupCrn = 1;
-  // The user-supplied backup name
-  string backupName = 2;
-}
-
-// Restore Metadata about the workspace
-message CDPCMLWorkspaceRestoreMetadata {
-  // The backup crn from which workspace is restored
-  string backupCrn = 1;
 }
 
 // Generated when a valid CDP CML workspace creation request has been made.
@@ -849,10 +806,6 @@ message CDPCMLWorkspaceRequested {
   }
   // private cluster.
   bool privateCluster = 15;
-  // Flag to identify if workspace is created by restoring from a backup
-  bool isRestore = 16;
-  // Backup metadata for workspace restore
-  CDPCMLWorkspaceBackupMetadata cdpCMLWorkspaceBackupMetadata = 17;
 }
 
 // Generated when a CDP CML workspace's status changed.
@@ -876,46 +829,6 @@ message CDPCMLWorkspaceStatusChanged {
   // added tags that are product-specific. The format of this is a map serialized
   // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
   string userTags = 9;
-  // Restore metadata for workspace
-  CDPCMLWorkspaceRestoreMetadata cdpCMLWorkspaceRestoreMetadata = 10;
-}
-
-// Generated when a valid CDP CML workspace backup creation request has been made
-message CDPCMLWorkspaceBackupRequested{
-  // The CDP workspace crn of the CML Workspace
-  string workspaceCrn = 1;
-  // The CDP backup crn of the CML Workspace
-  string backupCrn  = 2;
-  // The user-supplied backup name
-  string backupName = 3;
-  // The CDP account ID of the CML workspace.
-  string accountId = 4;
-  // The environment type.
-  CDPEnvironmentsEnvironmentType.Value environmentType = 5;
-  // The CRN of the CML workspace's environment.
-  string environmentCrn = 6;
-  // The CML crud app version.
-  string cmlVersion = 7;
-  // The CML workspace version deployed.
-  string workspaceVersion = 8;
-  // the request id of the create event
-  string requestId = 9;
-}
-
-// Generated when a CDP CML workspace backup status chnages
-message CDPCMLWorkspaceBackupStatusChanged {
-  // The CDP workspace backup crn of CML workspace
-  string backupCrn = 1;
-  // the CML workspace's status before the change.
-  CDPCMLWorkspaceBackupStatus.Value oldStatus = 2;
-  // the CML workspace's status after the change.
-  CDPCMLWorkspaceBackupStatus.Value newStatus = 3;
-  // NFS size of the the workspace Backup
-  int64 nfsSize = 4;
-  // A failure message for the CML workspace backup. This will only be set if newStatus is FAILED
-  string failureReason = 5;
-  // the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
-  string requestId = 6;
 }
 
 // States of the nodes in a CDP CML workspace.
@@ -1390,6 +1303,11 @@ message CDPProxyDetails {
   string authentication = 3;
 }
 
+message CDPOwnDnsZones {
+    // Whether DNS is provided for the postgres by the customer or not
+    bool postgres = 1;
+}
+
 message CDPNetworkDetails {
   // Whether the network is created by CDP CP or by the customer
   string networkType = 1;
@@ -1411,6 +1329,7 @@ message CDPNetworkDetails {
   string controlPlaneAndCCMAgentConnectionSecurity = 9;
   // Generated domain name
   string domain = 10;
+  CDPOwnDnsZones ownDnsZones= 11;
 }
 
 // Generated when Environment creation has been requested or finished
@@ -1467,8 +1386,6 @@ message CDPClusterShape {
   bool temporaryStorageUsed = 5;
   // Cluster template details in JSON format
   string clusterTemplateDetails = 6;
-  // Cluster template overrides in JSON format
-  string clusterTemplateOverridesDetails = 7;
 }
 
 // The Shape of the Data lake.
@@ -1772,18 +1689,6 @@ message CDPDFServiceStatus {
     ORPHANED_NOT_ENABLED = 18;
     // The status of a df service that became unorphaned
     UNORPHANED = 19;
-    // The status of a df service that is being requested to upgrade.
-    UPGRADE_REQUESTED = 20;
-    // The status of a df service that failed to upgrade.
-    UPGRADE_FAILED = 21;
-    // The status of a df service was upgraded successfully.
-    UPGRADE_COMPLETED = 22;
-    // The status of a df service that has k8s version upgrade in progress
-    UPGRADE_K8S_VERSION_IN_PROGRESS = 23;
-    // The status of a df service that has workload components upgrade in progress
-    UPGRADE_WORKLOAD_IN_PROGRESS = 24;
-    // The status of a df service that is being rolled back.
-    ROLLBACK_IN_PROGRESS = 25;
   }
 }
 
@@ -1845,62 +1750,6 @@ message CDPDFServiceStatusChanged {
   string failureReason = 4;
   // CRN of Cloudbreak environment
   string environmentCrn = 5;
-}
-
-// Generated when DataFlow Service upgrade has been requested
-message CDPDFServiceUpgradeRequested {
-  // Operation metadata
-  CDPDFOperationDetails operationDetails = 1;
-  // The crn of the CDP environment being enabled for DF.
-  string environmentCrn = 2;
-  // The environment type / cloud provider.
-  CDPEnvironmentsEnvironmentType.Value environmentType = 3;
-  // The instance type of nodes used in the DF service
-  string instanceType = 4;
-  // Minimum number of nodes.
-  int32 minNodes = 5;
-  // Maximum number of nodes to scale to.
-  int32 maxNodes = 6;
-  // The new k8s version requested to be upgraded to.
-  string newK8sServerVersion = 7;
-  // The k8s version that df service is on before the upgrade is requested.
-  string oldK8sServerVersion = 8;
-  // The new requested version of DataFlow service to be upgraded.
-  string newVersion = 9;
-  // The version that df service is on before the upgrade is requested.
-  string oldVersion = 10;
-  // Is the load balancer publicly available on the internet?
-  bool publicEndpoint = 11;
-  // Is K8S API access restricted by ip ranges (CIDR)?
-  bool accessRestricted = 12;
-  // The initial status of the df service. Should be UPGRADE_REQUESTED.
-  CDPDFServiceStatus.Value status = 13;
-  // Is the load balancer (if configured) restricting access by ip ranges?
-  bool loadBalancerAccessRestricted = 14;
-  // CRN of the actor that created the request
-  string actorCrn = 15;
-}
-
-message CDPDFServiceUpgradeStatusChanged {
-  // Operation metadata
-  CDPDFOperationDetails operationDetails = 1;
-  // The status of the df service before the change
-  CDPDFServiceStatus.Value oldStatus = 2;
-  // The status of the df service after the change
-  CDPDFServiceStatus.Value newStatus = 3;
-  // A failure message for the df service. This will only be set if newStatus is
-  // *_FAILED.
-  string failureReason = 4;
-  // CRN of Cloudbreak environment
-  string environmentCrn = 5;
-  // The new requested version of DataFlow service to be upgraded.
-  string newVersion = 6;
-  // The version that df service is on before the upgrade is requested.
-  string oldVersion = 7;
-  // The new k8s version requested to be upgraded to.
-  string newK8sServerVersion = 8;
-  // The k8s version that df service is on before the upgrade is requested.
-  string oldK8sServerVersion = 9;
 }
 
 // The status of a CDP Deployment.
@@ -2885,12 +2734,6 @@ message CDPVMDiagnosticsFailureType {
     UPLOAD_FAILURE = 6;
     // Failure during cleaning up resources.
     CLEANUP_FAILURE = 7;
-    // Failure during salt pillar update.
-    SALT_PILLAR_UPDATE_FAILURE = 8;
-    // Failure during salt state update.
-    SALT_STATE_UPDATE_FAILURE = 9;
-    // Failure during telemetry upgrade.
-    TELEMETRY_UPGRADE_FAILURE = 10;
   }
 }
 
@@ -2969,52 +2812,4 @@ message CDPStackPatchEventType {
       SUCCESS = 2;
       FAILURE = 3;
   }
-}
-
-// Generated when PEM service creates a certificate successfully.
-message CDPPEMCertificateCreated {
-  // PEM certificate request details.
-  CDPPEMCertificateRequestDetails requestDetails = 1;
-  // Certificate workflowId, to trace more details on the certificate workflow.
-  string workflowId = 2;
-}
-
-// Generated when PEM service renews a certificate successfully.
-message CDPPEMCertificateRenewed {
-  // PEM certificate request details.
-  CDPPEMCertificateRequestDetails requestDetails = 1;
-  // Certificate workflowId, to trace more details on the certificate workflow.
-  string workflowId = 2;
-  // Certificate provider that issued the certificate before renewal.
-  string prevCertificateProvider = 3;
-}
-
-// Generated when PEM service revokes a certificate successfully.
-message CDPPEMCertificateRevoked {
-  // PEM certificate request details.
-  CDPPEMCertificateRequestDetails requestDetails = 1;
-  // Reason to revoke the certificate.
-  string revocationReason = 2;
-}
-
-// The PEM certificate request details
-message CDPPEMCertificateRequestDetails {
-  // The CDP account ID of the user.
-  string accountId = 1;
-  // The cluster CRN.
-  string clusterCrn = 2;
-  // Name of the client (cb, dfx, cml) that requested certificate.
-  string clientName = 3;
-  // Certificate Serial Number.
-  string certSerialNumber = 4;
-  // Subjective Alternative Name OR domain name of certificate.
-  string san = 5;
-  // Hash of the SAN.
-  string sanHash = 6;
-  // Certificate not valid before.
-  string notBefore = 7;
-  // Certificate not valid before.
-  string notAfter = 8;
-  // Certificate Provider that issued the certificate.
-  string certificateProvider = 9;
 }
