@@ -29,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.util.ResourceUtil;
@@ -74,10 +75,10 @@ public class MockSdxTests extends AbstractMockTest {
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(sdxCustom, SdxCustomTestDto.class)
-                .withCustomInstanceGroup("master", "small")
+                .withCustomInstanceGroup("master", "xlarge")
                 .when(sdxTestClient.createCustom(), key(sdxCustom))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxCustom))
-                .then(MockSdxTests::validateInstanceGroupInstanceTypeIsModified)
+                .then(this::validateInstanceGroupInstanceTypeIsModified)
                 .then((tc, testDto, client) -> sdxTestClient.deleteCustom().action(tc, testDto, client))
                 .await(SdxClusterStatusResponse.DELETED, key(sdxCustom))
                 .validate();
@@ -220,12 +221,51 @@ public class MockSdxTests extends AbstractMockTest {
                 .validate();
     }
 
-    private static SdxCustomTestDto validateInstanceGroupInstanceTypeIsModified(TestContext testContext, SdxCustomTestDto testDto, SdxClient client) {
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running Cloudbreak",
+            when = "an invalid SDX Create request is sent with wrong custom instance type",
+            then = "SDX create should be failed"
+    )
+    public void testSDXCreateWithInvalidCustomInstanceTypesShouldFail(MockedTestContext testContext) {
+        String sdx = resourcePropertyProvider().getName();
+        String networkKey = "someNetwork";
+
+        testContext
+                .given(networkKey, EnvironmentNetworkTestDto.class)
+                .withMock(new EnvironmentNetworkMockParams())
+                .given(EnvironmentTestDto.class)
+                .withNetwork(networkKey)
+                .withCreateFreeIpa(Boolean.FALSE)
+                .withName(resourcePropertyProvider().getEnvironmentName())
+                .when(getEnvironmentTestClient().create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(sdx, SdxTestDto.class)
+                .withCustomInstanceGroup("master", "small")
+                .when(sdxTestClient.create(), key(sdx))
+                .await(SdxClusterStatusResponse.PROVISIONING_FAILED, key(sdx).withWaitForFlowFail())
+                .then(this::validateSdxStatusReason)
+                .validate();
+    }
+
+    private SdxCustomTestDto validateInstanceGroupInstanceTypeIsModified(TestContext testContext, SdxCustomTestDto testDto, SdxClient client) {
         InstanceGroupV4Response instanceGroupResponse = testDto.getResponse().getStackV4Response().getInstanceGroups().stream()
                 .filter(instanceGroup -> "master".equals(instanceGroup.getName()))
                 .findAny().orElseThrow(() -> new TestFailException("Could not find master instance group."));
-        if (instanceGroupResponse.getTemplate() == null || !"small".equals(instanceGroupResponse.getTemplate().getInstanceType())) {
-            throw new TestFailException("Instance type of master instance group is not small!");
+        if (instanceGroupResponse.getTemplate() == null || !"xlarge".equals(instanceGroupResponse.getTemplate().getInstanceType())) {
+            throw new TestFailException("Instance type of master instance group is not xlarge!");
+        }
+        return testDto;
+    }
+
+    private SdxTestDto validateSdxStatusReason(TestContext testContext, SdxTestDto testDto, SdxClient client) {
+        SdxClusterStatusResponse sdxStatus = testDto.getResponse().getStatus();
+        if (!SdxClusterStatusResponse.PROVISIONING_FAILED.equals(sdxStatus)) {
+            throw new TestFailException("Sdx status is not PROVISIONING_FAILED, current status: " + sdxStatus);
+        }
+        String statusReason = testDto.getResponse().getStatusReason();
+        if (!"Datalake creation failed. Invalid custom instance type for instance group: master - small".equals(statusReason)) {
+            throw new TestFailException("Sdx status reason is invalid: " + statusReason);
         }
         return testDto;
     }

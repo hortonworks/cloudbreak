@@ -47,6 +47,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
+import com.sequenceiq.datalake.service.sdx.SdxRecommendationService;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -68,6 +69,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
+import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
@@ -118,6 +120,9 @@ public class SdxController implements SdxEndpoint {
 
     @Inject
     private SdxImageCatalogService sdxImageCatalogService;
+
+    @Inject
+    private SdxRecommendationService sdxRecommendationService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -407,7 +412,15 @@ public class SdxController implements SdxEndpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
     public SdxDefaultTemplateResponse getDefaultTemplate(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform) {
-        return sdxService.getDefaultTemplate(clusterShape, runtimeVersion, cloudPlatform);
+        return sdxRecommendationService.getDefaultTemplateResponse(clusterShape, runtimeVersion, cloudPlatform);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
+    @CheckPermissionByResourceCrn(action = DESCRIBE_CREDENTIAL)
+    public SdxRecommendationResponse getRecommendation(@ResourceCrn String credentialCrn, SdxClusterShape clusterShape, String runtimeVersion,
+            String cloudPlatform, String region, String availabilityZone) {
+        return sdxRecommendationService.getRecommendation(credentialCrn, clusterShape, runtimeVersion, cloudPlatform, region, availabilityZone);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

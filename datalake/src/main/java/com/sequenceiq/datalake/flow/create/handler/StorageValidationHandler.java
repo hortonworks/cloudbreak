@@ -8,12 +8,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.dyngr.exception.PollerException;
-import com.dyngr.exception.PollerStoppedException;
-import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.create.event.SdxCreateFailedEvent;
@@ -32,9 +28,6 @@ import reactor.bus.Event;
 public class StorageValidationHandler extends ExceptionCatcherEventHandler<StorageValidationRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageValidationHandler.class);
-
-    @Value("${sdx.db.operation.duration_min:60}")
-    private int durationInMinutes;
 
     @Inject
     private EnvironmentService environmentService;
@@ -61,24 +54,14 @@ public class StorageValidationHandler extends ExceptionCatcherEventHandler<Stora
         Long sdxId = storageValidationRequest.getResourceId();
         String userId = storageValidationRequest.getUserId();
         try {
-            DetailedEnvironmentResponse env = environmentService.waitNetworkAndGetEnvironment(sdxId);
             Optional<SdxCluster> sdxCluster = sdxClusterRepository.findById(sdxId);
             if (sdxCluster.isPresent()) {
+                DetailedEnvironmentResponse env = environmentService.getDetailedEnvironmentResponseByName(sdxCluster.get().getEnvName());
                 stackRequestManifester.configureStackForSdxCluster(sdxCluster.get(), env);
                 return new StorageValidationSuccessEvent(sdxId, userId);
             } else {
                 throw notFound("SDX cluster", sdxId).get();
             }
-        } catch (UserBreakException userBreakException) {
-            LOGGER.error("Env polling exited before timeout. Cause: ", userBreakException);
-            return new SdxCreateFailedEvent(sdxId, userId, userBreakException);
-        } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Env poller stopped for sdx: {}", sdxId, pollerStoppedException);
-            return new SdxCreateFailedEvent(sdxId, userId,
-                    new PollerStoppedException("Env wait timed out after " + durationInMinutes + " minutes in sdx storage validation phase"));
-        } catch (PollerException exception) {
-            LOGGER.error("Env polling failed for sdx: {}", sdxId, exception);
-            return new SdxCreateFailedEvent(sdxId, userId, exception);
         } catch (Exception anotherException) {
             LOGGER.error("Something wrong happened in sdx storage validation phase", anotherException);
             return new SdxCreateFailedEvent(sdxId, userId, anotherException);

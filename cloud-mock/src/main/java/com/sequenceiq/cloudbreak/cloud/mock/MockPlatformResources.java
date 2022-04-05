@@ -66,18 +66,33 @@ public class MockPlatformResources implements PlatformResources {
 
     private enum MockedVmTypes {
 
-        SMALL("small"),
-        MEDIUM("medium"),
-        LARGE("large");
+        SMALL("small", 2, 200.0F),
+        MEDIUM("medium", 8, 800.0F),
+        LARGE("large", 10, 1000.0F),
+        XLARGE("xlarge", 15, 2000.0F);
 
         private final String value;
 
-        MockedVmTypes(String value) {
+        private final Integer cpu;
+
+        private final Float memory;
+
+        MockedVmTypes(String value, Integer cpu, Float memory) {
             this.value = value;
+            this.cpu = cpu;
+            this.memory = memory;
         }
 
         public String value() {
             return value;
+        }
+
+        public Integer cpu() {
+            return cpu;
+        }
+
+        public Float memory() {
+            return memory;
         }
 
         public VmTypeMeta getVmTypeMeta() {
@@ -86,6 +101,8 @@ public class MockPlatformResources implements PlatformResources {
             vmTypeMeta.setEphemeralConfig(getVolumeConfig(VolumeParameterType.EPHEMERAL));
             vmTypeMeta.setMagneticConfig(getVolumeConfig(VolumeParameterType.MAGNETIC));
             vmTypeMeta.setAutoAttachedConfig(getVolumeConfig(VolumeParameterType.AUTO_ATTACHED));
+            vmTypeMeta.getProperties().put(VmTypeMeta.CPU, cpu);
+            vmTypeMeta.getProperties().put(VmTypeMeta.MEMORY, memory);
             return vmTypeMeta;
         }
 

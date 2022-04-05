@@ -123,7 +123,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 
@@ -1040,6 +1039,20 @@ class SdxServiceTest {
     }
 
     @Test
+    void testCreateInternalSdxClusterWithCustomInstanceGroupShouldFail() {
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
+        StackV4Request stackV4Request = new StackV4Request();
+        ClusterV4Request clusterV4Request = new ClusterV4Request();
+        stackV4Request.setCluster(clusterV4Request);
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.12", CUSTOM);
+        withCustomInstanceGroups(sdxClusterRequest);
+        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request));
+        assertEquals("Custom instance group is not accepted on SDX Internal API.", badRequestException.getMessage());
+    }
+
+    @Test
     void testCreateSdxClusterWithCustomInstanceGroup() throws Exception {
         final String runtime = "7.2.12";
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
@@ -1576,28 +1589,6 @@ class SdxServiceTest {
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals(String.format("Provisioning a micro duty data lake cluster is not enabled for %s. ", CloudPlatform.AZURE.name()) +
                 "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
-    }
-
-    @Test
-    void testGetDefaultTemplateWhenMissingRequiredParameters() {
-        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplate(null,  "7.2.14", "AWS"));
-        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplate(LIGHT_DUTY,  null, "AWS"));
-        assertThrows(BadRequestException.class, () -> underTest.getDefaultTemplate(LIGHT_DUTY,  "7.2.14", null));
-    }
-
-    @Test
-    void testGetDefaultTemplateWhenMissingTemplateForParameters() {
-        when(cdpConfigService.getConfigForKey(any())).thenReturn(null);
-        assertThrows(NotFoundException.class, () -> underTest.getDefaultTemplate(LIGHT_DUTY,  "7.2.14", "AWS"));
-    }
-
-    @Test
-    void testGetDefaultTemplate() {
-        StackV4Request defaultTemplate = new StackV4Request();
-        when(cdpConfigService.getConfigForKey(any())).thenReturn(defaultTemplate);
-
-        SdxDefaultTemplateResponse response = underTest.getDefaultTemplate(LIGHT_DUTY, "7.2.14", "AWS");
-        assertEquals(defaultTemplate, response.getTemplate());
     }
 
 }

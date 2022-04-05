@@ -43,6 +43,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
+import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
@@ -297,4 +298,17 @@ public interface SdxEndpoint {
     @ApiOperation(value = "Gets the default template for the given datalake shape, cloud platform and runtime version", nickname = "getDefaultTemplate")
     SdxDefaultTemplateResponse getDefaultTemplate(@QueryParam("clusterShape") SdxClusterShape clusterShape, @QueryParam("runtimeVersion") String runtimeVersion,
             @QueryParam("cloudPlatform") String cloudPlatform);
+
+    @GET
+    @Path("recommendation")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Gets default and recommended instance types for the given datalake shape, cloud platform and runtime version",
+            nickname = "getRecommendation")
+    SdxRecommendationResponse getRecommendation(
+            @NotNull(message = "The 'credentialCrn' query parameter must be specified.") @QueryParam("credentialCrn") String credentialCrn,
+            @NotNull(message = "The 'clusterShape' query parameter must be specified.") @QueryParam("clusterShape") SdxClusterShape clusterShape,
+            @NotNull(message = "The 'runtimeVersion' query parameter must be specified.") @QueryParam("runtimeVersion") String runtimeVersion,
+            @NotNull(message = "The 'cloudPlatform' query parameter must be specified.") @QueryParam("cloudPlatform") String cloudPlatform,
+            @NotNull(message = "The 'region' query parameter must be specified.") @QueryParam("region") String region,
+            @QueryParam("availabilityZone") String availabilityZone);
 }

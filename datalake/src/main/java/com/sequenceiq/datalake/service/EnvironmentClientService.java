@@ -3,18 +3,21 @@ package com.sequenceiq.datalake.service;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.common.api.backup.response.BackupResponse;
-import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionHandler;
+import com.sequenceiq.common.api.backup.response.BackupResponse;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.platformresource.CredentialPlatformResourceEndpoint;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
 
 @Service
 public class EnvironmentClientService {
@@ -26,6 +29,9 @@ public class EnvironmentClientService {
 
     @Inject
     private CredentialEndpoint credentialEndpoint;
+
+    @Inject
+    private CredentialPlatformResourceEndpoint credentialPlatformResourceEndpoint;
 
     @Inject
     private WebApplicationExceptionHandler webApplicationExceptionHandler;
@@ -68,6 +74,16 @@ public class EnvironmentClientService {
         } else {
             LOGGER.error("Could not identify the location to store the backup");
             throw new BadRequestException("Backup Location is empty. Datalake backup is not triggered.");
+        }
+    }
+
+    public PlatformVmtypesResponse getVmTypesByCredential(String credentialCrn, String region, String platformVariant,
+            CdpResourceType resourceType, String availabilityZone) {
+        try {
+            return credentialPlatformResourceEndpoint.getVmTypesByCredential(null, credentialCrn, region, platformVariant, availabilityZone,
+                    resourceType);
+        } catch (WebApplicationException e) {
+            throw webApplicationExceptionHandler.handleException(e);
         }
     }
 }
