@@ -278,9 +278,9 @@
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'OPDB_AGENT' in exposed and 'OPDB_AGENT' in salt['pillar.get']('gateway:location') -%}
+            {% if 'OPDB-AGENT' in exposed and 'OPDB_AGENT' in salt['pillar.get']('gateway:location') -%}
             <param>
-                <name>OPDB_AGENT</name>
+                <name>OPDB-AGENT</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
             </param>
             {%- endif %}
@@ -604,11 +604,11 @@
     {%- endif %}
 
     {% if 'OPDB_AGENT' in salt['pillar.get']('gateway:location') -%}
-    {% if 'OPDB_AGENT' in exposed -%}
+    {% if 'OPDB-AGENT' in exposed -%}
     <service>
-        <role>OPDB_AGENT</role>
+        <role>OPDB-AGENT</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['OPDB_AGENT'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['OPDB_AGENT'] }}</url>
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['OPDB-AGENT'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
