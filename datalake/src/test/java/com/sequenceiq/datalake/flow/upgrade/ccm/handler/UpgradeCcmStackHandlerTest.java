@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.refEq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.concurrent.TimeUnit;
 
@@ -31,6 +32,7 @@ import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmFailedEvent;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackRequest;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmSuccessEvent;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.upgrade.ccm.SdxCcmUpgradeService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandlerTestSupport;
 
@@ -45,6 +47,9 @@ class UpgradeCcmStackHandlerTest {
 
     @Mock
     private EventBus eventBus;
+
+    @Mock
+    private SdxService sdxService;
 
     @Captor
     private ArgumentCaptor<Object> keyCaptor;
@@ -70,14 +75,15 @@ class UpgradeCcmStackHandlerTest {
     @Test
     void defaultFailureEvent() {
         Selectable failureEvent = underTest.defaultFailureEvent(1L, new Exception("error"),
-                new Event<>(new UpgradeCcmStackRequest(1L, "user", getSdxCluster())));
+                new Event<>(new UpgradeCcmStackRequest(1L, "user")));
         assertThat(failureEvent.selector()).isEqualTo("UpgradeCcmFailedEvent");
     }
 
     @Test
     void acceptSuccess() throws Exception {
         SdxCluster sdxCluster = getSdxCluster();
-        UpgradeCcmStackRequest request = new UpgradeCcmStackRequest(1L, "user", sdxCluster);
+        when(sdxService.getById(any())).thenReturn(sdxCluster);
+        UpgradeCcmStackRequest request = new UpgradeCcmStackRequest(1L, "user");
         PollingConfig expectedPollingConfig = new PollingConfig(1, TimeUnit.SECONDS, 2, TimeUnit.MINUTES);
         Event.Headers headers = new Event.Headers();
         Event<UpgradeCcmStackRequest> event = new Event<>(headers, request);
@@ -93,9 +99,10 @@ class UpgradeCcmStackHandlerTest {
     @ParameterizedTest
     @ValueSource(classes = { UserBreakException.class, PollerStoppedException.class, PollerException.class })
     void acceptWithExceptions(Class<? extends Throwable> errorClass) throws Exception {
-        UpgradeCcmStackRequest request = new UpgradeCcmStackRequest(1L, "user", getSdxCluster());
+        UpgradeCcmStackRequest request = new UpgradeCcmStackRequest(1L, "user");
         Event.Headers headers = new Event.Headers();
         Event<UpgradeCcmStackRequest> event = new Event<>(headers, request);
+        when(sdxService.getById(any())).thenReturn(getSdxCluster());
 
         doThrow(errorClass).when(ccmUpgradeService).initAndWaitForStackUpgrade(any(SdxCluster.class), any(PollingConfig.class));
         Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);

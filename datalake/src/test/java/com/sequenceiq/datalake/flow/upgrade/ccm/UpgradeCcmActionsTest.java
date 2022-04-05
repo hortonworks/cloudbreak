@@ -177,7 +177,7 @@ class UpgradeCcmActionsTest {
 
     @Test
     void stackUpgradeHappyPath() {
-        actionPayload = new UpgradeCcmStackEvent(ACTION_PAYLOAD_SELECTOR, sdxCluster, USER_ID);
+        actionPayload = new UpgradeCcmStackEvent(ACTION_PAYLOAD_SELECTOR, SDX_ID, USER_ID);
         setupContextWithPayload();
         testUpgradeActionHappyPath(underTest::upgradeCcmStack);
         UpgradeCcmStackRequest payload = (UpgradeCcmStackRequest) payloadArgumentCaptor.getValue();

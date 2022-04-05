@@ -157,7 +157,7 @@ public class StopStartUpscaleActions {
                 clusterUpscaleFlowService.upscaleCommissioningNodes(context.getStack().getId(), context.getHostGroupName(),
                         startedInstancesMetaData, metaDataWithServicesNotRunning);
 
-                StopStartUpscaleCommissionViaCMRequest commissionRequest = new StopStartUpscaleCommissionViaCMRequest(context.getStack(),
+                StopStartUpscaleCommissionViaCMRequest commissionRequest = new StopStartUpscaleCommissionViaCMRequest(context.getStack().getId(),
                         context.getHostGroupName(), startedInstancesMetaData, metaDataWithServicesNotRunning);
                 sendEvent(context, commissionRequest);
 
