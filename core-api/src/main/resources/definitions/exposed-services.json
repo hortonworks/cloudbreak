@@ -615,8 +615,8 @@
       "tlsPort": 30700,
       "apiOnly": false,
       "apiIncluded": false,
-      "visibleForDatalake": true,
-      "visibleForDatahub": true
+      "visibleForDatalake": false,
+      "visibleForDatahub": false
     },
     {
       "name": "KUDU",
