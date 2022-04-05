@@ -883,30 +883,6 @@ public class AzureClient {
         return privateDnsZones;
     }
 
-    public ValidationResult validateNetworkLinkExistenceForDnsZones(String networkLinkId, List<AzurePrivateDnsZoneServiceEnum> services,
-            String resourceGroupName) {
-        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        PagedList<PrivateZone> privateDnsZoneList = getPrivateDnsZoneList();
-        for (AzurePrivateDnsZoneServiceEnum service : services) {
-            String dnsZoneName = service.getDnsZoneName();
-            Optional<PrivateZone> privateZoneWithNetworkLink = privateDnsZoneList.stream()
-                    .filter(privateZone -> !privateZone.resourceGroupName().equalsIgnoreCase(resourceGroupName))
-                    .filter(privateZone -> privateZone.name().equalsIgnoreCase(dnsZoneName))
-                    .filter(privateZone -> privateZone.provisioningState().equals(SUCCEEDED))
-                    .filter(privateZone -> Objects.nonNull(getNetworkLinkByPrivateDnsZone(privateZone.resourceGroupName(), dnsZoneName, networkLinkId)))
-                    .findFirst();
-            if (privateZoneWithNetworkLink.isPresent()) {
-                PrivateZone privateZone = privateZoneWithNetworkLink.get();
-                String validationMessage = String.format("Network link for the network %s already exists for Private DNS Zone %s in resource group %s. "
-                            + "Please ensure that there is no existing network link and try again!",
-                    networkLinkId, dnsZoneName, privateZone.resourceGroupName());
-                LOGGER.warn(validationMessage);
-                resultBuilder.error(validationMessage);
-            }
-        }
-        return resultBuilder.build();
-    }
-
     public PagedList<PrivateZone> listPrivateDnsZonesByResourceGroup(String resourceGroupName) {
         return privatednsManager.privateZones().listByResourceGroup(resourceGroupName);
     }

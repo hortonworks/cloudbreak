@@ -73,7 +73,7 @@ public class AzureUtils {
 
     public static final String NETWORK_ID = "networkId";
 
-    public static final String PRIVATE_DNS_ZONE_ID = "privateDnsZoneId";
+    public static final String DATABASE_PRIVATE_DS_ZONE_ID = "databasePrivateDsZoneId";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureUtils.class);
 
@@ -208,7 +208,7 @@ public class AzureUtils {
     }
 
     public String getPrivateDnsZoneId(Network network) {
-        return network.getStringParameter(PRIVATE_DNS_ZONE_ID);
+        return network.getStringParameter(DATABASE_PRIVATE_DS_ZONE_ID);
     }
 
     public String getCustomResourceGroupName(Network network) {

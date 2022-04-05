@@ -16,7 +16,7 @@ public class AzureExistingPrivateDnsZonesService {
 
     public Map<AzurePrivateDnsZoneServiceEnum, String> getExistingZones(NetworkDto networkDto) {
         Map<AzurePrivateDnsZoneServiceEnum, String> result = new HashMap<>();
-        Optional.ofNullable(networkDto.getAzure().getPrivateDnsZoneId()).ifPresent(pz -> result.put(AzurePrivateDnsZoneServiceEnum.POSTGRES, pz));
+        Optional.ofNullable(networkDto.getAzure().getDatabasePrivateDnsZoneId()).ifPresent(pz -> result.put(AzurePrivateDnsZoneServiceEnum.POSTGRES, pz));
         return result;
     }
 

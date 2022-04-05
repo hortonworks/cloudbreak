@@ -79,7 +79,7 @@ public class AzureExistingPrivateDnsZonesServiceTest {
         return NetworkDto.builder()
                 .withAzure(
                         AzureParams.builder()
-                                .withPrivateDnsZoneId(postgresPrivateDnsZoneId)
+                                .withDatabasePrivateDnsZoneId(postgresPrivateDnsZoneId)
                                 .build()
                 )
                 .build();
