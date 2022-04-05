@@ -44,7 +44,7 @@ public class AzurePrivateEndpointValidatorTest {
 
     private static final String NETWORK_ID = "networkId";
 
-    private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingPrivateDnsZoneId";
+    private static final String EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID = "existingDatabasePrivateDnsZoneId";
 
     @Mock
     private AzureCloudSubnetParametersService azureCloudSubnetParametersService;
@@ -175,7 +175,7 @@ public class AzurePrivateEndpointValidatorTest {
     void testCheckNewPrivateDnsZoneWhenExistingDnsZone() {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         EnvironmentDto environmentDto = getEnvironmentDto(MY_SINGLE_RG, ResourceGroupUsagePattern.USE_SINGLE);
-        AzureParams azureParams = getAzureParams(EXISTING_PRIVATE_DNS_ZONE_ID);
+        AzureParams azureParams = getAzureParams(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID);
 
         underTest.checkNewPrivateDnsZone(validationResultBuilder, environmentDto, getNetworkDto(azureParams));
 
@@ -216,7 +216,7 @@ public class AzurePrivateEndpointValidatorTest {
     @Test
     void testCheckExistingPrivateDnsZoneWhenNotPrivateEndpoint() {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        AzureParams azureParams = getAzureParams(EXISTING_PRIVATE_DNS_ZONE_ID);
+        AzureParams azureParams = getAzureParams(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID);
         NetworkDto networkDto = getNetworkDto(azureParams, ServiceEndpointCreation.DISABLED);
         when(azureExistingPrivateDnsZonesService.hasNoExistingZones(networkDto)).thenReturn(false);
 
@@ -231,7 +231,7 @@ public class AzurePrivateEndpointValidatorTest {
     @Test
     void testCheckExistingPrivateDnsZoneWhenPrivateEndpoint() {
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        AzureParams azureParams = getAzureParams(EXISTING_PRIVATE_DNS_ZONE_ID);
+        AzureParams azureParams = getAzureParams(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID);
         NetworkDto networkDto = getNetworkDto(azureParams);
         when(azureExistingPrivateDnsZonesService.hasNoExistingZones(networkDto)).thenReturn(false);
 
@@ -247,11 +247,11 @@ public class AzurePrivateEndpointValidatorTest {
         return getAzureParams(null);
     }
 
-    private AzureParams getAzureParams(String privateDnsZoneId) {
+    private AzureParams getAzureParams(String databasePrivateDnsZoneId) {
         return AzureParams.builder()
                 .withNetworkId(NETWORK_ID)
                 .withResourceGroupName("networkResourceGroupName")
-                .withPrivateDnsZoneId(privateDnsZoneId)
+                .withDatabasePrivateDnsZoneId(databasePrivateDnsZoneId)
                 .build();
     }
 

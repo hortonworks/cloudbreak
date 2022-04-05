@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.network.v1.converter;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.NETWORK_ID;
-import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.PRIVATE_DNS_ZONE_ID;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.DATABASE_PRIVATE_DS_ZONE_ID;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureUtils.RG_NAME;
 
 import java.util.HashMap;
@@ -44,7 +44,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             azureNetwork.setResourceGroupName(azureParams.getResourceGroupName());
             azureNetwork.setNoPublicIp(azureParams.isNoPublicIp());
             if (ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT.equals(network.getServiceEndpointCreation())) {
-                azureNetwork.setPrivateDnsZoneId(azureParams.getPrivateDnsZoneId());
+                azureNetwork.setDatabasePrivateDnsZoneId(azureParams.getDatabasePrivateDnsZoneId());
             }
         }
         return azureNetwork;
@@ -81,7 +81,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 .withNetworkId(azureNetwork.getNetworkId())
                                 .withResourceGroupName(azureNetwork.getResourceGroupName())
                                 .withNoPublicIp(azureNetwork.getNoPublicIp())
-                                .withPrivateDnsZoneId(azureNetwork.getPrivateDnsZoneId())
+                                .withDatabasePrivateDnsZoneId(azureNetwork.getDatabasePrivateDnsZoneId())
                                 .build())
                 .build();
     }
@@ -112,7 +112,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
         Map<String, Object> param = new HashMap<>();
         param.put(RG_NAME, azureNetwork.getResourceGroupName());
         param.put(NETWORK_ID, azureNetwork.getNetworkId());
-        param.put(PRIVATE_DNS_ZONE_ID, azureNetwork.getPrivateDnsZoneId());
+        param.put(DATABASE_PRIVATE_DS_ZONE_ID, azureNetwork.getDatabasePrivateDnsZoneId());
         return new Network(null, param);
     }
 }

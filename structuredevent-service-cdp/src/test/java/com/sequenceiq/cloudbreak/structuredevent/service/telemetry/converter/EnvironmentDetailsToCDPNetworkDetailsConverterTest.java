@@ -263,7 +263,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
     public void testSetOwnDnsZoneWhenAzurePrivateDnsZonePresent() {
         NetworkDto networkDto = NetworkDto.builder()
                 .withAzure(AzureParams.builder()
-                        .withPrivateDnsZoneId("privateDnsZoneId")
+                        .withDatabasePrivateDnsZoneId("privateDnsZoneId")
                         .build()
                 )
                 .withRegistrationType(RegistrationType.EXISTING)
@@ -282,7 +282,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
     public void testSetOwnDnsZoneWhenAzurePrivateDnsZoneNull() {
         NetworkDto networkDto = NetworkDto.builder()
                 .withAzure(AzureParams.builder()
-                        .withPrivateDnsZoneId(null)
+                        .withDatabasePrivateDnsZoneId(null)
                         .build()
                 )
                 .withRegistrationType(RegistrationType.EXISTING)

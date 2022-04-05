@@ -8,13 +8,13 @@ public class AzureParams {
 
     private boolean noPublicIp;
 
-    private String privateDnsZoneId;
+    private String databasePrivateDnsZoneId;
 
     private AzureParams(Builder builder) {
         networkId = builder.networkId;
         resourceGroupName = builder.resourceGroupName;
         noPublicIp = builder.noPublicIp;
-        privateDnsZoneId = builder.privateDnsZoneId;
+        databasePrivateDnsZoneId = builder.databasePrivateDnsZoneId;
     }
 
     public String getNetworkId() {
@@ -41,12 +41,12 @@ public class AzureParams {
         this.noPublicIp = noPublicIp;
     }
 
-    public String getPrivateDnsZoneId() {
-        return privateDnsZoneId;
+    public String getDatabasePrivateDnsZoneId() {
+        return databasePrivateDnsZoneId;
     }
 
-    public void setPrivateDnsZoneId(String privateDnsZoneId) {
-        this.privateDnsZoneId = privateDnsZoneId;
+    public void setDatabasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
+        this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     }
 
     @Override
@@ -55,7 +55,7 @@ public class AzureParams {
                 "networkId='" + networkId + '\'' +
                 ", resourceGroupName='" + resourceGroupName + '\'' +
                 ", noPublicIp=" + noPublicIp +
-                ", privateDnsZoneId='" + privateDnsZoneId + '\'' +
+                ", databasePrivateDnsZoneId='" + databasePrivateDnsZoneId + '\'' +
                 '}';
     }
 
@@ -70,7 +70,7 @@ public class AzureParams {
 
         private boolean noPublicIp;
 
-        private String privateDnsZoneId;
+        private String databasePrivateDnsZoneId;
 
         private Builder() {
         }
@@ -90,8 +90,8 @@ public class AzureParams {
             return this;
         }
 
-        public Builder withPrivateDnsZoneId(String privateDnsZoneId) {
-            this.privateDnsZoneId = privateDnsZoneId;
+        public Builder withDatabasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
+            this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
             return this;
         }
 
