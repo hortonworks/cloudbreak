@@ -62,6 +62,7 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxInternalClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 
 @Prototype
 public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterRequest, SdxClusterDetailResponse, SdxInternalTestDto>
@@ -448,6 +449,14 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
             throw new IllegalArgumentException("SDX Repair does not exist!");
         }
         return repair.getRequest();
+    }
+
+    public SdxUpgradeRequest getSdxUpgradeRequest() {
+        SdxUpgradeTestDto upgrade = given(SdxUpgradeTestDto.class);
+        if (upgrade == null) {
+            throw new IllegalArgumentException("SDX Upgrade does not exist!");
+        }
+        return upgrade.getRequest();
     }
 
     public SdxClusterResizeRequest getSdxResizeRequest() {

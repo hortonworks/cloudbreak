@@ -49,4 +49,9 @@ public class SdxUpgradeTestDto extends AbstractSdxTestDto<SdxUpgradeRequest, Sdx
         getRequest().setSkipBackup(skipBackup);
         return this;
     }
+
+    public SdxUpgradeTestDto withLockComponents(Boolean lockComponents) {
+        getRequest().setLockComponents(lockComponents);
+        return this;
+    }
 }

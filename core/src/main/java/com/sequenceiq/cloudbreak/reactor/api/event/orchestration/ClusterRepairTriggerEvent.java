@@ -12,6 +12,8 @@ public class ClusterRepairTriggerEvent extends StackEvent {
 
     private final Map<String, List<String>> failedNodesMap;
 
+    private final boolean oneNodeFromEachHostGroupAtOnce;
+
     private final boolean restartServices;
 
     private final boolean upgrade;
@@ -24,6 +26,17 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         super(stackId);
         this.failedNodesMap = copyToSerializableMap(failedNodesMap);
         this.stackId = stackId;
+        this.oneNodeFromEachHostGroupAtOnce = false;
+        this.restartServices = restartServices;
+        this.upgrade = false;
+        this.triggeredStackVariant = null;
+    }
+
+    public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, boolean oneNodeFromEachHostGroupAtOnce, boolean restartServices) {
+        super(stackId);
+        this.failedNodesMap = copyToSerializableMap(failedNodesMap);
+        this.stackId = stackId;
+        this.oneNodeFromEachHostGroupAtOnce = oneNodeFromEachHostGroupAtOnce;
         this.restartServices = restartServices;
         this.upgrade = false;
         this.triggeredStackVariant = null;
@@ -34,6 +47,7 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         super(event, stackId);
         this.failedNodesMap = copyToSerializableMap(failedNodesMap);
         this.stackId = stackId;
+        this.oneNodeFromEachHostGroupAtOnce = false;
         this.restartServices = restartServices;
         this.upgrade = true;
         this.triggeredStackVariant = triggeredStackVariant;
@@ -57,6 +71,10 @@ public class ClusterRepairTriggerEvent extends StackEvent {
 
     public String getTriggeredStackVariant() {
         return triggeredStackVariant;
+    }
+
+    public boolean isOneNodeFromEachHostGroupAtOnce() {
+        return oneNodeFromEachHostGroupAtOnce;
     }
 
     private Map<String, List<String>> copyToSerializableMap(Map<String, List<String>> map) {

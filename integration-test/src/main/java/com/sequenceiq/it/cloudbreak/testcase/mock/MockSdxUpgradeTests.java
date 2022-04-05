@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.time.Duration;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -32,10 +33,12 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 
 public class MockSdxUpgradeTests extends AbstractMockTest {
 
@@ -153,6 +156,15 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then(SdxUpgradeTestAssertion.validateSuccessfulUpgrade())
+                .given(SdxUpgradeTestDto.class)
+                .withRuntime(null)
+                .withLockComponents(true)
+                .withReplaceVms(SdxUpgradeReplaceVms.ENABLED)
+                .given(sdxInternal, SdxInternalTestDto.class)
+                .when(sdxTestClient.upgradeInternal(), key(sdxInternal))
+                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdxInternal).withWaitForFlow(Boolean.FALSE))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal).withPollingInterval(Duration.ofSeconds(5L)))
+                .awaitForHealthyInstances()
                 .validate();
     }
 

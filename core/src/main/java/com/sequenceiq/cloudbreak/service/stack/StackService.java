@@ -956,6 +956,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.findIdByCrnAndWorkspaceId(crn, workspaceId).orElseThrow(notFound("Stack", crn));
     }
 
+    public Crn getCrnById(Long id) {
+        return Crn.fromString(stackRepository.findCrnById(id).orElseThrow(notFound("Stack", id)));
+    }
+
     public Set<StackListItem> getByWorkspaceId(Long workspaceId, String environmentCrn, List<StackType> stackTypes) {
         return stackRepository.findByWorkspaceId(workspaceId, environmentCrn, stackTypes);
     }

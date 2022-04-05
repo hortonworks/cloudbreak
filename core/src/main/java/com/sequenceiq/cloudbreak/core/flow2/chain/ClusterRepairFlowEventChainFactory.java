@@ -5,7 +5,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscal
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -22,6 +24,12 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
@@ -76,6 +84,9 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Inject
     private KerberosConfigService kerberosConfigService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     public String initEvent() {
@@ -134,6 +145,52 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private void addDownscaleAndUpscaleEvents(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers, Map<String,
             Set<String>> repairableGroupsWithHostNames, boolean singlePrimaryGW) {
+        Crn crnById = stackService.getCrnById(event.getStackId());
+        if (event.isOneNodeFromEachHostGroupAtOnce() && entitlementService.isDatalakeZduOSUpgradeEnabled(crnById.getAccountId())) {
+            repairOneNodeFromEachHostGroupAtOnce(event, flowTriggers, repairableGroupsWithHostNames);
+        } else {
+            addRepairFlows(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW);
+        }
+    }
+
+    private void repairOneNodeFromEachHostGroupAtOnce(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
+            Map<String, Set<String>> repairableGroupsWithHostNames) {
+        Optional<String> primaryGwFQDN = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(event.getStackId()).map(InstanceMetaData::getDiscoveryFQDN);
+        HashMultimap<String, String> repairableGroupsWithHostNameMultimap = HashMultimap.create();
+        repairableGroupsWithHostNames.forEach(repairableGroupsWithHostNameMultimap::putAll);
+        LinkedListMultimap<String, String> hostsByHostGroupAndSortedByPgw =
+                collectHostsByHostGroupAndSortByPgw(primaryGwFQDN, repairableGroupsWithHostNameMultimap);
+        addRepairFlowsForEachGroupsWithOneNode(event, flowTriggers, hostsByHostGroupAndSortedByPgw, primaryGwFQDN);
+    }
+
+    private LinkedListMultimap<String, String> collectHostsByHostGroupAndSortByPgw(Optional<String> primaryGwFQDN,
+            HashMultimap<String, String> repairableGroupsWithHostNameMultimap) {
+        return repairableGroupsWithHostNameMultimap.entries().stream()
+                .sorted(Entry.comparingByValue(Comparator.comparing(s -> primaryGwFQDN.filter(s::equals).isEmpty())))
+                .collect(Multimaps.toMultimap(Entry::getKey, Entry::getValue, LinkedListMultimap::create));
+    }
+
+    private void addRepairFlowsForEachGroupsWithOneNode(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
+            Multimap<String, String> orderedHostMultimap, Optional<String> primaryGwFQDNOptional) {
+        while (!orderedHostMultimap.values().isEmpty()) {
+            Map<String, Set<String>> repairableGroupsWithOneHostName = new HashMap<>();
+            for (String hostGroup : new HashSet<>(orderedHostMultimap.keySet())) {
+                orderedHostMultimap.get(hostGroup).stream().findFirst().ifPresent(hostName -> {
+                    repairableGroupsWithOneHostName.put(hostGroup, Collections.singleton(hostName));
+                    orderedHostMultimap.values().remove(hostName);
+                });
+            }
+            Set<String> repairedHosts = repairableGroupsWithOneHostName.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+            addRepairFlows(event, flowTriggers, repairableGroupsWithOneHostName, isPrimaryGWInHosts(primaryGwFQDNOptional, repairedHosts));
+        }
+    }
+
+    private boolean isPrimaryGWInHosts(Optional<String> primaryGwFQDN, Collection<String> hostNames) {
+        return hostNames.stream().anyMatch(fqdn -> primaryGwFQDN.filter(fqdn::equals).isPresent());
+    }
+
+    private void addRepairFlows(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers, Map<String, Set<String>> repairableGroupsWithHostNames,
+            boolean singlePrimaryGW) {
         if (!repairableGroupsWithHostNames.isEmpty()) {
             flowTriggers.add(downscaleEvent(singlePrimaryGW, event, repairableGroupsWithHostNames));
             LOGGER.info("Downscale event added for: {}", repairableGroupsWithHostNames);
