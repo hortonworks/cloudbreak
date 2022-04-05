@@ -148,6 +148,26 @@ public class ModelDescriptions {
 
     public static final String AZURE_GROUP_MAPPING = "Deprecated. Azure group mapping.";
 
+    public static final String AVAILABLE_VM_TYPES = "Collection of available vm types";
+
+    public static final String VM_TYPE_CONFIGS = "Virtual machine type configurations";
+
+    public static final String VM_TYPE_PROPERTIES = "Virtual machine type properties";
+
+    public static final String VM_TYPE_NAME = "Virtual machine type name";
+
+    public static final String VM_TYPE_METADATA = "Virtual machine type meta data";
+
+    public static final String VOLUME_PARAMETER_TYPE = "Volume parameter type";
+
+    public static final String VOLUME_MINIMUM_SIZE = "Volume minimum size";
+
+    public static final String VOLUME_MAXIMUM_SIZE = "Volume maximum size";
+
+    public static final String VOLUME_MINIMUM_NUMBER = "Volume minimum number";
+
+    public static final String VOLUME_MAXIMUM_NUMBER = "Volume maximum number";
+
     private ModelDescriptions() {
     }
 }

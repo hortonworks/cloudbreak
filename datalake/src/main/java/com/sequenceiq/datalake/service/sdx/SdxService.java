@@ -122,7 +122,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
-import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 
@@ -398,7 +397,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, cloudPlatform);
-        validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest.getClusterShape());
+        validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest);
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
         validateCcmV2Requirement(environment, runtimeVersion);
@@ -1015,14 +1014,18 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
-    private void validateInternalSdxRequest(StackV4Request stackv4Request, SdxClusterShape clusterShape) {
+    private void validateInternalSdxRequest(StackV4Request stackv4Request, SdxClusterRequest sdxClusterRequest) {
         ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
         if (stackv4Request != null) {
+            SdxClusterShape clusterShape = sdxClusterRequest.getClusterShape();
             if (!clusterShape.equals(CUSTOM)) {
                 validationResultBuilder.error("Cluster shape '" + clusterShape + "' is not accepted on SDX Internal API. Use 'CUSTOM' cluster shape");
             }
             if (stackv4Request.getCluster() == null) {
                 validationResultBuilder.error("Cluster cannot be null.");
+            }
+            if (CollectionUtils.isNotEmpty(sdxClusterRequest.getCustomInstanceGroups())) {
+                validationResultBuilder.error("Custom instance group is not accepted on SDX Internal API.");
             }
         }
         ValidationResult validationResult = validationResultBuilder.build();
@@ -1313,18 +1316,5 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             result = stackV4Request.getInstanceGroups().stream().map(InstanceGroupV4Base::getName).collect(Collectors.toSet());
         }
         return result;
-    }
-
-    public SdxDefaultTemplateResponse getDefaultTemplate(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform) {
-        if (clusterShape == null || StringUtils.isAnyBlank(runtimeVersion, cloudPlatform)) {
-            throw new BadRequestException("The following query params needs to be filled for this request: clusterShape, runtimeVersion, cloudPlatform");
-        }
-        StackV4Request defaultTemplate = cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.valueOf(cloudPlatform), clusterShape, runtimeVersion));
-        if (defaultTemplate == null) {
-            LOGGER.warn("Can't find template for cloudplatform: {}, shape {}, cdp version: {}", cloudPlatform, clusterShape, runtimeVersion);
-            throw notFound("Default template", "cloudPlatform: " + cloudPlatform + ", shape: " + clusterShape +
-                    ", runtime version: " + runtimeVersion).get();
-        }
-        return new SdxDefaultTemplateResponse(defaultTemplate);
     }
 }

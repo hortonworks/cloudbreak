@@ -4,6 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -52,6 +53,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
+import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
@@ -283,6 +285,18 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         sdxRecipe.setName(recipeName);
         sdxRecipe.setHostGroup(hostGroup);
         recipes.add(sdxRecipe);
+        return this;
+    }
+
+    public SdxTestDto withCustomInstanceGroup(String instanceGroup, String instanceType) {
+        if (getRequest().getCustomInstanceGroups() == null) {
+            getRequest().setCustomInstanceGroups(new ArrayList<>());
+        }
+        List<SdxInstanceGroupRequest> customInstanceGroups = getRequest().getCustomInstanceGroups();
+        SdxInstanceGroupRequest customInstanceGroup = new SdxInstanceGroupRequest();
+        customInstanceGroup.setName(instanceGroup);
+        customInstanceGroup.setInstanceType(instanceType);
+        customInstanceGroups.add(customInstanceGroup);
         return this;
     }
 

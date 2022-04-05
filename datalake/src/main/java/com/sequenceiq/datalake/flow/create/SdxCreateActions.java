@@ -28,6 +28,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.create.event.SdxValidationRequest;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitRequest;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitSuccessEvent;
 import com.sequenceiq.datalake.flow.create.event.RdsWaitRequest;
@@ -80,6 +81,30 @@ public class SdxCreateActions {
     @Inject
     private EventSenderService eventSenderService;
 
+    @Bean(name = "SDX_CREATION_VALIDATION_STATE")
+    public Action<?, ?> sdxValidation() {
+        return new AbstractSdxAction<>(SdxEvent.class) {
+            @Override
+            protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    SdxEvent payload) {
+                return SdxContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
+                setCorrectSdxIdIfNecessary(context, payload);
+                eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_PROVISION_STARTED);
+                SdxValidationRequest req = new SdxValidationRequest(context);
+                sendEvent(context, req.selector(), req);
+            }
+
+            @Override
+            protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                return SdxCreateFailedEvent.from(payload, ex);
+            }
+        };
+    }
+
     @Bean(name = "SDX_CREATION_STORAGE_VALIDATION_STATE")
     public Action<?, ?> storageValidation() {
         return new AbstractSdxAction<>(SdxEvent.class) {
@@ -92,11 +117,7 @@ public class SdxCreateActions {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 // When SDX is created as part of re-size flow chain, SDX in payload will not have the correct ID.
-                if (!Strings.isNullOrEmpty(payload.getSdxName())) {
-                    SdxCluster sdxCluster = sdxService.getByNameInAccount(context.getUserId(), payload.getSdxName());
-                    context.setSdxId(sdxCluster.getId());
-                }
-                eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_PROVISION_STARTED);
+                setCorrectSdxIdIfNecessary(context, payload);
                 StorageValidationRequest req = new StorageValidationRequest(context);
                 sendEvent(context, req.selector(), req);
             }
@@ -254,7 +275,7 @@ public class SdxCreateActions {
                 } catch (NotFoundException notFoundException) {
                     LOGGER.info("Can not set status to SDX_CREATION_FAILED because data lake was not found");
                 } catch (DatalakeStatusUpdateException datalakeStatusUpdateException) {
-                    LOGGER.info("Status update for data lake failed (possible reason: ongoing parallel deletion flow): ", exception.getMessage());
+                    LOGGER.info("Status update for data lake failed (possible reason: ongoing parallel deletion flow): {}", exception.getMessage());
                 }
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
@@ -266,5 +287,13 @@ public class SdxCreateActions {
                 return null;
             }
         };
+    }
+
+    private void setCorrectSdxIdIfNecessary(SdxContext context, SdxEvent payload) {
+        // When SDX is created as part of re-size flow chain, SDX in payload will not have the correct ID.
+        if (!Strings.isNullOrEmpty(payload.getSdxName())) {
+            SdxCluster sdxCluster = sdxService.getByNameInAccount(context.getUserId(), payload.getSdxName());
+            context.setSdxId(sdxCluster.getId());
+        }
     }
 }

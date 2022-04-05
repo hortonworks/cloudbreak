@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.flow.chain;
 
-import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.STORAGE_VALIDATION_WAIT_EVENT;
+import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_VALIDATION_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_EVENT;
 import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent.SDX_RESIZE_FLOW_CHAIN_START_EVENT;
@@ -57,7 +57,7 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
         chain.add(new SdxStartDetachEvent(SDX_DETACH_EVENT.event(), event.getResourceId(), event.getSdxCluster(), event.getUserId()));
 
         // Create new
-        chain.add(new SdxEvent(STORAGE_VALIDATION_WAIT_EVENT.event(), event.getResourceId(), event.getSdxCluster().getClusterName(), event.getUserId()));
+        chain.add(new SdxEvent(SDX_VALIDATION_EVENT.event(), event.getResourceId(), event.getSdxCluster().getClusterName(), event.getUserId()));
 
         if (event.shouldTakeBackup() && !event.getSdxCluster().isRangerRazEnabled()) {
             //restore the new cluster

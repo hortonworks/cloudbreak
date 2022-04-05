@@ -29,11 +29,12 @@ public class CloudVmTypesToPlatformVmTypesV1ResponseConverter {
             for (VmType vmType : entry.getValue()) {
                 vmTypeRespons.add(vmTypeToVmTypeV1ResponseConverter.convert(vmType));
             }
-            VmTypeResponse defaultVmType = vmTypeToVmTypeV1ResponseConverter
-                    .convert(source.getDefaultCloudVmResponses().get(entry.getKey()));
 
             VirtualMachinesResponse virtualMachinesResponse = new VirtualMachinesResponse();
-            virtualMachinesResponse.setDefaultVirtualMachine(defaultVmType);
+            VmType defaultVmType = source.getDefaultCloudVmResponses().get(entry.getKey());
+            if (defaultVmType != null) {
+                virtualMachinesResponse.setDefaultVirtualMachine(vmTypeToVmTypeV1ResponseConverter.convert(defaultVmType));
+            }
             virtualMachinesResponse.setVirtualMachines(vmTypeRespons);
             result.put(entry.getKey(), virtualMachinesResponse);
         }
