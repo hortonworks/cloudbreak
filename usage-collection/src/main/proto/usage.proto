@@ -752,16 +752,32 @@ message CDPCMLWorkspaceStatus {
   }
 }
 
+// The status of the Cloudera Machine Learning workspace backups.
 message CDPCMLWorkspaceBackupStatus {
   enum Value {
-    // The status when workspace is trying to create a backup
-    BACKUP_STARTED = 0;
-    // The status when workpsace has finsihed creating a backup
-    BACKUP_FINSHED = 1;
-    // The status when backup for a workspace has been deleted
-    BACKUP_DELETED = 2;
-    // The status when backup creation for a workspace has failed
-    BACKUP_FAILED = 3;
+    // A value indicating the enum is unset.
+    UNSET = 0;
+
+    // The status when the backup of a workspace has started.
+    CREATION_STARTED = 1;
+    // The status when backup of a workspace has succeeded.
+    CREATION_SUCCEEDED = 2;
+    // The status when backup of a workspace has failed.
+    CREATION_FAILED = 3;
+
+    // The status when deletion of the backup snapshot has started.
+    DELETION_STARTED = 4;
+    // The status when backup of a workspace has been successfully deleted.
+    DELETION_SUCCEEDED = 5;
+    // The status when deletion of the backup snapshot has failed.
+    DELETION_FAILED = 6;
+
+    // The status when validation for creating backup request has started.
+    VALIDATION_STARTED = 7;
+    // The status when validation for creating backup request has succeeded.
+    VALIDATION_SUCCEEDED = 8;
+    // The status when validation for creating backup request has failed.
+    VALIDATION_FAILED = 9;
   }
 }
 
@@ -1226,6 +1242,13 @@ message CDPFreeIPAStatus {
     DOWNSCALE_FINISHED = 5;
     // The status when CDP FreeIPA downscale has failed.
     DOWNSCALE_FAILED = 6;
+
+    // The status when CDP FreeIPA upgrade is initiated.
+    UPGRADE_STARTED = 7;
+    // The status when CDP FreeIPA upgrade has successfully finished.
+    UPGRADE_FINISHED = 8;
+    // The status when CDP FreeIPA upgrade has failed.
+    UPGRADE_FAILED = 9;
   }
 }
 
@@ -1414,6 +1437,11 @@ message CDPProxyDetails {
   string authentication = 3;
 }
 
+message CDPOwnDnsZones {
+    // Whether DNS is provided for the postgres by the customer or not
+    bool postgres = 1;
+}
+
 message CDPNetworkDetails {
   // Whether the network is created by CDP CP or by the customer
   string networkType = 1;
@@ -1435,6 +1463,8 @@ message CDPNetworkDetails {
   string controlPlaneAndCCMAgentConnectionSecurity = 9;
   // Generated domain name
   string domain = 10;
+  // If the customer is using his own DNS zones for some services
+  CDPOwnDnsZones ownDnsZones= 11;
 }
 
 // Generated when Environment creation has been requested or finished
@@ -3026,10 +3056,10 @@ message CDPStackPatchEvent {
 // Type of stack patch event.
 message CDPStackPatchEventType {
   enum Value {
-    UNSET = 0;
-    AFFECTED = 1;
-    SUCCESS = 2;
-    FAILURE = 3;
+      UNSET = 0;
+      AFFECTED = 1;
+      SUCCESS = 2;
+      FAILURE = 3;
   }
 }
 
