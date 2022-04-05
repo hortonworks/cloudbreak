@@ -138,6 +138,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerManualRepairFlow(STACK_ID);
         underTest.triggerStackRepairFlow(STACK_ID, new UnhealthyInstances());
         underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), false);
+        underTest.triggerClusterRepairFlow(STACK_ID, new HashMap<>(), true, false);
         underTest.triggerStackImageUpdate(new ImageChangeDto(STACK_ID, "asdf"));
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
         underTest.triggerClusterCertificationRenewal(STACK_ID);
@@ -154,7 +155,6 @@ public class ReactorFlowManagerTest {
         underTest.triggerStopStartStackUpscale(STACK_ID, instanceGroupAdjustment, true);
         underTest.triggerStopStartStackDownscale(STACK_ID, instanceIdsByHostgroup, false);
         underTest.triggerClusterServicesRestart(STACK_ID);
-
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
