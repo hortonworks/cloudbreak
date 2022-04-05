@@ -216,7 +216,7 @@ class EntitlementServiceTest {
 
     @Test
     void getEntitlementsTest() {
-        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any(Optional.class)))
+        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any(Optional.class), any()))
                 .thenReturn(ACCOUNT_ENTITLEMENTS_FOO_BAR);
         assertThat(underTest.getEntitlements(ACCOUNT_ID)).containsExactly(ENTITLEMENT_FOO, ENTITLEMENT_BAR);
     }
@@ -230,7 +230,7 @@ class EntitlementServiceTest {
                                 .setEntitlementName(entitlement)
                                 .build());
         }
-        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any()))
+        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any(), any()))
                 .thenReturn(builder.build());
     }
 

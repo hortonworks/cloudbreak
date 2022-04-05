@@ -28,6 +28,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.Databa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -104,6 +106,12 @@ public class DatabaseServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @InjectMocks
     private DatabaseService underTest;
 
@@ -147,7 +155,8 @@ public class DatabaseServiceTest {
         if (entitled != null) {
             when(entitlementService.databaseWireEncryptionEnabled(ACCOUNT_ID)).thenReturn(entitled);
         }
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.REQUESTED);
         when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(status);
@@ -203,7 +212,8 @@ public class DatabaseServiceTest {
 
         when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
         when(databaseServerV4Response.getStatus()).thenReturn(Status.AVAILABLE);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.start(cluster);
 
         verify(databaseServerV4Endpoint).start(DATABASE_CRN);
@@ -215,7 +225,8 @@ public class DatabaseServiceTest {
         cluster.setDatabaseCrn(DATABASE_CRN);
 
         DatabaseServerV4Response databaseServerV4Response = mock(DatabaseServerV4Response.class);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(databaseServerV4Response);
         when(databaseServerV4Response.getStatus()).thenReturn(Status.STOPPED);
 
@@ -229,7 +240,8 @@ public class DatabaseServiceTest {
         SdxCluster cluster = new SdxCluster();
         cluster.setDatabaseCrn(DATABASE_CRN);
         when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(cluster);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setCrn(DATABASE_CRN);
         databaseServerV4Response.setClusterCrn(CLUSTER_CRN);

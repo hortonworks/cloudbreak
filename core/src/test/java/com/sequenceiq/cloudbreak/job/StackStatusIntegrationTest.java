@@ -40,6 +40,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
@@ -138,6 +140,12 @@ class StackStatusIntegrationTest {
     @Mock
     private JobExecutionContext jobExecutionContext;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @MockBean
     private StackUtil stackUtil;
 
@@ -231,7 +239,8 @@ class StackStatusIntegrationTest {
         setUpCloudVmInstanceStatuses(Map.of(
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED));
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
@@ -260,7 +269,8 @@ class StackStatusIntegrationTest {
         setUpCloudVmInstanceStatuses(Map.of(
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
@@ -291,7 +301,8 @@ class StackStatusIntegrationTest {
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
         when(instanceMetaDataService.findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(STACK_ID)).thenReturn(Set.of());
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
@@ -323,7 +334,8 @@ class StackStatusIntegrationTest {
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
         when(instanceMetaDataService.findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(STACK_ID)).thenReturn(Set.of());
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
@@ -426,6 +438,9 @@ class StackStatusIntegrationTest {
 
         @MockBean
         private StackStopRestrictionService stackStopRestrictionService;
+
+        @MockBean
+        private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     }
 }

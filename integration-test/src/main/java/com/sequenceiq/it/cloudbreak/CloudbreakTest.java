@@ -19,6 +19,7 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.responses.UserProfileV4Response;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.TestParameter;
 
@@ -86,6 +87,9 @@ public class CloudbreakTest extends GherkinTest {
     @Inject
     private Environment environment;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     private TestParameter testParameter;
 
     public CloudbreakTest() {
@@ -123,7 +127,7 @@ public class CloudbreakTest extends GherkinTest {
                 testParameter.get(ACCESS_KEY), testParameter.get(SECRET_KEY), testParameter.get(USER_CRN), testParameter.get(USER_NAME));
 
         try {
-            CloudbreakClient client = CloudbreakClient.created();
+            CloudbreakClient client = CloudbreakClient.created(regionAwareInternalCrnGeneratorFactory.iam());
             client.create(testContext);
 
             UserProfileV4Response profile = CloudbreakClient.getSingletonCloudbreakClient().userProfileV4Endpoint().get();

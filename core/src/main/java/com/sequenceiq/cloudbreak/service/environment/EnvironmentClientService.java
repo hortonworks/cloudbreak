@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
 import com.sequenceiq.authorization.service.EnvironmentPropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -32,6 +33,9 @@ public class EnvironmentClientService implements EnvironmentPropertyProvider, Au
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public DetailedEnvironmentResponse getByName(String name) {
         try {
@@ -104,7 +108,9 @@ public class EnvironmentClientService implements EnvironmentPropertyProvider, Au
     public DetailedEnvironmentResponse getByCrnAsInternal(String environmentCrn) {
         DetailedEnvironmentResponse environment = null;
         if (Objects.nonNull(environmentCrn)) {
-            environment = measure(() -> ThreadBasedUserCrnProvider.doAsInternalActor(() -> getByCrn(environmentCrn)),
+            environment = measure(() -> ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> getByCrn(environmentCrn)),
                     LOGGER,
                     "Get Environment from Environment service in as internal user took {} ms");
         }

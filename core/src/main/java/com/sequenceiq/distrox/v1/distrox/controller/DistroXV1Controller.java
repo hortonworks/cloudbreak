@@ -322,6 +322,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrnList(action = AuthorizationResourceAction.START_DATAHUB)
+    public void restartClusterServicesByCrns(@ResourceCrnList List<String> crns) {
+        crns.forEach(this::restartClusterServicesByCrn);
+    }
+
+    @Override
     @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.START_DATAHUB)
     public void putStartByNames(@ResourceNameList List<String> names) {
         names.forEach(this::putStartByName);
@@ -685,6 +691,10 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     private Long getWorkspaceIdForCurrentUser() {
         return workspaceService.getForCurrentUser().getId();
+    }
+
+    private FlowIdentifier restartClusterServicesByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
+        return stackOperations.restartClusterServices(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser());
     }
 
 }

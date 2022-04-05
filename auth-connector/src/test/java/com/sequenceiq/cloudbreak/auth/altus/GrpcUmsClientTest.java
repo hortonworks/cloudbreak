@@ -37,6 +37,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Servi
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
@@ -76,6 +77,9 @@ public class GrpcUmsClientTest {
     @Mock
     private ManagedChannel managedChannel;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Captor
     private ArgumentCaptor<Iterable<AuthorizationProto.RightCheck>> captor;
 
@@ -83,8 +87,8 @@ public class GrpcUmsClientTest {
     public void setUp() {
         underTest = spy(rawGrpcUmsClient);
         lenient().doReturn(managedChannel).when(channelWrapper).getChannel();
-        lenient().doReturn(umsClient).when(underTest).makeClient(any(ManagedChannel.class));
-        lenient().doReturn(authorizationClient).when(underTest).makeAuthorizationClient();
+        lenient().doReturn(umsClient).when(underTest).makeClient(any(ManagedChannel.class), any());
+        lenient().doReturn(authorizationClient).when(underTest).makeAuthorizationClient(regionAwareInternalCrnGeneratorFactory);
     }
 
     @Test
@@ -108,7 +112,7 @@ public class GrpcUmsClientTest {
         when(umsClient.listWorkloadAdministrationGroupsForMember(anyString(), eq(memberCrn), eq(Optional.of(pageToken))))
                 .thenReturn(response2);
 
-        List<String> wags = underTest.listWorkloadAdministrationGroupsForMember(memberCrn, REQUEST_ID);
+        List<String> wags = underTest.listWorkloadAdministrationGroupsForMember(memberCrn, REQUEST_ID, regionAwareInternalCrnGeneratorFactory);
 
         verify(umsClient, times(2)).listWorkloadAdministrationGroupsForMember(anyString(), eq(memberCrn), any(Optional.class));
         assertTrue(wags.containsAll(wags1));
@@ -153,7 +157,8 @@ public class GrpcUmsClientTest {
     public void testCheckRightWithInvalidCrn() {
         assertEquals(
                 assertThrows(IllegalArgumentException.class, () -> underTest.checkResourceRight(USER_CRN,
-                        "environments/describeEnvironment", "invalidCrn", REQUEST_ID)).getMessage(),
+                        "environments/describeEnvironment", "invalidCrn", REQUEST_ID,
+                        regionAwareInternalCrnGeneratorFactory)).getMessage(),
                 "Provided resource [invalidCrn] is not in CRN format");
     }
 
@@ -161,7 +166,8 @@ public class GrpcUmsClientTest {
     public void testHasRightsWithInvalidCrn() {
         assertEquals(
                 assertThrows(IllegalArgumentException.class, () -> underTest.hasRights(USER_CRN,
-                        List.of("invalidCrn", "*"), "environments/describeEnvironment", REQUEST_ID)).getMessage(),
+                        List.of("invalidCrn", "*"), "environments/describeEnvironment", REQUEST_ID,
+                        regionAwareInternalCrnGeneratorFactory)).getMessage(),
                 "Following resources are not provided in CRN format: invalidCrn.");
         assertEquals(
                 assertThrows(IllegalArgumentException.class, () -> underTest.hasRightsOnResources(USER_CRN,
@@ -177,7 +183,8 @@ public class GrpcUmsClientTest {
         doThrow(new RuntimeException("Permission denied")).when(authorizationClient).checkRight(REQUEST_ID.get(), USER_CRN, "right", resourceCrn2);
 
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> {
-            underTest.hasRights(USER_CRN, List.of(resourceCrn1, resourceCrn2), "right", REQUEST_ID);
+            underTest.hasRights(USER_CRN, List.of(resourceCrn1, resourceCrn2), "right", REQUEST_ID,
+                    regionAwareInternalCrnGeneratorFactory);
         });
 
         assertEquals("Authorization failed due to user management service call failed with error.", exception.getMessage());
@@ -194,7 +201,8 @@ public class GrpcUmsClientTest {
         doAnswer(m -> Lists.newArrayList((Iterable<AuthorizationProto.RightCheck>) m.getArgument(2)).stream().map(i -> true).collect(Collectors.toList()))
                 .when(authorizationClient).hasRights(any(), anyString(), any());
 
-        underTest.hasRights(USER_CRN, List.of(resourceCrn1, resourceCrn2, resourceCrn3), "right", REQUEST_ID);
+        underTest.hasRights(USER_CRN, List.of(resourceCrn1, resourceCrn2, resourceCrn3), "right", REQUEST_ID,
+                regionAwareInternalCrnGeneratorFactory);
 
         verify(authorizationClient).hasRights(eq(REQUEST_ID.get()), eq(USER_CRN), captor.capture());
 

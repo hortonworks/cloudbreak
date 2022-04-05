@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -35,13 +36,18 @@ public class SdxCmSyncService {
     @Inject
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public void callCmSync(Long sdxId) {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             ClouderaManagerSyncV4Request clouderaManagerSyncV4Request = new ClouderaManagerSyncV4Request().withCandidateImageUuids(Set.of());
             LOGGER.debug("Calling core: sync CM and parcel versions from CM server for {}", sdxCluster.getClusterName());
-            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () ->
                     stackV4Endpoint.syncCm(0L, sdxCluster.getClusterName(), initiatorUserCrn, clouderaManagerSyncV4Request));
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (WebApplicationException e) {

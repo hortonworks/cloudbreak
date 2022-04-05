@@ -23,6 +23,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.PollBindUserCreationEvent;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -49,6 +51,12 @@ class StartBindUserCreationServiceTest {
 
     @Mock
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @InjectMocks
     private StartBindUserCreationService underTest;
@@ -77,7 +85,8 @@ class StartBindUserCreationServiceTest {
         OperationStatus operationStatus = new OperationStatus(OPERATION_ID, OperationType.BIND_USER_CREATE, OperationState.RUNNING, List.of(), List.of(),
                 null, 1L, null);
         when(freeIpaV1Endpoint.createBindUser(any(BindUserCreateRequest.class), anyString())).thenReturn(operationStatus);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackEvent result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startBindUserCreation(stackView));
 
         assertEquals(BIND_USER_CREATION_STARTED_EVENT.event(), result.selector());
@@ -90,7 +99,8 @@ class StartBindUserCreationServiceTest {
         OperationStatus operationStatus = new OperationStatus(OPERATION_ID, OperationType.BIND_USER_CREATE, OperationState.FAILED, List.of(), List.of(),
                 "errMsg", 1L, 2L);
         when(freeIpaV1Endpoint.createBindUser(any(BindUserCreateRequest.class), anyString())).thenReturn(operationStatus);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         StackEvent result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startBindUserCreation(stackView));
 
         assertEquals(VALIDATE_KERBEROS_CONFIG_FAILED_EVENT.event(), result.selector());
@@ -103,7 +113,8 @@ class StartBindUserCreationServiceTest {
         OperationStatus operationStatus = new OperationStatus(OPERATION_ID, OperationType.BIND_USER_CREATE, OperationState.REJECTED, List.of(), List.of(),
                 "errMsg", 1L, 2L);
         when(freeIpaV1Endpoint.createBindUser(any(BindUserCreateRequest.class), anyString())).thenReturn(operationStatus);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         assertThrows(RetryException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.startBindUserCreation(stackView)));
     }
 }

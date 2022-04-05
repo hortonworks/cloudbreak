@@ -22,6 +22,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Streams;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
@@ -54,6 +55,9 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     @Inject
     private FmsUserConverter fmsUserConverter;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public Map<String, UmsUsersState> get(
             String accountId, Collection<String> environmentCrns,
             Set<String> userCrns, Set<String> machineUserCrns,
@@ -63,9 +67,9 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                 getMachineUsers(accountId, requestIdOptional, fullSync, machineUserCrns);
 
         Map<String, FmsGroup> crnToFmsGroup = convertGroupsToFmsGroups(
-                grpcUmsClient.listAllGroups(accountId, requestIdOptional));
+                grpcUmsClient.listAllGroups(accountId, requestIdOptional, regionAwareInternalCrnGeneratorFactory));
         Map<UserManagementProto.WorkloadAdministrationGroup, FmsGroup> wags = convertWagsToFmsGroups(
-                grpcUmsClient.listWorkloadAdministrationGroups(accountId, requestIdOptional));
+                grpcUmsClient.listWorkloadAdministrationGroups(accountId, requestIdOptional, regionAwareInternalCrnGeneratorFactory));
         List<String> requestedWorkloadUsernames = Streams.concat(
                 users.stream().map(UserManagementProto.User::getWorkloadUsername),
                 machineUsers.stream().map(UserManagementProto.MachineUser::getWorkloadUsername))
@@ -123,10 +127,10 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
 
                     Supplier<Collection<String>> groupMembershipSupplier = () ->
                             grpcUmsClient.listGroupsForMember(
-                                    accountId, memberCrn, requestIdOptional);
+                                    accountId, memberCrn, requestIdOptional, regionAwareInternalCrnGeneratorFactory);
                     Supplier<Collection<String>> wagMembershipSupplier = () ->
                             grpcUmsClient.listWorkloadAdministrationGroupsForMember(
-                                    memberCrn, requestIdOptional);
+                                    memberCrn, requestIdOptional, regionAwareInternalCrnGeneratorFactory);
                     Supplier<WorkloadCredential> workloadCredentialSupplier = () ->
                             umsCredentialProvider.getCredentials(memberCrn, requestIdOptional);
 
@@ -157,9 +161,9 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
             Optional<String> requestIdOptional,
             boolean fullSync, Set<String> userCrns) {
         if (fullSync) {
-            return grpcUmsClient.listAllUsers(accountId, requestIdOptional);
+            return grpcUmsClient.listAllUsers(accountId, requestIdOptional, regionAwareInternalCrnGeneratorFactory);
         } else if (!userCrns.isEmpty()) {
-            return grpcUmsClient.listUsers(accountId, List.copyOf(userCrns), requestIdOptional);
+            return grpcUmsClient.listUsers(accountId, List.copyOf(userCrns), requestIdOptional, regionAwareInternalCrnGeneratorFactory);
         } else {
             return List.of();
         }
@@ -171,11 +175,13 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
         if (fullSync) {
             return grpcUmsClient.listAllMachineUsers(accountId,
                     DONT_INCLUDE_INTERNAL_MACHINE_USERS, INCLUDE_WORKLOAD_MACHINE_USERS,
-                    requestIdOptional);
+                    requestIdOptional,
+                    regionAwareInternalCrnGeneratorFactory);
         } else if (!machineUserCrns.isEmpty()) {
             return grpcUmsClient.listMachineUsers(accountId, List.copyOf(machineUserCrns),
                     DONT_INCLUDE_INTERNAL_MACHINE_USERS, INCLUDE_WORKLOAD_MACHINE_USERS,
-                    requestIdOptional);
+                    requestIdOptional,
+                    regionAwareInternalCrnGeneratorFactory);
         } else {
             return List.of();
         }

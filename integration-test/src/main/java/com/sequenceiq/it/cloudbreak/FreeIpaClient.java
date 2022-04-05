@@ -5,8 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiKeyClient;
@@ -97,23 +96,27 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
         return testContext -> testContext.getContextParam(key, FreeIpaClient.class);
     }
 
-    public static synchronized FreeIpaClient createProxyFreeIpaClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
+    public static synchronized FreeIpaClient createProxyFreeIpaClient(TestParameter testParameter, CloudbreakUser cloudbreakUser,
+        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         FreeIpaClient clientEntity = new FreeIpaClient();
         clientEntity.setActing(cloudbreakUser);
         clientEntity.freeIpaClient = new FreeIpaApiKeyClient(testParameter.get(FreeIpaTest.FREEIPA_SERVER_ROOT),
                 new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
-        clientEntity.freeipaInternalCrnClient = createFreeipaInternalClient(testParameter.get(FreeIpaTest.FREEIPA_SERVER_INTERNAL_ROOT));
+        clientEntity.freeipaInternalCrnClient = createFreeipaInternalClient(
+                testParameter.get(FreeIpaTest.FREEIPA_SERVER_INTERNAL_ROOT),
+                regionAwareInternalCrnGenerator);
         return clientEntity;
     }
 
-    public static synchronized FreeipaInternalCrnClient createFreeipaInternalClient(String serverRoot) {
+    public static synchronized FreeipaInternalCrnClient createFreeipaInternalClient(String serverRoot,
+        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         FreeIpaApiUserCrnClient freeIpaApiUserCrnClient = new FreeIpaApiUserCrnClientBuilder(serverRoot)
                 .withCertificateValidation(false)
                 .withIgnorePreValidation(true)
                 .withDebug(true)
                 .build();
-        return new FreeipaInternalCrnClient(freeIpaApiUserCrnClient, new InternalCrnBuilder(Crn.Service.IAM));
+        return new FreeipaInternalCrnClient(freeIpaApiUserCrnClient, regionAwareInternalCrnGenerator);
     }
 
     @Override

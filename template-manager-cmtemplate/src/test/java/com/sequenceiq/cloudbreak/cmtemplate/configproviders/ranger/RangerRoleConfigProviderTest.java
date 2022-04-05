@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 
 import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
+import static com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight.HBASE_ADMIN;
+import static com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight.RANGER_ADMIN;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getConfigNameToValueMap;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getConfigNameToVariableNameMap;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_DATABASE_HOST;
@@ -31,7 +33,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -119,11 +120,11 @@ public class RangerRoleConfigProviderTest {
                 .withProductDetails(generateCmRepo(() -> cdhVersion), null)
                 .build();
         if (expectedRoleConfigCount == 6) {
-            when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), UmsRight.RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
+            when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
         }
         if ("7.6.0".equals(cdhVersion)) {
-            when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), UmsRight.RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
-            when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), UmsRight.HBASE_ADMIN.getRight())).thenReturn(HBASE_ADMIN_GROUP);
+            when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
+            when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), HBASE_ADMIN.getRight())).thenReturn(HBASE_ADMIN_GROUP);
         }
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
@@ -256,7 +257,7 @@ public class RangerRoleConfigProviderTest {
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
 
-        when(virtualGroupService.getVirtualGroup(tpo.getVirtualGroupRequest(), UmsRight.RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
+        when(virtualGroupService.getVirtualGroup(tpo.getVirtualGroupRequest(), RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(RangerRoles.RANGER_ADMIN, tpo);
 

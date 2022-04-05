@@ -30,5 +30,6 @@ public class StackNameLengthValidatorTest {
     public void testValidationFailure() {
         assertFalse(underTest.isValid("asd", context));
         assertFalse(underTest.isValid("thisisaverylongstacknamewhichisnotallowedbecauseitistoolong", context));
+        assertFalse(underTest.isValid(null, context));
     }
 }

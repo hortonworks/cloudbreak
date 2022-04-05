@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -35,15 +36,19 @@ public class StackService {
 
     private final WebApplicationExceptionMessageExtractor messageExtractor;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public StackService(
         StackV4Endpoint stackV4Endpoint,
         FlowCancelService flowCancelService,
         FlowLogDBService flowLogDBService,
-        WebApplicationExceptionMessageExtractor messageExtractor) {
+        WebApplicationExceptionMessageExtractor messageExtractor,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.stackV4Endpoint = stackV4Endpoint;
         this.flowCancelService = flowCancelService;
         this.flowLogDBService = flowLogDBService;
         this.messageExtractor = messageExtractor;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public void triggerConfigUpdateForStack(String stackCrn) {
@@ -73,7 +78,9 @@ public class StackService {
         List<FlowIdentifier> flowIdentifiers = new ArrayList<>();
         for (String name : names) {
             try {
-                ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+                ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> {
                     FlowIdentifier flowidentifier = stackV4Endpoint.updateLoadBalancersInternal(0L, name, initiatorUserCrn);
                     flowIdentifiers.add(flowidentifier);
                 });

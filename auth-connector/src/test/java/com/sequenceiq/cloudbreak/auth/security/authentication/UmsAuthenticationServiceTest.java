@@ -16,6 +16,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -27,11 +28,14 @@ public class UmsAuthenticationServiceTest {
     @Mock
     private GrpcUmsClient grpcUmsClient;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     private UmsAuthenticationService underTest;
 
     @Before
     public void before() {
-        underTest = new UmsAuthenticationService(grpcUmsClient);
+        underTest = new UmsAuthenticationService(grpcUmsClient, regionAwareInternalCrnGeneratorFactory);
     }
 
     @Test
@@ -94,7 +98,7 @@ public class UmsAuthenticationServiceTest {
                 .setCrn(crn)
                 .build();
 
-        when(grpcUmsClient.getUserDetails(anyString(), any())).thenReturn(user);
+        when(grpcUmsClient.getUserDetails(anyString(), any(), any())).thenReturn(user);
         CloudbreakUser cloudbreakUser = underTest.getCloudbreakUser(crn, null);
 
         assertEquals("userId", cloudbreakUser.getUserId());
@@ -110,7 +114,7 @@ public class UmsAuthenticationServiceTest {
                 .setCrn(crn)
                 .build();
 
-        when(grpcUmsClient.getMachineUserDetails(anyString(), anyString(), any())).thenReturn(machineUser);
+        when(grpcUmsClient.getMachineUserDetails(anyString(), anyString(), any(), any())).thenReturn(machineUser);
         CloudbreakUser cloudbreakUser = underTest.getCloudbreakUser(crn, "principal");
 
         assertEquals("machineUserId", cloudbreakUser.getUserId());

@@ -92,7 +92,7 @@ public class ServiceEndpointCollector {
             } else {
                 Gateway gateway = cluster.getGateway();
                 if (gateway != null) {
-                    Optional<String> version = Optional.ofNullable(cluster.getBlueprint().getStackVersion());
+                    Optional<String> version = Optional.ofNullable(cluster.getBlueprint()).map(Blueprint::getStackVersion);
                     ExposedService exposedService = exposedServiceCollector.getClouderaManagerUIService();
                     Optional<GatewayTopology> gatewayTopology = getGatewayTopologyForService(gateway, exposedService, version);
                     Optional<String> managerUrl = gatewayTopology
@@ -115,7 +115,7 @@ public class ServiceEndpointCollector {
                     blueprintText,
                     entitlementService.getEntitlements(cluster.getWorkspace().getTenant().getName()));
             Gateway gateway = cluster.getGateway();
-            Optional<String> version = Optional.ofNullable(cluster.getBlueprint().getStackVersion());
+            Optional<String> version = Optional.ofNullable(cluster.getBlueprint()).map(Blueprint::getStackVersion);
             Map<String, List<String>> privateIps = componentLocatorService.getComponentLocation(cluster.getId(), processor,
                     knownExposedServices.stream().map(ExposedService::getServiceName).collect(Collectors.toSet()));
             LOGGER.debug("The private IPs in the cluster {}", privateIps);

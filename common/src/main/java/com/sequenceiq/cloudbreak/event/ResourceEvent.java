@@ -120,6 +120,9 @@ public enum ResourceEvent {
 
     ENVIRONMENT_START_DATAHUB_STARTED("environment.start.datahub.started"),
     ENVIRONMENT_START_DATAHUB_FAILED("environment.start.datahub.failed"),
+    ENVIRONMENT_RESTART_DATAHUB_STARTED("environment.restart.datahub.started"),
+    ENVIRONMENT_RESTART_DATAHUB_FAILED("environment.restart.datahub.failed"),
+    ENVIRONMENT_RESTART_DATAHUB_FINISHED("environment.restart.datahub.finished"),
     ENVIRONMENT_START_DATALAKE_STARTED("environment.start.datalake.started"),
     ENVIRONMENT_START_DATALAKE_FAILED("environment.start.datalake.failed"),
     ENVIRONMENT_START_FREEIPA_STARTED("environment.start.freeipa.started"),
@@ -472,6 +475,10 @@ public enum ResourceEvent {
     DATALAKE_RECOVERY_TEARDOWN_FINISHED("datalake.recovery.teardown.finished"),
     DATALAKE_RECOVERY_FAILED("datalake.recovery.failed"),
     DATALAKE_RECOVERY_FINISHED("datalake.recovery.finished"),
+
+    DATAHUB_REFRESH_IN_PROGRESS("datalake.datahub.refresh.in.progress"),
+    DATAHUB_REFRESH_FAILED("datalake.datahub.refresh.failed"),
+
 
     // deprecated
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped");

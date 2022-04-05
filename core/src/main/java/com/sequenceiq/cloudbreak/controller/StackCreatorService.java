@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
@@ -171,6 +172,9 @@ public class StackCreatorService {
     @Inject
     private StackToStackV4ResponseConverter stackToStackV4ResponseConverter;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         long start = System.currentTimeMillis();
         String stackName = stackRequest.getName();
@@ -214,7 +218,9 @@ public class StackCreatorService {
                         "Decorate Stack with data took {} ms");
 
                 DetailedEnvironmentResponse environment =  measure(() ->
-                        ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                        ThreadBasedUserCrnProvider.doAsInternalActor(
+                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                                () ->
                                 environmentClientService.getByCrn(stack.getEnvironmentCrn())),
                         LOGGER,
                         "Get Environment from Environment service took {} ms");

@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.flow.stop;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_ALL_DATAHUB_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_FINALIZED_EVENT;
+import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_IN_PROGRESS_EVENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -65,7 +66,11 @@ public class SdxStopActions {
             protected void doExecute(SdxContext context, SdxStartStopEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Execute stop flow for SDX: {}", payload.getResourceId());
                 stopService.stop(payload.getResourceId());
-                sendEvent(context, SDX_STOP_ALL_DATAHUB_EVENT.event(), payload);
+                if (payload.stopDataHubs()) {
+                    sendEvent(context, SDX_STOP_ALL_DATAHUB_EVENT.event(), payload);
+                } else {
+                    sendEvent(context, SDX_STOP_IN_PROGRESS_EVENT.event(), payload);
+                }
             }
 
             @Override

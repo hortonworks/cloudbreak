@@ -27,6 +27,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -79,6 +80,9 @@ public class CloudResourceAdvisor {
     @Inject
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public PlatformRecommendation createForBlueprint(Long workspaceId, String blueprintName, String credentialName,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
         Credential credential = credentialClientService.getByName(credentialName);
@@ -87,7 +91,9 @@ public class CloudResourceAdvisor {
 
     public PlatformRecommendation createForBlueprintByCredCrn(Long workspaceId, String blueprintName, String credentialCrn,
             String region, String platformVariant, String availabilityZone, CdpResourceType cdpResourceType) {
-        Credential credential = ThreadBasedUserCrnProvider.doAsInternalActor(() -> credentialClientService.getByCrn(credentialCrn));
+        Credential credential = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> credentialClientService.getByCrn(credentialCrn));
         return getPlatformRecommendationByCredential(workspaceId, blueprintName, region, platformVariant, availabilityZone, cdpResourceType, credential);
     }
 

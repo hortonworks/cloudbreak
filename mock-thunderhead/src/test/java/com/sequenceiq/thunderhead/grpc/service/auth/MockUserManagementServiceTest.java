@@ -1,6 +1,5 @@
 package com.sequenceiq.thunderhead.grpc.service.auth;
 
-import static com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder.INTERNAL_ACCOUNT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -37,6 +36,8 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListT
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadPasswordPolicy;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.thunderhead.util.JsonUtil;
 
 import io.grpc.StatusRuntimeException;
@@ -63,6 +64,12 @@ public class MockUserManagementServiceTest {
 
     @Mock
     private JsonUtil jsonUtil;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @Test
     public void testSetLicenseShouldReturnACloudbreakLicense() throws IOException {
@@ -326,7 +333,7 @@ public class MockUserManagementServiceTest {
     void testGetAccountWithAltusAccountId() {
         doCallRealMethod().when(mockCrnService).ensureProperAccountIdUsage(anyString());
         GetAccountRequest req = GetAccountRequest.newBuilder()
-                .setAccountId(INTERNAL_ACCOUNT)
+                .setAccountId("altus")
                 .build();
 
         expectedException.expect(StatusRuntimeException.class);

@@ -77,4 +77,7 @@ public interface ClusterModificationService {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
+    default int restartClusterServices() {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
 }

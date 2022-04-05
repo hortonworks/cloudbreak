@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sigmadbus.config.SigmaDatabusConfig;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRecordProcessingException;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
@@ -42,14 +43,17 @@ public abstract class AbstractDatabusRecordProcessor<C extends AbstractDatabusSt
 
     private final Tracer tracer;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public AbstractDatabusRecordProcessor(SigmaDatabusConfig sigmaDatabusConfig, C databusStreamConfiguration,
-            int numberOfWorkers, int queueSizeLimit, Tracer tracer) {
+            int numberOfWorkers, int queueSizeLimit, Tracer tracer, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.sigmaDatabusConfig = sigmaDatabusConfig;
         this.databusStreamConfiguration = databusStreamConfiguration;
         this.numberOfWorkers = numberOfWorkers;
         this.queueSizeLimit = queueSizeLimit;
         this.processingQueuesRef = new AtomicReference<>();
         this.tracer = tracer;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @PostConstruct
@@ -60,7 +64,7 @@ public abstract class AbstractDatabusRecordProcessor<C extends AbstractDatabusSt
         } else {
             LOGGER.debug("Starting sigma databus worker for databus service: {} ", getDatabusStreamConfiguration().getDbusServiceName());
             RoundRobinDatabusProcessingQueues<C> processingQueues = new RoundRobinDatabusProcessingQueues<C>(
-                    numberOfWorkers, queueSizeLimit, this, tracer);
+                    numberOfWorkers, queueSizeLimit, this, tracer, regionAwareInternalCrnGeneratorFactory);
             processingQueuesRef.set(processingQueues);
             getProcessingQueues().startWorkers();
             dataProcessingEnabled.set(true);

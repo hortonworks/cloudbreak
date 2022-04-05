@@ -1,20 +1,20 @@
 package com.sequenceiq.freeipa.api.client;
 
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 
 public class FreeipaInternalCrnClient {
 
     private FreeIpaApiUserCrnClient client;
 
-    private InternalCrnBuilder internalCrnBuilder;
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
-    public FreeipaInternalCrnClient(FreeIpaApiUserCrnClient crnClient, InternalCrnBuilder builder) {
+    public FreeipaInternalCrnClient(FreeIpaApiUserCrnClient crnClient, RegionAwareInternalCrnGenerator builder) {
         client = crnClient;
-        internalCrnBuilder = builder;
+        regionAwareInternalCrnGenerator = builder;
     }
 
     public FreeIpaApiUserCrnEndpoint withInternalCrn() {
-        return client.withCrn(internalCrnBuilder.getInternalCrnForServiceAsString());
+        return client.withCrn(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString());
     }
 
     public FreeIpaApiUserCrnEndpoint withUserCrn(String userCrn) {

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.PollBindUserCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.ValidateKerberosConfigEvent;
@@ -46,6 +47,9 @@ public class PollBindUserCreationHandler extends ExceptionCatcherEventHandler<Po
     @Inject
     private PollingService<FreeIpaOperationPollerObject> freeIpaOperationChecker;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(PollBindUserCreationEvent.class);
@@ -61,7 +65,7 @@ public class PollBindUserCreationHandler extends ExceptionCatcherEventHandler<Po
     protected Selectable doAccept(HandlerEvent<PollBindUserCreationEvent> event) {
         PollBindUserCreationEvent data = event.getData();
         FreeIpaOperationPollerObject operationPollerObject = new FreeIpaOperationPollerObject(data.getOperationId(),
-                OperationType.BIND_USER_CREATE.name(), operationV1Endpoint, data.getAccountId());
+                OperationType.BIND_USER_CREATE.name(), operationV1Endpoint, data.getAccountId(), regionAwareInternalCrnGeneratorFactory);
         ExtendedPollingResult result = freeIpaOperationChecker.pollWithAbsoluteTimeout(new FreeIpaOperationCheckerTask<>(), operationPollerObject,
                 pollIntervalMilliSec, pollWaitTimeSec, pollMaxError);
         if (result.isSuccess()) {

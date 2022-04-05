@@ -15,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.providerservices.CloudProviderServicesV4Endopint;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
@@ -60,6 +62,12 @@ public class CloudStorageLocationValidatorTest {
     @Mock
     private DetailedEnvironmentResponse environment;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @InjectMocks
     private CloudStorageLocationValidator underTest;
 
@@ -81,7 +89,8 @@ public class CloudStorageLocationValidatorTest {
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(ENV_REGION).withStatus(ResponseStatus.OK).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         underTest.validate(S3_OBJECT_PATH, FileSystemType.S3, environment, validationResultBuilder);
 
@@ -97,7 +106,8 @@ public class CloudStorageLocationValidatorTest {
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(ENV_REGION).withStatus(ResponseStatus.OK).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         underTest.validate(WASB_OBJECT_PATH, FileSystemType.WASB, environment, validationResultBuilder);
 
@@ -113,7 +123,8 @@ public class CloudStorageLocationValidatorTest {
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(ENV_REGION).withStatus(ResponseStatus.OK).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         underTest.validate(OBJECT_PATH, FileSystemType.S3, environment, validationResultBuilder);
 
@@ -129,7 +140,8 @@ public class CloudStorageLocationValidatorTest {
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withStatus(ResponseStatus.ACCESS_DENIED).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         underTest.validate(OBJECT_PATH, FileSystemType.S3, environment, validationResultBuilder);
 
@@ -145,7 +157,8 @@ public class CloudStorageLocationValidatorTest {
                 .build();
         ObjectStorageMetadataResponse response = ObjectStorageMetadataResponse.builder().withRegion(OTHER_REGION).withStatus(ResponseStatus.OK).build();
         when(cloudProviderServicesEndpoint.getObjectStorageMetaData(eq(request))).thenReturn(response);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         underTest.validate(OBJECT_PATH, FileSystemType.S3, environment, validationResultBuilder);
         ValidationResult result = validationResultBuilder.build();

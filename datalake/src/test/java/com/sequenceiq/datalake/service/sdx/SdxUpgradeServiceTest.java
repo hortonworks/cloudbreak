@@ -25,6 +25,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerProductV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
@@ -39,6 +41,12 @@ public class SdxUpgradeServiceTest {
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @Captor
     private ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor;
@@ -60,7 +68,8 @@ public class SdxUpgradeServiceTest {
         StackV4Response stackV4Response = getStackV4Response();
         when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
                 .thenReturn(stackV4Response);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
         verify(sdxService, times(1)).updateRuntimeVersionFromStackResponse(eq(sdxCluster), eq(stackV4Response));
@@ -85,7 +94,8 @@ public class SdxUpgradeServiceTest {
         stackV4Response.getCluster().getCm().setProducts(List.of(spark3));
         when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
                 .thenReturn(stackV4Response);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
         verify(sdxService, times(0)).save(any());
@@ -99,7 +109,8 @@ public class SdxUpgradeServiceTest {
         stackV4Response.getCluster().setCm(null);
         when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
                 .thenReturn(stackV4Response);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
         verify(sdxService, times(0)).save(any());
@@ -113,7 +124,8 @@ public class SdxUpgradeServiceTest {
         stackV4Response.setCluster(null);
         when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
                 .thenReturn(stackV4Response);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
         verify(sdxService, times(0)).save(any());
@@ -129,7 +141,8 @@ public class SdxUpgradeServiceTest {
         stackV4Response.getCluster().getCm().setProducts(List.of(cdp));
         when(stackV4Endpoint.get(eq(0L), eq("test-sdx-cluster"), eq(Set.of()), anyString()))
                 .thenReturn(stackV4Response);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.updateRuntimeVersionFromCloudbreak(1L);
 
         verify(sdxService, times(0)).save(any());

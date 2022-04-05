@@ -11,6 +11,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEve
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.EXTEND_METADATA_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.EXTEND_METADATA_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.EXTEND_METADATA_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPDATE_DOMAIN_DNS_RESOLVER_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPDATE_DOMAIN_DNS_RESOLVER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.UPSCALE_INVALID_EVENT;
@@ -27,6 +29,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleSta
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.GATEWAY_TLS_SETUP_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.RE_REGISTER_WITH_CLUSTER_PROXY_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPDATE_DOMAIN_DNS_RESOLVER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_PREVALIDATION_STATE;
 
@@ -47,7 +50,9 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
         implements RetryableFlowConfiguration<StackUpscaleEvent> {
     private static final List<Transition<StackUpscaleState, StackUpscaleEvent>> TRANSITIONS =
             new Builder<StackUpscaleState, StackUpscaleEvent>()
-                    .from(INIT_STATE).to(UPSCALE_PREVALIDATION_STATE).event(ADD_INSTANCES_EVENT).noFailureEvent()
+                    .from(INIT_STATE).to(UPDATE_DOMAIN_DNS_RESOLVER_STATE).event(ADD_INSTANCES_EVENT).noFailureEvent()
+                    .from(UPDATE_DOMAIN_DNS_RESOLVER_STATE).to(UPSCALE_PREVALIDATION_STATE).event(UPDATE_DOMAIN_DNS_RESOLVER_FINISHED_EVENT)
+                                    .failureEvent(UPDATE_DOMAIN_DNS_RESOLVER_FAILED_EVENT)
                     .from(UPSCALE_PREVALIDATION_STATE).to(ADD_INSTANCES_STATE).event(UPSCALE_VALID_EVENT).failureEvent(UPSCALE_INVALID_EVENT)
                     .from(UPSCALE_PREVALIDATION_STATE).to(ADD_INSTANCES_FINISHED_STATE).event(ADD_INSTANCES_FINISHED_EVENT).failureEvent(UPSCALE_INVALID_EVENT)
                     .from(ADD_INSTANCES_STATE).to(ADD_INSTANCES_FINISHED_STATE).event(ADD_INSTANCES_FINISHED_EVENT).failureEvent(ADD_INSTANCES_FAILURE_EVENT)
@@ -62,7 +67,7 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
                     .from(GATEWAY_TLS_SETUP_STATE).to(RE_REGISTER_WITH_CLUSTER_PROXY_STATE).event(StackUpscaleEvent.TLS_SETUP_FINISHED_EVENT)
                                     .failureEvent(StackUpscaleEvent.TLS_SETUP_FINISHED_FAILED_EVENT)
                     .from(RE_REGISTER_WITH_CLUSTER_PROXY_STATE).to(BOOTSTRAP_NEW_NODES_STATE).event(CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT)
-                    .failureEvent(CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT)
+                                    .failureEvent(CLUSTER_PROXY_RE_REGISTRATION_FAILED_EVENT)
                     .from(BOOTSTRAP_NEW_NODES_STATE).to(EXTEND_HOST_METADATA_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_EVENT)
                                     .failureEvent(StackUpscaleEvent.BOOTSTRAP_NEW_NODES_FAILURE_EVENT)
                     .from(EXTEND_HOST_METADATA_STATE).to(CLEANUP_FREEIPA_UPSCALE_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_FINISHED_EVENT)

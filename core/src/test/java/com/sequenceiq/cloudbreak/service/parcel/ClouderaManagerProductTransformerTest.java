@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -58,6 +59,14 @@ public class ClouderaManagerProductTransformerTest {
         assertThat(foundProducts, hasSize(2));
         assertTrue(assertCdhProduct(foundProducts));
         verify(preWarmParcelParser).parseProductFromParcel(preWarmParcels, preWarmCsdList);
+    }
+
+    @Test
+    public void testTransformShouldReturnEmptySetWhenTheImageIsNotPreWarmed() {
+        Set<ClouderaManagerProduct> foundProducts = underTest.transform(createBaseImage(), true, true);
+
+        assertTrue(foundProducts.isEmpty());
+        verifyNoInteractions(preWarmParcelParser);
     }
 
     @Test
@@ -123,6 +132,10 @@ public class ClouderaManagerProductTransformerTest {
     private Image createImage(List<String> preWarmParcels, List<String> preWarmCsdList) {
         return new Image(null, null, null, null, null, null, null, null, null, new ImageStackDetails(null, createStackRepoDetails(), null), OS_TYPE,
                 null, List.of(preWarmParcels), preWarmCsdList, null, false, null, null);
+    }
+
+    private Image createBaseImage() {
+        return new Image(null, null, null, null, null, null, null, null, null, null, OS_TYPE, null, null, null, null, false, null, null);
     }
 
     private StackRepoDetails createStackRepoDetails() {

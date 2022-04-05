@@ -714,8 +714,9 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
-            assertEquals(1, loadBalancers.size());
-            assertEquals(LoadBalancerType.PRIVATE, loadBalancers.iterator().next().getType());
+            assertEquals(2, loadBalancers.size());
+            assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.PRIVATE.equals(l.getType()));
+            assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.OUTBOUND.equals(l.getType()));
             InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
                 .filter(ig -> "master".equals(ig.getGroupName()))
                 .findFirst().get();
@@ -766,8 +767,9 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
-            assertEquals(1, loadBalancers.size());
-            assertEquals(LoadBalancerType.PRIVATE, loadBalancers.iterator().next().getType());
+            assertEquals(2, loadBalancers.size());
+            assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.PRIVATE.equals(l.getType()));
+            assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.OUTBOUND.equals(l.getType()));
             InstanceGroup managerInstanceGroup = stack.getInstanceGroups().stream()
                 .filter(ig -> "manager".equals(ig.getGroupName()))
                 .findFirst().get();
@@ -820,7 +822,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     }
 
     @Test
-    public void testCreateAzureLoadBalancerWithSkuSet() {
+    public void testCreateAzureLoadBalancerWithSkuSetToStandard() {
         Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
         CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
         DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
@@ -837,14 +839,44 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
-            assertEquals(1, loadBalancers.size());
-            LoadBalancer loadBalancer = loadBalancers.iterator().next();
-            assertEquals(LoadBalancerType.PRIVATE, loadBalancer.getType());
+            assertEquals(2, loadBalancers.size());
+            assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.PRIVATE.equals(l.getType()));
+            assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.OUTBOUND.equals(l.getType()));
             InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
                     .filter(ig -> "master".equals(ig.getGroupName()))
                     .findFirst().get();
             assertEquals(1, masterInstanceGroup.getTargetGroups().size());
-            assertEquals(LoadBalancerSku.STANDARD, loadBalancer.getSku());
+            assertTrue(loadBalancers.stream().allMatch(l -> LoadBalancerSku.STANDARD.equals(l.getSku())));
+
+            checkAvailabilitySetAttributes(loadBalancers);
+        });
+    }
+
+    @Test
+    public void testCreateAzureLoadBalancerWithSkuSetToBasic() {
+        Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
+        CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
+        AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
+        azureParameters.setLoadBalancerSku(LoadBalancerSku.BASIC);
+        StackV4Request request = new StackV4Request();
+        request.setEnableLoadBalancer(false);
+        request.setAzure(azureParameters);
+
+        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
+        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+        when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
+            assertEquals(1, loadBalancers.size());
+            assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.PRIVATE.equals(l.getType()));
+            InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
+                    .filter(ig -> "master".equals(ig.getGroupName()))
+                    .findFirst().get();
+            assertEquals(1, masterInstanceGroup.getTargetGroups().size());
+            assertTrue(loadBalancers.stream().allMatch(l -> LoadBalancerSku.BASIC.equals(l.getSku())));
 
             checkAvailabilitySetAttributes(loadBalancers);
         });
@@ -865,14 +897,19 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Set<LoadBalancer> loadBalancers = underTest.createLoadBalancers(stack, environment, request);
-            assertEquals(1, loadBalancers.size());
-            LoadBalancer loadBalancer = loadBalancers.iterator().next();
-            assertEquals(LoadBalancerType.PRIVATE, loadBalancer.getType());
+            if (LoadBalancerSku.getDefault().equals(LoadBalancerSku.STANDARD)) {
+                assertEquals(2, loadBalancers.size());
+                assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.PRIVATE.equals(l.getType()));
+                assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.OUTBOUND.equals(l.getType()));
+            } else if (LoadBalancerSku.getDefault().equals(LoadBalancerSku.BASIC)) {
+                assertEquals(1, loadBalancers.size());
+                assert loadBalancers.stream().anyMatch(l -> LoadBalancerType.PRIVATE.equals(l.getType()));
+            }
             InstanceGroup masterInstanceGroup = stack.getInstanceGroups().stream()
                     .filter(ig -> "master".equals(ig.getGroupName()))
                     .findFirst().get();
             assertEquals(1, masterInstanceGroup.getTargetGroups().size());
-            assertEquals(LoadBalancerSku.getDefault(), loadBalancer.getSku());
+            assertTrue(loadBalancers.stream().allMatch(l -> LoadBalancerSku.getDefault().equals(l.getSku())));
 
             checkAvailabilitySetAttributes(loadBalancers);
         });

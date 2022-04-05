@@ -7,12 +7,12 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -36,39 +36,47 @@ public class TargetedUpscaleSupportService {
     @Inject
     private StackUtil stackUtil;
 
-    @Cacheable(cacheNames = "targetedUpscaleCache", key = "{ #stack.resourceCrn }")
     public boolean targetedUpscaleOperationSupported(Stack stack) {
         try {
-            String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-            return entitlementService.targetedUpscaleSupported(accountId) &&
-                    isUnboundEliminationSupported(accountId) && isUnboundClusterConfigRemoved(stack);
+            return targetedUpscaleEntitlementsEnabled(stack.getResourceCrn()) && DnsResolverType.FREEIPA_FOR_ENV.equals(stack.getDomainDnsResolver());
         } catch (Exception e) {
             LOGGER.error("Error occurred during checking if targeted upscale supported, thus assuming it is not enabled, cause: ", e);
             return false;
         }
     }
 
-    public boolean isTargetedUpscaleAndUnboundEliminationSupported(Stack stack) {
-        try {
-            String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-            return entitlementService.targetedUpscaleSupported(accountId) && isUnboundEliminationSupported(accountId);
-        } catch (Exception e) {
-            LOGGER.error("Error occurred during checking if targeted upscale supported, thus assuming it is not enabled, cause: ", e);
-            return false;
+    public boolean targetedUpscaleEntitlementsEnabled(String crn) {
+        String accountId = Crn.safeFromString(crn).getAccountId();
+        return entitlementService.targetedUpscaleSupported(accountId) && isUnboundEliminationSupported(accountId);
+    }
+
+    public DnsResolverType getActualDnsResolverType(Stack stack) {
+        LOGGER.debug("Original value of domainDnsResolver field for stack {} is {}", stack.getResourceCrn(), stack.getDomainDnsResolver());
+        if (!isUnboundEliminationSupported(stack.getResourceCrn())) {
+            LOGGER.debug("Since unbound elimination is not supported, then targeted upscale also won't be supported, " +
+                    "thus all 00-cluster.conf will be regenerated for all nodes of stack {}.", stack.getResourceCrn());
+            return DnsResolverType.LOCAL_UNBOUND;
+        } else {
+            GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+            Set<Node> reachableNodes = stackUtil.collectReachableNodes(stack);
+            Set<String> reachableHostnames = reachableNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
+            boolean unboundClusterConfigPresentOnAnyNodes = hostOrchestrator.unboundClusterConfigPresentOnAnyNodes(primaryGatewayConfig, reachableHostnames);
+            LOGGER.debug("Result of check whether unbound config is present on nodes of stack [{}] is: {}",
+                    stack.getResourceCrn(), unboundClusterConfigPresentOnAnyNodes);
+            if (unboundClusterConfigPresentOnAnyNodes) {
+                LOGGER.debug("Although unbound elimination is enabled in account, 00-cluster.conf files still present on at least one node, " +
+                        "thus we will fall back to use local unbound service on all nodes of stack {}", stack.getResourceCrn());
+                return DnsResolverType.LOCAL_UNBOUND;
+            } else {
+                LOGGER.debug("Unbound elimination is enabled in account and 00-cluster.conf files were removed from all nodes, " +
+                        "thus we can use freeIPA of environment {} to resolve DNS within environment's domain for stack {}",
+                        stack.getEnvironmentCrn(), stack.getResourceCrn());
+                return DnsResolverType.FREEIPA_FOR_ENV;
+            }
         }
     }
 
-    private boolean isUnboundClusterConfigRemoved(Stack stack) {
-        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        Set<Node> reachableNodes = stackUtil.collectReachableNodes(stack);
-        Set<String> reachableHostnames = reachableNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-        boolean unboundClusterConfigPresentOnAnyNodes = hostOrchestrator.unboundClusterConfigPresentOnAnyNodes(primaryGatewayConfig, reachableHostnames);
-        LOGGER.info("Result of check whether unbound config is present on nodes of stack [{}] is: {}",
-                stack.getResourceCrn(), unboundClusterConfigPresentOnAnyNodes);
-        return !unboundClusterConfigPresentOnAnyNodes;
-    }
-
-    private boolean isUnboundEliminationSupported(String accountId) {
+    public boolean isUnboundEliminationSupported(String accountId) {
         if (entitlementService.isUnboundEliminationSupported(accountId)) {
             return true;
         } else {

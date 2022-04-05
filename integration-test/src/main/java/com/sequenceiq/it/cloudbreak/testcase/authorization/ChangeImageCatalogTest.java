@@ -9,6 +9,7 @@ import javax.ws.rs.ForbiddenException;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
@@ -65,6 +66,9 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
 
     @Inject
     private ResourceCreator resourceCreator;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -162,11 +166,11 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
         testContext.given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .given(UmsTestDto.class)
                 .assignTarget(imageCatalog3.getName())
                 .withSharedResourceUser()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .given(SdxChangeImageCatalogTestDto.class)
                 .withImageCatalog(imageCatalog3.getName())
                 .when(sdxTestClient.changeImageCatalog())
@@ -212,7 +216,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .given(SdxChangeImageCatalogTestDto.class)
                 .withImageCatalog(imageCatalogA.getName())
                 .whenException(sdxTestClient.changeImageCatalog(), ForbiddenException.class,
@@ -262,11 +266,11 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
         testContext.given(UmsTestDto.class)
                 .assignTarget(imageCatalog2.getName())
                 .withSharedResourceUser()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .given(DistroXChangeImageCatalogTestDto.class)
                 .withImageCatalog(imageCatalog2.getName())
                 .when(distroXClient.changeImageCatalog())
@@ -326,7 +330,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .given(DistroXChangeImageCatalogTestDto.class)
                 .withImageCatalog(imageCatalogA.getName())
                 .whenException(distroXClient.changeImageCatalog(), ForbiddenException.class,

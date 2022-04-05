@@ -25,6 +25,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceDeletionService;
 import com.sequenceiq.environment.util.PollingConfig;
@@ -43,6 +45,12 @@ class SdxDeleteServiceTest {
 
     @Mock
     private EnvironmentResourceDeletionService environmentResourceDeletionService;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @InjectMocks
     private SdxDeleteService underTest;
@@ -125,6 +133,8 @@ class SdxDeleteServiceTest {
                 .build().toString());
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(emptySet());
         when(environmentResourceDeletionService.getDatalakeClusterNames(environment)).thenReturn(Set.of("name"));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.deleteSdxClustersForEnvironment(pollingConfig, environment, true);
         verify(stackV4Endpoint).deleteInternal(eq(0L), eq("name"), eq(true), nullable(String.class));
         verify(sdxEndpoint, times(0)).deleteByCrn(anyString(), anyBoolean());

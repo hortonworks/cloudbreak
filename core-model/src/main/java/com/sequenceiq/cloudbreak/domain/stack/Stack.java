@@ -66,6 +66,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.converter.DatabaseAvailabilityTypeConverter;
+import com.sequenceiq.cloudbreak.domain.converter.DnsResolverTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -219,6 +220,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     private Set<LoadBalancer> loadBalancers = new HashSet<>();
 
     private String externalDatabaseEngineVersion;
+
+    @Convert(converter = DnsResolverTypeConverter.class)
+    private DnsResolverType domainDnsResolver;
 
     public String getResourceCrn() {
         return resourceCrn;
@@ -922,6 +926,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     public String getExternalDatabaseEngineVersion() {
         return externalDatabaseEngineVersion;
+    }
+
+    public DnsResolverType getDomainDnsResolver() {
+        return domainDnsResolver;
+    }
+
+    public void setDomainDnsResolver(DnsResolverType domainDnsResolver) {
+        this.domainDnsResolver = domainDnsResolver;
     }
 
     @Override

@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelStatusList
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelsApiListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerSingleParcelActivationListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStartupListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerStatusListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerSyncApiCommandIdCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerTemplateInstallationChecker;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerUpgradeParcelDistributeListenerTask;
@@ -87,6 +88,12 @@ public class ClouderaManagerPollingServiceProvider {
         LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getClusterManagerIp());
         return pollApiWithTimeListener(stack, apiClient, POLL_FOR_ONE_HOUR,
                 new ClouderaManagerStartupListenerTask(clouderaManagerApiPojoFactory, clusterEventService));
+    }
+
+    public ExtendedPollingResult checkCmStatus(Stack stack, ApiClient apiClient) {
+        LOGGER.debug("Check Cloudera Manager status. [Server address: {}]", stack.getClusterManagerIp());
+            return pollApiWithAttemptListener(stack, apiClient, 0,
+                    new ClouderaManagerStatusListenerTask(clouderaManagerApiPojoFactory, clusterEventService));
     }
 
     public ExtendedPollingResult startPollingCmHostStatusHealthy(Stack stack, ApiClient apiClient, Set<String> hostnamesToWaitFor) {
@@ -318,6 +325,16 @@ public class ClouderaManagerPollingServiceProvider {
         return clouderaManagerCommandPollerObjectPollingService.pollWithAttempt(
                 listenerTask,
                 clouderaManagerCommandPollerObject,
+                POLL_INTERVAL,
+                numAttempts);
+    }
+
+    private ExtendedPollingResult pollApiWithAttemptListener(Stack stack, ApiClient apiClient, int numAttempts,
+            AbstractClouderaManagerApiCheckerTask<ClouderaManagerPollerObject> listenerTask) {
+        ClouderaManagerPollerObject clouderaManagerPollerObject = new ClouderaManagerPollerObject(stack, apiClient);
+        return clouderaManagerPollerObjectPollingService.pollWithAttempt(
+                listenerTask,
+                clouderaManagerPollerObject,
                 POLL_INTERVAL,
                 numAttempts);
     }

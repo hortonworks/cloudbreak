@@ -17,7 +17,7 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
     public boolean checkStatus(T waitObject) {
         List<String> instanceIds = waitObject.getInstanceIds();
         Map<String, String> actualStatuses = waitObject.actualStatuses();
-        if (waitObject.getInstanceIds().size() > 0) {
+        if (!waitObject.getInstanceIds().isEmpty()) {
             if (actualStatuses.isEmpty()) {
                 throw new TestFailException(String.format("'%s' instance was not found.", instanceIds));
             }
@@ -26,7 +26,7 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
             if (waitObject.isDeletionInProgress() || waitObject.isDeleted()) {
                 LOGGER.error("Instance '{}' has been getting terminated (status:'{}'), waiting is cancelled.", instanceIds,
                         actualStatuses);
-                throw new TestFailException(String.format("Instance '%s' has been getting terminated, waiting is cancelled." +
+                throw new TestFailException(String.format("Instance has been getting terminated, waiting is cancelled." +
                         " Status: '%s' statusReason: '%s'", instanceIds, actualStatuses));
             }
             if (waitObject.isFailed()) {

@@ -11,7 +11,9 @@ logging:
 mock:
   server:
     address: localhost
-
+crn:
+  partition: cdp
+  region: us-west-1
 integrationtest:
   threadCount: 6
   parallel: methods

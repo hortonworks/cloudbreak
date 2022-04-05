@@ -9,7 +9,7 @@
     "availabilityZone": "avZone",
     "region": "eu-west-1"
   },
-  "environmentCrn": "cred",
+  "environmentCrn": "crn:cdp:datahub:eu-1:1234:user:91011",
   "authentication": {
     "publicKey": "ssh-key dsfsdfsdfsdf"
   },

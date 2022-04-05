@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -20,8 +21,11 @@ public class GetUserDetailsAction implements Action<UmsTestDto, UmsClient> {
 
     private final String userCrn;
 
-    public GetUserDetailsAction(String userCrn) {
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    public GetUserDetailsAction(String userCrn, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.userCrn = userCrn;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -29,7 +33,7 @@ public class GetUserDetailsAction implements Action<UmsTestDto, UmsClient> {
         Log.when(LOGGER, format(" Getting UMS user '%s' details. ", userCrn));
         Log.whenJson(LOGGER, " Get UMS user details request: ", testDto.getRequest());
         testDto.setResponse(client.getDefaultClient()
-                .getUserDetails(userCrn, Optional.of("")));
+                .getUserDetails(userCrn, Optional.of(""), regionAwareInternalCrnGeneratorFactory));
         UserManagementProto.User user = testDto.getResponse();
         LOGGER.info(format(" User details %ncrn: %s %nworkload username: %s %nfirst name: %s %nlast name: %s %nstate: %s %ncreation date: %s " +
                         "%nemail: %s %nexternal user id: %s %nSFDC contact id: %s ", user.getCrn(), user.getWorkloadUsername(), user.getFirstName(),

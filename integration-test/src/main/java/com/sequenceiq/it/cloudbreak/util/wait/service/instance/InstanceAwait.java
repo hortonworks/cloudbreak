@@ -23,10 +23,10 @@ public class InstanceAwait {
 
     public <E extends Enum<E>> CloudbreakTestDto await(CloudbreakTestDto entity, Map<List<String>, E> desiredStatuses, TestContext testContext,
             RunningParameter runningParameter, Duration pollingInterval, int maxRetry) {
+        if (entity == null) {
+            throw new RuntimeException("Sdx key has been provided but no result in resource map!");
+        }
         try {
-            if (entity == null) {
-                throw new RuntimeException("Sdx key has been provided but no result in resource map!");
-            }
             Log.await(LOGGER, String.format("%s for %s", entity.getName(), desiredStatuses));
             MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.setActingUser(runningParameter).getAccessKey());
 

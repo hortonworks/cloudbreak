@@ -1,0 +1,131 @@
+server:
+  servlet:
+    context-path: /consumption
+  shutdown: graceful
+  tomcat:
+    mbeanregistry:
+      enabled: true
+
+opentracing:
+  allowed-header-tags: "uber-trace-id,cdp-destination-api,cdp-caller-id,x-b3-parentspanid,x-b3-traceid,x-b3-spanid,x-b3-sampled,user-agent"
+  jaeger:
+    log-spans: false
+
+management:
+  endpoints:
+    web:
+      base-path: "/"
+      exposure:
+        include: info,health,prometheus
+      path-mapping:
+        prometheus: metrics
+  endpoint:
+    metrics:
+      enabled: true
+      export:
+        prometheus:
+          enabled: true
+    prometheus:
+      enabled: true
+    health:
+      probes:
+        enabled: true
+  metrics:
+    distribution:
+      sla:
+        "[http.server.requests]": "125ms, 250ms, 500ms, 1s, 2s"
+      percentiles:
+        "[http.server.requests]": "0.5, 0.95"
+cdp.structuredevent:
+  rest:
+    contentlogging: true
+consumption:
+  schema.migration.auto: true
+  cert.dir: /certs/
+  client.id: consumption
+  structuredevent:
+    rest:
+      enabled: false
+  db:
+    host: localhost
+    port: 5432
+    env:
+      user: postgres
+      pass:
+      db: consumptiondb
+      schema: public
+      cert.file: database.crt
+      ssl: false
+    postgres:
+      major:
+        version: 10
+  threadpool:
+    core.size: 40
+    capacity.size: 4000
+  environment:
+    url: http://localhost:8088
+    contextPath: /environmentservice
+  intermediate.threadpool:
+    core.size: 40
+    capacity.size: 4000
+  container.threadpool:
+    core.size: 40
+    capacity.size: 4000
+  etc.config.dir: /etc/consumption
+
+spring:
+  application:
+    name: ConsumptionService
+  freemarker:
+    template-loader-path: file:/etc/consumption,classpath:/
+    prefer-file-system-access: false
+  lifecycle:
+    timeout-per-shutdown-phase: 60s
+
+rest:
+  debug: false
+
+cert:
+  validation: true
+  ignorePreValidation: false
+
+secret:
+  application: consumption/shared
+  engine: "com.sequenceiq.cloudbreak.service.secret.vault.VaultKvV2Engine"
+
+vault:
+  addr: localhost
+  port: 8200
+  ssl.enabled: false
+  kv.engine.v2.path: secret
+  config.enabled: true
+  auth:
+    type: "token"
+    kubernetes:
+      service.account.token.path: /var/run/secrets/kubernetes.io/serviceaccount/token
+      mount.path: "dps-dev"
+      login.role: "cloudbreak.default"
+
+cb:
+  cert:
+    dir: /certs/
+
+  address.resolving.timeout: 60000
+
+  cloud.api.executorservice.pool.size: 40
+
+  structuredevent:
+    rest:
+      enabled: true
+      contentlogging: true
+
+altus:
+  audit:
+    enabled: false
+  ums:
+    host: localhost
+    caller: consumption
+
+crn:
+  partition: cdp
+  region: us-west-1

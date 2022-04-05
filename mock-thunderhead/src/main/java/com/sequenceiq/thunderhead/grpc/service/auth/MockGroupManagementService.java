@@ -27,7 +27,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListG
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 
 import io.grpc.stub.StreamObserver;
 
@@ -128,7 +128,7 @@ class MockGroupManagementService {
 
     private Map<String, Group> createWorkloadGroups(String accountId) {
         Map<String, Group> groups = new HashMap<>();
-        for (UmsRight right : UmsRight.values()) {
+        for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
             Group group = createGroup(accountId, generateWorkloadGroupName(right.getRight()));
             groups.put(group.getCrn(), group);
         }

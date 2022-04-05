@@ -1,0 +1,37 @@
+plugins {
+    id "java"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation     project(":common")
+    implementation     project(":cloud-api")
+    implementation     project(":flow-api")
+    implementation     project(":authorization-common-api")
+    implementation     project(':auth-internal-api')
+    implementation     project(":auth-connector")
+    implementation     project(":common-model")
+    implementation     project(":structuredevent-api-cdp")
+
+    implementation     group: "org.apache.commons",            name: "commons-lang3",                  version: apacheCommonsLangVersion
+    implementation     group: "io.swagger",                    name: "swagger-jersey2-jaxrs",          version: swaggerVersion
+    implementation     group: "javax.validation",              name: "validation-api",                 version: javaxValidationVersion
+    implementation     group: "org.glassfish.jersey.ext",      name: "jersey-proxy-client",            version: jerseyCoreVersion
+    implementation     group: "org.glassfish.jersey.media",    name: "jersey-media-json-jackson",      version: jerseyCoreVersion
+    implementation     group: "javax.activation",              name: "activation",                     version: javaxActivationVersion
+    implementation     group: "javax.xml.bind",                name: "jaxb-api",                       version: "2.3.0"
+    implementation     group: "com.sun.xml.bind",              name: "jaxb-impl",                      version: "2.3.0"
+    implementation     group: "com.sun.xml.bind",              name: "jaxb-core",                      version: "2.3.0"
+    implementation     group: "com.sun.xml.ws",                name: "rt",                             version: "2.3.0"
+    implementation     group: "com.sun.xml.ws",                name: "jaxws-rt",                       version: "2.3.0"
+    implementation     group: "io.opentracing.contrib",        name: "opentracing-jaxrs2",             version: opentracingJaxrs2Version
+    testImplementation group: "org.assertj",                   name: "assertj-core",                   version: assertjVersion
+    testImplementation group: "com.openpojo",                  name: "openpojo",                       version: openPojoVersion
+    testImplementation group: "org.hibernate",                 name: "hibernate-validator",            version: hibernateValidatorVersion
+    testImplementation group: "org.hamcrest",                  name: "hamcrest",                       version: hamcrestVersion
+
+    testImplementation group: 'org.mockito',                   name: 'mockito-core',                   version: mockitoVersion
+}

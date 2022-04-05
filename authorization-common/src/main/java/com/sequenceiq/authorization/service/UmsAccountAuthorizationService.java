@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Service
@@ -25,6 +26,9 @@ public class UmsAccountAuthorizationService {
     @Inject
     private UmsRightProvider umsRightProvider;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public void checkRightOfUser(String userCrn, AuthorizationResourceAction action) {
         String right = umsRightProvider.getRight(action);
         String unauthorizedMessage = String.format("You have no right to perform %s in account %s", right,
@@ -33,7 +37,7 @@ public class UmsAccountAuthorizationService {
     }
 
     private void checkRightOfUser(String userCrn, String right, String unauthorizedMessage) {
-        if (!umsClient.checkAccountRight(userCrn, right, getRequestId())) {
+        if (!umsClient.checkAccountRight(userCrn, right, getRequestId(), regionAwareInternalCrnGeneratorFactory)) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }

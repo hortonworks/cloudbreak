@@ -436,7 +436,7 @@
                   "apiVersion": "2020-05-01",
                   "type": "Microsoft.Network/loadBalancers",
                   "dependsOn": [
-                    <#if loadBalancer.type == "PUBLIC">
+                    <#if loadBalancer.type == "PUBLIC" || loadBalancer.type == "OUTBOUND">
                     "[resourceId('Microsoft.Network/publicIPAddresses', '${loadBalancer.name}-publicIp')]"
                     </#if>
                   ],
@@ -460,7 +460,7 @@
                        </#list>
                     ],
                     "frontendIPConfigurations": [
-                      <#if loadBalancer.type == "PUBLIC">
+                      <#if loadBalancer.type == "PUBLIC" || loadBalancer.type == "OUTBOUND">
                       {
                         "name": "${loadBalancer.name}-frontend",
                         "properties": {
@@ -487,9 +487,9 @@
                         }
                       }
                       </#if>
-                ],
-                "inboundNatPools": [],
-                "inboundNatRules": [],
+                    ],
+                    "inboundNatPools": [],
+                    "inboundNatRules": [],
                     "loadBalancingRules": [
                         <#list loadBalancer.rules as rule>
                             {
@@ -515,6 +515,25 @@
                             }<#if (rule_index + 1) != loadBalancer.rules?size>,</#if>
                         </#list>
                     ],
+                    "outboundRules": [
+                        <#list loadBalancer.outboundRules as outboundRule>
+                            {
+                                "name": "${outboundRule.name}",
+                                "properties": {
+                                    "allocatedOutboundPorts": 1000,
+                                    "backendAddressPool": {
+                                        "id": "[resourceId('Microsoft.Network/loadBalancers/backendAddressPools', '${loadBalancer.name}', '${outboundRule.groupName}-pool')]"
+                                    },
+                                    "enableTcpReset": false,
+                                    "frontendIPConfigurations": [{
+                                        "id": "[concat(resourceId('Microsoft.Network/loadBalancers', '${loadBalancer.name}'), '/frontendIPConfigurations/${loadBalancer.name}-frontend')]"
+                                    }],
+                                    "idleTimeoutInMinutes": 4,
+                                    "protocol": "Tcp"
+                                }
+                            }<#if (outboundRule_index + 1) != loadBalancer.outboundRules?size>,</#if>
+                        </#list>
+                    ],
                     "probes": [
                       <#list loadBalancer.probes as probe>
                       {
@@ -533,7 +552,7 @@
                       "name": "${loadBalancer.sku.templateName}"
                   }
                 }
-                <#if loadBalancer.type == "PUBLIC">
+                <#if loadBalancer.type == "PUBLIC" || loadBalancer.type == "OUTBOUND">
                 ,{
                     "type": "Microsoft.Network/publicIPAddresses",
                     "apiVersion": "2020-06-01",

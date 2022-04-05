@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 
 public abstract class AbstractAuthorizationFiltering<T> {
 
@@ -27,7 +27,7 @@ public abstract class AbstractAuthorizationFiltering<T> {
 
     public final T filterResources(Crn userCrn, AuthorizationResourceAction action, Map<String, Object> arguments) {
         T authorizedData;
-        if (InternalCrnBuilder.isInternalCrn(userCrn) ||
+        if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn) ||
                 !userCrn.getResourceType().equals(Crn.ResourceType.USER) ||
                 !entitlementService.listFilteringEnabled(userCrn.getAccountId())) {
             authorizedData = getAll(arguments);

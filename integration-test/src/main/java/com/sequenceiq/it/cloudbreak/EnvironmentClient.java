@@ -4,8 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
@@ -56,7 +55,8 @@ public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environ
         return new EnvironmentWaitObject(this, entity.getName(), entity.getCrn(), desiredStatuses.get("status"), ignoredFailedStatuses);
     }
 
-    public static synchronized EnvironmentClient createProxyEnvironmentClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {
+    public static synchronized EnvironmentClient createProxyEnvironmentClient(TestParameter testParameter, CloudbreakUser cloudbreakUser,
+        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         EnvironmentClient clientEntity = new EnvironmentClient();
         clientEntity.setActing(cloudbreakUser);
         clientEntity.environmentClient = new EnvironmentServiceApiKeyClient(
@@ -64,17 +64,19 @@ public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environ
                 new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
         clientEntity.environmentInternalCrnClient = createInternalEnvironmentClient(
-                testParameter.get(EnvironmentTest.ENVIRONMENT_INTERNAL_SERVER_ROOT));
+                testParameter.get(EnvironmentTest.ENVIRONMENT_INTERNAL_SERVER_ROOT),
+                regionAwareInternalCrnGenerator);
         return clientEntity;
     }
 
-    public static synchronized EnvironmentInternalCrnClient createInternalEnvironmentClient(String serverRoot) {
+    public static synchronized EnvironmentInternalCrnClient createInternalEnvironmentClient(String serverRoot,
+        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         EnvironmentServiceUserCrnClient userCrnClient = new EnvironmentServiceUserCrnClientBuilder(serverRoot)
                 .withCertificateValidation(false)
                 .withIgnorePreValidation(true)
                 .withDebug(true)
                 .build();
-        return new EnvironmentInternalCrnClient(userCrnClient, new InternalCrnBuilder(Crn.Service.IAM));
+        return new EnvironmentInternalCrnClient(userCrnClient, regionAwareInternalCrnGenerator);
     }
 
     @Override

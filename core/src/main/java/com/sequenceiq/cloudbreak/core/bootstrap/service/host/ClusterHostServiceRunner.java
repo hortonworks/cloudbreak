@@ -47,10 +47,11 @@ import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -68,6 +69,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.Postg
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
+import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
@@ -246,6 +248,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public NodeReachabilityResult runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, Map<String, String> candidateAddresses) {
         try {
             Set<Node> allNodes = stackUtil.collectNodes(stack);
@@ -397,7 +402,7 @@ public class ClusterHostServiceRunner {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         saveCustomNameservers(stack, kerberosConfig, servicePillar);
-        servicePillar.putAll(createUnboundEliminationPillar(Crn.safeFromString(stack.getResourceCrn()).getAccountId()));
+        servicePillar.putAll(createUnboundEliminationPillar(stack.getDomainDnsResolver()));
         addKerberosConfig(servicePillar, kerberosConfig);
         servicePillar.putAll(hostAttributeDecorator.createHostAttributePillars(stack));
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
@@ -584,7 +589,7 @@ public class ClusterHostServiceRunner {
 
     public Optional<String> decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
         String accountId = Crn.safeFromString(stackService.get(stackId).getResourceCrn()).getAccountId();
-        Account account = umsClient.getAccountDetails(accountId, MDCUtils.getRequestId());
+        Account account = umsClient.getAccountDetails(accountId, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
         Optional<String> licenseOpt = Optional.ofNullable(account.getClouderaManagerLicenseKey());
         if (licenseOpt.isPresent() && isNotEmpty(licenseOpt.get())) {
             String license = licenseOpt.get();
@@ -648,9 +653,9 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private Map<String, SaltPillarProperties> createUnboundEliminationPillar(String accountId) {
+    private Map<String, SaltPillarProperties> createUnboundEliminationPillar(DnsResolverType dnsResolverType) {
         return Map.of("unbound-elimination", new SaltPillarProperties("/unbound/elimination.sls", singletonMap("unbound_elimination_supported",
-                entitlementService.isUnboundEliminationSupported(accountId))));
+                DnsResolverType.FREEIPA_FOR_ENV.equals(dnsResolverType))));
     }
 
     private void saveCustomNameservers(Stack stack, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
@@ -723,7 +728,7 @@ public class ClusterHostServiceRunner {
             gateway.put("signkey", clusterGateway.getSignKey());
             gateway.put("tokencert", clusterGateway.getTokenCert());
             gateway.put("mastersecret", clusterGateway.getKnoxMasterSecret());
-            gateway.put("envAccessGroup", virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.ENVIRONMENT_ACCESS.getRight()));
+            gateway.put("envAccessGroup", virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.ENVIRONMENT_ACCESS.getRight()));
             List<Map<String, Object>> topologies = getTopologies(clusterGateway, cluster.getBlueprint().getStackVersion());
             gateway.put("topologies", topologies);
             if (cluster.getBlueprint() != null) {
@@ -735,7 +740,7 @@ public class ClusterHostServiceRunner {
             if (SSOType.SSO_PROVIDER_FROM_UMS.equals(clusterGateway.getSsoType())) {
                 String accountId = ThreadBasedUserCrnProvider.getAccountId();
                 try {
-                    String metadataXml = umsClient.getIdentityProviderMetadataXml(accountId);
+                    String metadataXml = umsClient.getIdentityProviderMetadataXml(accountId, regionAwareInternalCrnGeneratorFactory);
                     gateway.put("saml", metadataXml);
                 } catch (Exception e) {
                     LOGGER.debug("Could not get SAML metadata file to set up IdP in KNOXSSO.", e);

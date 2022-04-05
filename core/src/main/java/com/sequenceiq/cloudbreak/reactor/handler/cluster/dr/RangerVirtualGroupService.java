@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -42,6 +42,6 @@ public class RangerVirtualGroupService {
 
         LOGGER.debug("Admin Group:", adminGroup);
         VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(virtualGroupsEnvironmentCrn, adminGroup);
-        return virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.RANGER_ADMIN.getRight());
+        return virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.RANGER_ADMIN.getRight());
     }
 }

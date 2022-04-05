@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.vault.VaultException;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
@@ -35,6 +36,9 @@ public class ProxyConfigDtoService {
     @Inject
     private SecretService secretService;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public ProxyConfig getByCrn(String resourceCrn) {
         return convert(getProxyConfig(resourceCrn, proxyEndpoint::getByResourceCrn));
     }
@@ -49,8 +53,9 @@ public class ProxyConfigDtoService {
 
     public Optional<ProxyConfig> getByEnvironmentCrn(String environmentCrn) {
         try {
-            return Optional.ofNullable(ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    convert(proxyEndpoint.getByEnvironmentCrn(environmentCrn))));
+            return Optional.ofNullable(ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> convert(proxyEndpoint.getByEnvironmentCrn(environmentCrn))));
         } catch (NotFoundException ex) {
             return Optional.empty();
         }
@@ -78,7 +83,9 @@ public class ProxyConfigDtoService {
 
     private ProxyResponse getProxyConfig(String value, Function<String, ProxyResponse> function) {
         try {
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> function.apply(value));
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> function.apply(value));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to get Proxy config from Environment service due to: '%s' ", e.getMessage());
             LOGGER.error(message, e);
