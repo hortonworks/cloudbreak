@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.ADJUSTMENT_WITH_THRESHOLD;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.HOST_GROUP_WITH_ADJUSTMENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.HOST_GROUP_WITH_HOSTNAMES;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.NETWORK_SCALE_DETAILS;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.REPAIR;
@@ -38,9 +40,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -125,8 +127,8 @@ class StackUpscaleActionsTest {
                 Map.of(), Map.of(), false, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()));
     }
 
-    private AbstractStackUpscaleAction<StackScaleTriggerEvent> getPrevalidateAction() {
-        AbstractStackUpscaleAction<StackScaleTriggerEvent> action = (AbstractStackUpscaleAction<StackScaleTriggerEvent>) underTest.prevalidate();
+    private AbstractStackUpscaleAction<UpdateDomainDnsResolverResult> getPrevalidateAction() {
+        AbstractStackUpscaleAction<UpdateDomainDnsResolverResult> action = (AbstractStackUpscaleAction<UpdateDomainDnsResolverResult>) underTest.prevalidate();
         initActionPrivateFields(action);
         return action;
     }
@@ -142,8 +144,7 @@ class StackUpscaleActionsTest {
     void prevalidateTestDoExecuteWhenScalingNeededAndAllowed() throws Exception {
         when(cloudContext.getId()).thenReturn(STACK_ID);
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), Map.of(), Map.of(),
-                adjustmentTypeWithThreshold, VARIANT);
+        UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
 
         when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT);
 
@@ -155,7 +156,8 @@ class StackUpscaleActionsTest {
 
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
-        new AbstractActionTestSupport<>(getPrevalidateAction()).doExecute(context, payload, Map.of());
+        new AbstractActionTestSupport<>(getPrevalidateAction()).doExecute(context, payload, createVariables(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), Map.of(),
+                NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold, VARIANT));
 
         verify(stackUpscaleService).addInstanceFireEventAndLog(stack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), adjustmentTypeWithThreshold);
         verify(stackUpscaleService).startAddInstances(stack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT));
@@ -177,8 +179,7 @@ class StackUpscaleActionsTest {
     @Test
     void prevalidateTestDoExecuteWhenScalingNeededAndNotAllowed() throws Exception {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), Map.of(), Map.of(),
-                adjustmentTypeWithThreshold, VARIANT);
+        UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
 
         when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT_ZERO);
 
@@ -187,7 +188,8 @@ class StackUpscaleActionsTest {
 
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
-        new AbstractActionTestSupport<>(getPrevalidateAction()).doExecute(context, payload, Map.of());
+        new AbstractActionTestSupport<>(getPrevalidateAction()).doExecute(context, payload, createVariables(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), Map.of(),
+                NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold, VARIANT));
 
         verify(stackUpscaleService).addInstanceFireEventAndLog(stack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), adjustmentTypeWithThreshold);
         verifyEventForUpscaleStackResult(resourceStatuses);
@@ -214,8 +216,7 @@ class StackUpscaleActionsTest {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT_ZERO.longValue());
         context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
                 Map.of(), Map.of(), false, adjustmentTypeWithThreshold);
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), Map.of(), Map.of(),
-                adjustmentTypeWithThreshold, VARIANT);
+        UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
 
         when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, false)).thenReturn(ADJUSTMENT_ZERO);
 
@@ -224,7 +225,8 @@ class StackUpscaleActionsTest {
 
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
-        new AbstractActionTestSupport<>(getPrevalidateAction()).doExecute(context, payload, Map.of());
+        new AbstractActionTestSupport<>(getPrevalidateAction()).doExecute(context, payload, createVariables(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
+                Map.of(), NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold, VARIANT));
 
         verify(stackUpscaleService).addInstanceFireEventAndLog(stack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), adjustmentTypeWithThreshold);
         verifyEventForUpscaleStackResult(resourceStatuses);
@@ -233,11 +235,11 @@ class StackUpscaleActionsTest {
     @Test
     void prevalidateTestCreateContextWhenTriggeredVariantSet() {
         NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails();
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), Map.of(),
+        UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
+        Map<Object, Object> variables = createVariables(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
                 Map.of(INSTANCE_GROUP_NAME, Set.of("hostname")), networkScaleDetails, null, VARIANT);
-        Map<Object, Object> variables = new HashMap<>();
         new AbstractActionTestSupport<>(getPrevalidateAction()).prepareExecution(payload, variables);
-        Assertions.assertEquals(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), variables.get(AbstractStackUpscaleAction.HOST_GROUP_WITH_ADJUSTMENT));
+        Assertions.assertEquals(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), variables.get(HOST_GROUP_WITH_ADJUSTMENT));
         Assertions.assertEquals(Map.of(INSTANCE_GROUP_NAME, Set.of("hostname")), variables.get(HOST_GROUP_WITH_HOSTNAMES));
         Assertions.assertEquals(false, variables.get(REPAIR));
         Assertions.assertEquals(VARIANT, variables.get(TRIGGERED_VARIANT));
@@ -247,15 +249,29 @@ class StackUpscaleActionsTest {
     @Test
     void prevalidateTestCreateContextWhenTriggeredVariantNotSet() {
         NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails();
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), Map.of(),
+        UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
+        Map<Object, Object> variables = createVariables(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
                 Map.of(INSTANCE_GROUP_NAME, Set.of("hostname")),
                 networkScaleDetails, null, null);
-        Map<Object, Object> variables = new HashMap<>();
         new AbstractActionTestSupport<>(getPrevalidateAction()).prepareExecution(payload, variables);
-        Assertions.assertEquals(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), variables.get(AbstractStackUpscaleAction.HOST_GROUP_WITH_ADJUSTMENT));
+        Assertions.assertEquals(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), variables.get(HOST_GROUP_WITH_ADJUSTMENT));
         Assertions.assertEquals(Map.of(INSTANCE_GROUP_NAME, Set.of("hostname")), variables.get(HOST_GROUP_WITH_HOSTNAMES));
         Assertions.assertEquals(false, variables.get(REPAIR));
         Assertions.assertNull(variables.get(TRIGGERED_VARIANT));
         Assertions.assertEquals(networkScaleDetails, variables.get(NETWORK_SCALE_DETAILS));
+    }
+
+    public Map<Object, Object> createVariables(Map<String, Integer> hostGroupsWithAdjustment, Map<String, Set<String>> hostGroupsWithHostNames,
+            NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
+        Map<Object, Object> variables = new HashMap<>();
+        variables.put(HOST_GROUP_WITH_ADJUSTMENT, hostGroupsWithAdjustment);
+        variables.put(HOST_GROUP_WITH_HOSTNAMES, hostGroupsWithHostNames);
+        variables.put(REPAIR, false);
+        if (triggeredStackVariant != null) {
+            variables.put(TRIGGERED_VARIANT, triggeredStackVariant);
+        }
+        variables.put(NETWORK_SCALE_DETAILS, networkScaleDetails);
+        variables.put(ADJUSTMENT_WITH_THRESHOLD, adjustmentTypeWithThreshold);
+        return variables;
     }
 }

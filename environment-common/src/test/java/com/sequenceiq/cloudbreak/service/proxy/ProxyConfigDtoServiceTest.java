@@ -26,6 +26,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.vault.VaultException;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
@@ -45,6 +47,12 @@ class ProxyConfigDtoServiceTest {
 
     @Mock
     private ProxyEndpoint proxyEndpoint;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @InjectMocks
     private ProxyConfigDtoService underTest;
@@ -69,7 +77,8 @@ class ProxyConfigDtoServiceTest {
         proxyResponse.setUserName(secretResponse);
         proxyResponse.setPassword(secretResponse);
         proxyResponse.setNoProxyHosts(noProxyList);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentServiceCrnClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
         when(proxyEndpoint.getByResourceCrn(anyString())).thenReturn(proxyResponse);
         when(secretService.getByResponse(any(SecretResponse.class))).thenReturn(decryptedSecretValue);
@@ -89,7 +98,8 @@ class ProxyConfigDtoServiceTest {
     @Test
     void testGetWhenProxyConfigCouldNotBeFetchedFromEnvironmentMS() {
         SecretResponse secretResponse = new SecretResponse();
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentServiceCrnClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
         when(proxyEndpoint.getByResourceCrn(anyString())).thenThrow(new NotFoundException("The proxy config could not be found!"));
 
@@ -115,7 +125,8 @@ class ProxyConfigDtoServiceTest {
         proxyResponse.setPort(port);
         proxyResponse.setUserName(secretResponse);
         proxyResponse.setPassword(secretResponse);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentServiceCrnClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
         when(proxyEndpoint.getByResourceCrn(anyString())).thenReturn(proxyResponse);
         when(secretService.getByResponse(any(SecretResponse.class))).thenReturn(user).thenReturn(password);
@@ -138,7 +149,8 @@ class ProxyConfigDtoServiceTest {
         proxyResponse.setPort(port);
         proxyResponse.setUserName(user);
         proxyResponse.setPassword(password);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentServiceCrnClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
         when(proxyEndpoint.getByResourceCrn(anyString())).thenReturn(proxyResponse);
 
@@ -160,7 +172,8 @@ class ProxyConfigDtoServiceTest {
         proxyResponse.setPort(port);
         proxyResponse.setUserName(secretResponse);
         proxyResponse.setPassword(secretResponse);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(environmentServiceCrnClient.withCrn(anyString()).proxyV1Endpoint()).thenReturn(proxyEndpoint);
         when(proxyEndpoint.getByResourceCrn(anyString())).thenReturn(proxyResponse);
         when(secretService.getByResponse(any(SecretResponse.class))).thenThrow(new VaultException("Vault token is invalid!"));

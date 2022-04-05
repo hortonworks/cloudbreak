@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialEndpoint;
@@ -26,6 +27,9 @@ public class CredentialClientService implements AuthorizationResourceCrnProvider
 
     @Inject
     private CredentialConverter credentialConverter;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public Credential getByName(String name) {
         try {
@@ -54,7 +58,9 @@ public class CredentialClientService implements AuthorizationResourceCrnProvider
             //TODO CloudPlatfrom needs to be part of the response
             //TODO Revise paramaters because most of them should be a secret
             CredentialResponse credentialResponse = ThreadBasedUserCrnProvider
-                    .doAsInternalActor(() -> credentialEndpoint.getByEnvironmentCrn(envCrn));
+                    .doAsInternalActor(
+                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            () -> credentialEndpoint.getByEnvironmentCrn(envCrn));
             return credentialConverter.convert(credentialResponse);
         } catch (WebApplicationException | IllegalStateException e) {
             String message = String.format("Failed to GET Credential by environment crn: %s, due to: '%s' ", envCrn, e.getMessage());

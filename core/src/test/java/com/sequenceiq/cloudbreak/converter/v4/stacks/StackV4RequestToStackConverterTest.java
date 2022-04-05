@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClient
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.GatewaySecurityGroupDecorator;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
@@ -176,6 +177,9 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     @Mock
     private StackAuthenticationV4RequestToStackAuthenticationConverter stackAuthenticationV4RequestToStackAuthenticationConverter;
 
+    @Mock
+    private TargetedUpscaleSupportService targetedUpscaleSupportService;
+
     private Credential credential;
 
     @BeforeEach
@@ -195,6 +199,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
         when(costTagging.mergeTags(any(CDPTagMergeRequest.class))).thenReturn(new HashMap<>());
         when(datalakeService.getDatalakeCrn(any(), any())).thenReturn("crn");
+        when(targetedUpscaleSupportService.isUnboundEliminationSupported(anyString())).thenReturn(Boolean.FALSE);
         credential = Credential.builder()
                 .cloudPlatform("AWS")
                 .build();

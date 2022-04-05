@@ -4,6 +4,7 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import com.sequenceiq.cloudbreak.cloud.azure.loadbalancer.AzureLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.azure.loadbalancer.AzureLoadBalancingRule;
+import com.sequenceiq.cloudbreak.cloud.azure.loadbalancer.AzureOutboundRule;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,7 +65,8 @@ public class AzureLoadBalancerModelBuilder {
     private AzureLoadBalancer convertCloudLoadBalancerToAzureLoadBalancer(CloudLoadBalancer cloudLoadBalancer, String stackName) {
         Set<String> instanceGroupNames = collectInstanceGroupNames(cloudLoadBalancer);
         List<AzureLoadBalancingRule> rules = collectLoadBalancingRules(cloudLoadBalancer);
-        return buildAzureLb(cloudLoadBalancer.getType(), cloudLoadBalancer.getSku(), instanceGroupNames, rules, stackName);
+        List<AzureOutboundRule> outboundRules = collectOutboundRules(cloudLoadBalancer);
+        return buildAzureLb(cloudLoadBalancer.getType(), cloudLoadBalancer.getSku(), instanceGroupNames, rules, outboundRules, stackName);
     }
 
     private Set<String> collectInstanceGroupNames(CloudLoadBalancer cloudLoadBalancer) {
@@ -74,23 +77,42 @@ public class AzureLoadBalancerModelBuilder {
     }
 
     private List<AzureLoadBalancingRule> collectLoadBalancingRules(CloudLoadBalancer cloudLoadBalancer) {
-        return cloudLoadBalancer.getPortToTargetGroupMapping()
-            .entrySet().stream()
-            .map(entry -> {
-                TargetGroupPortPair pair = entry.getKey();
-                Group firstGroup = entry.getValue().stream().findFirst().orElse(null);
-                return new AzureLoadBalancingRule(pair, firstGroup);
-            })
-            .collect(toList());
+        if (!LoadBalancerType.OUTBOUND.equals(cloudLoadBalancer.getType())) {
+            return cloudLoadBalancer.getPortToTargetGroupMapping()
+                    .entrySet().stream()
+                    .map(entry -> {
+                        TargetGroupPortPair pair = entry.getKey();
+                        Group firstGroup = entry.getValue().stream().findFirst().orElse(null);
+                        return new AzureLoadBalancingRule(pair, firstGroup);
+                    })
+                    .collect(toList());
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    private List<AzureOutboundRule> collectOutboundRules(CloudLoadBalancer cloudLoadBalancer) {
+        if (LoadBalancerType.OUTBOUND.equals(cloudLoadBalancer.getType())) {
+            return cloudLoadBalancer.getPortToTargetGroupMapping()
+                    .entrySet().stream()
+                    .map(entry -> {
+                        Group firstGroup = entry.getValue().stream().findFirst().orElse(null);
+                        return new AzureOutboundRule(firstGroup);
+                    })
+                    .collect(toList());
+        } else {
+            return Collections.emptyList();
+        }
     }
 
     private AzureLoadBalancer buildAzureLb(LoadBalancerType type, LoadBalancerSku sku, Set<String> instanceGroupNames,
-            List<AzureLoadBalancingRule> rules, String stackName) {
+            List<AzureLoadBalancingRule> rules, List<AzureOutboundRule> outboundRules, String stackName) {
         return new AzureLoadBalancer.Builder()
                 .setType(type)
                 .setLoadBalancerSku(sku)
                 .setInstanceGroupNames(instanceGroupNames)
                 .setRules(rules)
+                .setOutboundRules(outboundRules)
                 .setStackName(stackName)
                 .createAzureLoadBalancer();
 

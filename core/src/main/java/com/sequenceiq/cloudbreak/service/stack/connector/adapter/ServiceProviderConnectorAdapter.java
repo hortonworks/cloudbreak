@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
@@ -82,6 +83,9 @@ public class ServiceProviderConnectorAdapter {
 
     @Inject
     private EnvironmentClientService environmentClientService;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
@@ -180,7 +184,9 @@ public class ServiceProviderConnectorAdapter {
                 .withVariant(stack.getPlatformVariant())
                 .build();
         Credential credential = ThreadBasedUserCrnProvider
-                .doAsInternalActor(() -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
+                .doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);
         eventBus.notify(getPlatformTemplateRequest.selector(), eventFactory.createEvent(getPlatformTemplateRequest));
@@ -234,7 +240,9 @@ public class ServiceProviderConnectorAdapter {
         LOGGER.debug("Get platform variant for: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         Credential credential = ThreadBasedUserCrnProvider
-                .doAsInternalActor(() -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
+                .doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn()));
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())

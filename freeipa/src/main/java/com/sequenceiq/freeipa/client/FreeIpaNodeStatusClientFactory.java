@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.client.RpcListener;
 import com.sequenceiq.node.health.client.CdpNodeStatusMonitorClient;
 
 @Component
-public class FreeIpaNodeStatusClientFactory extends FreeIpaClientFactory<CdpNodeStatusMonitorClient> {
+public class FreeIpaNodeStatusClientFactory extends AbstractFreeIpaHttpClientFactory<CdpNodeStatusMonitorClient> {
 
     protected static final String DEFAULT_BASE_PATH = "/nodestatus";
 

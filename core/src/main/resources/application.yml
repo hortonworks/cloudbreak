@@ -721,7 +721,6 @@ cb:
         interrupt.timeout.seconds: 120
 
   workspace.service.cache.ttl: 15
-  upscale.targeted.cache.ttl: 5
 
   structuredevent:
     rest:

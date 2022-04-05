@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -54,6 +55,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRes
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -67,6 +70,7 @@ import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 
 @Configuration
 public class StackUpscaleActions {
@@ -102,9 +106,10 @@ public class StackUpscaleActions {
     @Inject
     private EnvironmentClientService environmentClientService;
 
-    @Bean(name = "UPSCALE_PREVALIDATION_STATE")
-    public Action<?, ?> prevalidate() {
+    @Bean(name = "UPDATE_DOMAIN_DNS_RESOLVER_STATE")
+    public Action<?, ?> updateDomainDnsResolverAction() {
         return new AbstractStackUpscaleAction<>(StackScaleTriggerEvent.class) {
+
             @Override
             protected void prepareExecution(StackScaleTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(HOST_GROUP_WITH_ADJUSTMENT, payload.getHostGroupsWithAdjustment());
@@ -119,14 +124,36 @@ public class StackUpscaleActions {
 
             @Override
             protected void doExecute(StackScalingFlowContext context, StackScaleTriggerEvent payload, Map<Object, Object> variables) {
-                Map<String, Integer> hostGroupsWithAdjustment = payload.getHostGroupsWithAdjustment();
+                if (context.isRepair()) {
+                    LOGGER.debug("We do not need to update domainDnsResolver in case of repair activity, since it matters only in case of upscale activity.");
+                    sendEvent(context, new UpdateDomainDnsResolverResult(context.getStack().getId()));
+                } else {
+                    sendEvent(context, new UpdateDomainDnsResolverRequest(context.getStack().getId()));
+                }
+            }
+
+            @Override
+            protected Object getFailurePayload(StackScaleTriggerEvent payload, Optional<StackScalingFlowContext> flowContext, Exception ex) {
+                return new StackFailureEvent(EventSelectorUtil.failureSelector(UpdateDomainDnsResolverResult.class), payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "UPSCALE_PREVALIDATION_STATE")
+    public Action<?, ?> prevalidate() {
+        return new AbstractStackUpscaleAction<>(UpdateDomainDnsResolverResult.class) {
+
+            @Override
+            protected void doExecute(StackScalingFlowContext context, UpdateDomainDnsResolverResult payload, Map<Object, Object> variables) {
+                Map<String, Integer> hostGroupsWithAdjustment = (Map<String, Integer>) variables.get(HOST_GROUP_WITH_ADJUSTMENT);
                 int instanceCountToCreate = 0;
                 for (Map.Entry<String, Integer> hostGroupWithAdjustment : hostGroupsWithAdjustment.entrySet()) {
                     instanceCountToCreate += stackUpscaleService.getInstanceCountToCreate(context.getStack(), hostGroupWithAdjustment.getKey(),
                             hostGroupWithAdjustment.getValue(), context.isRepair());
                 }
 
-                stackUpscaleService.addInstanceFireEventAndLog(context.getStack(), hostGroupsWithAdjustment, payload.getAdjustmentTypeWithThreshold());
+                stackUpscaleService.addInstanceFireEventAndLog(context.getStack(), hostGroupsWithAdjustment,
+                        (AdjustmentTypeWithThreshold) variables.get(ADJUSTMENT_WITH_THRESHOLD));
                 if (instanceCountToCreate > 0) {
                     stackUpscaleService.startAddInstances(context.getStack(), hostGroupsWithAdjustment);
                     sendEvent(context);

@@ -27,6 +27,7 @@ import org.springframework.security.web.authentication.preauth.PreAuthenticatedA
 import org.springframework.security.web.authentication.preauth.RequestHeaderAuthenticationFilter;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.periscope.service.security.TenantBasedPermissionEvaluator;
 
@@ -54,6 +55,9 @@ public class SecurityConfig {
         @Inject
         private GrpcUmsClient umsClient;
 
+        @Inject
+        private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
         @Bean
         public RequestHeaderAuthenticationFilter headerAuthenticationFilter() throws Exception {
             RequestHeaderAuthenticationFilter requestHeaderAuthenticationFilter = new RequestHeaderAuthenticationFilter();
@@ -66,7 +70,7 @@ public class SecurityConfig {
 
         @Bean
         public UserDetailsService userDetailsService() {
-            return new CrnUserDetailsService(umsClient);
+            return new CrnUserDetailsService(umsClient, regionAwareInternalCrnGeneratorFactory);
         }
 
         @Bean

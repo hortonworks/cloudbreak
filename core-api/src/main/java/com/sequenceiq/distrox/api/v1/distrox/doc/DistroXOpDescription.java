@@ -26,6 +26,7 @@ public class DistroXOpDescription {
     public static final String STOP_BY_CRN = "stops the stack by crn";
     public static final String START_BY_NAME = "starts the stack by name";
     public static final String START_BY_CRN = "starts the stack by crn";
+    public static final String RESTART_CLUSTER_BY_CRN = "restarts the cluster by crn";
     public static final String SCALE_BY_NAME = "scales the stack by name";
     public static final String SCALE_BY_CRN = "scales the stack by crn";
     public static final String REPAIR_CLUSTER_BY_NAME = "repairs the stack by name";

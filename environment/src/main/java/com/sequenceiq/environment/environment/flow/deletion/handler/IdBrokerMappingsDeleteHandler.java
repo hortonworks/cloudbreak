@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_S3GUARD_TABLE_DELETE_EVENT;
 
@@ -10,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.idbmms.GrpcIdbmmsClient;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationErrorStatus;
 import com.sequenceiq.cloudbreak.idbmms.exception.IdbmmsOperationException;
@@ -34,12 +34,15 @@ public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<Envir
 
     private final GrpcIdbmmsClient idbmmsClient;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     protected IdBrokerMappingsDeleteHandler(EventSender eventSender, EnvironmentService environmentService, GrpcIdbmmsClient idbmmsClient,
-            HandlerExceptionProcessor exceptionProcessor) {
+            HandlerExceptionProcessor exceptionProcessor, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         super(eventSender);
         this.idbmmsClient = idbmmsClient;
         this.environmentService = environmentService;
         this.exceptionProcessor = exceptionProcessor;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -79,7 +82,7 @@ public class IdBrokerMappingsDeleteHandler extends EventSenderAwareHandler<Envir
     private void deleteIdBrokerMappings(String environmentCrn) {
         try {
             // Must pass the internal actor here as this operation is internal-use only; requests with other actors will be always rejected.
-            idbmmsClient.deleteMappings(INTERNAL_ACTOR_CRN, environmentCrn, Optional.empty());
+            idbmmsClient.deleteMappings(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), environmentCrn, Optional.empty());
         } catch (IdbmmsOperationException e) {
             if (e.getErrorStatus() == IdbmmsOperationErrorStatus.NOT_FOUND) {
                 // This is a non-fatal situation when deleting the environment.

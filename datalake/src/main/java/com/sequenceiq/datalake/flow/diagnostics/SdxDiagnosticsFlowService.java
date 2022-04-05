@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.DiagnosticsV4Endpoi
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.CmDiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.diagnostics.model.DiagnosticsCollectionRequest;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.datalake.converter.DiagnosticsParamsConverter;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -40,6 +41,9 @@ public class SdxDiagnosticsFlowService {
 
     @Inject
     private SdxService sdxService;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public FlowIdentifier startDiagnosticsCollection(Map<String, Object> properties) {
         LOGGER.debug("Start diagnostic collection for SDX");
@@ -69,6 +73,7 @@ public class SdxDiagnosticsFlowService {
                 .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
                 .run(() -> {
                     List<FlowLogResponse> flowLogs = ThreadBasedUserCrnProvider.doAsInternalActor(
+                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                             () -> flowEndpoint.getFlowLogsByFlowId(flowIdentifier.getPollableId()));
                     if (hasFlowFailed(flowLogs)) {
                         return AttemptResults.breakFor(failedMessage);

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.zeppelin;
 
+import static com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight.ZEPPELIN_ADMIN;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.zeppelin.ZeppelinRoles.ZEPPELIN_SERVER;
 
@@ -10,7 +11,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
@@ -26,7 +26,7 @@ public class ZeppelinRoleConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject templatePreparationObject) {
-        String adminGroup = virtualGroupService.getVirtualGroup(templatePreparationObject.getVirtualGroupRequest(), UmsRight.ZEPPELIN_ADMIN.getRight());
+        String adminGroup = virtualGroupService.getVirtualGroup(templatePreparationObject.getVirtualGroupRequest(), ZEPPELIN_ADMIN.getRight());
         return List.of(config(ZEPPELIN_ADMIN_GROUP, adminGroup));
     }
 

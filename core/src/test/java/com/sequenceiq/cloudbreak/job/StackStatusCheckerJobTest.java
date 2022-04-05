@@ -36,6 +36,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
@@ -149,6 +151,12 @@ public class StackStatusCheckerJobTest {
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @Before
     public void init() {
         Tracer tracer = Mockito.mock(Tracer.class);
@@ -201,6 +209,8 @@ public class StackStatusCheckerJobTest {
     @Test
     public void testInstanceSyncIfCMNotAccessible() throws JobExecutionException {
         setupForCMNotAccessible();
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
@@ -209,6 +219,8 @@ public class StackStatusCheckerJobTest {
     @Test
     public void testInstanceSyncCMNotRunning() throws JobExecutionException {
         setupForCM();
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(clusterOperationService, times(0)).reportHealthChange(anyString(), any(), anySet());
@@ -220,6 +232,8 @@ public class StackStatusCheckerJobTest {
         setupForCM();
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
@@ -238,6 +252,8 @@ public class StackStatusCheckerJobTest {
         when(instanceMetaData.getDiscoveryFQDN()).thenReturn("host1");
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
@@ -274,6 +290,8 @@ public class StackStatusCheckerJobTest {
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), healthChecks));
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
         when(instanceMetaData.getInstanceStatus()).thenReturn(instanceStatus);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         when(instanceMetaData.getDiscoveryFQDN()).thenReturn("host1");
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(instanceHgName);

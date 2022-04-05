@@ -60,7 +60,7 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
     public Map<String, String> actualStatuses() {
         return getInstanceMetaDatas().stream()
                 .collect(Collectors.toMap(InstanceMetaDataResponse::getInstanceId,
-                        instanceMetaDataV4Response -> instanceMetaDataV4Response.getInstanceStatus().name()));
+                        instanceMetaData -> instanceMetaData.getInstanceStatus().name()));
     }
 
     @Override
@@ -139,7 +139,7 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
     @Override
     public Map<String, String> getFetchedInstanceStatuses() {
         return getInstanceMetaDatas().stream().collect(Collectors.toMap(InstanceMetaDataResponse::getInstanceId,
-                instanceMetaDataResponse -> instanceMetaDataResponse.getInstanceStatus().name()));
+                instanceMetaData -> instanceMetaData.getInstanceStatus().name()));
     }
 
     public Map<String, InstanceStatus> getInstanceStatuses() {

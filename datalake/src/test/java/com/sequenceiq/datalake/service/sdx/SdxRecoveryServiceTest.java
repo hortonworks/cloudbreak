@@ -21,6 +21,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
@@ -50,6 +52,12 @@ public class SdxRecoveryServiceTest {
     @Mock
     private SdxStatusService sdxStatusService;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     private SdxCluster cluster;
 
     @InjectMocks
@@ -67,13 +75,16 @@ public class SdxRecoveryServiceTest {
         doNothing().when(cloudbreakFlowService).saveLastCloudbreakFlowChainId(any(), any());
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "FLOW_ID_1");
         RecoveryV4Response recoveryV4Response = new RecoveryV4Response(flowId);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(sdxService.getById(clusterId)).thenReturn(cluster);
-        when(ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+        when(ThreadBasedUserCrnProvider.doAsInternalActor(
+                "crn:cdp:iam:us-west-1:cloudera:user:__internal__actor__",
+                () ->
                 stackV4Endpoint.recoverClusterByNameInternal(0L, cluster.getClusterName(),
                         ThreadBasedUserCrnProvider.getUserCrn()))).thenReturn(recoveryV4Response);
 
-        ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.recoverCluster(clusterId));
+        ThreadBasedUserCrnProvider.doAsInternalActor("crn:cdp:iam:us-west-1:cloudera:user:__internal__actor__", () -> underTest.recoverCluster(clusterId));
 
         verify(stackV4Endpoint).recoverClusterByNameInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         verify(sdxStatusService, times(1))

@@ -72,11 +72,11 @@ class EnvironmentAccessCheckerTest {
         EnvironmentAccessChecker underTest = environmentAccessCheckerFactory.create(ENV_CRN);
         ArgumentCaptor<List<AuthorizationProto.RightCheck>> argumentCaptor = ArgumentCaptor.forClass((Class) List.class);
         when(grpcUmsClient.hasRightsNoCache(
-                eq(MEMBER_CRN), anyList(), any(Optional.class))).thenReturn(List.of(true, true));
+                eq(MEMBER_CRN), anyList(), any(Optional.class), any())).thenReturn(List.of(true, true));
 
         underTest.hasAccess(MEMBER_CRN, Optional.empty());
 
-        verify(grpcUmsClient).hasRightsNoCache(eq(MEMBER_CRN), argumentCaptor.capture(), any());
+        verify(grpcUmsClient).hasRightsNoCache(eq(MEMBER_CRN), argumentCaptor.capture(), any(), any());
         List<AuthorizationProto.RightCheck> capturedRightChecks = argumentCaptor.getValue();
         assertEquals(2, capturedRightChecks.size());
         AuthorizationProto.RightCheck hasAccess = capturedRightChecks.get(0);
@@ -92,7 +92,7 @@ class EnvironmentAccessCheckerTest {
 
         for (boolean hasAccess : new boolean[] { false, true}) {
             for (boolean ipaAdmin : new boolean[] { false, true}) {
-                when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList(), any(Optional.class)))
+                when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList(), any(Optional.class), any()))
                         .thenReturn(List.of(hasAccess, ipaAdmin));
 
                 EnvironmentAccessRights environmentAccessRights = underTest.hasAccess(MEMBER_CRN, Optional.empty());
@@ -108,7 +108,7 @@ class EnvironmentAccessCheckerTest {
         EnvironmentAccessChecker underTest = environmentAccessCheckerFactory.create(ENV_CRN);
 
         Throwable ex = new StatusRuntimeException(Status.Code.NOT_FOUND.toStatus());
-        when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList(), any(Optional.class)))
+        when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList(), any(Optional.class), any()))
                 .thenThrow(ex);
 
         EnvironmentAccessRights environmentAccessRights = underTest.hasAccess(MEMBER_CRN, Optional.empty());

@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user.poller;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
-
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
@@ -20,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
@@ -68,6 +67,9 @@ public class UserSyncPoller {
     @Inject
     private CooldownChecker cooldownChecker;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Scheduled(fixedDelayString = "${freeipa.usersync.poller.fixed-delay-millis}",
             initialDelayString = "${freeipa.usersync.poller.initial-delay-millis}")
     public void automaticUserSyncTask() {
@@ -85,7 +87,8 @@ public class UserSyncPoller {
             Optional<String> requestId = Optional.of(MDCBuilder.getOrGenerateRequestId());
             LOGGER.debug("Setting request id = {} for this poll", requestId);
 
-            ThreadBasedUserCrnProvider.doAs(INTERNAL_ACTOR_CRN, () -> {
+            ThreadBasedUserCrnProvider.doAs(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), () -> {
                 LOGGER.debug("Attempting to sync users to FreeIPA stacks");
                 List<Stack> stackList = stackService.findAllWithDetailedStackStatuses(DetailedStackStatus.AVAILABLE_STATUSES);
                 LOGGER.debug("Found {} active stacks", stackList.size());
@@ -119,7 +122,8 @@ public class UserSyncPoller {
                     cooldownChecker.isCooldownExpired(userSyncStatus, cooldownThresholdTime)) {
                 LOGGER.debug("Environment {} in Account {} is not in sync.",
                         stack.getEnvironmentCrn(), stack.getAccountId());
-                Operation operation = userSyncService.synchronizeUsers(stack.getAccountId(), INTERNAL_ACTOR_CRN,
+                Operation operation = userSyncService.synchronizeUsers(stack.getAccountId(),
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         Set.of(stack.getEnvironmentCrn()), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
                 LOGGER.debug("User Sync request resulted in operation {}", operation);
             } else {

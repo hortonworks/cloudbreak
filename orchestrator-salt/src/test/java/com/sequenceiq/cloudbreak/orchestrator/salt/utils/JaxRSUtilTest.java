@@ -2,7 +2,10 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.utils;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import javax.ws.rs.WebApplicationException;
@@ -16,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyWebApplicationException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.util.JaxRSUtil;
 
@@ -72,5 +76,34 @@ public class JaxRSUtilTest {
         WebApplicationException webApplicationException = assertThrows(WebApplicationException.class, () ->
                 JaxRSUtil.response(response, GenericResponses.class));
         assertEquals("Status: 500 SERVER ERROR Response: null", webApplicationException.getMessage());
+    }
+
+    @Test
+    public void testClusterProxyError() {
+        when(response.getStatusInfo()).thenReturn(statusType);
+        when(statusType.getFamily()).thenReturn(Family.SERVER_ERROR);
+        when(statusType.getStatusCode()).thenReturn(599);
+        when(statusType.getReasonPhrase()).thenReturn("Network connect timeout");
+        when(response.readEntity(any(Class.class))).thenReturn("{\"status\":599,\"code\":\"cluster-proxy.proxy.timeout\",\"message\":" +
+                "\"Connect timeout of Some(10 seconds) expired\",\"retryable\":true}");
+        WebApplicationException cpException = assertThrows(ClusterProxyWebApplicationException.class, () ->
+                JaxRSUtil.response(response, GenericResponses.class));
+        assertTrue(cpException instanceof ClusterProxyWebApplicationException);
+
+        when(response.readEntity(any(Class.class))).thenReturn("{\"status\":599,\"code\":\"cluster-proxy.proxy.timeout\",\"message\":" +
+                "\"Connect timeout of Some(10 seconds) expired\",\"retryable\":false}");
+        cpException = assertThrows(WebApplicationException.class, () ->
+                JaxRSUtil.response(response, GenericResponses.class));
+        assertFalse(cpException instanceof ClusterProxyWebApplicationException);
+
+        when(response.readEntity(any(Class.class))).thenReturn("{\"random\":true}");
+        cpException = assertThrows(WebApplicationException.class, () ->
+                JaxRSUtil.response(response, GenericResponses.class));
+        assertFalse(cpException instanceof ClusterProxyWebApplicationException);
+
+        when(response.readEntity(any(Class.class))).thenReturn("not a json");
+        cpException = assertThrows(WebApplicationException.class, () ->
+                JaxRSUtil.response(response, GenericResponses.class));
+        assertFalse(cpException instanceof ClusterProxyWebApplicationException);
     }
 }

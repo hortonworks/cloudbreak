@@ -15,11 +15,16 @@ import javax.ws.rs.client.WebTarget;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 
+@ExtendWith(MockitoExtension.class)
 class InvocationBuilderProviderTest {
 
     @Mock
@@ -28,12 +33,17 @@ class InvocationBuilderProviderTest {
     @Mock
     private Invocation.Builder mockBuilder;
 
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    @InjectMocks
     private InvocationBuilderProvider underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new InvocationBuilderProvider();
-        MockitoAnnotations.openMocks(this);
         when(mockWebTarget.request()).thenReturn(mockBuilder);
         when(mockBuilder.accept(anyString())).thenReturn(mockBuilder);
         when(mockBuilder.header(anyString(), any())).thenReturn(mockBuilder);
@@ -72,6 +82,8 @@ class InvocationBuilderProviderTest {
 
     @Test
     void testCreateInvocationBuilderForInternalActorShouldAcceptRequestCall() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.createInvocationBuilderForInternalActor(mockWebTarget);
 
         verify(mockWebTarget, times(1)).request();
@@ -79,6 +91,8 @@ class InvocationBuilderProviderTest {
 
     @Test
     void testCreateInvocationBuilderForInternalActorShouldSetApplicationJsonAsAcceptedFormat() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.createInvocationBuilderForInternalActor(mockWebTarget);
 
         verify(mockBuilder, times(1)).accept(anyString());
@@ -87,14 +101,18 @@ class InvocationBuilderProviderTest {
 
     @Test
     void testCreateInvocationBuilderForInternalActorShouldSetCrnHeader() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.createInvocationBuilderForInternalActor(mockWebTarget);
 
         verify(mockBuilder, times(1)).header(eq(CRN_HEADER), any());
-        verify(mockBuilder, times(1)).header(CRN_HEADER, ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
+        verify(mockBuilder, times(1)).header(CRN_HEADER, "crn");
     }
 
     @Test
     void testCreateInvocationBuilderForInternalActorShouldSetRequestIdHeader() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.createInvocationBuilderForInternalActor(mockWebTarget);
 
         verify(mockBuilder, times(1)).header(eq(REQUEST_ID_HEADER), anyString());

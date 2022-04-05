@@ -25,7 +25,7 @@ class PlatformStringTransformerTest {
         return Stream.of(
                 Arguments.of(CloudConstants.AWS, AwsConstants.AwsVariant.AWS_VARIANT.variant().value(), "AWS"),
                 Arguments.of(CloudConstants.AWS, AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value(), "AWS"),
-                Arguments.of(CloudConstants.AWS, AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value(), "AWS_NATIVE_GOV"),
+                Arguments.of(CloudConstants.AWS, AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value(), "AWS_GOV"),
                 Arguments.of(CloudConstants.AWS, null, "AWS"),
                 Arguments.of(CloudConstants.AWS, "", "AWS"),
 

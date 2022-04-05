@@ -222,20 +222,20 @@ class EnvironmentServiceTest {
         });
 
         verify(grpcUmsClient)
-                .assignResourceRole(eq(TestConstants.CRN), eq("envCrn"), eq("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"), any());
+                .assignResourceRole(eq(TestConstants.CRN), eq("envCrn"), eq("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"), any(), any());
     }
 
     @Test
     public void testRoleAssignmentFail() {
         doThrow(new RuntimeException("Bad"))
-                .when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
+                .when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any(), any());
 
         ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
             environmentServiceUnderTest.assignEnvironmentAdminRole(TestConstants.CRN, "envCrn");
         });
 
         verify(grpcUmsClient)
-                .assignResourceRole(eq(TestConstants.CRN), eq("envCrn"), eq("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"), any());
+                .assignResourceRole(eq(TestConstants.CRN), eq("envCrn"), eq("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"), any(), any());
         verifyNoMoreInteractions(grpcUmsClient);
     }
 

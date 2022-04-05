@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_4_3;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
@@ -39,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
@@ -1149,7 +1151,7 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @Test
-    public void removeUnusedParcels() {
+    void removeUnusedParcels() {
         // GIVEN
         Set<String> parcelNamesFromImage = new HashSet<>();
         ClouderaManagerProduct cmProduct1 = createClouderaManagerProduct("product1", "version1");
@@ -1180,7 +1182,7 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @Test
-    public void removeUnusedParcelsWhenSomeParcelOperationsFail() {
+    void removeUnusedParcelsWhenSomeParcelOperationsFail() {
         // GIVEN
         Set<String> parcelNamesFromImage = new HashSet<>();
         ClouderaManagerProduct cmProduct1 = createClouderaManagerProduct("product1", "version1");
@@ -1224,6 +1226,91 @@ class ClouderaManagerModificationServiceTest {
 
         assertTrue(underTest.isServicePresent(stack.getCluster().getName(), "RANGER_RAZ"));
         assertFalse(underTest.isServicePresent(stack.getCluster().getName(), "NON EXISTENT"));
+    }
+
+    @Test
+    void testStopClusterWhenCmIsAlreadyStopped() throws CloudbreakException {
+
+        ApiCommand apiCommand = new ApiCommand();
+        when(clouderaManagerPollingServiceProvider.checkCmStatus(stack, apiClientMock)).thenReturn(timeout);
+        when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
+
+        underTest.stopCluster(true);
+
+        verify(clouderaManagerPollingServiceProvider, never()).startPollingCmShutdown(stack, apiClientMock, apiCommand.getId());
+        verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
+        verify(eventService, times(0)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPING);
+    }
+
+    @Test
+    void testStopClusterWhenCmCallThrowsApiException() throws ApiException {
+
+        when(clouderaManagerPollingServiceProvider.checkCmStatus(stack, apiClientMock)).thenReturn(success);
+        when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
+        when(clustersResourceApi.stopCommand(stack.getName())).thenThrow(new ApiException("api exception"));
+        List<ApiService> services = List.of(
+                new ApiService().type("RANGER_RAZ").serviceState(ApiServiceState.STOPPED),
+                new ApiService().type("ATLAS").serviceState(ApiServiceState.STARTED),
+                new ApiService().type("HDFS").serviceState(ApiServiceState.STARTED));
+        when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices(anyString(), anyString())).thenReturn(new ApiServiceList().items(services));
+
+        ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.stopCluster(true));
+        assertEquals("api exception", exception.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void testStopClusterWhenCmIsNotStoppedAndNotStoppedServicesExistThenTheyAreStopped(boolean disableKnoxAutorestart) throws CloudbreakException, ApiException {
+
+        ApiCommand apiCommand = new ApiCommand();
+        when(clouderaManagerPollingServiceProvider.checkCmStatus(stack, apiClientMock)).thenReturn(success);
+        when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
+        when(clustersResourceApi.stopCommand(stack.getName())).thenReturn(apiCommand);
+        when(clouderaManagerPollingServiceProvider.startPollingCmShutdown(stack, apiClientMock, apiCommand.getId())).thenReturn(success);
+        List<ApiService> services = List.of(
+                new ApiService().type("RANGER_RAZ").serviceState(ApiServiceState.STOPPED),
+                new ApiService().type("ATLAS").serviceState(ApiServiceState.STARTED),
+                new ApiService().type("HDFS").serviceState(ApiServiceState.STARTED));
+        when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices(anyString(), anyString())).thenReturn(new ApiServiceList().items(services));
+
+        underTest.stopCluster(disableKnoxAutorestart);
+
+        if (disableKnoxAutorestart) {
+            verify(configService, times(1)).disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClientMock, stack.getName());
+        } else {
+            verify(configService, never()).disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClientMock, stack.getName());
+        }
+        verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmShutdown(stack, apiClientMock, apiCommand.getId());
+        verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
+        verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPING);
+
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = { true, false })
+    void testStopClusterWhenCmIsNotStoppedAndAllServicesStoppedThenTheyAreNotStopped(boolean disableKnoxAutorestart) throws CloudbreakException, ApiException {
+
+        ApiCommand apiCommand = new ApiCommand();
+        when(clouderaManagerPollingServiceProvider.checkCmStatus(stack, apiClientMock)).thenReturn(success);
+        when(clouderaManagerApiFactory.getClustersResourceApi(eq(apiClientMock))).thenReturn(clustersResourceApi);
+        List<ApiService> services = List.of(
+                new ApiService().type("RANGER_RAZ").serviceState(ApiServiceState.STOPPED),
+                new ApiService().type("ATLAS").serviceState(ApiServiceState.STOPPED),
+                new ApiService().type("HDFS").serviceState(ApiServiceState.STOPPED));
+        when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices(anyString(), anyString())).thenReturn(new ApiServiceList().items(services));
+        underTest.stopCluster(disableKnoxAutorestart);
+
+        if (disableKnoxAutorestart) {
+            verify(configService, times(1)).disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClientMock, stack.getName());
+        } else {
+            verify(configService, never()).disableKnoxAutorestartIfCmVersionAtLeast(CLOUDERAMANAGER_VERSION_7_1_0, apiClientMock, stack.getName());
+        }
+        verify(clouderaManagerPollingServiceProvider, never()).startPollingCmShutdown(stack, apiClientMock, apiCommand.getId());
+        verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
+        verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPING);
     }
 
     private ClusterComponent createClusterComponent(ClouderaManagerProduct clouderaManagerProduct) {

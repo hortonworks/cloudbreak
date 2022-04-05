@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -39,9 +40,12 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
 
     private final AutoSyncConfig autoSyncConfig;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public EnvironmentStatusCheckerJob(EnvironmentService environmentService, FlowLogService flowLogService,
             EnvironmentSyncService environmentSyncService, EnvironmentStatusUpdateService environmentStatusUpdateService,
-            EnvironmentJobService environmentJobService, AutoSyncConfig autoSyncConfig, Tracer tracer) {
+            EnvironmentJobService environmentJobService, AutoSyncConfig autoSyncConfig, Tracer tracer,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         super(tracer, "Environment Status Checker Job");
         this.environmentService = environmentService;
         this.flowLogService = flowLogService;
@@ -49,6 +53,7 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
         this.environmentStatusUpdateService = environmentStatusUpdateService;
         this.environmentJobService = environmentJobService;
         this.autoSyncConfig = autoSyncConfig;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -76,7 +81,9 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
     @VisibleForTesting
     void syncAnEnv(Environment environment) {
         try {
-            ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+            ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> {
                 EnvironmentStatus status = environmentSyncService.getStatusByFreeipa(environment);
                 if (environment.getStatus() != status) {
                     if (!flowLogService.isOtherFlowRunning(environment.getId())) {

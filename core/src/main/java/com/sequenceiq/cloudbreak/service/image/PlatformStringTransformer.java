@@ -20,7 +20,7 @@ public class PlatformStringTransformer {
         if (Strings.isNullOrEmpty(platformVariant)) {
             return imageCatalogPlatform(platform);
         } else if (platformVariant.toLowerCase().endsWith(GOV)) {
-            return imageCatalogPlatform(platformVariant);
+            return getPlatformStringForImageCatalog(platform, true);
         } else {
             return imageCatalogPlatform(platform);
         }

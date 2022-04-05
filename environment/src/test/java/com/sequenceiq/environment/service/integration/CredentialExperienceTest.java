@@ -32,6 +32,8 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.handler.CredentialPrerequisitesHandler;
@@ -128,6 +130,12 @@ public class CredentialExperienceTest {
     @MockBean
     private PolicyValidationErrorResponseConverter policyValidationErrorResponseConverter;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @BeforeEach
     public void setup() {
         when(userPreferencesRepository.save(any())).thenReturn(new UserPreferences("xid", "audit-xid", "user"));
@@ -141,6 +149,8 @@ public class CredentialExperienceTest {
 
     @Test
     public void testAwsPoliciesArePresent() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         CredentialPrerequisitesResponse res = testSkeleton("AWS", Boolean.TRUE);
         Assertions.assertNotNull(res.getAws().getPolicies());
         Assertions.assertEquals(3, res.getAws().getPolicies().size());
@@ -301,6 +311,9 @@ public class CredentialExperienceTest {
 
         @MockBean
         private FlowOperationStatisticsService flowOperationStatisticsService;
+
+        @MockBean
+        private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
         @Bean
         @Primary

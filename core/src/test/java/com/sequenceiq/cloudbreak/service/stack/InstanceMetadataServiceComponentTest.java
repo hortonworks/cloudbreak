@@ -14,12 +14,15 @@ import javax.inject.Inject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -46,6 +49,12 @@ public class InstanceMetadataServiceComponentTest {
     @Inject
     private EnvironmentClientService environmentClientService;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @Test
     public void saveInstanceAndGetUpdatedStack() {
 
@@ -70,7 +79,8 @@ public class InstanceMetadataServiceComponentTest {
         workerInstanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
         stack.setInstanceGroups(Set.of(workerInstanceGroup));
         when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(detailedEnvResponse);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, Map.of("worker", 42), Map.of(), false, false, null);
         Map<String, List<InstanceMetaData>> groupBySub = workerInstanceGroup.getInstanceMetaDataSet().stream()
                 .collect(Collectors.groupingBy(
@@ -117,7 +127,8 @@ public class InstanceMetadataServiceComponentTest {
         stack.setInstanceGroups(Set.of(workerInstanceGroup));
         when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(detailedEnvResponse);
         NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails(List.of("sub1", "sub2"));
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, Map.of("worker", 42), Map.of(), false, false, networkScaleDetails);
 
         Map<String, List<InstanceMetaData>> groupBySub = workerInstanceGroup.getInstanceMetaDataSet().stream()
@@ -169,5 +180,8 @@ public class InstanceMetadataServiceComponentTest {
 
         @MockBean
         private ResourceRetriever resourceRetriever;
+
+        @MockBean
+        private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
     }
 }

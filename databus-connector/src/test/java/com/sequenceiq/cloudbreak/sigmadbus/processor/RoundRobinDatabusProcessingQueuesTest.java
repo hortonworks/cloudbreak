@@ -38,7 +38,7 @@ public class RoundRobinDatabusProcessingQueuesTest {
         given(monitoringConfiguration.getDbusServiceName()).willReturn("Monitoring");
         doNothing().when(recordProcessor).handleDroppedDatabusRequest(input, 2);
         RoundRobinDatabusProcessingQueues<MonitoringConfiguration> underTest =
-                new RoundRobinDatabusProcessingQueues<>(2, 2, recordProcessor, tracer);
+                new RoundRobinDatabusProcessingQueues<>(2, 2, recordProcessor, tracer, null);
         // WHEN
         underTest.process(input);
         underTest.process(input);

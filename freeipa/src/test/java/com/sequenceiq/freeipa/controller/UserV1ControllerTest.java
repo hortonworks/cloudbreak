@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.controller;
 
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,6 +22,8 @@ import org.springframework.security.access.AccessDeniedException;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SetPasswordRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -63,6 +64,12 @@ public class UserV1ControllerTest {
 
     @Mock
     private OperationToSyncOperationStatus operationToSyncOperationStatus;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @Test
     void synchronizeUser() {
@@ -205,10 +212,12 @@ public class UserV1ControllerTest {
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
-        assertEquals(status, ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.synchronizeAllUsers(request)));
+        assertEquals(status, ThreadBasedUserCrnProvider
+                .doAsInternalActor("crn:altus:iam:us-west-1:altus:user:__internal__actor__",
+                        () -> underTest.synchronizeAllUsers(request)));
 
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(users, machineUsers, Optional.empty());
-        verify(userSyncService, times(1)).synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, INTERNAL_ACTOR_CRN,
+        verify(userSyncService, times(1)).synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, "crn:altus:iam:us-west-1:altus:user:__internal__actor__",
                 environments, userSyncFilter, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
     }
 
@@ -263,7 +272,7 @@ public class UserV1ControllerTest {
         SyncOperationStatus status = mock(SyncOperationStatus.class);
         when(operationToSyncOperationStatus.convert(operation)).thenReturn(status);
 
-        assertEquals(status, ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+        assertEquals(status, ThreadBasedUserCrnProvider.doAsInternalActor("crn", () ->
                 underTest.getSyncOperationStatusInternal(ACCOUNT_ID, operationId)));
 
         verify(operationService, times(1)).getOperationForAccountIdAndOperationId(ACCOUNT_ID, operationId);

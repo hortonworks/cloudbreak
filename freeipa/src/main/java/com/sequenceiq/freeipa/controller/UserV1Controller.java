@@ -22,7 +22,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -168,7 +168,7 @@ public class UserV1Controller implements UserV1Endpoint {
             return ThreadBasedUserCrnProvider.getAccountId();
         }
         String callingActorAccountId = Crn.safeFromString(callingActor).getAccountId();
-        if (!callingActorAccountId.equals(requestedAccountId) && !InternalCrnBuilder.isInternalCrn(callingActor)) {
+        if (!callingActorAccountId.equals(requestedAccountId) && !RegionAwareInternalCrnGeneratorUtil.isInternalCrn(callingActor)) {
             throw new AccessDeniedException(String.format("Actor %s does not belong to the request account %s", callingActor, requestedAccountId));
         }
         return requestedAccountId;

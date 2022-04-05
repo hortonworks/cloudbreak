@@ -75,4 +75,6 @@ include 'cloud-aws-native'
 include 'cloud-aws-gov'
 include 'custom-configurations'
 include 'custom-configurations-api'
+include 'cloud-consumption'
+include 'cloud-consumption-api'
 

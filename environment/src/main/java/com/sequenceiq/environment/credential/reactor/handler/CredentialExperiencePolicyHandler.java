@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialExperiencePolicyRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialExperiencePolicyResult;
@@ -23,8 +23,12 @@ public class CredentialExperiencePolicyHandler implements CloudPlatformEventHand
 
     private ExperienceConnectorService experienceConnectorService;
 
-    public CredentialExperiencePolicyHandler(ExperienceConnectorService experienceConnectorService) {
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    public CredentialExperiencePolicyHandler(ExperienceConnectorService experienceConnectorService,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.experienceConnectorService = experienceConnectorService;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -42,7 +46,7 @@ public class CredentialExperiencePolicyHandler implements CloudPlatformEventHand
 
             EnvironmentExperienceDto dto = new EnvironmentExperienceDto.Builder()
                     .withCloudPlatform(cloudContext.getPlatform().value())
-                    .withAccountId(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN)
+                    .withAccountId(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString())
                     .build();
             Map<String, String> policies = experienceConnectorService.collectExperiencePoliciesForCredentialCreation(dto);
 

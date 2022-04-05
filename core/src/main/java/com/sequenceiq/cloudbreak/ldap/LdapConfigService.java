@@ -15,6 +15,7 @@ import org.springframework.vault.VaultException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.dto.LdapView;
@@ -41,6 +42,9 @@ public class LdapConfigService {
     @Inject
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Retryable(value = CloudbreakServiceException.class, maxAttempts = MAX_ATTEMPT, backoff = @Backoff(delay = DELAY))
     public boolean isLdapConfigExistsForEnvironment(String environmentCrn, String clusterName) {
         return describeLdapConfig(environmentCrn, clusterName).isPresent();
@@ -54,7 +58,9 @@ public class LdapConfigService {
 
     private Optional<DescribeLdapConfigResponse> describeLdapConfig(String environmentCrn, String clusterName) {
         try {
-            return Optional.of(ThreadBasedUserCrnProvider.doAsInternalActor(() -> ldapConfigV1Endpoint.getForCluster(environmentCrn, clusterName)));
+            return Optional.of(ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> ldapConfigV1Endpoint.getForCluster(environmentCrn, clusterName)));
         } catch (NotFoundException e) {
             LOGGER.debug("No Ldap config found for {} environment. Ldap setup will be skipped!", environmentCrn, e);
             return Optional.empty();

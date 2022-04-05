@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN;
 
 import java.util.List;
 
@@ -12,6 +11,7 @@ import org.springframework.util.StringUtils;
 import com.cloudera.thunderhead.service.authorization.AuthorizationGrpc;
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
@@ -36,16 +36,20 @@ public class AuthorizationClient {
 
     private final UmsClientConfig umsClientConfig;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     /**
      * Constructor.
      *
      * @param channel  the managed channel.
      * @param tracer   tracer
      */
-    AuthorizationClient(ManagedChannel channel, UmsClientConfig umsClientConfig, Tracer tracer) {
+    AuthorizationClient(ManagedChannel channel, UmsClientConfig umsClientConfig, Tracer tracer,
+        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.channel = checkNotNull(channel, "channel should not be null.");
         this.umsClientConfig = checkNotNull(umsClientConfig, "umsClientConfig should not be null.");
         this.tracer = tracer;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public void checkRight(String requestId, String userCrn, String right, String resource) {
@@ -101,7 +105,7 @@ public class AuthorizationClient {
         return AuthorizationGrpc.newBlockingStub(channel).withInterceptors(
                 GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcShortTimeoutSec()),
                 GrpcUtil.getTracingInterceptor(tracer),
-                new AltusMetadataInterceptor(requestId, INTERNAL_ACTOR_CRN),
+                new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()),
                 new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName())
         );
     }

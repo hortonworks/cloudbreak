@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
@@ -196,6 +197,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     @Inject
     private ImageCatalogService imageCatalogService;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
 
@@ -245,7 +249,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public StackV4Response getDetail(String name, Set<String> entries, String accountId) {
         try {
             LOGGER.info("Calling cloudbreak for SDX cluster details by name {}", name);
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.get(WORKSPACE_ID_DEFAULT, name, entries, accountId));
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> stackV4Endpoint.get(WORKSPACE_ID_DEFAULT, name, entries, accountId));
         } catch (javax.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);
             return null;
@@ -335,17 +341,23 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public UpdateRecipesV4Response refreshRecipes(SdxCluster sdxCluster, UpdateRecipesV4Request request) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.refreshRecipesInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> stackV4Endpoint.refreshRecipesInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
                 sdxCluster.getInitiatorUserCrn()));
     }
 
     public AttachRecipeV4Response attachRecipe(SdxCluster sdxCluster, AttachRecipeV4Request request) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.attachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> stackV4Endpoint.attachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
                 sdxCluster.getInitiatorUserCrn()));
     }
 
     public DetachRecipeV4Response detachRecipe(SdxCluster sdxCluster, DetachRecipeV4Request request) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.detachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> stackV4Endpoint.detachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
                 sdxCluster.getInitiatorUserCrn()));
     }
 
@@ -362,7 +374,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public void updateRangerRazEnabled(SdxCluster sdxCluster) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+        ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> {
             RangerRazEnabledV4Response response = stackV4Endpoint.rangerRazEnabledInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), initiatorUserCrn);
             if (response.isRangerRazEnabled()) {
                 if (!sdxCluster.isRangerRazEnabled()) {
@@ -486,7 +500,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     private Set<String> fetchRecipesFromCore() {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        RecipeViewV4Responses recipeResponses = ThreadBasedUserCrnProvider.doAsInternalActor(() -> recipeV4Endpoint.listInternal(
+        RecipeViewV4Responses recipeResponses = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> recipeV4Endpoint.listInternal(
                 WORKSPACE_ID_DEFAULT, initiatorUserCrn));
         Set<String> recipeNames = recipeResponses.getResponses()
                 .stream()
@@ -696,13 +712,16 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public FlowIdentifier sync(String name, String accountId) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.sync(WORKSPACE_ID_DEFAULT, name, accountId));
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> stackV4Endpoint.sync(WORKSPACE_ID_DEFAULT, name, accountId));
     }
 
     public void syncByCrn(String userCrn, String crn) {
         SdxCluster sdxCluster = getByCrn(userCrn, crn);
-        ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                stackV4Endpoint.sync(WORKSPACE_ID_DEFAULT, sdxCluster.getClusterName(), Crn.fromString(crn).getAccountId()));
+        ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> stackV4Endpoint.sync(WORKSPACE_ID_DEFAULT, sdxCluster.getClusterName(), Crn.fromString(crn).getAccountId()));
     }
 
     public FlowIdentifier syncComponentVersionsFromCm(String userCrn, NameOrCrn clusterNameOrCrn) {

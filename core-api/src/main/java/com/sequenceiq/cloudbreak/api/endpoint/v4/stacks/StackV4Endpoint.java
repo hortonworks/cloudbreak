@@ -389,7 +389,7 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = CHECK_STACK_UPGRADE, nickname = "checkForClusterUpgradeByName")
     UpgradeV4Response checkForClusterUpgradeByName(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            UpgradeV4Request request, @AccountId @QueryParam("accountId") String accountId);
+            @NotNull UpgradeV4Request request, @AccountId @QueryParam("accountId") String accountId);
 
     @POST
     @Path("{name}/cluster_upgrade")

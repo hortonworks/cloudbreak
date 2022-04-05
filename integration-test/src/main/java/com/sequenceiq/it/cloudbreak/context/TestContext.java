@@ -28,6 +28,7 @@ import org.testng.ITestResult;
 import org.testng.Reporter;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -139,6 +140,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private CloudbreakActor cloudbreakActor;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     private boolean validated;
 
@@ -400,9 +404,12 @@ public abstract class TestContext implements ApplicationContextAware {
         Log.as(LOGGER, cloudbreakUser.toString());
         setActingUser(cloudbreakUser);
         if (clients.get(cloudbreakUser.getAccessKey()) == null) {
-            CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, cloudbreakUser);
-            FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, cloudbreakUser);
-            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, cloudbreakUser);
+            CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, cloudbreakUser,
+                    regionAwareInternalCrnGeneratorFactory.iam());
+            FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, cloudbreakUser,
+                    regionAwareInternalCrnGeneratorFactory.iam());
+            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, cloudbreakUser,
+                    regionAwareInternalCrnGeneratorFactory.iam());
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, cloudbreakUser);
             UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, cloudbreakUser);
@@ -418,9 +425,12 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private void initMicroserviceClientsForUMSAccountAdmin(CloudbreakUser accountAdmin) {
         if (clients.get(accountAdmin.getAccessKey()) == null) {
-            CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, accountAdmin);
-            FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, accountAdmin);
-            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, accountAdmin);
+            CloudbreakClient cloudbreakClient = CloudbreakClient.createProxyCloudbreakClient(testParameter, accountAdmin,
+                    regionAwareInternalCrnGeneratorFactory.iam());
+            FreeIpaClient freeIpaClient = FreeIpaClient.createProxyFreeIpaClient(testParameter, accountAdmin,
+                    regionAwareInternalCrnGeneratorFactory.iam());
+            EnvironmentClient environmentClient = EnvironmentClient.createProxyEnvironmentClient(testParameter, accountAdmin,
+                    regionAwareInternalCrnGeneratorFactory.iam());
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, accountAdmin);
             UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, accountAdmin);

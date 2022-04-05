@@ -26,7 +26,7 @@ import com.cloudera.api.swagger.model.ApiAuthRoleRef;
 import com.cloudera.api.swagger.model.ApiExternalUserMapping;
 import com.cloudera.api.swagger.model.ApiExternalUserMappingList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
-import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -115,7 +115,7 @@ public class ClouderaManagerLdapServiceTest {
         apiAuthRoleMetadataList.addItemsItem(
                 new ApiAuthRoleMetadata().displayName("ROLE_DASHBOARD_USER").uuid("uuid").role("ROLE_DASHBOARD_USER"));
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(apiAuthRoleMetadataList);
-        when(virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.CLOUDER_MANAGER_ADMIN.getRight())).thenReturn("virtualGroup");
+        when(virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN.getRight())).thenReturn("virtualGroup");
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig, virtualGroupRequest);
         // THEN
@@ -142,7 +142,7 @@ public class ClouderaManagerLdapServiceTest {
         apiAuthRoleMetadataList.addItemsItem(
                 new ApiAuthRoleMetadata().displayName("ROLE_ADMIN").uuid("uuid").role("ROLE_ADMIN"));
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(apiAuthRoleMetadataList);
-        when(virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.CLOUDER_MANAGER_ADMIN.getRight())).thenReturn("virtualGroup");
+        when(virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN.getRight())).thenReturn("virtualGroup");
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig, virtualGroupRequest);
         // THEN

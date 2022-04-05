@@ -117,6 +117,7 @@ dependencies {
   }
 
   implementation project(":structuredevent-service-cdp")
+  implementation project(':structuredevent-model')
   implementation project(':audit-connector')
   implementation project(':authorization-common')
   implementation project(':cloud-reactor-api')
@@ -143,6 +144,8 @@ dependencies {
   implementation project(':cloud-aws-cloudformation')
   implementation project(':cloud-aws-native')
   implementation project(':cloud-aws-gov')
+  implementation project(':cloud-azure')
+  implementation project(':cloud-gcp')
 
   runtimeOnly project(':orchestrator-salt')
   runtimeOnly project(':cloud-mock')

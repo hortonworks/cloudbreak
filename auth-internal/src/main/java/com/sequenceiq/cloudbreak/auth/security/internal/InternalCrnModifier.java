@@ -14,7 +14,8 @@ import com.sequenceiq.cloudbreak.auth.CrnUser;
 import com.sequenceiq.cloudbreak.auth.ReflectionUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Service
@@ -28,14 +29,17 @@ public class InternalCrnModifier {
     @Inject
     private ReflectionUtil reflectionUtil;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public String getInternalCrnWithAccountId(String accountId) {
-        return getAccountIdModifiedCrn(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, accountId);
+        return getAccountIdModifiedCrn(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), accountId);
     }
 
     public Object changeInternalCrn(ProceedingJoinPoint proceedingJoinPoint) {
         String userCrnString = ThreadBasedUserCrnProvider.getUserCrn();
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
-        if (userCrnString != null && InternalCrnBuilder.isInternalCrn(userCrnString)) {
+        if (userCrnString != null && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrnString)) {
             return ThreadBasedUserCrnProvider.doAs(getNewUserCrnIfAccountIdParamDefined(proceedingJoinPoint, methodSignature, userCrnString)
                         .or(() -> getNewUserCrnIfTenantAwareParamDefined(proceedingJoinPoint, methodSignature, userCrnString))
                         .orElse(userCrnString),
@@ -76,7 +80,7 @@ public class InternalCrnModifier {
     }
 
     private void createNewUser(Crn newUserCrn) {
-        CrnUser newUser = InternalCrnBuilder.createInternalCrnUser(newUserCrn);
+        CrnUser newUser = RegionAwareInternalCrnGeneratorUtil.createInternalCrnUser(newUserCrn);
         internalUserModifier.persistModifiedInternalUser(newUser);
     }
 }

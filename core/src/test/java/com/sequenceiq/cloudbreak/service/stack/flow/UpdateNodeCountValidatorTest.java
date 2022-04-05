@@ -230,7 +230,7 @@ public class UpdateNodeCountValidatorTest {
 
     @Test
     void validateStackStatusUpscaleNodeFailureTargetedUpscaleSupported() {
-        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.TRUE);
+        when(targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(any())).thenReturn(Boolean.TRUE);
         Stack stack = new Stack();
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
         underTest.validateStackStatus(stack, true);
@@ -238,7 +238,7 @@ public class UpdateNodeCountValidatorTest {
 
     @Test
     void validateStackStatusDownscaleNodeFailureTargetedUpscaleSupported() {
-        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.TRUE);
+        when(targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(any())).thenReturn(Boolean.TRUE);
         Stack stack = new Stack();
         stack.setName("stack");
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
@@ -251,7 +251,7 @@ public class UpdateNodeCountValidatorTest {
 
     @Test
     void validateStackStatusUpscaleNodeFailureTargetedUpscaleNotSupported() throws Exception {
-        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.FALSE);
+        when(targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(any())).thenReturn(Boolean.FALSE);
         Stack stack = new Stack();
         stack.setName("stack");
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
@@ -264,7 +264,7 @@ public class UpdateNodeCountValidatorTest {
 
     @Test
     void validateStackStatusDownscaleNodeFailureTargetedUpscaleNotSupported() throws Exception {
-        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.FALSE);
+        when(targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(any())).thenReturn(Boolean.FALSE);
         Stack stack = new Stack();
         stack.setName("stack");
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
@@ -295,7 +295,7 @@ public class UpdateNodeCountValidatorTest {
 
     @Test
     void validateClusterStatusUpscaleNodeFailureTargetedUpscaleSupported() {
-        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.TRUE);
+        when(targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(any())).thenReturn(Boolean.TRUE);
         Stack stack = new Stack();
         Cluster cluster = mock(Cluster.class);
         stack.setCluster(cluster);
@@ -305,7 +305,7 @@ public class UpdateNodeCountValidatorTest {
 
     @Test
     void validateClusterStatusDownscaleNodeFailureTargetedUpscaleSupported() {
-        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.TRUE);
+        when(targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(any())).thenReturn(Boolean.TRUE);
         Stack stack = new Stack();
         stack.setName("stack");
         Cluster cluster = mock(Cluster.class);
@@ -320,7 +320,7 @@ public class UpdateNodeCountValidatorTest {
 
     @Test
     void validateClusterStatusUpscaleNodeFailureTargetedUpscaleNotSupported() {
-        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.FALSE);
+        when(targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(any())).thenReturn(Boolean.FALSE);
         Stack stack = new Stack();
         stack.setName("stack");
         Cluster cluster = mock(Cluster.class);
@@ -335,7 +335,7 @@ public class UpdateNodeCountValidatorTest {
 
     @Test
     void validateClusterStatusDownscaleNodeFailureTargetedUpscaleNotSupported() {
-        when(targetedUpscaleSupportService.isTargetedUpscaleAndUnboundEliminationSupported(any())).thenReturn(Boolean.FALSE);
+        when(targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(any())).thenReturn(Boolean.FALSE);
         Stack stack = new Stack();
         stack.setName("stack");
         Cluster cluster = mock(Cluster.class);

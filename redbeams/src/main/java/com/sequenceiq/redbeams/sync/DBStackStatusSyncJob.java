@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -32,6 +33,9 @@ public class DBStackStatusSyncJob extends StatusCheckerJob {
     @Inject
     private DBStackStatusSyncService dbStackStatusSyncService;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public DBStackStatusSyncJob(Tracer tracer) {
         super(tracer, "DB Stack Status Sync Job");
     }
@@ -51,9 +55,12 @@ public class DBStackStatusSyncJob extends StatusCheckerJob {
         } else {
             try {
                 measure(() -> {
-                    ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
-                        dbStackStatusSyncService.sync(dbStack);
-                    });
+                    ThreadBasedUserCrnProvider.doAsInternalActor(
+                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            () -> {
+                                dbStackStatusSyncService.sync(dbStack);
+                            }
+                    );
                 }, LOGGER, ":::Auto sync::: DB stack sync in {}ms");
             } catch (Exception e) {
                 LOGGER.info(":::Auto sync::: Error occurred during DB sync: {}", e.getMessage(), e);

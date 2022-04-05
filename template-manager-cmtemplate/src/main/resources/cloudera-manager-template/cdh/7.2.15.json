@@ -126,7 +126,7 @@
     },
     {
       "name": "SQL_STREAM_BUILDER",
-      "version": "1.6.0"
+      "version": "1.6.1"
     },
     {
       "name": "SPARK3_ON_YARN",

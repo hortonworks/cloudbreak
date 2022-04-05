@@ -11,7 +11,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 
 @Component
 public class CrnAccountValidator {
@@ -23,7 +23,7 @@ public class CrnAccountValidator {
     }
 
     public void validateSameAccount(String userCrnValue, Collection<String> resourceCrns) {
-        if ((Crn.isCrn(userCrnValue) && InternalCrnBuilder.isInternalCrn(userCrnValue))
+        if ((Crn.isCrn(userCrnValue) && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrnValue))
                 || CollectionUtils.isEmpty(resourceCrns)) {
             return;
         }

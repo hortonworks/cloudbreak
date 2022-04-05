@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Service
@@ -24,6 +25,9 @@ public class ClouderaManagerDatabusService {
     @Inject
     private AltusIAMService altusIAMService;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     /**
      * Generate new machine user (if it is needed) and access api key for this user.
      * Also assign built-in dabaus uploader role for the machine user.
@@ -34,6 +38,7 @@ public class ClouderaManagerDatabusService {
     AltusCredential createMachineUserAndGenerateKeys(Stack stack) {
         String machineUserName = getWAMachineUserName(stack);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> altusIAMService.generateMachineUserWithAccessKeyForLegacyCm(
                         machineUserName,
                         ThreadBasedUserCrnProvider.getUserCrn(),
@@ -48,6 +53,7 @@ public class ClouderaManagerDatabusService {
         try {
             String machineUserName = getWAMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () ->  altusIAMService.clearLegacyMachineUser(
                             machineUserName,
                             ThreadBasedUserCrnProvider.getUserCrn(),

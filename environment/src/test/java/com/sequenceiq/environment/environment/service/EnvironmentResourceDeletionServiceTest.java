@@ -36,6 +36,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
@@ -74,6 +76,12 @@ class EnvironmentResourceDeletionServiceTest {
     @Mock
     private ClusterTemplateViewV4Responses clusterTemplateViewV4Responses;
 
+    @MockBean
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
     @Inject
     private EnvironmentResourceDeletionService environmentResourceDeletionServiceUnderTest;
 
@@ -89,12 +97,16 @@ class EnvironmentResourceDeletionServiceTest {
 
     @Test
     void getAttachedSdxClusterNames() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         environmentResourceDeletionServiceUnderTest.getAttachedSdxClusterCrns(environment);
         verify(sdxEndpoint).list(eq(ENVIRONMENT_NAME), eq(true));
     }
 
     @Test
     void getDatalakeClusterNames() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(datalakeEndpoint.list(isNull(), anyString())).thenReturn(new StackViewV4Responses());
         environmentResourceDeletionServiceUnderTest.getDatalakeClusterNames(environment);
         verify(datalakeEndpoint).list(isNull(), eq(ENVIRONMENT_CRN));
@@ -102,6 +114,8 @@ class EnvironmentResourceDeletionServiceTest {
 
     @Test
     void getAttachedDistroXClusterNames() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(distroXEndpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses());
         environmentResourceDeletionServiceUnderTest.getAttachedDistroXClusterNames(environment);
         verify(distroXEndpoint).list(isNull(), eq(ENVIRONMENT_CRN));
@@ -114,7 +128,8 @@ class EnvironmentResourceDeletionServiceTest {
         ClusterTemplateViewV4Response templateViewV4ResponseUserManaged = new ClusterTemplateViewV4Response();
         templateViewV4ResponseUserManaged.setName("name");
         templateViewV4ResponseUserManaged.setStatus(ResourceStatus.USER_MANAGED);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(clusterTemplateViewV4Responses.getResponses())
                 .thenReturn(Set.of(templateViewV4ResponseUserManaged));
         when(clusterTemplateV4Endpoint.listByEnv(anyLong(), anyString())).thenReturn(clusterTemplateViewV4Responses);
@@ -138,7 +153,8 @@ class EnvironmentResourceDeletionServiceTest {
         templateViewV4Response.setStatus(ResourceStatus.USER_MANAGED);
         when(clusterTemplateViewV4Responses.getResponses()).thenReturn(Set.of(templateViewV4Response));
         when(clusterTemplateV4Endpoint.listByEnv(anyLong(), anyString())).thenReturn(clusterTemplateViewV4Responses);
-
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         Assertions.assertThrows(EnvironmentServiceException.class,
                 () -> environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN));
 

@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -25,9 +26,14 @@ public class RedbeamsClientService {
     @Inject
     private DatabaseServerV4Endpoint redbeamsServerEndpoint;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public DatabaseServerV4Response getByCrn(String dbCrn) {
         try {
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.getByCrn(dbCrn));
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> redbeamsServerEndpoint.getByCrn(dbCrn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to GET DatabaseServer properties by dbCrn: %s", dbCrn);
             LOGGER.error(message, e);
@@ -38,7 +44,9 @@ public class RedbeamsClientService {
     public DatabaseServerStatusV4Response create(AllocateDatabaseServerV4Request request) {
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.createInternal(request, initiatorUserCrn));
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> redbeamsServerEndpoint.createInternal(request, initiatorUserCrn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to create DatabaseServer %s", request.getName());
             LOGGER.error(message, e);
@@ -48,7 +56,9 @@ public class RedbeamsClientService {
 
     public DatabaseServerV4Response deleteByCrn(String crn, boolean force) {
         try {
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.deleteByCrn(crn, force));
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> redbeamsServerEndpoint.deleteByCrn(crn, force));
         } catch (NotFoundException e) {
             String message = String.format("DatabaseServer with CRN %s was not found by Redbeams service in the deleteByCrn call.", crn);
             LOGGER.warn(message, e);
@@ -62,7 +72,9 @@ public class RedbeamsClientService {
 
     public void startByCrn(String crn) {
         try {
-            ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.start(crn));
+            ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> redbeamsServerEndpoint.start(crn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to start DatabaseServer with CRN %s", crn);
             LOGGER.error(message, e);
@@ -72,7 +84,9 @@ public class RedbeamsClientService {
 
     public void stopByCrn(String crn) {
         try {
-            ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.stop(crn));
+            ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> redbeamsServerEndpoint.stop(crn));
         } catch (WebApplicationException | ProcessingException e) {
             String message = String.format("Failed to stop DatabaseServer with CRN %s", crn);
             LOGGER.error(message, e);
@@ -83,7 +97,9 @@ public class RedbeamsClientService {
     public DatabaseServerV4Response getByClusterCrn(String environmentCrn, String clusterCrn) {
         validateForGetByClusterCrn(environmentCrn, clusterCrn);
         try {
-            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.getByClusterCrn(environmentCrn, clusterCrn));
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> redbeamsServerEndpoint.getByClusterCrn(environmentCrn, clusterCrn));
         } catch (NotFoundException e) {
             String message = String.format("DatabaseServer with Environment CRN %s and Cluster CRN %s was not found", environmentCrn, clusterCrn);
             LOGGER.debug(message, e);

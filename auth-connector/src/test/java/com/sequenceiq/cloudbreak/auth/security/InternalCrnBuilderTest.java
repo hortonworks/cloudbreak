@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.auth.security;
 
+import static com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator.regionalAwareInternalCrnGenerator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 
 public class InternalCrnBuilderTest {
 
@@ -17,8 +19,9 @@ public class InternalCrnBuilderTest {
 
     @Test
     public void generateInternalCrnWhenAutoscaleIsSpecified() {
-        InternalCrnBuilder internalCrnBuilder = new InternalCrnBuilder(Crn.Service.AUTOSCALE);
-        Crn generated = Crn.safeFromString(internalCrnBuilder.getInternalCrnForServiceAsString());
+        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator =
+                regionalAwareInternalCrnGenerator(Crn.Service.AUTOSCALE, "cdp", "us-west-1");
+        Crn generated = Crn.safeFromString(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString());
         assertEquals("altus", generated.getAccountId());
         assertEquals(Crn.Service.AUTOSCALE, generated.getService());
         assertEquals(Crn.ResourceType.USER, generated.getResourceType());
@@ -27,18 +30,19 @@ public class InternalCrnBuilderTest {
 
     @Test
     public void generateCrnAsStringWhenFreeIpaIs() {
-        InternalCrnBuilder internalCrnBuilder = new InternalCrnBuilder(Crn.Service.FREEIPA);
+        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator =
+                regionalAwareInternalCrnGenerator(Crn.Service.FREEIPA, "cdp", "us-west-1");
         assertEquals("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__",
-                internalCrnBuilder.getInternalCrnForServiceAsString());
+                regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString());
     }
 
     @Test
     public void whenInternalCrnProvidedThenReturnTrue() {
-        assertTrue(InternalCrnBuilder.isInternalCrn(internalCrn));
+        assertTrue(RegionAwareInternalCrnGeneratorUtil.isInternalCrn(internalCrn));
     }
 
     @Test
     public void whenUserCrnProvidedThenReturnFalse() {
-        assertFalse(InternalCrnBuilder.isInternalCrn(userCrn));
+        assertFalse(RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn));
     }
 }

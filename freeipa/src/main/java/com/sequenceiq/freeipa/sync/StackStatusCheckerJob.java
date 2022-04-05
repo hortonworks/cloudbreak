@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -61,6 +62,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private FreeipaStatusInfoLogger freeipaStatusInfoLogger;
 
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @Value("${freeipa.autosync.update.status:true}")
     private boolean updateStatus;
 
@@ -96,7 +100,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     public void syncAStack(Stack stack, boolean updateStatusFromFlow) {
         try {
             checkedMeasure(() -> {
-                ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
+                ThreadBasedUserCrnProvider.doAsInternalActor(
+                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> {
                     // Exclude terminated but include deleted
                     Set<InstanceMetaData> notTerminatedForStack = stack.getAllInstanceMetaDataList().stream()
                             .filter(Predicate.not(InstanceMetaData::isTerminated))

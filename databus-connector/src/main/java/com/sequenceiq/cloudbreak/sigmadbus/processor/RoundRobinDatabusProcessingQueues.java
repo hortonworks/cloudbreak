@@ -8,6 +8,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
 import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfiguration;
 
@@ -37,13 +38,17 @@ public class RoundRobinDatabusProcessingQueues<C extends AbstractDatabusStreamCo
 
     private final Tracer tracer;
 
-    public RoundRobinDatabusProcessingQueues(int numberOfQueues, int sizeLimit, AbstractDatabusRecordProcessor<C> recordProcessor, Tracer tracer) {
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    public RoundRobinDatabusProcessingQueues(int numberOfQueues, int sizeLimit, AbstractDatabusRecordProcessor<C> recordProcessor,
+        Tracer tracer, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.numberOfQueues = numberOfQueues > 0 ? numberOfQueues : 1;
         this.sizeLimit = sizeLimit > 0 ? sizeLimit : DEFAULT_SIZE_LIMIT;
         this.workers = new ArrayList<>();
         this.processingQueueList = new ArrayList<>();
         this.recordProcessor = recordProcessor;
         this.tracer = tracer;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
         initProcessingQueuesAndWorkers();
     }
 
@@ -53,7 +58,8 @@ public class RoundRobinDatabusProcessingQueues<C extends AbstractDatabusStreamCo
                     recordProcessor.getDatabusStreamConfiguration().getDbusServiceName().toLowerCase(), workerIndex);
             BlockingDeque<DatabusRequest> processingQueue = new LinkedBlockingDeque<>();
             processingQueueList.add(processingQueue);
-            DatabusRecordWorker<C> dataBusRecordWorker = new DatabusRecordWorker<C>(threadName, processingQueue, recordProcessor, tracer);
+            DatabusRecordWorker<C> dataBusRecordWorker =
+                    new DatabusRecordWorker<C>(threadName, processingQueue, recordProcessor, tracer, regionAwareInternalCrnGeneratorFactory);
             workers.add(dataBusRecordWorker);
         }
     }
