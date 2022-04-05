@@ -19,7 +19,7 @@ public class AzureNetworkViewTest {
 
     private static final String ENDPOINT_TYPE = "endpointType";
 
-    private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingPrivateDnsZoneId";
+    private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingDatabasePrivateDnsZoneId";
 
     @Mock
     private Network network;
@@ -54,6 +54,6 @@ public class AzureNetworkViewTest {
     @Test
     public void testGetPrivateDnsZoneId() {
         when(network.getStringParameter(EXISTING_PRIVATE_DNS_ZONE_ID)).thenReturn("privateDnsZoneId-a");
-        assertThat(underTest.getExistingPrivateDnsZoneId()).isEqualTo("privateDnsZoneId-a");
+        assertThat(underTest.getExistingDatabasePrivateDnsZoneId()).isEqualTo("privateDnsZoneId-a");
     }
 }

@@ -67,7 +67,7 @@ public class AzureDatabaseTemplateBuilder {
             Map<String, Object> model = new HashMap<>();
             model.put("usePrivateEndpoints", USE_PRIVATE_ENDPOINT.equals(azureNetworkView.getEndpointType()));
             model.put("subnetIdForPrivateEndpoint", azureNetworkView.getSubnetIdForPrivateEndpoint());
-            model.put("existingPrivateDnsZoneId", azureNetworkView.getExistingPrivateDnsZoneId());
+            model.put("existingDatabasePrivateDnsZoneId", azureNetworkView.getExistingDatabasePrivateDnsZoneId());
             model.put("adminLoginName", azureDatabaseServerView.getAdminLoginName());
             model.put("adminPassword", azureDatabaseServerView.getAdminPassword());
             model.put("backupRetentionDays", azureDatabaseServerView.getBackupRetentionDays());
