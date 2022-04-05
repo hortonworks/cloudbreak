@@ -1,6 +1,7 @@
 package com.sequenceiq.flow.service.flowlog;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -11,8 +12,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.persistence.Entity;
 
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.LazyInitializationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -95,20 +98,41 @@ public class FlowLogDBService implements FlowLogService {
         String objectAsString;
         try {
             objectAsString = JsonWriter.objectToJson(object, writeOptions);
+        } catch (LazyInitializationException e) {
+            LOGGER.debug("Lazy init exception occurred in {}. We cannot other method because will fail with Jackson as well, " +
+                    "and Gson will produce a StackOverFlowError. Error: {}", object.getClass().getName(), e.getMessage());
+            objectAsString = null;
         } catch (Exception e) {
             LOGGER.debug("Somehow can not serialize object to string, try another method.", e);
             objectAsString = JsonUtil.writeValueAsStringSilent(object);
             if (objectAsString == null) {
                 LOGGER.debug("Cannot serialize with JsonUtils, try with Gson");
-                objectAsString = getGsonWithExceptionSerializer().toJson(object);
+                objectAsString = parseWithGsonIfNotContainsEntity(object);
             }
         }
         if (objectAsString != null) {
-            LOGGER.debug("Serialize was succefully");
+            LOGGER.debug("Serialize was successfull");
         } else {
             LOGGER.debug("Object couldn't be serialized with any method");
         }
         return objectAsString;
+    }
+
+    String parseWithGsonIfNotContainsEntity(Object object) {
+        try {
+            if (noEntityFieldInObject(object)) {
+                return getGsonWithExceptionSerializer().toJson(object);
+            } else {
+                LOGGER.debug("{} has entity relation, skip the Gson serialization to avoid the StackOverFlowError", object.getClass().getName());
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Cannot serialize with Gson: {}", e.getMessage());
+        }
+        return null;
+    }
+
+    private boolean noEntityFieldInObject(Object object) {
+        return Arrays.stream(object.getClass().getDeclaredFields()).noneMatch(field -> field.getType().isAnnotationPresent(Entity.class));
     }
 
     private Gson getGsonWithExceptionSerializer() {
