@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,6 +12,7 @@ import static org.mockito.Mockito.when;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -120,9 +120,9 @@ public class SdxStopServiceTest {
     @Test
     public void testStopWhenClientErrorException() {
         SdxCluster sdxCluster = sdxCluster();
-        ClientErrorException clientErrorException = mock(ClientErrorException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
-        doThrow(clientErrorException).when(stackV4Endpoint).putStopInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
+        doThrow(new ClientErrorException(Response.Status.BAD_REQUEST)).when(stackV4Endpoint)
+                .putStopInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
@@ -133,9 +133,9 @@ public class SdxStopServiceTest {
     @Test
     public void testStopWhenWebApplicationException() {
         SdxCluster sdxCluster = sdxCluster();
-        WebApplicationException clientErrorException = mock(WebApplicationException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("error");
-        doThrow(clientErrorException).when(stackV4Endpoint).putStopInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
+        doThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR)).when(stackV4Endpoint)
+                .putStopInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);

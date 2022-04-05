@@ -159,12 +159,10 @@ public class AzureUpscaleServiceTest {
         List<Group> scaledGroups = createScaledGroups();
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
-        CloudException cloudException = mock(CloudException.class);
-        CloudError cloudError = mock(CloudError.class);
-        when(cloudException.body()).thenReturn(cloudError);
-        CloudError quotaError = mock(CloudError.class);
-        when(quotaError.code()).thenReturn("QuotaExceeded");
-        when(quotaError.message()).thenReturn("Operation could not be completed as it results in exceeding approved standardNCPromoFamily Cores quota. " +
+        CloudError cloudError = new CloudError();
+        CloudError quotaError = new CloudError();
+        quotaError.withCode("QuotaExceeded");
+        quotaError.withMessage("Operation could not be completed as it results in exceeding approved standardNCPromoFamily Cores quota. " +
                 "Additional details - Deployment Model: Resource Manager, Location: westus2, Current Limit: 200, Current Usage: 24, Additional Required: 600," +
                 " (Minimum) New Limit Required: 624. Submit a request for Quota increase at https://aka" +
                 ".ms/ProdportalCRP/#blade/Microsoft_Azure_Capacity/UsageAndQuota.ReactView/Parameters/%7B%22subscriptionId%22:" +
@@ -173,7 +171,8 @@ public class AzureUpscaleServiceTest {
                 "624,%22unit%22:%22Count%22,%22name%22:%7B%22value%22:%22standardNCPromoFamily%22%7D%7D%7D%7D]%7D by specifying parameters listed in the " +
                 "‘Details’ section for deployment to succeed. Please read more about quota limits at https://docs.microsoft.com/en-us/azure/" +
                 "azure-supportability/per-vm-quota-requests");
-        when(cloudError.details()).thenReturn(Collections.singletonList(quotaError));
+        cloudError.details().add(quotaError);
+        CloudException cloudException = new CloudException("", null, cloudError);
         when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
                 .thenThrow(cloudException);
 

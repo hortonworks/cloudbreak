@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.core.JsonLocation;
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.microsoft.azure.management.storage.StorageAccountSkuType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorageAccountTemplateBuilder;
@@ -70,8 +71,7 @@ class AzureStorageAccountBuilderServiceTest {
     private RuntimeException createMismatchedInputException() {
         JsonLocation jsonLocation = mock(JsonLocation.class);
         when(jsonLocation.sourceDescription()).thenReturn(SOURCE_DESCRIPTION);
-        MismatchedInputException mismatchedInputException = mock(MismatchedInputException.class);
-        when(mismatchedInputException.getLocation()).thenReturn(jsonLocation);
+        MismatchedInputException mismatchedInputException = new InvalidFormatException("msg", jsonLocation, "", String.class);
         return new RuntimeException("Unknown error with status code 400", mismatchedInputException);
     }
 
