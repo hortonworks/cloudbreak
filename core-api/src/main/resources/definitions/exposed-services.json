@@ -613,8 +613,8 @@
       "ssoSupported": true,
       "port": 30700,
       "tlsPort": 30700,
-      "apiOnly": false,
-      "apiIncluded": false,
+      "apiOnly": true,
+      "apiIncluded": true,
       "visibleForDatalake": false,
       "visibleForDatahub": false
     },

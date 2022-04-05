@@ -35,7 +35,7 @@ public class QueryProcessorConfigProvider extends AbstractRdsRoleConfigProvider 
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of(QueryStoreRoles.QUERYPROCESSOR);
+        return List.of(QueryStoreRoles.QUERY_PROCESSOR);
     }
 
     @Override

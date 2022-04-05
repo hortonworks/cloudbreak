@@ -71,7 +71,7 @@ public class QueryProcessorConfigProviderTest {
 
     @Test
     public void getRoleTypes() {
-        assertThat(underTest.getRoleTypes()).containsOnly(QueryStoreRoles.QUERYPROCESSOR);
+        assertThat(underTest.getRoleTypes()).containsOnly(QueryStoreRoles.QUERY_PROCESSOR);
     }
 
     @Test
