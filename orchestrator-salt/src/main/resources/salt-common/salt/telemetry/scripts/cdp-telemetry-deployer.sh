@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LOGFILE_FOLDER:="/var/log/cdp-telemetry-deployer"
+LOGFILE_FOLDER="/var/log/cdp-telemetry-deployer"
 
 function print_help() {
   cat << EOF
@@ -108,7 +108,7 @@ function upgrade_package() {
   if [[ "$local_version" == "-1" ]]; then
     cleanup_td_agent "$component"
     yum clean all --disablerepo="*" --enablerepo=cdp-infra-tools
-    yum install -y "${component}"
+    yum install -y "${component}" --disablerepo="*" --enablerepo=cdp-infra-tools
   else
     local version_cmp_result=$(version_lt $expected_version $local_version)
     if [[ "$version_cmp_result" == "0" ]]; then
@@ -116,7 +116,7 @@ function upgrade_package() {
     else
       yum clean all --disablerepo="*" --enablerepo=cdp-infra-tools
       yum remove -y "${component}"
-      yum install -y "${component}"
+      yum install -y "${component}" --disablerepo="*" --enablerepo=cdp-infra-tools
     fi
   fi
 }
