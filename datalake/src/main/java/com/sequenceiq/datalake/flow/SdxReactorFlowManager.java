@@ -272,7 +272,7 @@ public class SdxReactorFlowManager {
     public FlowIdentifier triggerCcmUpgradeFlow(SdxCluster cluster) {
         LOGGER.info("Trigger CCM Upgrade on Datalake for: {}", cluster);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        UpgradeCcmStackEvent event = new UpgradeCcmStackEvent(UPGRADE_CCM_UPGRADE_STACK_EVENT.event(), cluster, initiatorUserCrn);
+        UpgradeCcmStackEvent event = new UpgradeCcmStackEvent(UPGRADE_CCM_UPGRADE_STACK_EVENT.event(), cluster.getId(), initiatorUserCrn);
         return notify(event.selector(), event, cluster.getClusterName());
     }
 

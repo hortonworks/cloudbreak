@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommi
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -50,6 +51,9 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
+
+    @Inject
+    private StackService stackService;
 
     @Override
     public String selector() {
@@ -76,7 +80,7 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
         allInstancesToCommission.addAll(request.getServicesNotRunningInstancesToCommission());
 
         try {
-            Stack stack = request.getStack();
+            Stack stack = stackService.getByIdWithLists(request.getResourceId());
             Cluster cluster = stack.getCluster();
 
             flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_WAITING_HOSTSTART,
