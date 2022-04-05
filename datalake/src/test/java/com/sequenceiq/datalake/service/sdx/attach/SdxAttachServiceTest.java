@@ -5,9 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import javax.ws.rs.NotFoundException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,9 +20,9 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -131,6 +134,16 @@ public class SdxAttachServiceTest {
     }
 
     @Test
+    void testReattachStackNoStackNoError() {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        testCluster.setClusterName(ORIGINAL_TEST_CLUSTER_NAME);
+        testCluster.setCrn(ORIGINAL_TEST_CLUSTER_CRN);
+        doThrow(new NotFoundException("Stack not found.")).when(mockStackV4Endpoint).updateNameAndCrn(any(), any(), any(), any(), any());
+        sdxAttachService.reattachStack(testCluster, TEST_CLUSTER_NAME);
+    }
+
+    @Test
     void testReattachExternalDatabase() throws Exception {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
@@ -142,6 +155,17 @@ public class SdxAttachServiceTest {
         verify(mockRedbeamsServerEndpoint).updateClusterCrn(
                 eq(TEST_CLUSTER_ENV_CRN), eq(TEST_CLUSTER_CRN), eq(ORIGINAL_TEST_CLUSTER_CRN), any()
         );
+    }
+
+    @Test
+    void testReattachExternalDatabaseNoDBNoError() throws Exception {
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(mockSdxDetachNameGenerator.generateOriginalNameFromDetached(any())).thenReturn(ORIGINAL_TEST_CLUSTER_NAME);
+        when(mockSdxService.save(any())).thenReturn(testCluster);
+        testCluster.setCrn(TEST_CLUSTER_CRN);
+        doThrow(new NotFoundException("DB not found.")).when(mockRedbeamsServerEndpoint).updateClusterCrn(any(), any(), any(), any());
+        sdxAttachService.reattachDetachedSdxCluster(testCluster);
     }
 
     @Test
