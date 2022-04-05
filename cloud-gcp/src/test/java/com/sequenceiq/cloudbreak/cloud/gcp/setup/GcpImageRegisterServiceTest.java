@@ -20,6 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Image;
 import com.google.api.services.compute.model.Operation;
@@ -93,8 +95,10 @@ public class GcpImageRegisterServiceTest {
         Compute compute = mock(Compute.class);
         Compute.Images images = mock(Compute.Images.class);
         Compute.Images.Insert insert = mock(Compute.Images.Insert.class);
-        GoogleJsonResponseException googleJsonResponseException = mock(GoogleJsonResponseException.class);
-        GoogleJsonError googleJsonError = mock(GoogleJsonError.class);
+        GoogleJsonError details = new GoogleJsonError();
+        details.setMessage("error");
+        GoogleJsonResponseException googleJsonResponseException = new GoogleJsonResponseException(
+                new HttpResponseException.Builder(404, "", new HttpHeaders()), details);
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
@@ -104,9 +108,6 @@ public class GcpImageRegisterServiceTest {
         when(compute.images()).thenReturn(images);
         when(images.insert(anyString(), any(Image.class))).thenReturn(insert);
         when(insert.execute()).thenThrow(googleJsonResponseException);
-        when(googleJsonResponseException.getStatusCode()).thenReturn(HttpStatus.SC_NOT_FOUND);
-        when(googleJsonResponseException.getDetails()).thenReturn(googleJsonError);
-        when(googleJsonError.getMessage()).thenReturn("error");
 
         GoogleJsonResponseException exception = assertThrows(GoogleJsonResponseException.class,
                 () -> underTest.register(authenticatedContext, "bucket-name", "image-name"));

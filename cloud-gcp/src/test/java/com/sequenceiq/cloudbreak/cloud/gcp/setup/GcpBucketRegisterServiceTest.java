@@ -20,7 +20,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.Bucket;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -194,14 +197,13 @@ public class GcpBucketRegisterServiceTest {
         when(gcpLabelUtil.transformLabelKeyOrValue(anyString())).thenReturn("super-bucket");
         when(storage.buckets()).thenReturn(buckets);
         when(buckets.get(anyString())).thenReturn(get);
-        GoogleJsonResponseException googleJsonResponseException = mock(GoogleJsonResponseException.class);
-        when(googleJsonResponseException.getStatusCode()).thenReturn(404);
+        GoogleJsonError details = new GoogleJsonError();
+        details.setMessage("somethingAwful");
+        GoogleJsonResponseException googleJsonResponseException = new GoogleJsonResponseException(
+                new HttpResponseException.Builder(404, "", new HttpHeaders()), details);
         when(get.execute()).thenThrow(googleJsonResponseException);
         when(buckets.insert(anyString(), any(Bucket.class))).thenReturn(insert);
-        GoogleJsonResponseException exception = mock(GoogleJsonResponseException.class);
-        when(googleJsonResponseException.getStatusCode()).thenReturn(404);
-        when(insert.execute()).thenThrow(exception);
-        when(exception.getStatusCode()).thenReturn(404);
+        when(insert.execute()).thenThrow(googleJsonResponseException);
 
         GoogleJsonResponseException result = assertThrows(GoogleJsonResponseException.class,
                 () -> underTest.register(authenticatedContext));
@@ -232,14 +234,13 @@ public class GcpBucketRegisterServiceTest {
         when(gcpLabelUtil.transformLabelKeyOrValue(anyString())).thenReturn("super-bucket");
         when(storage.buckets()).thenReturn(buckets);
         when(buckets.get(anyString())).thenReturn(get);
-        GoogleJsonResponseException googleJsonResponseException = mock(GoogleJsonResponseException.class);
-        when(googleJsonResponseException.getStatusCode()).thenReturn(404);
+        GoogleJsonError details = new GoogleJsonError();
+        details.setMessage("somethingAwful");
+        GoogleJsonResponseException googleJsonResponseException = new GoogleJsonResponseException(
+                new HttpResponseException.Builder(404, "", new HttpHeaders()), details);
         when(get.execute()).thenThrow(googleJsonResponseException);
         when(buckets.insert(anyString(), any(Bucket.class))).thenReturn(insert);
-        GoogleJsonResponseException exception = mock(GoogleJsonResponseException.class);
-        when(googleJsonResponseException.getStatusCode()).thenReturn(404);
-        when(insert.execute()).thenThrow(exception);
-        when(exception.getStatusCode()).thenReturn(404);
+        when(insert.execute()).thenThrow(googleJsonResponseException);
 
         GoogleJsonResponseException result = assertThrows(GoogleJsonResponseException.class,
                 () -> underTest.register(authenticatedContext));

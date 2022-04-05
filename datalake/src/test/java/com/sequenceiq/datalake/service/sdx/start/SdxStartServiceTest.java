@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -15,6 +14,7 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -148,9 +148,8 @@ public class SdxStartServiceTest {
     @Test
     public void testStartWheClientErrorException() {
         SdxCluster sdxCluster = sdxCluster();
-        ClientErrorException clientErrorException = mock(ClientErrorException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
-        doThrow(clientErrorException).when(stackV4Endpoint).putStartInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
+        doThrow(new ClientErrorException(Response.Status.BAD_REQUEST)).when(stackV4Endpoint).putStartInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
@@ -163,9 +162,9 @@ public class SdxStartServiceTest {
     @Test
     public void testStartWhenWebApplicationException() {
         SdxCluster sdxCluster = sdxCluster();
-        WebApplicationException clientErrorException = mock(WebApplicationException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
-        doThrow(clientErrorException).when(stackV4Endpoint).putStartInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
+        doThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR)).when(stackV4Endpoint)
+                .putStartInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
@@ -189,9 +188,8 @@ public class SdxStartServiceTest {
     public void testStartDatahubThrowsWebException() {
         SdxCluster sdxCluster = sdxCluster();
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
-        WebApplicationException clientErrorException = mock(WebApplicationException.class);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
-        doThrow(clientErrorException).when(distroxService).startAttachedDistrox(eq(ENV_CRN));
+        doThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR)).when(distroxService).startAttachedDistrox(eq(ENV_CRN));
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.startAllDatahubs(CLUSTER_ID));
 
         assertEquals("Can not start datahub, error happened during operation: Error message: \"error\"", exception.getMessage());

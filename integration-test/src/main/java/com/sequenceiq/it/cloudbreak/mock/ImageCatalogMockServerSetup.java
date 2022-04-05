@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
@@ -59,7 +60,8 @@ public class ImageCatalogMockServerSetup {
         } else {
             target = client.target(cbServerAddress + "/info");
         }
-        try (Response response = target.request().get()) {
+        Invocation.Builder request = target.request();
+        try (Response response = request.get()) {
             CBVersion cbVersion = response.readEntity(CBVersion.class);
             LOGGER.info("CB version: Appname: {}, version: {}", cbVersion.getApp().getName(), cbVersion.getApp().getVersion());
             return cbVersion.getApp().getVersion();

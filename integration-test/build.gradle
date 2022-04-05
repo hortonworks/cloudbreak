@@ -180,6 +180,7 @@ dependencies {
     }
     because 'because there is no jar for 2.4.3 in maven central repo...'
   }
+  implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
 
   runtimeOnly group: 'javax.xml.bind',                name: 'jaxb-api', version: '2.3.0'
 }
