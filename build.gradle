@@ -161,8 +161,8 @@ subprojects {
     maxHeapSize = "1g"
     useJUnitPlatform()
     testlogger {
-      showSummary true
-      showStandardStreams true
+      showSummary false
+      showStandardStreams false
     }
     jacoco {
       destinationFile = file("$buildDir/jacoco/jacocoTest.exec")
@@ -192,7 +192,12 @@ subprojects {
     configFile = rootProject.file('config/checkstyle/checkstyle.xml')
   }
 
-  test.testLogging.showStandardStreams = project.hasProperty('showStandardStreams')
+  test {
+    testLogging {
+      showStandardStreams false
+      events "failed", "standardError"
+    }
+  }
 
   task allDeps(type: DependencyReportTask) {}
 

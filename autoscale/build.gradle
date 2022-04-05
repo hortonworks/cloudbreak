@@ -215,7 +215,7 @@ dependencies {
 
 test {
     include 'com/sequenceiq/**'
-    testLogging.showStandardStreams = true
+    testLogging.showStandardStreams = false
     ignoreFailures = false
     beforeTest { descriptor ->
         logger.lifecycle("Running test: " + descriptor)
