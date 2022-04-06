@@ -26,6 +26,10 @@ public class RoleCrnGenerator {
         return getResourceRoleCrn("EnvironmentAdmin").toString();
     }
 
+    public String getBuiltInEnvironmentUserResourceRoleCrn() {
+        return getResourceRoleCrn("EnvironmentUser").toString();
+    }
+
     public Crn getResourceRoleCrn(String resourceRoleName) {
         // we need to find out the proper partition and region in case of every cdp deployment, we stick to altus partition and current region
         return regionAwareCrnGenerator.generateAltusCrn(CrnResourceDescriptor.RESOURCE_ROLE, resourceRoleName);

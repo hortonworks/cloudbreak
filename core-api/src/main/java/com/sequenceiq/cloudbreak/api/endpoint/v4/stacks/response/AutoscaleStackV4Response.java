@@ -72,6 +72,9 @@ public class AutoscaleStackV4Response {
     @ApiModelProperty(StackModelDescription.TYPE)
     private StackType stackType;
 
+    @ApiModelProperty(StackModelDescription.ENVIRONMENT_CRN)
+    private String environmentCrn;
+
     @ApiModelProperty(StackModelDescription.TUNNEL)
     private Tunnel tunnel;
 
@@ -217,5 +220,13 @@ public class AutoscaleStackV4Response {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public String getEnvironmentCrn() {
+        return environmentCrn;
+    }
+
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 }

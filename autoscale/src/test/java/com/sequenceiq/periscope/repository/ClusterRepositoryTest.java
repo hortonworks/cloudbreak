@@ -39,6 +39,8 @@ class ClusterRepositoryTest {
 
     private static final String CLOUDBREAK_STACK_CRN_2 = "crn:cdp:datahub:us-west-1:tenant:cluster:35ae1d9d-4c4b-4d11-a714-91eadcc5be8a";
 
+    private static final String TEST_ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:c11d716f-8b87-432b-98ef-14a46399ea74";
+
     private static final int TEST_HOSTGROUP_MIN_SIZE = 3;
 
     private static final int TEST_HOSTGROUP_MAX_SIZE = 200;
@@ -101,6 +103,24 @@ class ClusterRepositoryTest {
         List<Cluster> result = underTest.findByTenantAndStackType(TEST_TENANT, StackType.WORKLOAD);
 
         assertThat(result).hasSize(2).hasSameElementsAs(Arrays.asList(loadCluster, timeCluster));
+    }
+
+    @Test
+    void testFindByEnvironmentCrnOrMachineUserCrnWithAllNull() {
+        List<Cluster> result = underTest.findByEnvironmentCrnOrMachineUserCrn(null, null);
+
+        assertThat(result).hasSize(2).hasSameElementsAs(Arrays.asList(loadCluster, timeCluster));
+    }
+
+    @Test
+    void testFindByEnvironmentCrnOrMachineUserCrnWithEnvironmentCrn() {
+        Cluster cluster = getAClusterWithLoadAlerts();
+        cluster.setEnvironmentCrn(TEST_ENV_CRN);
+        saveWithLoadAlerts(cluster);
+
+        List<Cluster> result = underTest.findByEnvironmentCrnOrMachineUserCrn(TEST_ENV_CRN, null);
+
+        assertThat(result).hasSize(3).hasSameElementsAs(Arrays.asList(loadCluster, timeCluster, cluster));
     }
 
     @Test

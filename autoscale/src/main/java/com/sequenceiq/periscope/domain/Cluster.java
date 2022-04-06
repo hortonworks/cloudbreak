@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.converter.db.StackTypeAttributeConverter;
+import com.sequenceiq.periscope.converter.db.UpdateFailedDetailsConverter;
 import com.sequenceiq.periscope.model.MonitoredStack;
 import com.sequenceiq.periscope.monitor.Monitored;
 import com.sequenceiq.periscope.monitor.evaluator.ScalingConstants;
@@ -73,6 +74,12 @@ public class Cluster implements Monitored, Clustered {
     @Column(name = "cb_stack_name")
     private String stackName;
 
+    @Column(name = "environment_crn")
+    private String environmentCrn;
+
+    @Column(name = "machine_user_crn")
+    private String machineUserCrn;
+
     @Column(name = "cloud_platform")
     private String cloudPlatform;
 
@@ -96,6 +103,10 @@ public class Cluster implements Monitored, Clustered {
 
     @Convert(converter = TunnelConverter.class)
     private Tunnel tunnel = Tunnel.DIRECT;
+
+    @Column(name = "update_failed_details")
+    @Convert(converter = UpdateFailedDetailsConverter.class)
+    private UpdateFailedDetails updateFailedDetails;
 
     public Cluster() {
     }
@@ -325,6 +336,30 @@ public class Cluster implements Monitored, Clustered {
 
     public void setStopStartScalingEnabled(Boolean stopStartScalingEnabled) {
         this.stopStartScalingEnabled = stopStartScalingEnabled;
+    }
+
+    public String getEnvironmentCrn() {
+        return environmentCrn;
+    }
+
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
+    }
+
+    public String getMachineUserCrn() {
+        return machineUserCrn;
+    }
+
+    public void setMachineUserCrn(String machineUserCrn) {
+        this.machineUserCrn = machineUserCrn;
+    }
+
+    public UpdateFailedDetails getUpdateFailedDetails() {
+        return updateFailedDetails;
+    }
+
+    public void setUpdateFailedDetails(UpdateFailedDetails updateFailedDetails) {
+        this.updateFailedDetails = updateFailedDetails;
     }
 }
 

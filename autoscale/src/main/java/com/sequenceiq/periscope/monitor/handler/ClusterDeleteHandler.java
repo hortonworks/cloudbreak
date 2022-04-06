@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.event.ClusterDeleteEvent;
+import com.sequenceiq.periscope.service.AltusMachineUserService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
 
@@ -26,6 +27,9 @@ public class ClusterDeleteHandler implements ApplicationListener<ClusterDeleteEv
     @Inject
     private CloudbreakCommunicator cloudbreakCommunicator;
 
+    @Inject
+    private AltusMachineUserService altusMachineUserService;
+
     @Override
     public void onApplicationEvent(ClusterDeleteEvent event) {
         Cluster cluster = clusterService.findById(event.getClusterId());
@@ -37,8 +41,21 @@ public class ClusterDeleteHandler implements ApplicationListener<ClusterDeleteEv
         StackStatusV4Response statusResponse = cloudbreakCommunicator.getStackStatusByCrn(cluster.getStackCrn());
 
         if (DELETE_COMPLETED.equals(statusResponse.getStatus())) {
+            beforeDeleteCleanup(cluster);
             clusterService.removeById(event.getClusterId());
             LOGGER.info("Deleted cluster: {}, CB Stack status: {}", cluster.getStackCrn(), statusResponse.getStatus());
+        }
+    }
+
+    protected void beforeDeleteCleanup(Cluster cluster) {
+        try {
+            if ((cluster.getEnvironmentCrn() != null) && (clusterService.countByEnvironmentCrn(cluster.getEnvironmentCrn()) <= 1)) {
+                altusMachineUserService.deleteMachineUserForEnvironment(cluster.getClusterPertain().getTenant(),
+                        cluster.getMachineUserCrn(), cluster.getEnvironmentCrn());
+            }
+        } catch (Exception ex) {
+            LOGGER.warn("Error deleting machineUserCrn '{}' for environment '{}'",
+                    cluster.getMachineUserCrn(), cluster.getEnvironmentCrn(), ex);
         }
     }
 }

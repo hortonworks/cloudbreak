@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.UpdateFailedDetails;
 
 @EntityType(entityClass = Cluster.class)
 @Transactional(Transactional.TxType.REQUIRED)
@@ -40,6 +41,8 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     @Query("SELECT c FROM Cluster c LEFT JOIN FETCH c.clusterPertain WHERE c.clusterPertain.tenant = :tenant and c.stackType = :stackType")
     List<Cluster> findByTenantAndStackType(@Param("tenant") String tenant, @Param("stackType") StackType stackType);
+
+    List<Cluster> findByEnvironmentCrnOrMachineUserCrn(String environmentCrn, String machineUserCrn);
 
     @Query("SELECT distinct c.id FROM Cluster c JOIN c.loadAlerts loadalert WHERE c.stackType = :stackType " +
             " and c.autoscalingEnabled = :autoScalingEnabled" +
@@ -76,6 +79,8 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     int countByStateAndAutoscalingEnabledAndPeriscopeNodeId(ClusterState state, boolean autoscalingEnabled, String nodeId);
 
+    int countByEnvironmentCrn(String environmentCrn);
+
     List<Cluster> findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(List<String> nodes);
 
     @Modifying
@@ -87,6 +92,18 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     void setClusterLastEvaluated(@Param("clusterId") Long clusterId, @Param("lastEvaluated") Long lastEvaluated);
 
     @Modifying
+    @Query("UPDATE Cluster c SET c.environmentCrn = :environmentCrn WHERE c.id = :clusterId")
+    void setEnvironmentCrn(@Param("clusterId") Long clusterId, @Param("environmentCrn") String environmentCrn);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.machineUserCrn = :machineUserCrn WHERE c.id = :clusterId")
+    void setMachineUserCrn(@Param("clusterId") Long clusterId, @Param("machineUserCrn") String machineUserCrn);
+
+    @Modifying
     @Query("UPDATE Cluster c SET c.lastScalingActivity = :lastScalingActivity WHERE c.id = :clusterId")
     void setClusterLastScalingActivity(@Param("clusterId") Long clusterId, @Param("lastScalingActivity") Long lastScalingActivity);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.updateFailedDetails = :updateFailedDetails WHERE c.id = :clusterId")
+    void setClusterUpdateFailedDetails(@Param("clusterId") Long clusterId, @Param("updateFailedDetails") UpdateFailedDetails updateFailedDetails);
 }
