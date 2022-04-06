@@ -28,10 +28,8 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationRequ
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -62,7 +60,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -93,9 +90,6 @@ public class StackUpscaleActions {
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
-
-    @Inject
-    private ResourceService resourceService;
 
     @Inject
     private StackService stackService;
@@ -158,9 +152,8 @@ public class StackUpscaleActions {
                     stackUpscaleService.startAddInstances(context.getStack(), hostGroupsWithAdjustment);
                     sendEvent(context);
                 } else {
-                    List<CloudResourceStatus> list = resourceService.getAllAsCloudResourceStatus(payload.getResourceId());
-                    UpscaleStackResult result = new UpscaleStackResult(payload.getResourceId(), ResourceStatus.CREATED, list);
-                    sendEvent(context, result.selector(), result);
+                    StackEvent event = new StackEvent(StackUpscaleEvent.EXTEND_METADATA_EVENT.event(), payload.getResourceId());
+                    sendEvent(context, event.selector(), event);
                 }
             }
 

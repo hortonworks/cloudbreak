@@ -31,19 +31,17 @@ import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
@@ -184,7 +182,6 @@ class StackUpscaleActionsTest {
         when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT_ZERO);
 
         List<CloudResourceStatus> resourceStatuses = List.of(cloudResourceStatus);
-        when(resourceService.getAllAsCloudResourceStatus(STACK_ID)).thenReturn(resourceStatuses);
 
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
@@ -192,23 +189,18 @@ class StackUpscaleActionsTest {
                 NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold, VARIANT));
 
         verify(stackUpscaleService).addInstanceFireEventAndLog(stack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), adjustmentTypeWithThreshold);
-        verifyEventForUpscaleStackResult(resourceStatuses);
+        verifyEventForExtendMetadata(resourceStatuses);
     }
 
-    private void verifyEventForUpscaleStackResult(List<CloudResourceStatus> resourceStatuses) {
+    private void verifyEventForExtendMetadata(List<CloudResourceStatus> resourceStatuses) {
         verify(reactorEventFactory).createEvent(anyMap(), payloadArgumentCaptor.capture());
-        verify(eventBus).notify("UPSCALESTACKRESULT", event);
+        verify(eventBus).notify("EXTEND_METADATA", event);
 
         Object responsePayload = payloadArgumentCaptor.getValue();
-        assertThat(responsePayload).isInstanceOf(UpscaleStackResult.class);
+        assertThat(responsePayload).isInstanceOf(StackEvent.class);
 
-        UpscaleStackResult upscaleStackResult = (UpscaleStackResult) responsePayload;
-        assertThat(upscaleStackResult.getResourceId()).isEqualTo(STACK_ID);
-        assertThat(upscaleStackResult.getResourceStatus()).isEqualTo(ResourceStatus.CREATED);
-        assertThat(upscaleStackResult.getResults()).isEqualTo(resourceStatuses);
-        assertThat(upscaleStackResult.getStatus()).isEqualTo(EventStatus.OK);
-        assertThat(upscaleStackResult.getStatusReason()).isNull();
-        assertThat(upscaleStackResult.getErrorDetails()).isNull();
+        StackEvent stackEvent = (StackEvent) responsePayload;
+        assertThat(stackEvent.getResourceId()).isEqualTo(STACK_ID);
     }
 
     @Test
@@ -221,7 +213,6 @@ class StackUpscaleActionsTest {
         when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, false)).thenReturn(ADJUSTMENT_ZERO);
 
         List<CloudResourceStatus> resourceStatuses = List.of(cloudResourceStatus);
-        when(resourceService.getAllAsCloudResourceStatus(STACK_ID)).thenReturn(resourceStatuses);
 
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
 
@@ -229,7 +220,7 @@ class StackUpscaleActionsTest {
                 Map.of(), NetworkScaleDetails.getEmpty(), adjustmentTypeWithThreshold, VARIANT));
 
         verify(stackUpscaleService).addInstanceFireEventAndLog(stack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), adjustmentTypeWithThreshold);
-        verifyEventForUpscaleStackResult(resourceStatuses);
+        verifyEventForExtendMetadata(resourceStatuses);
     }
 
     @Test
