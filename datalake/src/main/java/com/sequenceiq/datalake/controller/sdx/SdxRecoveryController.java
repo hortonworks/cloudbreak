@@ -32,7 +32,7 @@ public class SdxRecoveryController implements SdxRecoveryEndpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RECOVER_DATALAKE)
     public SdxRecoveryResponse recoverClusterByName(@ResourceName String name, @Valid SdxRecoveryRequest recoverSdxClusterRequest) {
-        SdxCluster cluster = sdxService.getByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), name);
+        SdxCluster cluster = sdxService.getByNameInAccountAllowDetached(ThreadBasedUserCrnProvider.getUserCrn(), name);
         return sdxRecoverySelectorService.triggerRecovery(cluster, recoverSdxClusterRequest);
     }
 
@@ -47,7 +47,7 @@ public class SdxRecoveryController implements SdxRecoveryEndpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RECOVER_DATALAKE)
     public SdxRecoverableResponse getClusterRecoverableByName(@ResourceName String name) {
-        SdxCluster cluster = sdxService.getByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), name);
+        SdxCluster cluster = sdxService.getByNameInAccountAllowDetached(ThreadBasedUserCrnProvider.getUserCrn(), name);
         return sdxRecoverySelectorService.validateRecovery(cluster);
     }
 
