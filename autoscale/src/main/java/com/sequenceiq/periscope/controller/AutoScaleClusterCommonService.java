@@ -173,8 +173,7 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
 
     @Override
     public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
-        // this is a hack, but unfortunately environment crn is not present in autoscale service
-        return Optional.of(resourceCrn);
+        return Optional.ofNullable(getClusterByCrnOrName(NameOrCrn.ofCrn(resourceCrn)).getEnvironmentCrn());
     }
 
     protected Cluster getClusterByCrnOrName(NameOrCrn nameOrCrn) {

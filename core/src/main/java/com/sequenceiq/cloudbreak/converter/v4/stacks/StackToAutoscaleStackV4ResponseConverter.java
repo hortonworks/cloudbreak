@@ -24,6 +24,7 @@ public class StackToAutoscaleStackV4ResponseConverter {
         result.setCloudPlatform(source.getCloudPlatform());
         result.setUserCrn(source.getCreator().getUserCrn());
         result.setStackType(source.getType());
+        result.setEnvironmentCrn(source.getEnvironmentCrn());
 
         if (source.getCluster() != null) {
             Cluster cluster = source.getCluster();

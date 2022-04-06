@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.event.ClusterStatusSyncEvent;
+import com.sequenceiq.periscope.service.AltusMachineUserService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.LoggingUtils;
 
@@ -30,6 +31,9 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
 
     @Inject
     private CloudbreakCommunicator cloudbreakCommunicator;
+
+    @Inject
+    private AltusMachineUserService altusMachineUserService;
 
     @Override
     public void onApplicationEvent(ClusterStatusSyncEvent event) {
@@ -55,8 +59,13 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         LOGGER.info("Computed clusterAvailable: {}", clusterAvailable);
         LOGGER.info("Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ", statusResponse, cluster.getStackCrn(), clusterAvailable);
 
+        updateClusterState(cluster, statusResponse, clusterAvailable);
+    }
+
+    private void updateClusterState(Cluster cluster, StackStatusV4Response statusResponse, boolean clusterAvailable) {
         if (DELETE_COMPLETED.equals(statusResponse.getStatus())) {
-            clusterService.removeById(autoscaleClusterId);
+            beforeDeleteCleanup(cluster);
+            clusterService.removeById(cluster.getId());
             LOGGER.info("Deleted cluster '{}', CB Stack Status '{}'.", cluster.getStackCrn(), statusResponse.getStatus());
         } else if (clusterAvailable && !RUNNING.equals(cluster.getState())) {
             clusterService.setState(cluster.getId(), ClusterState.RUNNING);
@@ -66,6 +75,31 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
             clusterService.setState(cluster.getId(), ClusterState.SUSPENDED);
             LOGGER.info("Suspended cluster '{}', CB Stack Status '{}', CB Cluster Status '{}'",
                     cluster.getStackCrn(), statusResponse.getStatus(), statusResponse.getClusterStatus());
+        } else if (RUNNING.equals(cluster.getState()) && (cluster.getMachineUserCrn() == null || cluster.getEnvironmentCrn() == null)) {
+            populateEnvironmentAndMachineUserIfNotPresent(cluster);
+        }
+    }
+
+    protected void beforeDeleteCleanup(Cluster cluster) {
+        try {
+            if ((cluster.getEnvironmentCrn() != null) && (clusterService.countByEnvironmentCrn(cluster.getEnvironmentCrn()) <= 1)) {
+                altusMachineUserService.deleteMachineUserForEnvironment(cluster.getClusterPertain().getTenant(),
+                        cluster.getMachineUserCrn(), cluster.getEnvironmentCrn());
+            }
+        } catch (Exception ex) {
+            LOGGER.warn("Error deleting machineUserCrn '{}' for environment '{}'",
+                    cluster.getMachineUserCrn(), cluster.getEnvironmentCrn(), ex);
+        }
+    }
+
+    protected void populateEnvironmentAndMachineUserIfNotPresent(Cluster cluster) {
+        if (cluster.getEnvironmentCrn() == null) {
+            String envCrn = cloudbreakCommunicator.getAutoscaleClusterByCrn(cluster.getStackCrn()).getEnvironmentCrn();
+            clusterService.setEnvironmentCrn(cluster.getId(), envCrn);
+        }
+
+        if (cluster.getMachineUserCrn() == null) {
+            altusMachineUserService.initializeMachineUserForEnvironment(cluster);
         }
     }
 }

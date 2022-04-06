@@ -2,11 +2,13 @@ package com.sequenceiq.periscope.monitor.evaluator;
 
 import static com.sequenceiq.periscope.monitor.evaluator.ScalingConstants.DEFAULT_MAX_SCALE_DOWN_STEP_SIZE;
 
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -24,6 +26,7 @@ import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
+import com.sequenceiq.periscope.domain.UpdateFailedDetails;
 import com.sequenceiq.periscope.model.yarn.YarnScalingServiceV1Response;
 import com.sequenceiq.periscope.monitor.MonitorUpdateRate;
 import com.sequenceiq.periscope.monitor.client.YarnMetricsClient;
@@ -46,6 +49,8 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(CronTimeEvaluator.class);
 
     private static final String EVALUATOR_NAME = CronTimeEvaluator.class.getName();
+
+    private static final Long UPDATE_FAILED_INTERVAL_MINUTES = 60L;
 
     @Inject
     private TimeAlertRepository alertRepository;
@@ -166,8 +171,9 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
     private void populateDecommissionCandidates(ScalingEvent event, StackV4Response stackV4Response, Cluster cluster,
             ScalingPolicy policy, int mandatoryDownScaleCount) {
         try {
+            String pollingUserCrn = Optional.ofNullable(getMachineUserCrnIfApplicable(cluster)).orElse(cluster.getClusterPertain().getUserCrn());
             YarnScalingServiceV1Response yarnResponse = yarnMetricsClient.getYarnMetricsForCluster(cluster,
-                    stackV4Response, policy.getHostGroup(), Optional.of(mandatoryDownScaleCount));
+                    stackV4Response, policy.getHostGroup(), pollingUserCrn, Optional.of(mandatoryDownScaleCount));
             Map<String, String> hostFqdnsToInstanceId = stackResponseUtils.getCloudInstanceIdsForHostGroup(stackV4Response, policy.getHostGroup());
 
             List<String> decommissionNodes = yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(cluster.getStackCrn(), yarnResponse,
@@ -177,5 +183,18 @@ public class CronTimeEvaluator extends EvaluatorExecutor {
             LOGGER.error("Error retrieving decommission candidates for  policy '{}', adjustment type '{}', cluster '{}'",
                     policy.getName(), policy.getAdjustmentType(), cluster.getStackCrn(), ex);
         }
+    }
+
+    private String getMachineUserCrnIfApplicable(Cluster cluster) {
+        UpdateFailedDetails updateFailedDetails = cluster.getUpdateFailedDetails();
+        if (updateFailedDetails == null || TimeUnit.MILLISECONDS.toMinutes(
+                Instant.now().toEpochMilli() - updateFailedDetails.getLastExceptionTimestamp()) >= UPDATE_FAILED_INTERVAL_MINUTES) {
+            if (cluster.getMachineUserCrn() != null) {
+                LOGGER.debug("Attempting to invoke YARN with machineUser, forbiddenExceptionCount: {}, for evaluator: {}",
+                        updateFailedDetails != null ? updateFailedDetails.getExceptionCount() : 0, EVALUATOR_NAME);
+            }
+            return cluster.getMachineUserCrn();
+        }
+        return null;
     }
 }

@@ -65,6 +65,8 @@ public class YarnLoadEvaluatorTest {
 
     private static final int TEST_HOSTGROUP_MAX_SIZE = 200;
 
+    private static final String MACHINE_USER_CNR = "machineUserCrn";
+
     @InjectMocks
     private YarnLoadEvaluator underTest;
 
@@ -349,6 +351,7 @@ public class YarnLoadEvaluatorTest {
         cluster.setLoadAlerts(Set.of(loadAlert));
         cluster.setLastScalingActivity(Instant.now()
                 .minus(45, ChronoUnit.MINUTES).toEpochMilli());
+        cluster.setMachineUserCrn(MACHINE_USER_CNR);
         return cluster;
     }
 
@@ -358,7 +361,7 @@ public class YarnLoadEvaluatorTest {
         when(stackResponseUtils.getCloudInstanceIdsForHostGroup(any(), any())).thenCallRealMethod();
         when(stackResponseUtils.getCloudInstanceIdsWithServicesHealthyForHostGroup(any(), any())).thenCallRealMethod();
         lenient().when(stackResponseUtils.getStoppedInstanceCountInHostGroup(any(), any())).thenCallRealMethod();
-        when(yarnMetricsClient.getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), any(Optional.class)))
+        when(yarnMetricsClient.getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), anyString(), any(Optional.class)))
                 .thenReturn(upScale);
         when(yarnResponseUtils.getYarnRecommendedScaleUpCount(any(YarnScalingServiceV1Response.class), anyString(), anyInt(), any(Optional.class), anyInt()))
                 .thenCallRealMethod();

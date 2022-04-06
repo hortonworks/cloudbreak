@@ -27,6 +27,15 @@ public class ServiceEndpointConfig {
     @Value("${periscope.cloudbreak.url:}")
     private String cloudbreakUrl;
 
+    @Value("${periscope.freeipa.url:}")
+    private String freeIpaServerUrl;
+
+    @Value("${periscope.freeipa.serviceid:}")
+    private String freeIpaServiceId;
+
+    @Value("${periscope.freeipa.contextPath:}")
+    private String freeIpaContextPath;
+
     @Value("${periscope.cloudbreak.serviceid:}")
     private String cloudbreakServiceId;
 
@@ -45,5 +54,11 @@ public class ServiceEndpointConfig {
     @DependsOn("serviceAddressResolver")
     public String cloudbreakUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
         return serviceAddressResolver.resolveUrl(cloudbreakUrl, "http", cloudbreakServiceId);
+    }
+
+    @Bean
+    @DependsOn("serviceAddressResolver")
+    public String freeIpaServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+        return serviceAddressResolver.resolveUrl(freeIpaServerUrl + freeIpaContextPath, "http", freeIpaServiceId);
     }
 }

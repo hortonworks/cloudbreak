@@ -34,6 +34,7 @@ import org.mockito.verification.VerificationMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.model.yarn.YarnScalingServiceV1Response;
@@ -88,6 +89,10 @@ public class CronTimeEvaluatorTest {
     private String testHostGroup = "compute";
 
     private String clusterCrn = "testCrn";
+
+    private String machineUserCrn = "testMachineUserCrn";
+
+    private String testUserCnr = "testUserCrn";
 
     @BeforeEach
     private void setup() {
@@ -176,7 +181,7 @@ public class CronTimeEvaluatorTest {
         if (!"SCALE_UP_MODE".equals(testMode)) {
             YarnScalingServiceV1Response yarnScalingServiceV1Response = getMockYarnScalingResponse("test", yarnGivenDecommissionCount.get());
             when(stackResponseUtils.getCloudInstanceIdsForHostGroup(any(), any())).thenCallRealMethod();
-            when(yarnMetricsClient.getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), any(Optional.class)))
+            when(yarnMetricsClient.getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), any(), any(Optional.class)))
                     .thenReturn(yarnScalingServiceV1Response);
             when(yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(anyString(), any(YarnScalingServiceV1Response.class),
                     any(Map.class), anyInt(), any(Optional.class), anyInt())).thenCallRealMethod();
@@ -188,7 +193,8 @@ public class CronTimeEvaluatorTest {
         ArgumentCaptor<ScalingEvent> captor = ArgumentCaptor.forClass(ScalingEvent.class);
         verify(eventPublisher).publishEvent(captor.capture());
         verify(stackResponseUtils, verificationMode).getCloudInstanceIdsForHostGroup(any(), any());
-        verify(yarnMetricsClient, verificationMode).getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), any(Optional.class));
+        verify(yarnMetricsClient, verificationMode).getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), anyString(),
+                any(Optional.class));
         verify(yarnResponseUtils, verificationMode).getYarnRecommendedDecommissionHostsForHostGroup(anyString(), any(YarnScalingServiceV1Response.class),
                 any(Map.class), anyInt(), any(Optional.class), anyInt());
 
@@ -213,7 +219,12 @@ public class CronTimeEvaluatorTest {
 
         Cluster cluster = new Cluster();
         cluster.setStackCrn(clusterCrn);
+        cluster.setMachineUserCrn(machineUserCrn);
         alert.setCluster(cluster);
+
+        ClusterPertain clusterPertain = new ClusterPertain();
+        clusterPertain.setUserCrn(testUserCnr);
+        cluster.setClusterPertain(clusterPertain);
 
         ScalingPolicy scalingPolicy = new ScalingPolicy();
         scalingPolicy.setHostGroup(testHostGroup);

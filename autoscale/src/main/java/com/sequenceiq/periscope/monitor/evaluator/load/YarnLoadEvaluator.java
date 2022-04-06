@@ -1,8 +1,10 @@
 package com.sequenceiq.periscope.monitor.evaluator.load;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
@@ -16,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.LoadAlertConfiguration;
+import com.sequenceiq.periscope.domain.UpdateFailedDetails;
 import com.sequenceiq.periscope.model.yarn.YarnScalingServiceV1Response;
 import com.sequenceiq.periscope.monitor.client.YarnMetricsClient;
 import com.sequenceiq.periscope.monitor.context.ClusterIdEvaluatorContext;
@@ -37,6 +40,8 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(YarnLoadEvaluator.class);
 
     private static final String EVALUATOR_NAME = YarnLoadEvaluator.class.getName();
+
+    private static final Long UPDATE_FAILED_INTERVAL_MINUTES = 60L;
 
     @Inject
     private ClusterService clusterService;
@@ -69,6 +74,8 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
 
     private String policyHostGroup;
 
+    private String pollingUserCrn;
+
     @Nonnull
     @Override
     public EvaluatorContext getContext() {
@@ -97,6 +104,7 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
             loadAlert = cluster.getLoadAlerts().stream().findFirst().get();
             loadAlertConfiguration = loadAlert.getLoadAlertConfiguration();
             policyHostGroup = loadAlert.getScalingPolicy().getHostGroup();
+            pollingUserCrn = Optional.ofNullable(getMachineUserCrnIfApplicable(cluster)).orElse(cluster.getClusterPertain().getUserCrn());
 
             if (isCoolDownTimeElapsed(cluster.getStackCrn(), "polled", loadAlertConfiguration.getPollingCoolDownMillis(),
                     cluster.getLastScalingActivity())) {
@@ -104,7 +112,8 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
             }
         } catch (Exception ex) {
             LOGGER.info("Failed to process load alert for Cluster '{}', exception '{}'", stackCrn, ex);
-            eventPublisher.publishEvent(new UpdateFailedEvent(clusterId));
+            eventPublisher.publishEvent(new UpdateFailedEvent(clusterId, ex, Instant.now().toEpochMilli(),
+                    pollingUserCrn != null && pollingUserCrn.equals(cluster.getMachineUserCrn())));
         } finally {
             LOGGER.debug("Finished loadEvaluator for cluster '{}' in '{}' ms", stackCrn, System.currentTimeMillis() - start);
         }
@@ -126,12 +135,16 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
 
         Optional<Integer> mandatoryUpScaleCount = Optional.of(configMinNodeCount)
                 .filter(mandatoryUpScale -> mandatoryUpScale < 0).map(upscale -> -1 * upscale);
-
         Optional<Integer> mandatoryDownScaleCount = Optional.of(configMaxNodeCount)
                 .filter(mandatoryDownscale -> mandatoryDownscale < 0).map(downscale -> -1 * downscale);
 
         YarnScalingServiceV1Response yarnResponse = yarnMetricsClient
-                .getYarnMetricsForCluster(cluster, stackV4Response, policyHostGroup, mandatoryDownScaleCount);
+                .getYarnMetricsForCluster(cluster, stackV4Response, policyHostGroup, pollingUserCrn, mandatoryDownScaleCount);
+
+        if (cluster.getUpdateFailedDetails() != null && pollingUserCrn.equals(cluster.getMachineUserCrn())) {
+            // Successful YARN API call
+            clusterService.setUpdateFailedDetails(cluster.getId(), null);
+        }
 
         int yarnRecommendedScaleUpCount = yarnResponseUtils.getYarnRecommendedScaleUpCount(yarnResponse, policyHostGroup,
                 maxAllowedUpScale, mandatoryUpScaleCount, loadAlertConfiguration.getMaxScaleUpStepSize());
@@ -141,6 +154,12 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
 
         LOGGER.info("yarnRecommendedScaleUpCount={}, yarnRecommendedDecommssion={}", yarnRecommendedScaleUpCount, yarnRecommendedDecommissionHosts);
 
+        fireAppropriateEvent(yarnRecommendedScaleUpCount, stackV4Response, existingHostGroupSize, serviceHealthyHostGroupSize,
+                yarnRecommendedDecommissionHosts);
+    }
+
+    private void fireAppropriateEvent(int yarnRecommendedScaleUpCount, StackV4Response stackV4Response, int existingHostGroupSize,
+            int serviceHealthyHostGroupSize, List<String> yarnRecommendedDecommissionHosts) {
         if (yarnRecommendedScaleUpCount > 0 && isCoolDownTimeElapsed(cluster.getStackCrn(), "scaled-up",
                 loadAlertConfiguration.getScaleUpCoolDownMillis(), cluster.getLastScalingActivity()))  {
             if (Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
@@ -174,5 +193,18 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
         eventPublisher.publishEvent(scalingEvent);
         LOGGER.info("Triggered ScaleDown for Cluster '{}', NodeCount '{}', HostGroup '{}', DecommissionNodeIds '{}'",
                 cluster.getStackCrn(), yarnRecommendedDecommissionHosts.size(), policyHostGroup, yarnRecommendedDecommissionHosts);
+    }
+
+    private String getMachineUserCrnIfApplicable(Cluster cluster) {
+        UpdateFailedDetails updateFailedDetails = cluster.getUpdateFailedDetails();
+        if (updateFailedDetails == null || TimeUnit.MILLISECONDS.toMinutes(
+                Instant.now().toEpochMilli() - updateFailedDetails.getLastExceptionTimestamp()) >= UPDATE_FAILED_INTERVAL_MINUTES) {
+            if (cluster.getMachineUserCrn() != null) {
+                LOGGER.debug("Attempting to invoke YARN with machineUser, forbiddenExceptionCount: {} for evaluator: {}",
+                        updateFailedDetails != null ? updateFailedDetails.getExceptionCount() : 0, EVALUATOR_NAME);
+            }
+            return cluster.getMachineUserCrn();
+        }
+        return null;
     }
 }
