@@ -50,6 +50,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOIN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_SELECT_INSTANCE_TYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
@@ -444,6 +445,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datalake.select.instance.type.enable}")
     private boolean enableDatalakeSelectInstanceType;
+
+    @Value("${auth.mock.freeipa.select.instance.type.enable}")
+    private boolean enableFreeIpaSelectInstanceType;
 
     @Value("${auth.mock.datalake.zdu.osupgrade.enable}")
     private boolean enableDatalakeZduOSUpgrade;
@@ -914,6 +918,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDatalakeSelectInstanceType) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_SELECT_INSTANCE_TYPE));
+        }
+        if (enableFreeIpaSelectInstanceType) {
+            builder.addEntitlements(createEntitlement(CDP_FREEIPA_SELECT_INSTANCE_TYPE));
         }
         if (enableDatalakeZduOSUpgrade) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_ZDU_OS_UPGRADE));

@@ -48,6 +48,7 @@ public class InstanceTemplateRequestToTemplateConverter {
     public Template convert(InstanceTemplateRequest source, CloudPlatform cloudPlatform, String accountId,
             String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey) {
         Template template = new Template();
+        template.setAccountId(accountId);
         template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
         setVolumesProperty(source.getAttachedVolumes(), template, cloudPlatform);
@@ -66,8 +67,8 @@ public class InstanceTemplateRequestToTemplateConverter {
         Optional.ofNullable(source.getAws())
                 .map(AwsInstanceTemplateParameters::getSpot)
                 .ifPresent(spotParameters -> {
-                            attributes.put(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, spotParameters.getPercentage());
-                            if (Objects.nonNull(spotParameters.getMaxPrice())) {
+                    attributes.put(AwsInstanceTemplate.EC2_SPOT_PERCENTAGE, spotParameters.getPercentage());
+                    if (Objects.nonNull(spotParameters.getMaxPrice())) {
                                 attributes.put(AwsInstanceTemplate.EC2_SPOT_MAX_PRICE, spotParameters.getMaxPrice());
                             }
                         }

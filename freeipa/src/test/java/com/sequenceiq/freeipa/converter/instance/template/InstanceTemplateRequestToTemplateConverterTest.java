@@ -68,6 +68,16 @@ class InstanceTemplateRequestToTemplateConverterTest {
     }
 
     @Test
+    void shouldSetAccoundIdWhenProvided() {
+        InstanceTemplateRequest source = new InstanceTemplateRequest();
+        source.setInstanceType(INSTANCE_TYPE);
+
+        Template result = underTest.convert(source, CLOUD_PLATFORM, ACCOUNT_ID, null, null, null);
+
+        assertThat(result.getAccountId()).isEqualTo(ACCOUNT_ID);
+    }
+
+    @Test
     void shouldSetDefaultInstanceTypeWhenNotProvided() {
         String defaultInstanceType = "default";
 

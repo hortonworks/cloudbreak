@@ -376,6 +376,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private InstanceTemplateRequest createInstanceTemplate(FreeIpaCreationDto freeIpaCreation) {
         InstanceTemplateRequest instanceTemplateRequest = new InstanceTemplateRequest();
+        instanceTemplateRequest.setInstanceType(freeIpaCreation.getInstanceType());
         Optional.ofNullable(freeIpaCreation.getAws())
                 .map(FreeIpaCreationAwsParametersDto::getSpot)
                 .ifPresent(spotParametersDto -> {
