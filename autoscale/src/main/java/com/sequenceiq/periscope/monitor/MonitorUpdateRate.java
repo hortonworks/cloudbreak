@@ -48,6 +48,11 @@ public final class MonitorUpdateRate {
     public static final String EVERY_FIVE_MIN_RATE_CRON = "0 0/5 * * * ?";
 
     /**
+     * Every 10 minutes.
+     */
+    public static final String EVERY_TEN_MIN_RATE_CRON = "0 0/10 * * * ?";
+
+    /**
      * Every minutes.
      */
     public static final String EVERY_QUARTER_PAST_SEC_RATE_CRON = "15 * * * * ?";

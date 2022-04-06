@@ -56,6 +56,8 @@ periscope:
       enabled: false
     cluster-status-monitor:
       enabled: false
+    delete-monitor:
+      enabled: false
 
 cb:
   server:
