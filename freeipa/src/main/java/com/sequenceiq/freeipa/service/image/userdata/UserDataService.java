@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.dto.Credential;
+import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -73,6 +74,13 @@ public class UserDataService {
         Stack stack = getStack(stackId);
         LOGGER.debug("Regenerating user data for stack {}", stack.getResourceName());
         createUserData(stack, stack::getCcmParameters);
+    }
+
+    public void updateJumpgateFlagOnly(Long stackId) {
+        LOGGER.debug("Updating Jumpgate flag in user data for stack {}", stackId);
+        ImageEntity image = imageService.getByStackId(stackId);
+        image.setUserdata(image.getUserdata().replace("IS_CCM_V2_JUMPGATE_ENABLED=false", "IS_CCM_V2_JUMPGATE_ENABLED=true"));
+        imageService.save(image);
     }
 
     private void createUserData(Stack stack, Supplier<CcmConnectivityParameters> ccmParametersSupplier) {

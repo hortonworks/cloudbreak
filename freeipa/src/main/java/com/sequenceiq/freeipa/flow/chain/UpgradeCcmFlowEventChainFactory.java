@@ -16,6 +16,7 @@ import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSel
 
 @Component
 public class UpgradeCcmFlowEventChainFactory implements FlowEventChainFactory<UpgradeCcmFlowChainTriggerEvent> {
+
     @Override
     public String initEvent() {
         return FlowChainTriggers.UPGRADE_CCM_CHAIN_TRIGGER_EVENT;
@@ -25,10 +26,10 @@ public class UpgradeCcmFlowEventChainFactory implements FlowEventChainFactory<Up
     public FlowTriggerEventQueue createFlowTriggerEventQueue(UpgradeCcmFlowChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new UpgradeCcmTriggerEvent(UpgradeCcmStateSelector.UPGRADE_CCM_TRIGGER_EVENT.event(), event.getOperationId(), event.getResourceId(),
-                event.accepted())
+                event.getOldTunnel(), event.accepted())
                 .withIsChained(true)
                 .withIsFinal(false));
-        flowEventChain.add(new UserDataUpdateRequest(UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(), event.getResourceId())
+        flowEventChain.add(new UserDataUpdateRequest(UpdateUserDataEvents.UPDATE_USERDATA_TRIGGER_EVENT.event(), event.getResourceId(), event.getOldTunnel())
                 .withOperationId(event.getOperationId())
                 .withIsChained(true)
                 .withIsFinal(true));

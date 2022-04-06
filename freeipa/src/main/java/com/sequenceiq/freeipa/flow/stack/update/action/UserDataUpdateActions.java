@@ -54,12 +54,7 @@ public class UserDataUpdateActions {
                 setOperationId(variables, payload.getOperationId());
                 setChainedAction(variables, payload.isChained());
                 setFinalChain(variables, payload.isFinal());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackContext context) {
-                return new UserDataUpdateRequest(context.getStack().getId());
+                sendEvent(context, new UserDataUpdateRequest(context.getStack().getId(), payload.getOldTunnel()));
             }
 
             @Override

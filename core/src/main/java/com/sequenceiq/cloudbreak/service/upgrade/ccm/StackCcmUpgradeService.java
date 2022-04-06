@@ -35,7 +35,7 @@ public class StackCcmUpgradeService {
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Ccm upgrade has been initiated for stack {}", nameOrCrn.getNameOrCrn());
+        LOGGER.debug("CCM upgrade has been initiated for stack {}", nameOrCrn.getNameOrCrn());
         String selector = CCM_UPGRADE_EVENT.event();
         return reactorNotifier.notify(stack.getId(), selector, new StackEvent(selector, stack.getId()));
     }

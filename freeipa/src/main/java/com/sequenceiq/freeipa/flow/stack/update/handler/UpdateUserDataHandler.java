@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateFailed;
 import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateRequest;
 import com.sequenceiq.freeipa.flow.stack.update.event.UserDataUpdateSuccess;
@@ -22,6 +21,7 @@ import reactor.bus.Event;
 
 @Component
 public class UpdateUserDataHandler extends ExceptionCatcherEventHandler<UserDataUpdateRequest> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateUserDataHandler.class);
 
     @Inject
@@ -40,10 +40,21 @@ public class UpdateUserDataHandler extends ExceptionCatcherEventHandler<UserData
 
     @Override
     protected Selectable doAccept(HandlerEvent<UserDataUpdateRequest> event) {
-        StackEvent request = event.getData();
+        UserDataUpdateRequest request = event.getData();
         try {
             LOGGER.info("Updating userData in the stack's current used image entity...");
-            userDataService.createUserData(request.getResourceId());
+            switch (request.getOldTunnel()) {
+                case CCM:
+                    LOGGER.debug("Regenerating user data from request payload.");
+                    userDataService.regenerateUserData(request.getResourceId());
+                    break;
+                case CCMV2:
+                    LOGGER.debug("Updating Jumpgate flag only.");
+                    userDataService.updateJumpgateFlagOnly(request.getResourceId());
+                    break;
+                default:
+                    throw new IllegalStateException(String.format("Upgrade from %s is not implemented", request.getOldTunnel()));
+            }
             return new UserDataUpdateSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Updating user data in the stack's image entity has failed", e);

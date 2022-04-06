@@ -94,5 +94,9 @@
   {
     "path": "/var/log/jumpgate/out.log",
     "label": "jumpgate_agent_out"
+  },
+  {
+    "path": "/var/log/upgrade-ccm.log",
+    "label": "upgrade_ccm"
   }
 ]

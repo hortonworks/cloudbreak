@@ -9,3 +9,4 @@ base:
     - proxy.proxy
     - freeipa
     - freeipa.services
+    - upgradeccm

@@ -121,9 +121,7 @@ public class CcmUserDataService {
         String ccmV2AgentCrn = ccmV2Parameters.getAgentCrn();
         if (StringUtils.isNotBlank(ccmV2AgentCrn)) {
             LOGGER.debug("Adding CcmV2AgentCrn '{}' to stack", ccmV2AgentCrn);
-            Stack stack = stackService.getStackById(stackId);
-            stack.setCcmV2AgentCrn(ccmV2AgentCrn);
-            stackService.save(stack);
+            stackService.setCcmV2AgentCrnByStackId(stackId, ccmV2AgentCrn);
             LOGGER.debug("Added CcmV2AgentCrn  '{}' to stack", ccmV2AgentCrn);
         }
     }
