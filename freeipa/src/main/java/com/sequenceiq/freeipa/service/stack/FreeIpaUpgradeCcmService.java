@@ -4,13 +4,17 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedS
 import static com.sequenceiq.freeipa.flow.chain.FlowChainTriggers.UPGRADE_CCM_CHAIN_TRIGGER_EVENT;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
@@ -26,6 +30,8 @@ public class FreeIpaUpgradeCcmService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaUpgradeCcmService.class);
 
+    private final EntitlementService entitlementService;
+
     private final FreeIpaFlowManager flowManager;
 
     private final StackService stackService;
@@ -36,8 +42,10 @@ public class FreeIpaUpgradeCcmService {
 
     private final OperationToOperationStatusConverter operationConverter;
 
-    public FreeIpaUpgradeCcmService(FreeIpaFlowManager flowManager, StackService stackService, StackUpdater stackUpdater, OperationService operationService,
-            OperationToOperationStatusConverter operationConverter) {
+    public FreeIpaUpgradeCcmService(EntitlementService entitlementService, FreeIpaFlowManager flowManager, StackService stackService, StackUpdater stackUpdater,
+            OperationService operationService, OperationToOperationStatusConverter operationConverter) {
+
+        this.entitlementService = entitlementService;
         this.flowManager = flowManager;
         this.stackService = stackService;
         this.stackUpdater = stackUpdater;
@@ -47,33 +55,69 @@ public class FreeIpaUpgradeCcmService {
 
     public OperationStatus upgradeCcm(String environmentCrn, String accountId) {
         MDCBuilder.addEnvCrn(environmentCrn);
-        MDCBuilder.addAccountId(accountId);
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
-        validateCcmUpgrade(stack);
+        MDCBuilder.addAccountId(accountId);
+        if (isAlreadyUpgraded(stack)) {
+            LOGGER.info("FreeIPA stack '{}' is already upgraded to {}.", stack.getName(), stack.getTunnel());
+            return alreadyFinishedOperationStatus(environmentCrn);
+        } else {
+            validateCcmUpgrade(stack);
+            validateEntitlements(stack, accountId);
+            return startUpgradeOperation(accountId, stack);
+        }
+    }
 
+    private boolean isAlreadyUpgraded(Stack stack) {
+        return stack.getTunnel() == Tunnel.latestUpgradeTarget();
+    }
+
+    private OperationStatus alreadyFinishedOperationStatus(String environmentCrn) {
+        SuccessDetails successDetails = new SuccessDetails(environmentCrn);
+        long timestamp = System.currentTimeMillis();
+        return new OperationStatus(UUID.randomUUID().toString(), OperationType.UPGRADE_CCM, OperationState.COMPLETED, List.of(successDetails),
+                null, null, timestamp, timestamp);
+    }
+
+    private void validateCcmUpgrade(Stack stack) {
+        if (!stack.isAvailable()) {
+            throw new BadRequestException(
+                    String.format("FreeIPA stack '%s' must be AVAILABLE to start Cluster Connectivity Manager upgrade.", stack.getName()));
+        }
+
+        if (!Tunnel.getUpgradables().contains(stack.getTunnel())) {
+            throw new BadRequestException(
+                    String.format("FreeIPA stack '%s' has a tunnel type '%s' and thus Cluster Connectivity Manager upgrade is not possible.",
+                            stack.getName(), stack.getTunnel()));
+        }
+    }
+
+    private void validateEntitlements(Stack stack, String accountId) {
+        if (stack.getTunnel().useCcmV1() && !entitlementService.ccmV1ToV2JumpgateUpgradeEnabled(accountId) ||
+                stack.getTunnel().useCcmV2() && !entitlementService.ccmV2ToV2JumpgateUpgradeEnabled(accountId)) {
+
+            throw new BadRequestException(
+                    String.format("FreeIPA stack '%s' has a tunnel type '%s' but the account is not entitled for Cluster Connectivity Manager upgrade.",
+                            stack.getName(), stack.getTunnel()));
+        }
+    }
+
+    private OperationStatus startUpgradeOperation(String accountId, Stack stack) {
         LOGGER.info("Start 'UPGRADE_CCM' operation");
         Operation operation = operationService.startOperation(accountId, OperationType.UPGRADE_CCM, List.of(stack.getEnvironmentCrn()), List.of());
         if (OperationState.RUNNING == operation.getStatus()) {
-            return operationConverter.convert(triggerCcmUpgradeFlowChain(environmentCrn, accountId, operation, stack));
+            return operationConverter.convert(triggerCcmUpgradeFlowChain(accountId, operation, stack));
         } else {
             LOGGER.info("Operation isn't in RUNNING state: {}", operation);
             return operationConverter.convert(operation);
         }
     }
 
-    private void validateCcmUpgrade(Stack stack) {
-        if (!stack.isAvailable()) {
-            throw new BadRequestException(
-                String.format("FreeIPA stack '%s' must be AVAILABLE to start Cluster Connectivity Manager upgrade.", stack.getName()));
-        }
-    }
-
-    private Operation triggerCcmUpgradeFlowChain(String environmentCrn, String accountId, Operation operation, Stack stack) {
+    private Operation triggerCcmUpgradeFlowChain(String accountId, Operation operation, Stack stack) {
         try {
             LOGGER.info("Starting CCM upgrade flow chain, new status: {}", UPGRADE_CCM_REQUESTED);
             stackUpdater.updateStackStatus(stack, UPGRADE_CCM_REQUESTED, "Starting of CCM upgrade requested");
             UpgradeCcmFlowChainTriggerEvent event = new UpgradeCcmFlowChainTriggerEvent(UPGRADE_CCM_CHAIN_TRIGGER_EVENT,
-                    operation.getOperationId(), stack.getId());
+                    operation.getOperationId(), stack.getId(), stack.getTunnel());
             flowManager.notify(UPGRADE_CCM_CHAIN_TRIGGER_EVENT, event);
             LOGGER.info("Started CCM upgrade flow");
             return operation;

@@ -111,7 +111,6 @@ class CcmUserDataServiceTest {
         DefaultCcmV2Parameters defaultCcmV2Parameters = mock(DefaultCcmV2Parameters.class);
         FreeIpa freeIpa = mock(FreeIpa.class);
 
-        when(stackService.getStackById(stack.getId())).thenReturn(stack);
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         when(freeIpa.getDomain()).thenReturn("cldr.work.site");
         when(ccmV2ParameterSupplier.getCcmV2Parameters(anyString(), any(Optional.class), anyString(), anyString())).thenReturn(defaultCcmV2Parameters);
@@ -124,8 +123,7 @@ class CcmUserDataServiceTest {
         verify(ccmV2ParameterSupplier, times(1)).getCcmV2Parameters(anyString(), any(Optional.class), anyString(), anyString());
         verifyNoInteractions(ccmParameterSupplier);
 
-        assertEquals("testAgentCrn", stack.getCcmV2AgentCrn(), "Ccm V2 Config should be initialized");
-        verify(stackService, times(1)).save(stack);
+        verify(stackService, times(1)).setCcmV2AgentCrnByStackId(100L, "testAgentCrn");
     }
 
     @Test
@@ -135,7 +133,6 @@ class CcmUserDataServiceTest {
         DefaultCcmV2JumpgateParameters defaultCcmV2JumpgateParameters = mock(DefaultCcmV2JumpgateParameters.class);
         FreeIpa freeIpa = mock(FreeIpa.class);
 
-        when(stackService.getStackById(stack.getId())).thenReturn(stack);
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
         when(freeIpa.getDomain()).thenReturn("cldr.work.site");
         when(ccmV2JumpgateParameterSupplier.getCcmV2JumpgateParameters(anyString(), any(Optional.class), anyString(), anyString()))
@@ -149,8 +146,7 @@ class CcmUserDataServiceTest {
         verify(ccmV2JumpgateParameterSupplier, times(1)).getCcmV2JumpgateParameters(anyString(), any(Optional.class), anyString(), anyString());
         verifyNoInteractions(ccmParameterSupplier);
 
-        assertEquals("testAgentCrn", stack.getCcmV2AgentCrn(), "Ccm V2 Jumpgate Config should be initialized");
-        verify(stackService, times(1)).save(stack);
+        verify(stackService, times(1)).setCcmV2AgentCrnByStackId(100L, "testAgentCrn");
     }
 
     private Stack getAStack() {

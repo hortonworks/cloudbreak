@@ -40,8 +40,12 @@ public class UpgradeCcmHealthCheckHandler extends AbstractUpgradeCcmEventHandler
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeCcmEvent> event) {
         UpgradeCcmEvent request = event.getData();
-        LOGGER.info("Health check for CCM upgrade...");
-        upgradeCcmService.healthCheck(request.getResourceId());
+        if (request.getOldTunnel().useCcmV1()) {
+            LOGGER.info("Health check for CCM upgrade...");
+            upgradeCcmService.healthCheck(request.getResourceId());
+        } else {
+            LOGGER.info("Health check is skipped for previous tunnel type '{}'", request.getOldTunnel());
+        }
         return UPGRADE_CCM_HEALTH_CHECK_FINISHED_EVENT.createBasedOn(request);
     }
 

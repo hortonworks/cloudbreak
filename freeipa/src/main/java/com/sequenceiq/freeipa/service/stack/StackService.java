@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -235,4 +236,13 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         LOGGER.debug("Stack is fetched for env:{} and accountId:{} ", envCrn, accountId);
         return stack;
     }
+
+    public int setCcmV2AgentCrnByStackId(Long stackId, String ccmV2AgentCrn) {
+        return stackRepository.setCcmV2AgentCrnByStackId(stackId, ccmV2AgentCrn);
+    }
+
+    public int setTunnelByStackId(Long stackId, Tunnel tunnel) {
+        return stackRepository.setTunnelByStackId(stackId, tunnel);
+    }
+
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.chain;
 
 import static com.sequenceiq.freeipa.flow.chain.FlowChainTriggers.UPGRADE_CCM_CHAIN_TRIGGER_EVENT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.chain.FlowChains;
@@ -58,13 +60,17 @@ import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmOperationAcceptor;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmService;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.action.UpgradeCcmActions;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.action.UpgradeCcmContext;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFlowChainTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmChangeTunnelHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmCheckPrerequisitesHandler;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmDeregisterMinaHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmHealthCheckHandler;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmObtainAgentDataHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmPushSaltStatesHandler;
-import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmReconfigureHandler;
-import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmRegisterCcmHandler;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmReconfigureNginxHandler;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmRegisterClusterProxyHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmRemoveMinaHandler;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler.UpgradeCcmUpgradeHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
@@ -84,11 +90,11 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     private static final long STACK_ID = 1L;
 
-    private static final int ALL_CALLED_ONCE = 18;
+    private static final int ALL_CALLED_ONCE = 22;
 
-    private static final int CALLED_ONCE_TILL_REMOVE_MINA = 16;
+    private static final int CALLED_ONCE_TILL_DEREGISTER_MINA = 20;
 
-    private static final int CALLED_ONCE_TILL_GENERATE_USERDATA = 17;
+    private static final int CALLED_ONCE_TILL_GENERATE_USERDATA = 21;
 
     @Inject
     private FlowRegister flowRegister;
@@ -139,11 +145,13 @@ class UpgradeCcmFlowChainIntegrationTest {
     public void setup() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
+        stack.setTunnel(Tunnel.CCM);
         ImageEntity image = new ImageEntity();
         stack.setImage(image);
         image.setUserdata(USER_DATA);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stackService.getStackById(STACK_ID)).thenReturn(stack);
+        when(upgradeCcmService.checkPrerequsities(STACK_ID)).thenReturn(stack);
 
         CloudConnector<Object> connector = mock(CloudConnector.class);
         AuthenticatedContext context = mock(AuthenticatedContext.class);
@@ -161,14 +169,14 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     @Test
     public void testUpdateUserDataFailsInChain() throws Exception {
-        doThrow(new BadRequestException()).when(userDataService).createUserData(STACK_ID);
+        doThrow(new BadRequestException()).when(userDataService).regenerateUserData(STACK_ID);
         testFlow(CALLED_ONCE_TILL_GENERATE_USERDATA, true, false);
     }
 
     @Test
-    public void testCcmUpgradeWhenRemoveMinaFailsInChain() throws Exception {
-        doThrow(new BadRequestException()).when(upgradeCcmService).removeMina(STACK_ID);
-        testFlow(CALLED_ONCE_TILL_REMOVE_MINA, false, false);
+    public void testCcmUpgradeWhenDeregisterMinaFailsInChain() throws Exception {
+        doThrow(new BadRequestException()).when(upgradeCcmService).deregisterMina(STACK_ID);
+        testFlow(CALLED_ONCE_TILL_DEREGISTER_MINA, false, false);
     }
 
     private void testFlow(int calledOnce, boolean ccmUpgradeSuccess, boolean userDataUpdateSuccess) throws Exception {
@@ -184,7 +192,15 @@ class UpgradeCcmFlowChainIntegrationTest {
         verify(upgradeCcmService, times(ccmUpgradeSuccess ? 1 : 0)).finishedState(STACK_ID);
         verify(resourcesApi, times(userDataUpdateSuccess ? 1 : 0)).updateUserData(any(), any(), any(), eq(USER_DATA));
 
-        verify(upgradeCcmService, times(ccmUpgradeSuccess ? 0 : 1)).failedState(STACK_ID);
+        ArgumentCaptor<UpgradeCcmContext> contextCaptor = ArgumentCaptor.forClass(UpgradeCcmContext.class);
+        ArgumentCaptor<UpgradeCcmFailureEvent> payloadCaptor = ArgumentCaptor.forClass(UpgradeCcmFailureEvent.class);
+        verify(upgradeCcmService, times(ccmUpgradeSuccess ? 0 : 1)).failedState(contextCaptor.capture(), payloadCaptor.capture());
+        if (!ccmUpgradeSuccess) {
+            UpgradeCcmContext context = contextCaptor.getValue();
+            UpgradeCcmFailureEvent payload = payloadCaptor.getValue();
+            assertEquals(STACK_ID, context.getStack().getId());
+            assertEquals(STACK_ID, payload.getResourceId());
+        }
 
         verify(operationService, times(ccmUpgradeSuccess && userDataUpdateSuccess ? 1 : 0)).completeOperation(any(), any(), any(), any());
         verify(operationService, times(ccmUpgradeSuccess && userDataUpdateSuccess ? 0 : 1)).failOperation(any(), any(), any());
@@ -199,26 +215,30 @@ class UpgradeCcmFlowChainIntegrationTest {
         verify(upgradeCcmService, times(expected[i++])).checkPrerequsities(STACK_ID);
         verify(upgradeCcmService, times(expected[i++])).changeTunnelState(STACK_ID);
         verify(upgradeCcmService, times(expected[i++])).changeTunnel(STACK_ID);
+        verify(upgradeCcmService, times(expected[i++])).obtainAgentDataState(STACK_ID);
+        verify(upgradeCcmService, times(expected[i++])).obtainAgentData(STACK_ID);
         verify(upgradeCcmService, times(expected[i++])).pushSaltStatesState(STACK_ID);
         verify(upgradeCcmService, times(expected[i++])).pushSaltStates(STACK_ID);
         verify(upgradeCcmService, times(expected[i++])).upgradeState(STACK_ID);
         verify(upgradeCcmService, times(expected[i++])).upgrade(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).reconfigureState(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).reconfigure(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).registerCcmState(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).registerCcm(STACK_ID);
+        verify(upgradeCcmService, times(expected[i++])).reconfigureNginxState(STACK_ID);
+        verify(upgradeCcmService, times(expected[i++])).reconfigureNginx(STACK_ID);
+        verify(upgradeCcmService, times(expected[i++])).registerClusterProxyState(STACK_ID);
+        verify(upgradeCcmService, times(expected[i++])).registerClusterProxy(STACK_ID);
         verify(upgradeCcmService, times(expected[i++])).healthCheckState(STACK_ID);
         verify(upgradeCcmService, times(expected[i++])).healthCheck(STACK_ID);
         verify(upgradeCcmService, times(expected[i++])).removeMinaState(STACK_ID);
         verify(upgradeCcmService, times(expected[i++])).removeMina(STACK_ID);
-        verify(userDataService, times(expected[i++])).createUserData(STACK_ID);
+        verify(upgradeCcmService, times(expected[i++])).deregisterMinaState(STACK_ID);
+        verify(upgradeCcmService, times(expected[i++])).deregisterMina(STACK_ID);
+        verify(userDataService, times(expected[i++])).regenerateUserData(STACK_ID);
         verify(resourcesApi, times(expected[i++])).updateUserData(any(), any(), any(), eq(USER_DATA));
     }
 
     private void flowFinishedSuccessfully(int numberOfRanFlows) {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2 * numberOfRanFlows)).save(flowLog.capture());
-        assertTrue(flowLog.getAllValues().stream().anyMatch(f -> f.getFinalized()), "flow has not finalized");
+        assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
     }
 
     private FlowIdentifier triggerFlow() {
@@ -226,7 +246,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> freeIpaFlowManager.notify(selector,
-                        new UpgradeCcmFlowChainTriggerEvent(selector, "opi", STACK_ID)));
+                        new UpgradeCcmFlowChainTriggerEvent(selector, "opi", STACK_ID, Tunnel.CCM)));
     }
 
     private void letItFlow() {
@@ -248,10 +268,12 @@ class UpgradeCcmFlowChainIntegrationTest {
             UpgradeCcmChangeTunnelHandler.class,
             UpgradeCcmPushSaltStatesHandler.class,
             UpgradeCcmUpgradeHandler.class,
-            UpgradeCcmReconfigureHandler.class,
-            UpgradeCcmRegisterCcmHandler.class,
+            UpgradeCcmReconfigureNginxHandler.class,
+            UpgradeCcmRegisterClusterProxyHandler.class,
             UpgradeCcmHealthCheckHandler.class,
             UpgradeCcmRemoveMinaHandler.class,
+            UpgradeCcmObtainAgentDataHandler.class,
+            UpgradeCcmDeregisterMinaHandler.class,
             UpgradeCcmService.class,
             FlowIntegrationTestConfig.class
     })

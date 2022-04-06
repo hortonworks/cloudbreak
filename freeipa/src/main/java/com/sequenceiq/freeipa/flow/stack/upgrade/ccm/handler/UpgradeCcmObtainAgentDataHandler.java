@@ -1,8 +1,8 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_REGISTER_CCM_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_OBTAIN_AGENT_DATA_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILED_EVENT;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_REGISTER_CCM_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_OBTAIN_AGENT_DATA_FINISHED_EVENT;
 
 import javax.inject.Inject;
 
@@ -19,30 +19,34 @@ import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFailureEven
 import reactor.bus.Event;
 
 @Component
-public class UpgradeCcmRegisterCcmHandler extends AbstractUpgradeCcmEventHandler {
+public class UpgradeCcmObtainAgentDataHandler extends AbstractUpgradeCcmEventHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeCcmRegisterCcmHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeCcmObtainAgentDataHandler.class);
 
     @Inject
     private UpgradeCcmService upgradeCcmService;
 
     @Override
     public String selector() {
-        return UPGRADE_CCM_REGISTER_CCM_EVENT.event();
+        return UPGRADE_CCM_OBTAIN_AGENT_DATA_EVENT.event();
     }
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
-        LOGGER.error("Registering CCM for CCM upgrade has failed", e);
+        LOGGER.error("Obtaining agent data for CCM upgrade has failed", e);
         return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId, e);
     }
 
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeCcmEvent> event) {
         UpgradeCcmEvent request = event.getData();
-        LOGGER.info("Registering CCM for CCM upgrade...");
-        upgradeCcmService.registerCcm(request.getResourceId());
-        return UPGRADE_CCM_REGISTER_CCM_FINISHED_EVENT.createBasedOn(request);
+        if (request.getOldTunnel().useCcmV1()) {
+            LOGGER.info("Obtaining agent data for CCM upgrade...");
+            upgradeCcmService.obtainAgentData(request.getResourceId());
+        } else {
+            LOGGER.info("Obtaining agent data is skipped for previous tunnel type '{}'", request.getOldTunnel());
+        }
+        return UPGRADE_CCM_OBTAIN_AGENT_DATA_FINISHED_EVENT.createBasedOn(request);
     }
 
 }

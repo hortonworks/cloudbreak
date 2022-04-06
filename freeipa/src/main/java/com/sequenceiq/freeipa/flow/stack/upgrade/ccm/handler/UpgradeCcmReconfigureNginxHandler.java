@@ -1,8 +1,8 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.handler;
 
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_APPLY_UPGRADE_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_RECONFIGURE_NGINX_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILED_EVENT;
-import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_UPGRADE_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_RECONFIGURE_NGINX_FINISHED_EVENT;
 
 import javax.inject.Inject;
 
@@ -20,21 +20,21 @@ import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFailureEven
 import reactor.bus.Event;
 
 @Component
-public class UpgradeCcmUpgradeHandler extends AbstractUpgradeCcmEventHandler {
+public class UpgradeCcmReconfigureNginxHandler extends AbstractUpgradeCcmEventHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeCcmUpgradeHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeCcmReconfigureNginxHandler.class);
 
     @Inject
     private UpgradeCcmService upgradeCcmService;
 
     @Override
     public String selector() {
-        return UPGRADE_CCM_APPLY_UPGRADE_EVENT.event();
+        return UPGRADE_CCM_RECONFIGURE_NGINX_EVENT.event();
     }
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
-        LOGGER.error("Running upgrade for CCM upgrade has failed", e);
+        LOGGER.error("Reconfiguring NGiNX for CCM upgrade has failed", e);
         return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId, e);
     }
 
@@ -42,17 +42,17 @@ public class UpgradeCcmUpgradeHandler extends AbstractUpgradeCcmEventHandler {
     protected Selectable doAccept(HandlerEvent<UpgradeCcmEvent> event) {
         UpgradeCcmEvent request = event.getData();
         if (request.getOldTunnel().useCcmV1()) {
+            LOGGER.info("NGiNX reconfiguration is needed for previous CCM tunnel type");
             try {
-                LOGGER.info("Running upgrade state for CCM...");
-                upgradeCcmService.upgrade(request.getResourceId());
+                upgradeCcmService.reconfigureNginx(request.getResourceId());
             } catch (CloudbreakOrchestratorException e) {
-                LOGGER.debug("Failed applying CCM upgrade state");
+                LOGGER.debug("Failed reconfiguring NGiNX with salt state");
                 return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), request.getResourceId(), e);
             }
         } else {
-            LOGGER.info("Running upgrade step is skipped for previous tunnel type '{}'", request.getOldTunnel());
+            LOGGER.info("NGiNX reconfiguration is not needed for previous tunnel type '{}'", request.getOldTunnel());
         }
-        return UPGRADE_CCM_UPGRADE_FINISHED_EVENT.createBasedOn(request);
+        return UPGRADE_CCM_RECONFIGURE_NGINX_FINISHED_EVENT.createBasedOn(request);
     }
 
 }

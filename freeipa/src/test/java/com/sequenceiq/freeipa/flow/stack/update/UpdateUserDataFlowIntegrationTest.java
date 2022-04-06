@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -113,6 +114,7 @@ class UpdateUserDataFlowIntegrationTest {
     public void setup() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
+        stack.setTunnel(Tunnel.CCM);
         ImageEntity image = new ImageEntity();
         stack.setImage(image);
         image.setUserdata(USER_DATA);
@@ -135,7 +137,7 @@ class UpdateUserDataFlowIntegrationTest {
 
     @Test
     public void testUserDataUpdateWhenNewUserDataFails() throws Exception {
-        doThrow(new BadRequestException()).when(userDataService).createUserData(STACK_ID);
+        doThrow(new BadRequestException()).when(userDataService).regenerateUserData(STACK_ID);
         testFlow(CALLED_ONCE_TILL_GENERATE_USERDATA, false);
     }
 
@@ -158,7 +160,7 @@ class UpdateUserDataFlowIntegrationTest {
     private void verifyServiceCalls(int tillInt) {
         final int[] expected = new int[ALL_CALLED_ONCE];
         Arrays.fill(expected, 0, tillInt, 1);
-        verify(userDataService, times(expected[0])).createUserData(STACK_ID);
+        verify(userDataService, times(expected[0])).regenerateUserData(STACK_ID);
     }
 
     private void flowFinishedSuccessfully() {
@@ -172,7 +174,7 @@ class UpdateUserDataFlowIntegrationTest {
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> freeIpaFlowManager.notify(selector,
-                        new UserDataUpdateRequest(selector, STACK_ID).withOperationId("opi")));
+                        new UserDataUpdateRequest(selector, STACK_ID, Tunnel.CCM).withOperationId("opi")));
     }
 
     private void letItFlow(FlowIdentifier flowIdentifier) {
