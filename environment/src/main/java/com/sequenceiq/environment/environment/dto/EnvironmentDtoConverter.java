@@ -190,6 +190,7 @@ public class EnvironmentDtoConverter {
         environment.setStatusReason(null);
         environment.setCreateFreeIpa(creationDto.getFreeIpaCreation().getCreate());
         environment.setFreeIpaInstanceCountByGroup(creationDto.getFreeIpaCreation().getInstanceCountByGroup());
+        environment.setFreeIpaInstanceType(creationDto.getFreeIpaCreation().getInstanceType());
         environment.setFreeIpaImageCatalog(creationDto.getFreeIpaCreation().getImageCatalog());
         environment.setFreeIpaEnableMultiAz(creationDto.getFreeIpaCreation().isEnableMultiAz());
         environment.setDeletionType(NONE);
@@ -279,35 +280,44 @@ public class EnvironmentDtoConverter {
     }
 
     private FreeIpaCreationDto environmentToFreeIpaCreationDto(Environment environment) {
-        return getFreeIpaCreationDto(environment.isCreateFreeIpa(), environment.getFreeIpaInstanceCountByGroup(), environment.getFreeIpaImageCatalog(),
-                environment.getFreeIpaImageId(), environment.isFreeIpaEnableMultiAz(), environment.getCloudPlatform(), environment.getParameters());
+        FreeIpaCreationDto freeIpaCreationDto = getFreeIpaCreationDto(environment.isCreateFreeIpa(), environment.getFreeIpaInstanceCountByGroup(),
+                environment.getFreeIpaInstanceType(), environment.getFreeIpaImageCatalog(), environment.getFreeIpaImageId(),
+                environment.isFreeIpaEnableMultiAz());
+        freeIpaCreationDto.setAws(getFreeIpaAwsParameters(environment.getCloudPlatform(), environment.getParameters()));
+        return freeIpaCreationDto;
     }
 
     private FreeIpaCreationDto environmentToFreeIpaCreationDto(EnvironmentView environment) {
-        return getFreeIpaCreationDto(environment.isCreateFreeIpa(), environment.getFreeIpaInstanceCountByGroup(), environment.getFreeIpaImageCatalog(),
-                environment.getFreeIpaImageId(), environment.isFreeIpaEnableMultiAz(), environment.getCloudPlatform(), environment.getParameters());
+        FreeIpaCreationDto freeIpaCreationDto = getFreeIpaCreationDto(environment.isCreateFreeIpa(), environment.getFreeIpaInstanceCountByGroup(),
+                environment.getFreeIpaInstanceType(), environment.getFreeIpaImageCatalog(), environment.getFreeIpaImageId(),
+                environment.isFreeIpaEnableMultiAz());
+        freeIpaCreationDto.setAws(getFreeIpaAwsParameters(environment.getCloudPlatform(), environment.getParameters()));
+        return freeIpaCreationDto;
     }
 
-    private FreeIpaCreationDto getFreeIpaCreationDto(boolean createFreeIpa, Integer freeIpaInstanceCountByGroup, String freeIpaImageCatalog,
-            String freeIpaImageId, boolean freeIpaEnableMultiAz, String cloudPlatform, BaseParameters parameters) {
+    private FreeIpaCreationAwsParametersDto getFreeIpaAwsParameters(String cloudPlatform, BaseParameters parameters) {
+        if (cloudPlatform.equals(CloudPlatform.AWS.name())) {
+            AwsParameters awsParameters = (AwsParameters) parameters;
+            return FreeIpaCreationAwsParametersDto.builder()
+                    .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
+                            .withPercentage(awsParameters.getFreeIpaSpotPercentage())
+                            .withMaxPrice(awsParameters.getFreeIpaSpotMaxPrice())
+                            .build())
+                    .build();
+        } else {
+            return null;
+        }
+    }
+
+    private FreeIpaCreationDto getFreeIpaCreationDto(boolean createFreeIpa, Integer freeIpaInstanceCountByGroup, String freeIpaInstanceType,
+            String freeIpaImageCatalog, String freeIpaImageId, boolean freeIpaEnableMultiAz) {
         FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder()
                 .withCreate(createFreeIpa);
         Optional.ofNullable(freeIpaInstanceCountByGroup).ifPresent(builder::withInstanceCountByGroup);
+        builder.withInstanceType(freeIpaInstanceType);
         builder.withImageCatalog(freeIpaImageCatalog);
         builder.withImageId(freeIpaImageId);
         builder.withEnableMultiAz(freeIpaEnableMultiAz);
-        if (cloudPlatform.equals(CloudPlatform.AWS.name())) {
-            AwsParameters awsParameters = (AwsParameters) parameters;
-            if (Objects.nonNull(parameters)) {
-                builder.withAws(FreeIpaCreationAwsParametersDto.builder()
-                        .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
-                                .withPercentage(awsParameters.getFreeIpaSpotPercentage())
-                                .withMaxPrice(awsParameters.getFreeIpaSpotMaxPrice())
-                                .build())
-                        .build());
-            }
-        }
-
         return builder.build();
     }
 }

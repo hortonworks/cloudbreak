@@ -118,6 +118,8 @@ public class EnvironmentView extends CompactView implements AuthResource {
 
     private Integer freeIpaInstanceCountByGroup;
 
+    private String freeIpaInstanceType;
+
     private String freeIpaImageCatalog;
 
     private String freeIpaImageId;
@@ -445,6 +447,14 @@ public class EnvironmentView extends CompactView implements AuthResource {
 
     public void setFreeIpaInstanceCountByGroup(Integer freeIpaInstanceCountByGroup) {
         this.freeIpaInstanceCountByGroup = freeIpaInstanceCountByGroup;
+    }
+
+    public String getFreeIpaInstanceType() {
+        return freeIpaInstanceType;
+    }
+
+    public void setFreeIpaInstanceType(String freeIpaInstanceType) {
+        this.freeIpaInstanceType = freeIpaInstanceType;
     }
 
     public String getFreeIpaImageCatalog() {

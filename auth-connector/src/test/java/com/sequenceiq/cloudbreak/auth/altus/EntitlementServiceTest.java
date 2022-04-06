@@ -205,6 +205,9 @@ class EntitlementServiceTest {
                 {"CDP_DATALAKE_SELECT_INSTANCE_TYPE", (EntitlementCheckFunction) EntitlementService::isDatalakeSelectInstanceTypeEnabled, false},
                 {"CDP_DATALAKE_SELECT_INSTANCE_TYPE", (EntitlementCheckFunction) EntitlementService::isDatalakeSelectInstanceTypeEnabled, true},
 
+                {"CDP_FREEIPA_SELECT_INSTANCE_TYPE", (EntitlementCheckFunction) EntitlementService::isFreeIpaSelectInstanceTypeEnabled, false},
+                {"CDP_FREEIPA_SELECT_INSTANCE_TYPE", (EntitlementCheckFunction) EntitlementService::isFreeIpaSelectInstanceTypeEnabled, true},
+
                 {"CDP_DATALAKE_ZDU_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatalakeZduOSUpgradeEnabled, false},
                 {"CDP_DATALAKE_ZDU_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatalakeZduOSUpgradeEnabled, true},
 

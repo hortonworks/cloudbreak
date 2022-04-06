@@ -14,6 +14,9 @@ public class FreeIpaResponse implements Serializable {
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_INSTANCE_COUNT_BY_GROUP)
     private Integer instanceCountByGroup = 1;
 
+    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_INSTANCE_TYPE)
+    private String instanceType;
+
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_PARAMETERS)
     private AwsFreeIpaParameters aws;
 
@@ -29,6 +32,14 @@ public class FreeIpaResponse implements Serializable {
 
     public void setInstanceCountByGroup(Integer instanceCountByGroup) {
         this.instanceCountByGroup = instanceCountByGroup;
+    }
+
+    public String getInstanceType() {
+        return instanceType;
+    }
+
+    public void setInstanceType(String instanceType) {
+        this.instanceType = instanceType;
     }
 
     public AwsFreeIpaParameters getAws() {
@@ -59,6 +70,7 @@ public class FreeIpaResponse implements Serializable {
     public String toString() {
         return "FreeIpaResponse{" +
                 "instanceCountByGroup=" + instanceCountByGroup +
+                "instanceType=" + instanceType +
                 ", aws=" + aws +
                 ", image=" + image +
                 ", enableMultiAz=" + enableMultiAz +

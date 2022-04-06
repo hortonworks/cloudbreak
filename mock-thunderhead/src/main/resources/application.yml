@@ -19,6 +19,7 @@ auth:
       ha:
         repair.enable: true
       rebuild.enable: true
+      select.instance.type.enable: true
     cloudstoragevalidation.enable:
       global: true
       aws: true

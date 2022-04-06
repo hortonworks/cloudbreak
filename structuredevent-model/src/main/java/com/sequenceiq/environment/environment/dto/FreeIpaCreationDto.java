@@ -14,6 +14,8 @@ public class FreeIpaCreationDto {
 
     private String imageId;
 
+    private String instanceType;
+
     private FreeIpaCreationDto(Builder builder) {
         create = builder.create;
         instanceCountByGroup = builder.instanceCountByGroup;
@@ -21,6 +23,7 @@ public class FreeIpaCreationDto {
         imageCatalog = builder.imageCatalog;
         enableMultiAz = builder.enableMultiAz;
         imageId = builder.imageId;
+        instanceType = builder.instanceType;
     }
 
     public void setCreate(boolean create) {
@@ -71,6 +74,14 @@ public class FreeIpaCreationDto {
         this.enableMultiAz = enableMultiAz;
     }
 
+    public String getInstanceType() {
+        return instanceType;
+    }
+
+    public void setInstanceType(String instanceType) {
+        this.instanceType = instanceType;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaCreationDto{" +
@@ -80,6 +91,7 @@ public class FreeIpaCreationDto {
             "imageCatalog='" + imageCatalog + '\'' +
             "imageId='" + imageId + '\'' +
             "enableMultiAz='" + enableMultiAz + '\'' +
+            "instanceType='" + instanceType + '\'' +
             '}';
     }
 
@@ -100,6 +112,8 @@ public class FreeIpaCreationDto {
         private String imageId;
 
         private boolean enableMultiAz;
+
+        private String instanceType;
 
         private Builder() {
         }
@@ -131,6 +145,11 @@ public class FreeIpaCreationDto {
 
         public Builder withEnableMultiAz(boolean enableMultiAz) {
             this.enableMultiAz = enableMultiAz;
+            return this;
+        }
+
+        public Builder withInstanceType(String instanceType) {
+            this.instanceType = instanceType;
             return this;
         }
 

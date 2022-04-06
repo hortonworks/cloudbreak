@@ -28,6 +28,8 @@ public class FreeIpaConverterTest {
 
     private static final String IMAGE_ID = "image id";
 
+    private static final String INSTANCE_TYPE = "instance type";
+
     @Mock
     private EntitlementService entitlementService;
 
@@ -157,6 +159,19 @@ public class FreeIpaConverterTest {
         // THEN
         assertNull(result.getImageCatalog());
         assertNull(result.getImageId());
+    }
+
+    @Test
+    public void testConvertWithInstanceType() {
+        // GIVEN
+        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
+        request.setCreate(true);
+        request.setInstanceType(INSTANCE_TYPE);
+        // WHEN
+        FreeIpaCreationDto result = underTest.convert(request, "id", CloudConstants.AWS);
+        // THEN
+        assertNotNull(result.getInstanceType());
+        assertEquals(INSTANCE_TYPE, result.getInstanceType());
     }
 
     private FreeIpaImageRequest aFreeIpaImage(String catalog, String id) {

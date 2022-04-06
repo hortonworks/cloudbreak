@@ -79,6 +79,8 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     private Integer freeIpaInstanceCountByGroup;
 
+    private String freeIpaInstanceType;
+
     private String freeIpaImageCatalog;
 
     private String freeIpaImageId;
@@ -376,6 +378,14 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     public void setFreeIpaInstanceCountByGroup(Integer freeIpaInstanceCountByGroup) {
         this.freeIpaInstanceCountByGroup = freeIpaInstanceCountByGroup;
+    }
+
+    public String getFreeIpaInstanceType() {
+        return freeIpaInstanceType;
+    }
+
+    public void setFreeIpaInstanceType(String freeIpaInstanceType) {
+        this.freeIpaInstanceType = freeIpaInstanceType;
     }
 
     public String getFreeIpaImageCatalog() {
