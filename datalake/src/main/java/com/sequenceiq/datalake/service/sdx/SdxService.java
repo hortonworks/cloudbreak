@@ -328,11 +328,16 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         Optional<SdxCluster> sdxCluster = measure(() ->
                         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, name), LOGGER,
                 "Fetching SDX cluster took {}ms from DB. Name: [{}]", name);
-        if (sdxCluster.isPresent()) {
-            return sdxCluster.get();
-        } else {
-            throw notFound("SDX cluster", name).get();
-        }
+        return sdxCluster.orElseThrow(notFound("SDX cluster", name));
+    }
+
+    public SdxCluster getByNameInAccountAllowDetached(String userCrn, String name) {
+        LOGGER.info("Searching for SDX cluster by name {} allowing detached", name);
+        String accountIdFromCrn = getAccountIdFromCrn(userCrn);
+        Optional<SdxCluster> sdxCluster = measure(() ->
+                        sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name), LOGGER,
+                "Fetching SDX cluster allowing detached took {}ms from DB. Name: [{}]", name);
+        return sdxCluster.orElseThrow(notFound("SDX cluster", name));
     }
 
     public void delete(SdxCluster sdxCluster) {
