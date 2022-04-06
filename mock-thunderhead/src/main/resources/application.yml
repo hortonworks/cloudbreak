@@ -44,6 +44,7 @@ auth:
       recovery.resize.enable: true
       multiaz.enable: true
       select.instance.type.enable: true
+      zdu.osupgrade.enable: true
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
     datahub:

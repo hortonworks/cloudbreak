@@ -203,7 +203,10 @@ class EntitlementServiceTest {
                 {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, true},
 
                 {"CDP_DATALAKE_SELECT_INSTANCE_TYPE", (EntitlementCheckFunction) EntitlementService::isDatalakeSelectInstanceTypeEnabled, false},
-                {"CDP_DATALAKE_SELECT_INSTANCE_TYPE", (EntitlementCheckFunction) EntitlementService::isDatalakeSelectInstanceTypeEnabled, true}
+                {"CDP_DATALAKE_SELECT_INSTANCE_TYPE", (EntitlementCheckFunction) EntitlementService::isDatalakeSelectInstanceTypeEnabled, true},
+
+                {"CDP_DATALAKE_ZDU_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatalakeZduOSUpgradeEnabled, false},
+                {"CDP_DATALAKE_ZDU_OS_UPGRADE", (EntitlementCheckFunction) EntitlementService::isDatalakeZduOSUpgradeEnabled, true}
         };
     }
 
