@@ -125,6 +125,9 @@ public class FreeIpaCreationService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private FreeIpaRecommendationService freeIpaRecommendationService;
+
     @Value("${info.app.version:}")
     private String appVersion;
 
@@ -158,6 +161,7 @@ public class FreeIpaCreationService {
         stack.setTemplate(template);
         SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(accountId);
         multiAzValidator.validateMultiAzForStack(stack.getPlatformvariant(), stack.getInstanceGroups());
+        freeIpaRecommendationService.validateCustomInstanceType(stack, credential);
         try {
             Triple<Stack, ImageEntity, FreeIpa> stackImageFreeIpaTuple = transactionService.required(() -> {
                 SecurityConfig savedSecurityConfig = securityConfigService.save(securityConfig);

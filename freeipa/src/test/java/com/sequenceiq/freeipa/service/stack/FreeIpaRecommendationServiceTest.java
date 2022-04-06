@@ -1,7 +1,9 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,16 +21,21 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.FreeIpaRecommendationResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.VmTypeResponse;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.instance.VmTypeToVmTypeResponseConverter;
 import com.sequenceiq.freeipa.dto.Credential;
+import com.sequenceiq.freeipa.entity.InstanceGroup;
+import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.stack.instance.DefaultInstanceTypeProvider;
 
@@ -50,6 +57,9 @@ class FreeIpaRecommendationServiceTest {
     @Spy
     private VmTypeToVmTypeResponseConverter vmTypeConverter;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private FreeIpaRecommendationService underTest;
 
@@ -64,6 +74,49 @@ class FreeIpaRecommendationServiceTest {
         Set<VmTypeResponse> vmTypes = recommendation.getVmTypes();
         assertEquals(2, vmTypes.size());
         assertThat(vmTypes.stream().map(VmTypeResponse::getValue).collect(Collectors.toSet())).containsExactly("large", "medium");
+    }
+
+    @Test
+    public void testValidateCustomInstanceTypeWhenEntitlementIsNotEnabled() {
+        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"))).thenReturn("medium");
+        when(entitlementService.isFreeIpaSelectInstanceTypeEnabled(anyString())).thenReturn(Boolean.FALSE);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateCustomInstanceType(createStack("large"), new Credential("AWS", "Cred", null, "crn", "account")));
+        assertEquals("Custom instance type for FreeIPA is not enabled!", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testValidateCustomInstanceTypeWhenCustomInstanceTypeIsSmaller() {
+        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"))).thenReturn("medium");
+        when(entitlementService.isFreeIpaSelectInstanceTypeEnabled(anyString())).thenReturn(Boolean.TRUE);
+        when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateCustomInstanceType(createStack("small"), new Credential("AWS", "Cred", null, "crn", "account")));
+        assertEquals("Invalid custom instance type for FreeIPA: master - small", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testValidateCustomInstanceTypeWhenCustomInstanceTypeIsLarger() {
+        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"))).thenReturn("medium");
+        when(entitlementService.isFreeIpaSelectInstanceTypeEnabled(anyString())).thenReturn(Boolean.TRUE);
+        when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
+
+        assertDoesNotThrow(() -> underTest.validateCustomInstanceType(createStack("large"), new Credential("AWS", "Cred", null, "crn", "account")));
+    }
+
+    private Stack createStack(String instanceType) {
+        Stack stack = new Stack();
+        stack.setCloudPlatform("AWS");
+        stack.setRegion("eu-central-1");
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setGroupName("master");
+        Template template = new Template();
+        template.setInstanceType(instanceType);
+        instanceGroup.setTemplate(template);
+        stack.getInstanceGroups().add(instanceGroup);
+        return stack;
     }
 
     private CloudVmTypes initCloudVmTypes() {

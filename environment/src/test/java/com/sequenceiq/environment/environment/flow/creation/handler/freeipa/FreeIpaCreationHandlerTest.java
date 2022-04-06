@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
 import static java.util.Collections.emptyMap;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -85,6 +86,8 @@ public class FreeIpaCreationHandlerTest {
     private static final String IMAGE_CATALOG = "image catalog";
 
     private static final String IMAGE_ID = "image id";
+
+    private static final String INSTANCE_TYPE = "instance type";
 
     @Mock
     private EventSender eventSender;
@@ -262,7 +265,6 @@ public class FreeIpaCreationHandlerTest {
                         .build())
                 .build());
         environmentDto.setCredential(new Credential());
-        environmentDto.setCredential(new Credential());
 
         ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
                 .success()
@@ -300,7 +302,6 @@ public class FreeIpaCreationHandlerTest {
         environmentDto.getFreeIpaCreation().setImageId(IMAGE_ID);
         environmentDto.getFreeIpaCreation().setImageCatalog(IMAGE_CATALOG);
         environmentDto.setCredential(new Credential());
-        environmentDto.setCredential(new Credential());
         Environment environment = new Environment();
         environment.setCreateFreeIpa(true);
 
@@ -329,11 +330,41 @@ public class FreeIpaCreationHandlerTest {
     }
 
     @Test
+    public void testFreeIpaInstanceTypeIsPopulatedIfProvided() {
+        EnvironmentDto environmentDto = someEnvironmentWithFreeIpaCreation();
+        environmentDto.getFreeIpaCreation().setInstanceType(INSTANCE_TYPE);
+        environmentDto.setCredential(new Credential());
+        Environment environment = new Environment();
+        environment.setCreateFreeIpa(true);
+
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())).thenReturn(true);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(connectors.getDefault(any())).thenReturn(mock(CloudConnector.class));
+        when(freeIpaPollingService.pollWithTimeout(
+                any(FreeIpaCreationRetrievalTask.class),
+                any(FreeIpaPollerObject.class),
+                anyLong(),
+                anyInt(),
+                anyInt()))
+                .thenReturn(extendedPollingResult);
+
+        victim.accept(new Event<>(environmentDto));
+
+        ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
+        verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
+        assertThat(freeIpaRequest.getInstanceGroups()).extracting(ig -> ig.getInstanceTemplate().getInstanceType()).containsOnly(INSTANCE_TYPE);
+    }
+
+    @Test
     public void testFreeIpaImageIdIsPopulatedInCaseOfMissingImageCatalog() {
         EnvironmentDto environmentDto = someEnvironmentWithFreeIpaCreation();
         environmentDto.getFreeIpaCreation().setImageId(IMAGE_ID);
         environmentDto.getFreeIpaCreation().setImageCatalog(null);
-        environmentDto.setCredential(new Credential());
         environmentDto.setCredential(new Credential());
         Environment environment = new Environment();
         environment.setCreateFreeIpa(true);
