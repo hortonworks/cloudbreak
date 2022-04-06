@@ -281,6 +281,9 @@ public class MockUserManagementServiceTest {
 
                 {"enableDatalakeSelectInstanceType false", "enableDatalakeSelectInstanceType", false, "CDP_DATALAKE_SELECT_INSTANCE_TYPE", false},
                 {"enableDatalakeSelectInstanceType true", "enableDatalakeSelectInstanceType", true, "CDP_DATALAKE_SELECT_INSTANCE_TYPE", true},
+
+                {"enableFreeIpaSelectInstanceType false", "enableFreeIpaSelectInstanceType", false, "CDP_FREEIPA_SELECT_INSTANCE_TYPE", false},
+                {"enableFreeIpaSelectInstanceType true", "enableFreeIpaSelectInstanceType", true, "CDP_FREEIPA_SELECT_INSTANCE_TYPE", true},
         };
     }
 

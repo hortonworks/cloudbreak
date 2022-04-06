@@ -79,6 +79,8 @@ public class FreeIpaConverter {
             }
             Optional.ofNullable(request.getInstanceCountByGroup())
                     .ifPresent(builder::withInstanceCountByGroup);
+            Optional.ofNullable(request.getInstanceType())
+                    .ifPresent(builder::withInstanceType);
             Optional.ofNullable(request.getAws())
                     .map(AwsFreeIpaParameters::getSpot)
                     .ifPresent(spotParameters -> builder.withAws(FreeIpaCreationAwsParametersDto.builder()
