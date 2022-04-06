@@ -42,6 +42,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_SELECT_INSTANCE_TYPE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_ZDU_OS_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
@@ -442,6 +443,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datalake.select.instance.type.enable}")
     private boolean enableDatalakeSelectInstanceType;
+
+    @Value("${auth.mock.datalake.zdu.osupgrade.enable}")
+    private boolean enableDatalakeZduOSUpgrade;
 
     private String cbLicense;
 
@@ -906,6 +910,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDatalakeSelectInstanceType) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_SELECT_INSTANCE_TYPE));
+        }
+        if (enableDatalakeZduOSUpgrade) {
+            builder.addEntitlements(createEntitlement(CDP_DATALAKE_ZDU_OS_UPGRADE));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
