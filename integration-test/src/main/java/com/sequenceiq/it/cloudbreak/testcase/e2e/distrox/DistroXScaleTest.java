@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETED_ON_PROVIDER_SIDE;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -53,7 +54,20 @@ public class DistroXScaleTest extends AbstractE2ETest {
             throw new TestFailException("Test should execute at least 1 round of scaling");
         }
 
+        StringBuilder instanceToStopId = new StringBuilder();
         testContext.given(DistroXTestDto.class)
+                .then((tc, testDto, client) -> {
+                    CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
+                    Optional<String> anInstanceToStop = distroxUtil.getInstanceIds(testDto, client, params.getHostGroup()).stream().findFirst();
+                    if (anInstanceToStop.isEmpty()) {
+                        throw new TestFailException(String.format(
+                                "At least 1 instance needed from group %s to test stop it and test targeted upscale.", params.getIrrelevantHostGroup()));
+                    }
+                    cloudFunctionality.stopInstances(testDto.getName(), List.of(anInstanceToStop.get()));
+                    instanceToStopId.append(anInstanceToStop.get());
+                    return testDto;
+                })
+                .await(STACK_NODE_FAILURE)
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleUpTarget()))
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
@@ -69,6 +83,10 @@ public class DistroXScaleTest extends AbstractE2ETest {
                 .awaitForFlow()
                 // removing deleted instance since downscale still validates if stack is available
                 .awaitForActionedInstances(DELETED_ON_PROVIDER_SIDE)
+                .then((tc, testDto, client) -> {
+                    testDto.setInstanceIdsForActions(mergeInstanceIdList(testDto.getInstanceIdsForAction(), instanceToStopId.toString()));
+                    return testDto;
+                })
                 .when(distroXTestClient.removeInstances())
                 .awaitForFlow()
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleDownTarget()))
@@ -80,6 +98,12 @@ public class DistroXScaleTest extends AbstractE2ETest {
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleDownTarget()))
                 .awaitForFlow()
                 .validate());
+    }
+
+    private List<String> mergeInstanceIdList(List<String> instanceIdsForAction, String instance) {
+        List<String> result = new ArrayList<>(instanceIdsForAction);
+        result.add(instance);
+        return result;
     }
 
 }

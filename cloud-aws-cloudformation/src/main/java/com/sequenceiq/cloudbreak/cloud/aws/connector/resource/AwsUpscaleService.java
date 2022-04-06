@@ -23,6 +23,7 @@ import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.Instance;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -83,6 +84,9 @@ public class AwsUpscaleService {
 
     @Inject
     private AwsMetadataCollector awsMetadataCollector;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources,
             AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
@@ -159,12 +163,21 @@ public class AwsUpscaleService {
             List<com.amazonaws.services.ec2.model.Instance> instancesForGroup =
                     awsMetadataCollector.collectInstancesForGroup(ac, amazonASClient, amazonEC2Client, cloudFormationClient, group.getName());
             for (com.amazonaws.services.ec2.model.Instance i : instancesForGroup) {
-                if (!"running".equalsIgnoreCase(i.getState().getName())) {
+                if (getAllowedInstanceStates(ac.getCloudCredential().getAccountId()).noneMatch(state -> state.equalsIgnoreCase(i.getState().getName()))) {
                     throw new RuntimeException(String.format("Instance (%s) in the group (%s) is not running (%s).",
                             i.getInstanceId(), group.getName(), i.getState().getName()));
                 }
             }
         }
+    }
+
+    private Stream<String> getAllowedInstanceStates(String accountId) {
+        Stream<String> result = Stream.of("running");
+        if (entitlementService.isUnboundEliminationSupported(accountId) && entitlementService.targetedUpscaleSupported(accountId)) {
+            result = Stream.of("running", "stopped");
+        }
+        LOGGER.info("Allowed instance states in the scaled group: {}", result);
+        return result;
     }
 
     private void sendASGUpdateFailedMessage(AmazonAutoScalingClient amazonASClient, Map<String, Group> desiredAutoscalingGroupsByName,

@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -15,6 +17,7 @@ import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.autoscaling.model.Instance;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsInstanceConnector;
@@ -42,6 +45,9 @@ public class AwsCloudFormationSetup extends AwsSetup {
     @Inject
     private AwsCloudFormationClient awsClient;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public void scalingPrerequisites(AuthenticatedContext ac, CloudStack stack, boolean upscale) {
         if (!upscale) {
@@ -62,8 +68,8 @@ public class AwsCloudFormationSetup extends AwsSetup {
             List<CloudInstance> groupInstances = group.getInstances().stream().filter(
                     inst -> InstanceStatus.CREATED.equals(inst.getTemplate().getStatus())).collect(Collectors.toList());
             List<CloudVmInstanceStatus> instanceStatuses = instanceConnector.check(ac, groupInstances);
-            if (!instanceStatuses.stream().allMatch(inst -> inst.getStatus().equals(InstanceStatus.STARTED))) {
-                String errorMessage = "Not all the existing instances are in [Started] state, upscale is not possible!";
+            if (checkInstanceStatuses(instanceStatuses, ac.getCloudCredential().getAccountId())) {
+                String errorMessage = "Not all the existing instances are in allowed state, upscale is not possible!";
                 LOGGER.info(errorMessage);
                 throw new CloudConnectorException(errorMessage);
             }
@@ -85,5 +91,14 @@ public class AwsCloudFormationSetup extends AwsSetup {
                 throw new CloudConnectorException(errorMessage);
             }
         }
+    }
+
+    private boolean checkInstanceStatuses(List<CloudVmInstanceStatus> instanceStatuses, String accountId) {
+        Set<InstanceStatus> allowedStates = EnumSet.of(InstanceStatus.STARTED);
+        if (entitlementService.targetedUpscaleSupported(accountId) && entitlementService.isUnboundEliminationSupported(accountId)) {
+            allowedStates.addAll(EnumSet.of(InstanceStatus.STOPPED, InstanceStatus.ZOMBIE));
+        }
+        LOGGER.info("Scaling is allowed from states: {}", allowedStates);
+        return !instanceStatuses.stream().allMatch(inst -> allowedStates.contains(inst.getStatus()));
     }
 }
