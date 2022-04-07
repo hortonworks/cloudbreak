@@ -9,6 +9,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -43,6 +45,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConver
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredentialUpdate;
+import com.sequenceiq.freeipa.util.ThreadInterruptChecker;
 
 @ExtendWith(MockitoExtension.class)
 class WorkloadCredentialServiceTest {
@@ -68,6 +71,9 @@ class WorkloadCredentialServiceTest {
     @Mock
     private UserMetadataConverter userMetadataConverter;
 
+    @Mock
+    private ThreadInterruptChecker interruptChecker;
+
     @InjectMocks
     private WorkloadCredentialService underTest;
 
@@ -79,6 +85,7 @@ class WorkloadCredentialServiceTest {
         underTest.setWorkloadCredential(false, freeIpaClient, new WorkloadCredentialUpdate(USER, USER_CRN, createWorkloadCredential()));
 
         verify(freeIpaClient).invoke(eq("user_mod"), eq(List.of(USER)), any(), any());
+        verifyNoInteractions(interruptChecker);
     }
 
     @Test
@@ -90,6 +97,7 @@ class WorkloadCredentialServiceTest {
         underTest.setWorkloadCredential(false, freeIpaClient, new WorkloadCredentialUpdate(USER, USER_CRN, createWorkloadCredential()));
 
         verify(freeIpaClient).invoke(eq("user_mod"), eq(List.of(USER)), any(), any());
+        verifyNoInteractions(interruptChecker);
     }
 
     @Test
@@ -100,30 +108,33 @@ class WorkloadCredentialServiceTest {
         underTest.setWorkloadCredential(true, freeIpaClient, new WorkloadCredentialUpdate(USER, USER_CRN, createWorkloadCredential()));
 
         verify(freeIpaClient).invoke(eq("user_mod"), eq(List.of(USER)), argThat(matchesTitleAttribute("userMetadataJson")), any());
+        verifyNoInteractions(interruptChecker);
     }
 
     @Test
     void testBatchSetWorkloadCredentials() throws Exception {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         when(batchPartitionSizeProperties.getByOperation(any())).thenReturn(100);
-        doNothing().when(freeIpaClient).callBatch(any(), any(), any(), any());
+        doNothing().when(freeIpaClient).callBatch(any(), any(), any(), any(), any());
 
         setWorkloadCredentials(true, false, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(), warnings::put);
 
-        verify(freeIpaClient).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient).callBatch(any(), any(), any(), any(), any());
+        verifyNoInteractions(interruptChecker);
     }
 
     @Test
     void testBatchSetWorkloadCredentialsWithUpdateOptimization() throws Exception {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         when(batchPartitionSizeProperties.getByOperation(any())).thenReturn(100);
-        doNothing().when(freeIpaClient).callBatch(any(), any(), any(), any());
+        doNothing().when(freeIpaClient).callBatch(any(), any(), any(), any(), any());
         when(userMetadataConverter.toUserMetadataJson(any(), anyLong())).thenReturn("userMetadataJson");
 
         setWorkloadCredentials(true, true, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(), warnings::put);
 
-        verify(freeIpaClient).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient).callBatch(any(), any(), any(), any(), any());
         verify(userMetadataConverter, times(USERS.size())).toUserMetadataJson(any(), anyLong());
+        verifyNoInteractions(interruptChecker);
     }
 
     @Test
@@ -134,6 +145,7 @@ class WorkloadCredentialServiceTest {
         setWorkloadCredentials(false, false, freeIpaClient, getCredentialMap(), getUsersWithCredentialsToUpdate(), getUserToCrnMap(), warnings::put);
 
         verify(freeIpaClient, times(4)).invoke(eq("user_mod"), any(), any(), any());
+        verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
     @Test
@@ -149,6 +161,7 @@ class WorkloadCredentialServiceTest {
         for (String username : userToCrnMap.keySet()) {
             verify(freeIpaClient).invoke(eq("user_mod"), eq(List.of(username)), argThat(matchesTitleAttribute(username + "-userMetadataJson")), any());
         }
+        verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
     @Test
@@ -161,6 +174,7 @@ class WorkloadCredentialServiceTest {
 
         verify(freeIpaClient, times(4)).invoke(eq("user_mod"), any(), any(), any());
         assertEquals(0, warnings.size());
+        verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
     @Test
@@ -173,6 +187,7 @@ class WorkloadCredentialServiceTest {
 
         verify(freeIpaClient, times(4)).invoke(eq("user_mod"), any(), any(), any());
         assertEquals(4, warnings.size());
+        verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
     private Map<String, WorkloadCredential> getCredentialMap() {
@@ -212,12 +227,13 @@ class WorkloadCredentialServiceTest {
 
     private void setWorkloadCredentials(boolean batchCallEnabled, boolean updateOptimizationEnabled, FreeIpaClient ipaClient,
             Map<String, WorkloadCredential> usersWorkloadCredentialMap, Set<String> usersWithCredentialsToUpdate, Map<String, String> userToCrnMap,
-            BiConsumer<String, String> warnings) throws FreeIpaClientException {
+            BiConsumer<String, String> warnings) throws FreeIpaClientException, TimeoutException {
         ImmutableSet<WorkloadCredentialUpdate> credentialUpdates = usersWithCredentialsToUpdate.stream()
                 .map(username -> new WorkloadCredentialUpdate(username, userToCrnMap.get(username), usersWorkloadCredentialMap.get(username)))
                 .collect(ImmutableSet.toImmutableSet());
         WorkloadCredentialsUpdateType credentialsUpdateType = updateOptimizationEnabled ?
                 WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED : WorkloadCredentialsUpdateType.FORCE_UPDATE;
+
         underTest.setWorkloadCredentials(new UserSyncOptions(false, batchCallEnabled, credentialsUpdateType), ipaClient, credentialUpdates,
                 warnings);
     }

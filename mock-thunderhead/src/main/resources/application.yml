@@ -20,6 +20,8 @@ auth:
         repair.enable: true
       rebuild.enable: true
       select.instance.type.enable: true
+      batch.call.enable: true
+      usersync.thread.timeout.enable: true
     cloudstoragevalidation.enable:
       global: true
       aws: true
@@ -66,7 +68,6 @@ auth:
     nodestatus.salt.ping.enable: true
     diagnostics.vm.enable: true
     user.sync.credentials.update.optimization.enable: true
-    freeipa.batch.call.enable: true
     azure:
       disk:
         SSEWithCMK.enable: true

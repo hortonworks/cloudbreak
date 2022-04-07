@@ -9,6 +9,7 @@ import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.SYNC_
 import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.USER_SYNC_DELETE;
 
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import javax.inject.Inject;
 
@@ -89,6 +90,9 @@ public class UserSyncForStackService {
             }
 
             return toSyncStatusDetail(environmentCrn, warnings);
+        } catch (TimeoutException e) {
+            LOGGER.warn("Timed out while synchronizing environment {}", environmentCrn, e);
+            return SyncStatusDetail.fail(environmentCrn, "Timed out", warnings);
         } catch (Exception e) {
             LOGGER.warn("Failed to synchronize environment {}", environmentCrn, e);
             return SyncStatusDetail.fail(environmentCrn, e.getLocalizedMessage(), warnings);
@@ -126,7 +130,7 @@ public class UserSyncForStackService {
     }
 
     private void retrySyncIfBatchCallHasWarnings(Stack stack, UmsUsersState umsUsersState, Multimap<String, String> warnings, UserSyncOptions options,
-            FreeIpaClient freeIpaClient, UsersStateDifference usersStateDifferenceBeforeSync) throws FreeIpaClientException {
+            FreeIpaClient freeIpaClient, UsersStateDifference usersStateDifferenceBeforeSync) throws FreeIpaClientException, TimeoutException {
         if (options.isFullSync() && !warnings.isEmpty() && options.isFmsToFreeIpaBatchCallEnabled()) {
             UsersStateDifference usersStateDifferenceAfterSync = compareUmsAndFreeIpa(umsUsersState, options, freeIpaClient);
             if (userStateDifferenceCalculator.usersStateDifferenceChanged(usersStateDifferenceBeforeSync, usersStateDifferenceAfterSync)) {

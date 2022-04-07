@@ -9,9 +9,11 @@ import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -26,6 +28,8 @@ import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,8 +38,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.ImmutableMultimap;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
@@ -74,7 +80,7 @@ class UserSyncForEnvServiceTest {
     private UmsUsersStateProviderDispatcher umsUsersStateProviderDispatcher;
 
     @Mock
-    @Qualifier(UsersyncConfig.USERSYNC_TASK_EXECUTOR)
+    @Qualifier(UsersyncConfig.USERSYNC_EXTERNAL_TASK_EXECUTOR)
     private ExecutorService asyncTaskExecutor;
 
     @Mock
@@ -85,6 +91,9 @@ class UserSyncForEnvServiceTest {
 
     @Mock
     private UmsVirtualGroupCreateService umsVirtualGroupCreateService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private UserSyncForEnvService underTest;
@@ -119,7 +128,7 @@ class UserSyncForEnvServiceTest {
         when(userSyncStatusService.getOrCreateForStack(stack1)).thenReturn(new UserSyncStatus());
         when(userSyncStatusService.getOrCreateForStack(stack2)).thenReturn(new UserSyncStatus());
 
-        underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1, stack2), userSyncFilter, options);
+        underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1, stack2), userSyncFilter, options, System.currentTimeMillis());
 
         verify(umsVirtualGroupCreateService).createVirtualGroups(ACCOUNT_ID, List.of(stack1, stack2));
         verify(userSyncStatusService, times(2)).save(any(UserSyncStatus.class));
@@ -159,7 +168,7 @@ class UserSyncForEnvServiceTest {
         when(userSyncForStackService.synchronizeStack(stack2, umsUsersState2, options))
                 .thenReturn(new SyncStatusDetail(ENV_CRN_2, SynchronizationStatus.REJECTED, "fial2", ImmutableMultimap.of(ENV_CRN_2, "failed2")));
 
-        underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1, stack2), userSyncFilter, options);
+        underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1, stack2), userSyncFilter, options, System.currentTimeMillis());
 
         verifyNoInteractions(userSyncStatusService);
         ArgumentCaptor<Collection> successCaptor = ArgumentCaptor.forClass(Collection.class);
@@ -201,7 +210,7 @@ class UserSyncForEnvServiceTest {
         });
         when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID), any(Optional.class))).thenReturn(new UmsEventGenerationIds());
 
-        underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1), userSyncFilter, options);
+        underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1), userSyncFilter, options, System.currentTimeMillis());
 
         verifyNoInteractions(userSyncStatusService);
         ArgumentCaptor<Collection> successCaptor = ArgumentCaptor.forClass(Collection.class);
@@ -216,6 +225,83 @@ class UserSyncForEnvServiceTest {
                         hasProperty("additionalDetails", anEmptyMap())
                 ))
         ));
+    }
+
+    @Test
+    public void testSyncUsersTimesOut() {
+        ReflectionTestUtils.setField(underTest, "operationTimeout", 0L);
+        Stack stack1 = mock(Stack.class);
+        when(stack1.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
+        UserSyncOptions options = new UserSyncOptions(true, true, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+        doAnswer(inv -> {
+            inv.getArgument(2, Runnable.class).run();
+            return null;
+        }).when(operationService).tryWithOperationCleanup(eq(OPERATION_ID), eq(ACCOUNT_ID), any(Runnable.class));
+        UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
+        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), any()))
+                .thenReturn(Map.of(ENV_CRN, umsUsersState1));
+        Future<?> future = mock(Future.class);
+        when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
+            when(future.get(0L, TimeUnit.MILLISECONDS)).thenThrow(new TimeoutException("timeout"));
+            return future;
+        });
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID), any(Optional.class))).thenReturn(new UmsEventGenerationIds());
+        when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+
+        underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1), userSyncFilter, options, System.currentTimeMillis());
+
+        verifyNoInteractions(userSyncStatusService);
+        ArgumentCaptor<Collection> successCaptor = ArgumentCaptor.forClass(Collection.class);
+        ArgumentCaptor<Collection> failureCaptor = ArgumentCaptor.forClass(Collection.class);
+        verify(operationService).completeOperation(eq(ACCOUNT_ID), eq(OPERATION_ID), successCaptor.capture(), failureCaptor.capture());
+        assertTrue(successCaptor.getValue().isEmpty());
+        verify(future).cancel(true);
+        List<FailureDetails> failures = (List<FailureDetails>) failureCaptor.getValue();
+        assertThat(failures, allOf(
+                hasItem(allOf(
+                        hasProperty("environment", is(ENV_CRN)),
+                        hasProperty("message", is("Timed out")),
+                        hasProperty("additionalDetails", anEmptyMap())
+                ))
+        ));
+    }
+
+    @Test
+    public void testSyncUsersDoesntTimeout() {
+        ReflectionTestUtils.setField(underTest, "operationTimeout", 0L);
+        Stack stack1 = mock(Stack.class);
+        when(stack1.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
+        UserSyncOptions options = new UserSyncOptions(true, true, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+        doAnswer(inv -> {
+            inv.getArgument(2, Runnable.class).run();
+            return null;
+        }).when(operationService).tryWithOperationCleanup(eq(OPERATION_ID), eq(ACCOUNT_ID), any(Runnable.class));
+        UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
+        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), any()))
+                .thenReturn(Map.of(ENV_CRN, umsUsersState1));
+        when(userSyncForStackService.synchronizeStack(stack1, umsUsersState1, options))
+                .thenReturn(new SyncStatusDetail(ENV_CRN, SynchronizationStatus.COMPLETED, "", ImmutableMultimap.of()));
+        Future<SyncStatusDetail> future = mock(Future.class);
+        when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
+            SyncStatusDetail result = (SyncStatusDetail) inv.getArgument(0, Callable.class).call();
+            when(future.get(anyLong(), eq(TimeUnit.MILLISECONDS))).thenReturn(result);
+            return future;
+        });
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID), any(Optional.class))).thenReturn(new UmsEventGenerationIds());
+        when(userSyncStatusService.getOrCreateForStack(stack1)).thenReturn(new UserSyncStatus());
+        when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+
+        underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1), userSyncFilter, options, System.currentTimeMillis());
+
+        ArgumentCaptor<Collection> successCaptor = ArgumentCaptor.forClass(Collection.class);
+        ArgumentCaptor<Collection> failureCaptor = ArgumentCaptor.forClass(Collection.class);
+        verify(operationService).completeOperation(eq(ACCOUNT_ID), eq(OPERATION_ID), successCaptor.capture(), failureCaptor.capture());
+        verify(future, never()).cancel(true);
+        verify(future, never()).cancel(false);
+        assertTrue(failureCaptor.getValue().isEmpty());
+        assertTrue(successCaptor.getValue().contains(new SuccessDetails(ENV_CRN)));
     }
 
     @Test
@@ -241,7 +327,7 @@ class UserSyncForEnvServiceTest {
         when(userSyncForStackService.synchronizeStackForDeleteUser(stack2, "deleteMe"))
                 .thenReturn(new SyncStatusDetail(ENV_CRN_2, SynchronizationStatus.COMPLETED, "", ImmutableMultimap.of()));
 
-        underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1, stack2), userSyncFilter, options);
+        underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1, stack2), userSyncFilter, options, System.currentTimeMillis());
 
         verifyNoInteractions(userSyncStatusService);
         ArgumentCaptor<Collection> successCaptor = ArgumentCaptor.forClass(Collection.class);

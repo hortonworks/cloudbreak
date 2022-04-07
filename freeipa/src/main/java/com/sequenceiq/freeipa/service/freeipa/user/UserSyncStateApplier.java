@@ -12,6 +12,7 @@ import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.REMOV
 import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.SET_WORKLOAD_CREDENTIALS;
 import static java.util.Objects.requireNonNull;
 
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 
 import javax.inject.Inject;
@@ -45,7 +46,7 @@ public class UserSyncStateApplier {
     private UserSyncOperations operations;
 
     public void applyDifference(UmsUsersState umsUsersState, String environmentCrn, Multimap<String, String> warnings,
-            UsersStateDifference usersStateDifference, UserSyncOptions options, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
+            UsersStateDifference usersStateDifference, UserSyncOptions options, FreeIpaClient freeIpaClient) throws FreeIpaClientException, TimeoutException {
         LOGGER.debug("Starting {} ...", APPLY_DIFFERENCE_TO_IPA);
         applyStateDifferenceToIpa(environmentCrn, freeIpaClient, usersStateDifference, warnings::put, options.isFmsToFreeIpaBatchCallEnabled());
         LOGGER.debug("Finished {}.", APPLY_DIFFERENCE_TO_IPA);
@@ -63,7 +64,7 @@ public class UserSyncStateApplier {
     }
 
     public void applyStateDifferenceToIpa(String environmentCrn, FreeIpaClient freeIpaClient, UsersStateDifference stateDifference,
-            BiConsumer<String, String> warnings, boolean fmsToFreeipaBatchCallEnabled) throws FreeIpaClientException {
+            BiConsumer<String, String> warnings, boolean fmsToFreeipaBatchCallEnabled) throws FreeIpaClientException, TimeoutException {
         LOGGER.info("Applying state difference {} to environment {}.", stateDifference, environmentCrn);
 
         LOGGER.debug("Starting {} for {} groups ...", ADD_GROUPS,

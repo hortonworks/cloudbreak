@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,7 +63,7 @@ class UserSyncStateApplierTest {
     private UserSyncStateApplier underTest;
 
     @Test
-    void testApplyStateDifferenceToIpa() throws FreeIpaClientException {
+    void testApplyStateDifferenceToIpa() throws FreeIpaClientException, TimeoutException {
 
         Multimap<String, String> warnings = ArrayListMultimap.create();
 
@@ -74,7 +75,7 @@ class UserSyncStateApplierTest {
     }
 
     @Test
-    public void testApplyDifferenceNoPasswordHashSupport() throws FreeIpaClientException {
+    public void testApplyDifferenceNoPasswordHashSupport() throws FreeIpaClientException, TimeoutException {
         UmsUsersState umsUsersState = mock(UmsUsersState.class);
         UserSyncOptions userSyncOptions = mock(UserSyncOptions.class);
         UsersStateDifference usersStateDifference = createStateDiff();
@@ -88,7 +89,7 @@ class UserSyncStateApplierTest {
     }
 
     @Test
-    public void testApplyDifferenceWithPasswordHashSupport() throws FreeIpaClientException {
+    public void testApplyDifferenceWithPasswordHashSupport() throws FreeIpaClientException, TimeoutException {
         UsersState usersState = UsersState.newBuilder()
                 .addUserMetadata("userToUpdate1", new UserMetadata("userToUpdate1Crn", 1L))
                 .addUserMetadata("userToUpdate2", new UserMetadata("userToUpdate2Crn", 2L))
@@ -127,7 +128,7 @@ class UserSyncStateApplierTest {
         ));
     }
 
-    private void verifyOperationsCalled(UsersStateDifference usersStateDifference) throws FreeIpaClientException {
+    private void verifyOperationsCalled(UsersStateDifference usersStateDifference) throws FreeIpaClientException, TimeoutException {
         verify(operations).addGroups(eq(true), eq(freeIpaClient), eq(usersStateDifference.getGroupsToAdd()), any());
         verify(operations).addUsers(eq(true), eq(freeIpaClient), eq(usersStateDifference.getUsersToAdd()), any());
         verify(operations).disableUsers(eq(true), eq(freeIpaClient), eq(usersStateDifference.getUsersToDisable()), any());

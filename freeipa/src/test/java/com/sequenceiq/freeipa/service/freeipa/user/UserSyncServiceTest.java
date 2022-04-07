@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -21,6 +21,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
@@ -68,14 +71,13 @@ public class UserSyncServiceTest {
 
     private static final String INTERNAL_ACTOR = "crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__";
 
+    private static final Long TIMEOUT = 6L;
+
     @Mock
     private StackService stackService;
 
     @Mock
     private OperationService operationService;
-
-    @Mock
-    private FreeIpaUsersStateProvider freeIpaUsersStateProvider;
 
     @Mock
     private UserSyncStatusService userSyncStatusService;
@@ -103,6 +105,9 @@ public class UserSyncServiceTest {
 
     @Mock
     private ExecutorService asyncTaskExecutor;
+
+    @Mock
+    private ScheduledExecutorService scheduledExecutorService;
 
     @Mock
     private UserSyncForEnvService userSyncForEnvService;
@@ -164,7 +169,7 @@ public class UserSyncServiceTest {
         verify(userSyncStatusService).save(userSyncStatus);
         ArgumentCaptor<UserSyncOptions> syncOptionsCaptor = ArgumentCaptor.forClass(UserSyncOptions.class);
         verify(userSyncForEnvService)
-                .synchronizeUsers(eq(operation.getOperationId()), eq(ACCOUNT_ID), eq(List.of(stack)), eq(requestFilter), syncOptionsCaptor.capture());
+                .synchronizeUsers(eq(operation.getOperationId()), eq(ACCOUNT_ID), eq(List.of(stack)), eq(requestFilter), syncOptionsCaptor.capture(), anyLong());
         UserSyncOptions userSyncOptions = syncOptionsCaptor.getValue();
         assertTrue(userSyncOptions.isFullSync());
         assertTrue(userSyncOptions.isCredentialsUpdateOptimizationEnabled());
@@ -214,7 +219,8 @@ public class UserSyncServiceTest {
         verifyNoInteractions(userSyncStatusService);
         ArgumentCaptor<UserSyncOptions> syncOptionsCaptor = ArgumentCaptor.forClass(UserSyncOptions.class);
         verify(userSyncForEnvService)
-                .synchronizeUsers(eq(operation.getOperationId()), eq(ACCOUNT_ID), eq(List.of(stack, stack2)), eq(requestFilter), syncOptionsCaptor.capture());
+                .synchronizeUsers(eq(operation.getOperationId()), eq(ACCOUNT_ID), eq(List.of(stack, stack2)), eq(requestFilter), syncOptionsCaptor.capture(),
+                        anyLong());
         UserSyncOptions userSyncOptions = syncOptionsCaptor.getValue();
         assertFalse(userSyncOptions.isFullSync());
         assertTrue(userSyncOptions.isCredentialsUpdateOptimizationEnabled());
@@ -269,12 +275,135 @@ public class UserSyncServiceTest {
         verify(userSyncStatusService).save(userSyncStatus);
         ArgumentCaptor<UserSyncOptions> syncOptionsCaptor = ArgumentCaptor.forClass(UserSyncOptions.class);
         verify(userSyncForEnvService)
-                .synchronizeUsers(eq(operation.getOperationId()), eq(ACCOUNT_ID), eq(List.of(stack)), eq(requestFilter), syncOptionsCaptor.capture());
+                .synchronizeUsers(eq(operation.getOperationId()), eq(ACCOUNT_ID), eq(List.of(stack)), eq(requestFilter), syncOptionsCaptor.capture(), anyLong());
         UserSyncOptions userSyncOptions = syncOptionsCaptor.getValue();
         assertTrue(userSyncOptions.isFullSync());
         assertTrue(userSyncOptions.isCredentialsUpdateOptimizationEnabled());
         assertTrue(userSyncOptions.isFmsToFreeIpaBatchCallEnabled());
         verify(commonPermissionCheckingUtils).checkPermissionForUserOnResources(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, ACTOR_CRN, List.of(ENV_CRN));
+    }
+
+    @Test
+    public void testSyncUsersWithTimeoutCheckTaskFinished() {
+        Stack stack = mock(Stack.class);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        Operation operation = createRunningOperation();
+        when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
+                .thenReturn(operation);
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(2, Runnable.class);
+            runnable.run();
+            return null;
+        }).when(operationService).tryWithOperationCleanup(eq(operation.getOperationId()), eq(ACCOUNT_ID), any(Runnable.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn(INTERNAL_ACTOR);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        UserSyncStatus userSyncStatus = new UserSyncStatus();
+        when(userSyncStatusService.getOrCreateForStack(stack)).thenReturn(userSyncStatus);
+        when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        ReflectionTestUtils.setField(underTest, "operationTimeout", TIMEOUT);
+        Future<?> usersyncTask = mock(Future.class);
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(0, Runnable.class);
+            assertEquals(operation.getOperationId(), MDCBuilder.getMdcContextMap().get(LoggerContextKey.OPERATION_ID.toString()));
+            assertEquals(INTERNAL_ACTOR, ThreadBasedUserCrnProvider.getUserCrn());
+            runnable.run();
+            return usersyncTask;
+        }).when(asyncTaskExecutor).submit(any(Runnable.class));
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(0, Runnable.class);
+            runnable.run();
+            return null;
+        }).when(scheduledExecutorService).schedule(any(Runnable.class), eq(TIMEOUT), eq(TimeUnit.MILLISECONDS));
+        when(usersyncTask.isDone()).thenReturn(Boolean.TRUE);
+
+        Operation result = underTest.synchronizeUsers(ACCOUNT_ID, ACTOR_CRN, Set.of(), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+
+        assertEquals(operation, result);
+        ArgumentCaptor<UserSyncRequestFilter> requestFilterCaptor = ArgumentCaptor.forClass(UserSyncRequestFilter.class);
+        verify(userSyncRequestValidator).validateParameters(eq(ACCOUNT_ID), eq(ACTOR_CRN), eq(Set.of()), requestFilterCaptor.capture());
+        UserSyncRequestFilter requestFilter = requestFilterCaptor.getValue();
+        assertTrue(requestFilter.getUserCrnFilter().isEmpty());
+        assertTrue(requestFilter.getMachineUserCrnFilter().isEmpty());
+        assertTrue(requestFilter.getDeletedWorkloadUser().isEmpty());
+        assertEquals(operation, userSyncStatus.getLastStartedFullSync());
+        verify(userSyncStatusService).save(userSyncStatus);
+        ArgumentCaptor<UserSyncOptions> syncOptionsCaptor = ArgumentCaptor.forClass(UserSyncOptions.class);
+        verify(userSyncForEnvService)
+                .synchronizeUsers(eq(operation.getOperationId()), eq(ACCOUNT_ID), eq(List.of(stack)), eq(requestFilter), syncOptionsCaptor.capture(), anyLong());
+        UserSyncOptions userSyncOptions = syncOptionsCaptor.getValue();
+        assertTrue(userSyncOptions.isFullSync());
+        assertTrue(userSyncOptions.isCredentialsUpdateOptimizationEnabled());
+        assertTrue(userSyncOptions.isFmsToFreeIpaBatchCallEnabled());
+        verify(usersyncTask, never()).cancel(true);
+        verify(usersyncTask, never()).cancel(false);
+        verify(usersyncTask).isCancelled();
+        verify(usersyncTask).isDone();
+        verify(operationService, never()).timeout(anyString(), anyString());
+    }
+
+    @Test
+    public void testSyncUsersWithTimeoutCheckTaskRunnable() {
+        Stack stack = mock(Stack.class);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        Operation operation = createRunningOperation();
+        when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
+                .thenReturn(operation);
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(2, Runnable.class);
+            runnable.run();
+            return null;
+        }).when(operationService).tryWithOperationCleanup(eq(operation.getOperationId()), eq(ACCOUNT_ID), any(Runnable.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn(INTERNAL_ACTOR);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        UserSyncStatus userSyncStatus = new UserSyncStatus();
+        when(userSyncStatusService.getOrCreateForStack(stack)).thenReturn(userSyncStatus);
+        when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        ReflectionTestUtils.setField(underTest, "operationTimeout", TIMEOUT);
+        Future<?> usersyncTask = mock(Future.class);
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(0, Runnable.class);
+            assertEquals(operation.getOperationId(), MDCBuilder.getMdcContextMap().get(LoggerContextKey.OPERATION_ID.toString()));
+            assertEquals(INTERNAL_ACTOR, ThreadBasedUserCrnProvider.getUserCrn());
+            runnable.run();
+            return usersyncTask;
+        }).when(asyncTaskExecutor).submit(any(Runnable.class));
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(0, Runnable.class);
+            runnable.run();
+            return null;
+        }).when(scheduledExecutorService).schedule(any(Runnable.class), eq(TIMEOUT), eq(TimeUnit.MILLISECONDS));
+
+        Operation result = underTest.synchronizeUsers(ACCOUNT_ID, ACTOR_CRN, Set.of(), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+
+        assertEquals(operation, result);
+        ArgumentCaptor<UserSyncRequestFilter> requestFilterCaptor = ArgumentCaptor.forClass(UserSyncRequestFilter.class);
+        verify(userSyncRequestValidator).validateParameters(eq(ACCOUNT_ID), eq(ACTOR_CRN), eq(Set.of()), requestFilterCaptor.capture());
+        UserSyncRequestFilter requestFilter = requestFilterCaptor.getValue();
+        assertTrue(requestFilter.getUserCrnFilter().isEmpty());
+        assertTrue(requestFilter.getMachineUserCrnFilter().isEmpty());
+        assertTrue(requestFilter.getDeletedWorkloadUser().isEmpty());
+        assertEquals(operation, userSyncStatus.getLastStartedFullSync());
+        verify(userSyncStatusService).save(userSyncStatus);
+        ArgumentCaptor<UserSyncOptions> syncOptionsCaptor = ArgumentCaptor.forClass(UserSyncOptions.class);
+        verify(userSyncForEnvService)
+                .synchronizeUsers(eq(operation.getOperationId()), eq(ACCOUNT_ID), eq(List.of(stack)), eq(requestFilter), syncOptionsCaptor.capture(), anyLong());
+        UserSyncOptions userSyncOptions = syncOptionsCaptor.getValue();
+        assertTrue(userSyncOptions.isFullSync());
+        assertTrue(userSyncOptions.isCredentialsUpdateOptimizationEnabled());
+        assertTrue(userSyncOptions.isFmsToFreeIpaBatchCallEnabled());
+        verify(usersyncTask).cancel(true);
+        verify(usersyncTask, never()).cancel(false);
+        verify(usersyncTask).isCancelled();
+        verify(usersyncTask).isDone();
+        verify(operationService).timeout(operation.getOperationId(), ACCOUNT_ID);
     }
 
     private Operation createRunningOperation() {
@@ -284,29 +413,5 @@ public class UserSyncServiceTest {
         operation.setStatus(OperationState.RUNNING);
         operation.setOperationType(OperationType.USER_SYNC);
         return operation;
-    }
-
-
-    //    @Test
-    void testAsyncSynchronizeUsersUsesInternalCrn() {
-        Stack stack = mock(Stack.class);
-        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(anySet(), anyString())).thenReturn(List.of(stack));
-        Operation operation = mock(Operation.class);
-        when(operation.getStatus()).thenReturn(OperationState.RUNNING);
-        when(operation.getOperationId()).thenReturn("operationId");
-        when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
-                .thenReturn(operation);
-        UserSyncStatus userSyncStatus = mock(UserSyncStatus.class);
-        when(userSyncStatusService.getOrCreateForStack(any(Stack.class))).thenReturn(userSyncStatus);
-        when(userSyncStatusService.save(userSyncStatus)).thenReturn(userSyncStatus);
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
-                .thenReturn(INTERNAL_ACTOR);
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        UserSyncService spyService = spy(underTest);
-
-        spyService.synchronizeUsers("accountId", "actorCrn", Set.of(), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
-
-
     }
 }

@@ -19,6 +19,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -173,7 +174,7 @@ class UserSyncForStackServiceTest {
     }
 
     @Test
-    public void testSynchronizeStackSuccessPartialAtFirst() throws FreeIpaClientException {
+    public void testSynchronizeStackSuccessPartialAtFirst() throws FreeIpaClientException, TimeoutException {
         UmsUsersState umsUsersState = mock(UmsUsersState.class);
         when(umsUsersState.getRequestedWorkloadUsernames()).thenReturn(ImmutableSet.of("user1", "user2"));
         UserSyncOptions options = new UserSyncOptions(false, false, WorkloadCredentialsUpdateType.FORCE_UPDATE);
@@ -197,7 +198,7 @@ class UserSyncForStackServiceTest {
     }
 
     @Test
-    public void testSynchronizeStackFailsPartial() throws FreeIpaClientException {
+    public void testSynchronizeStackFailsPartial() throws FreeIpaClientException, TimeoutException {
         UmsUsersState umsUsersState = mock(UmsUsersState.class);
         when(umsUsersState.getRequestedWorkloadUsernames()).thenReturn(ImmutableSet.of("user1", "user2"));
         UserSyncOptions options = new UserSyncOptions(false, false, WorkloadCredentialsUpdateType.FORCE_UPDATE);
@@ -255,7 +256,7 @@ class UserSyncForStackServiceTest {
     }
 
     @Test
-    public void testSynchronizeStackForDeleteUser() throws FreeIpaClientException {
+    public void testSynchronizeStackForDeleteUser() throws FreeIpaClientException, TimeoutException {
         UsersState usersState = mock(UsersState.class);
         when(usersState.getUsers()).thenReturn(ImmutableSet.of(new FmsUser().withName("deleteMe")));
         when(usersState.getGroups()).thenReturn(ImmutableSet.of());

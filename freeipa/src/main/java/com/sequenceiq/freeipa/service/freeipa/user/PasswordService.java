@@ -63,8 +63,8 @@ public class PasswordService {
     private GrpcUmsClient umsClient;
 
     @Inject
-    @Qualifier(UsersyncConfig.USERSYNC_TASK_EXECUTOR)
-    private ExecutorService asyncTaskExecutor;
+    @Qualifier(UsersyncConfig.USERSYNC_EXTERNAL_TASK_EXECUTOR)
+    private ExecutorService usersyncExternalTaskExecutor;
 
     @Inject
     private OperationService operationService;
@@ -116,7 +116,7 @@ public class PasswordService {
     private void asyncSetPasswords(String operationId, String accountId, String userCrn, String password, List<Stack> stacks) {
         try {
             MDCBuilder.addOperationId(operationId);
-            asyncTaskExecutor.submit(() -> internalSetPasswords(operationId, accountId, userCrn, password, stacks));
+            usersyncExternalTaskExecutor.submit(() -> internalSetPasswords(operationId, accountId, userCrn, password, stacks));
         } finally {
             MDCBuilder.removeOperationId();
         }

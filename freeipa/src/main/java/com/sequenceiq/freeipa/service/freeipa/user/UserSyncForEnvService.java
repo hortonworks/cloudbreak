@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -19,9 +21,11 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
@@ -43,6 +47,9 @@ public class UserSyncForEnvService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserSyncForEnvService.class);
 
+    @Value("#{${freeipa.operation.cleanup.timeout-millis} * 0.9 }")
+    private Long operationTimeout;
+
     @Inject
     private UmsEventGenerationIdsProvider umsEventGenerationIdsProvider;
 
@@ -53,7 +60,7 @@ public class UserSyncForEnvService {
     private UmsUsersStateProviderDispatcher umsUsersStateProviderDispatcher;
 
     @Inject
-    @Qualifier(UsersyncConfig.USERSYNC_TASK_EXECUTOR)
+    @Qualifier(UsersyncConfig.USERSYNC_INTERNAL_TASK_EXECUTOR)
     private ExecutorService asyncTaskExecutor;
 
     @Inject
@@ -65,8 +72,11 @@ public class UserSyncForEnvService {
     @Inject
     private UmsVirtualGroupCreateService umsVirtualGroupCreateService;
 
-    public void synchronizeUsers(String operationId, String accountId, List<Stack> stacks, UserSyncRequestFilter userSyncFilter,
-            UserSyncOptions options) {
+    @Inject
+    private EntitlementService entitlementService;
+
+    public void synchronizeUsers(String operationId, String accountId, List<Stack> stacks, UserSyncRequestFilter userSyncFilter, UserSyncOptions options,
+            long startTime) {
         operationService.tryWithOperationCleanup(operationId, accountId, () -> {
             Set<String> environmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toSet());
             UserSyncLogEvent logUserSyncEvent = options.isFullSync() ? FULL_USER_SYNC : PARTIAL_USER_SYNC;
@@ -84,7 +94,7 @@ public class UserSyncForEnvService {
 
             statusFutures.forEach((envCrn, statusFuture) -> {
                 try {
-                    SyncStatusDetail statusDetail = statusFuture.get();
+                    SyncStatusDetail statusDetail = waitForSyncStatusDetailResult(startTime, statusFuture, accountId);
                     switch (statusDetail.getStatus()) {
                         case COMPLETED:
                             success.add(new SuccessDetails(envCrn));
@@ -96,6 +106,10 @@ public class UserSyncForEnvService {
                             failure.add(createFailureDetails(envCrn, "Unexpected status: " + statusDetail.getStatus(), statusDetail.getWarnings()));
                             break;
                     }
+                } catch (TimeoutException e) {
+                    LOGGER.warn("Sync timed out for env: {}", envCrn, e);
+                    statusFuture.cancel(true);
+                    failure.add(new FailureDetails(envCrn, "Timed out"));
                 } catch (InterruptedException | ExecutionException e) {
                     LOGGER.error("Sync is interrupted for env: {}", envCrn, e);
                     failure.add(new FailureDetails(envCrn, e.getLocalizedMessage()));
@@ -104,6 +118,19 @@ public class UserSyncForEnvService {
             operationService.completeOperation(accountId, operationId, success, failure);
             LOGGER.info("Finished {} for environments {} with operationId {}.", logUserSyncEvent, environmentCrns, operationId);
         });
+    }
+
+    private SyncStatusDetail waitForSyncStatusDetailResult(long startTime, Future<SyncStatusDetail> statusFuture, String accountId)
+            throws InterruptedException, ExecutionException, TimeoutException {
+        if (entitlementService.isUserSyncThreadTimeoutEnabled(accountId)) {
+            long elapsedTime = System.currentTimeMillis() - startTime;
+            long timeout = operationTimeout - elapsedTime;
+            LOGGER.debug("Get SyncStatusDetail with {}ms timeout", timeout);
+            return statusFuture.get(timeout < 0 ? 0 : timeout, TimeUnit.MILLISECONDS);
+        } else {
+            LOGGER.debug("Get SyncStatusDetail without timeout");
+            return statusFuture.get();
+        }
     }
 
     private Map<String, Future<SyncStatusDetail>> startAsyncSyncsForStacks(String operationId, String accountId, List<Stack> stacks,

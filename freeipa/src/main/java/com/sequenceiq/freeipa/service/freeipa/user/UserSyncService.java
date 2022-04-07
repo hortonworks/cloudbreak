@@ -2,9 +2,13 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -13,6 +17,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -39,6 +44,9 @@ public class UserSyncService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserSyncService.class);
 
+    @Value("#{${freeipa.operation.cleanup.timeout-millis} * 0.95 }")
+    private Long operationTimeout;
+
     @Inject
     private StackService stackService;
 
@@ -46,8 +54,12 @@ public class UserSyncService {
     private OperationService operationService;
 
     @Inject
-    @Qualifier(UsersyncConfig.USERSYNC_TASK_EXECUTOR)
-    private ExecutorService asyncTaskExecutor;
+    @Qualifier(UsersyncConfig.USERSYNC_EXTERNAL_TASK_EXECUTOR)
+    private ExecutorService usersyncExternalTaskExecutor;
+
+    @Inject
+    @Qualifier(UsersyncConfig.USERSYNC_TIMEOUT_TASK_EXECUTOR)
+    private ScheduledExecutorService timeoutTaskExecutor;
 
     @Inject
     private UserSyncStatusService userSyncStatusService;
@@ -153,11 +165,32 @@ public class UserSyncService {
     private void asyncSynchronizeUsers(String operationId, String accountId, List<Stack> stacks, UserSyncRequestFilter userSyncFilter, UserSyncOptions options) {
         try {
             MDCBuilder.addOperationId(operationId);
-            asyncTaskExecutor.submit(() -> userSyncForEnvService.synchronizeUsers(operationId, accountId, stacks, userSyncFilter, options));
+            long startTime = System.currentTimeMillis();
+            Future<?> task = usersyncExternalTaskExecutor.submit(() ->
+                    userSyncForEnvService.synchronizeUsers(operationId, accountId, stacks, userSyncFilter, options, startTime));
+            scheduleTimeoutTask(operationId, accountId, task);
         } finally {
             MDCBuilder.removeOperationId();
         }
 
+    }
+
+    private void scheduleTimeoutTask(String operationId, String accountId, Future<?> task) {
+        if (entitlementService.isUserSyncThreadTimeoutEnabled(accountId)) {
+            LOGGER.info("Scheduling timeout task for {} with {}ms timeout", operationId, operationTimeout);
+            Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
+            timeoutTaskExecutor.schedule(() -> {
+                MDCBuilder.buildMdcContextFromMap(mdcContextMap);
+                if (task.isCancelled() || task.isDone()) {
+                    LOGGER.debug("Nothing to do for operation id: [{}]", operationId);
+                } else {
+                    LOGGER.debug("Terminating usersync task with operation id: [{}]", operationId);
+                    task.cancel(true);
+                    operationService.timeout(operationId, accountId);
+                }
+                MDCBuilder.cleanupMdc();
+            }, operationTimeout, TimeUnit.MILLISECONDS);
+        }
     }
 
     private Set<String> union(Collection<String> collection1, Collection<String> collection2) {

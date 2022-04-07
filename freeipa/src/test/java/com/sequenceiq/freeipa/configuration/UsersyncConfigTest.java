@@ -41,7 +41,7 @@ class UsersyncConfigTest {
             + ACCOUNT_ID + ":user:" + UUID.randomUUID().toString();
 
     @Inject
-    @Qualifier(UsersyncConfig.USERSYNC_TASK_EXECUTOR)
+    @Qualifier(UsersyncConfig.USERSYNC_EXTERNAL_TASK_EXECUTOR)
     ExecutorService usersyncTaskExecutor;
 
     @MockBean
