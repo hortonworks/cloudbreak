@@ -58,6 +58,7 @@ public class FmsUserConverter {
             case DEACTIVATED:
                 return FmsUser.State.DISABLED;
             case ACTIVE:
+            case CONTROL_PLANE_LOCKED_OUT:
             case DELETING:
             case UNRECOGNIZED:
             default:
