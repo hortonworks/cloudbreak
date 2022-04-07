@@ -1,7 +1,7 @@
 {
-  "description": "7.2.15 - Streaming Analytics Heavy Duty with Apache Flink",
+  "description": "7.2.16 - Streaming Analytics Light Duty with Apache Flink",
   "blueprint": {
-    "cdhVersion": "7.2.15",
+    "cdhVersion": "7.2.16",
     "displayName": "streaming-analytics",
     "hostTemplates": [
       {
@@ -215,18 +215,6 @@
           {
             "name": "hdfs_service",
             "ref": "hdfs"
-          },
-          {
-            "name": "state_backend",
-            "value": "ROCKSDB"
-          },
-          {
-            "name": "checkpointing_interval",
-            "value": 600000
-          },
-          {
-            "name": "state_backend_rocksdb_predefined_options",
-            "value": "FLASH_SSD_OPTIMIZED"
           }
         ],
         "roleConfigGroups": [
@@ -249,6 +237,10 @@
           {
             "name": "flink_service",
             "ref": "flink"
+          },
+          {
+            "name": "kafka_service",
+            "ref": "kafka"
           }
         ],
         "roleConfigGroups": [
