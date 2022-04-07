@@ -83,6 +83,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
 import static java.util.Collections.newSetFromMap;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -446,6 +447,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datalake.zdu.osupgrade.enable}")
     private boolean enableDatalakeZduOSUpgrade;
+
+    @Value("${auth.mock.workloadiam.sync.enable}")
+    private boolean enableWorkloadIamSync;
 
     private String cbLicense;
 
@@ -913,6 +917,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableDatalakeZduOSUpgrade) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_ZDU_OS_UPGRADE));
+        }
+        if (enableWorkloadIamSync) {
+            builder.addEntitlements(createEntitlement(WORKLOAD_IAM_SYNC));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
