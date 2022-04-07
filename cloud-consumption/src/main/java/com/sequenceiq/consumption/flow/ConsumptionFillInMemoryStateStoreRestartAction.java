@@ -1,4 +1,4 @@
-package com.sequenceiq.consumption.configuration.flow;
+package com.sequenceiq.consumption.flow;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

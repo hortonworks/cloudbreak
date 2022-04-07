@@ -5,6 +5,7 @@ import javax.ws.rs.client.WebTarget;
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint;
 import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventV1Endpoint;
+import com.sequenceiq.consumption.api.v1.consumption.endpoint.ConsumptionInternalEndpoint;
 import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 
@@ -34,5 +35,9 @@ public class ConsumptionServiceCrnEndpoints extends AbstractUserCrnServiceEndpoi
         return getEndpoint(AuthorizationUtilEndpoint.class);
     }
 
+    @Override
+    public ConsumptionInternalEndpoint consumptionEndpoint() {
+        return getEndpoint(ConsumptionInternalEndpoint.class);
+    }
 }
 

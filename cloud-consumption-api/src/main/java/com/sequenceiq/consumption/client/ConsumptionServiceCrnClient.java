@@ -2,7 +2,7 @@ package com.sequenceiq.consumption.client;
 
 import com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceClient;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
-import com.sequenceiq.consumption.api.ConsumptionApi;
+import com.sequenceiq.consumption.api.v1.ConsumptionApi;
 
 public class ConsumptionServiceCrnClient extends AbstractUserCrnServiceClient<ConsumptionServiceCrnEndpoints> {
 
