@@ -101,6 +101,22 @@ class FmsUserConverterTest {
     }
 
     @Test
+    public void testUserToFmsUserControlPlaneLockedOutState() {
+        String workloadUsername = "foobar";
+        UserManagementProto.User umsUser = UserManagementProto.User.newBuilder()
+                .setWorkloadUsername(workloadUsername)
+                .setState(UserManagementProto.ActorState.Value.CONTROL_PLANE_LOCKED_OUT)
+                .build();
+
+        FmsUser fmsUser = underTest.toFmsUser(umsUser);
+
+        assertEquals(workloadUsername, fmsUser.getName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getFirstName());
+        assertEquals(underTest.NONE_STRING, fmsUser.getLastName());
+        assertEquals(FmsUser.State.ENABLED, fmsUser.getState());
+    }
+
+    @Test
     public void testUserToFmsUserUnrecognizedState() {
         String workloadUsername = "foobar";
         UserManagementProto.User umsUser = UserManagementProto.User.newBuilder()
