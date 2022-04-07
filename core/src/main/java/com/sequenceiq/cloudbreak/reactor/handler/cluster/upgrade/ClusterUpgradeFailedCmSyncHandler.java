@@ -44,7 +44,7 @@ public class ClusterUpgradeFailedCmSyncHandler extends ExceptionCatcherEventHand
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeFailedCmSyncRequest> event) {
         ClusterUpgradeFailedCmSyncRequest request = event.getData();
         try {
-            Stack stack = stackService.getById(request.getResourceId());
+            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             cmSyncerService.syncFromCmToDb(stack, request.getCandidateImages());
         } catch (Exception e) {
             LOGGER.warn("Error during syncing CM version to DB, syncing skipped.", e);

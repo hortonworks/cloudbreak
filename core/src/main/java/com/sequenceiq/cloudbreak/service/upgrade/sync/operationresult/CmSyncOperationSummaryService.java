@@ -14,17 +14,17 @@ public class CmSyncOperationSummaryService {
     @Inject
     private CmSyncOperationResultEvaluatorService cmSyncOperationResultEvaluatorService;
 
-    public CmSyncOperationSummary evaluate(CmSyncOperationResult cmSyncOperationResult) {
+    public CmSyncOperationStatus evaluate(CmSyncOperationResult cmSyncOperationResult) {
         if (cmSyncOperationResult.isEmpty()) {
             String message = "CM sync could not be carried out, most probably the CM server is down. Please make sure the CM server is running.";
             LOGGER.debug(message);
-            return CmSyncOperationSummary.ofError(message);
+            return CmSyncOperationStatus.ofError(message);
         } else {
-            CmSyncOperationSummary.Builder cmSyncOperationSummaryBuilder =
+            CmSyncOperationStatus.Builder cmSyncOperationStatusBuilder =
                     cmSyncOperationResultEvaluatorService.evaluateCmRepoSync(cmSyncOperationResult.getCmRepoSyncOperationResult());
-            cmSyncOperationSummaryBuilder.merge(
+            cmSyncOperationStatusBuilder.merge(
                     cmSyncOperationResultEvaluatorService.evaluateParcelSync(cmSyncOperationResult.getCmParcelSyncOperationResult()));
-            return cmSyncOperationSummaryBuilder.build();
+            return cmSyncOperationStatusBuilder.build();
         }
     }
 

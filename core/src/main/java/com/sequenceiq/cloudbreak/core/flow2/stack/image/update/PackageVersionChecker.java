@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater.Package;
+import com.sequenceiq.cloudbreak.service.cluster.Package;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 
 @Component

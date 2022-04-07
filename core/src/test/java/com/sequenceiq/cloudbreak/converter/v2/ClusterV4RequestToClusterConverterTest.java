@@ -31,7 +31,6 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
@@ -247,7 +246,7 @@ public class ClusterV4RequestToClusterConverterTest {
     }
 
     @Test
-    public void testConvertClouderaManagerRequestWithNullProductList() throws JsonProcessingException {
+    public void testConvertClouderaManagerRequestWithNullProductList() {
         ClusterV4Request request = new ClusterV4Request();
         request.setBlueprintName(BLUEPRINT);
         blueprint.setStackType(StackType.CDH.name());
@@ -274,7 +273,7 @@ public class ClusterV4RequestToClusterConverterTest {
     }
 
     @Test
-    public void testConvertClouderaManagerRequestWithNullRepo() throws JsonProcessingException {
+    public void testConvertClouderaManagerRequestWithNullRepo() {
         ClusterV4Request request = new ClusterV4Request();
         request.setBlueprintName(BLUEPRINT);
         blueprint.setStackType(StackType.CDH.name());

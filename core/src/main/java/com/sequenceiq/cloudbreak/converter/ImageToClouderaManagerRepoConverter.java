@@ -14,6 +14,7 @@ public class ImageToClouderaManagerRepoConverter {
         clouderaManagerRepo.setPredefined(Boolean.TRUE);
         clouderaManagerRepo.setVersion(image.getPackageVersion(ImagePackageVersion.CM));
         clouderaManagerRepo.setBaseUrl(image.getRepo().get(image.getOsType()));
+        clouderaManagerRepo.setBuildNumber(image.getCmBuildNumber());
         return clouderaManagerRepo;
     }
 }

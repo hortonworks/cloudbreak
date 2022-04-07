@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.CmSyncResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncImageCollectorService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncerService;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationStatus;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -56,16 +57,17 @@ public class CmSyncHandlerTest {
         Set<String> candidateImageUuids = Set.of(IMAGE_UUID_1);
         HandlerEvent<CmSyncRequest> event = getCmSyncRequestHandlerEvent(candidateImageUuids);
         Stack stack = new Stack();
-        when(stackService.getById(STACK_ID)).thenReturn(stack);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         Set<Image> foundImages = Set.of(mock(Image.class));
         when(cmSyncImageCollectorService.collectImages(USER_CRN, stack, candidateImageUuids)).thenReturn(foundImages);
-        CmSyncOperationSummary cmSyncOperationSummary = CmSyncOperationSummary.builder().withSuccess("").build();
+        CmSyncOperationStatus cmSyncOperationStatus = CmSyncOperationStatus.builder().withSuccess("").build();
+        CmSyncOperationSummary cmSyncOperationSummary = new CmSyncOperationSummary(cmSyncOperationStatus);
         when(cmSyncerService.syncFromCmToDb(stack, foundImages)).thenReturn(cmSyncOperationSummary);
 
         Selectable result = underTest.doAccept(event);
 
         assertEquals("CMSYNCRESULT", result.selector());
-        verify(stackService).getById(STACK_ID);
+        verify(stackService).getByIdWithListsInTransaction(STACK_ID);
         verify(cmSyncImageCollectorService).collectImages(USER_CRN, stack, candidateImageUuids);
         verify(cmSyncerService).syncFromCmToDb(stack, foundImages);
     }
@@ -75,7 +77,7 @@ public class CmSyncHandlerTest {
         Set<String> candidateImageUuids = Set.of(IMAGE_UUID_1);
         HandlerEvent<CmSyncRequest> event = getCmSyncRequestHandlerEvent(candidateImageUuids);
         Exception exception = new CloudbreakServiceException("errordetail");
-        when(stackService.getById(STACK_ID)).thenThrow(exception);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenThrow(exception);
 
         CmSyncResult result = (CmSyncResult) underTest.doAccept(event);
 
@@ -83,7 +85,7 @@ public class CmSyncHandlerTest {
         assertThat(result.getErrorDetails(), instanceOf(CloudbreakServiceException.class));
         assertEquals("unexpected error: errordetail", result.getErrorDetails().getMessage());
         assertEquals("unexpected error: errordetail", result.getStatusReason());
-        verify(stackService).getById(STACK_ID);
+        verify(stackService).getByIdWithListsInTransaction(STACK_ID);
         verify(cmSyncImageCollectorService, never()).collectImages(anyString(), any(), any());
         verify(cmSyncerService, never()).syncFromCmToDb(any(), any());
     }
@@ -93,10 +95,11 @@ public class CmSyncHandlerTest {
         Set<String> candidateImageUuids = Set.of(IMAGE_UUID_1);
         HandlerEvent<CmSyncRequest> event = getCmSyncRequestHandlerEvent(candidateImageUuids);
         Stack stack = new Stack();
-        when(stackService.getById(STACK_ID)).thenReturn(stack);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         Set<Image> foundImages = Set.of(mock(Image.class));
         when(cmSyncImageCollectorService.collectImages(USER_CRN, stack, candidateImageUuids)).thenReturn(foundImages);
-        CmSyncOperationSummary cmSyncOperationSummary = CmSyncOperationSummary.builder().withError("My error description").build();
+        CmSyncOperationStatus cmSyncOperationStatus = CmSyncOperationStatus.builder().withError("My error description").build();
+        CmSyncOperationSummary cmSyncOperationSummary = new CmSyncOperationSummary(cmSyncOperationStatus);
         when(cmSyncerService.syncFromCmToDb(stack, foundImages)).thenReturn(cmSyncOperationSummary);
 
         CmSyncResult result = (CmSyncResult) underTest.doAccept(event);

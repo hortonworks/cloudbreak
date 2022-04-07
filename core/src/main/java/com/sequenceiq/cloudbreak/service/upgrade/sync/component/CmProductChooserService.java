@@ -48,7 +48,7 @@ public class CmProductChooserService {
             return Optional.empty();
         } else {
             Optional<ClouderaManagerRepo> foundClouderaManagerRepo = candidateCmVersions.stream()
-                    .filter(candidateCmVersion -> installedCmVersionOptional.get().equals(candidateCmVersion.getVersion()))
+                    .filter(candidateCmVersion -> installedCmVersionOptional.get().equals(candidateCmVersion.getFullVersion()))
                     .findFirst();
             LOGGER.debug("ClouderaManagerRepo found based on the CM server version: {}", foundClouderaManagerRepo);
             return foundClouderaManagerRepo;

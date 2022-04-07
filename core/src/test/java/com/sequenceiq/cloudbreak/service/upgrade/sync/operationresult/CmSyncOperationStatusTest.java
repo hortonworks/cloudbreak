@@ -12,33 +12,33 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class CmSyncOperationSummaryTest {
+public class CmSyncOperationStatusTest {
 
     private static final String SUCCESS_MESSAGE = "successMessage";
 
     private static final String ERROR_MESSAGE = "errorMessage";
 
-    private final CmSyncOperationSummary.Builder underTest = CmSyncOperationSummary.builder();
+    private final CmSyncOperationStatus.Builder underTest = CmSyncOperationStatus.builder();
 
     @Test
     void testBuilderWhenSuccessOnlyThenSuccess() {
-        CmSyncOperationSummary cmSyncOperationsummary = underTest.withSuccess(SUCCESS_MESSAGE).build();
+        CmSyncOperationStatus cmSyncOperationStatus = underTest.withSuccess(SUCCESS_MESSAGE).build();
 
-        assertTrue(cmSyncOperationsummary.hasSucceeded());
-        assertEquals("successMessage", cmSyncOperationsummary.getMessage());
+        assertTrue(cmSyncOperationStatus.hasSucceeded());
+        assertEquals("successMessage", cmSyncOperationStatus.getMessage());
     }
 
     @Test
     void testBuilderWhenSuccessAndFailureThenFailure() {
-        CmSyncOperationSummary cmSyncOperationsummary = underTest.withSuccess(SUCCESS_MESSAGE).withError(ERROR_MESSAGE).build();
+        CmSyncOperationStatus cmSyncOperationStatus = underTest.withSuccess(SUCCESS_MESSAGE).withError(ERROR_MESSAGE).build();
 
-        assertFalse(cmSyncOperationsummary.hasSucceeded());
-        assertEquals(String.format("%s %s", SUCCESS_MESSAGE, ERROR_MESSAGE), cmSyncOperationsummary.getMessage());
+        assertFalse(cmSyncOperationStatus.hasSucceeded());
+        assertEquals(String.format("%s %s", SUCCESS_MESSAGE, ERROR_MESSAGE), cmSyncOperationStatus.getMessage());
     }
 
     @Test
     void testBuilderMergeWhenEmptyWithError() {
-        CmSyncOperationSummary.Builder other = CmSyncOperationSummary.builder().withError(ERROR_MESSAGE);
+        CmSyncOperationStatus.Builder other = CmSyncOperationStatus.builder().withError(ERROR_MESSAGE);
 
         underTest.merge(other);
 
@@ -49,7 +49,7 @@ public class CmSyncOperationSummaryTest {
 
     @Test
     void testBuilderMergeWhenThisSuccessWithOtherSuccessThenSuccess() {
-        CmSyncOperationSummary.Builder other = CmSyncOperationSummary.builder().withSuccess(SUCCESS_MESSAGE);
+        CmSyncOperationStatus.Builder other = CmSyncOperationStatus.builder().withSuccess(SUCCESS_MESSAGE);
         underTest.withSuccess(SUCCESS_MESSAGE);
 
         underTest.merge(other);
@@ -61,7 +61,7 @@ public class CmSyncOperationSummaryTest {
 
     @Test
     void testBuilderMergeWhenThisErrorWithOtherSuccessThenError() {
-        CmSyncOperationSummary.Builder other = CmSyncOperationSummary.builder().withSuccess(SUCCESS_MESSAGE);
+        CmSyncOperationStatus.Builder other = CmSyncOperationStatus.builder().withSuccess(SUCCESS_MESSAGE);
         underTest.withError(ERROR_MESSAGE);
 
         underTest.merge(other);
@@ -73,7 +73,7 @@ public class CmSyncOperationSummaryTest {
 
     @Test
     void testBuilderMergeWhenThisSuccessWithOtherErrorThenError() {
-        CmSyncOperationSummary.Builder other = CmSyncOperationSummary.builder().withError(ERROR_MESSAGE);
+        CmSyncOperationStatus.Builder other = CmSyncOperationStatus.builder().withError(ERROR_MESSAGE);
         underTest.withSuccess(SUCCESS_MESSAGE);
 
         underTest.merge(other);
@@ -85,7 +85,7 @@ public class CmSyncOperationSummaryTest {
 
     @Test
     void testBuilderMergeWhenThisErrorWithOtherErrorThenError() {
-        CmSyncOperationSummary.Builder other = CmSyncOperationSummary.builder().withError(ERROR_MESSAGE);
+        CmSyncOperationStatus.Builder other = CmSyncOperationStatus.builder().withError(ERROR_MESSAGE);
         underTest.withError(ERROR_MESSAGE);
 
         underTest.merge(other);

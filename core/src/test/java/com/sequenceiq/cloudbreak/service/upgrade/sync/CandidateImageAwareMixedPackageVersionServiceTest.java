@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED_MULTIPLE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED_NO_CANDIDATE;
-
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -25,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -36,11 +36,15 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
 
     private static final String CM_VERSION = "7.2.0";
 
+    private static final String CM_VERSION_WITH_BUILD_NUMBER = "7.2.0-1000";
+
     private static final String CDH_KEY = "CDH";
 
     private static final String V_7_2_2 = "7.2.2";
 
     private static final String IMAGE_CATALOG_URL = "http://imagecatalog";
+
+    private static final String CM_BUILD_NUMBER = "1000";
 
     @InjectMocks
     private CandidateImageAwareMixedPackageVersionService underTest;
@@ -84,7 +88,7 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
         candidateImages.add(otherImage3);
         candidateImages.add(properImage);
 
-        underTest.examinePackageVersionsWithAllCandidateImages(STACK_ID, candidateImages, CM_VERSION, activeParcels, IMAGE_CATALOG_URL);
+        underTest.examinePackageVersionsWithAllCandidateImages(STACK_ID, candidateImages, CM_VERSION_WITH_BUILD_NUMBER, activeParcels, IMAGE_CATALOG_URL);
 
         verify(clouderaManagerProductTransformer).transformToMap(otherImage1, true, true);
         verify(mixedPackageVersionComparator).matchParcelVersions(activeParcels, products1);
@@ -100,21 +104,21 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
     void testExaminePackageVersionsWithAllCandidateImagesShouldSendNotificationWhenTheVersionsAreNotValidAndThereAreMultipleCandidate() {
         Map<String, String> activeProducts = Map.of(CDH_KEY, V_7_2_2);
         Set<ParcelInfo> activeParcels = createParcelInfo(activeProducts);
-        String activeCmVersion = "7.4.0";
+        String activeCmVersion = "7.4.0-1000";
 
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage1 = createCatalogImage("image1", 125L, activeCmVersion);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage1 = createCatalogImage("image1", 125L, "7.4.0");
         Map<String, String> products1 = Map.of(CDH_KEY, "7.2.7");
         when(clouderaManagerProductTransformer.transformToMap(otherImage1, true, true)).thenReturn(products1);
         when(mixedPackageVersionComparator.matchParcelVersions(activeParcels, products1)).thenReturn(false);
 
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage2 = createCatalogImage("image2", 123L, "7.2.7");
 
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage3 = createCatalogImage("image3", 123L, activeCmVersion);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage3 = createCatalogImage("image3", 123L, "7.4.0");
         Map<String, String> products3 = Map.of(CDH_KEY, "7.2.8");
         when(clouderaManagerProductTransformer.transformToMap(otherImage3, true, true)).thenReturn(products3);
         when(mixedPackageVersionComparator.matchParcelVersions(activeParcels, products3)).thenReturn(false);
 
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage4 = createCatalogImage("image4", 124L, activeCmVersion);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage4 = createCatalogImage("image4", 124L, "7.4.0");
         when(clouderaManagerProductTransformer.transformToMap(otherImage4, true, true)).thenReturn(activeProducts);
         when(mixedPackageVersionComparator.matchParcelVersions(activeParcels, activeProducts)).thenReturn(false);
 
@@ -126,7 +130,7 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
 
         when(mixedPackageMessageProvider.createActiveParcelsMessage(activeParcels)).thenReturn("CDH 7.2.2");
         when(mixedPackageMessageProvider.createSuggestedVersionsMessage(products1, activeParcels, activeCmVersion))
-                .thenReturn("Cloudera Manager 7.4.0, CDH 7.2.7");
+                .thenReturn("Cloudera Manager 7.4.0-1000, CDH 7.2.7");
 
         underTest.examinePackageVersionsWithAllCandidateImages(STACK_ID, candidateImages, activeCmVersion, activeParcels, IMAGE_CATALOG_URL);
 
@@ -137,19 +141,19 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
         verify(clouderaManagerProductTransformer).transformToMap(otherImage4, true, true);
         verify(mixedPackageVersionComparator).matchParcelVersions(activeParcels, activeProducts);
         verify(eventService).fireCloudbreakEvent(STACK_ID, UPDATE_IN_PROGRESS.name(), STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED_MULTIPLE,
-                List.of(activeCmVersion, "CDH 7.2.2", "Cloudera Manager 7.4.0, CDH 7.2.7", "http://imagecatalog"));
+                List.of(activeCmVersion, "CDH 7.2.2", "Cloudera Manager 7.4.0-1000, CDH 7.2.7", "http://imagecatalog"));
     }
 
     @Test
     void testExaminePackageVersionsWithAllCandidateImagesShouldSendNotificationWhenTheVersionsAreNotValidAndThereIsOnlyOneCandidate() {
         Map<String, String> activeProducts = Map.of(CDH_KEY, V_7_2_2);
         Set<ParcelInfo> activeParcels = createParcelInfo(activeProducts);
-        String activeCmVersion = "7.4.0";
+        String activeCmVersion = "7.4.0-1000";
 
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage1 = createCatalogImage("image1", 125L, V_7_2_2);
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage2 = createCatalogImage("image2", 123L, "7.2.7");
 
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage3 = createCatalogImage("image3", 123L, activeCmVersion);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage3 = createCatalogImage("image3", 123L, "7.4.0");
         Map<String, String> products3 = Map.of(CDH_KEY, "7.2.8");
         when(clouderaManagerProductTransformer.transformToMap(otherImage3, true, true)).thenReturn(products3);
         when(mixedPackageVersionComparator.matchParcelVersions(activeParcels, products3)).thenReturn(false);
@@ -164,7 +168,7 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
 
         when(mixedPackageMessageProvider.createActiveParcelsMessage(activeParcels)).thenReturn("CDH 7.2.2");
         when(mixedPackageMessageProvider.createSuggestedVersionsMessage(products3, activeParcels, activeCmVersion))
-                .thenReturn("Cloudera Manager 7.4.0, CDH 7.2.8");
+                .thenReturn("Cloudera Manager 7.4.0-1000, CDH 7.2.8");
 
         underTest.examinePackageVersionsWithAllCandidateImages(STACK_ID, candidateImages, activeCmVersion, activeParcels, IMAGE_CATALOG_URL);
 
@@ -173,14 +177,14 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
         verify(mixedPackageMessageProvider).createActiveParcelsMessage(activeParcels);
         verify(mixedPackageMessageProvider).createSuggestedVersionsMessage(products3, activeParcels, activeCmVersion);
         verify(eventService).fireCloudbreakEvent(STACK_ID, UPDATE_IN_PROGRESS.name(), STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED,
-                List.of("7.4.0", "CDH 7.2.2", "Cloudera Manager 7.4.0, CDH 7.2.8"));
+                List.of("7.4.0-1000", "CDH 7.2.2", "Cloudera Manager 7.4.0-1000, CDH 7.2.8"));
     }
 
     @Test
     void testExaminePackageVersionsWithAllCandidateImagesShouldSendNotificationWhenTheVersionsAreNotValidAndThereAreNoCandidate() {
         Map<String, String> activeProducts = Map.of(CDH_KEY, V_7_2_2);
         Set<ParcelInfo> activeParcels = createParcelInfo(activeProducts);
-        String activeCmVersion = "7.4.0";
+        String activeCmVersion = "7.4.0-1000";
 
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage1 = createCatalogImage("image1", 125L, V_7_2_2);
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image otherImage2 = createCatalogImage("image2", 123L, "7.2.7");
@@ -199,7 +203,7 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
 
         verify(mixedPackageMessageProvider).createActiveParcelsMessage(activeParcels);
         verify(eventService).fireCloudbreakEvent(STACK_ID, UPDATE_IN_PROGRESS.name(), STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED_NO_CANDIDATE,
-                List.of("7.4.0", "CDH 7.2.2"));
+                List.of("7.4.0-1000", "CDH 7.2.2"));
     }
 
     private Set<ParcelInfo> createParcelInfo(Map<String, String> parcels) {
@@ -208,7 +212,8 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
 
     private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createCatalogImage(String imageId, Long created, String cmVersion) {
         return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, created, null, null, null, imageId, null, null, null, null, null,
-                Map.of(CM.getKey(), cmVersion), null, Collections.emptyList(), null, false, null, null);
+                Map.of(CM.getKey(), cmVersion, ImagePackageVersion.CM_BUILD_NUMBER.getKey(), CM_BUILD_NUMBER),
+                null, Collections.emptyList(), CM_BUILD_NUMBER, false, null, null);
     }
 
 }

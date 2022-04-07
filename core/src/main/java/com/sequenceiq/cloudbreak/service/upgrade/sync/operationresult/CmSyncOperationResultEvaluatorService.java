@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
 
 @Service
@@ -19,39 +20,43 @@ public class CmSyncOperationResultEvaluatorService {
 
     private static final String READING_PARCEL_VERSIONS = "Reading versions of active parcels";
 
-    public CmSyncOperationSummary.Builder evaluateParcelSync(CmParcelSyncOperationResult cmParcelSyncOperationResult) {
+    public CmSyncOperationStatus.Builder evaluateParcelSync(CmParcelSyncOperationResult cmParcelSyncOperationResult) {
         if (cmParcelSyncOperationResult.getActiveParcels().isEmpty()) {
             String message = String.format("%s failed, it was not possible to retrieve versions of active parcels from the CM server.", READING_PARCEL_VERSIONS);
             LOGGER.debug(message);
-            return CmSyncOperationSummary.builder().withError(message);
+            return CmSyncOperationStatus.builder().withError(message);
         } else {
             return evaluateIfAllParcelsWereFound(cmParcelSyncOperationResult);
         }
     }
 
-    public CmSyncOperationSummary.Builder evaluateCmRepoSync(CmRepoSyncOperationResult cmRepoSyncOperationResult) {
+    public CmSyncOperationStatus.Builder evaluateCmRepoSync(CmRepoSyncOperationResult cmRepoSyncOperationResult) {
         if (cmRepoSyncOperationResult.getInstalledCmVersion().isEmpty()) {
             String message = String.format("%s failed, it was not possible to retrieve CM version from the server.", READING_CM_VERSION);
             LOGGER.debug(message);
-            return CmSyncOperationSummary.builder().withError(message);
+            return CmSyncOperationStatus.builder().withError(message);
         } else {
             return evaluateIfCmRepoWasFound(cmRepoSyncOperationResult);
         }
     }
 
-    private CmSyncOperationSummary.Builder evaluateIfAllParcelsWereFound(CmParcelSyncOperationResult cmParcelSyncOperationResult) {
-        Set<String> activeParcelNames = cmParcelSyncOperationResult.getActiveParcels().stream().map(ParcelInfo::getName).collect(Collectors.toSet());
-        Set<String> foundCmProductNames = cmParcelSyncOperationResult.getFoundCmProducts().stream().map(cmp -> cmp.getName()).collect(Collectors.toSet());
+    private CmSyncOperationStatus.Builder evaluateIfAllParcelsWereFound(CmParcelSyncOperationResult cmParcelSyncOperationResult) {
+        Set<String> activeParcelNames = cmParcelSyncOperationResult.getActiveParcels().stream()
+                .map(ParcelInfo::getName)
+                .collect(Collectors.toSet());
+        Set<String> foundCmProductNames = cmParcelSyncOperationResult.getFoundCmProducts().stream()
+                .map(ClouderaManagerProduct::getName)
+                .collect(Collectors.toSet());
         Set<String> notFoundProductNames = Sets.difference(activeParcelNames, foundCmProductNames);
         if (notFoundProductNames.isEmpty()) {
             String message = String.format("%s succeeded, the following active parcels were found on the CM server: %s.", READING_PARCEL_VERSIONS,
                     activeParcelsToPrintableList(cmParcelSyncOperationResult));
             LOGGER.debug(message);
-            return CmSyncOperationSummary.builder().withSuccess(message);
+            return CmSyncOperationStatus.builder().withSuccess(message);
         } else {
             String message = getParcelErrorMessage(activeParcelNames, foundCmProductNames, notFoundProductNames);
             LOGGER.debug(message);
-            return CmSyncOperationSummary.builder().withError(message);
+            return CmSyncOperationStatus.builder().withError(message);
         }
     }
 
@@ -61,16 +66,16 @@ public class CmSyncOperationResultEvaluatorService {
                 .collect(Collectors.joining(", "));
     }
 
-    private CmSyncOperationSummary.Builder evaluateIfCmRepoWasFound(CmRepoSyncOperationResult cmRepoSyncOperationResult) {
+    private CmSyncOperationStatus.Builder evaluateIfCmRepoWasFound(CmRepoSyncOperationResult cmRepoSyncOperationResult) {
         String cmInstalledVersion = cmRepoSyncOperationResult.getInstalledCmVersion().get();
         if (cmRepoSyncOperationResult.getFoundClouderaManagerRepo().isEmpty()) {
             String message = String.format("%s failed, no matching component found on images for CM server version %s.", READING_CM_VERSION, cmInstalledVersion);
             LOGGER.debug(message);
-            return CmSyncOperationSummary.builder().withError(message);
+            return CmSyncOperationStatus.builder().withError(message);
         } else {
             String message = String.format("%s succeeded, the current version of CM is %s.", READING_CM_VERSION, cmInstalledVersion);
             LOGGER.debug(message);
-            return CmSyncOperationSummary.builder().withSuccess(message);
+            return CmSyncOperationStatus.builder().withSuccess(message);
         }
     }
 

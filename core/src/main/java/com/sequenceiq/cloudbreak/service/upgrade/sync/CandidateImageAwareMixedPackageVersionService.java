@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.sync;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED_MULTIPLE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_CM_MIXED_PACKAGE_VERSIONS_FAILED_NO_CANDIDATE;
@@ -44,7 +45,7 @@ public class CandidateImageAwareMixedPackageVersionService {
     public void examinePackageVersionsWithAllCandidateImages(Long stackId, Set<Image> candidateImages, String currentCmVersion, Set<ParcelInfo> activeParcels,
             String imageCatalogUrl) {
         LOGGER.debug("Target image not found for cluster therefore comparing package versions with other candidate images.");
-        if (areComponentVersionsMatchWithAnyImage(activeParcels, currentCmVersion, candidateImages)) {
+        if (componentVersionsMatchWithAnyImage(activeParcels, currentCmVersion, candidateImages)) {
             LOGGER.debug("The combination of the cluster package versions are compatible.");
         } else {
             Set<Image> imagesWithSameCmVersion = getImageByCurrentCmVersion(currentCmVersion, candidateImages);
@@ -66,12 +67,12 @@ public class CandidateImageAwareMixedPackageVersionService {
         }
     }
 
-    private boolean areComponentVersionsMatchWithAnyImage(Set<ParcelInfo> activeParcels, String cmVersion, Set<Image> images) {
+    private boolean componentVersionsMatchWithAnyImage(Set<ParcelInfo> activeParcels, String cmVersion, Set<Image> images) {
         return images.stream().anyMatch(image -> cmVersion.equals(getCmVersion(image.getPackageVersions())) && matchParcelVersions(activeParcels, image));
     }
 
     private String getCmVersion(Map<String, String> packageVersions) {
-        return packageVersions.get(CM.getKey());
+        return String.format("%s-%s", packageVersions.get(CM.getKey()), packageVersions.get(CM_BUILD_NUMBER.getKey()));
     }
 
     private boolean matchParcelVersions(Set<ParcelInfo> activeParcels, Image image) {
