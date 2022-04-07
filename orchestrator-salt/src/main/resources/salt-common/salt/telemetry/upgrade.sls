@@ -5,6 +5,7 @@
   file.managed:
     - source: salt://telemetry/template/proxy.env.j2
     - template: jinja
+    - makedirs: True
     - mode: 700
 
 {%- if telemetry.repoName and (telemetry.desiredCdpTelemetryVersion or telemetry.desiredCdpLoggingAgentVersion) %}
