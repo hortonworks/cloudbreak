@@ -279,7 +279,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     private SimpleEnvironmentResponses toSimpleEnvironmentResponses(List<EnvironmentDto> environmentDtos) {
-        List<SimpleEnvironmentResponse> responses = environmentDtos.stream().map(environmentResponseConverter::dtoToSimpleResponse)
+        List<SimpleEnvironmentResponse> responses = environmentDtos.stream()
+                .map(c -> environmentResponseConverter.dtoToSimpleResponse(c, true, true))
                 .collect(Collectors.toList());
         return new SimpleEnvironmentResponses(responses);
     }

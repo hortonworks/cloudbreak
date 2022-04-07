@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 
@@ -32,6 +33,13 @@ public class ClouderaManagerProductsProvider {
                 .filter(clusterComponent -> clusterComponent.getName().equals(StackType.CDH.name()))
                 .map(this::getClouderaManagerProduct)
                 .findFirst();
+    }
+
+    public ClouderaManagerProduct getCdhProducts(Set<ClouderaManagerProduct> products) {
+        return products.stream()
+                .filter(service -> service.getName().equals(StackType.CDH.name()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("Runtime component not found!"));
     }
 
     private ClouderaManagerProduct getClouderaManagerProduct(ClusterComponent clusterComponent) {

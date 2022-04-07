@@ -64,6 +64,8 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private String name;
 
+        private String originalName;
+
         private String description;
 
         private String creator;
@@ -142,6 +144,11 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         public Builder withName(String name) {
             this.name = name;
+            return this;
+        }
+
+        public Builder withOriginalName(String originalName) {
+            this.originalName = originalName;
             return this;
         }
 
@@ -319,6 +326,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
             DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
             detailedEnvironmentResponse.setCrn(crn);
             detailedEnvironmentResponse.setName(name);
+            detailedEnvironmentResponse.setOriginalName(originalName);
             detailedEnvironmentResponse.setCreator(creator);
             detailedEnvironmentResponse.setDescription(description);
             detailedEnvironmentResponse.setRegions(regions);

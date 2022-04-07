@@ -12,7 +12,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -60,12 +59,12 @@ public class ParcelServiceTest {
         ParcelOperationStatus removalStatus = new ParcelOperationStatus();
 
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
-        when(imageReaderService.getParcelNames(STACK_ID, stack.isDatalake())).thenReturn(parcelNames);
+        when(imageReaderService.getParcelNames(STACK_ID)).thenReturn(parcelNames);
         when(clusterApi.removeUnusedParcels(clusterComponentsByBlueprint, parcelNames)).thenReturn(removalStatus);
 
         underTest.removeUnusedParcelComponents(stack, clusterComponentsByBlueprint);
 
-        verify(imageReaderService).getParcelNames(STACK_ID, stack.isDatalake());
+        verify(imageReaderService).getParcelNames(STACK_ID);
         verify(clusterApiConnectors).getConnector(stack);
         verify(clusterApi).removeUnusedParcels(clusterComponentsByBlueprint, parcelNames);
         verify(clusterComponentUpdater).removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint, removalStatus);
@@ -77,7 +76,6 @@ public class ParcelServiceTest {
         cluster.setId(CLUSTER_ID);
         stack.setId(STACK_ID);
         stack.setCluster(cluster);
-        stack.setType(StackType.WORKLOAD);
         return stack;
     }
 }

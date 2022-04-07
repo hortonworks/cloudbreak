@@ -50,10 +50,10 @@ public class ImageReaderService {
         return foundParcelProducts;
     }
 
-    public Set<String> getParcelNames(Long stackId, boolean datalake) {
+    public Set<String> getParcelNames(Long stackId) {
         try {
             StatedImage currentImage = imageService.getCurrentImage(stackId);
-            return getParcels(Set.of(currentImage.getImage()), datalake)
+            return getParcels(Set.of(currentImage.getImage()), false)
                     .stream()
                     .map(ClouderaManagerProduct::getName)
                     .collect(Collectors.toSet());
