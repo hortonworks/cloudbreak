@@ -1,7 +1,6 @@
 package com.sequenceiq.flow.service.flowlog;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -254,19 +253,6 @@ public class FlowLogDBServiceTest {
     public void testHasPendingFlowEvent() {
         Boolean actual = underTest.hasPendingFlowEvent(Lists.newArrayList(createFlowLog(true, "1"), createFlowLog(false, "2")));
         assertEquals(Boolean.TRUE, actual);
-    }
-
-    @Test
-    public void testGetSerializedStringWhenCannotSerializeEntityWithRecursion() {
-        TestEntity testEntity = new TestEntity();
-        testEntity.setName("name");
-        TestClass testClass = new TestClass();
-        testClass.setEntity(testEntity);
-        testClass.setEntity(testEntity);
-        testClass.setValue("value");
-        testEntity.setTestClass(testClass);
-        String actual = underTest.parseWithGsonIfNotContainsEntity(testClass);
-        assertNull(actual);
     }
 
     private FlowLog createFlowLog(boolean pending, String flowId) {
