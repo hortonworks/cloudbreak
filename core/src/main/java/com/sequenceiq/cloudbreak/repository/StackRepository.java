@@ -66,9 +66,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     Optional<Stack> findByNameAndWorkspaceIdWithLists(@Param("name") String name, @Param("type") StackType type, @Param("workspaceId") Long workspaceId,
             @Param("showTerminated") Boolean showTerminated, @Param("terminatedAfter") Long terminatedAfter);
 
-    @Query("SELECT s.id as id, s.name as name, s.stackStatus as status FROM Stack s "
+    @Query("SELECT s.id as id, s.name as name, s.resourceCrn as crn FROM Stack s "
             + "WHERE s.environmentCrn= :environmentCrn AND s.type = :type AND s.terminated=null")
-    List<StackStatusView> findByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn, @Param("type") StackType type);
+    List<StackIdView> findByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn, @Param("type") StackType type);
 
     @Query("SELECT COUNT(s.id) FROM Stack s "
             + "WHERE s.environmentCrn= :environmentCrn AND s.type = :type AND s.terminated=null")
