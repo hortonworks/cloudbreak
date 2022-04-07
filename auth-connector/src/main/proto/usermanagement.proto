@@ -154,10 +154,14 @@ service UserManagement {
     returns (ListAccountsResponse) {}
 
   // Get the rights for an actor.
+  // These rights handle authorization and not authentication
+  // i.e., the rights of the actor are returned regardless of whether the actor is disabled.
   rpc GetRights(GetRightsRequest)
     returns (GetRightsResponse) {}
 
   // Checks if an actor has the input rights on the input resources.
+  // These rights handle authorization and not authentication
+  // i.e., the rights of the actor are checked regardless of whether the actor is disabled.
   rpc CheckRights(CheckRightsRequest)
     returns (CheckRightsResponse) {}
 
@@ -438,6 +442,10 @@ service UserManagement {
   rpc GetActorWorkloadCredentials(GetActorWorkloadCredentialsRequest)
     returns (GetActorWorkloadCredentialsResponse) {}
 
+  // Removes workload password minimum lifetime date for an actor.
+  rpc UnsetWorkloadPasswordMinLifetime (UnsetWorkloadPasswordMinLifetimeRequest)
+      returns (UnsetWorkloadPasswordMinLifetimeResponse) {}
+
   // Returns a unique ID for the following events:
   // * Role assignment events.
   // * Resource role assignment events.
@@ -525,6 +533,44 @@ service UserManagement {
   // Update user.
   rpc UpdateUser(UpdateUserRequest)
     returns (UpdateUserResponse) {}
+
+  // Set Cloudera SSO strict mode for the account.
+  rpc SetCssoStrictMode(SetCssoStrictModeRequest)
+      returns (SetCssoStrictModeResponse) {}
+
+  // Handles interactive logout requests from console.
+  rpc InteractiveLogout(InteractiveLogoutRequest)
+      returns (InteractiveLogoutResponse) {}
+
+  // Lists users for SCIM client. It's not a shared backend method for other services to call.
+  rpc ScimListUsers (ScimListUsersRequest)
+      returns (ScimListUsersResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY: For SCIM use only. It is NOT a shared backend method for other services to call.";
+  }
+
+  // SCIM call. Remove all SCIM members from a group. It is not a shared backend method for other
+  // services to call.
+  rpc ScimRemoveAllMembersFromGroup (ScimRemoveAllMembersFromGroupRequest)
+      returns (ScimRemoveAllMembersFromGroupResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY: For SCIM use only. It is NOT a shared backend method for other services to call.";
+  }
+
+  // SCIM call. Replace all SCIM members of a group. It is not a shared backend method for other
+  // services to call.
+  rpc ScimReplaceAllMembersOfGroup (ScimReplaceAllMembersOfGroupRequest)
+      returns (ScimReplaceAllMembersOfGroupResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY: For SCIM use only. It is NOT a shared backend method for other services to call.";
+  }
+
+  // SCIM call. Lists all groups. It's not a shared backend method for other services to call.
+  rpc ScimListGroups (ScimListGroupsRequest)
+      returns (ScimListGroupsResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY: For SCIM use only. It is NOT a shared backend method for other services to call.";
+  }
 }
 
 // The state of the actor.
@@ -538,6 +584,10 @@ message ActorState {
     DELETING = 1;
     // Deactivated actor can no longer authenticate in to CDP.
     DEACTIVATED = 2;
+    // Control plane locked out indicates that the actor can no longer
+    // authenticate to the control plane, but can authenticate to workload
+    // clusters. The state is used for inactivity timeout for FedRAMP AC-2 (3).
+    CONTROL_PLANE_LOCKED_OUT = 3;
   }
 }
 
@@ -589,6 +639,8 @@ message User {
   // identify user. It also maps to the "userName" attribute of the SCIM User schema and passed as
   // "userName" while creating users through SCIM.
   string idpUserId = 18;
+  // Information about the workload password details for the user.
+  WorkloadPasswordDetails workloadPasswordDetails = 19;
 }
 
 // A MachineUser is an internal Altus identity, used by applications to call
@@ -625,6 +677,21 @@ message MachineUser {
   uint64 safeDeleteDateMs = 8;
   // A list of cloud identities for the machine user.
   repeated CloudIdentity cloudIdentities = 9;
+  // Information about the workload password details for the machine user.
+  WorkloadPasswordDetails workloadPasswordDetails = 10;
+}
+
+message WorkloadPasswordDetails {
+  // Whether a workload password has been set.
+  bool isPasswordSet = 1;
+  // The workload password expiration date, in ms from the Java epoch of
+  // 1970-01-01T00:00:00Z. The value of 0 means that the password does
+  // not expire.
+  uint64 passwordExpirationDate = 2;
+  // The workload password min lifetime date, in ms from the Java epoch of
+  // 1970-01-01T00:00:00Z. A new password can not be set until the min lifetime
+  // date. The value of 0 means there is no min lifetime date.
+  uint64 passwordMinLifetimeDate = 3;
 }
 
 // A Group is a Altus resource that contains a collection of Actors. Groups
@@ -1045,6 +1112,11 @@ message GetUserRequest {
   reserved 1;
   string accountId = 2;
   string userIdOrCrn = 3;
+  // The CRN of the identity provider connector the user belongs to.
+  // This field is deprecated and optional.
+  nullable.StringValue identityProviderCrn = 4 [(options.FieldExtension.hidden) = true,
+    (options.FieldExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY",
+    (options.FieldExtension.deprecated) = true];
 }
 
 message GetUserResponse {
@@ -1053,6 +1125,13 @@ message GetUserResponse {
 
 message ListUsersRequest {
   reserved 1;
+  // The fields 7 (identityProviderCrn), 8 (identityProviderUserId) were SCIM specific, which got removed as a part
+  // of CDPCP-5490. These numbers should be un-reserved but at the moment of this writing we are unsure of its usage
+  // by any internal client.
+  // CDPCP-5606 Tracks adding callingServiceName header to SCIM API. Once we have callingServiceName in SCIM API, we
+  // can check the logs and confirm that whether these fields are only used from SCIM or from other internal clients
+  // as well. If they were only used by SCIM then we can un-reserve 7 and 8.
+  reserved 7, 8;
   // The account in which to list users.
   string accountId = 4;
   // The list is optional. The default is to return all users.
@@ -1077,6 +1156,11 @@ message DeleteActorRequest {
   Actor actor = 2;
   // If set the 'true' the actor will be deleted from storage.
   bool forceDelete = 3;
+  // The CRN of the identity provider connector the user belongs to.
+  // This field is deprecated and optional.
+  nullable.StringValue identityProviderCrn = 4 [(options.FieldExtension.hidden) = true,
+    (options.FieldExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY",
+    (options.FieldExtension.deprecated) = true];
 }
 
 message DeleteActorResponse {
@@ -1434,6 +1518,11 @@ message Account {
   WorkloadPasswordPolicy machineUserPasswordPolicy = 16;
   // The authentication policy.
   AuthenticationPolicy authenticationPolicy = 17;
+  // Whether strict mode is enabled on the account. The default value is 'false'.
+  // When it is true, it means that strict mode is enabled on the account and interactive login
+  // through Cloudera SSO is disabled for all users including account administrators of the
+  // account. The 'true' value overrides the setting for `clouderaSSOLoginEnabled`.
+  bool clouderaSSOStrictModeEnabled = 18;
 }
 
 message AuthenticationPolicy {
@@ -1959,6 +2048,23 @@ message RedisSessionTokenCacheEntry {
   int32 inactivityDurationSec = 6;
 }
 
+// This structure is used to serialize the redis SCIM pagination entry and is not used in
+// our rpc system. It provides mapping between the integer-based `startIndex` and
+// ItemPage (nextPageToken).
+message RedisScimPaginationCacheEntry {
+  // The DynamoDB next page token.
+  string nextPageToken = 1;
+  // The query ID of the first pagination call. It will be same for subsequent pagination requests
+  // initiated by the same SCIM client. Generally used for logging purpose to correlate page(s)
+  // between subsequent pagination requests.
+  string queryId = 2;
+  // The total number of resources (users or groups) found before the current pagination request.
+  // It will be updated after each pagination query to DynamoDB.
+  int32 runningTotalResults = 3;
+  // The estimated total number of resources (users or groups) in storage.
+  int32 estimatedTotalResults = 4;
+}
+
 // This is used to serialize all the Role dynamoDB related information that is
 // not indexed.
 message RoleDetails {
@@ -2066,6 +2172,14 @@ message WorkloadPasswordPolicyStorage {
   // Whether passwords must include symbols. The symbols are '#', '&', '*', '$', '%',
   // '@', '^', '.', '_', and '!'. The default is 'false'.
   bool mustIncludeSymbols = 6;
+  // The number of previous passwords that should be remembered, the actor is prevented
+  // from reusing these passwords. Can be any number between 0 and 20. The default is 0,
+  // this value means all previous passwords may be reused.
+  uint32 passwordHistorySize = 7;
+  // Account-wide min lifetime, in ms, of actors workload passwords. Password for an actor can't
+  // be set again until this duration is complete. A value of 0 indicates that passwords can be
+  // changed any time.
+  uint64 workloadPasswordMinLifetime = 8;
 }
 
 // Object used to serialize account metadata that does not require its own
@@ -2085,6 +2199,11 @@ message AccountDetails {
   WorkloadPasswordPolicyStorage machineUsersPasswordPolicy = 5;
   // The console authentication policy.
   AuthenticationPolicy authenticationPolicy = 6;
+  // Whether strict mode is enabled on the account. The default value is 'false'.
+  // When it is 'true', it means that strict mode is enabled on the account and interactive login
+  // through Cloudera SSO is disabled for all users including account administrators of the
+  // account. The 'true' value also overrides the setting for `clouderaSSOLoginDisabled`.
+  bool clouderaSSOStrictModeEnabled = 7;
 }
 
 // Set Account Messages request object.
@@ -3239,6 +3358,10 @@ message ActorDetails {
   // 1970-01-01T00:00:00Z. The value of 0 means that the password hash does
   // not expire.
   uint64 encryptedPasswordHashExpirationDate = 4;
+  // The password hash min lifetime date, in ms from the Java epoch of
+  // 1970-01-01T00:00:00Z. A new password can not be set until the min lifetime
+  // date. The value of 0 means there is no min lifetime date.
+  uint64 encryptedPasswordHashMinLifetimeDate = 9;
   // A list of kerberos keys for the actor.
   repeated StoredKerberosKey kerberosKeys = 2;
   // A list of ssh public keys for the actor.
@@ -3249,6 +3372,16 @@ message ActorDetails {
   int64 workloadCredentialsVersion = 7;
   // Cloud identities assigned to the actor.
   CloudIdentitiesStorage cloudIdentities = 5;
+  // A list of previously used passwords for the actor. The newest passwords
+  // are at the front of the list.
+  repeated PasswordDetails passwordHistory = 8;
+}
+
+message PasswordDetails {
+  // The cdp workload password hash, encrypted.
+  string encryptedPasswordHash = 1 [(options.FieldExtension.sensitive) = true];
+  // The salt used to generate the password hash.
+  string passwordHashSalt = 2;
 }
 
 // This is used to serialize all the Group dynamoDB related information that is
@@ -3286,6 +3419,13 @@ message ValidateActorWorkloadCredentialsRequest {
 message ValidateActorWorkloadCredentialsResponse {
 }
 
+message UnsetWorkloadPasswordMinLifetimeRequest {
+  string actorCrn = 1;
+}
+
+message UnsetWorkloadPasswordMinLifetimeResponse {
+}
+
 // Definition of a Kerberos Key used in rpc calls (vs storage)
 message ActorKerberosKey {
   // The key type
@@ -3311,6 +3451,10 @@ message GetActorWorkloadCredentialsResponse {
   // password hash expires. A value of 0 indicates that the password hash
   // never expires.
   uint64 passwordHashExpirationDate = 3;
+  // The password hash min lifetime date, in ms from the Java epoch of
+  // 1970-01-01T00:00:00Z. A new password can not be set until the min lifetime
+  // date. The value of 0 means there is no min lifetime date.
+  uint64 passwordHashMinLifetimeDate  = 7;
   // A list of kerberos keys for the actor.
   repeated ActorKerberosKey kerberosKeys = 2;
   // The workload username for the actor.
@@ -3462,6 +3606,14 @@ message WorkloadPasswordPolicy {
   // Whether passwords must include symbols. The symbols are '#', '&', '*', '$', '%',
   // '@', '^', '.', '_', and '!'. The default is 'false'.
   bool mustIncludeSymbols = 6;
+  // The number of previous passwords that should be remembered. The actor is prevented
+  // from reusing these passwords. Can be any number between 0 and 20. The default is 0,
+  // this value means all previous passwords may be reused.
+  uint32 passwordHistorySize = 7;
+  // Account-wide min lifetime, in ms, of actor's workload passwords. Password for an actor can't
+  // be set again until this duration is complete. A value of 0 indicates that passwords can be
+  // changed any time.
+  uint64 workloadPasswordMinLifetime = 8;
 }
 
 message SetWorkloadPasswordPolicyRequest {
@@ -3662,6 +3814,9 @@ message GetUserSyncStateModelRequest {
   // actors that pass at least one of these rights checks. The results of the rights
   // checks are included in the response for each included actor.
   repeated RightsCheck rightsCheck = 2;
+  // Whether to skip the workload credentials in the response.
+  // If skipped, only the workload credentials version will be included.
+  bool skipCredentials = 3;
 }
 
 message GetUserSyncStateModelResponse {
@@ -3682,7 +3837,7 @@ message GetUserSyncStateModelResponse {
 // workload credentials through user sync.
 // TODO CDPCP-3033 - migrate GetActorWorkloadCredentialsResponse to use this object
 message ActorWorkloadCredentials {
-  reserved 4;
+  reserved 4, 7;
   // The password hash.
   string passwordHash = 1 [(options.FieldExtension.sensitive) = true];
   // The date, in ms from the Java epoch of 1970-01-01T00:00:00Z, when the
@@ -3695,6 +3850,11 @@ message ActorWorkloadCredentials {
   repeated SshPublicKey sshPublicKey = 5;
   // The version number of the workload credentials. Version numbering begins at zero.
   int64 workloadCredentialsVersion = 6;
+}
+
+message ActorWorkloadCredentialsVersion {
+  // The version number of the workload credentials. Version numbering begins at zero.
+  int64 workloadCredentialsVersion = 1;
 }
 
 message RightsCheckResult {
@@ -3715,8 +3875,12 @@ message UserSyncActor {
   // Wags this actor is a member of, represented as indices into the
   // list of workload administration groups in the response.
   repeated int32 workloadAdministrationGroupIndex = 4;
-  // Credentials.
-  ActorWorkloadCredentials credentials = 5;
+  oneof usersyncactor_oneof {
+    // Credentials.
+    ActorWorkloadCredentials credentials = 5;
+    // Credentials version only
+    ActorWorkloadCredentialsVersion credentialsVersion = 6;
+  }
 }
 
 message UserSyncActorDetails {
@@ -3893,9 +4057,181 @@ message UpdateUserRequest {
   // User.state will be set to ActorState.Value.ACTIVE if the value is false.
   // If it is not set then the user's state will not be changed.
   nullable.BoolValue isDeactivated = 7;
+  // The CRN of the identity provider connector the user belongs to.
+  // This field is deprecated and optional.
+  nullable.StringValue identityProviderCrn = 8 [(options.FieldExtension.hidden) = true,
+    (options.FieldExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY",
+    (options.FieldExtension.deprecated) = true];
 }
 
 message UpdateUserResponse {
   // The updated user.
   User user = 1;
+}
+
+message SetCssoStrictModeRequest {
+  // The account ID for which strict mode is being enabled or disabled.
+  string accountId = 1;
+  // Whether to enable or disable strict mode on the account. The default value is 'false'.
+  // Set it 'true' to enable strict mode. Enabling strict mode will restrict Cloudera SSO login
+  // for all the users including account administrators of the account. Disabling strict mode
+  // will allow account administrator login through Cloudera SSO. The 'true' value also overrides
+  // the setting for `clouderaSSOLoginEnabled`.
+  bool enableStrictMode = 2;
+}
+
+message SetCssoStrictModeResponse {
+}
+
+message InteractiveLogoutRequest {
+  // The session token to be removed from server as a part of interactive logout process.
+  string sessionToken = 1 [(options.FieldExtension.sensitive) = true];
+  // The IP address that the request was made from.
+  string sourceIpAddress = 2;
+}
+
+message InteractiveLogoutResponse {
+}
+
+// ========================================================================
+// SECTION: SCIM
+//
+// These messages pertain to SCIM.
+// ========================================================================
+
+message ScimListUsersRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY";
+
+  // The account in which to list users.
+  string accountId = 1;
+  // The ID of the identity provider connector the user belongs to.
+  string identityProviderId = 2;
+  // The list of identity provider user IDs. Current implementation only supports filtering based
+  // on single identityProviderUserId and throws exception if more than 1 values are provided for
+  // identityProviderUserId.
+  repeated string identityProviderUserId = 3;
+  // The start index from where pagination request should start or continue.
+  // It is a 1-based index. It can be negative. A value less than 1 SHALL be interpreted as 1.
+  sint32 startIndex = 4;
+  // The number of users to list for this request. It corresponds to a page size.
+  // It can be negative. A negative value SHALL be interpreted as "0". A value of "0"
+  // indicates that no resource results are to be returned  except for "totalResults".
+  // Ref: https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.4
+  sint32 count = 5;
+  // The query string used for filtering. It can be empty if no filtering is requested by the
+  // SCIM client.
+  string filter = 6;
+}
+
+message ScimListUsersResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY";
+
+  // The list of users.
+  repeated User user = 1;
+  // The estimated total number of users in the account for the queried identity provider.
+  int32 totalResults = 2;
+  // The 1-based index of the first result in the current set of query results.
+  int32 startIndex = 3;
+}
+
+message ScimRemoveAllMembersFromGroupRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY";
+
+  // Account ID for which the request is being made.
+  string accountId = 1;
+  // The group ID.
+  string groupId = 2;
+  // The identity provider ID. This limits the members-to-be-removed to users in this identity
+  // provider.
+  string identityProviderId = 3;
+}
+
+message ScimRemoveAllMembersFromGroupResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY";
+
+  // A list of all the user CRNs that were removed from the group.
+  repeated string membersRemoved = 1;
+}
+
+message ScimReplaceAllMembersOfGroupRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY";
+
+  // Account ID for which the request is being made.
+  string accountId = 1;
+  // The group ID.
+  string groupId = 2;
+  // The identity provider ID. This limits the members-to-be-removed to users in this identity
+  // provider.
+  string identityProviderId = 3;
+  // The list of user IDs to add to the group.
+  repeated string userId = 4;
+}
+
+message ScimReplaceAllMembersOfGroupResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY";
+  // A list of all the user CRNs that were removed from the group.
+  repeated string membersRemoved = 1;
+  // A list of all the user CRNs that were added to the group.
+  repeated string membersAdded = 2;
+}
+
+message ScimListGroupsRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY";
+
+  // The account ID for which the request is being made.
+  string accountId = 1;
+  // The ID of the identity provider connector initiating this request.
+  string identityProviderId = 2;
+  // The list of group names. It is optional. The default is to return all groups in the account.
+  // The current implementation only supports filtering based on a single groupName and throws an
+  // exception if more than one value is provided for groupName.
+  repeated string groupName = 3;
+  // The start index from where pagination request should start or continue.
+  // It is a 1-based index. It can be negative. A value less than 1 SHALL be interpreted as 1.
+  sint32 startIndex = 4;
+  // The number of groups to list for this request. It corresponds to a page size.
+  // It can be negative. A negative value SHALL be interpreted as "0". A value of "0"
+  // indicates that no resource results are to be returned except for "totalResults".
+  // Ref: https://datatracker.ietf.org/doc/html/rfc7644#section-3.4.2.4
+  sint32 count = 5;
+  // The query string used for filtering. It can be empty if no filtering is requested by the
+  // SCIM client.
+  string filter = 6;
+  // Whether to exclude group members from the response.
+  bool excludeMembers = 7;
+}
+
+message ScimListGroupsResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY";
+  // The list of SCIM groups in the queried account. Note that the groups are not IdP specific
+  // like users.
+  repeated ScimGroup scimGroup = 1;
+  // The estimated total number of groups in the account.
+  // If request provided non-empty `groupName`, then it is total number of matching groups
+  // in the account.
+  int32 totalResults = 2;
+  // The 1-based index of the first result in the current set of query results.
+  int32 startIndex = 3;
+}
+
+// An object encapsulating SCIM Group schema attributes.
+message ScimGroup {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "FOR_CLOUDERA_USE_ONLY";
+  // The group ID.
+  string groupId = 1;
+  // The group name. Must be unique within the account. Cannot be empty string.
+  string groupName = 2;
+  // The creation date in ms from the Java epoch of 1970-01-01T00:00:00Z.
+  uint64 creationDate = 3;
+  // The list of group member (user) CRNs. The group members are optional.
+  repeated string memberCrn = 4;
 }
