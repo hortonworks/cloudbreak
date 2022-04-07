@@ -49,7 +49,7 @@ public class CommonExperienceService implements Experience {
         this.commonExperiencePathCreator = commonExperiencePathCreator;
         this.experienceConnectorService = experienceConnectorService;
         this.experienceValidator = experienceValidator;
-        this.configuredExperiences = identifyConfiguredExperiences(config);
+        configuredExperiences = identifyConfiguredExperiences(config);
     }
 
     @Override
@@ -133,6 +133,7 @@ public class CommonExperienceService implements Experience {
                     .map(cp -> ExperienceCluster.builder()
                             .withName(cp.getName())
                             .withExperienceName(xp.getName())
+                            .withPublicName(xp.getBusinessName())
                             .withStatus(cp.getStatus())
                             .withStatusReason(cp.getStatusReason())
                             .build())
