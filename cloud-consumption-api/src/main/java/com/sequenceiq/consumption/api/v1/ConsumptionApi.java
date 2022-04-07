@@ -1,4 +1,4 @@
-package com.sequenceiq.consumption.api;
+package com.sequenceiq.consumption.api.v1;
 
 public class ConsumptionApi {
 

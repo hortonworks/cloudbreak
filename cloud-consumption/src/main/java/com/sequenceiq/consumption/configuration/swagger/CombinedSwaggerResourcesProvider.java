@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.consumption.api.ConsumptionApi;
+import com.sequenceiq.consumption.api.v1.ConsumptionApi;
 
 import springfox.documentation.swagger.web.InMemorySwaggerResourcesProvider;
 import springfox.documentation.swagger.web.SwaggerResource;

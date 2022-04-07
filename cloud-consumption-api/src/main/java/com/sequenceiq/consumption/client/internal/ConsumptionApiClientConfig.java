@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
-import com.sequenceiq.consumption.api.ConsumptionApi;
+import com.sequenceiq.consumption.api.v1.ConsumptionApi;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 

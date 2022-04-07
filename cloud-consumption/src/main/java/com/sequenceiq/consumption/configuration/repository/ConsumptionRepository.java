@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepos
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
-import com.sequenceiq.consumption.configuration.domain.Consumption;
+import com.sequenceiq.consumption.domain.Consumption;
 
 @Transactional(TxType.REQUIRED)
 @EntityType(entityClass = Consumption.class)

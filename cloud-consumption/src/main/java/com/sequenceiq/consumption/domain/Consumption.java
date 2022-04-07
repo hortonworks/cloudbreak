@@ -1,4 +1,4 @@
-package com.sequenceiq.consumption.configuration.domain;
+package com.sequenceiq.consumption.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;

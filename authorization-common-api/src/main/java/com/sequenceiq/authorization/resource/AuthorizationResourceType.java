@@ -13,7 +13,6 @@ public enum AuthorizationResourceType {
     DATABASE_SERVER(false),
     RECIPE(false),
     AUDIT_CREDENTIAL(false),
-    CONSUMPTION(false),
     STRUCTURED_EVENT(false);
 
     private boolean hierarchicalAuthorizationNeeded;
