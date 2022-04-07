@@ -36,11 +36,10 @@ import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.service.stack.StackIdViewImpl;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -177,22 +176,8 @@ public class DatalakeServiceTest {
     public void testGetDatalakeStackByStackEnvironmentCrnWithResult() {
         Stack stack = new Stack();
         stack.setType(StackType.WORKLOAD);
-        when(stackService.getByEnvironmentCrnAndStackType(any(), any())).thenReturn(List.of(new StackStatusView() {
-            @Override
-            public Long getId() {
-                return 1L;
-            }
+        when(stackService.getByEnvironmentCrnAndStackType(any(), any())).thenReturn(List.of(new StackIdViewImpl(1L, "no", "no")));
 
-            @Override
-            public String getName() {
-                return null;
-            }
-
-            @Override
-            public StackStatus getStatus() {
-                return null;
-            }
-        }));
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(new Stack());
 
         Optional<Stack> res = underTest.getDatalakeStackByStackEnvironmentCrn(stack);

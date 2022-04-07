@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -119,7 +119,7 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
         if (StackType.DATALAKE.equals(datahubStack.getType())) {
             return Optional.empty();
         }
-        List<StackStatusView> res = stackService.getByEnvironmentCrnAndStackType(datahubStack.getEnvironmentCrn(), StackType.DATALAKE);
+        List<StackIdView> res = stackService.getByEnvironmentCrnAndStackType(datahubStack.getEnvironmentCrn(), StackType.DATALAKE);
         if (res.isEmpty()) {
             return Optional.empty();
         } else {
