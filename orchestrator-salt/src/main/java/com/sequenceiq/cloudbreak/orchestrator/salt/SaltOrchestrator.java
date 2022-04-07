@@ -40,6 +40,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.model.PackageInfo;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.NodeVolumes;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
@@ -774,11 +775,31 @@ public class SaltOrchestrator implements HostOrchestrator {
     public Map<String, Map<String, String>> getPackageVersionsFromAllHosts(GatewayConfig gateway, Map<String, Optional<String>> packages)
             throws CloudbreakOrchestratorFailedException {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
+            Map<String, List<PackageInfo>> packageVersions = SaltStates.getPackageVersions(saltConnector, packages);
+            return packageVersions.entrySet()
+                    .stream()
+                    .collect(Collectors.toMap(Entry::getKey, entry -> convertPackageInfoListToMap(entry.getValue())));
+        } catch (RuntimeException e) {
+            LOGGER.info("Error occurred during determine package versions: " + Joiner.on(",").join(packages.keySet()), e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
+    public Map<String, List<PackageInfo>> getFullPackageVersionsFromAllHosts(GatewayConfig gateway, Map<String, Optional<String>> packages)
+            throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
             return SaltStates.getPackageVersions(saltConnector, packages);
         } catch (RuntimeException e) {
             LOGGER.info("Error occurred during determine package versions: " + Joiner.on(",").join(packages.keySet()), e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
+    }
+
+    private Map<String, String> convertPackageInfoListToMap(List<PackageInfo> packageInfoList) {
+        Map<String, String> versionMap = new HashMap<>();
+        packageInfoList.forEach(packageInfo -> versionMap.put(packageInfo.getName(), packageInfo.getVersion()));
+        return versionMap;
     }
 
     @Override

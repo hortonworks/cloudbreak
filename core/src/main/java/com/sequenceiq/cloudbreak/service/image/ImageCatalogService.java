@@ -561,7 +561,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public StatedImages getImages(ImageFilter imageFilter) throws CloudbreakImageCatalogException {
-        LOGGER.info("Determine images for imageCatalogUrl: '{}', platforms: '{}' and govPlatforms: '{}' and Cloudbreak version: '{}'.",
+        LOGGER.info("Determine images for imageCatalogUrl: '{}', platforms: '{}' and Cloudbreak version: '{}'.",
                 imageFilter.getImageCatalog().getImageCatalogUrl(),
                 imageFilter.getPlatforms(),
                 imageFilter.getCbVersion());

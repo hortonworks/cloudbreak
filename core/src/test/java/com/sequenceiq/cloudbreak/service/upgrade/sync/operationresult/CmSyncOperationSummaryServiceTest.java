@@ -34,19 +34,19 @@ public class CmSyncOperationSummaryServiceTest {
         CmParcelSyncOperationResult cmParcelSyncOperationResult = new CmParcelSyncOperationResult(Set.of(new ParcelInfo("", "")), Set.of());
         CmSyncOperationResult cmSyncOperationResult = new CmSyncOperationResult(cmRepoSyncOperationResult, cmParcelSyncOperationResult);
 
-        CmSyncOperationSummary.Builder cmSyncOperationSummaryBuilder = mock(CmSyncOperationSummary.Builder.class);
-        when(cmSyncOperationSummaryBuilder.build()).thenReturn(CmSyncOperationSummary.builder().withSuccess("successStory").build());
+        CmSyncOperationStatus.Builder cmSyncOperationStatusBuilder = mock(CmSyncOperationStatus.Builder.class);
+        when(cmSyncOperationStatusBuilder.build()).thenReturn(CmSyncOperationStatus.builder().withSuccess("successStory").build());
 
-        when(cmSyncOperationResultEvaluatorService.evaluateCmRepoSync(cmRepoSyncOperationResult)).thenReturn(cmSyncOperationSummaryBuilder);
-        when(cmSyncOperationResultEvaluatorService.evaluateParcelSync(cmParcelSyncOperationResult)).thenReturn(CmSyncOperationSummary.builder());
+        when(cmSyncOperationResultEvaluatorService.evaluateCmRepoSync(cmRepoSyncOperationResult)).thenReturn(cmSyncOperationStatusBuilder);
+        when(cmSyncOperationResultEvaluatorService.evaluateParcelSync(cmParcelSyncOperationResult)).thenReturn(CmSyncOperationStatus.builder());
 
-        CmSyncOperationSummary endResult = underTest.evaluate(cmSyncOperationResult);
+        CmSyncOperationStatus endResult = underTest.evaluate(cmSyncOperationResult);
 
         assertTrue(endResult.hasSucceeded());
         assertEquals("successStory", endResult.getMessage());
         verify(cmSyncOperationResultEvaluatorService).evaluateCmRepoSync(cmRepoSyncOperationResult);
         verify(cmSyncOperationResultEvaluatorService).evaluateParcelSync(cmParcelSyncOperationResult);
-        verify(cmSyncOperationSummaryBuilder).merge(any());
+        verify(cmSyncOperationStatusBuilder).merge(any());
     }
 
     @Test
@@ -55,11 +55,11 @@ public class CmSyncOperationSummaryServiceTest {
         CmParcelSyncOperationResult cmParcelSyncOperationResult = new CmParcelSyncOperationResult(Set.of(), Set.of());
         CmSyncOperationResult cmSyncOperationResult = new CmSyncOperationResult(cmRepoSyncOperationResult, cmParcelSyncOperationResult);
 
-        CmSyncOperationSummary cmSyncOperationSummary = underTest.evaluate(cmSyncOperationResult);
+        CmSyncOperationStatus cmSyncOperationStatus = underTest.evaluate(cmSyncOperationResult);
 
-        assertFalse(cmSyncOperationSummary.hasSucceeded());
+        assertFalse(cmSyncOperationStatus.hasSucceeded());
         assertEquals("CM sync could not be carried out, most probably the CM server is down. Please make sure the CM server is running.",
-                cmSyncOperationSummary.getMessage());
+                cmSyncOperationStatus.getMessage());
         verify(cmSyncOperationResultEvaluatorService, never()).evaluateParcelSync(any());
         verify(cmSyncOperationResultEvaluatorService, never()).evaluateCmRepoSync(any());
     }

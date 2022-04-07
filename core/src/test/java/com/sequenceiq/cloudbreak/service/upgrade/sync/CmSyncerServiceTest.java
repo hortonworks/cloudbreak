@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.db.ComponentPersistingServ
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmParcelSyncOperationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmRepoSyncOperationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationResult;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationStatus;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummaryService;
 
@@ -65,12 +66,13 @@ public class CmSyncerServiceTest {
         when(stack.getId()).thenReturn(STACK_ID);
         when(cmInstalledComponentFinderService.findCmRepoComponent(stack, candidateImages)).thenReturn(cmRepoSyncOperationResult);
         when(cmInstalledComponentFinderService.findParcelComponents(stack, candidateImages)).thenReturn(cmParcelSyncOperationResult);
-        when(cmSyncOperationSummaryService.evaluate(any())).thenReturn(CmSyncOperationSummary.builder().withSuccess("myMessage").build());
+        when(cmSyncOperationSummaryService.evaluate(any())).thenReturn(CmSyncOperationStatus.builder().withSuccess("myMessage").build());
 
         CmSyncOperationSummary cmSyncOperationSummary = underTest.syncFromCmToDb(stack, candidateImages);
+        CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationSummary.getSyncOperationStatus();
 
-        assertTrue(cmSyncOperationSummary.hasSucceeded());
-        assertEquals("myMessage", cmSyncOperationSummary.getMessage());
+        assertTrue(cmSyncOperationStatus.hasSucceeded());
+        assertEquals("myMessage", cmSyncOperationStatus.getMessage());
         verify(cmInstalledComponentFinderService).findCmRepoComponent(stack, candidateImages);
         verify(cmInstalledComponentFinderService).findParcelComponents(stack, candidateImages);
         verify(stack).getId();
@@ -101,9 +103,10 @@ public class CmSyncerServiceTest {
         Set<Image> candidateImages = Set.of(mock(Image.class));
 
         CmSyncOperationSummary cmSyncOperationSummary = underTest.syncFromCmToDb(stack, candidateImages);
+        CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationSummary.getSyncOperationStatus();
 
-        assertFalse(cmSyncOperationSummary.hasSucceeded());
-        assertEquals("CM server is down, it is not possible to sync parcels and CM version from the server.", cmSyncOperationSummary.getMessage());
+        assertFalse(cmSyncOperationStatus.hasSucceeded());
+        assertEquals("CM server is down, it is not possible to sync parcels and CM version from the server.", cmSyncOperationStatus.getMessage());
         verify(cmServerQueryService).isCmServerRunning(eq(stack));
         verify(cmInstalledComponentFinderService, never()).findCmRepoComponent(any(), any());
         verify(cmInstalledComponentFinderService, never()).findParcelComponents(any(), any());
@@ -116,11 +119,12 @@ public class CmSyncerServiceTest {
         Set<Image> candidateImages = Set.of();
 
         CmSyncOperationSummary cmSyncOperationSummary = underTest.syncFromCmToDb(stack, candidateImages);
+        CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationSummary.getSyncOperationStatus();
 
-        assertFalse(cmSyncOperationSummary.hasSucceeded());
+        assertFalse(cmSyncOperationStatus.hasSucceeded());
         assertEquals(
                 "No candidate images supplied for CM sync, it is not possible to sync parcels and CM version from the server. Please call Cloudera support",
-                cmSyncOperationSummary.getMessage());
+                cmSyncOperationStatus.getMessage());
         verify(cmServerQueryService).isCmServerRunning(eq(stack));
         verify(cmInstalledComponentFinderService, never()).findCmRepoComponent(any(), any());
         verify(cmInstalledComponentFinderService, never()).findParcelComponents(any(), any());

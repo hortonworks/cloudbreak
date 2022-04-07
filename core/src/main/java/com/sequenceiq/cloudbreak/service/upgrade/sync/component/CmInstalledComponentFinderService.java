@@ -40,5 +40,4 @@ public class CmInstalledComponentFinderService {
         Set<ClouderaManagerProduct> activeProducts = cmProductChooserService.chooseParcelProduct(activeParcels, candidateProducts);
         return new CmParcelSyncOperationResult(activeParcels, activeProducts);
     }
-
 }

@@ -42,6 +42,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.Package;
+import com.sequenceiq.cloudbreak.service.cluster.PackageName;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -72,13 +74,13 @@ public class InstanceMetadataUpdaterTest {
 
     @Before
     public void setUp() throws CloudbreakException, JsonProcessingException, CloudbreakOrchestratorFailedException {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         when(gatewayConfigService.getPrimaryGatewayConfig(any(Stack.class))).thenReturn(gatewayConfig);
 
-        InstanceMetadataUpdater.Package packageByName = new InstanceMetadataUpdater.Package();
+        Package packageByName = new Package();
         packageByName.setName("packageByName");
         packageByName.setPkg(Lists.newArrayList(generatePackageName("packageByName", "(.*)-(.*)")));
-        InstanceMetadataUpdater.Package packageByCmd = new InstanceMetadataUpdater.Package();
+        Package packageByCmd = new Package();
         packageByCmd.setName("packageByCmd");
         packageByCmd.setPkg(Lists.newArrayList(generatePackageName("packageByCmd", null)));
 
@@ -198,8 +200,8 @@ public class InstanceMetadataUpdaterTest {
         return instanceGroup;
     }
 
-    private InstanceMetadataUpdater.PackageName generatePackageName(String pkg, String pattern) {
-        InstanceMetadataUpdater.PackageName packageName = new InstanceMetadataUpdater.PackageName();
+    private PackageName generatePackageName(String pkg, String pattern) {
+        PackageName packageName = new PackageName();
         packageName.setName(pkg);
         packageName.setPattern(pattern);
         return packageName;

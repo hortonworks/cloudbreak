@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
+import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
@@ -71,11 +73,11 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
         Map<HostName, Set<HealthCheck>> hostStatuses = extendedHostStatuses.getHostsHealth();
         Map<String, String> unhealthyHosts = hostStatuses.keySet().stream()
                 .filter(hostName -> !extendedHostStatuses.isHostHealthy(hostName))
-                .collect(Collectors.toMap(hostName -> hostName.value(), hostName -> extendedHostStatuses.statusReasonForHost(hostName)));
+                .collect(Collectors.toMap(StringType::value, extendedHostStatuses::statusReasonForHost));
         Set<String> noReportHosts = runningInstances.stream()
-                .filter(i -> i.getDiscoveryFQDN() != null)
-                .filter(i -> !hostStatuses.containsKey(hostName(i.getDiscoveryFQDN())))
                 .map(InstanceMetaData::getDiscoveryFQDN)
+                .filter(Objects::nonNull)
+                .filter(discoveryFQDN -> !hostStatuses.containsKey(hostName(discoveryFQDN)))
                 .collect(toSet());
 
         if (!unhealthyHosts.isEmpty() || !noReportHosts.isEmpty()) {
@@ -97,8 +99,8 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
                 .collect(Collectors.toMap(i -> i.getCloudInstance().getInstanceId(), i -> InstanceSyncState.getInstanceSyncState(i.getStatus())));
         Set<String> notRunningInstances = runningInstances.stream()
                 .filter(i -> !InstanceSyncState.RUNNING.equals(instanceSyncStates.getOrDefault(i.getInstanceId(), InstanceSyncState.UNKNOWN)))
-                .filter(i -> i.getDiscoveryFQDN() != null)
-                .map(i -> i.getDiscoveryFQDN())
+                .map(InstanceMetaData::getDiscoveryFQDN)
+                .filter(Objects::nonNull)
                 .collect(toSet());
 
         if (!notRunningInstances.isEmpty()) {

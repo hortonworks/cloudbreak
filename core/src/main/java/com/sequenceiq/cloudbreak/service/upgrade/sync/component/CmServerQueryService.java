@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -11,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.model.PackageInfo;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
 
@@ -22,6 +25,9 @@ public class CmServerQueryService {
 
     @Inject
     private ClusterApiConnectors apiConnectors;
+
+    @Inject
+    private CmVersionQueryService cmVersionQueryService;
 
     /**
      * Will query all active parcels (CDH and non-CDH as well) from the CM server. Received format:
@@ -41,14 +47,21 @@ public class CmServerQueryService {
     }
 
     /**
-     * Will query the CM server for the CM version
-     * @param stack The stack, to get the coordinates of the CM to query
-     * @return The actual CM version
+     * Will query all the nodes for the installed CM version
+     * @param stack The stack, with metadata to be able to build the client to query package versions
+     * @return The actual CM version, in format version-build number e.g. 7.2.2-13072522
      */
     Optional<String> queryCmVersion(Stack stack) {
-        Optional<String> cmVersionOptional = apiConnectors.getConnector(stack).clusterStatusService().getClusterManagerVersion();
-        LOGGER.debug("Reading CM version info from CM server, found version: {}", cmVersionOptional);
-        return cmVersionOptional;
+        try {
+            Map<String, List<PackageInfo>> packageVersions = cmVersionQueryService.queryCmPackageInfo(stack);
+            PackageInfo cmPackageInfo = cmVersionQueryService.checkCmPackageInfoConsistency(packageVersions);
+            String version = cmPackageInfo.getFullVersion();
+            LOGGER.debug("Reading CM version info, found version: {}", version);
+            return Optional.of(version);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            LOGGER.warn("Encountered error during reading CM version info", e);
+            return Optional.empty();
+        }
     }
 
     public boolean isCmServerRunning(Stack stack) {

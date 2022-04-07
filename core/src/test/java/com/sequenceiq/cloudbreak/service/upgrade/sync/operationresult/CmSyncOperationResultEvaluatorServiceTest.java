@@ -35,36 +35,36 @@ public class CmSyncOperationResultEvaluatorServiceTest {
     void testEvaluateCmRepoSyncWhenInstalledVersionAndFoundComponentPresentThenSuccess() {
         CmRepoSyncOperationResult cmRepoSyncOperationResult = new CmRepoSyncOperationResult(INSTALLED_CM_VERSION, new ClouderaManagerRepo());
 
-        CmSyncOperationSummary.Builder cmSyncOperationSummaryBuilder = underTest.evaluateCmRepoSync(cmRepoSyncOperationResult);
+        CmSyncOperationStatus.Builder cmSyncOperationStatusBuilder = underTest.evaluateCmRepoSync(cmRepoSyncOperationResult);
 
-        CmSyncOperationSummary cmSyncOperationSummary = cmSyncOperationSummaryBuilder.build();
-        assertTrue(cmSyncOperationSummary.hasSucceeded());
+        CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationStatusBuilder.build();
+        assertTrue(cmSyncOperationStatus.hasSucceeded());
         assertEquals(String.format("Reading CM repository version succeeded, the current version of CM is %s.", INSTALLED_CM_VERSION),
-                cmSyncOperationSummary.getMessage());
+                cmSyncOperationStatus.getMessage());
     }
 
     @Test
     void testEvaluateCmRepoSyncWhenInstalledVersionNotPresentThenCmDownFailure() {
         CmRepoSyncOperationResult cmRepoSyncOperationResult = new CmRepoSyncOperationResult(null, null);
 
-        CmSyncOperationSummary.Builder cmSyncOperationSummaryBuilder = underTest.evaluateCmRepoSync(cmRepoSyncOperationResult);
+        CmSyncOperationStatus.Builder cmSyncOperationStatusBuilder = underTest.evaluateCmRepoSync(cmRepoSyncOperationResult);
 
-        CmSyncOperationSummary cmSyncOperationSummary = cmSyncOperationSummaryBuilder.build();
-        assertFalse(cmSyncOperationSummary.hasSucceeded());
+        CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationStatusBuilder.build();
+        assertFalse(cmSyncOperationStatus.hasSucceeded());
         assertEquals("Reading CM repository version failed, it was not possible to retrieve CM version from the server.",
-                cmSyncOperationSummary.getMessage());
+                cmSyncOperationStatus.getMessage());
     }
 
     @Test
     void testEvaluateCmRepoSyncWhenFoundComponentMissingThenComponentNotFoundFailure() {
         CmRepoSyncOperationResult cmRepoSyncOperationResult = new CmRepoSyncOperationResult(INSTALLED_CM_VERSION, null);
 
-        CmSyncOperationSummary.Builder cmSyncOperationSummaryBuilder = underTest.evaluateCmRepoSync(cmRepoSyncOperationResult);
+        CmSyncOperationStatus.Builder cmSyncOperationStatusBuilder = underTest.evaluateCmRepoSync(cmRepoSyncOperationResult);
 
-        CmSyncOperationSummary cmSyncOperationSummary = cmSyncOperationSummaryBuilder.build();
-        assertFalse(cmSyncOperationSummary.hasSucceeded());
+        CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationStatusBuilder.build();
+        assertFalse(cmSyncOperationStatus.hasSucceeded());
         assertEquals(String.format("Reading CM repository version failed, no matching component found on images for CM server version %s.",
-                        INSTALLED_CM_VERSION), cmSyncOperationSummary.getMessage());
+                        INSTALLED_CM_VERSION), cmSyncOperationStatus.getMessage());
     }
 
     @Test
@@ -79,14 +79,14 @@ public class CmSyncOperationResultEvaluatorServiceTest {
         );
         CmParcelSyncOperationResult cmParcelSyncOperationResult = new CmParcelSyncOperationResult(activeParcels, foundCmProducts);
 
-        CmSyncOperationSummary.Builder cmSyncOperationSummaryBuilder = underTest.evaluateParcelSync(cmParcelSyncOperationResult);
+        CmSyncOperationStatus.Builder cmSyncOperationStatusBuilder = underTest.evaluateParcelSync(cmParcelSyncOperationResult);
 
-        CmSyncOperationSummary cmSyncOperationSummary = cmSyncOperationSummaryBuilder.build();
-        assertTrue(cmSyncOperationSummary.hasSucceeded());
-        assertThat(cmSyncOperationSummary.getMessage(),
+        CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationStatusBuilder.build();
+        assertTrue(cmSyncOperationStatus.hasSucceeded());
+        assertThat(cmSyncOperationStatus.getMessage(),
                 containsString("Reading versions of active parcels succeeded, the following active parcels were found on the CM server: "));
-        assertThat(cmSyncOperationSummary.getMessage(), containsString(PARCEL_1_NAME));
-        assertThat(cmSyncOperationSummary.getMessage(), containsString(PARCEL_2_NAME));
+        assertThat(cmSyncOperationStatus.getMessage(), containsString(PARCEL_1_NAME));
+        assertThat(cmSyncOperationStatus.getMessage(), containsString(PARCEL_2_NAME));
     }
 
     @Test
@@ -95,12 +95,12 @@ public class CmSyncOperationResultEvaluatorServiceTest {
         Set<ClouderaManagerProduct> foundCmProducts = Set.of();
         CmParcelSyncOperationResult cmParcelSyncOperationResult = new CmParcelSyncOperationResult(activeParcels, foundCmProducts);
 
-        CmSyncOperationSummary.Builder cmSyncOperationSummaryBuilder = underTest.evaluateParcelSync(cmParcelSyncOperationResult);
+        CmSyncOperationStatus.Builder cmSyncOperationStatusBuilder = underTest.evaluateParcelSync(cmParcelSyncOperationResult);
 
-        CmSyncOperationSummary cmSyncOperationSummary = cmSyncOperationSummaryBuilder.build();
-        assertFalse(cmSyncOperationSummary.hasSucceeded());
+        CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationStatusBuilder.build();
+        assertFalse(cmSyncOperationStatus.hasSucceeded());
         assertEquals("Reading versions of active parcels failed, it was not possible to retrieve versions of active parcels from the CM server.",
-                cmSyncOperationSummary.getMessage());
+                cmSyncOperationStatus.getMessage());
     }
 
     @Test
@@ -112,12 +112,12 @@ public class CmSyncOperationResultEvaluatorServiceTest {
         Set<ClouderaManagerProduct> foundCmProducts = Set.of(new ClouderaManagerProduct().withName(PARCEL_1_NAME));
         CmParcelSyncOperationResult cmParcelSyncOperationResult = new CmParcelSyncOperationResult(activeParcels, foundCmProducts);
 
-        CmSyncOperationSummary.Builder cmSyncOperationSummaryBuilder = underTest.evaluateParcelSync(cmParcelSyncOperationResult);
+        CmSyncOperationStatus.Builder cmSyncOperationStatusBuilder = underTest.evaluateParcelSync(cmParcelSyncOperationResult);
 
-        CmSyncOperationSummary cmSyncOperationSummary = cmSyncOperationSummaryBuilder.build();
-        assertFalse(cmSyncOperationSummary.hasSucceeded());
+        CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationStatusBuilder.build();
+        assertFalse(cmSyncOperationStatus.hasSucceeded());
         assertEquals(String.format("Reading versions of active parcels failed, the version of some active parcels could not be retrieved from CM server: %s. " +
-                                "Parcel versions successfully read: %s.", Set.of(PARCEL_2_NAME), Set.of(PARCEL_1_NAME)), cmSyncOperationSummary.getMessage()
+                                "Parcel versions successfully read: %s.", Set.of(PARCEL_2_NAME), Set.of(PARCEL_1_NAME)), cmSyncOperationStatus.getMessage()
         );
     }
 
@@ -130,14 +130,14 @@ public class CmSyncOperationResultEvaluatorServiceTest {
         Set<ClouderaManagerProduct> foundCmProducts = Set.of();
         CmParcelSyncOperationResult cmParcelSyncOperationResult = new CmParcelSyncOperationResult(activeParcels, foundCmProducts);
 
-        CmSyncOperationSummary.Builder cmSyncOperationSummaryBuilder = underTest.evaluateParcelSync(cmParcelSyncOperationResult);
+        CmSyncOperationStatus.Builder cmSyncOperationStatusBuilder = underTest.evaluateParcelSync(cmParcelSyncOperationResult);
 
-        CmSyncOperationSummary cmSyncOperationSummary = cmSyncOperationSummaryBuilder.build();
-        assertFalse(cmSyncOperationSummary.hasSucceeded());
-        assertThat(cmSyncOperationSummary.getMessage(), containsString(
+        CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationStatusBuilder.build();
+        assertFalse(cmSyncOperationStatus.hasSucceeded());
+        assertThat(cmSyncOperationStatus.getMessage(), containsString(
                 "Reading versions of active parcels failed, the version of active parcels that could not be retrieved from CM server:"));
-        assertThat(cmSyncOperationSummary.getMessage(), containsString(PARCEL_1_NAME));
-        assertThat(cmSyncOperationSummary.getMessage(), containsString(PARCEL_2_NAME));
+        assertThat(cmSyncOperationStatus.getMessage(), containsString(PARCEL_1_NAME));
+        assertThat(cmSyncOperationStatus.getMessage(), containsString(PARCEL_2_NAME));
     }
 
 }

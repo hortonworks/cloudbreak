@@ -7,7 +7,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGE_VERS
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGE_VERSION_CANNOT_BE_QUERIED;
 
 import java.io.IOException;
-import java.util.AbstractMap.SimpleEntry;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -225,7 +225,7 @@ public class InstanceMetadataUpdater {
             Map<String, String> versionByName =
                     entry.getValue().entrySet().stream()
                             .filter(e -> StringUtils.isNotBlank(e.getValue()) && !StringUtils.equalsAny(e.getValue(), "false", "null", null))
-                            .collect(Collectors.toMap(e -> getPkgNameStringMap(pkgNames).get(e.getKey()), Entry::getValue));
+                            .collect(Collectors.toMap(e -> getPkgNameStringMap(pkgNames).get(e.getKey()), Entry::getValue, (a1, a2) -> a1));
             packageVersionsByNameByHost.put(entry.getKey(), versionByName);
         }
         return packageVersionsByNameByHost;
@@ -242,7 +242,7 @@ public class InstanceMetadataUpdater {
          */
         return packages.stream().filter(pkg -> pkg.getPkg() != null && !pkg.getPkg().isEmpty())
                 .flatMap(pkg -> pkg.getPkg().stream()
-                        .map(pkgName -> new SimpleEntry<>(pkgName, pkg.getName())))
+                        .map(pkgName -> new AbstractMap.SimpleEntry<>(pkgName, pkg.getName())))
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
@@ -322,87 +322,4 @@ public class InstanceMetadataUpdater {
                 image.getImageCatalogName(), image.getImageId(), packageVersionsOnHost);
     }
 
-    public static class Package {
-        private String name;
-
-        private List<PackageName> pkg;
-
-        private String command;
-
-        private boolean prewarmed;
-
-        private String grain;
-
-        private String commandVersionPattern;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public List<PackageName> getPkg() {
-            return pkg;
-        }
-
-        public void setPkg(List<PackageName> pkg) {
-            this.pkg = pkg;
-        }
-
-        public String getCommand() {
-            return command;
-        }
-
-        public void setCommand(String command) {
-            this.command = command;
-        }
-
-        public boolean isPrewarmed() {
-            return prewarmed;
-        }
-
-        public void setPrewarmed(boolean prewarmed) {
-            this.prewarmed = prewarmed;
-        }
-
-        public String getGrain() {
-            return grain;
-        }
-
-        public void setGrain(String grain) {
-            this.grain = grain;
-        }
-
-        public String getCommandVersionPattern() {
-            return commandVersionPattern;
-        }
-
-        public void setCommandVersionPattern(String commandVersionPattern) {
-            this.commandVersionPattern = commandVersionPattern;
-        }
-    }
-
-    public static class PackageName {
-        private String name;
-
-        private String pattern;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getPattern() {
-            return pattern;
-        }
-
-        public void setPattern(String pattern) {
-            this.pattern = pattern;
-        }
-    }
 }

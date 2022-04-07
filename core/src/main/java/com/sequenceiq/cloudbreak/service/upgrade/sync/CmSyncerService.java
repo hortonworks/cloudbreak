@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.component.CmInstalledCompo
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.CmServerQueryService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.db.ComponentPersistingService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationResult;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationStatus;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummaryService;
 
@@ -39,26 +40,31 @@ public class CmSyncerService {
 
     /**
      * Will retrieve (if CM server is reachable):
-     * - all the active parcels, CDH and prewarm parcels as well
+     * - all the active parcels, CDH and prewarmed parcels as well
      * - CM version
      * from the CM server and will try to find matching products in stated images.
      * The found products will then be used to update the Component and ClusterComponent table in DB
-     *  @param stack           The stack that needs to be synced
+     * @param stack           The stack that needs to be synced
      * @param candidateImages Set of candidate images whose products are used to match against the parcel version received from CM server.
+     * @return the summary of the sync operation, with status, parcel and package information
      */
     public CmSyncOperationSummary syncFromCmToDb(Stack stack, Set<Image> candidateImages) {
         if (!cmServerQueryService.isCmServerRunning(stack)) {
             String message = "CM server is down, it is not possible to sync parcels and CM version from the server.";
             LOGGER.info(message);
-            return CmSyncOperationSummary.builder().withError(message).build();
+            return buildSummaryWithErrorMessage(message);
         }
         if (candidateImages.isEmpty()) {
             String message = "No candidate images supplied for CM sync, it is not possible to sync parcels and CM version from the server. " +
                     "Please call Cloudera support";
             LOGGER.info(message);
-            return CmSyncOperationSummary.builder().withError(message).build();
+            return buildSummaryWithErrorMessage(message);
         }
         return syncInternal(stack, candidateImages);
+    }
+
+    private CmSyncOperationSummary buildSummaryWithErrorMessage(String message) {
+        return new CmSyncOperationSummary(CmSyncOperationStatus.builder().withError(message).build());
     }
 
     private CmSyncOperationSummary syncInternal(Stack stack, Set<Image> candidateImages) {
@@ -68,10 +74,10 @@ public class CmSyncerService {
         );
         LOGGER.debug("Synced CM versions and found components: {}", cmSyncOperationResult);
         componentPersistingService.persistComponentsToDb(stack, cmSyncOperationResult);
-        CmSyncOperationSummary cmSyncOperationSummary = cmSyncOperationSummaryService.evaluate(cmSyncOperationResult);
+        CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationSummaryService.evaluate(cmSyncOperationResult);
         mixedPackageVersionService.validatePackageVersions(stack.getId(), cmSyncOperationResult, candidateImages);
-        LOGGER.info("CM sync was executed, summary: {}", cmSyncOperationSummary);
-        return cmSyncOperationSummary;
+        LOGGER.info("CM sync was executed, summary: {}", cmSyncOperationStatus);
+        return new CmSyncOperationSummary(cmSyncOperationStatus, cmSyncOperationResult);
     }
 
 }

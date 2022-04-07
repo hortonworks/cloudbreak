@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -18,6 +18,8 @@ public class ClouderaManagerRepo {
     private String baseUrl;
 
     private String gpgKeyUrl;
+
+    private String buildNumber;
 
     public Boolean getPredefined() {
         return predefined;
@@ -51,6 +53,23 @@ public class ClouderaManagerRepo {
         this.gpgKeyUrl = gpgKeyUrl;
     }
 
+    public String getBuildNumber() {
+        return buildNumber;
+    }
+
+    public void setBuildNumber(String buildNumber) {
+        this.buildNumber = buildNumber;
+    }
+
+    @JsonIgnore
+    public String getFullVersion() {
+        if (Objects.isNull(buildNumber)) {
+            return this.version;
+        } else {
+            return String.format("%s-%s", this.version, this.buildNumber);
+        }
+    }
+
     public ClouderaManagerRepo withPredefined(Boolean predefined) {
         setPredefined(predefined);
         return this;
@@ -71,13 +90,9 @@ public class ClouderaManagerRepo {
         return this;
     }
 
-    public Map<String, Object> asMap() {
-        Map<String, Object> map = new HashMap<>();
-        map.put("predefined", predefined);
-        map.put("version", version);
-        map.put("baseUrl", baseUrl);
-        map.put("gpgKeyUrl", gpgKeyUrl);
-        return map;
+    public ClouderaManagerRepo withBuildNumber(String buildNumber) {
+        setBuildNumber(buildNumber);
+        return this;
     }
 
     @Override
@@ -87,6 +102,7 @@ public class ClouderaManagerRepo {
                 ", version='" + version + '\'' +
                 ", baseUrl='" + baseUrl + '\'' +
                 ", gpgKeyUrl='" + gpgKeyUrl + '\'' +
+                ", buildNumber='" + buildNumber + '\'' +
                 '}';
     }
 }

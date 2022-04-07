@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.CmSyncResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncImageCollectorService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.CmSyncerService;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationStatus;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -54,15 +55,17 @@ public class CmSyncHandler extends ExceptionCatcherEventHandler<CmSyncRequest> {
     protected Selectable doAccept(HandlerEvent<CmSyncRequest> event) {
         CmSyncRequest request = event.getData();
         try {
-            Stack stack = stackService.getById(request.getResourceId());
+            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             Set<Image> candidateImages = cmSyncImageCollectorService.collectImages(request.getFlowTriggerUserCrn(), stack, request.getCandidateImageUuids());
             CmSyncOperationSummary cmSyncOperationSummary = cmSyncerService.syncFromCmToDb(stack, candidateImages);
-            if (!cmSyncOperationSummary.hasSucceeded()) {
-                LOGGER.debug("Reading CM and active parcel versions from CM server encountered failures. Details: {}", cmSyncOperationSummary.getMessage());
-                Exception e = new CloudbreakServiceException(cmSyncOperationSummary.getMessage());
-                return new CmSyncResult(cmSyncOperationSummary.getMessage(), e, request);
+            CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationSummary.getSyncOperationStatus();
+            if (!cmSyncOperationStatus.hasSucceeded()) {
+                LOGGER.debug("Reading CM and active parcel versions from CM server encountered failures. Details: {}", cmSyncOperationStatus.getMessage());
+                Exception e = new CloudbreakServiceException(cmSyncOperationStatus.getMessage());
+                return new CmSyncResult(cmSyncOperationStatus.getMessage(), e, request);
             }
-            return new CmSyncResult(request, cmSyncOperationSummary.getMessage());
+
+            return new CmSyncResult(request, cmSyncOperationStatus.getMessage());
         } catch (Exception e) {
             LOGGER.warn("Reading CM and active parcel versions from CM server resulted in error ", e);
             String message = String.format("unexpected error: %s", e.getMessage());

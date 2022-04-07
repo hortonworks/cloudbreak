@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.Package;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 
 public class PackageVersionCheckerTest {
@@ -57,10 +58,10 @@ public class PackageVersionCheckerTest {
         when(statedImage.getImage()).thenReturn(image);
         when(image.isPrewarmed()).thenReturn(false);
         when(image.getPackageVersions()).thenReturn(packageVersions);
-        InstanceMetadataUpdater.Package aPackage = new InstanceMetadataUpdater.Package();
+        Package aPackage = new Package();
         aPackage.setName(packageName);
         aPackage.setPrewarmed(false);
-        InstanceMetadataUpdater.Package prewarmedPackage = new InstanceMetadataUpdater.Package();
+        Package prewarmedPackage = new Package();
         prewarmedPackage.setName(packageName);
         prewarmedPackage.setPrewarmed(true);
         when(instanceMetadataUpdater.getPackages()).thenReturn(Lists.newArrayList(aPackage, prewarmedPackage));
@@ -83,7 +84,7 @@ public class PackageVersionCheckerTest {
         when(statedImage.getImage()).thenReturn(image);
         when(image.isPrewarmed()).thenReturn(true);
         when(image.getPackageVersions()).thenReturn(packageVersions);
-        InstanceMetadataUpdater.Package aPackage = new InstanceMetadataUpdater.Package();
+        Package aPackage = new Package();
         aPackage.setName(packageName);
         aPackage.setPrewarmed(true);
         when(instanceMetadataUpdater.getPackages()).thenReturn(Collections.singletonList(aPackage));
@@ -106,7 +107,7 @@ public class PackageVersionCheckerTest {
         when(statedImage.getImage()).thenReturn(image);
         when(image.isPrewarmed()).thenReturn(true);
         when(image.getPackageVersions()).thenReturn(Collections.emptyMap());
-        InstanceMetadataUpdater.Package aPackage = new InstanceMetadataUpdater.Package();
+        Package aPackage = new Package();
         aPackage.setName(packageName);
         aPackage.setPrewarmed(true);
         when(instanceMetadataUpdater.getPackages()).thenReturn(Collections.singletonList(aPackage));
@@ -128,7 +129,7 @@ public class PackageVersionCheckerTest {
         when(statedImage.getImage()).thenReturn(image);
         when(image.isPrewarmed()).thenReturn(true);
         when(image.getPackageVersions()).thenReturn(Collections.singletonMap(packageName, "2"));
-        InstanceMetadataUpdater.Package aPackage = new InstanceMetadataUpdater.Package();
+        Package aPackage = new Package();
         aPackage.setName(packageName);
         aPackage.setPrewarmed(true);
         when(instanceMetadataUpdater.getPackages()).thenReturn(Collections.singletonList(aPackage));

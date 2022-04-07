@@ -787,7 +787,9 @@ cb:
       - name: cm
         pkg:
           - name: cloudera-manager-agent
-            pattern: "(.*)-.*"
+            pattern: "(.*)-(.*)\\..*"
+          - name: cloudera-manager-server
+            pattern: "(.*)-(.*)\\..*"
         prewarmed: true
   paywall.url: "https://archive.cloudera.com/p/cdp-public/"
   nodestatus:

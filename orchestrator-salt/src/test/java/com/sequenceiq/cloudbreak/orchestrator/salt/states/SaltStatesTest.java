@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.common.model.PackageInfo;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
@@ -330,13 +331,13 @@ public class SaltStatesTest {
         packages.put("package", Optional.empty());
 
         // WHEN
-        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
+        Map<String, List<PackageInfo>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
         // THEN
-        for (Map.Entry<String, Map<String, String>> e : actualResponse.entrySet()) {
+        for (Map.Entry<String, List<PackageInfo>> e : actualResponse.entrySet()) {
             String expectedVersion = pkgVersionsOnHosts.get(e.getKey());
-            Map<String, String> actualPkgVersions = e.getValue();
+            List<PackageInfo> actualPkgVersions = e.getValue();
             assertEquals(1, actualPkgVersions.size());
-            assertEquals(expectedVersion, actualPkgVersions.get("package"));
+            assertEquals(expectedVersion, actualPkgVersions.get(0).getVersion());
         }
     }
 
@@ -352,7 +353,7 @@ public class SaltStatesTest {
         packages.put("package", Optional.empty());
 
         // WHEN
-        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
+        Map<String, List<PackageInfo>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
         // THEN
         assertTrue(actualResponse.size() == 0);
     }
@@ -360,14 +361,14 @@ public class SaltStatesTest {
     @Test
     public void testGetPackageVersionsWithMorePackages() {
         // GIVEN
-        Map<String, Map<String, String>> pkgVersionsOnHosts = new HashMap<>();
-        Map<String, String> pkgVersionsOnHost1 = new HashMap<>();
-        pkgVersionsOnHost1.put("package1", "1.0");
-        pkgVersionsOnHost1.put("package2", "2.0");
+        Map<String, List<PackageInfo>> pkgVersionsOnHosts = new HashMap<>();
+        List<PackageInfo> pkgVersionsOnHost1 = new ArrayList<>();
+        pkgVersionsOnHost1.add(new PackageInfo("package1", "1.0"));
+        pkgVersionsOnHost1.add(new PackageInfo("package2", "2.0", "3.0A13466743"));
         pkgVersionsOnHosts.put("host1", pkgVersionsOnHost1);
-        Map<String, String> pkgVersionsOnHost2 = new HashMap<>();
-        pkgVersionsOnHost2.put("package1", "2.0");
-        pkgVersionsOnHost2.put("package2", "3.0");
+        List<PackageInfo> pkgVersionsOnHost2 = new ArrayList<>();
+        pkgVersionsOnHost2.add(new PackageInfo("package1", "2.0"));
+        pkgVersionsOnHost2.add(new PackageInfo("package2", "3.0", "3.0A13466743"));
         pkgVersionsOnHosts.put("host2", pkgVersionsOnHost2);
 
         Map<String, String> pkgVersionsOnHost1Resp = new HashMap<>();
@@ -388,7 +389,7 @@ public class SaltStatesTest {
         packages.put("package2", Optional.of("(.*)-(.*)"));
 
         // WHEN
-        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
+        Map<String, List<PackageInfo>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
         // THEN
         Assert.assertEquals(pkgVersionsOnHosts, actualResponse);
     }
@@ -405,7 +406,7 @@ public class SaltStatesTest {
         packages.put("package2", Optional.of("(.*)-(.*)"));
 
         // WHEN
-        Map<String, Map<String, String>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
+        Map<String, List<PackageInfo>> actualResponse = SaltStates.getPackageVersions(saltConnector, packages);
         // THEN
         assertTrue(actualResponse.size() == 0);
     }
