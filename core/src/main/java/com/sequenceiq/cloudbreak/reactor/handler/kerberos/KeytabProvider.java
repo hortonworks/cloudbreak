@@ -52,14 +52,12 @@ public class KeytabProvider {
     }
 
     private String getAccountId(Stack stack) {
-        String accountId;
         if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
             LOGGER.debug("Current user is internal, getting account id from requested stack crn");
-            accountId = Crn.fromString(stack.getResourceCrn()).getAccountId();
+            return Crn.fromString(stack.getResourceCrn()).getAccountId();
         } else {
             LOGGER.debug("Current user is not internal, getting account id from user crn");
-            accountId = ThreadBasedUserCrnProvider.getAccountId();
+            return ThreadBasedUserCrnProvider.getAccountId();
         }
-        return accountId;
     }
 }

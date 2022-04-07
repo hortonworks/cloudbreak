@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.freeipa;
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -25,6 +26,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.kerberos.KrbKeySetEncoder;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredentialUpdate;
+import com.sequenceiq.freeipa.util.ThreadInterruptChecker;
 
 @Service
 public class WorkloadCredentialService {
@@ -36,6 +38,9 @@ public class WorkloadCredentialService {
     @Inject
     private UserMetadataConverter userMetadataConverter;
 
+    @Inject
+    private ThreadInterruptChecker interruptChecker;
+
     public void setWorkloadCredential(boolean credentialsUpdateOptimizationEnabled, FreeIpaClient freeIpaClient, WorkloadCredentialUpdate update)
             throws IOException, FreeIpaClientException {
         LOGGER.debug("Setting workload credentials for user '{}'", update.getUsername());
@@ -44,7 +49,7 @@ public class WorkloadCredentialService {
     }
 
     public void setWorkloadCredentials(UserSyncOptions options, FreeIpaClient freeIpaClient, Set<WorkloadCredentialUpdate> updates,
-            BiConsumer<String, String> warnings) throws FreeIpaClientException {
+            BiConsumer<String, String> warnings) throws FreeIpaClientException, TimeoutException {
         if (!updates.isEmpty()) {
             List<SetWlCredentialOperation> operations = updates.stream()
                     .flatMap(update -> createUpdateOperation(options, freeIpaClient, warnings, update))
@@ -60,9 +65,10 @@ public class WorkloadCredentialService {
     }
 
     private void updateOneByOne(FreeIpaClient freeIpaClient,  BiConsumer<String, String> warnings, List<SetWlCredentialOperation> operations)
-            throws FreeIpaClientException {
+            throws FreeIpaClientException, TimeoutException {
         LOGGER.debug("Updating workload credentials one by one");
         for (SetWlCredentialOperation operation : operations) {
+            interruptChecker.throwTimeoutExIfInterrupted();
             try {
                 operation.invoke(freeIpaClient);
             } catch (FreeIpaClientException e) {
@@ -73,7 +79,7 @@ public class WorkloadCredentialService {
     }
 
     private void updateInBatch(FreeIpaClient freeIpaClient,  BiConsumer<String, String> warnings, List<SetWlCredentialOperation> operations)
-            throws FreeIpaClientException {
+            throws FreeIpaClientException, TimeoutException {
         LOGGER.debug("Updating workload credentials in batches");
         List<Object> batchCallOperations = operations.stream()
                 .map(AbstractFreeipaOperation::getOperationParamsForBatchCall)
@@ -81,7 +87,8 @@ public class WorkloadCredentialService {
         String operationName = operations.stream()
                 .map(UserModOperation::getOperationName)
                 .findFirst().orElse("unknown");
-        freeIpaClient.callBatch(warnings, batchCallOperations, batchPartitionSizeProperties.getByOperation(operationName), Set.of());
+        freeIpaClient.callBatch(warnings, batchCallOperations, batchPartitionSizeProperties.getByOperation(operationName), Set.of(),
+                () -> interruptChecker.throwTimeoutExIfInterrupted());
     }
 
     private Stream<SetWlCredentialOperation> createUpdateOperation(UserSyncOptions options, FreeIpaClient freeIpaClient, BiConsumer<String, String> warnings,

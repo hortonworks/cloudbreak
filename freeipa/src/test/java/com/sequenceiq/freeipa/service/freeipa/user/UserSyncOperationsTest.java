@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -49,6 +50,7 @@ import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
+import com.sequenceiq.freeipa.util.ThreadInterruptChecker;
 
 @ExtendWith(MockitoExtension.class)
 class UserSyncOperationsTest {
@@ -60,6 +62,9 @@ class UserSyncOperationsTest {
 
     @Mock
     private BatchPartitionSizeProperties batchPartitionSizeProperties;
+
+    @Mock
+    private ThreadInterruptChecker interruptChecker;
 
     @InjectMocks
     private UserSyncOperations underTest;
@@ -78,7 +83,7 @@ class UserSyncOperationsTest {
         underTest.addUsersToGroups(true, freeIpaClient, groupMapping, warnings::put);
 
         ArgumentCaptor<List<Object>> operationsCaptor = ArgumentCaptor.forClass(List.class);
-        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of()));
+        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of()), any());
         assertTrue(warnings.isEmpty());
         List<Object> operations = operationsCaptor.getValue();
         assertEquals(10, operations.size());
@@ -91,6 +96,7 @@ class UserSyncOperationsTest {
             Collection<String> users = (Collection<String>) asdf.get("user");
             assertEquals(MAX_SUBJECTS_PER_REQUEST, users.size());
         });
+        verify(interruptChecker, times(10)).throwTimeoutExIfInterrupted();
     }
 
     @Test
@@ -103,7 +109,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         ArgumentCaptor<List<Object>> operationsCaptor = ArgumentCaptor.forClass(List.class);
-        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of()));
+        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of()), any());
         assertTrue(warnings.isEmpty());
         List<Object> operations = operationsCaptor.getValue();
         assertEquals(10, operations.size());
@@ -116,6 +122,7 @@ class UserSyncOperationsTest {
             Collection<String> users = (Collection<String>) asdf.get("user");
             assertEquals(MAX_SUBJECTS_PER_REQUEST, users.size());
         });
+        verify(interruptChecker, times(10)).throwTimeoutExIfInterrupted();
     }
 
     @Test
@@ -128,7 +135,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         ArgumentCaptor<List<Object>> operationsCaptor = ArgumentCaptor.forClass(List.class);
-        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of()));
+        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of()), any());
         List<Object> operations = operationsCaptor.getValue();
         assertEquals(1, operations.size());
         operations.forEach(op -> {
@@ -140,10 +147,11 @@ class UserSyncOperationsTest {
             Collection<String> users = (Collection<String>) asdf.get("user");
             assertEquals(1, users.size());
         });
+        verify(interruptChecker, times(1)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testAddGroupsBatch() throws FreeIpaClientException {
+    public void testAddGroupsBatch() throws FreeIpaClientException, TimeoutException {
         FmsGroup g1 = new FmsGroup().withName(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP);
         FmsGroup g2 = new FmsGroup().withName("group_1");
         FmsGroup g3 = new FmsGroup().withName("group_2");
@@ -154,7 +162,8 @@ class UserSyncOperationsTest {
         underTest.addGroups(true, freeIpaClient, groups, warnings::put);
 
         ArgumentCaptor<List<Object>> operationsCaptor = ArgumentCaptor.forClass(List.class);
-        verify(freeIpaClient, times(2)).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
+        verify(freeIpaClient, times(2))
+                .callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)), any());
         List<List<Object>> captorAllValues = operationsCaptor.getAllValues();
         List<Object> posixOps = captorAllValues.get(0);
         assertEquals(2, posixOps.size());
@@ -176,10 +185,11 @@ class UserSyncOperationsTest {
             assertEquals(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP, groupName.get(0));
             assertTrue(((Map<String, Boolean>) params.get(1)).get("nonposix"));
         });
+        verify(interruptChecker, times(3)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testAddUsersBatch() throws FreeIpaClientException {
+    public void testAddUsersBatch() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         FmsUser user1 = new FmsUser().withName("user_1").withFirstName("User_1").withLastName("Test1").withState(FmsUser.State.ENABLED);
         FmsUser user2 = new FmsUser().withName("user_2").withFirstName("User_2").withLastName("Test2").withState(FmsUser.State.DISABLED);
@@ -190,7 +200,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         ArgumentCaptor<List<Object>> operationsCaptor = ArgumentCaptor.forClass(List.class);
-        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
+        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)), any());
         List<Object> operations = operationsCaptor.getValue();
         assertEquals(2, operations.size());
         Object user1oper = operations.stream().filter(op -> {
@@ -216,10 +226,11 @@ class UserSyncOperationsTest {
         assertEquals("User_2", attribs2.get("givenname"));
         assertEquals("Test2", attribs2.get("sn"));
         assertTrue(((List<String>) attribs2.get("setattr")).contains("nsAccountLock=true"));
+        verify(interruptChecker, times(2)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testDisableUsersBatch() throws FreeIpaClientException {
+    public void testDisableUsersBatch() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         Set<String> users = Set.of("user1", "user2");
         when(batchPartitionSizeProperties.getByOperation("user_disable")).thenReturn(3);
@@ -228,7 +239,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         ArgumentCaptor<List<Object>> operationsCaptor = ArgumentCaptor.forClass(List.class);
-        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of(FreeIpaErrorCodes.ALREADY_INACTIVE)));
+        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of(FreeIpaErrorCodes.ALREADY_INACTIVE)), any());
         List<Object> operations = operationsCaptor.getValue();
         assertEquals(2, operations.size());
         operations.forEach(op -> {
@@ -238,10 +249,11 @@ class UserSyncOperationsTest {
             assertTrue(((List<String>) params.get(0)).get(0).startsWith("user"));
             assertTrue(((Map<String, Object>) params.get(1)).isEmpty());
         });
+        verify(interruptChecker, times(2)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testEnableUsersBatch() throws FreeIpaClientException {
+    public void testEnableUsersBatch() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         Set<String> users = Set.of("user1", "user2");
         when(batchPartitionSizeProperties.getByOperation("user_enable")).thenReturn(3);
@@ -250,7 +262,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         ArgumentCaptor<List<Object>> operationsCaptor = ArgumentCaptor.forClass(List.class);
-        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of(FreeIpaErrorCodes.ALREADY_ACTIVE)));
+        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of(FreeIpaErrorCodes.ALREADY_ACTIVE)), any());
         List<Object> operations = operationsCaptor.getValue();
         assertEquals(2, operations.size());
         operations.forEach(op -> {
@@ -260,10 +272,11 @@ class UserSyncOperationsTest {
             assertTrue(((List<String>) params.get(0)).get(0).startsWith("user"));
             assertTrue(((Map<String, Object>) params.get(1)).isEmpty());
         });
+        verify(interruptChecker, times(2)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testRemoveUsersBatch() throws FreeIpaClientException {
+    public void testRemoveUsersBatch() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         Set<String> users = Set.of("user1", "user2");
         when(batchPartitionSizeProperties.getByOperation("user_del")).thenReturn(3);
@@ -272,7 +285,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         ArgumentCaptor<List<Object>> operationsCaptor = ArgumentCaptor.forClass(List.class);
-        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of(FreeIpaErrorCodes.NOT_FOUND)));
+        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of(FreeIpaErrorCodes.NOT_FOUND)), any());
         List<Object> operations = operationsCaptor.getValue();
         assertEquals(2, operations.size());
         operations.forEach(op -> {
@@ -282,10 +295,11 @@ class UserSyncOperationsTest {
             assertTrue(((List<String>) params.get(0)).get(0).startsWith("user"));
             assertTrue(((Map<String, Object>) params.get(1)).isEmpty());
         });
+        verify(interruptChecker, times(2)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testRemoveGroupsBatch() throws FreeIpaClientException {
+    public void testRemoveGroupsBatch() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         Set<FmsGroup> groups = Set.of(new FmsGroup().withName("group1"), new FmsGroup().withName("group2"));
         when(batchPartitionSizeProperties.getByOperation("group_del")).thenReturn(3);
@@ -294,7 +308,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         ArgumentCaptor<List<Object>> operationsCaptor = ArgumentCaptor.forClass(List.class);
-        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of(FreeIpaErrorCodes.NOT_FOUND)));
+        verify(freeIpaClient).callBatch(any(), operationsCaptor.capture(), eq(3), eq(Set.of(FreeIpaErrorCodes.NOT_FOUND)), any());
         List<Object> operations = operationsCaptor.getValue();
         assertEquals(2, operations.size());
         operations.forEach(op -> {
@@ -304,10 +318,11 @@ class UserSyncOperationsTest {
             assertTrue(((List<String>) params.get(0)).get(0).startsWith("group"));
             assertTrue(((Map<String, Object>) params.get(1)).isEmpty());
         });
+        verify(interruptChecker, times(2)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testRemoveGroupsSingle() throws FreeIpaClientException {
+    public void testRemoveGroupsSingle() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         Set<FmsGroup> groups = Set.of(new FmsGroup().withName("group1"), new FmsGroup().withName("group2"));
         ArgumentCaptor<List<Object>> flagsCaptor = ArgumentCaptor.forClass(List.class);
@@ -323,7 +338,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         verifyNoInteractions(batchPartitionSizeProperties);
-        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any(), any());
         List<List<Object>> flagsList = flagsCaptor.getAllValues();
         assertThat(flagsList, allOf(
                 hasItem(hasItem("group1")),
@@ -331,10 +346,11 @@ class UserSyncOperationsTest {
         ));
         List<Map<String, Object>> paramsList = paramsCaptor.getAllValues();
         assertThat(paramsList, everyItem(aMapWithSize(0)));
+        verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testRemoveUsersSingle() throws FreeIpaClientException {
+    public void testRemoveUsersSingle() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         Set<String> users = Set.of("user1", "user2");
         ArgumentCaptor<List<Object>> flagsCaptor = ArgumentCaptor.forClass(List.class);
@@ -350,7 +366,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         verifyNoInteractions(batchPartitionSizeProperties);
-        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any(), any());
         List<List<Object>> flagsList = flagsCaptor.getAllValues();
         assertThat(flagsList, allOf(
                 hasItem(hasItem("user1")),
@@ -358,10 +374,11 @@ class UserSyncOperationsTest {
         ));
         List<Map<String, Object>> paramsList = paramsCaptor.getAllValues();
         assertThat(paramsList, everyItem(aMapWithSize(0)));
+        verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testEnableUsersSingle() throws FreeIpaClientException {
+    public void testEnableUsersSingle() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         Set<String> users = Set.of("user1", "user2");
         ArgumentCaptor<List<Object>> flagsCaptor = ArgumentCaptor.forClass(List.class);
@@ -377,7 +394,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         verifyNoInteractions(batchPartitionSizeProperties);
-        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any(), any());
         List<List<Object>> flagsList = flagsCaptor.getAllValues();
         assertThat(flagsList, allOf(
                 hasItem(hasItem("user1")),
@@ -385,10 +402,11 @@ class UserSyncOperationsTest {
         ));
         List<Map<String, Object>> paramsList = paramsCaptor.getAllValues();
         assertThat(paramsList, everyItem(aMapWithSize(0)));
+        verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testDisableUsersSingle() throws FreeIpaClientException {
+    public void testDisableUsersSingle() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         Set<String> users = Set.of("user1", "user2");
         ArgumentCaptor<List<Object>> flagsCaptor = ArgumentCaptor.forClass(List.class);
@@ -404,7 +422,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         verifyNoInteractions(batchPartitionSizeProperties);
-        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any(), any());
         List<List<Object>> flagsList = flagsCaptor.getAllValues();
         assertThat(flagsList, allOf(
                 hasItem(hasItem("user1")),
@@ -412,10 +430,11 @@ class UserSyncOperationsTest {
         ));
         List<Map<String, Object>> paramsList = paramsCaptor.getAllValues();
         assertThat(paramsList, everyItem(aMapWithSize(0)));
+        verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testAddUsersSingle() throws FreeIpaClientException {
+    public void testAddUsersSingle() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         FmsUser user1 = new FmsUser().withName("user1").withFirstName("User_1").withLastName("Test1").withState(FmsUser.State.ENABLED);
         FmsUser user2 = new FmsUser().withName("user2").withFirstName("User_2").withLastName("Test2").withState(FmsUser.State.DISABLED);
@@ -433,7 +452,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         verifyNoInteractions(batchPartitionSizeProperties);
-        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any(), any());
         List<List<Object>> flagsList = flagsCaptor.getAllValues();
         assertThat(flagsList, allOf(
                 hasItem(hasItem("user1")),
@@ -451,10 +470,11 @@ class UserSyncOperationsTest {
                         hasEntry("sn", "Test2")
                 ))
         ));
+        verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testAddGroupsSingle() throws FreeIpaClientException {
+    public void testAddGroupsSingle() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         FmsGroup group1 = new FmsGroup().withName(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP);
         FmsGroup group2 = new FmsGroup().withName("group2");
@@ -472,7 +492,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         verifyNoInteractions(batchPartitionSizeProperties);
-        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any(), any());
         List<List<Object>> flagsList = flagsCaptor.getAllValues();
         assertThat(flagsList, allOf(
                 hasItem(hasItem(UserSyncConstants.CDP_USERSYNC_INTERNAL_GROUP)),
@@ -481,6 +501,7 @@ class UserSyncOperationsTest {
         List<Map<String, Object>> paramsList = paramsCaptor.getAllValues();
         assertTrue(paramsList.get(0).isEmpty());
         assertEquals(true, paramsList.get(1).get("nonposix"));
+        verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
     @Test
@@ -500,7 +521,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         verifyNoInteractions(batchPartitionSizeProperties);
-        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any(), any());
         List<List<Object>> flagsList = flagsCaptor.getAllValues();
         Map<String, Long> flagCount = flagsList.stream()
                 .flatMap(Collection::stream)
@@ -515,6 +536,7 @@ class UserSyncOperationsTest {
             assertEquals(10, ((List<String>) map.get("user")).size());
             assertTrue(((List<String>) map.get("user")).stream().allMatch(user -> user.startsWith("user")));
         });
+        verify(interruptChecker, times(20)).throwTimeoutExIfInterrupted();
     }
 
     @Test
@@ -534,7 +556,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         verifyNoInteractions(batchPartitionSizeProperties);
-        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any(), any());
         List<List<Object>> flagsList = flagsCaptor.getAllValues();
         Map<String, Long> flagCount = flagsList.stream()
                 .flatMap(Collection::stream)
@@ -549,6 +571,7 @@ class UserSyncOperationsTest {
             assertEquals(10, ((List<String>) map.get("user")).size());
             assertTrue(((List<String>) map.get("user")).stream().allMatch(user -> user.startsWith("user")));
         });
+        verify(interruptChecker, times(20)).throwTimeoutExIfInterrupted();
     }
 
     @Test
@@ -563,11 +586,12 @@ class UserSyncOperationsTest {
 
         assertFalse(warnings.isEmpty());
         verifyNoInteractions(batchPartitionSizeProperties);
-        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any(), any());
+        verify(interruptChecker, times(11)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testSingleErrorHandlingAcceptableErrorCode() throws FreeIpaClientException {
+    public void testSingleErrorHandlingAcceptableErrorCode() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         Set<String> users = Set.of("user1", "user2");
         ArgumentCaptor<List<Object>> flagsCaptor = ArgumentCaptor.forClass(List.class);
@@ -579,7 +603,7 @@ class UserSyncOperationsTest {
 
         assertTrue(warnings.isEmpty());
         verifyNoInteractions(batchPartitionSizeProperties);
-        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any(), any());
         List<List<Object>> flagsList = flagsCaptor.getAllValues();
         assertThat(flagsList, allOf(
                 hasItem(hasItem("user1")),
@@ -587,10 +611,11 @@ class UserSyncOperationsTest {
         ));
         List<Map<String, Object>> paramsList = paramsCaptor.getAllValues();
         assertThat(paramsList, everyItem(aMapWithSize(0)));
+        verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
     @Test
-    public void testSingleErrorHandlingNotAcceptableErrorCode() throws FreeIpaClientException {
+    public void testSingleErrorHandlingNotAcceptableErrorCode() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
         Set<String> users = Set.of("user1", "user2");
         ArgumentCaptor<List<Object>> flagsCaptor = ArgumentCaptor.forClass(List.class);
@@ -602,7 +627,7 @@ class UserSyncOperationsTest {
 
         assertFalse(warnings.isEmpty());
         verifyNoInteractions(batchPartitionSizeProperties);
-        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any());
+        verify(freeIpaClient, never()).callBatch(any(), any(), any(), any(), any());
         verify(freeIpaClient, times(2)).checkIfClientStillUsable(any(FreeIpaClientException.class));
         List<List<Object>> flagsList = flagsCaptor.getAllValues();
         assertThat(flagsList, allOf(
@@ -611,6 +636,7 @@ class UserSyncOperationsTest {
         ));
         List<Map<String, Object>> paramsList = paramsCaptor.getAllValues();
         assertThat(paramsList, everyItem(aMapWithSize(0)));
+        verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
     private Multimap<String, String> setupGroupMapping(int numGroups, int numPerGroup) {

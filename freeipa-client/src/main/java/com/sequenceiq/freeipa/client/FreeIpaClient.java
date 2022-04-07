@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
+import com.sequenceiq.cloudbreak.util.CheckedTimeoutRunnable;
 import com.sequenceiq.freeipa.client.model.Ca;
 import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.Config;
@@ -680,9 +682,10 @@ public class FreeIpaClient {
     }
 
     public void callBatch(BiConsumer<String, String> warnings, List<Object> operations, Integer partitionSize,
-            Set<FreeIpaErrorCodes> acceptableErrorCodes) throws FreeIpaClientException {
+            Set<FreeIpaErrorCodes> acceptableErrorCodes, CheckedTimeoutRunnable check) throws FreeIpaClientException, TimeoutException {
         List<List<Object>> partitions = Lists.partition(operations, partitionSize);
         for (List<Object> operationsPartition : partitions) {
+            check.run();
             BatchOperation.create(operationsPartition, warnings, acceptableErrorCodes).invoke(this);
         }
     }

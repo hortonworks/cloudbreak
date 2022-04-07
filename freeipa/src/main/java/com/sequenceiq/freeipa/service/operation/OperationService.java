@@ -115,6 +115,14 @@ public class OperationService {
         }
     }
 
+    public Operation timeout(String operationId, String accountId) {
+        Operation operation = getOperationForAccountIdAndOperationId(accountId, operationId);
+        operation.setStatus(OperationState.TIMEDOUT);
+        operation.setEndTime(System.currentTimeMillis());
+        LOGGER.info("Operation timed out: {}", operation);
+        return operationRepository.save(operation);
+    }
+
     private Operation requestOperation(String accountId, OperationType operationType,
             Collection<String> environmentCrns, Collection<String> userCrns) {
         Operation operation = new Operation();

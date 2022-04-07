@@ -51,6 +51,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOIN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENVIRONMENT_PRIVILEGED_USER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
@@ -477,6 +478,10 @@ public class EntitlementService {
 
     public boolean isWorkloadIamSyncEnabled(String accountId) {
         return isEntitlementRegistered(accountId, WORKLOAD_IAM_SYNC);
+    }
+
+    public boolean isUserSyncThreadTimeoutEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_FMS_USERSYNC_THREAD_TIMEOUT);
     }
 
     public List<String> getEntitlements(String accountId) {

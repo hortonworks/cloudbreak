@@ -46,6 +46,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_SELECT_INSTANCE_TYPE;
@@ -322,9 +323,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.datahub.os.upgrade.enable}")
     private boolean datahubOsUpgradeEnabled;
 
-    @Value("${auth.mock.raws3.enable}")
-    private boolean rawS3Enabled;
-
     @Value("${auth.mock.ccmv2.enable}")
     private boolean ccmV2Enabled;
 
@@ -369,9 +367,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datalake.efs.enable}")
     private boolean enableDataLakeEfs;
-
-    @Value("${auth.mock.datalake.customimage.enable}")
-    private boolean enableDataLakeCustomImage;
 
     @Value("${auth.mock.differentdatahubversionthandatalake.enabled}")
     private boolean enableDifferentDataHubVersionThanDataLake;
@@ -505,6 +500,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.saas.enable}")
     private boolean enableSaas;
+
+    @Value("${auth.mock.freeipa.usersync.thread.timeout.enable}")
+    private boolean enableFreeipaUsersyncTimeout;
 
     @PostConstruct
     public void init() {
@@ -904,6 +902,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableFreeIpaUpgrade) {
             builder.addEntitlements(createEntitlement(CDP_FREEIPA_UPGRADE));
+        }
+        if (enableFreeipaUsersyncTimeout) {
+            builder.addEntitlements(createEntitlement(CDP_FMS_USERSYNC_THREAD_TIMEOUT));
         }
         if (enableUnboundElimination) {
             builder.addEntitlements(createEntitlement(CDP_UNBOUND_ELIMINATION));
