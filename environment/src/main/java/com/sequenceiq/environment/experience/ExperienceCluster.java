@@ -13,11 +13,14 @@ public class ExperienceCluster {
 
     private final String statusReason;
 
+    private final String publicName;
+
     private ExperienceCluster(Builder builder) {
         name = builder.name;
         experienceName = builder.experienceName;
         status = builder.status;
         statusReason = builder.statusReason;
+        publicName = builder.publicName;
     }
 
     public String getName() {
@@ -36,6 +39,10 @@ public class ExperienceCluster {
         return statusReason;
     }
 
+    public String getPublicName() {
+        return publicName;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -47,6 +54,7 @@ public class ExperienceCluster {
                 .add("experienceName='" + experienceName + "'")
                 .add("status='" + status + "'")
                 .add("statusReason='" + statusReason + "'")
+                .add("publicName='" + publicName + "'")
                 .toString();
     }
 
@@ -62,12 +70,13 @@ public class ExperienceCluster {
         return Objects.equals(name, that.name)
                 && Objects.equals(experienceName, that.experienceName)
                 && Objects.equals(status, that.status)
+                && Objects.equals(publicName, that.publicName)
                 && Objects.equals(statusReason, that.statusReason);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, experienceName, status, statusReason);
+        return Objects.hash(name, experienceName, status, statusReason, publicName);
     }
 
     public static class Builder {
@@ -79,6 +88,8 @@ public class ExperienceCluster {
         private String experienceName;
 
         private String statusReason;
+
+        private String publicName;
 
         public Builder withName(String name) {
             this.name = name;
@@ -100,8 +111,14 @@ public class ExperienceCluster {
             return this;
         }
 
+        public Builder withPublicName(String publicName) {
+            this.publicName = publicName;
+            return this;
+        }
+
         public ExperienceCluster build() {
             return new ExperienceCluster(this);
         }
     }
+
 }

@@ -35,6 +35,8 @@ public class ExperiencesByLiftie implements Experience {
 
     private static final String LIFTIE = "LIFTIE";
 
+    private static final String KUBERNETES_XP = "Kubernetes Experience";
+
     private final ListClustersResponseValidator listClustersResponseValidator;
 
     private final LiftieApi liftieApi;
@@ -45,7 +47,7 @@ public class ExperiencesByLiftie implements Experience {
             ListClustersResponseValidator listClustersResponseValidator) {
         this.listClustersResponseValidator = listClustersResponseValidator;
         this.liftieApi = liftieApi;
-        this.workloads = identifyConfiguredWorkloads(workloadConfig);
+        workloads = identifyConfiguredWorkloads(workloadConfig);
     }
 
     @Override
@@ -144,6 +146,7 @@ public class ExperiencesByLiftie implements Experience {
                 .withStatus(cv.getClusterStatus().getStatus())
                 .withStatusReason(cv.getClusterStatus().getMessage())
                 .withExperienceName(LIFTIE)
+                .withPublicName(KUBERNETES_XP)
                 .build();
     }
 
