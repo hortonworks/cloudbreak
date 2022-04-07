@@ -284,6 +284,9 @@ public class MockUserManagementServiceTest {
 
                 {"enableDatalakeZduOSUpgrade false", "enableDatalakeZduOSUpgrade", false, "CDP_DATALAKE_ZDU_OS_UPGRADE", false},
                 {"enableDatalakeZduOSUpgrade true", "enableDatalakeZduOSUpgrade", true, "CDP_DATALAKE_ZDU_OS_UPGRADE", true},
+
+                {"enableWorkloadIamSync false", "enableWorkloadIamSync", false, "WORKLOAD_IAM_SYNC", false},
+                {"enableWorkloadIamSync true", "enableWorkloadIamSync", true, "WORKLOAD_IAM_SYNC", true},
         };
     }
 

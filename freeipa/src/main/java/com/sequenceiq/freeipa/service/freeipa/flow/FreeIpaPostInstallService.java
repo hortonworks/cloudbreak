@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -53,6 +54,9 @@ public class FreeIpaPostInstallService {
     @Inject
     private FreeIpaTopologyService freeIpaTopologyService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Retryable(value = FreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
@@ -64,6 +68,7 @@ public class FreeIpaPostInstallService {
         freeIpaTopologyService.updateReplicationTopology(stackId, Set.of(), freeIpaClient);
         if (fullPostInstall) {
             setInitialFreeIpaPolicies(stack, freeIpaClient);
+            synchronizeUsers(stack);
         }
     }
 
@@ -80,9 +85,17 @@ public class FreeIpaPostInstallService {
         }
         passwordPolicyService.updatePasswordPolicy(freeIpaClient);
         modifyAdminPasswordExpirationIfNeeded(freeIpaClient);
-        userSyncService.synchronizeUsers(
-                ThreadBasedUserCrnProvider.getAccountId(), ThreadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()),
-                Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+    }
+
+    private void synchronizeUsers(Stack stack) {
+        if (entitlementService.isWorkloadIamSyncEnabled(stack.getAccountId())) {
+            LOGGER.debug("WORKLOAD_IAM_SYNC entitled. Usersync will be triggered automatically by the Workload IAM service");
+        } else {
+            LOGGER.debug("WORKLOAD_IAM_SYNC not entitled. Explicitly triggering initial usersync.");
+            userSyncService.synchronizeUsers(
+                    ThreadBasedUserCrnProvider.getAccountId(), ThreadBasedUserCrnProvider.getUserCrn(), Set.of(stack.getEnvironmentCrn()),
+                    Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+        }
     }
 
     private void modifyAdminPasswordExpirationIfNeeded(FreeIpaClient client) throws FreeIpaClientException {
