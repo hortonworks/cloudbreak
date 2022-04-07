@@ -3026,6 +3026,37 @@ public final class UserManagementGrpc {
     return getGetActorWorkloadCredentialsMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse> getUnsetWorkloadPasswordMinLifetimeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UnsetWorkloadPasswordMinLifetime",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse> getUnsetWorkloadPasswordMinLifetimeMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse> getUnsetWorkloadPasswordMinLifetimeMethod;
+    if ((getUnsetWorkloadPasswordMinLifetimeMethod = UserManagementGrpc.getUnsetWorkloadPasswordMinLifetimeMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getUnsetWorkloadPasswordMinLifetimeMethod = UserManagementGrpc.getUnsetWorkloadPasswordMinLifetimeMethod) == null) {
+          UserManagementGrpc.getUnsetWorkloadPasswordMinLifetimeMethod = getUnsetWorkloadPasswordMinLifetimeMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UnsetWorkloadPasswordMinLifetime"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnsetWorkloadPasswordMinLifetime"))
+              .build();
+        }
+      }
+    }
+    return getUnsetWorkloadPasswordMinLifetimeMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> getGetEventGenerationIdsMethod;
 
@@ -3646,6 +3677,192 @@ public final class UserManagementGrpc {
     return getUpdateUserMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse> getSetCssoStrictModeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetCssoStrictMode",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse> getSetCssoStrictModeMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse> getSetCssoStrictModeMethod;
+    if ((getSetCssoStrictModeMethod = UserManagementGrpc.getSetCssoStrictModeMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getSetCssoStrictModeMethod = UserManagementGrpc.getSetCssoStrictModeMethod) == null) {
+          UserManagementGrpc.getSetCssoStrictModeMethod = getSetCssoStrictModeMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetCssoStrictMode"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetCssoStrictMode"))
+              .build();
+        }
+      }
+    }
+    return getSetCssoStrictModeMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse> getInteractiveLogoutMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "InteractiveLogout",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse> getInteractiveLogoutMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse> getInteractiveLogoutMethod;
+    if ((getInteractiveLogoutMethod = UserManagementGrpc.getInteractiveLogoutMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getInteractiveLogoutMethod = UserManagementGrpc.getInteractiveLogoutMethod) == null) {
+          UserManagementGrpc.getInteractiveLogoutMethod = getInteractiveLogoutMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "InteractiveLogout"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InteractiveLogout"))
+              .build();
+        }
+      }
+    }
+    return getInteractiveLogoutMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse> getScimListUsersMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ScimListUsers",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse> getScimListUsersMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse> getScimListUsersMethod;
+    if ((getScimListUsersMethod = UserManagementGrpc.getScimListUsersMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getScimListUsersMethod = UserManagementGrpc.getScimListUsersMethod) == null) {
+          UserManagementGrpc.getScimListUsersMethod = getScimListUsersMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ScimListUsers"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ScimListUsers"))
+              .build();
+        }
+      }
+    }
+    return getScimListUsersMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse> getScimRemoveAllMembersFromGroupMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ScimRemoveAllMembersFromGroup",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse> getScimRemoveAllMembersFromGroupMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse> getScimRemoveAllMembersFromGroupMethod;
+    if ((getScimRemoveAllMembersFromGroupMethod = UserManagementGrpc.getScimRemoveAllMembersFromGroupMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getScimRemoveAllMembersFromGroupMethod = UserManagementGrpc.getScimRemoveAllMembersFromGroupMethod) == null) {
+          UserManagementGrpc.getScimRemoveAllMembersFromGroupMethod = getScimRemoveAllMembersFromGroupMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ScimRemoveAllMembersFromGroup"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ScimRemoveAllMembersFromGroup"))
+              .build();
+        }
+      }
+    }
+    return getScimRemoveAllMembersFromGroupMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse> getScimReplaceAllMembersOfGroupMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ScimReplaceAllMembersOfGroup",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse> getScimReplaceAllMembersOfGroupMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse> getScimReplaceAllMembersOfGroupMethod;
+    if ((getScimReplaceAllMembersOfGroupMethod = UserManagementGrpc.getScimReplaceAllMembersOfGroupMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getScimReplaceAllMembersOfGroupMethod = UserManagementGrpc.getScimReplaceAllMembersOfGroupMethod) == null) {
+          UserManagementGrpc.getScimReplaceAllMembersOfGroupMethod = getScimReplaceAllMembersOfGroupMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ScimReplaceAllMembersOfGroup"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ScimReplaceAllMembersOfGroup"))
+              .build();
+        }
+      }
+    }
+    return getScimReplaceAllMembersOfGroupMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse> getScimListGroupsMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ScimListGroups",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest,
+      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse> getScimListGroupsMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse> getScimListGroupsMethod;
+    if ((getScimListGroupsMethod = UserManagementGrpc.getScimListGroupsMethod) == null) {
+      synchronized (UserManagementGrpc.class) {
+        if ((getScimListGroupsMethod = UserManagementGrpc.getScimListGroupsMethod) == null) {
+          UserManagementGrpc.getScimListGroupsMethod = getScimListGroupsMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ScimListGroups"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ScimListGroups"))
+              .build();
+        }
+      }
+    }
+    return getScimListGroupsMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -4024,6 +4241,8 @@ public final class UserManagementGrpc {
     /**
      * <pre>
      * Get the rights for an actor.
+     * These rights handle authorization and not authentication
+     * i.e., the rights of the actor are returned regardless of whether the actor is disabled.
      * </pre>
      */
     public void getRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest request,
@@ -4034,6 +4253,8 @@ public final class UserManagementGrpc {
     /**
      * <pre>
      * Checks if an actor has the input rights on the input resources.
+     * These rights handle authorization and not authentication
+     * i.e., the rights of the actor are checked regardless of whether the actor is disabled.
      * </pre>
      */
     public void checkRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest request,
@@ -4702,6 +4923,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Removes workload password minimum lifetime date for an actor.
+     * </pre>
+     */
+    public void unsetWorkloadPasswordMinLifetime(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnsetWorkloadPasswordMinLifetimeMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Returns a unique ID for the following events:
      * * Role assignment events.
      * * Resource role assignment events.
@@ -4906,6 +5137,68 @@ public final class UserManagementGrpc {
     public void updateUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateUserMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Set Cloudera SSO strict mode for the account.
+     * </pre>
+     */
+    public void setCssoStrictMode(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetCssoStrictModeMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Handles interactive logout requests from console.
+     * </pre>
+     */
+    public void interactiveLogout(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInteractiveLogoutMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Lists users for SCIM client. It's not a shared backend method for other services to call.
+     * </pre>
+     */
+    public void scimListUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getScimListUsersMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Remove all SCIM members from a group. It is not a shared backend method for other
+     * services to call.
+     * </pre>
+     */
+    public void scimRemoveAllMembersFromGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getScimRemoveAllMembersFromGroupMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Replace all SCIM members of a group. It is not a shared backend method for other
+     * services to call.
+     * </pre>
+     */
+    public void scimReplaceAllMembersOfGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getScimReplaceAllMembersOfGroupMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Lists all groups. It's not a shared backend method for other services to call.
+     * </pre>
+     */
+    public void scimListGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getScimListGroupsMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -5590,6 +5883,13 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse>(
                   this, METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS)))
           .addMethod(
+            getUnsetWorkloadPasswordMinLifetimeMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse>(
+                  this, METHODID_UNSET_WORKLOAD_PASSWORD_MIN_LIFETIME)))
+          .addMethod(
             getGetEventGenerationIdsMethod(),
             io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
@@ -5729,6 +6029,48 @@ public final class UserManagementGrpc {
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse>(
                   this, METHODID_UPDATE_USER)))
+          .addMethod(
+            getSetCssoStrictModeMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse>(
+                  this, METHODID_SET_CSSO_STRICT_MODE)))
+          .addMethod(
+            getInteractiveLogoutMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse>(
+                  this, METHODID_INTERACTIVE_LOGOUT)))
+          .addMethod(
+            getScimListUsersMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse>(
+                  this, METHODID_SCIM_LIST_USERS)))
+          .addMethod(
+            getScimRemoveAllMembersFromGroupMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse>(
+                  this, METHODID_SCIM_REMOVE_ALL_MEMBERS_FROM_GROUP)))
+          .addMethod(
+            getScimReplaceAllMembersOfGroupMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse>(
+                  this, METHODID_SCIM_REPLACE_ALL_MEMBERS_OF_GROUP)))
+          .addMethod(
+            getScimListGroupsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest,
+                com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse>(
+                  this, METHODID_SCIM_LIST_GROUPS)))
           .build();
     }
   }
@@ -6108,6 +6450,8 @@ public final class UserManagementGrpc {
     /**
      * <pre>
      * Get the rights for an actor.
+     * These rights handle authorization and not authentication
+     * i.e., the rights of the actor are returned regardless of whether the actor is disabled.
      * </pre>
      */
     public void getRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest request,
@@ -6119,6 +6463,8 @@ public final class UserManagementGrpc {
     /**
      * <pre>
      * Checks if an actor has the input rights on the input resources.
+     * These rights handle authorization and not authentication
+     * i.e., the rights of the actor are checked regardless of whether the actor is disabled.
      * </pre>
      */
     public void checkRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest request,
@@ -6852,6 +7198,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Removes workload password minimum lifetime date for an actor.
+     * </pre>
+     */
+    public void unsetWorkloadPasswordMinLifetime(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUnsetWorkloadPasswordMinLifetimeMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Returns a unique ID for the following events:
      * * Role assignment events.
      * * Resource role assignment events.
@@ -7076,6 +7433,74 @@ public final class UserManagementGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getUpdateUserMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Set Cloudera SSO strict mode for the account.
+     * </pre>
+     */
+    public void setCssoStrictMode(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSetCssoStrictModeMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Handles interactive logout requests from console.
+     * </pre>
+     */
+    public void interactiveLogout(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getInteractiveLogoutMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Lists users for SCIM client. It's not a shared backend method for other services to call.
+     * </pre>
+     */
+    public void scimListUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getScimListUsersMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Remove all SCIM members from a group. It is not a shared backend method for other
+     * services to call.
+     * </pre>
+     */
+    public void scimRemoveAllMembersFromGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getScimRemoveAllMembersFromGroupMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Replace all SCIM members of a group. It is not a shared backend method for other
+     * services to call.
+     * </pre>
+     */
+    public void scimReplaceAllMembersOfGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getScimReplaceAllMembersOfGroupMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Lists all groups. It's not a shared backend method for other services to call.
+     * </pre>
+     */
+    public void scimListGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getScimListGroupsMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -7423,6 +7848,8 @@ public final class UserManagementGrpc {
     /**
      * <pre>
      * Get the rights for an actor.
+     * These rights handle authorization and not authentication
+     * i.e., the rights of the actor are returned regardless of whether the actor is disabled.
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse getRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest request) {
@@ -7433,6 +7860,8 @@ public final class UserManagementGrpc {
     /**
      * <pre>
      * Checks if an actor has the input rights on the input resources.
+     * These rights handle authorization and not authentication
+     * i.e., the rights of the actor are checked regardless of whether the actor is disabled.
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse checkRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest request) {
@@ -8101,6 +8530,16 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Removes workload password minimum lifetime date for an actor.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse unsetWorkloadPasswordMinLifetime(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUnsetWorkloadPasswordMinLifetimeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Returns a unique ID for the following events:
      * * Role assignment events.
      * * Resource role assignment events.
@@ -8305,6 +8744,68 @@ public final class UserManagementGrpc {
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse updateUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getUpdateUserMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Set Cloudera SSO strict mode for the account.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse setCssoStrictMode(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSetCssoStrictModeMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Handles interactive logout requests from console.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse interactiveLogout(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getInteractiveLogoutMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Lists users for SCIM client. It's not a shared backend method for other services to call.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse scimListUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getScimListUsersMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Remove all SCIM members from a group. It is not a shared backend method for other
+     * services to call.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse scimRemoveAllMembersFromGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getScimRemoveAllMembersFromGroupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Replace all SCIM members of a group. It is not a shared backend method for other
+     * services to call.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse scimReplaceAllMembersOfGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getScimReplaceAllMembersOfGroupMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Lists all groups. It's not a shared backend method for other services to call.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse scimListGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getScimListGroupsMethod(), getCallOptions(), request);
     }
   }
 
@@ -8683,6 +9184,8 @@ public final class UserManagementGrpc {
     /**
      * <pre>
      * Get the rights for an actor.
+     * These rights handle authorization and not authentication
+     * i.e., the rights of the actor are returned regardless of whether the actor is disabled.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse> getRights(
@@ -8694,6 +9197,8 @@ public final class UserManagementGrpc {
     /**
      * <pre>
      * Checks if an actor has the input rights on the input resources.
+     * These rights handle authorization and not authentication
+     * i.e., the rights of the actor are checked regardless of whether the actor is disabled.
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse> checkRights(
@@ -9427,6 +9932,17 @@ public final class UserManagementGrpc {
 
     /**
      * <pre>
+     * Removes workload password minimum lifetime date for an actor.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse> unsetWorkloadPasswordMinLifetime(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUnsetWorkloadPasswordMinLifetimeMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Returns a unique ID for the following events:
      * * Role assignment events.
      * * Resource role assignment events.
@@ -9652,6 +10168,74 @@ public final class UserManagementGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getUpdateUserMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Set Cloudera SSO strict mode for the account.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse> setCssoStrictMode(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSetCssoStrictModeMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Handles interactive logout requests from console.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse> interactiveLogout(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getInteractiveLogoutMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * Lists users for SCIM client. It's not a shared backend method for other services to call.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse> scimListUsers(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getScimListUsersMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Remove all SCIM members from a group. It is not a shared backend method for other
+     * services to call.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse> scimRemoveAllMembersFromGroup(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getScimRemoveAllMembersFromGroupMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Replace all SCIM members of a group. It is not a shared backend method for other
+     * services to call.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse> scimReplaceAllMembersOfGroup(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getScimReplaceAllMembersOfGroupMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
+     * SCIM call. Lists all groups. It's not a shared backend method for other services to call.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse> scimListGroups(
+        com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getScimListGroupsMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_INTERACTIVE_LOGIN = 0;
@@ -9751,26 +10335,33 @@ public final class UserManagementGrpc {
   private static final int METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS = 94;
   private static final int METHODID_VALIDATE_ACTOR_WORKLOAD_CREDENTIALS = 95;
   private static final int METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS = 96;
-  private static final int METHODID_GET_EVENT_GENERATION_IDS = 97;
-  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 98;
-  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 99;
-  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 100;
-  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 101;
-  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 102;
-  private static final int METHODID_UNSET_WORKLOAD_PASSWORD_POLICY = 103;
-  private static final int METHODID_SET_AUTHENTICATION_POLICY = 104;
-  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 105;
-  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 106;
-  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 107;
-  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 108;
-  private static final int METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = 109;
-  private static final int METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = 110;
-  private static final int METHODID_SET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = 111;
-  private static final int METHODID_GET_USER_SYNC_STATE_MODEL = 112;
-  private static final int METHODID_LIST_ROLE_ASSIGNMENTS = 113;
-  private static final int METHODID_GENERATE_WORKLOAD_AUTH_TOKEN = 114;
-  private static final int METHODID_GET_WORKLOAD_AUTH_CONFIGURATION = 115;
-  private static final int METHODID_UPDATE_USER = 116;
+  private static final int METHODID_UNSET_WORKLOAD_PASSWORD_MIN_LIFETIME = 97;
+  private static final int METHODID_GET_EVENT_GENERATION_IDS = 98;
+  private static final int METHODID_ADD_ACTOR_SSH_PUBLIC_KEY = 99;
+  private static final int METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS = 100;
+  private static final int METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = 101;
+  private static final int METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY = 102;
+  private static final int METHODID_SET_WORKLOAD_PASSWORD_POLICY = 103;
+  private static final int METHODID_UNSET_WORKLOAD_PASSWORD_POLICY = 104;
+  private static final int METHODID_SET_AUTHENTICATION_POLICY = 105;
+  private static final int METHODID_ASSIGN_CLOUD_IDENTITY = 106;
+  private static final int METHODID_UNASSIGN_CLOUD_IDENTITY = 107;
+  private static final int METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 108;
+  private static final int METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = 109;
+  private static final int METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = 110;
+  private static final int METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = 111;
+  private static final int METHODID_SET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = 112;
+  private static final int METHODID_GET_USER_SYNC_STATE_MODEL = 113;
+  private static final int METHODID_LIST_ROLE_ASSIGNMENTS = 114;
+  private static final int METHODID_GENERATE_WORKLOAD_AUTH_TOKEN = 115;
+  private static final int METHODID_GET_WORKLOAD_AUTH_CONFIGURATION = 116;
+  private static final int METHODID_UPDATE_USER = 117;
+  private static final int METHODID_SET_CSSO_STRICT_MODE = 118;
+  private static final int METHODID_INTERACTIVE_LOGOUT = 119;
+  private static final int METHODID_SCIM_LIST_USERS = 120;
+  private static final int METHODID_SCIM_REMOVE_ALL_MEMBERS_FROM_GROUP = 121;
+  private static final int METHODID_SCIM_REPLACE_ALL_MEMBERS_OF_GROUP = 122;
+  private static final int METHODID_SCIM_LIST_GROUPS = 123;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -10177,6 +10768,10 @@ public final class UserManagementGrpc {
           serviceImpl.getActorWorkloadCredentials((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse>) responseObserver);
           break;
+        case METHODID_UNSET_WORKLOAD_PASSWORD_MIN_LIFETIME:
+          serviceImpl.unsetWorkloadPasswordMinLifetime((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordMinLifetimeResponse>) responseObserver);
+          break;
         case METHODID_GET_EVENT_GENERATION_IDS:
           serviceImpl.getEventGenerationIds((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse>) responseObserver);
@@ -10256,6 +10851,30 @@ public final class UserManagementGrpc {
         case METHODID_UPDATE_USER:
           serviceImpl.updateUser((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse>) responseObserver);
+          break;
+        case METHODID_SET_CSSO_STRICT_MODE:
+          serviceImpl.setCssoStrictMode((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetCssoStrictModeResponse>) responseObserver);
+          break;
+        case METHODID_INTERACTIVE_LOGOUT:
+          serviceImpl.interactiveLogout((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogoutResponse>) responseObserver);
+          break;
+        case METHODID_SCIM_LIST_USERS:
+          serviceImpl.scimListUsers((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListUsersResponse>) responseObserver);
+          break;
+        case METHODID_SCIM_REMOVE_ALL_MEMBERS_FROM_GROUP:
+          serviceImpl.scimRemoveAllMembersFromGroup((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimRemoveAllMembersFromGroupResponse>) responseObserver);
+          break;
+        case METHODID_SCIM_REPLACE_ALL_MEMBERS_OF_GROUP:
+          serviceImpl.scimReplaceAllMembersOfGroup((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimReplaceAllMembersOfGroupResponse>) responseObserver);
+          break;
+        case METHODID_SCIM_LIST_GROUPS:
+          serviceImpl.scimListGroups((com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ScimListGroupsResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -10415,6 +11034,7 @@ public final class UserManagementGrpc {
               .addMethod(getSetActorWorkloadCredentialsMethod())
               .addMethod(getValidateActorWorkloadCredentialsMethod())
               .addMethod(getGetActorWorkloadCredentialsMethod())
+              .addMethod(getUnsetWorkloadPasswordMinLifetimeMethod())
               .addMethod(getGetEventGenerationIdsMethod())
               .addMethod(getAddActorSshPublicKeyMethod())
               .addMethod(getListActorSshPublicKeysMethod())
@@ -10435,6 +11055,12 @@ public final class UserManagementGrpc {
               .addMethod(getGenerateWorkloadAuthTokenMethod())
               .addMethod(getGetWorkloadAuthConfigurationMethod())
               .addMethod(getUpdateUserMethod())
+              .addMethod(getSetCssoStrictModeMethod())
+              .addMethod(getInteractiveLogoutMethod())
+              .addMethod(getScimListUsersMethod())
+              .addMethod(getScimRemoveAllMembersFromGroupMethod())
+              .addMethod(getScimReplaceAllMembersOfGroupMethod())
+              .addMethod(getScimListGroupsMethod())
               .build();
         }
       }
