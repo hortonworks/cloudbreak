@@ -55,7 +55,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
+import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -67,8 +67,10 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.service.stack.StackIdViewImpl;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
+import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -151,6 +153,9 @@ public class MetadataSetupServiceTest {
     private StackService stackService;
 
     @Mock
+    private StackStatusService stackStatusService;
+
+    @Mock
     private Clock clock;
 
     @InjectMocks
@@ -226,14 +231,16 @@ public class MetadataSetupServiceTest {
         when(loadBalancerPersistenceService.findByStackId(STACK_ID)).thenReturn(loadBalancerSet);
         when(loadBalancerConfigService.generateLoadBalancerEndpoint(stack)).thenCallRealMethod();
 
-        TestStackStatusView stackStatusView = new TestStackStatusView();
-        stackStatusView.setId(STACK_ID);
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
-        stackStatusView.setStatus(stackStatus);
+        stackStatus.setStack(stack);
 
-        when(stackService.getByEnvironmentCrnAndStackType(STACK_CRN, StackType.DATALAKE)).thenReturn(List.of(stackStatusView));
 
+        StackIdView stackIdView = new StackIdViewImpl(STACK_ID, STACK_NAME, "no");
+
+
+        when(stackService.getByEnvironmentCrnAndStackType(STACK_CRN, StackType.DATALAKE)).thenReturn(List.of(stackIdView));
+        when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(Optional.of(stackStatus));
         when(targetGroupPersistenceService.findByLoadBalancerId(any())).thenReturn(Set.of());
         Iterable<CloudLoadBalancerMetadata> cloudLoadBalancerMetaDataStatuses = getCloudLoadBalancerMetaDataStatuses();
 
@@ -284,19 +291,22 @@ public class MetadataSetupServiceTest {
         when(loadBalancerPersistenceService.findByStackId(OLD_STACK_ID)).thenReturn(new HashSet<>());
         when(loadBalancerConfigService.generateLoadBalancerEndpoint(stack)).thenCallRealMethod();
 
-        TestStackStatusView stackStatusView = new TestStackStatusView();
-        stackStatusView.setId(STACK_ID);
+        StackIdView stackIdView = new StackIdViewImpl(STACK_ID, STACK_NAME, "no");
+
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
-        stackStatusView.setStatus(stackStatus);
-        TestStackStatusView stackStatusViewOld = new TestStackStatusView();
+        stackStatus.setStack(stack);
 
-        stackStatusViewOld.setId(OLD_STACK_ID);
+
+        StackIdView stackIdViewOld = new StackIdViewImpl(OLD_STACK_ID, OLD_STACK_NAME, "old_no");
         StackStatus stoppedStackStatus = new StackStatus();
         stoppedStackStatus.setStatus(Status.STOPPED);
-        stackStatusViewOld.setStatus(stoppedStackStatus);
+        stoppedStackStatus.setStack(oldStack);
 
-        when(stackService.getByEnvironmentCrnAndStackType(STACK_CRN, StackType.DATALAKE)).thenReturn(List.of(stackStatusView, stackStatusViewOld));
+        when(stackService.getByEnvironmentCrnAndStackType(STACK_CRN, StackType.DATALAKE)).thenReturn(List.of(stackIdView, stackIdViewOld));
+        when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(STACK_ID)).thenReturn(Optional.of(stackStatus));
+        when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(OLD_STACK_ID)).thenReturn(Optional.of(stoppedStackStatus));
+
         when(stackService.getByIdWithGatewayInTransaction(OLD_STACK_ID)).thenReturn(oldStack);
 
         when(targetGroupPersistenceService.findByLoadBalancerId(any())).thenReturn(Set.of());
@@ -611,32 +621,5 @@ public class MetadataSetupServiceTest {
         assertEquals(Boolean.FALSE, instanceMetaData.getClusterManagerServer());
         assertEquals(InstanceMetadataType.CORE, instanceMetaData.getInstanceMetadataType());
         assertEquals(InstanceLifeCycle.SPOT, instanceMetaData.getLifeCycle());
-    }
-
-    private static class TestStackStatusView implements StackStatusView {
-        private Long id;
-
-        private StackStatus status;
-
-        public Long getId() {
-            return id;
-        }
-
-        @Override
-        public String getName() {
-            return null;
-        }
-
-        public StackStatus getStatus() {
-            return status;
-        }
-
-        public void setId(Long id) {
-            this.id = id;
-        }
-
-        public void setStatus(StackStatus status) {
-            this.status = status;
-        }
     }
 }
