@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.S
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -86,14 +87,15 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     @Override
     public FreeIpaTestDto valid() {
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
-                .withEnvironment(getTestContext().given(EnvironmentTestDto.class))
+                .withEnvironment(getTestContext().given(EnvironmentTestDto.class).withTunnel(Tunnel.CLUSTER_PROXY))
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()), OptionalInt.empty(), OptionalInt.empty())
                 .withNetwork(getTestContext().given(NetworkV4TestDto.class))
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
                 .withFreeIpa("ipatest.local", "ipaserver", "admin1234", "admins")
-                .withCatalog(getCloudProvider().getFreeIpaImageCatalogUrl());
+                .withCatalog(getCloudProvider().getFreeIpaImageCatalogUrl())
+                .withTunnel(Tunnel.CLUSTER_PROXY);
     }
 
     public FreeIpaTestDto withFreeIpaHa(int instanceGroupCount, int instanceCountByGroup) {
@@ -366,6 +368,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     public FreeIpaTestDto withGatewayPort(Integer port) {
         getRequest().setGatewayPort(port);
+        return this;
+    }
+
+    public FreeIpaTestDto withTunnel(Tunnel tunnel) {
+        getRequest().setTunnel(tunnel);
         return this;
     }
 
