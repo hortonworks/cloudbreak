@@ -73,7 +73,7 @@ public class UserSyncForEnvService {
             LOGGER.info("Starting {} for environments {} with operationId {} ...", logUserSyncEvent, environmentCrns, operationId);
 
             if (options.isFullSync()) {
-                umsVirtualGroupCreateService.createVirtualGroups(accountId, environmentCrns);
+                umsVirtualGroupCreateService.createVirtualGroups(accountId, stacks);
             }
 
             Map<String, Future<SyncStatusDetail>> statusFutures =

@@ -121,7 +121,7 @@ class UserSyncForEnvServiceTest {
 
         underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1, stack2), userSyncFilter, options);
 
-        verify(umsVirtualGroupCreateService).createVirtualGroups(ACCOUNT_ID, Set.of(ENV_CRN, ENV_CRN_2));
+        verify(umsVirtualGroupCreateService).createVirtualGroups(ACCOUNT_ID, List.of(stack1, stack2));
         verify(userSyncStatusService, times(2)).save(any(UserSyncStatus.class));
         ArgumentCaptor<Collection> successCaptor = ArgumentCaptor.forClass(Collection.class);
         ArgumentCaptor<Collection> failureCaptor = ArgumentCaptor.forClass(Collection.class);
