@@ -76,6 +76,10 @@ public class StackView extends CompactView {
         return cluster;
     }
 
+    public void setClusterView(ClusterView cluster) {
+        this.cluster = cluster;
+    }
+
     public OrchestratorView getOrchestrator() {
         return orchestrator;
     }
@@ -171,5 +175,9 @@ public class StackView extends CompactView {
 
     public String getEnvironmentCrn() {
         return environmentCrn;
+    }
+
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
     }
 }
