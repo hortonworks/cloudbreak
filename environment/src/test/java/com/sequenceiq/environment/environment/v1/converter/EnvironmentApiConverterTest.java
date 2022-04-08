@@ -138,7 +138,7 @@ public class EnvironmentApiConverterTest {
         when(freeIpaConverter.convert(request.getFreeIpa(), "test-aws", cloudPlatform.name())).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
-        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 
@@ -167,7 +167,7 @@ public class EnvironmentApiConverterTest {
         verify(freeIpaConverter).convert(request.getFreeIpa(), "test-aws", cloudPlatform.name());
         verify(accountTelemetry).getFeatures();
         verify(accountTelemetryService).getOrDefault(any());
-        verify(telemetryApiConverter).convert(eq(request.getTelemetry()), any());
+        verify(telemetryApiConverter).convert(eq(request.getTelemetry()), any(), anyString());
         verify(tunnelConverter).convert(request.getTunnel());
         verify(networkRequestToDtoConverter).convert(request.getNetwork());
     }
@@ -182,7 +182,7 @@ public class EnvironmentApiConverterTest {
 
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
-        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 
         EnvironmentEditDto actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.initEditDto(request));
@@ -196,7 +196,7 @@ public class EnvironmentApiConverterTest {
 
         verify(accountTelemetry).getFeatures();
         verify(accountTelemetryService).getOrDefault(any());
-        verify(telemetryApiConverter).convert(eq(request.getTelemetry()), any());
+        verify(telemetryApiConverter).convert(eq(request.getTelemetry()), any(), anyString());
         verify(networkRequestToDtoConverter).convert(request.getNetwork());
     }
 
@@ -213,7 +213,7 @@ public class EnvironmentApiConverterTest {
         when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
-        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 
@@ -242,7 +242,7 @@ public class EnvironmentApiConverterTest {
         when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
-        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 
@@ -273,7 +273,7 @@ public class EnvironmentApiConverterTest {
         when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
-        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(backupConverter.convert(eq(request.getBackup()))).thenReturn(environmentBackup);
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
@@ -311,7 +311,7 @@ public class EnvironmentApiConverterTest {
         when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
-        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(backupConverter.convert(eq(request.getBackup()))).thenReturn(environmentBackup);
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
@@ -341,7 +341,7 @@ public class EnvironmentApiConverterTest {
         when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
-        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(backupConverter.convert(eq(request.getBackup()))).thenReturn(environmentBackup);
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
@@ -373,7 +373,7 @@ public class EnvironmentApiConverterTest {
         when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
-        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
+        when(telemetryApiConverter.convert(eq(request.getTelemetry()), any(), anyString())).thenReturn(environmentTelemetry);
         when(backupConverter.convert(eq(request.getBackup()))).thenReturn(environmentBackup);
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);

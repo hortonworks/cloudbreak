@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3Config;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.S3ConfigGenerator;
 import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
@@ -55,8 +54,6 @@ public class FluentConfigService {
 
     private final ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration;
 
-    private final MonitoringConfiguration monitoringConfiguration;
-
     public FluentConfigService(S3ConfigGenerator s3ConfigGenerator,
             AdlsGen2ConfigGenerator adlsGen2ConfigGenerator,
             GcsConfigGenerator gcsConfigGenerator,
@@ -68,8 +65,6 @@ public class FluentConfigService {
         this.anonymizationRuleResolver = anonymizationRuleResolver;
         this.meteringConfiguration = telemetryConfiguration.getMeteringConfiguration();
         this.clusterLogsCollectionConfiguration = telemetryConfiguration.getClusterLogsCollectionConfiguration();
-        this.monitoringConfiguration = telemetryConfiguration.getMonitoringConfiguration();
-
     }
 
     public FluentConfigView createFluentConfigs(TelemetryClusterDetails clusterDetails,
@@ -149,13 +144,6 @@ public class FluentConfigService {
                 builder.withClusterLogsCollection(true);
                 LOGGER.debug("Fluent based cluster log collection is enabled.");
                 builder.withClusterLogsCollectionConfiguration(clusterLogsCollectionConfiguration);
-                validDatabusLogging = true;
-            }
-            if (databusEnabled && telemetry.isMonitoringFeatureEnabled()) {
-                // TODO: support pushing metrics - then this value can be set to "true"
-                builder.withMonitoringEnabled(false);
-                LOGGER.debug("Telemetry based cluster monitoring is enabled, but pushing metrics is not supported yet.");
-                builder.withMonitoringConfiguration(monitoringConfiguration);
                 validDatabusLogging = true;
             }
         }

@@ -111,14 +111,6 @@ copy_cdp_logging_agent_conf:
     - group: "{{ fluent.group }}"
     - mode: 640
 
-/etc/cdp-logging-agent/databus_monitoring.conf:
-   file.managed:
-    - source: salt://fluent/template/databus_monitoring.conf.j2
-    - template: jinja
-    - user: "{{ fluent.user }}"
-    - group: "{{ fluent.group }}"
-    - mode: 640
-
 /etc/cdp-logging-agent/input_databus.conf:
   file.managed:{% if telemetry.logs %}
     - source: salt://fluent/template/input_vm_logs.conf.j2{% else %}

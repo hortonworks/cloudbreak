@@ -190,7 +190,7 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testDecorateWithMonitoring() {
+    public void testDecorateWithSaasMonitoring() {
         // GIVEN
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
@@ -214,6 +214,7 @@ public class TelemetryDecoratorTest {
         MeteringConfigView meteringConfigView = new MeteringConfigView.Builder().build();
         mockConfigServiceResults(dataConfigView, new FluentConfigView.Builder().build(), meteringConfigView,
                 monitoringConfigView, nodeStatusConfigView, telemetryCommonConfigView);
+        given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(true);
         // WHEN
         Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar,
                 createStack(), new Telemetry());
@@ -303,7 +304,7 @@ public class TelemetryDecoratorTest {
                 .willReturn(fluentConfigView);
         given(meteringConfigService.createMeteringConfigs(anyBoolean(), anyString(), anyString(), anyString(),
                 anyString(), anyString())).willReturn(meteringConfigView);
-        given(monitoringConfigService.createMonitoringConfig(any(), any()))
+        given(monitoringConfigService.createMonitoringConfig(any(), any(), any(), anyBoolean()))
                 .willReturn(monitoringConfigView);
         given(nodeStatusConfigService.createNodeStatusConfig(isNull(), isNull(), anyBoolean())).willReturn(nodeStatusConfigView);
         given(telemetryCommonConfigService.createTelemetryCommonConfigs(any(), anyList(), any())).willReturn(telemetryCommonConfigView);

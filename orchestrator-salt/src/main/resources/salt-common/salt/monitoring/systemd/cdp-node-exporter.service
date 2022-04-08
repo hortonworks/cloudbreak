@@ -1,0 +1,15 @@
+[Unit]
+Description=CDP Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/opt/node_exporter/node_exporter
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfigView;
 import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.common.api.telemetry.model.AnonymizationRule;
 
 public class FluentConfigView implements TelemetryConfigView {
@@ -50,8 +49,6 @@ public class FluentConfigView implements TelemetryConfigView {
     private final MeteringConfiguration meteringConfiguration;
 
     private final ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration;
-
-    private final MonitoringConfiguration monitoringConfiguration;
 
     private final TelemetryClusterDetails clusterDetails;
 
@@ -106,7 +103,6 @@ public class FluentConfigView implements TelemetryConfigView {
         this.monitoringEnabled = builder.monitoringEnabled;
         this.clusterLogsCollectionConfiguration = builder.clusterLogsCollectionConfiguration;
         this.meteringConfiguration = builder.meteringConfiguration;
-        this.monitoringConfiguration = builder.monitoringConfiguration;
         this.clusterDetails = builder.clusterDetails;
         this.user = builder.user;
         this.group = builder.group;
@@ -231,10 +227,6 @@ public class FluentConfigView implements TelemetryConfigView {
         return meteringEnabled;
     }
 
-    public boolean isMonitoringEnabled() {
-        return monitoringEnabled;
-    }
-
     public Map<String, Object> getOverrideAttributes() {
         return this.overrideAttributes;
     }
@@ -246,7 +238,6 @@ public class FluentConfigView implements TelemetryConfigView {
         map.put("cloudStorageLoggingEnabled", this.cloudStorageLoggingEnabled);
         map.put("cloudLoggingServiceEnabled", this.cloudLoggingServiceEnabled);
         map.put("dbusMeteringEnabled", this.meteringEnabled);
-        map.put("dbusMonitoringEnabled", this.monitoringEnabled);
         map.put("dbusClusterLogsCollection", this.clusterLogsCollection);
         map.put("dbusClusterLogsCollectionDisableStop", DBUS_DISABLE_STOP_CLUSTER_LOG_COLLECTION_DEFAULT);
         map.put("dbusIncludeSaltLogs", DBUS_INCLUDE_SALT_LOGS_DEFAULT);
@@ -281,9 +272,6 @@ public class FluentConfigView implements TelemetryConfigView {
         if (this.clusterLogsCollectionConfiguration != null) {
             map.putAll(clusterLogsCollectionConfiguration.getDbusConfigs());
         }
-        if (this.monitoringConfiguration != null) {
-            map.putAll(monitoringConfiguration.getDbusConfigs());
-        }
         if (this.overrideAttributes != null) {
             fillOverrideAttributes(map);
         }
@@ -317,8 +305,6 @@ public class FluentConfigView implements TelemetryConfigView {
         private MeteringConfiguration meteringConfiguration;
 
         private ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration;
-
-        private MonitoringConfiguration monitoringConfiguration;
 
         private TelemetryClusterDetails clusterDetails;
 
@@ -490,11 +476,6 @@ public class FluentConfigView implements TelemetryConfigView {
 
         public Builder withClusterLogsCollectionConfiguration(ClusterLogsCollectionConfiguration clusterLogsCollectionConfiguration) {
             this.clusterLogsCollectionConfiguration = clusterLogsCollectionConfiguration;
-            return this;
-        }
-
-        public Builder withMonitoringConfiguration(MonitoringConfiguration monitoringConfiguration) {
-            this.monitoringConfiguration = monitoringConfiguration;
             return this;
         }
 

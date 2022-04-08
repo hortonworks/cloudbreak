@@ -22,14 +22,14 @@ import com.sequenceiq.cloudbreak.sigmadbus.SigmaDatabusClient;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRecordProcessingException;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequestContext;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfiguration;
 
 import io.opentracing.Tracer;
 
 @ExtendWith(MockitoExtension.class)
 public class DatabusRecordWorkerTest {
 
-    private DatabusRecordWorker<MonitoringConfiguration> underTest;
+    private DatabusRecordWorker<AbstractDatabusStreamConfiguration> underTest;
 
     @Mock
     private Tracer tracer;
@@ -38,10 +38,10 @@ public class DatabusRecordWorkerTest {
     private BlockingDeque<DatabusRequest> processingQueue;
 
     @Mock
-    private AbstractDatabusRecordProcessor<MonitoringConfiguration> databusRecordProcessor;
+    private AbstractDatabusRecordProcessor<AbstractDatabusStreamConfiguration> databusRecordProcessor;
 
     @Mock
-    private SigmaDatabusClient<MonitoringConfiguration> dataBusClient;
+    private SigmaDatabusClient<AbstractDatabusStreamConfiguration> dataBusClient;
 
     @Mock
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -96,7 +96,7 @@ public class DatabusRecordWorkerTest {
     public void testProcessGetClient() {
         // GIVEN
         // WHEN
-        SigmaDatabusClient<MonitoringConfiguration> clientResult = underTest.getClient();
+        SigmaDatabusClient<AbstractDatabusStreamConfiguration> clientResult = underTest.getClient();
         // THEN
         assertNotNull(clientResult);
     }

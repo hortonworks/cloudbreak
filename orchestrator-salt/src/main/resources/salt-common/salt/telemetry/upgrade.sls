@@ -8,7 +8,7 @@
     - makedirs: True
     - mode: 700
 
-{%- if telemetry.repoName and (telemetry.desiredCdpTelemetryVersion or telemetry.desiredCdpLoggingAgentVersion) %}
+{%- if telemetry.repoName %}
 /etc/yum.repos.d/cdp-infra-tools.repo:
   file.managed:
     - source: salt://telemetry/template/cdp-infra-tools.repo.j2
@@ -39,6 +39,9 @@ upgrade_cdp_infra_tools_components:
 {%- endif %}
 {%- if telemetry.desiredCdpLoggingAgentVersion %}
           - /bin/bash -c 'source /opt/cdp-telemetry/conf/proxy.env; /opt/salt/scripts/cdp-telemetry-deployer.sh upgrade -c cdp-logging-agent -v {{ telemetry.desiredCdpLoggingAgentVersion }}';exit 0
+{%- endif %}
+{%- if telemetry.desiredCdpVmAgentVersion %}
+          - /bin/bash -c 'source /opt/cdp-telemetry/conf/proxy.env; /opt/salt/scripts/cdp-telemetry-deployer.sh upgrade -c cdp-vmagent -v {{ telemetry.desiredCdpVmAgentVersion }}';exit 0
 {%- endif %}
         - onlyif: source /opt/cdp-telemetry/conf/proxy.env; {{ test_cmd }}
 {%- endif %}

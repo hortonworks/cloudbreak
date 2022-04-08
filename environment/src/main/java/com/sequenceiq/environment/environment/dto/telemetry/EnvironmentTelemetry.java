@@ -13,6 +13,8 @@ public class EnvironmentTelemetry implements Serializable {
 
     private EnvironmentLogging logging;
 
+    private EnvironmentMonitoring monitoring;
+
     private EnvironmentWorkloadAnalytics workloadAnalytics;
 
     private EnvironmentFeatures features;
@@ -25,6 +27,14 @@ public class EnvironmentTelemetry implements Serializable {
 
     public void setLogging(EnvironmentLogging logging) {
         this.logging = logging;
+    }
+
+    public EnvironmentMonitoring getMonitoring() {
+        return monitoring;
+    }
+
+    public void setMonitoring(EnvironmentMonitoring monitoring) {
+        this.monitoring = monitoring;
     }
 
     public EnvironmentWorkloadAnalytics getWorkloadAnalytics() {
@@ -55,10 +65,10 @@ public class EnvironmentTelemetry implements Serializable {
     public String toString() {
         return "EnvironmentTelemetry{" +
                 "logging=" + logging +
+                ", monitoring=" + monitoring +
                 ", workloadAnalytics=" + workloadAnalytics +
                 ", features=" + features +
                 ", fluentAttributes=" + fluentAttributes +
                 '}';
     }
-
 }

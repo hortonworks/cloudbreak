@@ -50,8 +50,10 @@ import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.common.api.cloudstorage.StorageIdentityBase;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.telemetry.request.MonitoringRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
+import com.sequenceiq.common.api.telemetry.response.MonitoringResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -271,6 +273,12 @@ public class StackRequestManifester {
             loggingRequest.setCloudwatch(envLogging.getCloudwatch());
             loggingRequest.setStorageLocation(envLogging.getStorageLocation());
             telemetryRequest.setLogging(loggingRequest);
+            MonitoringRequest monitoringRequest = new MonitoringRequest();
+            MonitoringResponse envMonitoring = envTelemetry.getMonitoring();
+            if (envMonitoring != null) {
+                monitoringRequest.setRemoteWriteUrl(envMonitoring.getRemoteWriteUrl());
+            }
+            telemetryRequest.setMonitoring(monitoringRequest);
             if (envTelemetry.getFeatures() != null) {
                 FeaturesRequest featuresRequest = new FeaturesRequest();
                 featuresRequest.setClusterLogsCollection(envTelemetry.getFeatures().getClusterLogsCollection());

@@ -37,7 +37,7 @@ public class ClusterMonitoringEngine {
     public void installAndStartMonitoring(Stack stack, Telemetry telemetry) throws CloudbreakException {
         if (telemetry != null && telemetry.isMonitoringFeatureEnabled()) {
             try {
-                LOGGER.info("Install and start monitoring for CM server.");
+                LOGGER.info("Install and start VM monitoring for CM cluster.");
                 Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedAndNotZombieInstanceMetaDataSet();
                 List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
                 Set<Node> allNodes = instanceMetaDataSet.stream()

@@ -9,7 +9,8 @@ User=root
 Group=root
 ExecStart=/opt/dev-prometheus/prometheus \
   --config.file=/opt/dev-prometheus/prometheus.yml \
-  --storage.local.path="/opt/dev-prometheus/data/dev-prometheus" \
+  --storage.tsdb.path="/opt/dev-prometheus/data/dev-prometheus" \
+  --web.enable-remote-write-receiver \
   --web.console.templates=/opt/dev-prometheus/consoles \
   --web.console.libraries=/opt/dev-prometheus/console_libraries \
   --web.listen-address=0.0.0.0:9090

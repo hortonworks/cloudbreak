@@ -35,11 +35,9 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_BULK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_CUSTOM_CONFIGS;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_SELECT_INSTANCE_TYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_ZDU_OS_UPGRADE;
@@ -61,6 +59,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SHOW_CLI;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
@@ -417,9 +416,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.diagnostics.vm.enable}")
     private boolean diagnosticsEnabled;
 
-    @Value("${auth.mock.metrics.databus.processing.enable}")
-    private boolean metricsDatabusProcessing;
-
     @Value("${auth.mock.nodestatus.salt.ping.enable}")
     private boolean nodestatusSaltPingEnabled;
 
@@ -507,6 +503,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.freeipa.upgrade.enable}")
     private boolean enableFreeIpaUpgrade;
+
+    @Value("${auth.mock.saas.enable}")
+    private boolean enableSaas;
 
     @PostConstruct
     public void init() {
@@ -877,15 +876,14 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (cmHAEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CM_HA));
         }
-        if (metricsDatabusProcessing) {
-            builder.addEntitlements(createEntitlement(CDP_DATALAKE_METRICS_DATABUS_PROCESSING));
-            builder.addEntitlements(createEntitlement(CDP_DATAHUB_METRICS_DATABUS_PROCESSING));
-        }
         if (enableGcpDiskEncryptionWithCMEK) {
             builder.addEntitlements(createEntitlement(CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK));
         }
         if (diagnosticsEnabled) {
             builder.addEntitlements(createEntitlement(CDP_VM_DIAGNOSTICS));
+        }
+        if (enableSaas) {
+            builder.addEntitlements(createEntitlement(CDP_SAAS));
         }
         if (enableFmsFreeipaBatchCall) {
             builder.addEntitlements(createEntitlement(FMS_FREEIPA_BATCH_CALL));

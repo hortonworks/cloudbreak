@@ -1,0 +1,16 @@
+[Unit]
+Description=CDP BlackBox Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/opt/blackbox_exporter/blackbox_exporter \
+    --config.file=/opt/blackbox_exporter/blackbox.yml
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,3 +1,5 @@
+{%- from 'monitoring/settings.sls' import monitoring with context %}
+{%- if salt['grains.get']('master')[0] == salt['grains.get']('fqdn_ip4')[0] %}
 /opt/dev-prometheus:
   file.directory:
     - name: /opt/dev-prometheus
@@ -11,10 +13,10 @@
 install_prometheus:
   archive.extracted:
     - name: /opt/dev-prometheus/
-    - source: https://github.com/prometheus/prometheus/releases/download/v1.4.1/prometheus-1.4.1.linux-amd64.tar.gz
+    - source: https://github.com/prometheus/prometheus/releases/download/v2.34.0/prometheus-2.34.0.linux-amd64.tar.gz
     - archive_format: tar
     - enforce_toplevel: False
-    - source_hash: md5=6cfb712ef7f33f42611bf7ebb02bc740
+    - source_hash: md5=4d065c3b71824122272748d898aae779
     - options: --strip-components=1
     - if_missing: /opt/dev-prometheus/prometheus
 
@@ -59,3 +61,4 @@ start_dev_grafana:
   service.running:
     - enable: True
     - name: grafana-server
+{%- endif %}

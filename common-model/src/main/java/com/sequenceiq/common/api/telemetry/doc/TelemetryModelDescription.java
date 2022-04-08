@@ -15,6 +15,8 @@ public class TelemetryModelDescription {
     public static final String TELEMETRY_LOGGING_CLOUDWATCH_ATTRIBUTES = "telemetry - logging cloudwatch attributes";
     public static final String TELEMETRY_LOGGING_STORAGE_LOCATION = "telemetry - logging storage location / container";
     public static final String TELEMETRY_CLUSTER_LOGS_COLLECTION_ENABLED = "enable cluster logs collection";
+    public static final String TELEMETRY_MONITORING = "Monitoring related (telemetry) settings.";
+    public static final String TELEMETRY_MONITORING_REMOTE_WRITE_URL = "Monitoring prometheus endpoint for remote writes.";
     public static final String TELEMETRY_CLUSTER_MONITORING_ENABLED = "enable monitoring for cluster services";
     public static final String TELEMETRY_CLOUD_STORAGE_LOGGING_ENABLED = "enable uploading daemon service logs to cloud storage from the cluster nodes. " +
             "(default: enabled)";

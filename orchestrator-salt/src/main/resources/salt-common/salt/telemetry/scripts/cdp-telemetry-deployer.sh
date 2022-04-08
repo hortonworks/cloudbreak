@@ -9,7 +9,7 @@ function print_help() {
      upgrade            upgrade or install cdp infra tools (cdp-telemetry, cdp-logging-agent)
      help               print usage
    upgrade command arguments:
-     -c, --component  <COMPONENT NAME>       Name of the component, values: cdp-telemetry | cdp-logging-agent
+     -c, --component  <COMPONENT NAME>       Name of the component, values: cdp-telemetry | cdp-logging-agent | cdp-vmagent
 EOF
 }
 
@@ -65,7 +65,7 @@ function check_local_version() {
     local installed=$(is_component_installed "$component")
     if [[ "$installed" == "1" ]]; then
         echo "-1"
-    elif [[ "$component" == "cdp-logging-agent" || "$component" == "cdp-telemetry" ]]; then
+    elif [[ "$component" == "cdp-logging-agent" || "$component" == "cdp-telemetry" || "$component" == "cdp-vmagent" ]]; then
         local telemetry_tool_version=$(rpm -q --queryformat '%-{VERSION}' "$component")
         echo "$telemetry_tool_version"
     else
@@ -143,8 +143,8 @@ function run_operation() {
     init_logfile
     if [[ "$COMPONENT" == "" ]]; then
       do_exit 1 "Component option is missing. It needs to be set to cdp-logging-agent or cdp-telemetry"
-    elif [[ "$COMPONENT" != "cdp-telemetry" && "$COMPONENT" != "cdp-logging-agent" ]]; then
-      do_exit 1 "Component option is invalid. (value: $COMPONENT) It needs to be set to cdp-logging-agent or cdp-telemetry)"
+    elif [[ "$COMPONENT" != "cdp-telemetry" && "$COMPONENT" != "cdp-logging-agent" && "$COMPONENT" != "cdp-vmagent" ]]; then
+      do_exit 1 "Component option is invalid. (value: $COMPONENT) It needs to be set to cdp-logging-agent, cdp-telemetry or cdp-vmagent)"
     fi
     if [[ "$https_proxy" != "" ]]; then
       export https_proxy="${https_proxy}"

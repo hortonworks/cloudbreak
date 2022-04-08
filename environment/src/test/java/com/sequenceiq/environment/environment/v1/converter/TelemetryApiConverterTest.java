@@ -5,12 +5,18 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.logcollection.ClusterLogsCollectionConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
@@ -27,22 +33,30 @@ import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentLogging;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.dto.telemetry.S3CloudStorageParameters;
 
+@ExtendWith(MockitoExtension.class)
 public class TelemetryApiConverterTest {
 
     private static final String INSTANCE_PROFILE_VALUE = "myInstanceProfile";
 
+    private static final String ACCOUNT_ID = "accId";
+
     private TelemetryApiConverter underTest;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration("", "", true, "****", "****");
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
-        MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(true, null, null);
+        MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
+        monitoringConfig.setEnabled(true);
+        monitoringConfig.setRemoteWriteUrl("http://myaddress/api/v1/receive");
         TelemetryConfiguration telemetryConfiguration = new TelemetryConfiguration(
                 altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
-        underTest = new TelemetryApiConverter(telemetryConfiguration);
+        underTest = new TelemetryApiConverter(telemetryConfiguration, entitlementService);
     }
 
     @Test
@@ -60,10 +74,12 @@ public class TelemetryApiConverterTest {
         fr.addWorkloadAnalytics(true);
         fr.addMonitoring(true);
         telemetryRequest.setFeatures(fr);
+        given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(true);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features());
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
+        assertEquals("http://myaddress/api/v1/receive", result.getMonitoring().getRemoteWriteUrl());
         assertTrue(result.getFeatures().getClusterLogsCollection().isEnabled());
         assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
         assertTrue(result.getFeatures().getUseSharedAltusCredential().isEnabled());
@@ -76,7 +92,7 @@ public class TelemetryApiConverterTest {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features());
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
         assertNull(result.getFeatures());
     }
@@ -88,7 +104,7 @@ public class TelemetryApiConverterTest {
         FeaturesRequest fr = new FeaturesRequest();
         telemetryRequest.setFeatures(fr);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features());
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
         assertNull(result.getFeatures().getWorkloadAnalytics());
     }
@@ -101,9 +117,51 @@ public class TelemetryApiConverterTest {
         fr.addWorkloadAnalytics(true);
         telemetryRequest.setFeatures(fr);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features());
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
         assertTrue(result.getFeatures().getWorkloadAnalytics().isEnabled());
+    }
+
+    @Test
+    public void testConvertWithDefaultMonitoringFeatureWithoutCdpSaas() {
+        // GIVEN
+        TelemetryRequest telemetryRequest = new TelemetryRequest();
+        given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(false);
+        // WHEN
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
+        // THEN
+        assertNull(result.getFeatures());
+        assertNull(result.getMonitoring().getRemoteWriteUrl());
+    }
+
+    @Test
+    public void testConvertWithMonitoringFeatureWithoutCdpSaas() {
+        // GIVEN
+        TelemetryRequest telemetryRequest = new TelemetryRequest();
+        given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(false);
+        FeaturesRequest featuresRequest = new FeaturesRequest();
+        featuresRequest.addMonitoring(true);
+        telemetryRequest.setFeatures(featuresRequest);
+        // WHEN
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
+        // THEN
+        assertTrue(result.getFeatures().getMonitoring().isEnabled());
+        assertNull(result.getMonitoring().getRemoteWriteUrl());
+    }
+
+    @Test
+    public void testConvertWithDisabledMonitoringFeatureWithCdpSaas() {
+        // GIVEN
+        TelemetryRequest telemetryRequest = new TelemetryRequest();
+        given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(true);
+        FeaturesRequest featuresRequest = new FeaturesRequest();
+        featuresRequest.addMonitoring(false);
+        telemetryRequest.setFeatures(featuresRequest);
+        // WHEN
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
+        // THEN
+        assertFalse(result.getFeatures().getMonitoring().isEnabled());
+        assertNotNull(result.getMonitoring().getRemoteWriteUrl());
     }
 
     @Test
@@ -114,7 +172,7 @@ public class TelemetryApiConverterTest {
         fr.addWorkloadAnalytics(false);
         telemetryRequest.setFeatures(fr);
         // WHEN
-        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features());
+        EnvironmentTelemetry result = underTest.convert(telemetryRequest, new Features(), ACCOUNT_ID);
         // THEN
         assertFalse(result.getFeatures().getWorkloadAnalytics().isEnabled());
     }
