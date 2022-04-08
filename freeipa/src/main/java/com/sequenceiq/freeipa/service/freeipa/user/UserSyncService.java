@@ -157,6 +157,7 @@ public class UserSyncService {
         } finally {
             MDCBuilder.removeOperationId();
         }
+
     }
 
     private Set<String> union(Collection<String> collection1, Collection<String> collection2) {
