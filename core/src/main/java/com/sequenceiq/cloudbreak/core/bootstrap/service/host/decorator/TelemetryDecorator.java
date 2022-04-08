@@ -183,8 +183,9 @@ public class TelemetryDecorator {
             servicePillar.put("fluent",
                     new SaltPillarProperties("/fluent/init.sls", singletonMap("fluent", fluentConfig)));
         }
+        boolean cdpSaasEnabled = entitlementService.isCdpSaasEnabled(accountId);
         setupMetering(servicePillar, stack, serviceType, meteringEnabled);
-        setupMonitoring(servicePillar, stack, clusterDetails);
+        setupMonitoring(servicePillar, cdpSaasEnabled, stack, telemetry);
         setupNodeStatusMonitor(servicePillar, stack);
         return servicePillar;
     }
@@ -222,19 +223,26 @@ public class TelemetryDecorator {
         return new AltusCredential(null, null);
     }
 
-    private void setupMonitoring(Map<String, SaltPillarProperties> servicePillar, Stack stack, TelemetryClusterDetails clusterDetails) {
-        if (stack.getCluster() != null && stack.getCluster().getCloudbreakClusterManagerMonitoringUser() != null
-                && stack.getCluster().getCloudbreakClusterManagerMonitoringPassword() != null) {
-            String monitoringUser = stack.getCluster().getCloudbreakClusterManagerMonitoringUser();
-            char[] monitoringPassword = stack.getCluster().getCloudbreakClusterManagerMonitoringPassword().toCharArray();
-            MonitoringAuthConfig authConfig = new MonitoringAuthConfig(monitoringUser, monitoringPassword);
-            MonitoringConfigView monitoringConfigView = monitoringConfigService.createMonitoringConfig(
-                    MonitoringClusterType.CLOUDERA_MANAGER, authConfig);
+    private void setupMonitoring(Map<String, SaltPillarProperties> servicePillar, boolean cdpSaasEnabled, Stack stack,
+            Telemetry telemetry) {
+        if (telemetry.isMonitoringFeatureEnabled()) {
+            LOGGER.debug("Filling monitoring configs.");
+            MonitoringAuthConfig cmAuthConfig = null;
+            if (stack.getCluster() != null && stack.getCluster().getCloudbreakClusterManagerMonitoringUser() != null
+                    && stack.getCluster().getCloudbreakClusterManagerMonitoringPassword() != null) {
+                String cmMonitoringUser = stack.getCluster().getCloudbreakClusterManagerMonitoringUser();
+                char[] cmMonitoringPassword = stack.getCluster().getCloudbreakClusterManagerMonitoringPassword().toCharArray();
+                cmAuthConfig = new MonitoringAuthConfig(cmMonitoringUser, cmMonitoringPassword);
+            }
+            MonitoringConfigView monitoringConfigView = monitoringConfigService.createMonitoringConfig(telemetry.getMonitoring(),
+                    MonitoringClusterType.CLOUDERA_MANAGER, cmAuthConfig, cdpSaasEnabled);
             if (monitoringConfigView.isEnabled()) {
                 Map<String, Object> monitoringConfig = monitoringConfigView.toMap();
                 servicePillar.put("monitoring",
                         new SaltPillarProperties("/monitoring/init.sls", singletonMap("monitoring", monitoringConfig)));
             }
+        } else {
+            LOGGER.debug("CDP Saas is not enabled, do not use monitoring features");
         }
     }
 

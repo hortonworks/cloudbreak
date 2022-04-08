@@ -64,7 +64,6 @@ auth:
     cm.sync.command.poller.enable: true
     datahub.nodestatus.check.enable: true
     nodestatus.salt.ping.enable: true
-    metrics.databus.processing.enable: false
     diagnostics.vm.enable: true
     user.sync.credentials.update.optimization.enable: true
     freeipa.batch.call.enable: true
@@ -89,6 +88,7 @@ auth:
     unbound.elimination.enable: true
     targeted.upscale.enable: true
     e2e.test.only.enable: true
+    saas.enable: false
     workloadiam.sync.enable: false
 
 crn:

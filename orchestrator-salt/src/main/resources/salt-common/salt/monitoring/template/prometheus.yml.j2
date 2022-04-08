@@ -1,0 +1,31 @@
+{%- from 'telemetry/settings.sls' import telemetry with context %}
+{%- from 'monitoring/settings.sls' import monitoring with context %}
+{%- set hostname = salt['grains.get']('fqdn') %}
+global:
+  scrape_interval: {{ monitoring.scrapeIntervalSeconds }}s
+scrape_configs:
+  - job_name: node_exporter
+    static_configs:
+     - targets: ['localhost:9100']
+       labels:
+         resource_crn: {{ telemetry.clusterCrn }}
+         platform: {{ telemetry.platform }}
+         hostname: {{ hostname }}
+  - job_name: 'blackbox'
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets:
+        - https://archive.cloudera.com
+        labels:
+          resource_crn: {{ telemetry.clusterCrn }}
+          platform: {{ telemetry.platform }}
+          hostname: {{ hostname }}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: 127.0.0.1:9115

@@ -20,6 +20,7 @@ base:
     - cloudera-manager.settings
     - fluent
     - metering
+    - monitoring.init
     - mount.disk
     - postgresql.root-certs
 
@@ -73,7 +74,6 @@ base:
     - gateway.init
     - gateway.ldap
     - gateway.settings
-    - monitoring.init
     - postgresql.disaster_recovery
 
   'roles:knox_gateway':

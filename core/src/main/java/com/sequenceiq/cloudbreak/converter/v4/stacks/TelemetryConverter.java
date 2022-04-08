@@ -18,14 +18,17 @@ import com.sequenceiq.common.api.telemetry.base.FeaturesBase;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
+import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.telemetry.request.MonitoringRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
+import com.sequenceiq.common.api.telemetry.response.MonitoringResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.telemetry.response.WorkloadAnalyticsResponse;
 import com.sequenceiq.common.api.type.FeatureSetting;
@@ -70,9 +73,11 @@ public class TelemetryConverter {
         TelemetryResponse response = null;
         if (telemetry != null) {
             LoggingResponse loggingResponse = createLoggingResponseFromSource(telemetry);
+            MonitoringResponse monitoringResponse = createMonitoringResponseFromSource(telemetry);
             WorkloadAnalyticsResponse waResponse = createWorkloadAnalyticsResponseFromSource(telemetry);
             response = new TelemetryResponse();
             response.setLogging(loggingResponse);
+            response.setMonitoring(monitoringResponse);
             response.setWorkloadAnalytics(waResponse);
             response.setFluentAttributes(telemetry.getFluentAttributes());
             response.setRules(telemetry.getRules());
@@ -87,8 +92,10 @@ public class TelemetryConverter {
         LOGGER.debug("Converting telemetry request to telemetry object");
         if (request != null) {
             Logging logging = createLoggingFromRequest(request);
+            Monitoring monitoring = createMonitoringFromRequest(request);
             WorkloadAnalytics workloadAnalytics = createWorkloadAnalyticsFromRequest(request);
             telemetry.setLogging(logging);
+            telemetry.setMonitoring(monitoring);
             telemetry.setWorkloadAnalytics(workloadAnalytics);
             setWorkloadAnalyticsFeature(telemetry, features);
             setClusterLogsCollection(request, features);
@@ -119,6 +126,8 @@ public class TelemetryConverter {
         if (response != null) {
             LoggingRequest loggingRequest = createLoggingRequestFromResponse(response);
             telemetryRequest.setLogging(loggingRequest);
+            MonitoringRequest monitoringRequest = createMonitoringRequestFromResponse(response);
+            telemetryRequest.setMonitoring(monitoringRequest);
             FeaturesResponse featuresResponse = response.getFeatures();
             if (featuresResponse != null) {
                 LOGGER.debug("Setting cluster logs collection request (telemetry) based on environment response.");
@@ -146,11 +155,13 @@ public class TelemetryConverter {
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         if (telemetry != null) {
             LoggingRequest loggingRequest = createLoggingRequestFromSource(telemetry);
+            MonitoringRequest monitoringRequest = createMonitoringRequestFromSource(telemetry);
             WorkloadAnalyticsRequest waRequest = createWorkloadAnalyticsRequestFromSource(telemetry);
             FeaturesRequest featuresRequest = createFeaturesRequestFromSource(telemetry);
 
             telemetryRequest.setWorkloadAnalytics(waRequest);
             telemetryRequest.setLogging(loggingRequest);
+            telemetryRequest.setMonitoring(monitoringRequest);
             telemetryRequest.setFluentAttributes(telemetry.getFluentAttributes());
             telemetryRequest.setFeatures(featuresRequest);
         }
@@ -253,6 +264,16 @@ public class TelemetryConverter {
         return loggingRequest;
     }
 
+    private MonitoringRequest createMonitoringRequestFromSource(Telemetry telemetry) {
+        MonitoringRequest monitoringRequest = null;
+        Monitoring monitoring = telemetry.getMonitoring();
+        if (monitoring != null) {
+            monitoringRequest = new MonitoringRequest();
+            monitoringRequest.setRemoteWriteUrl(monitoring.getRemoteWriteUrl());
+        }
+        return monitoringRequest;
+    }
+
     private void setMeteringFeature(StackType type, Features features) {
         if (meteringEnabled && StackType.WORKLOAD.equals(type)) {
             LOGGER.debug("Setting metering for workload cluster (as metering is enabled)");
@@ -286,6 +307,17 @@ public class TelemetryConverter {
         return logging;
     }
 
+    private Monitoring createMonitoringFromRequest(TelemetryRequest request) {
+        Monitoring monitoring = null;
+        if (request.getMonitoring() != null) {
+            LOGGER.debug("Create monitoring telemetry settings from monitoring request.");
+            MonitoringRequest monitoringRequest = request.getMonitoring();
+            monitoring = new Monitoring();
+            monitoring.setRemoteWriteUrl(monitoringRequest.getRemoteWriteUrl());
+        }
+        return monitoring;
+    }
+
     private WorkloadAnalytics createWorkloadAnalyticsFromRequest(TelemetryRequest request) {
         WorkloadAnalytics workloadAnalytics = null;
         if (request.getWorkloadAnalytics() != null) {
@@ -311,6 +343,17 @@ public class TelemetryConverter {
             loggingResponse.setCloudwatch(CloudwatchParams.copy(logging.getCloudwatch()));
         }
         return loggingResponse;
+    }
+
+    private MonitoringResponse createMonitoringResponseFromSource(Telemetry telemetry) {
+        MonitoringResponse monitoringResponse = null;
+        if (telemetry.getMonitoring() != null) {
+            LOGGER.debug("Setting monitoring telemetry settings (response).");
+            Monitoring monitoring = telemetry.getMonitoring();
+            monitoringResponse = new MonitoringResponse();
+            monitoringResponse.setRemoteWriteUrl(monitoring.getRemoteWriteUrl());
+        }
+        return monitoringResponse;
     }
 
     private WorkloadAnalyticsResponse createWorkloadAnalyticsResponseFromSource(Telemetry telemetry) {
@@ -351,6 +394,17 @@ public class TelemetryConverter {
             loggingRequest.setCloudwatch(loggingResponse.getCloudwatch());
         }
         return loggingRequest;
+    }
+
+    private MonitoringRequest createMonitoringRequestFromResponse(TelemetryResponse response) {
+        MonitoringRequest monitoringRequest = null;
+        if (response.getMonitoring() != null) {
+            LOGGER.debug("Setting monitoring response (telemetry) based on environment response");
+            MonitoringResponse monitoringResponse = response.getMonitoring();
+            monitoringRequest = new MonitoringRequest();
+            monitoringRequest.setRemoteWriteUrl(monitoringResponse.getRemoteWriteUrl());
+        }
+        return monitoringRequest;
     }
 
     private Map<String, Object> enrichWithSdxData(Map<String, Object> attributes,

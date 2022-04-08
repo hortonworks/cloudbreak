@@ -11,6 +11,7 @@ base:
              - dns
              - logrotate
              - ccm
+             - monitoring
 
            'roles:freeipa_primary':
              - match: grain

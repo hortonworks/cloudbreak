@@ -38,10 +38,14 @@ import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringClusterType;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigView;
 import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigView;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
+import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
@@ -63,6 +67,9 @@ public class TelemetryConfigService implements TelemetryConfigProvider {
 
     @Inject
     private NodeStatusConfigService nodeStatusConfigService;
+
+    @Inject
+    private MonitoringConfigService monitoringConfigService;
 
     @Inject
     private TelemetryCommonConfigService telemetryCommonConfigService;
@@ -104,15 +111,30 @@ public class TelemetryConfigService implements TelemetryConfigProvider {
             String databusEndpoint = getDatabusEndpoint(stack, telemetry);
             boolean databusEnabled = telemetry.isClusterLogsCollectionEnabled();
             boolean databusEndpointValidation = entitlementService.isFreeIpaDatabusEndpointValidationEnabled(stack.getAccountId());
+            boolean cdpSaasEnabled = entitlementService.isCdpSaasEnabled(stack.getAccountId());
             Map<String, SaltPillarProperties> servicePillarConfig = new HashMap<>();
             servicePillarConfig.putAll(getTelemetryCommonPillarConfig(stack, telemetry, databusEndpoint, databusEndpointValidation));
             servicePillarConfig.putAll(getFluentPillarConfig(stack, telemetry, databusEnabled));
+            servicePillarConfig.putAll(getMonitoringPillarConfig(stack, telemetry, cdpSaasEnabled));
             servicePillarConfig.putAll(getDatabusPillarConfig(stack, databusEndpoint, databusEnabled));
             servicePillarConfig.putAll(getCdpNodeStatusPillarConfig(stack));
             return servicePillarConfig;
         } else {
             return Map.of();
         }
+    }
+
+    private Map<String, SaltPillarProperties> getMonitoringPillarConfig(Stack stack, Telemetry telemetry, boolean cdpSaasEnabled) {
+        Map<String, Object> config = new HashMap<>();
+        if (telemetry.isMonitoringFeatureEnabled()) {
+            Monitoring monitoring = telemetry.getMonitoring();
+            LOGGER.debug("Monitoring is enabled, filling configs ...");
+            MonitoringConfigView configView = monitoringConfigService.createMonitoringConfig(monitoring,
+                    MonitoringClusterType.FREEIPA, null, cdpSaasEnabled);
+            config = configView.toMap();
+        }
+        return Map.of("monitoring",
+                new SaltPillarProperties("/monitoring/init.sls", Collections.singletonMap("monitoring", config)));
     }
 
     private Map<String, SaltPillarProperties> getDatabusPillarConfig(Stack stack, String databusEndpoint, boolean databusEnabled)

@@ -5,6 +5,7 @@ base:
     - databus
     - fluent
     - nodestatus
+    - monitoring
     - discovery
     - proxy.proxy
     - freeipa

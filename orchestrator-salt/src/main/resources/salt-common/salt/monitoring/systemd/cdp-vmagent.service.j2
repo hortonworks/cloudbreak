@@ -1,0 +1,24 @@
+{%- from 'monitoring/settings.sls' import monitoring with context %}
+[Unit]
+Description=CDP VM agent for collecting metrics
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/opt/cdp-vmagent/bin/vmagent-prod -remoteWrite.url={{ monitoring.remoteWriteUrl }} \
+{%- if monitoring.username %}
+     -remoteWrite.basicAuth.username={{ monitoring.username }} \
+{%- if monitoring.password %}
+     -remoteWrite.basicAuth.passwordFile=/opt/cdp-vmagent/remote_pwd_file \
+{%- endif %}
+{%- elif monitoring.token %}
+     -remoteWrite.bearerTokenFile=/opt/cdp-vmagent/remote_token_file \
+{%- endif %}
+     -promscrape.config=/opt/cdp-vmagent/prometheus.yml
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

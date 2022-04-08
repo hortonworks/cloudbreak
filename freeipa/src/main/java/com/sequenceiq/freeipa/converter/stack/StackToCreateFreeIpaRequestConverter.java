@@ -10,10 +10,12 @@ import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
+import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.telemetry.request.MonitoringRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.request.WorkloadAnalyticsRequest;
 import com.sequenceiq.freeipa.api.model.Backup;
@@ -292,6 +294,7 @@ public class StackToCreateFreeIpaRequestConverter implements Converter<Stack, Cr
             request = new TelemetryRequest();
             request.setFluentAttributes(telemetry.getFluentAttributes());
             request.setLogging(getLoggingRequest(telemetry.getLogging()));
+            request.setMonitoring(getMonitoringRequest(telemetry.getMonitoring()));
             request.setFeatures(getFeaturesRequest(telemetry.getFeatures()));
             request.setWorkloadAnalytics(getWorkloadAnalyticsRequest(telemetry.getWorkloadAnalytics()));
         }
@@ -310,6 +313,16 @@ public class StackToCreateFreeIpaRequestConverter implements Converter<Stack, Cr
             request.setCloudwatch(logging.getCloudwatch());
         }
         LOGGER.debug("Created logging request {} from logging {}", request, logging);
+        return request;
+    }
+
+    private MonitoringRequest getMonitoringRequest(Monitoring monitoring) {
+        MonitoringRequest request = null;
+        if (monitoring != null) {
+            request = new MonitoringRequest();
+            request.setRemoteWriteUrl(monitoring.getRemoteWriteUrl());
+        }
+        LOGGER.debug("Created monitoring request {} from monitoring {}", request, monitoring);
         return request;
     }
 

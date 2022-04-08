@@ -11,7 +11,6 @@
 @include input_databus.conf
 {% endif %}
 @include databus_metering.conf
-@include databus_monitoring.conf
 {% if fluent.cloudLoggingServiceEnabled %}
 @include filter.conf
 {% endif %}

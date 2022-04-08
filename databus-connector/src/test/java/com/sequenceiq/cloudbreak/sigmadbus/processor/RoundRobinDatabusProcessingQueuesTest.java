@@ -13,7 +13,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.sigmadbus.model.DatabusRequest;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.databus.AbstractDatabusStreamConfiguration;
 
 import io.opentracing.Tracer;
 
@@ -21,10 +21,10 @@ import io.opentracing.Tracer;
 public class RoundRobinDatabusProcessingQueuesTest {
 
     @Mock
-    private MetricsDatabusRecordProcessor recordProcessor;
+    private AbstractDatabusRecordProcessor recordProcessor;
 
     @Mock
-    private MonitoringConfiguration monitoringConfiguration;
+    private AbstractDatabusStreamConfiguration databusStreamConfiguration;
 
     @Mock
     private Tracer tracer;
@@ -34,10 +34,10 @@ public class RoundRobinDatabusProcessingQueuesTest {
         // GIVEN
         MockitoAnnotations.openMocks(this);
         DatabusRequest input = DatabusRequest.Builder.newBuilder().build();
-        given(recordProcessor.getDatabusStreamConfiguration()).willReturn(monitoringConfiguration);
-        given(monitoringConfiguration.getDbusServiceName()).willReturn("Monitoring");
+        given(recordProcessor.getDatabusStreamConfiguration()).willReturn(databusStreamConfiguration);
+        given(databusStreamConfiguration.getDbusServiceName()).willReturn("Monitoring");
         doNothing().when(recordProcessor).handleDroppedDatabusRequest(input, 2);
-        RoundRobinDatabusProcessingQueues<MonitoringConfiguration> underTest =
+        RoundRobinDatabusProcessingQueues<AbstractDatabusStreamConfiguration> underTest =
                 new RoundRobinDatabusProcessingQueues<>(2, 2, recordProcessor, tracer, null);
         // WHEN
         underTest.process(input);

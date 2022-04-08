@@ -12,12 +12,15 @@ import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.CloudwatchParams;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Logging;
+import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.telemetry.request.MonitoringRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.FeaturesResponse;
 import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
+import com.sequenceiq.common.api.telemetry.response.MonitoringResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 
 @Component
@@ -46,6 +49,7 @@ public class TelemetryConverter {
         if (freeIpaTelemetryEnabled && request != null) {
             telemetry = new Telemetry();
             telemetry.setLogging(createLoggingFromRequest(request.getLogging()));
+            telemetry.setMonitoring(createMonitoringFromRequest(request.getMonitoring()));
             telemetry.setFeatures(createFeaturesFromRequest(request.getFeatures()));
             telemetry.setDatabusEndpoint(databusEndpoint);
             telemetry.setFluentAttributes(request.getFluentAttributes());
@@ -59,6 +63,7 @@ public class TelemetryConverter {
             response = new TelemetryResponse();
             response.setFluentAttributes(telemetry.getFluentAttributes());
             response.setLogging(createLoggingResponseFromSource(telemetry.getLogging()));
+            response.setMonitoring(createMonitoringResponseFromSource(telemetry.getMonitoring()));
             response.setFeatures(createFeaturesResponseFromSource(telemetry.getFeatures()));
             response.setRules(telemetry.getRules());
         }
@@ -93,6 +98,15 @@ public class TelemetryConverter {
         return logging;
     }
 
+    private Monitoring createMonitoringFromRequest(MonitoringRequest monitoringRequest) {
+        Monitoring monitoring = null;
+        if (monitoringRequest != null) {
+            monitoring = new Monitoring();
+            monitoring.setRemoteWriteUrl(monitoringRequest.getRemoteWriteUrl());
+        }
+        return monitoring;
+    }
+
     private LoggingResponse createLoggingResponseFromSource(Logging logging) {
         LoggingResponse loggingResponse = null;
         if (logging != null) {
@@ -118,6 +132,15 @@ public class TelemetryConverter {
             }
         }
         return loggingResponse;
+    }
+
+    private MonitoringResponse createMonitoringResponseFromSource(Monitoring monitoring) {
+        MonitoringResponse monitoringResponse = null;
+        if (monitoring != null) {
+            monitoringResponse = new MonitoringResponse();
+            monitoringResponse.setRemoteWriteUrl(monitoring.getRemoteWriteUrl());
+        }
+        return monitoringResponse;
     }
 
     private Features createFeaturesFromRequest(FeaturesRequest featuresRequest) {

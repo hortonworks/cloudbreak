@@ -24,12 +24,25 @@ telemetry:
     base-url: https://archive.cloudera.com/p/cdp-infra-tools/latest/redhat7/yum
     gpg-key: https://archive.cloudera.com/p/cdp-infra-tools/latest/redhat7/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     gpg-check: 1
+  monitoring:
+    enabled: false
+    paas-support: false
+    remote-write-url: ""
+    scrape-interval-seconds: 300
+    dev-stack: false
+    global-auth:
+      enabled: false
+      username: ""
+      password: ""
+      token: ""
   upgrade:
     enabled: false
     cdp-telemetry:
       desired-version: 0.4.23
     cdp-logging-agent:
       desired-version: 0.2.16
+    cdp-vm-agent:
+      desired-version: 1.73.1
     metering-agent:
       desired-date: 2022-01-18
   usage:

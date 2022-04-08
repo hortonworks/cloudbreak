@@ -20,6 +20,9 @@ public class Telemetry implements Serializable {
     @JsonProperty("workloadAnalytics")
     private WorkloadAnalytics workloadAnalytics;
 
+    @JsonProperty("monitoring")
+    private Monitoring monitoring;
+
     @JsonProperty("databusEndpoint")
     private String databusEndpoint;
 
@@ -38,6 +41,14 @@ public class Telemetry implements Serializable {
 
     public void setLogging(Logging logging) {
         this.logging = logging;
+    }
+
+    public Monitoring getMonitoring() {
+        return monitoring;
+    }
+
+    public void setMonitoring(Monitoring monitoring) {
+        this.monitoring = monitoring;
     }
 
     public WorkloadAnalytics getWorkloadAnalytics() {
@@ -88,8 +99,8 @@ public class Telemetry implements Serializable {
 
     @JsonIgnore
     public boolean isMonitoringFeatureEnabled() {
-        return features != null && features.getMonitoring() != null
-                && features.getMonitoring().isEnabled();
+        return features == null || (features.getMonitoring() != null
+                && features.getMonitoring().isEnabled());
     }
 
     @JsonIgnore

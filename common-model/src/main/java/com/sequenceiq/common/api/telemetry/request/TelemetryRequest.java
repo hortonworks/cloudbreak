@@ -14,6 +14,9 @@ public class TelemetryRequest extends TelemetryBase {
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_LOGGING)
     private LoggingRequest logging;
 
+    @ApiModelProperty(TelemetryModelDescription.TELEMETRY_MONITORING)
+    private MonitoringRequest monitoring;
+
     @ApiModelProperty(TelemetryModelDescription.TELEMETRY_WORKLOAD_ANALYTICS)
     private WorkloadAnalyticsRequest workloadAnalytics;
 
@@ -26,6 +29,14 @@ public class TelemetryRequest extends TelemetryBase {
 
     public void setLogging(LoggingRequest logging) {
         this.logging = logging;
+    }
+
+    public MonitoringRequest getMonitoring() {
+        return monitoring;
+    }
+
+    public void setMonitoring(MonitoringRequest monitoring) {
+        this.monitoring = monitoring;
     }
 
     public WorkloadAnalyticsRequest getWorkloadAnalytics() {
@@ -46,10 +57,11 @@ public class TelemetryRequest extends TelemetryBase {
 
     @Override
     public String toString() {
-        return super.toString() + ", " + "TelemetryRequest{" +
+        return "TelemetryRequest{" +
                 "logging=" + logging +
+                ", monitoring=" + monitoring +
                 ", workloadAnalytics=" + workloadAnalytics +
                 ", features=" + features +
-                '}';
+                "} " + super.toString();
     }
 }

@@ -37,11 +37,9 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_CUSTOM_CONFIGS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_DATABUS_ENDPOINT_VALIDATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_SELECT_INSTANCE_TYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_ZDU_OS_UPGRADE;
@@ -66,6 +64,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UNBOUND_ELIMINATION;
@@ -176,16 +175,12 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_DATAHUB_NODESTATUS_CHECK);
     }
 
-    public boolean datahubMetricsDatabusProcessing(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_DATAHUB_METRICS_DATABUS_PROCESSING);
-    }
-
-    public boolean datalakeMetricsDatabusProcessing(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_DATALAKE_METRICS_DATABUS_PROCESSING);
-    }
-
     public boolean nodestatusSaltPingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_NODESTATUS_ENABLE_SALT_PING);
+    }
+
+    public boolean isCdpSaasEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_SAAS);
     }
 
     public boolean automaticUsersyncPollerEnabled(String accountId) {

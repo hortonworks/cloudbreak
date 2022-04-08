@@ -20,6 +20,18 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private final char[] cmPassword;
 
+    private final String remoteWriteUrl;
+
+    private final Integer scrapeIntervalSeconds;
+
+    private final boolean useDevStack;
+
+    private final String username;
+
+    private final char[] password;
+
+    private final char[] token;
+
     private final TelemetryClusterDetails clusterDetails;
 
     private MonitoringConfigView(Builder builder) {
@@ -28,6 +40,12 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.cmUsername = builder.cmUsername;
         this.cmPassword = builder.cmPassword;
         this.clusterDetails = builder.clusterDetails;
+        this.remoteWriteUrl = builder.remoteWriteUrl;
+        this.scrapeIntervalSeconds = builder.scrapeIntervalSeconds;
+        this.useDevStack = builder.useDevStack;
+        this.username = builder.username;
+        this.password = builder.password;
+        this.token = builder.token;
     }
 
     public boolean isEnabled() {
@@ -50,13 +68,43 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return clusterDetails;
     }
 
+    public String getRemoteWriteUrl() {
+        return remoteWriteUrl;
+    }
+
+    public Integer getScrapeIntervalSeconds() {
+        return scrapeIntervalSeconds;
+    }
+
+    public boolean isUseDevStack() {
+        return useDevStack;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public char[] getPassword() {
+        return password;
+    }
+
+    public char[] getToken() {
+        return token;
+    }
+
     @Override
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
         map.put("enabled", this.enabled);
+        map.put("remoteWriteUrl", this.remoteWriteUrl);
+        map.put("scrapeIntervalSeconds", this.scrapeIntervalSeconds);
+        map.put("useDevStack", this.useDevStack);
         map.put("type", ObjectUtils.defaultIfNull(this.type, EMPTY_CONFIG_DEFAULT));
         map.put("cmUsername", ObjectUtils.defaultIfNull(this.cmUsername, EMPTY_CONFIG_DEFAULT));
         map.put("cmPassword", ObjectUtils.defaultIfNull(this.cmPassword, EMPTY_CONFIG_DEFAULT));
+        map.put("username", ObjectUtils.defaultIfNull(this.username, EMPTY_CONFIG_DEFAULT));
+        map.put("password", this.password != null ? new String(this.password) : EMPTY_CONFIG_DEFAULT);
+        map.put("token", this.token != null ? new String(this.token) : EMPTY_CONFIG_DEFAULT);
         if (this.clusterDetails != null) {
             map.putAll(clusterDetails.toMap());
         }
@@ -67,7 +115,19 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         private boolean enabled;
 
+        private String remoteWriteUrl;
+
+        private Integer scrapeIntervalSeconds;
+
+        private boolean useDevStack;
+
         private String type;
+
+        private String username;
+
+        private char[] password;
+
+        private char[] token;
 
         private String cmUsername;
 
@@ -84,8 +144,38 @@ public class MonitoringConfigView implements TelemetryConfigView {
             return this;
         }
 
+        public Builder withRemoteWriteUrl(String remoteWriteUrl) {
+            this.remoteWriteUrl = remoteWriteUrl;
+            return this;
+        }
+
+        public Builder withScrapeIntervalSeconds(Integer scrapeIntervalSeconds) {
+            this.scrapeIntervalSeconds = scrapeIntervalSeconds;
+            return this;
+        }
+
+        public Builder withUseDevStack(boolean useDevStack) {
+            this.useDevStack = useDevStack;
+            return this;
+        }
+
         public Builder withType(String type) {
             this.type = type;
+            return this;
+        }
+
+        public Builder withUsername(String username) {
+            this.username = username;
+            return this;
+        }
+
+        public Builder withPassword(char[] password) {
+            this.password = password;
+            return this;
+        }
+
+        public Builder withToken(char[] token) {
+            this.token = token;
             return this;
         }
 

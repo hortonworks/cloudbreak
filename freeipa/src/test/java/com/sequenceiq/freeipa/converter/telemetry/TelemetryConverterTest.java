@@ -16,9 +16,11 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.Logging;
+import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.telemetry.request.MonitoringRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 
@@ -30,6 +32,8 @@ public class TelemetryConverterTest {
 
     private static final String DATABUS_S3_BUCKET = "myCustomS3Bucket";
 
+    private static final String MONITORING_REMOTE_WRITE_URL = "http://myendpoint/api/v1/write";
+
     private static final String EMAIL = "blah@blah.blah";
 
     private TelemetryConverter underTest;
@@ -39,7 +43,8 @@ public class TelemetryConverterTest {
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
         MeteringConfiguration meteringConfiguration = new MeteringConfiguration(false, null, null);
         ClusterLogsCollectionConfiguration logCollectionConfig = new ClusterLogsCollectionConfiguration(true, null, null);
-        MonitoringConfiguration monitoringConfig = new MonitoringConfiguration(true, null, null);
+        MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
+        monitoringConfig.setEnabled(true);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, meteringConfiguration, logCollectionConfig, monitoringConfig, null);
         underTest = new TelemetryConverter(telemetryConfiguration, true);
@@ -54,6 +59,9 @@ public class TelemetryConverterTest {
         FeaturesRequest featuresRequest = new FeaturesRequest();
         featuresRequest.addClusterLogsCollection(false);
         telemetryRequest.setLogging(logging);
+        MonitoringRequest monitoringRequest = new MonitoringRequest();
+        monitoringRequest.setRemoteWriteUrl(MONITORING_REMOTE_WRITE_URL);
+        telemetryRequest.setMonitoring(monitoringRequest);
         telemetryRequest.setFeatures(featuresRequest);
         // WHEN
         Telemetry result = underTest.convert(telemetryRequest);
@@ -63,6 +71,7 @@ public class TelemetryConverterTest {
         assertThat(result.getFeatures().getCloudStorageLogging().isEnabled(), is(true));
         assertThat(result.getFeatures().getMonitoring().isEnabled(), is(true));
         assertThat(result.getDatabusEndpoint(), is(DATABUS_ENDPOINT));
+        assertThat(result.getMonitoring().getRemoteWriteUrl(), is(MONITORING_REMOTE_WRITE_URL));
     }
 
     @Test
@@ -73,10 +82,14 @@ public class TelemetryConverterTest {
         logging.setS3(s3Params);
         Telemetry telemetry = new Telemetry();
         telemetry.setLogging(logging);
+        Monitoring monitoring = new Monitoring();
+        monitoring.setRemoteWriteUrl(MONITORING_REMOTE_WRITE_URL);
+        telemetry.setMonitoring(monitoring);
         // WHEN
         TelemetryResponse result = underTest.convert(telemetry);
         // THEN
         assertThat(result.getLogging().getS3().getInstanceProfile(), is(INSTANCE_PROFILE_VALUE));
+        assertThat(result.getMonitoring().getRemoteWriteUrl(), is(MONITORING_REMOTE_WRITE_URL));
     }
 
     @Test
