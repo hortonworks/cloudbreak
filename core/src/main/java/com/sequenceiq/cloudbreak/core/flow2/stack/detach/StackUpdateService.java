@@ -39,10 +39,15 @@ public class StackUpdateService {
     @Inject
     private TransactionService transactionService;
 
-    public void updateNameAndCrn(Stack stack, String newName, String newCrn) {
+    public void updateNameAndCrn(Stack stack, String newName, String newCrn, boolean retainOriginalName) {
         MDCBuilder.buildMdcContext(stack);
         try {
             transactionService.required(() -> {
+                if (retainOriginalName) {
+                    stack.setOriginalName(stack.getName());
+                } else {
+                    stack.setOriginalName(null);
+                }
                 stack.setName(newName);
                 stack.setResourceCrn(newCrn);
                 Stack savedStack = measure(() -> stackService.save(stack),

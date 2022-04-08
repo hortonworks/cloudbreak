@@ -36,6 +36,11 @@ public class CloudContext {
 
     private final String crn;
 
+    /**
+     * Specifically used for cases in which the original stack has been detached during a resize operation.
+     */
+    private String originalName;
+
     private CloudContext(Builder builder) {
         this.id = builder.id;
         this.name = builder.name;
@@ -47,6 +52,7 @@ public class CloudContext {
         this.tenantId = builder.tenantId;
         this.userName = builder.userName;
         this.govCloud = builder.govCloud;
+        this.originalName = builder.originalName;
     }
 
     public Long getId() {
@@ -93,6 +99,10 @@ public class CloudContext {
         return govCloud;
     }
 
+    public String getOriginalName() {
+        return originalName;
+    }
+
     @Override
     public String toString() {
         return "CloudContext{" +
@@ -129,6 +139,8 @@ public class CloudContext {
         private String crn;
 
         private boolean govCloud;
+
+        private String originalName;
 
         public Builder withId(Long id) {
             this.id = id;
@@ -182,6 +194,11 @@ public class CloudContext {
 
         public Builder withGovCloud(boolean govCloud) {
             this.govCloud = govCloud;
+            return this;
+        }
+
+        public Builder withOriginalName(String originalName) {
+            this.originalName = originalName;
             return this;
         }
 

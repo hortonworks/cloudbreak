@@ -179,7 +179,8 @@ public interface StackV4Endpoint {
     @ApiOperation(value = UPDATE_BY_NAME_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "updateNameCrnAndType")
     void updateNameAndCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("newName") String newName, @QueryParam("newCrn") String newCrn);
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn, @QueryParam("newName") String newName, @QueryParam("newCrn") String newCrn,
+            @QueryParam("retainOriginalName") @DefaultValue("false") boolean retainOriginalName);
 
     @POST
     @Path("{name}/sync")
