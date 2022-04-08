@@ -129,7 +129,8 @@ public class SdxAttachServiceTest {
         testCluster.setCrn(ORIGINAL_TEST_CLUSTER_CRN);
         sdxAttachService.reattachStack(testCluster, TEST_CLUSTER_NAME);
         verify(mockStackV4Endpoint).updateNameAndCrn(
-                eq(0L), eq(TEST_CLUSTER_NAME), any(), eq(ORIGINAL_TEST_CLUSTER_NAME), eq(ORIGINAL_TEST_CLUSTER_CRN)
+                eq(0L), eq(TEST_CLUSTER_NAME), any(), eq(ORIGINAL_TEST_CLUSTER_NAME), eq(ORIGINAL_TEST_CLUSTER_CRN),
+                eq(false)
         );
     }
 
@@ -139,7 +140,7 @@ public class SdxAttachServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         testCluster.setClusterName(ORIGINAL_TEST_CLUSTER_NAME);
         testCluster.setCrn(ORIGINAL_TEST_CLUSTER_CRN);
-        doThrow(new NotFoundException("Stack not found.")).when(mockStackV4Endpoint).updateNameAndCrn(any(), any(), any(), any(), any());
+        doThrow(new NotFoundException("Stack not found.")).when(mockStackV4Endpoint).updateNameAndCrn(any(), any(), any(), any(), any(), eq(false));
         sdxAttachService.reattachStack(testCluster, TEST_CLUSTER_NAME);
     }
 

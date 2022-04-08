@@ -97,7 +97,7 @@ public class SdxAttachService {
      */
     public void reattachStack(SdxCluster cluster, String originalName) {
         LOGGER.info("Started reattaching stack of SDX cluster with ID: {}", cluster.getId());
-        sdxAttachDetachUtils.updateStack(originalName, cluster.getClusterName(), cluster.getCrn());
+        sdxAttachDetachUtils.updateStack(originalName, cluster.getClusterName(), cluster.getCrn(), false);
         jobService.schedule(cluster.getId(), SdxClusterJobAdapter.class);
         LOGGER.info("Finished reattaching stack of SDX cluster with ID: {}. Now has name {} and crn {}.",
                 cluster.getId(), cluster.getClusterName(), cluster.getCrn());
@@ -115,7 +115,7 @@ public class SdxAttachService {
                     cluster.getId(), cluster.getCrn());
         } catch (RuntimeException e) {
             // Undo the stack update to put everything back in its original state.
-            sdxAttachDetachUtils.updateStack(cluster.getClusterName(), detachedName, detachedCrn);
+            sdxAttachDetachUtils.updateStack(cluster.getClusterName(), detachedName, detachedCrn, true);
             jobService.schedule(cluster.getId(), SdxClusterJobAdapter.class);
             throw e;
         }

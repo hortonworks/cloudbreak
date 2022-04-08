@@ -224,6 +224,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     @Convert(converter = DnsResolverTypeConverter.class)
     private DnsResolverType domainDnsResolver;
 
+    /**
+     * Specifically used for cases in which the stack has been detached during a resize operation.
+     * This allows us to retain the original stack name which can be necessary when resources are defined around
+     * the original name.
+     */
+    private String originalName;
+
     public String getResourceCrn() {
         return resourceCrn;
     }
@@ -936,6 +943,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.domainDnsResolver = domainDnsResolver;
     }
 
+    public String getOriginalName() {
+        return originalName;
+    }
+
+    public void setOriginalName(String originalName) {
+        this.originalName = originalName;
+    }
+
     @Override
     public String toString() {
         return "Stack{" +
@@ -983,6 +998,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", ccmV2AgentCrn='" + ccmV2AgentCrn + '\'' +
                 ", externalDatabaseCreationType=" + externalDatabaseCreationType +
                 ", externalDatabaseEngineVersion=" + externalDatabaseEngineVersion +
+                ", originalName=" + originalName +
                 '}';
     }
 

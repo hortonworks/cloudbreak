@@ -48,6 +48,7 @@ public class StackInstanceStatusChecker {
             CloudContext cloudContext = CloudContext.Builder.builder()
                     .withId(stack.getId())
                     .withName(stack.getName())
+                    .withOriginalName(stack.getOriginalName())
                     .withCrn(stack.getResourceCrn())
                     .withPlatform(stack.getCloudPlatform())
                     .withVariant(stack.getPlatformVariant())
