@@ -76,11 +76,11 @@ public class SdxUpgradeRecoveryService implements RecoveryService {
                     () ->
                     stackV4Endpoint.getClusterRecoverableByNameInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn));
             return new SdxRecoverableResponse(response.getReason(), response.getStatus());
-        } catch (WebApplicationException e) {
+        } catch (Exception e) {
+            LOGGER.error("Stack recovery validation failed on cluster: " + sdxCluster.getClusterName(), e);
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
-            String message = String.format("Stack recovery validation failed on cluster: [%s]. Message: [%s]",
-                    sdxCluster.getClusterName(), exceptionMessage);
-            throw new CloudbreakApiException(message, e);
+            return new SdxRecoverableResponse(String.format("Stack recovery validation failed on cluster: [%s]. Message: [%s]",
+                    sdxCluster.getClusterName(), exceptionMessage), RecoveryStatus.NON_RECOVERABLE);
         }
     }
 
