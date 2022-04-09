@@ -34,11 +34,15 @@ public class SdxRecoverySelectorService {
     }
 
     public SdxRecoveryResponse triggerRecovery(SdxCluster sdxCluster, SdxRecoveryRequest sdxRecoveryRequest) {
-
         List<String> responseReasons = new ArrayList<>();
+        SdxRecoverableResponse recoverableResponse;
 
         for (RecoveryService recoveryService : services) {
-            SdxRecoverableResponse recoverableResponse = recoveryService.validateRecovery(sdxCluster, sdxRecoveryRequest);
+            try {
+                recoverableResponse = recoveryService.validateRecovery(sdxCluster, sdxRecoveryRequest);
+            } catch (Exception e) {
+                recoverableResponse = interpretValidationError(sdxCluster, e);
+            }
             responseReasons.add(recoverableResponse.getReason());
             if (recoverableResponse.getStatus().recoverable()) {
                 return recoveryService.triggerRecovery(sdxCluster, sdxRecoveryRequest);
@@ -52,10 +56,14 @@ public class SdxRecoverySelectorService {
     }
 
     public SdxRecoverableResponse validateRecovery(SdxCluster sdxCluster) {
-
         List<SdxRecoverableResponse> sdxRecoverableResponses = new ArrayList<>();
+        SdxRecoverableResponse recoverableResponse;
         for (RecoveryService recoveryService : services) {
-            SdxRecoverableResponse recoverableResponse = recoveryService.validateRecovery(sdxCluster);
+            try {
+                recoverableResponse = recoveryService.validateRecovery(sdxCluster);
+            } catch (Exception e) {
+                recoverableResponse = interpretValidationError(sdxCluster, e);
+            }
             sdxRecoverableResponses.add(recoverableResponse);
             if (recoverableResponse.getStatus().recoverable()) {
                 return recoverableResponse;
@@ -70,5 +78,12 @@ public class SdxRecoverySelectorService {
 
         return new SdxRecoverableResponse(sdxRecoverableResponses.stream()
                 .map(SdxRecoverableResponse::getReason).collect(Collectors.joining(", ")), RecoveryStatus.NON_RECOVERABLE);
+    }
+
+    private SdxRecoverableResponse interpretValidationError(SdxCluster sdxCluster, Exception e) {
+        LOGGER.error("Stack recovery validation failed on cluster: " + sdxCluster.getClusterName(), e);
+        return new SdxRecoverableResponse(String.format(
+                "Stack recovery validation failed on cluster: [%s]. Message: [%s]", sdxCluster.getClusterName(),
+                e.getMessage()), RecoveryStatus.NON_RECOVERABLE);
     }
 }
