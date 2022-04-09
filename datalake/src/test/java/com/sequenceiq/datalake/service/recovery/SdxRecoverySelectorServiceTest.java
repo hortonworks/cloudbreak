@@ -101,6 +101,26 @@ public class SdxRecoverySelectorServiceTest {
     }
 
     @Test
+    public void testRecoveryServiceCanSwitchDespiteValidationError() {
+        setUpgradeTest();
+        when(mockResizeRecoveryService.validateRecovery(cluster, request)).thenAnswer(invocation -> {
+            throw new Exception("Error!");
+        });
+
+        SdxRecoveryResponse response = new SdxRecoveryResponse();
+        when(mockSdxUpgradeRecoveryService.triggerRecovery(cluster, request)).thenReturn(response);
+
+        SdxRecoveryResponse result = sdxRecoverySelectorService.triggerRecovery(cluster, request);
+
+        // Basically, just check that we pass through to the Upgrade Recovery Service despite error during resize recovery validation.
+        Mockito.verify(mockResizeRecoveryService, never()).triggerRecovery(cluster, request);
+        Mockito.verify(mockSdxUpgradeRecoveryService).triggerRecovery(cluster, request);
+
+        assertNotNull(result);
+        assertEquals(response, result);
+    }
+
+    @Test
     public void testRecoveryServiceCanSwitchToResizeRecovery() {
         setResizeTest();
 
