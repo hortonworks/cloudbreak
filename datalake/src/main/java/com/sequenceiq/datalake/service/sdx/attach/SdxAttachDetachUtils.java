@@ -1,7 +1,10 @@
 package com.sequenceiq.datalake.service.sdx.attach;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -12,6 +15,8 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4En
 
 @Component
 public class SdxAttachDetachUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SdxAttachDetachUtils.class);
+
     @Inject
     private StackV4Endpoint stackV4Endpoint;
 
@@ -31,11 +36,17 @@ public class SdxAttachDetachUtils {
     public void updateStack(String originalName, String newName, String newCrn) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         ThreadBasedUserCrnProvider.doAsInternalActor(
-                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () ->
-                stackV4Endpoint.updateNameAndCrn(
-                        0L, originalName, initiatorUserCrn, newName, newCrn
-                )
+            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+            () -> {
+                try {
+                    stackV4Endpoint.updateNameAndCrn(
+                            0L, originalName, initiatorUserCrn, newName, newCrn
+                    );
+                } catch (NotFoundException e) {
+                    LOGGER.warn("Stack not found for original name: '" + originalName +
+                            "'. Skipping update of stack.", e);
+                }
+            }
         );
     }
 
@@ -43,10 +54,16 @@ public class SdxAttachDetachUtils {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () ->
-                redbeamsServerEndpoint.updateClusterCrn(
-                        cluster.getEnvCrn(), originalCrn, cluster.getCrn(), initiatorUserCrn
-                )
+                () -> {
+                    try {
+                        redbeamsServerEndpoint.updateClusterCrn(
+                                cluster.getEnvCrn(), originalCrn, cluster.getCrn(), initiatorUserCrn
+                        );
+                    } catch (NotFoundException e) {
+                        LOGGER.warn("External DB not found for original CRN: '" + originalCrn +
+                                "'. Skipping update of external DB.", e);
+                    }
+                }
         );
     }
 }

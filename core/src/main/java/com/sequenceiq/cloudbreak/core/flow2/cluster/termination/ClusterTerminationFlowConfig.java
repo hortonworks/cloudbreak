@@ -24,17 +24,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTe
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<ClusterTerminationState, ClusterTerminationEvent> {
+public class ClusterTerminationFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ClusterTerminationState, ClusterTerminationEvent> {
 
     private static final List<Transition<ClusterTerminationState, ClusterTerminationEvent>> TRANSITIONS =
             new Builder<ClusterTerminationState, ClusterTerminationEvent>()
@@ -59,9 +55,6 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
 
     private static final FlowEdgeConfig<ClusterTerminationState, ClusterTerminationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CLUSTER_TERMINATION_FAILED_STATE, FAIL_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public ClusterTerminationFlowConfig() {
         super(ClusterTerminationState.class, ClusterTerminationEvent.class);
@@ -90,10 +83,5 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
     @Override
     public String getDisplayName() {
         return "Terminate cluster";
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

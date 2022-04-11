@@ -281,6 +281,9 @@ public class MockUserManagementServiceTest {
 
                 {"enableDatalakeSelectInstanceType false", "enableDatalakeSelectInstanceType", false, "CDP_DATALAKE_SELECT_INSTANCE_TYPE", false},
                 {"enableDatalakeSelectInstanceType true", "enableDatalakeSelectInstanceType", true, "CDP_DATALAKE_SELECT_INSTANCE_TYPE", true},
+
+                {"enableDatalakeZduOSUpgrade false", "enableDatalakeZduOSUpgrade", false, "CDP_DATALAKE_ZDU_OS_UPGRADE", false},
+                {"enableDatalakeZduOSUpgrade true", "enableDatalakeZduOSUpgrade", true, "CDP_DATALAKE_ZDU_OS_UPGRADE", true},
         };
     }
 

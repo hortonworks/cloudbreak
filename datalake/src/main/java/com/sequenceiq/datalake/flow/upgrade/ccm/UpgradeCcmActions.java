@@ -43,7 +43,7 @@ public class UpgradeCcmActions {
             @Override
             protected void doExecute(SdxContext context, UpgradeCcmStackEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Execute CCM upgrade stack flow for SDX: {}", payload.getResourceId());
-                UpgradeCcmStackRequest request = UpgradeCcmStackRequest.from(context, payload.getSdxCluster());
+                UpgradeCcmStackRequest request = UpgradeCcmStackRequest.from(context);
                 sendEvent(context, request);
             }
 

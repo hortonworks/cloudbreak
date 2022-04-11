@@ -19,7 +19,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.api.client.googleapis.json.GoogleJsonError;
@@ -34,9 +33,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 class AbstractGcpBaseResourceCheckerTest {
 
     private static final String RESOURCE_NAME = "something";
-
-    @Mock
-    private GoogleJsonResponseException mockGoogleJsonResponseException;
 
     private AbstractGcpBaseResourceChecker underTest;
 
@@ -59,13 +55,15 @@ class AbstractGcpBaseResourceCheckerTest {
     @ParameterizedTest
     @EnumSource(ResourceType.class)
     void testExceptionHandlerWhenGoogleJsonErrorIsNullThenGcpResourceExceptionShouldCome(ResourceType resourceType) {
-        String expectedExceptionMessage = "somethingAwful";
-        when(mockGoogleJsonResponseException.getMessage()).thenReturn(expectedExceptionMessage);
+        GoogleJsonError details = new GoogleJsonError();
+        details.setMessage("somethingAwful");
         GcpResourceException expectedException = assertThrows(GcpResourceException.class,
-                () -> underTest.exceptionHandler(mockGoogleJsonResponseException, RESOURCE_NAME, resourceType));
+                () -> underTest.exceptionHandler(new GoogleJsonResponseException(
+                        new HttpResponseException.Builder(404, "", new HttpHeaders()),
+                        details), RESOURCE_NAME, resourceType));
 
         assertNotNull(expectedException.getMessage());
-        assertThat(expectedException.getMessage()).contains(expectedExceptionMessage);
+        assertThat(expectedException.getMessage()).contains("somethingAwful");
     }
 
     @ParameterizedTest

@@ -12,19 +12,15 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopState.STO
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopState, StackStopEvent>
+public class StackStopFlowConfig extends StackStatusFinalizerAbstractFlowConfig<StackStopState, StackStopEvent>
         implements RetryableFlowConfiguration<StackStopEvent> {
 
     private static final List<Transition<StackStopState, StackStopEvent>> TRANSITIONS = new Builder<StackStopState, StackStopEvent>()
@@ -38,9 +34,6 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STOP_FAILED_STATE, STOP_FAIL_HANDLED_EVENT);
 
     private static final String FLOW_DISPLAY_NAME = "Stop Stack";
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public StackStopFlowConfig() {
         super(StackStopState.class, StackStopEvent.class);
@@ -81,10 +74,5 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
     @Override
     public StackStopEvent getRetryableEvent() {
         return STOP_FAIL_HANDLED_EVENT;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

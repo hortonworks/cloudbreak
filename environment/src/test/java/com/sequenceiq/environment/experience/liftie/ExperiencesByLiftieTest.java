@@ -56,6 +56,8 @@ class ExperiencesByLiftieTest {
 
     private static final String LIFTIE = "LIFTIE";
 
+    private static final String BUSINESS_NAME = "Kubernetes Experience";
+
     private static final int TWICE = 2;
 
     private static final int ONCE = 1;
@@ -135,6 +137,7 @@ class ExperiencesByLiftieTest {
                 .withExperienceName(LIFTIE)
                 .withName("TestCluster1")
                 .withStatus(AVAILABLE_STATUS)
+                .withPublicName(BUSINESS_NAME)
                 .build();
         assertThat(clusters).containsOnly(expected);
 
@@ -161,6 +164,7 @@ class ExperiencesByLiftieTest {
                 .withExperienceName(LIFTIE)
                 .withName("availableCluster1")
                 .withStatus(AVAILABLE_STATUS)
+                .withPublicName(BUSINESS_NAME)
                 .build();
         assertThat(clusters).containsOnly(expected);
 
@@ -187,10 +191,12 @@ class ExperiencesByLiftieTest {
         ExperienceCluster expected1 = ExperienceCluster.builder()
                 .withExperienceName(LIFTIE)
                 .withName("availableCluster1")
+                .withPublicName(BUSINESS_NAME)
                 .withStatus(AVAILABLE_STATUS)
                 .build();
         ExperienceCluster expected2 = ExperienceCluster.builder()
                 .withExperienceName(LIFTIE)
+                .withPublicName(BUSINESS_NAME)
                 .withName("availableCluster2")
                 .withStatus(AVAILABLE_STATUS)
                 .build();

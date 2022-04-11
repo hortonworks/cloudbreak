@@ -2,6 +2,7 @@ package com.sequenceiq.environment.platformresource.v1;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.when;
 import javax.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
+import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNoSqlTablesResponse;
@@ -83,8 +86,19 @@ class CredentialPlatformResourceControllerTest {
     @Mock
     private CloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter cloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter;
 
+    @Mock
+    private CustomCheckUtil customCheckUtil;
+
     @InjectMocks
     private CredentialPlatformResourceController underTest;
+
+    @BeforeEach
+    public void init() {
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(customCheckUtil).run(any(Runnable.class));
+    }
 
     @Test
     void getNoSqlTables() {
@@ -97,7 +111,7 @@ class CredentialPlatformResourceControllerTest {
         doNothing().when(commonPermissionCheckingUtils).checkPermissionForUserOnResource(any(), any(), any());
 
         PlatformNoSqlTablesResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getNoSqlTables(null,
-                    CREDENTIAL_CRN, "region", "aws", "az"));
+                CREDENTIAL_CRN, "region", "aws", "az"));
 
         verify(platformParameterService).getNoSqlTables(platformResourceRequest);
         verify(cloudNoSqlTablesToPlatformNoSqlTablesV1ResponseConverter).convert(noSqlTables);

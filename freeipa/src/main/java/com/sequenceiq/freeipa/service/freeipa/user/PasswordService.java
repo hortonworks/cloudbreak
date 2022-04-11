@@ -41,7 +41,6 @@ import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordResult;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.util.CrnService;
 
 @Service
 public class PasswordService {
@@ -58,7 +57,7 @@ public class PasswordService {
     private FreeIpaFlowManager freeIpaFlowManager;
 
     @Inject
-    private CrnService crnService;
+    private CustomCheckUtil customCheckUtil;
 
     @Inject
     private GrpcUmsClient umsClient;
@@ -87,8 +86,8 @@ public class PasswordService {
     public Operation setPasswordWithCustomPermissionCheck(String accountId, String userCrn,
             String password, Set<String> environmentCrnFilter, AuthorizationResourceAction action) {
         List<Stack> stacks = getStacksForSetPassword(accountId, userCrn, password, environmentCrnFilter);
-        List<String> relatedEnvironmentCrns = stacks.stream().map(stack -> stack.getEnvironmentCrn()).collect(Collectors.toList());
-        CustomCheckUtil.run(userCrn, () -> commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, userCrn, relatedEnvironmentCrns));
+        List<String> relatedEnvironmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toList());
+        customCheckUtil.run(userCrn, () -> commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, userCrn, relatedEnvironmentCrns));
         return setPasswordForStacks(accountId, userCrn, password, environmentCrnFilter, stacks);
     }
 

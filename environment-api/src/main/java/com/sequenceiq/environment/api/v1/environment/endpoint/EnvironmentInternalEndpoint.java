@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescript
 import java.util.List;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.environment.api.doc.environment.EnvironmentOpDescription;
 import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValidationErrorResponses;
+import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -35,4 +37,13 @@ public interface EnvironmentInternalEndpoint {
     PolicyValidationErrorResponses policyValidationByEnvironmentCrn(
         @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
         @QueryParam("service") List<String> services);
+
+    @GET
+    @Path("/crn/{crn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.INTERNAL_CONSUMPTION_LIST, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "getEnvironmentV1InternalByCrn")
+    SimpleEnvironmentResponse internalGetByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+        @QueryParam("withNetwork") @DefaultValue("false") boolean withNetwork);
+
 }

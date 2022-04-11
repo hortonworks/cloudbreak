@@ -21,19 +21,15 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.CcmUpgrad
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class CcmUpgradeFlowConfig extends AbstractFlowConfiguration<CcmUpgradeState, CcmUpgradeEvent>
+public class CcmUpgradeFlowConfig extends StackStatusFinalizerAbstractFlowConfig<CcmUpgradeState, CcmUpgradeEvent>
         implements RetryableFlowConfiguration<CcmUpgradeEvent> {
 
     private static final List<Transition<CcmUpgradeState, CcmUpgradeEvent>> TRANSITIONS =
@@ -69,9 +65,6 @@ public class CcmUpgradeFlowConfig extends AbstractFlowConfiguration<CcmUpgradeSt
 
     private static final FlowEdgeConfig<CcmUpgradeState, CcmUpgradeEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CCM_UPGRADE_FAILED_STATE, FAIL_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public CcmUpgradeFlowConfig() {
         super(CcmUpgradeState.class, CcmUpgradeEvent.class);
@@ -112,10 +105,5 @@ public class CcmUpgradeFlowConfig extends AbstractFlowConfiguration<CcmUpgradeSt
     @Override
     public CcmUpgradeEvent getRetryableEvent() {
         return FAIL_HANDLED_EVENT;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

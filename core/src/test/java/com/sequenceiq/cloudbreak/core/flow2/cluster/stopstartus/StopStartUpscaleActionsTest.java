@@ -342,7 +342,7 @@ public class StopStartUpscaleActionsTest {
         List<InstanceMetaData> startedInstances = instancesActionableStopped.subList(0, adjustment);
 
         StopStartUpscaleCommissionViaCMRequest request =
-                new StopStartUpscaleCommissionViaCMRequest(stack, INSTANCE_GROUP_NAME_ACTIONABLE, startedInstances, Collections.emptyList());
+                new StopStartUpscaleCommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, startedInstances, Collections.emptyList());
         Set<String> successfullyCommissionedFqdns = startedInstances.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.toUnmodifiableSet());
         StopStartUpscaleCommissionViaCMResult payload =
                 new StopStartUpscaleCommissionViaCMResult(request, successfullyCommissionedFqdns, Collections.emptyList());
@@ -386,7 +386,7 @@ public class StopStartUpscaleActionsTest {
         List<String> notCommissionedFqdns = notCommissioned.stream().map(x -> x.getDiscoveryFQDN()).collect(Collectors.toList());
 
         StopStartUpscaleCommissionViaCMRequest request =
-                new StopStartUpscaleCommissionViaCMRequest(stack, INSTANCE_GROUP_NAME_ACTIONABLE, startedInstances, notCommissioned);
+                new StopStartUpscaleCommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, startedInstances, notCommissioned);
         Set<String> successfullyCommissionedFqdns = startedInstances.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.toUnmodifiableSet());
         StopStartUpscaleCommissionViaCMResult payload = new StopStartUpscaleCommissionViaCMResult(request, successfullyCommissionedFqdns, notCommissionedFqdns);
 

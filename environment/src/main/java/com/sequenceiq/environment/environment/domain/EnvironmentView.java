@@ -32,6 +32,8 @@ import com.sequenceiq.environment.proxy.domain.ProxyConfigView;
 @Table(name = "Environment")
 public class EnvironmentView extends CompactView implements AuthResource {
 
+    private String originalName;
+
     @Column(nullable = false)
     private String cloudPlatform;
 
@@ -200,6 +202,14 @@ public class EnvironmentView extends CompactView implements AuthResource {
 
     public Set<Region> getRegionSet() {
         return JsonUtil.jsonToType(regions.getValue(), new RegionSetTypeReference());
+    }
+
+    public String getOriginalName() {
+        return originalName;
+    }
+
+    public void setOriginalName(String originalName) {
+        this.originalName = originalName;
     }
 
     public EnvironmentTelemetry getTelemetry() {

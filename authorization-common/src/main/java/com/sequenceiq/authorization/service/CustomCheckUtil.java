@@ -1,21 +1,20 @@
 package com.sequenceiq.authorization.service;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 
+@Component
 public class CustomCheckUtil {
 
-    private CustomCheckUtil() {
-
-    }
-
-    public static void run(String actorCrn, Runnable runnable) {
+    public void run(String actorCrn, Runnable runnable) {
         if (!RegionAwareInternalCrnGeneratorUtil.isInternalCrn(actorCrn)) {
             runnable.run();
         }
     }
 
-    public static void run(Runnable runnable) {
+    public void run(Runnable runnable) {
         if (!RegionAwareInternalCrnGeneratorUtil.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
             runnable.run();
         }

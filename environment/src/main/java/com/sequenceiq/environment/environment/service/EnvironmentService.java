@@ -35,14 +35,14 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
-import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
-import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
@@ -149,6 +149,13 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         LOGGER.debug("Listing environments by account id '{}'.", accountId);
         Set<Environment> environments = environmentRepository.findByAccountId(accountId);
         return environments.stream().map(environmentDtoConverter::environmentToDto).collect(Collectors.toList());
+    }
+
+    public EnvironmentDto internalGetByCrn(String crn) {
+        LOGGER.debug("Listing environments by crn '{}'.", crn);
+        Optional<Environment> environment = environmentRepository.findOneByResourceCrnEvenIfDeleted(crn);
+        MDCBuilder.buildMdcContext(environment.orElseThrow(() -> new NotFoundException(String.format("No environment found with resource CRN '%s'.", crn))));
+        return environmentDtoConverter.environmentToDto(environment.get());
     }
 
     public void setRegions(Environment environment, Set<String> requestedRegions, CloudRegions cloudRegions) {

@@ -229,7 +229,7 @@ public class ClouderaManagerDecomissioner {
         }
     }
 
-    public void enterMaintenanceMode(Stack stack, Set<String> hostList, ApiClient client) {
+    public void enterMaintenanceMode(Set<String> hostList, ApiClient client) {
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
         String currentHostId = null;
         int successCount = 0;

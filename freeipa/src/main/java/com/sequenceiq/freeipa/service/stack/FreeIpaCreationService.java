@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.stack;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Future;
 
 import javax.inject.Inject;
@@ -172,7 +173,7 @@ public class FreeIpaCreationService {
                     new StackEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT, stackImageFreeIpaTuple.getLeft().getId()));
             InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
             return stackToDescribeFreeIpaResponseConverter
-                    .convert(stackImageFreeIpaTuple.getLeft(), stackImageFreeIpaTuple.getMiddle(), stackImageFreeIpaTuple.getRight(), null, false);
+                    .convert(stackImageFreeIpaTuple.getLeft(), stackImageFreeIpaTuple.getMiddle(), stackImageFreeIpaTuple.getRight(), Optional.empty(), false);
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Creation of FreeIPA failed", e);
             throw new BadRequestException("Creation of FreeIPA failed: " + e.getCause().getMessage(), e);

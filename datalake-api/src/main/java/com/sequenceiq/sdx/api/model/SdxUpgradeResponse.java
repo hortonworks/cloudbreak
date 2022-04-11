@@ -4,18 +4,30 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.ApiModelProperty;
+
+@ApiModel
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SdxUpgradeResponse {
 
+    @ApiModelProperty(ModelDescriptions.CURRENT_IMAGE)
     private ImageInfoV4Response current;
 
+    @ApiModelProperty(ModelDescriptions.UPGRADE_CANDIDATE_IMAGES)
     private List<ImageInfoV4Response> upgradeCandidates;
 
+    @ApiModelProperty(ModelDescriptions.UPGRADE_ERROR_REASON)
     private String reason;
 
+    @ApiModelProperty(ModelDescriptions.FLOW_IDENTIFIER)
     private FlowIdentifier flowIdentifier;
 
     public SdxUpgradeResponse() {

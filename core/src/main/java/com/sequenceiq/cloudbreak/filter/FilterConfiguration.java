@@ -32,25 +32,16 @@ public class FilterConfiguration {
         WorkspaceConfiguratorFilter filter = new WorkspaceConfiguratorFilter(restRequestThreadLocalService, workspaceService, userService,
                 authenticatedUserService);
         registrationBean.setFilter(filter);
-        registrationBean.setOrder(Integer.MAX_VALUE);
+        registrationBean.setOrder(FilterOrderConstants.WORKSPACE_FILTER_ORDER);
         return registrationBean;
     }
 
     @Bean
     public FilterRegistrationBean<CloudbreakUserConfiguratorFilter> identityUserConfiguratorFilterRegistrationBean() {
         FilterRegistrationBean<CloudbreakUserConfiguratorFilter> registrationBean = new FilterRegistrationBean<>();
-        CloudbreakUserConfiguratorFilter filter = new CloudbreakUserConfiguratorFilter(restRequestThreadLocalService, authenticatedUserService);
+        CloudbreakUserConfiguratorFilter filter = new CloudbreakUserConfiguratorFilter(userService, restRequestThreadLocalService, authenticatedUserService);
         registrationBean.setFilter(filter);
-        registrationBean.setOrder(Integer.MAX_VALUE);
-        return registrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<UserCreatorFilter> userCreatorFilterRegistrationBean() {
-        FilterRegistrationBean<UserCreatorFilter> registrationBean = new FilterRegistrationBean<>();
-        UserCreatorFilter filter = new UserCreatorFilter(userService, authenticatedUserService);
-        registrationBean.setFilter(filter);
-        registrationBean.setOrder(Integer.MAX_VALUE);
+        registrationBean.setOrder(FilterOrderConstants.CLOUDBREAK_USER_CONFIGURATOR_ORDER);
         return registrationBean;
     }
 }

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.reactor.api.event.cluster;
 import java.util.Collections;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
@@ -16,13 +15,10 @@ public class StopStartUpscaleCommissionViaCMRequest extends ClusterPlatformReque
 
     private final List<InstanceMetaData> servicesNotRunningInstancesToCommission;
 
-    private final Stack stack;
-
-    public StopStartUpscaleCommissionViaCMRequest(Stack stack, String hostGroupName, List<InstanceMetaData> startedInstancesToCommission,
+    public StopStartUpscaleCommissionViaCMRequest(Long stackId, String hostGroupName, List<InstanceMetaData> startedInstancesToCommission,
             List<InstanceMetaData> servicesNotRunningInstancesToCommission) {
-        super(stack.getId());
+        super(stackId);
         this.hostGroupName = hostGroupName;
-        this.stack = stack;
         this.startedInstancesToCommission = startedInstancesToCommission == null ? Collections.emptyList() : startedInstancesToCommission;
         this.servicesNotRunningInstancesToCommission =
                 servicesNotRunningInstancesToCommission == null ? Collections.emptyList() : servicesNotRunningInstancesToCommission;
@@ -36,10 +32,6 @@ public class StopStartUpscaleCommissionViaCMRequest extends ClusterPlatformReque
         return servicesNotRunningInstancesToCommission;
     }
 
-    public Stack getStack() {
-        return stack;
-    }
-
     @Override
     public String getHostGroupName() {
         return hostGroupName;
@@ -50,7 +42,6 @@ public class StopStartUpscaleCommissionViaCMRequest extends ClusterPlatformReque
         return "StopStartUpscaleCommissionViaCMRequest{" +
                 "startedInstancesToCommissionCount=" + startedInstancesToCommission.size() +
                 ", servicesNotRunningInstancesToCommissionCount=" + servicesNotRunningInstancesToCommission.size() +
-                ", stack=" + stack +
                 '}';
     }
 

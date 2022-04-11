@@ -50,18 +50,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCreationState, StackCreationEvent>
+public class StackCreationFlowConfig extends StackStatusFinalizerAbstractFlowConfig<StackCreationState, StackCreationEvent>
         implements RetryableFlowConfiguration<StackCreationEvent> {
     private static final List<Transition<StackCreationState, StackCreationEvent>> TRANSITIONS = new Builder<StackCreationState, StackCreationEvent>()
             .defaultFailureEvent(STACK_CREATION_FAILED_EVENT)
@@ -87,9 +83,6 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
 
     private static final FlowEdgeConfig<StackCreationState, StackCreationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STACK_CREATION_FAILED_STATE, STACKCREATION_FAILURE_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public StackCreationFlowConfig() {
         super(StackCreationState.class, StackCreationEvent.class);
@@ -125,10 +118,5 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
     @Override
     public StackCreationEvent getRetryableEvent() {
         return STACKCREATION_FAILURE_HANDLED_EVENT;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

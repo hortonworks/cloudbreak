@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.job.stackpatcher;
 import static com.sequenceiq.cloudbreak.job.stackpatcher.ExistingStackPatcherJobAdapter.STACK_PATCH_TYPE_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -29,12 +30,14 @@ import org.quartz.JobKey;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackPatch;
+import com.sequenceiq.cloudbreak.domain.stack.StackPatchStatus;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchApplyException;
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchService;
-import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchUsageReporterService;
+import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchService;
 
 @ExtendWith(MockitoExtension.class)
 class ExistingStackPatcherJobTest {
@@ -51,10 +54,10 @@ class ExistingStackPatcherJobTest {
     private ExistingStackPatchService existingStackPatchService;
 
     @Mock
-    private StackPatchUsageReporterService stackPatchUsageReporterService;
+    private ExistingStackPatcherServiceProvider existingStackPatcherServiceProvider;
 
     @Mock
-    private ExistingStackPatcherServiceProvider existingStackPatcherServiceProvider;
+    private StackPatchService stackPatchService;
 
     @InjectMocks
     private ExistingStackPatcherJob underTest;
@@ -68,7 +71,12 @@ class ExistingStackPatcherJobTest {
     @Mock
     private JobDetail jobDetail;
 
+    @Captor
+    private ArgumentCaptor<StackPatch> stackPatchArgumentCaptor;
+
     private Stack stack;
+
+    private StackPatch stackPatch;
 
     @BeforeEach
     void setUp() throws UnknownStackPatchTypeException {
@@ -89,6 +97,9 @@ class ExistingStackPatcherJobTest {
         lenient().when(jobDetail.getKey()).thenReturn(JobKey.jobKey(stack.getId().toString()));
         lenient().when(jobDetail.getJobDataMap()).thenReturn(new JobDataMap(Map.of(STACK_PATCH_TYPE_NAME, STACK_PATCH_TYPE.name())));
         lenient().when(context.getJobDetail()).thenReturn(jobDetail);
+
+        stackPatch = new StackPatch(stack, STACK_PATCH_TYPE);
+        lenient().when(stackPatchService.getOrCreate(stack, STACK_PATCH_TYPE)).thenReturn(stackPatch);
     }
 
     @Test
@@ -103,7 +114,7 @@ class ExistingStackPatcherJobTest {
 
     @Test
     void shouldNotApplyWhenStackIsAlreadyFixed() throws JobExecutionException, ExistingStackPatchApplyException {
-        when(existingStackPatchService.isStackAlreadyFixed(stack)).thenReturn(true);
+        stackPatch.setStatus(StackPatchStatus.FIXED);
 
         underTest.executeTracedJob(context);
 
@@ -128,7 +139,7 @@ class ExistingStackPatcherJobTest {
         underTest.executeTracedJob(context);
 
         verify(existingStackPatchService).apply(stack);
-        verify(stackPatchUsageReporterService).reportAffected(stack, STACK_PATCH_TYPE);
+        verify(stackPatchService).updateStatusAndReportUsage(stackPatch, StackPatchStatus.AFFECTED);
     }
 
     @Test
@@ -140,8 +151,8 @@ class ExistingStackPatcherJobTest {
 
         verifyUnschedule();
         verify(existingStackPatchService).apply(stack);
-        verify(stackPatchUsageReporterService).reportAffected(stack, STACK_PATCH_TYPE);
-        verify(stackPatchUsageReporterService).reportSuccess(stack, STACK_PATCH_TYPE);
+        verify(stackPatchService).updateStatusAndReportUsage(stackPatch, StackPatchStatus.AFFECTED);
+        verify(stackPatchService).updateStatusAndReportUsage(stackPatch, StackPatchStatus.FIXED);
     }
 
     @Test
@@ -155,8 +166,8 @@ class ExistingStackPatcherJobTest {
                 .hasMessageStartingWith("Failed to patch stack");
 
         verify(jobService, never()).unschedule(any());
-        verify(stackPatchUsageReporterService).reportAffected(stack, STACK_PATCH_TYPE);
-        verify(stackPatchUsageReporterService).reportFailure(stack, STACK_PATCH_TYPE, errorMessage);
+        verify(stackPatchService).updateStatusAndReportUsage(stackPatch, StackPatchStatus.AFFECTED);
+        verify(stackPatchService).updateStatusAndReportUsage(stackPatch, StackPatchStatus.FAILED, errorMessage);
     }
 
     @Test
@@ -170,7 +181,10 @@ class ExistingStackPatcherJobTest {
                 .isInstanceOf(JobExecutionException.class)
                 .hasMessage(errorMessage);
         verifyUnschedule();
-        verify(stackPatchUsageReporterService).reportFailure(stack, StackPatchType.UNKNOWN, errorMessage);
+        verify(stackPatchService).updateStatusAndReportUsage(stackPatchArgumentCaptor.capture(), eq(StackPatchStatus.FAILED), eq(errorMessage));
+        Assertions.assertThat(stackPatchArgumentCaptor.getValue())
+                .returns(StackPatchType.UNKNOWN, StackPatch::getType)
+                .returns(stack, StackPatch::getStack);
     }
 
     private void setStackStatus(Status status) {

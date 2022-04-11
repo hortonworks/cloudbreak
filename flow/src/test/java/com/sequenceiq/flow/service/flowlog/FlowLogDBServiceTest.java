@@ -20,6 +20,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+
 import org.assertj.core.util.Lists;
 import org.junit.Rule;
 import org.junit.Test;
@@ -318,6 +322,57 @@ public class FlowLogDBServiceTest {
         @Override
         public String event() {
             return null;
+        }
+    }
+
+    @Entity
+    public static class TestEntity {
+        @Id
+        private String name;
+
+        @OneToOne
+        private TestClass testClass;
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public TestClass getTestClass() {
+            return testClass;
+        }
+
+        public void setTestClass(TestClass testClass) {
+            this.testClass = testClass;
+        }
+    }
+
+    @Entity
+    public static class TestClass {
+
+        @Id
+        private String value;
+
+        @OneToOne
+        private TestEntity entity;
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue(String value) {
+            this.value = value;
+        }
+
+        public void setEntity(TestEntity entity) {
+            this.entity = entity;
+        }
+
+        public TestEntity getEntity() {
+            return entity;
         }
     }
 }

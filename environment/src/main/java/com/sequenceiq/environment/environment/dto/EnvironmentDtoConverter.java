@@ -87,6 +87,7 @@ public class EnvironmentDtoConverter {
                 .withId(environmentView.getId())
                 .withResourceCrn(environmentView.getResourceCrn())
                 .withName(environmentView.getName())
+                .withOriginalName(environmentView.getOriginalName())
                 .withDescription(environmentView.getDescription())
                 .withAccountId(environmentView.getAccountId())
                 .withArchived(environmentView.isArchived())
@@ -130,6 +131,7 @@ public class EnvironmentDtoConverter {
                 .withId(environment.getId())
                 .withResourceCrn(environment.getResourceCrn())
                 .withName(environment.getName())
+                .withOriginalName(environment.getOriginalName())
                 .withDescription(environment.getDescription())
                 .withAccountId(environment.getAccountId())
                 .withArchived(environment.isArchived())
@@ -173,6 +175,7 @@ public class EnvironmentDtoConverter {
         environment.setAccountId(creationDto.getAccountId());
         environment.setCreator(creationDto.getCreator());
         environment.setName(creationDto.getName());
+        environment.setOriginalName(creationDto.getName());
         environment.setArchived(false);
         environment.setCloudPlatform(creationDto.getCloudPlatform());
         environment.setDescription(creationDto.getDescription());

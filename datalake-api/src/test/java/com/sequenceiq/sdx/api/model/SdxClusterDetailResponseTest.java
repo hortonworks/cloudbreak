@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 
-class SdxClusterDetailResponseTest {
+public class SdxClusterDetailResponseTest {
 
     private static final String TAG_KEY = "sometthing";
 

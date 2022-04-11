@@ -13,4 +13,6 @@ dependencies {
   implementation project(':structuredevent-model')
 
   implementation     group: 'io.opentracing.contrib',        name: 'opentracing-jaxrs2',             version: opentracingJaxrs2Version
+
+  testImplementation project(path: ':common', configuration: 'tests')
 }

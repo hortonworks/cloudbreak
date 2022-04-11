@@ -13,18 +13,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class ExternalDatabaseStopFlowConfig extends AbstractFlowConfiguration<ExternalDatabaseStopState, ExternalDatabaseStopEvent>
+public class ExternalDatabaseStopFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ExternalDatabaseStopState, ExternalDatabaseStopEvent>
         implements RetryableFlowConfiguration<ExternalDatabaseStopEvent> {
 
     private static final List<Transition<ExternalDatabaseStopState, ExternalDatabaseStopEvent>> TRANSITIONS =
@@ -43,9 +39,6 @@ public class ExternalDatabaseStopFlowConfig extends AbstractFlowConfiguration<Ex
 
     private static final FlowEdgeConfig<ExternalDatabaseStopState, ExternalDatabaseStopEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, EXTERNAL_DATABASE_STOP_FAILED_STATE, EXTERNAL_DATABASE_STOP_FAILURE_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public ExternalDatabaseStopFlowConfig() {
         super(ExternalDatabaseStopState.class, ExternalDatabaseStopEvent.class);
@@ -81,10 +74,5 @@ public class ExternalDatabaseStopFlowConfig extends AbstractFlowConfiguration<Ex
     @Override
     public ExternalDatabaseStopEvent getRetryableEvent() {
         return EXTERNAL_DATABASE_STOP_FAILURE_HANDLED_EVENT;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

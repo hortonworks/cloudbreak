@@ -59,7 +59,7 @@ public class EventSenderService {
     }
 
     public void sendEventAndNotification(EnvironmentDto environmentDto, String userCrn, ResourceEvent resourceEvent, Collection<?> messageArgs) {
-        SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto);
+        SimpleEnvironmentResponse simpleResponse = environmentResponseConverter.dtoToSimpleResponse(environmentDto, true, true);
         sendEventAndNotificationWithPayload(environmentDto, userCrn, resourceEvent, simpleResponse, messageArgs);
     }
 

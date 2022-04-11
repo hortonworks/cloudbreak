@@ -10,9 +10,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
-import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsEventGenerationIdsProvider;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,6 +27,7 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsEventGenerationIds;
+import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsEventGenerationIdsProvider;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentUserSyncStateCalculatorTest {
@@ -42,9 +43,7 @@ class EnvironmentUserSyncStateCalculatorTest {
 
     @Test
     void internalCalculateEnvironmentUserSyncStateNoStatus() {
-        UserSyncStatus userSyncStatus = null;
-
-        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus);
+        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, Optional.empty());
 
         assertEquals(UserSyncState.STALE, result.getState());
         assertNull(result.getLastUserSyncOperationId());
@@ -54,7 +53,7 @@ class EnvironmentUserSyncStateCalculatorTest {
     void internalCalculateEnvironmentUserSyncStateNoLastSync() {
         UserSyncStatus userSyncStatus = new UserSyncStatus();
 
-        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus);
+        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, Optional.of(userSyncStatus));
 
         assertEquals(UserSyncState.STALE, result.getState());
         assertNull(result.getLastUserSyncOperationId());
@@ -68,7 +67,7 @@ class EnvironmentUserSyncStateCalculatorTest {
         lastSync.setStatus(OperationState.RUNNING);
         userSyncStatus.setLastStartedFullSync(lastSync);
 
-        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus);
+        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, Optional.of(userSyncStatus));
 
         assertEquals(UserSyncState.SYNC_IN_PROGRESS, result.getState());
         assertEquals(lastSync.getOperationId(), result.getLastUserSyncOperationId());
@@ -82,7 +81,7 @@ class EnvironmentUserSyncStateCalculatorTest {
         lastSync.setStatus(OperationState.FAILED);
         userSyncStatus.setLastStartedFullSync(lastSync);
 
-        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus);
+        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, Optional.of(userSyncStatus));
 
         assertEquals(UserSyncState.SYNC_FAILED, result.getState());
         assertEquals(lastSync.getOperationId(), result.getLastUserSyncOperationId());
@@ -96,7 +95,7 @@ class EnvironmentUserSyncStateCalculatorTest {
         lastSync.setStatus(OperationState.FAILED);
         userSyncStatus.setLastStartedFullSync(lastSync);
 
-        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus);
+        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, Optional.of(userSyncStatus));
 
         assertEquals(UserSyncState.SYNC_FAILED, result.getState());
         assertEquals(lastSync.getOperationId(), result.getLastUserSyncOperationId());
@@ -110,7 +109,8 @@ class EnvironmentUserSyncStateCalculatorTest {
         lastSync.setStatus(OperationState.REQUESTED);
         userSyncStatus.setLastStartedFullSync(lastSync);
 
-        assertThrows(IllegalStateException.class, () -> underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus));
+        assertThrows(IllegalStateException.class, () -> underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN,
+                Optional.of(userSyncStatus)));
     }
 
     @Test
@@ -121,7 +121,8 @@ class EnvironmentUserSyncStateCalculatorTest {
         lastSync.setStatus(OperationState.REJECTED);
         userSyncStatus.setLastStartedFullSync(lastSync);
 
-        assertThrows(IllegalStateException.class, () -> underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus));
+        assertThrows(IllegalStateException.class, () -> underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN,
+                Optional.of(userSyncStatus)));
     }
 
     @Test
@@ -133,7 +134,7 @@ class EnvironmentUserSyncStateCalculatorTest {
         lastSync.setFailureList(List.of(new FailureDetails(ENVIRONMENT_CRN, "failure message")));
         userSyncStatus.setLastStartedFullSync(lastSync);
 
-        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus);
+        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, Optional.of(userSyncStatus));
 
         assertEquals(UserSyncState.SYNC_FAILED, result.getState());
         assertEquals(lastSync.getOperationId(), result.getLastUserSyncOperationId());
@@ -153,7 +154,7 @@ class EnvironmentUserSyncStateCalculatorTest {
 
         when(eventGenerationIdsChecker.isInSync(userSyncStatus, current)).thenReturn(false);
 
-        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus);
+        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, Optional.of(userSyncStatus));
 
         assertEquals(UserSyncState.STALE, result.getState());
         assertEquals(lastSync.getOperationId(), result.getLastUserSyncOperationId());
@@ -173,7 +174,7 @@ class EnvironmentUserSyncStateCalculatorTest {
 
         when(eventGenerationIdsChecker.isInSync(userSyncStatus, current)).thenReturn(true);
 
-        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, userSyncStatus);
+        EnvironmentUserSyncState result = underTest.internalCalculateEnvironmentUserSyncState(ACCOUNT_ID, ENVIRONMENT_CRN, Optional.of(userSyncStatus));
 
         assertEquals(UserSyncState.UP_TO_DATE, result.getState());
         assertEquals(lastSync.getOperationId(), result.getLastUserSyncOperationId());

@@ -22,17 +22,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDown
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<ClusterDownscaleState, ClusterDownscaleEvent> {
+public class ClusterDownscaleFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ClusterDownscaleState, ClusterDownscaleEvent> {
     private static final List<Transition<ClusterDownscaleState, ClusterDownscaleEvent>> TRANSITIONS =
             new Builder<ClusterDownscaleState, ClusterDownscaleEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
@@ -86,9 +82,6 @@ public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<Cluste
     private static final FlowEdgeConfig<ClusterDownscaleState, ClusterDownscaleEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_DOWNSCALE_FAILED_STATE, FAIL_HANDLED_EVENT);
 
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
-
     public ClusterDownscaleFlowConfig() {
         super(ClusterDownscaleState.class, ClusterDownscaleEvent.class);
     }
@@ -116,10 +109,5 @@ public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<Cluste
     @Override
     public String getDisplayName() {
         return "Downscale cluster";
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_PUBLICKEY_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -214,7 +215,7 @@ class EnvDeleteActionsTest {
 
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentResponseConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class));
+        verify(environmentResponseConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class), anyBoolean(), anyBoolean());
         verify(notificationService, never()).send(any(ResourceEvent.class), any(SimpleEnvironmentResponse.class), anyString());
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
     }

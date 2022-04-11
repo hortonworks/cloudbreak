@@ -221,6 +221,7 @@ class CommonExperienceServiceTest {
                 .withExperienceName(TEST_XP_NAME)
                 .withName("Workload1")
                 .withStatus("AVAILABLE")
+                .withPublicName(TEST_XP_BUSINESS_NAME)
                 .build();
 
         assertThat(clusters).containsOnly(expected);
@@ -251,6 +252,7 @@ class CommonExperienceServiceTest {
                 .withExperienceName(TEST_XP_NAME)
                 .withName("Workload1")
                 .withStatus("AVAILABLE")
+                .withPublicName(TEST_XP_BUSINESS_NAME)
                 .build();
 
         assertThat(clusters).containsOnly(expected);

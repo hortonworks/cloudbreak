@@ -12,9 +12,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdat
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.START_AMBARI_SERVICES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.UPLOAD_RECIPES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.UPLOAD_RECIPES_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState.RECONFIGURE_KEYTABS_FOR_SU_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState.RECONFIGURE_KEYTABS_FOR_SU_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState.RUN_HIGHSTATE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState.SALT_UPDATE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState.SALT_UPDATE_FINISHED_STATE;
@@ -23,17 +23,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdat
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class SaltUpdateFlowConfig extends AbstractFlowConfiguration<SaltUpdateState, SaltUpdateEvent> {
+public class SaltUpdateFlowConfig extends StackStatusFinalizerAbstractFlowConfig<SaltUpdateState, SaltUpdateEvent> {
 
     private static final List<Transition<SaltUpdateState, SaltUpdateEvent>> TRANSITIONS =
             new Builder<SaltUpdateState, SaltUpdateEvent>().defaultFailureEvent(SALT_UPDATE_FAILED_EVENT)
@@ -47,9 +43,6 @@ public class SaltUpdateFlowConfig extends AbstractFlowConfiguration<SaltUpdateSt
                     .failureEvent(START_AMBARI_SERVICES_FAILED_EVENT)
             .from(SALT_UPDATE_FINISHED_STATE).to(FINAL_STATE).event(SALT_UPDATE_FINISHED_EVENT).noFailureEvent()
             .build();
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public SaltUpdateFlowConfig() {
         super(SaltUpdateState.class, SaltUpdateEvent.class);
@@ -78,10 +71,5 @@ public class SaltUpdateFlowConfig extends AbstractFlowConfiguration<SaltUpdateSt
     @Override
     public String getDisplayName() {
         return "Salt update";
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

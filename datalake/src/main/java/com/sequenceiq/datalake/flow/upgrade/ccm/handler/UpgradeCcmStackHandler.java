@@ -18,6 +18,7 @@ import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmFailedEvent;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackRequest;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmSuccessEvent;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.upgrade.ccm.SdxCcmUpgradeService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -38,6 +39,9 @@ public class UpgradeCcmStackHandler extends ExceptionCatcherEventHandler<Upgrade
     @Inject
     private SdxCcmUpgradeService ccmUpgradeService;
 
+    @Inject
+    private SdxService sdxService;
+
     @Override
     public String selector() {
         return UpgradeCcmStackRequest.class.getSimpleName();
@@ -51,7 +55,7 @@ public class UpgradeCcmStackHandler extends ExceptionCatcherEventHandler<Upgrade
     @Override
     protected Selectable doAccept(HandlerEvent<UpgradeCcmStackRequest> event) {
         UpgradeCcmStackRequest request = event.getData();
-        SdxCluster sdxCluster = request.getSdxCluster();
+        SdxCluster sdxCluster = sdxService.getById(request.getResourceId());
         Long sdxId = request.getResourceId();
         String userId = request.getUserId();
         Selectable response;

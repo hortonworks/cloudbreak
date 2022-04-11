@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -137,7 +138,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         when(balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)).thenReturn(true);
         when(stackToAvailabilityStatusConverter.convert(stack)).thenReturn(AvailabilityStatus.AVAILABLE);
 
-        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, userSyncStatus, true);
+        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true);
 
         assertThat(result)
                 .returns(NAME, DescribeFreeIpaResponse::getName)

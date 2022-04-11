@@ -33,20 +33,16 @@ import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.Diagnostics
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsCollectionsState;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors;
 import com.sequenceiq.flow.api.model.operation.OperationType;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors>
+public class DiagnosticsCollectionFlowConfig extends StackStatusFinalizerAbstractFlowConfig<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors>
         implements RetryableFlowConfiguration<DiagnosticsCollectionStateSelectors> {
 
     private static final List<Transition<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors>> TRANSITIONS
@@ -123,9 +119,6 @@ public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<D
     private static final FlowEdgeConfig<DiagnosticsCollectionsState, DiagnosticsCollectionStateSelectors> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DIAGNOSTICS_COLLECTION_FAILED_STATE, HANDLED_FAILED_DIAGNOSTICS_COLLECTION_EVENT);
 
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
-
     protected DiagnosticsCollectionFlowConfig() {
         super(DiagnosticsCollectionsState.class, DiagnosticsCollectionStateSelectors.class);
     }
@@ -165,10 +158,5 @@ public class DiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration<D
     @Override
     public DiagnosticsCollectionStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_DIAGNOSTICS_COLLECTION_EVENT;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

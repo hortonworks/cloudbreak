@@ -16,12 +16,12 @@ public class CloudbreakRestRequestThreadLocalService implements LegacyRestReques
 
     private static final ThreadLocal<CloudbreakUser> CLOUDBREAK_USER = new ThreadLocal<>();
 
-    public void setRequestedWorkspaceId(Long workspaceId) {
-        REQUESTED_WORKSPACE_ID.set(workspaceId);
-    }
-
     public Long getRequestedWorkspaceId() {
         return REQUESTED_WORKSPACE_ID.get();
+    }
+
+    public void setRequestedWorkspaceId(Long workspaceId) {
+        REQUESTED_WORKSPACE_ID.set(workspaceId);
     }
 
     public void removeRequestedWorkspaceId() {
@@ -29,13 +29,13 @@ public class CloudbreakRestRequestThreadLocalService implements LegacyRestReques
     }
 
     @Override
-    public void setCloudbreakUser(CloudbreakUser cloudbreakUser) {
-        CLOUDBREAK_USER.set(cloudbreakUser);
+    public CloudbreakUser getCloudbreakUser() {
+        return CLOUDBREAK_USER.get();
     }
 
     @Override
-    public CloudbreakUser getCloudbreakUser() {
-        return CLOUDBREAK_USER.get();
+    public void setCloudbreakUser(CloudbreakUser cloudbreakUser) {
+        CLOUDBREAK_USER.set(cloudbreakUser);
     }
 
     @Override
@@ -58,5 +58,9 @@ public class CloudbreakRestRequestThreadLocalService implements LegacyRestReques
                     "Overwrite the previous value ('{}') with null.", getRequestedWorkspaceId());
             setRequestedWorkspaceId(null);
         }
+    }
+
+    public String getRestThreadLocalContextAsString() {
+        return String.format("CloudbreakUser: %s WorkspaceId: %s", CLOUDBREAK_USER.get(), REQUESTED_WORKSPACE_ID.get());
     }
 }

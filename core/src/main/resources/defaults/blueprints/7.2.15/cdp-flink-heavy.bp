@@ -1,7 +1,7 @@
 {
-  "description": "7.2.14 - Streaming Analytics Heavy Duty with Apache Flink",
+  "description": "7.2.15 - Streaming Analytics Heavy Duty with Apache Flink",
   "blueprint": {
-    "cdhVersion": "7.2.14",
+    "cdhVersion": "7.2.15",
     "displayName": "streaming-analytics",
     "hostTemplates": [
       {

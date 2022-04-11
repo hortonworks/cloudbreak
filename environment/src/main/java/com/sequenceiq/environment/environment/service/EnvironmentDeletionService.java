@@ -123,7 +123,9 @@ public class EnvironmentDeletionService {
             amountOfConnectedExperiences = environmentResourceDeletionService.getConnectedExperienceAmount(env);
         } catch (IllegalStateException | IllegalArgumentException | ExperienceOperationFailedException re) {
             LOGGER.info("Something has occurred during checking the connected experiences!", re);
-            throw new IllegalStateException("Unable to access all experience to check whether the environment have any connected one(s)!");
+            throw new IllegalStateException("Unable to access (due to: " + re.getMessage() + ") all experience to check whether the environment "
+                    + "have any connected one(s)! If you would like to bypass the issue, you can use the force deletion option, but please keep in mind that "
+                    + "- in some cases - it can leave resources on the cloud provider side that needs to be checked and cleaned by hand afterwards.");
         }
         if (amountOfConnectedExperiences == 1) {
             throw new BadRequestException("The given environment [" + env.getName() + "] has 1 connected experience. " +

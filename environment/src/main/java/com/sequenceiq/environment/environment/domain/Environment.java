@@ -47,6 +47,8 @@ public class Environment implements AuthResource, AccountAwareResource {
     @Column(nullable = false)
     private String name;
 
+    private String originalName;
+
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
@@ -199,6 +201,14 @@ public class Environment implements AuthResource, AccountAwareResource {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getOriginalName() {
+        return originalName;
+    }
+
+    public void setOriginalName(String originalName) {
+        this.originalName = originalName;
     }
 
     public void setArchived(boolean archived) {

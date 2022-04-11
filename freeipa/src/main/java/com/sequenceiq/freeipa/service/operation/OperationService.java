@@ -99,6 +99,22 @@ public class OperationService {
         }
     }
 
+    public void tryWithOperationCleanup(String operationId, String accountId, Runnable runnable) {
+        try {
+            runnable.run();
+        } catch (Throwable t) {
+            try {
+                LOGGER.error("Operation {} in account {} failed. Attempting to mark failure in database then re-throwing.",
+                        operationId, accountId, t);
+                failOperation(accountId, operationId,
+                        "User sync operation failed: " + t.getLocalizedMessage());
+            } catch (Exception e) {
+                LOGGER.error("Failed to mark operation {} in account {} as failed in database.", operationId, accountId, e);
+            }
+            throw t;
+        }
+    }
+
     private Operation requestOperation(String accountId, OperationType operationType,
             Collection<String> environmentCrns, Collection<String> userCrns) {
         Operation operation = new Operation();

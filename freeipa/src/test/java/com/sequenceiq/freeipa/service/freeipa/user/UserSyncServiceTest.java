@@ -1,57 +1,55 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 import org.junit.Before;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
+import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
+import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
-import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.configuration.BatchPartitionSizeProperties;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
-import com.sequenceiq.freeipa.service.freeipa.user.model.FmsUser;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
-import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -60,50 +58,63 @@ public class UserSyncServiceTest {
     private static final String ACCOUNT_ID = UUID.randomUUID().toString();
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:"
-            + ACCOUNT_ID + ":environment:" + UUID.randomUUID().toString();
+            + ACCOUNT_ID + ":environment:" + UUID.randomUUID();
 
-    private static final int MAX_SUBJECTS_PER_REQUEST = 10;
+    private static final String ENV_CRN_2 = "crn:cdp:environments:us-west-1:"
+            + ACCOUNT_ID + ":environment:" + UUID.randomUUID();
 
-    @Mock
-    StackService stackService;
+    private static final String ACTOR_CRN = "crn:cdp:users:us-west-1:"
+            + ACCOUNT_ID + ":user:" + UUID.randomUUID();
 
-    @Mock
-    OperationService operationService;
-
-    @Mock
-    FreeIpaUsersStateProvider freeIpaUsersStateProvider;
+    private static final String INTERNAL_ACTOR = "crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__";
 
     @Mock
-    UserSyncStatusService userSyncStatusService;
+    private StackService stackService;
 
     @Mock
-    UserSyncRequestValidator userSyncRequestValidator;
+    private OperationService operationService;
 
     @Mock
-    EntitlementService entitlementService;
+    private FreeIpaUsersStateProvider freeIpaUsersStateProvider;
 
     @Mock
-    FreeIpaClientFactory freeIpaClientFactory;
+    private UserSyncStatusService userSyncStatusService;
 
     @Mock
-    RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+    private UserSyncRequestValidator userSyncRequestValidator;
 
     @Mock
-    RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+    private EntitlementService entitlementService;
 
     @Mock
-    FreeIpaClient freeIpaClient;
+    private FreeIpaClientFactory freeIpaClientFactory;
 
     @Mock
-    BatchPartitionSizeProperties batchPartitionSizeProperties;
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    @Mock
+    private FreeIpaClient freeIpaClient;
+
+    @Mock
+    private BatchPartitionSizeProperties batchPartitionSizeProperties;
+
+    @Mock
+    private ExecutorService asyncTaskExecutor;
+
+    @Mock
+    private UserSyncForEnvService userSyncForEnvService;
+
+    @Mock
+    private CustomCheckUtil customCheckUtil;
+
+    @Mock
+    private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
 
     @InjectMocks
-    UserSyncService underTest;
-
-    @BeforeEach
-    void setUp() {
-        underTest.maxSubjectsPerRequest = MAX_SUBJECTS_PER_REQUEST;
-    }
+    private UserSyncService underTest;
 
     @Before
     public void setup() throws FreeIpaClientException {
@@ -112,58 +123,171 @@ public class UserSyncServiceTest {
     }
 
     @Test
-    void testFullSyncRetrievesFullIpaState() throws Exception {
-        UmsUsersState umsUsersState = mock(UmsUsersState.class);
-        underTest.getIpaUserState(freeIpaClient, umsUsersState, true);
-        verify(freeIpaUsersStateProvider).getUsersState(any());
+    public void testSyncUsers() {
+        Stack stack = mock(Stack.class);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        Operation operation = createRunningOperation();
+        when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
+                .thenReturn(operation);
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(2, Runnable.class);
+            runnable.run();
+            return null;
+        }).when(operationService).tryWithOperationCleanup(eq(operation.getOperationId()), eq(ACCOUNT_ID), any(Runnable.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn(INTERNAL_ACTOR);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        UserSyncStatus userSyncStatus = new UserSyncStatus();
+        when(userSyncStatusService.getOrCreateForStack(stack)).thenReturn(userSyncStatus);
+        when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(0, Runnable.class);
+            assertEquals(operation.getOperationId(), MDCBuilder.getMdcContextMap().get(LoggerContextKey.OPERATION_ID.toString()));
+            assertEquals(INTERNAL_ACTOR, ThreadBasedUserCrnProvider.getUserCrn());
+            runnable.run();
+            return mock(Future.class);
+        }).when(asyncTaskExecutor).submit(any(Runnable.class));
+
+
+        Operation result = underTest.synchronizeUsers(ACCOUNT_ID, ACTOR_CRN, Set.of(), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+
+        assertEquals(operation, result);
+        ArgumentCaptor<UserSyncRequestFilter> requestFilterCaptor = ArgumentCaptor.forClass(UserSyncRequestFilter.class);
+        verify(userSyncRequestValidator).validateParameters(eq(ACCOUNT_ID), eq(ACTOR_CRN), eq(Set.of()), requestFilterCaptor.capture());
+        UserSyncRequestFilter requestFilter = requestFilterCaptor.getValue();
+        assertTrue(requestFilter.getUserCrnFilter().isEmpty());
+        assertTrue(requestFilter.getMachineUserCrnFilter().isEmpty());
+        assertTrue(requestFilter.getDeletedWorkloadUser().isEmpty());
+        assertEquals(operation, userSyncStatus.getLastStartedFullSync());
+        verify(userSyncStatusService).save(userSyncStatus);
+        ArgumentCaptor<UserSyncOptions> syncOptionsCaptor = ArgumentCaptor.forClass(UserSyncOptions.class);
+        verify(userSyncForEnvService)
+                .synchronizeUsers(eq(operation.getOperationId()), eq(ACCOUNT_ID), eq(List.of(stack)), eq(requestFilter), syncOptionsCaptor.capture());
+        UserSyncOptions userSyncOptions = syncOptionsCaptor.getValue();
+        assertTrue(userSyncOptions.isFullSync());
+        assertTrue(userSyncOptions.isCredentialsUpdateOptimizationEnabled());
+        assertTrue(userSyncOptions.isFmsToFreeIpaBatchCallEnabled());
     }
 
     @Test
-    void testFilteredSyncRetrievesFilteredIpaState() throws Exception {
-        UmsUsersState umsUsersState = mock(UmsUsersState.class);
-        ImmutableSet<String> workloadUsers = mock(ImmutableSet.class);
-        when(umsUsersState.getRequestedWorkloadUsernames()).thenReturn(workloadUsers);
-        underTest.getIpaUserState(freeIpaClient, umsUsersState, false);
-        verify(freeIpaUsersStateProvider).getFilteredFreeIpaState(any(), eq(workloadUsers));
+    public void testSyncUsersWithFilterAndMultipleStack() {
+        Stack stack = mock(Stack.class);
+        Stack stack2 = mock(Stack.class);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(stack2.getEnvironmentCrn()).thenReturn(ENV_CRN_2);
+        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Set.of(ENV_CRN, ENV_CRN_2), ACCOUNT_ID))
+                .thenReturn(List.of(stack, stack2));
+        Operation operation = createRunningOperation();
+        when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
+                .thenReturn(operation);
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(2, Runnable.class);
+            runnable.run();
+            return null;
+        }).when(operationService).tryWithOperationCleanup(eq(operation.getOperationId()), eq(ACCOUNT_ID), any(Runnable.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn(INTERNAL_ACTOR);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(0, Runnable.class);
+            assertEquals(operation.getOperationId(), MDCBuilder.getMdcContextMap().get(LoggerContextKey.OPERATION_ID.toString()));
+            assertEquals(INTERNAL_ACTOR, ThreadBasedUserCrnProvider.getUserCrn());
+            runnable.run();
+            return mock(Future.class);
+        }).when(asyncTaskExecutor).submit(any(Runnable.class));
+
+
+        Operation result = underTest.synchronizeUsers(ACCOUNT_ID, ACTOR_CRN, Set.of(ENV_CRN, ENV_CRN_2), Set.of("userCrn"), Set.of("machineUserCrn"),
+                WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+
+        assertEquals(operation, result);
+        ArgumentCaptor<UserSyncRequestFilter> requestFilterCaptor = ArgumentCaptor.forClass(UserSyncRequestFilter.class);
+        verify(userSyncRequestValidator).validateParameters(eq(ACCOUNT_ID), eq(ACTOR_CRN), eq(Set.of(ENV_CRN, ENV_CRN_2)), requestFilterCaptor.capture());
+        UserSyncRequestFilter requestFilter = requestFilterCaptor.getValue();
+        assertEquals(requestFilter.getUserCrnFilter(), Set.of("userCrn"));
+        assertEquals(requestFilter.getMachineUserCrnFilter(), Set.of("machineUserCrn"));
+        assertTrue(requestFilter.getDeletedWorkloadUser().isEmpty());
+        verifyNoInteractions(userSyncStatusService);
+        ArgumentCaptor<UserSyncOptions> syncOptionsCaptor = ArgumentCaptor.forClass(UserSyncOptions.class);
+        verify(userSyncForEnvService)
+                .synchronizeUsers(eq(operation.getOperationId()), eq(ACCOUNT_ID), eq(List.of(stack, stack2)), eq(requestFilter), syncOptionsCaptor.capture());
+        UserSyncOptions userSyncOptions = syncOptionsCaptor.getValue();
+        assertFalse(userSyncOptions.isFullSync());
+        assertTrue(userSyncOptions.isCredentialsUpdateOptimizationEnabled());
+        assertTrue(userSyncOptions.isFmsToFreeIpaBatchCallEnabled());
     }
 
     @Test
-    void testAddUsersToGroupsPartitionsRequests() throws Exception {
-        Multimap<String, String> groupMapping = setupGroupMapping(5, underTest.maxSubjectsPerRequest * 2);
+    public void testSyncUsersWithCustomPermissionCheck() {
+        Stack stack = mock(Stack.class);
+        when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
+        when(stackService.getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Set.of(), ACCOUNT_ID)).thenReturn(List.of(stack));
+        Operation operation = createRunningOperation();
+        when(operationService.startOperation(anyString(), any(OperationType.class), anyCollection(), anyCollection()))
+                .thenReturn(operation);
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(2, Runnable.class);
+            runnable.run();
+            return null;
+        }).when(operationService).tryWithOperationCleanup(eq(operation.getOperationId()), eq(ACCOUNT_ID), any(Runnable.class));
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
+                .thenReturn(INTERNAL_ACTOR);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        UserSyncStatus userSyncStatus = new UserSyncStatus();
+        when(userSyncStatusService.getOrCreateForStack(stack)).thenReturn(userSyncStatus);
+        when(entitlementService.usersyncCredentialsUpdateOptimizationEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        when(entitlementService.isFmsToFreeipaBatchCallEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(0, Runnable.class);
+            assertEquals(operation.getOperationId(), MDCBuilder.getMdcContextMap().get(LoggerContextKey.OPERATION_ID.toString()));
+            assertEquals(INTERNAL_ACTOR, ThreadBasedUserCrnProvider.getUserCrn());
+            runnable.run();
+            return mock(Future.class);
+        }).when(asyncTaskExecutor).submit(any(Runnable.class));
+        UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
+        doAnswer(inv -> {
+            Runnable runnable = inv.getArgument(1, Runnable.class);
+            runnable.run();
+            return null;
+        }).when(customCheckUtil).run(eq(ACTOR_CRN), any(Runnable.class));
 
-        Multimap<String, String> warnings = ArrayListMultimap.create();
-        doNothing().when(freeIpaClient).callBatch(any(), any(), any(), any());
+        Operation result = underTest.synchronizeUsersWithCustomPermissionCheck(ACCOUNT_ID, ACTOR_CRN, Set.of(), userSyncFilter,
+                WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED, AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);
 
-        underTest.addUsersToGroups(true, freeIpaClient, groupMapping, warnings::put);
-
-        assertTrue(warnings.isEmpty());
+        assertEquals(operation, result);
+        ArgumentCaptor<UserSyncRequestFilter> requestFilterCaptor = ArgumentCaptor.forClass(UserSyncRequestFilter.class);
+        verify(userSyncRequestValidator).validateParameters(eq(ACCOUNT_ID), eq(ACTOR_CRN), eq(Set.of()), requestFilterCaptor.capture());
+        UserSyncRequestFilter requestFilter = requestFilterCaptor.getValue();
+        assertTrue(requestFilter.getUserCrnFilter().isEmpty());
+        assertTrue(requestFilter.getMachineUserCrnFilter().isEmpty());
+        assertTrue(requestFilter.getDeletedWorkloadUser().isEmpty());
+        assertEquals(operation, userSyncStatus.getLastStartedFullSync());
+        verify(userSyncStatusService).save(userSyncStatus);
+        ArgumentCaptor<UserSyncOptions> syncOptionsCaptor = ArgumentCaptor.forClass(UserSyncOptions.class);
+        verify(userSyncForEnvService)
+                .synchronizeUsers(eq(operation.getOperationId()), eq(ACCOUNT_ID), eq(List.of(stack)), eq(requestFilter), syncOptionsCaptor.capture());
+        UserSyncOptions userSyncOptions = syncOptionsCaptor.getValue();
+        assertTrue(userSyncOptions.isFullSync());
+        assertTrue(userSyncOptions.isCredentialsUpdateOptimizationEnabled());
+        assertTrue(userSyncOptions.isFmsToFreeIpaBatchCallEnabled());
+        verify(commonPermissionCheckingUtils).checkPermissionForUserOnResources(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT, ACTOR_CRN, List.of(ENV_CRN));
     }
 
-    @Test
-    void testRemoveUsersFromGroupsPartitionsRequests() throws Exception {
-        Multimap<String, String> groupMapping = setupGroupMapping(5, underTest.maxSubjectsPerRequest * 2);
-
-        Multimap<String, String> warnings = ArrayListMultimap.create();
-        doNothing().when(freeIpaClient).callBatch(any(), any(), any(), any());
-
-        underTest.removeUsersFromGroups(true, freeIpaClient, groupMapping, warnings::put);
-
-        assertTrue(warnings.isEmpty());
+    private Operation createRunningOperation() {
+        Operation operation = new Operation();
+        operation.setOperationId(UUID.randomUUID().toString());
+        operation.setAccountId(ACCOUNT_ID);
+        operation.setStatus(OperationState.RUNNING);
+        operation.setOperationType(OperationType.USER_SYNC);
+        return operation;
     }
 
-    @Test
-    void testRemoveUsersFromGroupsNullMembersInResponse() throws Exception {
-        Multimap<String, String> groupMapping = setupGroupMapping(1, 1);
 
-        Multimap<String, String> warnings = ArrayListMultimap.create();
-        doNothing().when(freeIpaClient).callBatch(any(), any(), any(), any());
-
-        underTest.removeUsersFromGroups(true, freeIpaClient, groupMapping, warnings::put);
-
-        assertTrue(warnings.isEmpty());
-    }
-
-    @Test
+    //    @Test
     void testAsyncSynchronizeUsersUsesInternalCrn() {
         Stack stack = mock(Stack.class);
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
@@ -177,72 +301,12 @@ public class UserSyncServiceTest {
         when(userSyncStatusService.getOrCreateForStack(any(Stack.class))).thenReturn(userSyncStatus);
         when(userSyncStatusService.save(userSyncStatus)).thenReturn(userSyncStatus);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
-                .thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+                .thenReturn(INTERNAL_ACTOR);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         UserSyncService spyService = spy(underTest);
 
-        doAnswer(invocation -> {
-            assertEquals("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__", ThreadBasedUserCrnProvider.getUserCrn());
-            return null;
-        }).when(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyList(), any(), any());
-
         spyService.synchronizeUsers("accountId", "actorCrn", Set.of(), Set.of(), Set.of(), WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
 
-        verify(spyService).asyncSynchronizeUsers(anyString(), anyString(), anyList(), any(), any());
-    }
 
-    @Test
-    void testApplyStateDifferenceToIpa() throws FreeIpaClientException {
-        FmsGroup groupToAdd1 = new FmsGroup().withName("groupToAdd1");
-        FmsGroup groupToAdd2 = new FmsGroup().withName("groupToAdd2");
-        FmsGroup groupToRemove1 = new FmsGroup().withName("groupToRemove1");
-        FmsGroup groupToRemove2 = new FmsGroup().withName("groupToRemove2");
-        FmsUser userToAdd1 = new FmsUser().withName("userToAdd1").withFirstName("clark").withLastName("kent");
-        FmsUser userToAdd2 = new FmsUser().withName("userToAdd2").withFirstName("peter").withLastName("parker");
-        String userToRemove1 = "userToRemove1";
-        String userToRemove2 = "userToRemove2";
-        String userToDisable1 = "userToDisable1";
-        String userToDisable2 = "userToDisable2";
-        String userToEnable1 = "userToEnable1";
-        String userToEnable2 = "userToEnable2";
-        Multimap<String, String> warnings = ArrayListMultimap.create();
-
-        doNothing().when(freeIpaClient).callBatch(any(), any(), any(), any());
-
-        UsersStateDifference usersStateDifference = new UsersStateDifference(
-                ImmutableSet.of(groupToAdd1, groupToAdd2),
-                ImmutableSet.of(groupToRemove1, groupToRemove2),
-                ImmutableSet.of(userToAdd1, userToAdd2),
-                ImmutableSet.of(),
-                ImmutableSet.of(userToRemove1, userToRemove2),
-                ImmutableMultimap.<String, String>builder()
-                        .put(groupToAdd1.getName(), userToAdd1.getName())
-                        .put(groupToAdd2.getName(), userToAdd2.getName())
-                        .build(),
-                ImmutableMultimap.<String, String>builder()
-                        .put(groupToRemove1.getName(), userToRemove1)
-                        .put(groupToRemove2.getName(), userToRemove2)
-                        .build(),
-                ImmutableSet.of(userToDisable1, userToDisable2),
-                ImmutableSet.of(userToEnable1, userToEnable2)
-        );
-
-        underTest.applyStateDifferenceToIpa(ENV_CRN, freeIpaClient, usersStateDifference, warnings::put, true);
-
-        // 9 times instead of 8 because non-posix groups are added in a separate batch
-        verify(freeIpaClient, times(9)).callBatch(any(), any(), any(), any());
-
-        verifyNoMoreInteractions(freeIpaClient);
-    }
-
-    private Multimap<String, String> setupGroupMapping(int numGroups, int numPerGroup) {
-        Multimap<String, String> groupMapping = HashMultimap.create();
-        for (int i = 0; i < numGroups; ++i) {
-            String group = "group" + i;
-            for (int j = 0; j < numPerGroup; ++j) {
-                groupMapping.put(group, "user" + j);
-            }
-        }
-        return groupMapping;
     }
 }

@@ -16,17 +16,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscal
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownscaleState, StackDownscaleEvent> {
+public class StackDownscaleConfig extends StackStatusFinalizerAbstractFlowConfig<StackDownscaleState, StackDownscaleEvent> {
     private static final List<Transition<StackDownscaleState, StackDownscaleEvent>> TRANSITIONS =
             new Builder<StackDownscaleState, StackDownscaleEvent>()
                 .from(INIT_STATE).to(DOWNSCALE_COLLECT_RESOURCES_STATE).event(STACK_DOWNSCALE_EVENT).noFailureEvent()
@@ -39,9 +35,6 @@ public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownsca
 
     private static final FlowEdgeConfig<StackDownscaleState, StackDownscaleEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DOWNSCALE_FAILED_STATE, DOWNSCALE_FAIL_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public StackDownscaleConfig() {
         super(StackDownscaleState.class, StackDownscaleEvent.class);
@@ -72,10 +65,5 @@ public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownsca
     @Override
     protected FlowEdgeConfig<StackDownscaleState, StackDownscaleEvent> getEdgeConfig() {
         return EDGE_CONFIG;
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

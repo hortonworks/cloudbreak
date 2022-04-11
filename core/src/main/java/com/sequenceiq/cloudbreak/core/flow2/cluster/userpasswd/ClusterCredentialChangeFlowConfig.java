@@ -14,17 +14,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCre
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class ClusterCredentialChangeFlowConfig extends AbstractFlowConfiguration<ClusterCredentialChangeState, ClusterCredentialChangeEvent> {
+public class ClusterCredentialChangeFlowConfig extends StackStatusFinalizerAbstractFlowConfig<ClusterCredentialChangeState, ClusterCredentialChangeEvent> {
     private static final List<Transition<ClusterCredentialChangeState, ClusterCredentialChangeEvent>> TRANSITIONS =
             new Builder<ClusterCredentialChangeState, ClusterCredentialChangeEvent>()
                     .from(INIT_STATE).to(CLUSTER_CREDENTIALCHANGE_STATE).event(CLUSTER_CREDENTIALCHANGE_EVENT).noFailureEvent()
@@ -35,9 +31,6 @@ public class ClusterCredentialChangeFlowConfig extends AbstractFlowConfiguration
 
     private static final FlowEdgeConfig<ClusterCredentialChangeState, ClusterCredentialChangeEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_CREDENTIALCHANGE_FAILED_STATE, FAIL_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public ClusterCredentialChangeFlowConfig() {
         super(ClusterCredentialChangeState.class, ClusterCredentialChangeEvent.class);
@@ -68,10 +61,5 @@ public class ClusterCredentialChangeFlowConfig extends AbstractFlowConfiguration
     @Override
     public String getDisplayName() {
         return "Change cluster credential";
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

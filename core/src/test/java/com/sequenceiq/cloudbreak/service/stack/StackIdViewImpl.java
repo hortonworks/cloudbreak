@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 
-class StackIdViewImpl implements StackIdView {
+public class StackIdViewImpl implements StackIdView {
 
     private final Long id;
 
@@ -10,7 +10,7 @@ class StackIdViewImpl implements StackIdView {
 
     private final String crn;
 
-    StackIdViewImpl(Long id, String name, String crn) {
+    public StackIdViewImpl(Long id, String name, String crn) {
         this.id = id;
         this.name = name;
         this.crn = crn;

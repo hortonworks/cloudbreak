@@ -64,7 +64,8 @@ public class StackToDescribeFreeIpaResponseConverter {
     @Inject
     private StackToAvailabilityStatusConverter stackToAvailabilityStatusConverter;
 
-    public DescribeFreeIpaResponse convert(Stack stack, ImageEntity image, FreeIpa freeIpa, UserSyncStatus userSyncStatus, Boolean includeAllInstances) {
+    public DescribeFreeIpaResponse convert(Stack stack, ImageEntity image, FreeIpa freeIpa, Optional<UserSyncStatus> userSyncStatus,
+            Boolean includeAllInstances) {
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
         describeFreeIpaResponse.setName(stack.getName());
         describeFreeIpaResponse.setEnvironmentCrn(stack.getEnvironmentCrn());
@@ -86,7 +87,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         decorateFreeIpaServerResponseWithLoadBalancedHost(stack, describeFreeIpaResponse.getFreeIpa(), freeIpa);
         describeFreeIpaResponse.setAppVersion(stack.getAppVersion());
         decorateWithCloudStorageAndTelemetry(stack, describeFreeIpaResponse);
-        Optional.ofNullable(userSyncStatus).ifPresent(u -> describeFreeIpaResponse.setUserSyncStatus(userSyncStatusConverter.convert(u)));
+        userSyncStatus.ifPresent(u -> describeFreeIpaResponse.setUserSyncStatus(userSyncStatusConverter.convert(u)));
         return describeFreeIpaResponse;
     }
 

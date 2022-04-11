@@ -79,7 +79,7 @@ public class MockPatchService extends ExistingStackPatchService {
         try {
             StackTags stackTags = stack.getTags().get(StackTags.class);
             String stackPatchResultTag = stackTags.getUserDefinedTags().get(STACK_PATCH_RESULT_TAG_KEY);
-            stackUpdater.updateStackStatus(stack.getId(), STACK_STATUS, STATUS_REASON);
+            stack = stackUpdater.updateStackStatus(stack.getId(), STACK_STATUS, STATUS_REASON);
             switch (stackPatchResultTag) {
                 case STACK_PATCH_RESULT_TAG_VALUE_SUCCESS:
                     return true;

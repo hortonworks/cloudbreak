@@ -13,18 +13,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.In
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
-public class InstanceTerminationFlowConfig extends AbstractFlowConfiguration<InstanceTerminationState, InstanceTerminationEvent> {
+public class InstanceTerminationFlowConfig extends StackStatusFinalizerAbstractFlowConfig<InstanceTerminationState, InstanceTerminationEvent> {
 
     private static final List<Transition<InstanceTerminationState, InstanceTerminationEvent>> TRANSITIONS =
             new Builder<InstanceTerminationState, InstanceTerminationEvent>()
@@ -36,9 +32,6 @@ public class InstanceTerminationFlowConfig extends AbstractFlowConfiguration<Ins
 
     private static final FlowEdgeConfig<InstanceTerminationState, InstanceTerminationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, TERMINATION_FAILED_STATE, TERMINATION_FAIL_HANDLED_EVENT);
-
-    @Inject
-    private StackStatusFinalizer stackStatusFinalizer;
 
     public InstanceTerminationFlowConfig() {
         super(InstanceTerminationState.class, InstanceTerminationEvent.class);
@@ -74,10 +67,5 @@ public class InstanceTerminationFlowConfig extends AbstractFlowConfiguration<Ins
     @Override
     public String getDisplayName() {
         return "Terminate instance";
-    }
-
-    @Override
-    public FlowFinalizerCallback getFinalizerCallBack() {
-        return stackStatusFinalizer;
     }
 }

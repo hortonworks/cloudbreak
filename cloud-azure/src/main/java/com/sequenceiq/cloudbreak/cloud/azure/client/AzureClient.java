@@ -112,8 +112,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.validation.ValidationResult;
-import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -860,7 +858,16 @@ public class AzureClient {
     }
 
     public PagedList<PrivateZone> getPrivateDnsZoneList() {
-        return privatednsManager.privateZones().list();
+        PagedList<PrivateZone> privateDnsZones = privatednsManager.privateZones().list();
+        privateDnsZones.loadAll();
+        return privateDnsZones;
+    }
+
+    public PagedList<PrivateZone> getPrivateDnsZonesByResourceGroup(String subscriptionId, String resourceGroupName) {
+        privatednsManager dnsManager = azureClientCredentials.getPrivateDnsManagerWithAnotherSubscription(subscriptionId);
+        PagedList<PrivateZone> privateDnsZones = dnsManager.privateZones().listByResourceGroup(resourceGroupName);
+        privateDnsZones.loadAll();
+        return privateDnsZones;
     }
 
     public List<PrivateZone> getPrivateDnsZoneListFromAllSubscriptions() {
@@ -878,39 +885,26 @@ public class AzureClient {
         return privateDnsZones;
     }
 
-    public ValidationResult validateNetworkLinkExistenceForDnsZones(String networkLinkId, List<AzurePrivateDnsZoneServiceEnum> services,
-            String resourceGroupName) {
-        ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
-        PagedList<PrivateZone> privateDnsZoneList = getPrivateDnsZoneList();
-        for (AzurePrivateDnsZoneServiceEnum service : services) {
-            String dnsZoneName = service.getDnsZoneName();
-            Optional<PrivateZone> privateZoneWithNetworkLink = privateDnsZoneList.stream()
-                    .filter(privateZone -> !privateZone.resourceGroupName().equalsIgnoreCase(resourceGroupName))
-                    .filter(privateZone -> privateZone.name().equalsIgnoreCase(dnsZoneName))
-                    .filter(privateZone -> privateZone.provisioningState().equals(SUCCEEDED))
-                    .filter(privateZone -> Objects.nonNull(getNetworkLinkByPrivateDnsZone(privateZone.resourceGroupName(), dnsZoneName, networkLinkId)))
-                    .findFirst();
-            if (privateZoneWithNetworkLink.isPresent()) {
-                PrivateZone privateZone = privateZoneWithNetworkLink.get();
-                String validationMessage = String.format("Network link for the network %s already exists for Private DNS Zone %s in resource group %s. "
-                            + "Please ensure that there is no existing network link and try again!",
-                    networkLinkId, dnsZoneName, privateZone.resourceGroupName());
-                LOGGER.warn(validationMessage);
-                resultBuilder.error(validationMessage);
-            }
-        }
-        return resultBuilder.build();
-    }
-
     public PagedList<PrivateZone> listPrivateDnsZonesByResourceGroup(String resourceGroupName) {
-        return privatednsManager.privateZones().listByResourceGroup(resourceGroupName);
+        PagedList<PrivateZone> privateDnsZones = privatednsManager.privateZones().listByResourceGroup(resourceGroupName);
+        privateDnsZones.loadAll();
+        return privateDnsZones;
     }
 
     public PagedList<VirtualNetworkLinkInner> listNetworkLinksByPrivateDnsZoneName(String resourceGroupName, String dnsZoneName) {
-        return privatednsManager.virtualNetworkLinks().inner().list(resourceGroupName, dnsZoneName);
+        PagedList<VirtualNetworkLinkInner> virtualNetworkLinks = privatednsManager.virtualNetworkLinks().inner().list(resourceGroupName, dnsZoneName);
+        virtualNetworkLinks.loadAll();
+        return virtualNetworkLinks;
     }
 
-    private VirtualNetworkLinkInner getNetworkLinkByPrivateDnsZone(String resourceGroupName, String dnsZoneName, String virtualNetworkLinkName) {
+    public PagedList<VirtualNetworkLinkInner> listNetworkLinksByPrivateDnsZoneName(String subscriptionId, String resourceGroupName, String dnsZoneName) {
+        privatednsManager dnsManager = azureClientCredentials.getPrivateDnsManagerWithAnotherSubscription(subscriptionId);
+        PagedList<VirtualNetworkLinkInner> virtualNetworkLinks = dnsManager.virtualNetworkLinks().inner().list(resourceGroupName, dnsZoneName);
+        virtualNetworkLinks.loadAll();
+        return virtualNetworkLinks;
+    }
+
+    public VirtualNetworkLinkInner getNetworkLinkByPrivateDnsZone(String resourceGroupName, String dnsZoneName, String virtualNetworkLinkName) {
         return virtualNetworkLinkName == null ? null
                 : privatednsManager.virtualNetworkLinks().inner().get(resourceGroupName, dnsZoneName, virtualNetworkLinkName);
     }

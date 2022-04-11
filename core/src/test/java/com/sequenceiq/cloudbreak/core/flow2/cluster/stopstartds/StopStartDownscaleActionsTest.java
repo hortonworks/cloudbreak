@@ -183,7 +183,7 @@ public class StopStartDownscaleActionsTest {
 
         StopStartDownscaleContext stopStartDownscaleContext = createContext(instanceIdsToRemove);
         StopStartDownscaleDecommissionViaCMRequest r =
-                new StopStartDownscaleDecommissionViaCMRequest(stack, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove);
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove);
         StopStartDownscaleDecommissionViaCMResult payload = new StopStartDownscaleDecommissionViaCMResult(r, decommissionedHostsFqdns, Collections.emptyList());
 
         mockStackEtc(instancesActionableStarted, instancesActionableNotStarted, instancesRandomStarted, instancesRandomNotStarted);
@@ -226,7 +226,7 @@ public class StopStartDownscaleActionsTest {
 
         StopStartDownscaleContext stopStartDownscaleContext = createContext(instanceIdsToRemove);
         StopStartDownscaleDecommissionViaCMRequest r =
-                new StopStartDownscaleDecommissionViaCMRequest(stack, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove);
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove);
         StopStartDownscaleDecommissionViaCMResult payload = new StopStartDownscaleDecommissionViaCMResult(r, decommissionedHostsFqdns, notDecommissionedFqdns);
 
         mockStackEtc(instancesActionableStarted, instancesActionableNotStarted, instancesRandomStarted, instancesRandomNotStarted);
@@ -270,7 +270,7 @@ public class StopStartDownscaleActionsTest {
 
         StopStartDownscaleContext stopStartDownscaleContext = createContext(instanceIdsToRemove);
         StopStartDownscaleDecommissionViaCMRequest r =
-                new StopStartDownscaleDecommissionViaCMRequest(stack, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove);
+                new StopStartDownscaleDecommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, instanceIdsToRemove);
         StopStartDownscaleDecommissionViaCMResult payload = new StopStartDownscaleDecommissionViaCMResult(r, decommissionedHostsFqdns, notDecommissionedFqdns);
 
         mockStackEtc(instancesActionableStarted, instancesActionableNotStarted, instancesRandomStarted, instancesRandomNotStarted);
