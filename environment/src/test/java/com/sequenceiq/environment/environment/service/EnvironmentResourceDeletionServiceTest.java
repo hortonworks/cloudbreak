@@ -38,12 +38,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
 @ExtendWith(SpringExtension.class)
 class EnvironmentResourceDeletionServiceTest {
@@ -53,7 +53,7 @@ class EnvironmentResourceDeletionServiceTest {
     private static final String ENVIRONMENT_CRN = "someEnvCrn";
 
     @MockBean
-    private SdxEndpoint sdxEndpoint;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @MockBean
     private ThreadBasedUserCrnProvider userCrnProvider;
@@ -100,7 +100,7 @@ class EnvironmentResourceDeletionServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         environmentResourceDeletionServiceUnderTest.getAttachedSdxClusterCrns(environment);
-        verify(sdxEndpoint).list(eq(ENVIRONMENT_NAME), eq(true));
+        verify(platformAwareSdxConnector).listSdxCrns(eq(ENVIRONMENT_NAME), eq(ENVIRONMENT_CRN));
     }
 
     @Test

@@ -13,6 +13,7 @@ import com.sequenceiq.thunderhead.grpc.service.auth.MockPersonalResourceViewServ
 import com.sequenceiq.thunderhead.grpc.service.auth.MockUserManagementService;
 import com.sequenceiq.thunderhead.grpc.service.datalakedr.MockDatalakeDrService;
 import com.sequenceiq.thunderhead.grpc.service.pem.MockPublicEndpointManagementService;
+import com.sequenceiq.thunderhead.grpc.service.saas.sdx.MockSdxSaasService;
 
 @Configuration
 public class GrpcServerConfig {
@@ -35,6 +36,9 @@ public class GrpcServerConfig {
     @Inject
     private MockPublicEndpointManagementService mockPublicEndpointManagementService;
 
+    @Inject
+    private MockSdxSaasService mockSdxSaasService;
+
     @Value("${grpc.server.port:8982}")
     private int grpcServerPort;
 
@@ -49,7 +53,8 @@ public class GrpcServerConfig {
                 mockAuthorizationService.bindService(),
                 mockPersonalResourceViewService.bindService(),
                 mockAuditLogService.bindService(),
-                mockPublicEndpointManagementService.bindService());
+                mockPublicEndpointManagementService.bindService(),
+                mockSdxSaasService.bindService());
     }
 
     @Bean

@@ -22,7 +22,7 @@ dependencies {
   implementation project(':template-manager-tag')
   implementation project(':auth-connector')
 
-  implementation group: 'com.dyngr', name: 'polling', version: '1.1.3'
+  implementation group: 'com.dyngr', name: 'polling', version: dyngrPollingVersion
 
   api(group: 'com.amazonaws', name: 'aws-java-sdk-core', version: awsSdkVersion) {
     exclude group: 'commons-logging'
