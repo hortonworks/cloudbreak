@@ -420,6 +420,17 @@
         ]
       },
       {
+        "refName": "query_processor",
+        "serviceType": "QUERY_PROCESSOR",
+        "roleConfigGroups": [
+          {
+            "refName": "query_processor-QUERY_PROCESSOR",
+            "roleType": "QUERY_PROCESSOR",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "knox",
         "roleConfigGroups": [
           {
@@ -535,6 +546,7 @@
           "zeppelin-ZEPPELIN_SERVER-BASE",
           "das-DAS_EVENT_PROCESSOR",
           "das-DAS_WEBAPP",
+          "query_processor-QUERY_PROCESSOR",
           "hdfs-JOURNALNODE-BASE",
           "zookeeper-SERVER-BASE",
           "yarn-QUEUEMANAGER_WEBAPP-BASE",
