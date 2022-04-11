@@ -23,7 +23,7 @@ public class VolumeConverter {
     public VolumeV4Request convert(VolumeV1Request source) {
         VolumeV4Request response = new VolumeV4Request();
         response.setSize(source.getSize());
-        response.setCount(source.getCount());
+        response.setCount(source.getCount() == null ? Integer.valueOf(0) : source.getCount());
         response.setType(source.getType());
         return response;
     }
