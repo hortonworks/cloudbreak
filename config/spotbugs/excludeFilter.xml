@@ -89,4 +89,7 @@
     <Match>
         <Package name="~com\.cloudera\.thunderhead\.service\.authdistributor.*"/>
     </Match>
+    <Match>
+        <Package name="~com\.cloudera\.thunderhead\.service\.sdxsvc.*"/>
+    </Match>
 </FindBugsFilter>

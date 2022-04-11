@@ -93,6 +93,7 @@ auth:
     e2e.test.only.enable: true
     saas.enable: false
     workloadiam.sync.enable: false
+    saas.sdx.integration.enable: true
 
 crn:
   partition: cdp
