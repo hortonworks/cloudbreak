@@ -36,5 +36,6 @@ public enum AllServiceTypes {
     SPARK3_ON_YARN,
     IMPALA,
     ATLAS,
-    KNOX
+    KNOX,
+    QUERY_PROCESSOR
 }
