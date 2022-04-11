@@ -38,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
+import com.sequenceiq.it.cloudbreak.SdxSaasItClient;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
@@ -447,11 +448,16 @@ public abstract class TestContext implements ApplicationContextAware {
                     regionAwareInternalCrnGeneratorFactory.iam());
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, cloudbreakUser);
             UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost);
+            SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createProxySdxSaasClient(tracer, umsHost, regionAwareInternalCrnGeneratorFactory);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, cloudbreakUser);
-            Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
-                    FreeIpaClient.class, freeIpaClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient,
+            Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(
+                    CloudbreakClient.class, cloudbreakClient,
+                    FreeIpaClient.class, freeIpaClient,
+                    EnvironmentClient.class, environmentClient,
+                    SdxClient.class, sdxClient,
                     RedbeamsClient.class, redbeamsClient,
-                    UmsClient.class, umsClient);
+                    UmsClient.class, umsClient,
+                    SdxSaasItClient.class, sdxSaasItClient);
             clients.put(cloudbreakUser.getAccessKey(), clientMap);
             cloudbreakClient.setWorkspaceId(0L);
         }
@@ -468,11 +474,16 @@ public abstract class TestContext implements ApplicationContextAware {
                     regionAwareInternalCrnGeneratorFactory.iam());
             SdxClient sdxClient = SdxClient.createProxySdxClient(testParameter, accountAdmin);
             UmsClient umsClient = UmsClient.createProxyUmsClient(tracer, umsHost);
+            SdxSaasItClient sdxSaasItClient = SdxSaasItClient.createProxySdxSaasClient(tracer, umsHost, regionAwareInternalCrnGeneratorFactory);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, accountAdmin);
-            Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(CloudbreakClient.class, cloudbreakClient,
-                    FreeIpaClient.class, freeIpaClient, EnvironmentClient.class, environmentClient, SdxClient.class, sdxClient,
+            Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(
+                    CloudbreakClient.class, cloudbreakClient,
+                    FreeIpaClient.class, freeIpaClient,
+                    EnvironmentClient.class, environmentClient,
+                    SdxClient.class, sdxClient,
                     RedbeamsClient.class, redbeamsClient,
-                    UmsClient.class, umsClient);
+                    UmsClient.class, umsClient,
+                    SdxSaasItClient.class, sdxSaasItClient);
             clients.put(accountAdmin.getAccessKey(), clientMap);
         }
         LOGGER.info(" Microservice clients have been initialized successfully for UMS account admin:: \nDisplay name: {} \nAccess key: {} \nSecret key: {} " +

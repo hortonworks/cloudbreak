@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.auth.crn;
 
+import java.util.Arrays;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 public enum CrnResourceDescriptor {
+    // sdx saas
+    SDX_SAAS_INSTANCE(Crn.ResourceType.INSTANCE, Crn.Service.SDXSVC),
     // ums (iam) service
     GROUP(Crn.ResourceType.GROUP, Crn.Service.IAM),
     MACHINE_USER(Crn.ResourceType.MACHINE_USER, Crn.Service.IAM),
@@ -63,5 +67,10 @@ public enum CrnResourceDescriptor {
 
     public Pair createServiceAndResourceTypePair() {
         return Pair.of(getServiceType().getName(), getResourceType().getName());
+    }
+
+    public static CrnResourceDescriptor getByCrnString(String crn) {
+        return Arrays.stream(values()).filter(crnResourceDescriptor -> crnResourceDescriptor.checkIfCrnMatches(Crn.safeFromString(crn)))
+                .findFirst().orElseThrow(() -> new IllegalStateException(String.format("There is no matching crn descriptor for crn %s", crn)));
     }
 }

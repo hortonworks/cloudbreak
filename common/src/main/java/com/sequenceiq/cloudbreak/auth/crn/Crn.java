@@ -174,7 +174,9 @@ public class Crn {
         ACCOUNTTELEMETRY("accounttelemetry", NON_ADMIN_SERVICE),
         ML("ml", NON_ADMIN_SERVICE),
         DF("df", NON_ADMIN_SERVICE),
-        CCMV2("ccmv2", NON_ADMIN_SERVICE);
+        CCMV2("ccmv2", NON_ADMIN_SERVICE),
+        SDXSVC("sdxsvc", NON_ADMIN_SERVICE),
+        SDXSVCADMIN("sdxsvcadmin", ADMIN_SERVICE);
 
         private static final ImmutableMap<String, Service> FROM_STRING;
 
@@ -376,7 +378,9 @@ public class Crn {
         PROXY_CONIFG("proxyConfig"),
         SERVICE("service"),
         AGENT("agent"),
-        WXM_ENVIRONMENT("wxm_environment");
+        WXM_ENVIRONMENT("wxm_environment"),
+        INSTANCE("instance"),
+        CONNECTION("connection");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
 
