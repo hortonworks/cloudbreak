@@ -3,10 +3,13 @@ package com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer;
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService.DUPLICATE_LISTENER_ERROR_CODE;
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService.DUPLICATE_LOAD_BALANCER_NAME_ERROR_CODE;
 import static com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService.DUPLICATE_TARGET_GROUP_NAME_ERROR_CODE;
+import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -96,11 +99,33 @@ class AwsNativeLoadBalancerLaunchServiceTest {
     }
 
     @Test
+    void testLaunchLoadBalancerResourcesWhenNoNeedToRegisterTargetGroup() {
+        CloudStack stack = mock(CloudStack.class);
+        AwsLoadBalancer loadBalancer = mock(AwsLoadBalancer.class);
+
+        CloudResource loadBalancerResource = CloudResource.builder()
+                .name("aLoadBalancerName")
+                .reference("aLoadBalancerArn")
+                .type(ResourceType.ELASTIC_LOAD_BALANCER)
+                .build();
+        when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(eq(ResourceType.ELASTIC_LOAD_BALANCER), eq(CommonStatus.CREATED), any()))
+                .thenReturn(Optional.of(loadBalancerResource));
+
+        when(stack.getGroups()).thenReturn(emptyList());
+        when(stack.getLoadBalancers()).thenReturn(emptyList());
+        when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(loadBalancer));
+
+        undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, false);
+
+        verify(loadBalancer, never()).getListeners();
+    }
+
+    @Test
     void testLaunchLoadBalancerResourcesWhenNoLoadBalancerSpecified() {
         CloudStack stack = getCloudStack();
         when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(new ArrayList<>());
 
-        List<CloudResourceStatus> result = undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient);
+        List<CloudResourceStatus> result = undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true);
 
         assertTrue(result.isEmpty());
     }
@@ -114,7 +139,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancingClient.registerLoadBalancer(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
 
         Assertions.assertThrows(CloudConnectorException.class,
-                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient));
+                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
     }
 
     @Test
@@ -134,7 +159,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancingClient.createTargetGroup(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
 
         Assertions.assertThrows(CloudConnectorException.class,
-                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient));
+                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier, times(1)).notifyAllocation(cloudResourceArgumentCaptor.capture(), any());
@@ -156,7 +181,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancingClient.createTargetGroup(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
 
         Assertions.assertThrows(CloudConnectorException.class,
-                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient));
+                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier, times(1)).notifyAllocation(cloudResourceArgumentCaptor.capture(), any());
@@ -187,7 +212,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancingClient.registerListener(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
 
         Assertions.assertThrows(CloudConnectorException.class,
-                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient));
+                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier, times(2)).notifyAllocation(cloudResourceArgumentCaptor.capture(), any());
@@ -224,7 +249,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancingClient.registerListener(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
 
         Assertions.assertThrows(CloudConnectorException.class,
-                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient));
+                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier, times(2)).notifyAllocation(cloudResourceArgumentCaptor.capture(), any());
@@ -263,7 +288,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancingClient.registerTargets(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
 
         Assertions.assertThrows(CloudConnectorException.class,
-                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient));
+                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(loadBalancingClient, times(1)).registerTargets(any());
@@ -308,7 +333,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancingClient.registerTargets(any())).thenThrow(new AmazonElasticLoadBalancingException("something went wrong"));
 
         Assertions.assertThrows(CloudConnectorException.class,
-                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient));
+                () -> undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(loadBalancingClient, times(1)).registerTargets(any());
@@ -349,7 +374,8 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResult);
         when(loadBalancingClient.registerTargets(any())).thenReturn(new RegisterTargetsResult());
 
-        List<CloudResourceStatus> statuses = undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient);
+        List<CloudResourceStatus> statuses = undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient,
+                true);
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier, times(3)).notifyAllocation(cloudResourceArgumentCaptor.capture(), any());
@@ -394,7 +420,8 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResult);
         when(loadBalancingClient.registerTargets(any())).thenReturn(new RegisterTargetsResult());
 
-        List<CloudResourceStatus> statuses = undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient);
+        List<CloudResourceStatus> statuses = undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient,
+                true);
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier, times(2)).notifyAllocation(cloudResourceArgumentCaptor.capture(), any());
@@ -437,7 +464,8 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResult);
         when(loadBalancingClient.registerTargets(any())).thenReturn(new RegisterTargetsResult());
 
-        List<CloudResourceStatus> statuses = undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient);
+        List<CloudResourceStatus> statuses = undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient,
+                true);
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier, times(2)).notifyAllocation(cloudResourceArgumentCaptor.capture(), any());
@@ -481,7 +509,8 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .thenReturn(Optional.of(listenerResource));
         when(loadBalancingClient.registerTargets(any())).thenReturn(new RegisterTargetsResult());
 
-        List<CloudResourceStatus> statuses = undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient);
+        List<CloudResourceStatus> statuses = undertTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient,
+                true);
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier, times(2)).notifyAllocation(cloudResourceArgumentCaptor.capture(), any());

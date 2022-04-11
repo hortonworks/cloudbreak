@@ -92,7 +92,7 @@ public class AwsNativeLoadBalancerLaunchService {
     private AwsResourceNameService resourceNameService;
 
     public List<CloudResourceStatus> launchLoadBalancerResources(AuthenticatedContext authenticatedContext, CloudStack stack,
-            PersistenceNotifier persistenceNotifier, AmazonElasticLoadBalancingClient loadBalancingClient) {
+            PersistenceNotifier persistenceNotifier, AmazonElasticLoadBalancingClient loadBalancingClient, boolean registerTargetGroups) {
         LOGGER.debug("Creating AWS load balancer and it's resources for cloud stack: '{}'", authenticatedContext.getCloudContext().getCrn());
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         Map<String, List<String>> privateIdsByGroupName = stack.getGroups()
@@ -109,17 +109,19 @@ public class AwsNativeLoadBalancerLaunchService {
         try {
             for (AwsLoadBalancer awsLoadBalancer : loadBalancers) {
                 createLoadBalancer(creationContext, awsLoadBalancer);
-                for (AwsListener listener : awsLoadBalancer.getListeners()) {
-                    AwsTargetGroup targetGroup = listener.getTargetGroup();
-                    creationContext.setTargetGroupName(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, stackName,
-                            awsLoadBalancer.getScheme().resourceName(), targetGroup.getPort()));
-                    createTargetGroup(creationContext, awsNetworkView, targetGroup);
-                    createListener(creationContext, listener);
-                    registerTarget(loadBalancingClient, stackId, targetGroup);
+                if (registerTargetGroups) {
+                    for (AwsListener listener : awsLoadBalancer.getListeners()) {
+                        AwsTargetGroup targetGroup = listener.getTargetGroup();
+                        creationContext.setTargetGroupName(resourceNameService.resourceName(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP, stackName,
+                                awsLoadBalancer.getScheme().resourceName(), targetGroup.getPort()));
+                        createTargetGroup(creationContext, awsNetworkView, targetGroup);
+                        createListener(creationContext, listener);
+                        registerTarget(loadBalancingClient, stackId, targetGroup);
+                    }
                 }
             }
         } catch (Exception ex) {
-            String message = "Load balancer and it's resources could not be created";
+            String message = "Load balancer and it's resources could not be created. " + ex.getMessage();
             LOGGER.warn(message, ex);
             throw new CloudConnectorException(message, ex);
         }
@@ -196,6 +198,7 @@ public class AwsNativeLoadBalancerLaunchService {
         if (existingLoadBalancer.isPresent()) {
             targetGroupResource = existingLoadBalancer.get();
             targetGroupArn = targetGroupResource.getReference();
+            targetGroup.setArn(targetGroupArn);
             LOGGER.info("Elastic load balancer target group resource has already been created for stack proceeding forward with existing resource '{}'",
                     targetGroupArn);
         } else {
