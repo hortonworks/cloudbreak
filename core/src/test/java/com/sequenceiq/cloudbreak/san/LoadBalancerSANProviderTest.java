@@ -104,7 +104,7 @@ class LoadBalancerSANProviderTest {
         Set<LoadBalancer> loadBalancers = new HashSet<>();
         loadBalancers.add(loadBalancer);
         when(loadBalancerPersistenceService.findByStackId(ID)).thenReturn(loadBalancers);
-        when(loadBalancerConfigService.selectLoadBalancer(loadBalancers, LoadBalancerType.PUBLIC)).thenReturn(Optional.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(loadBalancers, LoadBalancerType.PUBLIC)).thenReturn(Optional.of(loadBalancer));
     }
 
     private String getBlueprintText(String path) {

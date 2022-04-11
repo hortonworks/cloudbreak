@@ -108,7 +108,7 @@ public class FreeIPAEndpointManagementServiceTest {
         loadBalancer.setDns(LB_DNS);
         loadBalancer.setEndpoint(LB_ENDPOINT);
         when(loadBalancerPersistenceService.findByStackId(any())).thenReturn(Set.of(loadBalancer));
-        when(loadBalancerConfigService.selectLoadBalancer(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.registerLoadBalancerDomainWithFreeIPA(stack));
@@ -126,7 +126,7 @@ public class FreeIPAEndpointManagementServiceTest {
         loadBalancer.setIp(LB_IP);
         loadBalancer.setEndpoint(LB_ENDPOINT);
         when(loadBalancerPersistenceService.findByStackId(any())).thenReturn(Set.of(loadBalancer));
-        when(loadBalancerConfigService.selectLoadBalancer(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.registerLoadBalancerDomainWithFreeIPA(stack));
@@ -144,7 +144,7 @@ public class FreeIPAEndpointManagementServiceTest {
         loadBalancer.setDns(LB_DNS);
         loadBalancer.setEndpoint(LB_ENDPOINT);
         when(loadBalancerPersistenceService.findByStackId(any())).thenReturn(Set.of(loadBalancer));
-        when(loadBalancerConfigService.selectLoadBalancer(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.deleteLoadBalancerDomainFromFreeIPA(stack));
@@ -159,7 +159,7 @@ public class FreeIPAEndpointManagementServiceTest {
         loadBalancer.setIp(LB_IP);
         loadBalancer.setEndpoint(LB_ENDPOINT);
         when(loadBalancerPersistenceService.findByStackId(any())).thenReturn(Set.of(loadBalancer));
-        when(loadBalancerConfigService.selectLoadBalancer(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.deleteLoadBalancerDomainFromFreeIPA(stack));
