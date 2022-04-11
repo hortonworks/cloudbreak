@@ -44,7 +44,7 @@ public class TemplateToInstanceTemplateV4RequestConverter {
 
     private VolumeV4Request getAttachedVolume(VolumeTemplate source) {
         VolumeV4Request ret = new VolumeV4Request();
-        ret.setCount(source.getVolumeCount());
+        ret.setCount(source.getVolumeCount() == null ? Integer.valueOf(0) : source.getVolumeCount());
         ret.setSize(source.getVolumeSize());
         ret.setType(source.getVolumeType());
         return ret;
