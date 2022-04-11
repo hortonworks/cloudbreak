@@ -836,7 +836,8 @@ cb:
         TEZ: 7.2.0,
         YARN: 7.2.0,
         ZEPPELIN: 7.2.0,
-        ZOOKEEPER: 7.2.0
+        ZOOKEEPER: 7.2.0,
+        QUERY_PROCESSOR: 7.2.15
 
   stopRestriction:
     restrictedCloudPlatform: AWS
