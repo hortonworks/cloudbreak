@@ -1340,6 +1340,20 @@ message CDPClusterStatus {
     DIAGNOSTIC_COLLECTION_FINISHED = 35;
     // The status when CB could not create the diagnostic bundle for the the cluster
     DIAGNOSTIC_COLLECTION_FAILED = 36;
+
+    // The status when a cluster is trying to upscale via stop-start
+    STOP_START_UPSCALE_STARTED = 37;
+    // The status when a cluster has completed upscale via stop-start
+    STOP_START_UPSCALE_FINISHED = 38;
+    // The status when a cluster failed to upscale via stop-start
+    STOP_START_UPSCALE_FAILED = 39;
+
+    // The status when a cluster is trying to downscale via stop-start
+    STOP_START_DOWNSCALE_STARTED = 40;
+    // The status when a cluster has completed downscale via stop-start
+    STOP_START_DOWNSCALE_FINISHED = 41;
+    // The status when a cluster failed to downscale via stop-start
+    STOP_START_DOWNSCALE_FAILED = 42;
   }
 }
 
