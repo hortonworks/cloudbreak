@@ -178,7 +178,8 @@ public class StackCommonService {
         put(stack, updateRequest);
     }
 
-    public void putStartInstancesInDefaultWorkspace(NameOrCrn nameOrCrn, Long workspaceId, UpdateStackV4Request updateRequest, ScalingStrategy scalingStrategy) {
+    public FlowIdentifier putStartInstancesInDefaultWorkspace(NameOrCrn nameOrCrn, Long workspaceId, UpdateStackV4Request updateRequest,
+            ScalingStrategy scalingStrategy) {
         LOGGER.info("Received putStack: {}, with scalingStrategy: {}, updateRequest: {}", nameOrCrn, scalingStrategy, updateRequest);
         Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
         if (stack.isEmpty()) {
@@ -188,7 +189,7 @@ public class StackCommonService {
             throw new BadRequestException("The entitlement for scaling via stop/start is not enabled");
         }
         MDCBuilder.buildMdcContext(stack);
-        putStartInstances(stack.get(), updateRequest, scalingStrategy);
+        return putStartInstances(stack.get(), updateRequest, scalingStrategy);
     }
 
     public FlowIdentifier putStopInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {

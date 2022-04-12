@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -59,14 +60,14 @@ public interface AutoscaleV4Endpoint {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_START_INSTANCES_BY_ID, produces = APPLICATION_JSON,
             notes = Notes.STACK_NOTES, nickname = "putStackForAutoscaleStartByCrn")
-    void putStackStartInstancesByCrn(@PathParam("crn") String crn, @Valid UpdateStackV4Request updateRequest);
+    FlowIdentifier putStackStartInstancesByCrn(@PathParam("crn") String crn, @Valid UpdateStackV4Request updateRequest);
 
     @PUT
     @Path("/stack/startNodes/name/{name}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_START_INSTANCES_BY_ID, produces = APPLICATION_JSON,
             notes = Notes.STACK_NOTES, nickname = "putStackForAutoscaleStartByName")
-    void putStackStartInstancesByName(@PathParam("name") String name, @Valid UpdateStackV4Request updateRequest);
+    FlowIdentifier putStackStartInstancesByName(@PathParam("name") String name, @Valid UpdateStackV4Request updateRequest);
 
     @PUT
     @Path("/stack/crn/{crn}/{userId}/cluster")
@@ -150,7 +151,7 @@ public interface AutoscaleV4Endpoint {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.STOP_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
             notes = Notes.STACK_NOTES, nickname = "autoscaleStopInstancesByCrn")
-    void stopInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
+    FlowIdentifier stopInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
             @RequestBody @NotEmpty List<String> instanceIds,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("scalingStrategy") ScalingStrategy scalingStrategy);
@@ -160,7 +161,7 @@ public interface AutoscaleV4Endpoint {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.STOP_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
             notes = Notes.STACK_NOTES, nickname = "autoscaleStopInstancesByName")
-    void stopInstancesForClusterName(@PathParam("name") String clusterName,
+    FlowIdentifier stopInstancesForClusterName(@PathParam("name") String clusterName,
             @RequestBody @NotEmpty List<String> instanceIds,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("scalingStrategy") ScalingStrategy scalingStrategy);

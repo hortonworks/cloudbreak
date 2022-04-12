@@ -22,9 +22,9 @@ public class DistroXScaleStopInstancesAction implements Action<DistroXTestDto, C
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, String.format(" Stopping instances [%s] for distrox '%s' Compute scaling... ", testDto.getInstanceIdsForAction(), testDto.getName()));
         Log.whenJson(LOGGER, " Distrox Compute scale stop instances request: ", testDto.getRequest());
-        client.getDefaultClient()
+        testDto.setFlow("scale stop", client.getDefaultClient()
                 .autoscaleEndpoint()
-                .stopInstancesForClusterName(testDto.getName(), testDto.getInstanceIdsForAction(), false, ScalingStrategy.STOPSTART);
+                .stopInstancesForClusterName(testDto.getName(), testDto.getInstanceIdsForAction(), false, ScalingStrategy.STOPSTART));
         StackV4Response stackV4Response = client.getDefaultClient()
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), new HashSet<>(Arrays.asList("hardware_info", "events")));
