@@ -372,7 +372,7 @@ class ExposedServiceCollectorTest {
             "KNOX_TOKEN_INTEGRATOR",
             "KAFKA_CONNECT",
             "SSB-SSE-API",
-                "QUERY_PROCESSOR");
+            "QUERY_PROCESSOR");
     }
 
     @Test
