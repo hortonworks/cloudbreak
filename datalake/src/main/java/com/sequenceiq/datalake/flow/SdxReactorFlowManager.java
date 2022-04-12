@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow;
 
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RESIZE_TRIGGERED;
 import static com.sequenceiq.datalake.flow.datalake.recovery.DatalakeUpgradeRecoveryEvent.DATALAKE_RECOVERY_EVENT;
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.cert.renew.event.SdxStartCertRenewalEvent;
 import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEvent;
 import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncStartEvent;
@@ -98,6 +100,9 @@ public class SdxReactorFlowManager {
     @Inject
     private FlowNameFormatService flowNameFormatService;
 
+    @Inject
+    private EventSenderService eventSenderService;
+
     public FlowIdentifier triggerSdxCreation(SdxCluster cluster) {
         LOGGER.info("Trigger Datalake creation for: {}", cluster);
         String selector = SDX_VALIDATION_EVENT.event();
@@ -111,6 +116,7 @@ public class SdxReactorFlowManager {
         boolean performBackup = shouldSdxBackupBePerformed(
                 newSdxCluster, entitlementService.isDatalakeBackupOnResizeEnabled(ThreadBasedUserCrnProvider.getAccountId())
         );
+        eventSenderService.sendEventAndNotification(newSdxCluster, userId, DATALAKE_RESIZE_TRIGGERED);
         return notify(SDX_RESIZE_FLOW_CHAIN_START_EVENT, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
                 environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup), newSdxCluster.getClusterName());
     }
