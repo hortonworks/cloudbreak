@@ -39,6 +39,10 @@ public class ClusterUseCaseMapper {
         firstStepUseCaseMap.put(Pair.of("UpscaleFlowEventChainFactory", "StackUpscaleConfig"), UsageProto.CDPClusterStatus.Value.UPSCALE_STARTED);
         firstStepUseCaseMap.put(Pair.of("MultiHostgroupDownscaleFlowEventChainFactory", "FlowChainInitFlowConfig"),
                 UsageProto.CDPClusterStatus.Value.DOWNSCALE_STARTED);
+        firstStepUseCaseMap.put(Pair.of("StopStartUpscaleFlowEventChainFactory", "StopStartUpscaleFlowConfig"),
+                UsageProto.CDPClusterStatus.Value.STOP_START_UPSCALE_STARTED);
+        firstStepUseCaseMap.put(Pair.of("StopStartDownscaleFlowEventChainFactory", "StopStartDownscaleFlowConfig"),
+                UsageProto.CDPClusterStatus.Value.STOP_START_DOWNSCALE_STARTED);
         firstStepUseCaseMap.put(Pair.of("DownscaleFlowEventChainFactory", "ClusterDownscaleFlowConfig"), UsageProto.CDPClusterStatus.Value.DOWNSCALE_STARTED);
         firstStepUseCaseMap.put(Pair.of("StartFlowEventChainFactory", "StackStartFlowConfig"), UsageProto.CDPClusterStatus.Value.RESUME_STARTED);
         firstStepUseCaseMap.put(Pair.of("StopFlowEventChainFactory", "ClusterStopFlowConfig"), UsageProto.CDPClusterStatus.Value.SUSPEND_STARTED);
@@ -97,6 +101,14 @@ public class ClusterUseCaseMapper {
                 case "MultiHostgroupDownscaleFlowEventChainFactory":
                     useCase = getClusterStatus(nextFlowState, "FLOWCHAIN_FINALIZE_FINISHED_STATE",
                             UsageProto.CDPClusterStatus.Value.DOWNSCALE_FINISHED, UsageProto.CDPClusterStatus.Value.DOWNSCALE_FAILED);
+                    break;
+                case "StopStartUpscaleFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "STOPSTART_UPSCALE_FINALIZE_STATE",
+                            UsageProto.CDPClusterStatus.Value.STOP_START_UPSCALE_FINISHED, UsageProto.CDPClusterStatus.Value.STOP_START_UPSCALE_FAILED);
+                    break;
+                case "StopStartDownscaleFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "STOPSTART_DOWNSCALE_FINALIZE_STATE",
+                            UsageProto.CDPClusterStatus.Value.STOP_START_DOWNSCALE_FINISHED, UsageProto.CDPClusterStatus.Value.STOP_START_DOWNSCALE_FAILED);
                     break;
                 case "DownscaleFlowEventChainFactory":
                     useCase = getClusterStatus(nextFlowState, "DOWNSCALE_FINISHED_STATE",
