@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -98,16 +99,16 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void putStackStartInstancesByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid UpdateStackV4Request updateRequest) {
-        stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId(), updateRequest,
-                ScalingStrategy.STOPSTART);
+    public FlowIdentifier putStackStartInstancesByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid UpdateStackV4Request updateRequest) {
+        return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId(),
+                updateRequest, ScalingStrategy.STOPSTART);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void putStackStartInstancesByName(@ResourceName String name, @Valid UpdateStackV4Request updateRequest) {
-        stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), updateRequest,
-                ScalingStrategy.STOPSTART);
+    public FlowIdentifier putStackStartInstancesByName(@ResourceName String name, @Valid UpdateStackV4Request updateRequest) {
+        return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(),
+                updateRequest, ScalingStrategy.STOPSTART);
     }
 
     @Override
@@ -156,21 +157,21 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void stopInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, @NotEmpty List<String> instanceIds,
+    public FlowIdentifier stopInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, @NotEmpty List<String> instanceIds,
             Boolean forced, ScalingStrategy scalingStrategy) {
         LOGGER.info("stopInstancesForClusterCrn. ScalingStrategy={}, forced={}, clusterCrn={}, instanceIds=[{}]",
                 scalingStrategy, forced, clusterCrn, instanceIds);
-        stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getRequestedWorkspaceId(),
+        return stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getRequestedWorkspaceId(),
                 new HashSet(instanceIds), forced);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void stopInstancesForClusterName(@ResourceName String clusterName, @NotEmpty List<String> instanceIds,
+    public FlowIdentifier stopInstancesForClusterName(@ResourceName String clusterName, @NotEmpty List<String> instanceIds,
             Boolean forced, ScalingStrategy scalingStrategy) {
         LOGGER.info("stopInstancesForClusterName: ScalingStrategy={}, forced={}, clusterName={}, instanceIds=[{}]",
                 scalingStrategy, forced, clusterName, instanceIds);
-        stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofName(clusterName), restRequestThreadLocalService.getRequestedWorkspaceId(),
+        return stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofName(clusterName), restRequestThreadLocalService.getRequestedWorkspaceId(),
                 new HashSet<>(instanceIds), forced);
     }
 

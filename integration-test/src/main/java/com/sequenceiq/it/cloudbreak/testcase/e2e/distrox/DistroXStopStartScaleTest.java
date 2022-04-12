@@ -10,7 +10,6 @@ import javax.inject.Inject;
 import org.testng.ITestContext;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.DistroxStopStartScaleDurationAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -72,12 +71,10 @@ public class DistroXStopStartScaleTest extends AbstractE2ETest {
                     return testDto;
                 })
                 .when(distroXTestClient.scaleStopInstances())
-                .await(STACK_AVAILABLE)
-                .awaitForActionedInstances(InstanceStatus.STOPPED)
+                .awaitForFlow()
                 .then(new DistroxStopStartScaleDurationAssertions(6, false))
                 .when(distroXTestClient.scaleStartInstances(params.getHostGroup(), params.getScaleUpTarget()))
-                .await(STACK_AVAILABLE)
-                .awaitForHealthyInstances()
+                .awaitForFlow()
                 .when(distroXTestClient.get())
                 .then(new DistroxStopStartScaleDurationAssertions(6, true));
         IntStream.range(1, params.getTimes())
@@ -85,12 +82,10 @@ public class DistroXStopStartScaleTest extends AbstractE2ETest {
                             testContext
                                     .given(DistroXTestDto.class)
                                     .when(distroXTestClient.scaleStopInstances())
-                                    .await(STACK_AVAILABLE)
-                                    .awaitForActionedInstances(InstanceStatus.STOPPED)
+                                    .awaitForFlow()
                                     .then(new DistroxStopStartScaleDurationAssertions(6, false))
                                     .when(distroXTestClient.scaleStartInstances(params.getHostGroup(), params.getScaleUpTarget()))
-                                    .await(STACK_AVAILABLE)
-                                    .awaitForHealthyInstances()
+                                    .awaitForFlow()
                                     .when(distroXTestClient.get())
                                     .then(new DistroxStopStartScaleDurationAssertions(6, true));
                         }
