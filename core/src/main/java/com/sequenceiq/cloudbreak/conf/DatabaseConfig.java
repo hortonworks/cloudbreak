@@ -48,7 +48,7 @@ public class DatabaseConfig {
     @Value("${cb.db.env.db:}")
     private String dbName;
 
-    @Value("${cb.db.env.poolsize:60}")
+    @Value("${cb.db.env.poolsize:30}")
     private int poolSize;
 
     @Value("${cb.db.env.connectiontimeout:30}")
