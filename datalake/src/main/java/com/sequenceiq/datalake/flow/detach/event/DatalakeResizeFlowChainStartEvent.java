@@ -15,15 +15,22 @@ public class DatalakeResizeFlowChainStartEvent extends SdxEvent {
 
     private final boolean backup;
 
-    public DatalakeResizeFlowChainStartEvent(Long sdxId, SdxCluster newSdxCluster, String userId, String backupLocation, boolean backup) {
+    private final boolean restore;
+
+    public DatalakeResizeFlowChainStartEvent(Long sdxId, SdxCluster newSdxCluster, String userId, String backupLocation, boolean backup, boolean restore) {
         super(sdxId, userId);
         this.sdxCluster = newSdxCluster;
         this.backupLocation = backupLocation;
         this.backup = backup;
+        this.restore = restore;
     }
 
     public boolean shouldTakeBackup() {
         return backup;
+    }
+
+    public boolean shouldPerformRestore() {
+        return restore;
     }
 
     public SdxCluster getSdxCluster() {
@@ -45,6 +52,7 @@ public class DatalakeResizeFlowChainStartEvent extends SdxEvent {
                 event -> Objects.equals(sdxCluster.getClusterShape(), event.sdxCluster.getClusterShape())
                         && Objects.equals(sdxCluster.getCrn(), event.sdxCluster.getCrn())
                         && Objects.equals(backupLocation, event.backupLocation)
-                        && backup == event.backup);
+                        && backup == event.backup
+                        && restore == event.restore);
     }
 }

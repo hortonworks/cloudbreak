@@ -9,6 +9,7 @@ import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -32,11 +33,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
+import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -55,9 +60,11 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxOperationRepository;
+import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.FlowState;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxBackupResponse;
@@ -103,6 +110,12 @@ public class SdxBackupRestoreService {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private DatalakeDrConfig datalakeDrConfig;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     public SdxDatabaseBackupResponse triggerDatabaseBackup(SdxCluster sdxCluster, SdxDatabaseBackupRequest backupRequest) {
         MDCBuilder.buildMdcContext(sdxCluster);
@@ -498,5 +511,85 @@ public class SdxBackupRestoreService {
     private AttemptResult<DatalakeBackupStatusResponse> sdxFullDrSucceeded(SdxCluster sdxCluster, DatalakeBackupStatusResponse response) {
         LOGGER.info("Full DR operation for SDX cluster {} is successful", sdxCluster.getClusterName());
         return AttemptResults.finishWith(response);
+    }
+
+    /**
+     * Checks if Sdx backup can be performed.
+     *
+     * @param cluster Sdx cluster.
+     * @param entitlementEnabled Whether the entitlement required for backups with this operation is enabled.
+     * @return true if backup can be performed, False otherwise.
+     */
+    public boolean shouldSdxBackupBePerformed(SdxCluster cluster, boolean entitlementEnabled) {
+        String reason = null;
+        if (!entitlementEnabled) {
+            reason = "Required entitlement for backup during this operation not enabled for this account.";
+        } else if (!datalakeDrConfig.isConfigured()) {
+            reason = "Datalake DR is not configured!";
+        } else {
+            DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(cluster.getEnvName());
+            CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
+            if (CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform.name())) {
+                return true;
+            }
+
+            if (isVersionOlderThan(cluster, "7.2.1")) {
+                reason = "Unsupported runtime: " + cluster.getRuntime();
+            } else if (cluster.getCloudStorageFileSystemType() == null) {
+                reason = "Cloud storage not initialized";
+            }  else if (cluster.getCloudStorageFileSystemType().isGcs()) {
+                reason = "Unsupported cloud provider GCS ";
+            } else if (cluster.getCloudStorageFileSystemType().isAdlsGen2() &&
+                    isVersionOlderThan(cluster, "7.2.2")) {
+                reason = "Unsupported cloud provider Azure on runtime: " + cluster.getRuntime();
+            }
+        }
+        if (reason != null) {
+            LOGGER.info("Backup not triggered. Reason: " + reason);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Checks if Sdx restore can be performed.
+     *
+     * @param cluster Sdx cluster.
+     * @param entitlementEnabled Whether the entitlement required for restore with this operation is enabled.
+     * @return true if restore can be performed, False otherwise.
+     */
+    public boolean shouldSdxRestoreBePerformed(SdxCluster cluster, boolean entitlementEnabled) {
+        String reason = null;
+
+        if (!shouldSdxBackupBePerformed(cluster, entitlementEnabled)) {
+            reason = "Restore not performed as backup is not performed.";
+        } else {
+            DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(cluster.getEnvName());
+            CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
+            if (cluster.isRangerRazEnabled()) {
+                if (isVersionOlderThan(cluster, "7.2.14")) {
+                    reason = "Automatic restore is not supported for RAZ on : " + cluster.getRuntime();
+                } else if (isVersionEqual(cluster, "7.2.14") && (CloudPlatform.AWS.equalsIgnoreCase(cloudPlatform.name()))) {
+                    reason = "Automatic restore is not supported for RAZ (AWS) on: " + cluster.getRuntime();
+                }
+            }
+        }
+        if (reason != null) {
+            LOGGER.info("Restore not triggered. Reason: " + reason);
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isVersionOlderThan(SdxCluster cluster, String baseVersion) {
+        LOGGER.info("Compared: String version {} with Versioned {}", cluster.getRuntime(), baseVersion);
+        Comparator<Versioned> versionComparator = new VersionComparator();
+        return versionComparator.compare(cluster::getRuntime, () -> baseVersion) < 0;
+    }
+
+    private static boolean isVersionEqual(SdxCluster cluster, String baseVersion) {
+        LOGGER.info("Compared: String version {} with Versioned {}", cluster.getRuntime(), baseVersion);
+        Comparator<Versioned> versionComparator = new VersionComparator();
+        return versionComparator.compare(cluster::getRuntime, () -> baseVersion) == 0;
     }
 }
