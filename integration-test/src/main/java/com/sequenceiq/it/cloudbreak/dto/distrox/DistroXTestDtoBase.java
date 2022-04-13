@@ -213,4 +213,8 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         return this;
     }
 
+    public DistroXTestDtoBase<T> withLoadBalancer() {
+        getRequest().setEnableLoadBalancer(true);
+        return this;
+    }
 }

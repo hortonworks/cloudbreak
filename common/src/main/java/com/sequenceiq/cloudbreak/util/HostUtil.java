@@ -10,6 +10,9 @@ public class HostUtil {
     }
 
     public static boolean hasPort(String url) {
+        if (url == null) {
+            return false;
+        }
         Pattern compile = Pattern.compile(".*\\d{4,5}/?(.*)/?");
         Matcher matcher = compile.matcher(url);
         return matcher.find();
