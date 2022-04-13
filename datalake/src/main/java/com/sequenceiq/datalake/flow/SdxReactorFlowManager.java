@@ -18,7 +18,6 @@ import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
 
-import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -30,11 +29,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.type.Versioned;
-import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
@@ -60,8 +55,8 @@ import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowConstants;
@@ -95,13 +90,13 @@ public class SdxReactorFlowManager {
     private EnvironmentClientService environmentClientService;
 
     @Inject
-    private DatalakeDrConfig datalakeDrConfig;
-
-    @Inject
     private FlowNameFormatService flowNameFormatService;
 
     @Inject
     private EventSenderService eventSenderService;
+
+    @Inject
+    private SdxBackupRestoreService sdxBackupRestoreService;
 
     public FlowIdentifier triggerSdxCreation(SdxCluster cluster) {
         LOGGER.info("Trigger Datalake creation for: {}", cluster);
@@ -113,12 +108,15 @@ public class SdxReactorFlowManager {
     public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster) {
         LOGGER.info("Trigger Datalake resizing for: {}", sdxClusterId);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        boolean performBackup = shouldSdxBackupBePerformed(
+        boolean performBackup = sdxBackupRestoreService.shouldSdxBackupBePerformed(
+                newSdxCluster, entitlementService.isDatalakeBackupOnResizeEnabled(ThreadBasedUserCrnProvider.getAccountId())
+        );
+        boolean performRestore = sdxBackupRestoreService.shouldSdxRestoreBePerformed(
                 newSdxCluster, entitlementService.isDatalakeBackupOnResizeEnabled(ThreadBasedUserCrnProvider.getAccountId())
         );
         eventSenderService.sendEventAndNotification(newSdxCluster, userId, DATALAKE_RESIZE_TRIGGERED);
         return notify(SDX_RESIZE_FLOW_CHAIN_START_EVENT, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
-                environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup), newSdxCluster.getClusterName());
+                environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup, performRestore), newSdxCluster.getClusterName());
     }
 
     public FlowIdentifier triggerSdxResizeRecovery(SdxCluster oldSdxCluster, SdxCluster newSdxCluster) {
@@ -150,7 +148,7 @@ public class SdxReactorFlowManager {
     public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId, SdxUpgradeReplaceVms replaceVms, boolean skipBackup) {
         LOGGER.info("Trigger Datalake runtime upgrade for: {} with imageId: {} and replace vm param: {}", cluster, imageId, replaceVms);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        if (!skipBackup && shouldSdxBackupBePerformed(
+        if (!skipBackup && sdxBackupRestoreService.shouldSdxBackupBePerformed(
                 cluster, entitlementService.isDatalakeBackupOnUpgradeEnabled(ThreadBasedUserCrnProvider.getAccountId())
         )) {
             LOGGER.info("Triggering backup before an upgrade");
@@ -169,51 +167,6 @@ public class SdxReactorFlowManager {
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCmSyncStartEvent event = new SdxCmSyncStartEvent(cluster.getId(), userId);
         return notify(event.selector(), event, cluster.getClusterName());
-    }
-
-    /**
-     * Checks if Sdx backup can be performed.
-     *
-     * @param cluster Sdx cluster.
-     * @param entitlementEnabled Whether the entitlement required for backups with this operation is enabled.
-     * @return true if backup can be performed, False otherwise.
-     */
-    private boolean shouldSdxBackupBePerformed(SdxCluster cluster, boolean entitlementEnabled) {
-        String reason = null;
-        if (!entitlementEnabled) {
-            reason = "Required entitlement for backup during this operation not enabled for this account.";
-        } else if (!datalakeDrConfig.isConfigured()) {
-            reason = "Datalake DR is not configured!";
-        } else {
-            DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(cluster.getEnvName());
-            CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
-            if (CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform.name())) {
-                return true;
-            }
-
-            if (isVersionOlderThan(cluster, "7.2.1")) {
-                reason = "Unsupported runtime: " + cluster.getRuntime();
-            } else if (cluster.getCloudStorageFileSystemType() == null) {
-                reason = "Cloud storage not initialized";
-            }  else if (cluster.getCloudStorageFileSystemType().isGcs()) {
-                reason = "Unsupported cloud provider GCS ";
-            } else if (cluster.getCloudStorageFileSystemType().isAdlsGen2() &&
-                    isVersionOlderThan(cluster, "7.2.2")) {
-                reason = "Unsupported cloud provider Azure on runtime: " + cluster.getRuntime();
-            }
-        }
-
-        if (reason != null) {
-            LOGGER.info("Backup not triggered. Reason: " + reason);
-            return false;
-        }
-        return true;
-    }
-
-    private static boolean isVersionOlderThan(SdxCluster cluster, String baseVersion) {
-        LOGGER.info("Compared: String version {} with Versioned {}", cluster.getRuntime(), baseVersion);
-        Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(cluster::getRuntime, () -> baseVersion) < 0;
     }
 
     public FlowIdentifier triggerDatalakeRuntimeRecoveryFlow(SdxCluster cluster, SdxRecoveryType recoveryType) {
