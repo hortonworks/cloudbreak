@@ -910,17 +910,19 @@ public class GrpcUmsClient {
     /**
      * Retrieves user sync state model from UMS.
      *
-     * @param accountId    the account Id
-     * @param requestId    an optional request Id
-     * @param rightsChecks list of rights checks for resources. a List is used to preserve order.
+     * @param accountId         the account Id
+     * @param requestId         an optional request Id
+     * @param rightsChecks      list of rights checks for resources. a List is used to preserve order.
+     * @param skipCredentials   whether to skip including credentials in the response
      * @return the user sync state for this account and rights checks
      */
-    public GetUserSyncStateModelResponse getUserSyncStateModel(String accountId, List<RightsCheck> rightsChecks, Optional<String> requestId,
+    public GetUserSyncStateModelResponse getUserSyncStateModel(String accountId, List<RightsCheck> rightsChecks,
+        boolean skipCredentials, Optional<String> requestId,
         RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         String generatedRequestId = RequestIdUtil.getOrGenerate(requestId);
         LOGGER.debug("Retrieving user sync state model for account {} using request ID {}", accountId, generatedRequestId);
-        return client.getUserSyncStateModel(generatedRequestId, accountId, rightsChecks);
+        return client.getUserSyncStateModel(generatedRequestId, accountId, rightsChecks, skipCredentials);
     }
 
     @Cacheable(cacheNames = "umsRolesCache", key = "{ #accountId }")

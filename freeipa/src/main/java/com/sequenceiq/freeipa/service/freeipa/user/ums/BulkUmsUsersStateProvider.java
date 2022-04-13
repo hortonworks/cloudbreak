@@ -11,6 +11,10 @@ import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
@@ -18,7 +22,6 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
-import com.sequenceiq.freeipa.service.freeipa.user.conversion.WorkloadCredentialConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
@@ -27,6 +30,8 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
 
 @Component
 public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BulkUmsUsersStateProvider.class);
+
     @Inject
     private GrpcUmsClient grpcUmsClient;
 
@@ -37,10 +42,10 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     private FmsUserConverter fmsUserConverter;
 
     @Inject
-    private WorkloadCredentialConverter workloadCredentialConverter;
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+    private UmsCredentialProvider umsCredentialProvider;
 
     public Map<String, UmsUsersState> get(
             String accountId, Collection<String> environmentCrns,
@@ -49,6 +54,7 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
         UserManagementProto.GetUserSyncStateModelResponse userSyncStateModel = grpcUmsClient.getUserSyncStateModel(
                 accountId,
                 umsRightsChecksFactory.get(environmentCrnList),
+                true,
                 requestIdOptional,
                 regionAwareInternalCrnGeneratorFactory);
 
@@ -83,7 +89,8 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                     addActorsToUmsUsersStateBuilder(
                             environmentIndex,
                             userSyncStateModel,
-                            actorHandler);
+                            actorHandler,
+                            requestIdOptional);
 
                     addServicePrincipalsCloudIdentities(
                             umsUsersStateBuilder,
@@ -99,7 +106,8 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     private void addActorsToUmsUsersStateBuilder(
             int environmentIndex,
             UserManagementProto.GetUserSyncStateModelResponse userSyncStateModel,
-            ActorHandler actorHandler) {
+            ActorHandler actorHandler,
+            Optional<String> requestIdOptional) {
 
 
         // process actors - users and machine users are combined in the actor list
@@ -120,16 +128,27 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                                             .get(wagIndex).getWorkloadAdministrationGroupName())
                             .collect(Collectors.toList());
             Supplier<WorkloadCredential> workloadCredentialSupplier = () ->
-                    workloadCredentialConverter.toWorkloadCredential(actor.getCredentials());
+                    umsCredentialProvider.getCredentials(actor.getActorDetails().getCrn(), requestIdOptional);
 
-            actorHandler.handleActor(
-                    environmentAccessRights,
-                    fmsUserConverter.toFmsUser(actor.getActorDetails()),
-                    actor.getActorDetails().getCrn(),
-                    groupMembershipSupplier,
-                    wagMembershipSupplier,
-                    workloadCredentialSupplier,
-                    actor.getActorDetails().getCloudIdentityList());
+            try {
+                actorHandler.handleActor(
+                        environmentAccessRights,
+                        fmsUserConverter.toFmsUser(actor.getActorDetails()),
+                        actor.getActorDetails().getCrn(),
+                        groupMembershipSupplier,
+                        wagMembershipSupplier,
+                        workloadCredentialSupplier,
+                        actor.getActorDetails().getCloudIdentityList());
+            } catch (StatusRuntimeException e) {
+                if (e.getStatus().getCode() == Status.Code.NOT_FOUND) {
+                    LOGGER.warn("Member CRN {} not found in UMS. NOT_FOUND errors indicate that a user/machineUser " +
+                                    "has been deleted after we have retrieved the list of users/machineUsers from " +
+                                    "the UMS. Member will not be added to the UMS Users State. {}",
+                            actor.getActorDetails().getCrn(), e.getLocalizedMessage());
+                } else {
+                    throw e;
+                }
+            }
         });
     }
 

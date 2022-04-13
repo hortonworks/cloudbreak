@@ -1,7 +1,9 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -44,6 +47,9 @@ public class BulkUmsUsersStateProviderTest  extends BaseUmsUsersStateProviderTes
     @Spy
     @SuppressFBWarnings
     private WorkloadCredentialConverter workloadCredentialConverter = new WorkloadCredentialConverter();
+
+    @Mock
+    private UmsCredentialProvider umsCredentialProvider;
 
     @InjectMocks
     private BulkUmsUsersStateProvider underTest;
@@ -127,15 +133,22 @@ public class BulkUmsUsersStateProviderTest  extends BaseUmsUsersStateProviderTes
                                                     .get(testData.allWags.get(i).getWorkloadAdministrationGroupName()))
                                             .boxed()
                                             .collect(Collectors.toList()))
-                                    .setCredentials(toActorWorkloadCredentials(
+                                    .setCredentialsVersion(toActorWorkloadCredentialsVersion(
                                             testData.memberCrnToWorkloadCredentials.get(u.getCrn())))
                                     .build();
                         }))
                 .collect(Collectors.toList()));
 
         when(grpcUmsClient.getUserSyncStateModel(
-                eq(ACCOUNT_ID), eq(expectedRightsChecks), any(Optional.class), any()))
+                eq(ACCOUNT_ID), eq(expectedRightsChecks), eq(true), any(Optional.class), any()))
                 .thenReturn(builder.build());
+
+        doAnswer(invocation -> workloadCredentialConverter
+                .toWorkloadCredential(
+                        testData.memberCrnToWorkloadCredentials.get(invocation.getArgument(0, String.class))))
+                .when(umsCredentialProvider)
+                .getCredentials(anyString(), any(Optional.class));
+
         setupServicePrincipals();
     }
 
@@ -146,6 +159,13 @@ public class BulkUmsUsersStateProviderTest  extends BaseUmsUsersStateProviderTes
                 .setPasswordHashExpirationDate(response.getPasswordHashExpirationDate())
                 .addAllKerberosKeys(response.getKerberosKeysList())
                 .addAllSshPublicKey(response.getSshPublicKeyList())
+                .setWorkloadCredentialsVersion(response.getWorkloadCredentialsVersion())
+                .build();
+    }
+
+    private static UserManagementProto.ActorWorkloadCredentialsVersion toActorWorkloadCredentialsVersion(
+            UserManagementProto.GetActorWorkloadCredentialsResponse response) {
+        return UserManagementProto.ActorWorkloadCredentialsVersion.newBuilder()
                 .setWorkloadCredentialsVersion(response.getWorkloadCredentialsVersion())
                 .build();
     }

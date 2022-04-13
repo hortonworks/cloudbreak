@@ -1139,14 +1139,16 @@ public class UmsClient {
      * @param requestId          the request ID for the request
      * @param accountId          the account ID
      * @param rightsChecks       list of rights checks for resources. A List is used to preserve order.
+     * @param skipCredentials    whether to skip including credentials in the response
      * @return the user sync state model
      */
     public GetUserSyncStateModelResponse getUserSyncStateModel(
-            String requestId, String accountId, List<RightsCheck> rightsChecks) {
+            String requestId, String accountId, List<RightsCheck> rightsChecks, boolean skipCredentials) {
         validateAccountIdWithWarning(accountId);
         GetUserSyncStateModelRequest request = GetUserSyncStateModelRequest.newBuilder()
                 .setAccountId(accountId)
                 .addAllRightsCheck(rightsChecks)
+                .setSkipCredentials(skipCredentials)
                 .build();
         return newStub(requestId).getUserSyncStateModel(request);
     }
