@@ -130,7 +130,7 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
     private Optional<LoadBalancer> getLoadBalancer(Long stackId) {
         Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId);
         if (!loadBalancers.isEmpty()) {
-            return loadBalancerConfigService.selectLoadBalancer(loadBalancers, LoadBalancerType.PRIVATE);
+            return loadBalancerConfigService.selectLoadBalancerForFrontend(loadBalancers, LoadBalancerType.PRIVATE);
         }
         return Optional.empty();
     }

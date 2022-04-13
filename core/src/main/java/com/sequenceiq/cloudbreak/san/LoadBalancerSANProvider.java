@@ -38,7 +38,7 @@ public class LoadBalancerSANProvider {
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_11)) {
             Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stack.getId());
             if (!loadBalancers.isEmpty()) {
-                Optional<LoadBalancer> loadBalancer = loadBalancerConfigService.selectLoadBalancer(loadBalancers, LoadBalancerType.PUBLIC);
+                Optional<LoadBalancer> loadBalancer = loadBalancerConfigService.selectLoadBalancerForFrontend(loadBalancers, LoadBalancerType.PUBLIC);
                 return loadBalancer.flatMap(this::getBestSANForLB);
             }
         }
