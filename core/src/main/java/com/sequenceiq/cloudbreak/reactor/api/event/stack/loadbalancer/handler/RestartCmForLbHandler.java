@@ -66,7 +66,7 @@ public class RestartCmForLbHandler extends ExceptionCatcherEventHandler<RestartC
         try {
             LOGGER.debug("Restarting CM server to pick up latest config changes");
             restartCMServer(stack);
-            clusterApiConnectors.getConnector(stack).waitForServer(stack, false);
+            clusterApiConnectors.getConnector(stack).waitForServer(false);
             LOGGER.debug("CM server restart was successful");
             return new RestartCmForLbSuccess(request.getResourceId());
         } catch (Exception e) {

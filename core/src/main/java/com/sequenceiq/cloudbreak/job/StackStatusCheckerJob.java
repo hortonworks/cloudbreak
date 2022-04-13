@@ -230,7 +230,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void doSync(Stack stack) {
-        ClusterApi connector = clusterApiConnectors.getConnector(stack);
+        ClusterApi connector = clusterApiConnectors.getConnectorWithShortTimeouts(stack);
         Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId());
         try {
             if (isClusterManagerRunning(stack, connector)) {
@@ -239,8 +239,10 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Map<HostName, Set<HealthCheck>> hostStatuses = extendedHostStatuses.getHostsHealth();
                 LOGGER.debug("Cluster '{}' state check, host certicates expiring: [{}], cm running, hoststates: {}",
                         stack.getId(), extendedHostStatuses.isAnyCertExpiring(), hostStatuses);
-                reportHealthAndSyncInstances(stack, runningInstances, getFailedInstancesInstanceMetadata(extendedHostStatuses, runningInstances),
-                        getNewHealthyHostNames(extendedHostStatuses, runningInstances), extendedHostStatuses.isAnyCertExpiring());
+                reportHealthAndSyncInstances(stack, runningInstances,
+                        getFailedInstancesInstanceMetadata(extendedHostStatuses, runningInstances),
+                        getNewHealthyHostNames(extendedHostStatuses, runningInstances),
+                        extendedHostStatuses.isAnyCertExpiring());
             } else {
                 syncInstances(stack, runningInstances, false);
             }
@@ -329,7 +331,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private boolean isCMRunning(ClusterApi connector) {
-        return connector.clusterStatusService().isClusterManagerRunningQuickCheck();
+        return connector.clusterStatusService().isClusterManagerRunning();
     }
 
     private Set<String> getNewHealthyHostNames(ExtendedHostStatuses hostStatuses, Set<InstanceMetaData> runningInstances) {
