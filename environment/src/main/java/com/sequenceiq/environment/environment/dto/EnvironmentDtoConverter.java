@@ -296,7 +296,7 @@ public class EnvironmentDtoConverter {
     }
 
     private FreeIpaCreationAwsParametersDto getFreeIpaAwsParameters(String cloudPlatform, BaseParameters parameters) {
-        if (cloudPlatform.equals(CloudPlatform.AWS.name())) {
+        if (cloudPlatform.equals(CloudPlatform.AWS.name()) && Objects.nonNull(parameters)) {
             AwsParameters awsParameters = (AwsParameters) parameters;
             return FreeIpaCreationAwsParametersDto.builder()
                     .withSpot(FreeIpaCreationAwsSpotParametersDto.builder()
