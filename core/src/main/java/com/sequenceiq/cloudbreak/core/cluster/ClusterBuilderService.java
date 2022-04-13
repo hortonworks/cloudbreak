@@ -99,7 +99,7 @@ public class ClusterBuilderService {
     public void startCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        connector.waitForServer(stack, true);
+        connector.waitForServer(true);
         boolean ldapConfigured = ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName());
         connector.changeOriginalCredentialsAndCreateCloudbreakUser(ldapConfigured);
     }
@@ -110,7 +110,7 @@ public class ClusterBuilderService {
         clusterService.updateCreationDateOnCluster(stack.getCluster());
         clusterApiConnectors
                 .getConnector(stack)
-                .waitForServer(stack, true);
+                .waitForServer(true);
     }
 
     public void validateLicence(Long stackId) {
