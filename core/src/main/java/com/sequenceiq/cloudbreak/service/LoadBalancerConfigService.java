@@ -181,7 +181,7 @@ public class LoadBalancerConfigService {
         return lb.getIp();
     }
 
-    public Optional<LoadBalancer> selectLoadBalancer(Set<LoadBalancer> loadBalancers, LoadBalancerType preferredType) {
+    public Optional<LoadBalancer> selectLoadBalancerForFrontend(Set<LoadBalancer> loadBalancers, LoadBalancerType preferredType) {
         Preconditions.checkNotNull(preferredType);
         Optional<LoadBalancer> loadBalancerOptional = loadBalancers.stream()
             .filter(lb -> preferredType.equals(lb.getType()))
@@ -190,7 +190,7 @@ public class LoadBalancerConfigService {
             LOGGER.debug("Found load balancer of type {}", preferredType);
         } else {
             loadBalancerOptional = loadBalancers.stream()
-                .filter(lb -> lb.getType() != null && !preferredType.equals(lb.getType()))
+                .filter(lb -> lb.getType() != null && !LoadBalancerType.OUTBOUND.equals(lb.getType()))
                 .findFirst();
             loadBalancerOptional.ifPresent(loadBalancer ->
                     LOGGER.debug("Could not find load balancer of preferred type {}. Using type {}", preferredType, loadBalancer.getType()));
