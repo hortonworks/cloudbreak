@@ -167,6 +167,9 @@ class EntitlementServiceTest {
                 {"CDP_CB_AZURE_DISK_SSE_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAzureDiskSSEWithCMKEnabled, false},
                 {"CDP_CB_AZURE_DISK_SSE_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAzureDiskSSEWithCMKEnabled, true},
 
+                {"CDP_CB_AZURE_ENCRYPTION_AT_HOST", (EntitlementCheckFunction) EntitlementService::isAzureEncryptionAtHostEnabled, false},
+                {"CDP_CB_AZURE_ENCRYPTION_AT_HOST", (EntitlementCheckFunction) EntitlementService::isAzureEncryptionAtHostEnabled, true},
+
                 {"CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAWSDiskEncryptionWithCMKEnabled, false},
                 {"CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAWSDiskEncryptionWithCMKEnabled, true},
 

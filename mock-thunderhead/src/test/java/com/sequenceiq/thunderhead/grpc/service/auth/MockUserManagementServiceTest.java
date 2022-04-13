@@ -250,6 +250,9 @@ public class MockUserManagementServiceTest {
                 {"enableAzureDiskSSEWithCMK false", "enableAzureDiskSSEWithCMK", false, "CDP_CB_AZURE_DISK_SSE_WITH_CMK", false},
                 {"enableAzureDiskSSEWithCMK true", "enableAzureDiskSSEWithCMK", true, "CDP_CB_AZURE_DISK_SSE_WITH_CMK", true},
 
+                {"enableAzureEncryptionAtHost false", "enableAzureEncryptionAtHost", false, "CDP_CB_AZURE_ENCRYPTION_AT_HOST", false},
+                {"enableAzureEncryptionAtHost true", "enableAzureEncryptionAtHost", true, "CDP_CB_AZURE_ENCRYPTION_AT_HOST", true},
+
                 {"enableAWSDiskEncryptionWithCMK false", "enableAWSDiskEncryptionWithCMK", false, "CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK", false},
                 {"enableAWSDiskEncryptionWithCMK true", "enableAWSDiskEncryptionWithCMK", true, "CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK", true},
 
