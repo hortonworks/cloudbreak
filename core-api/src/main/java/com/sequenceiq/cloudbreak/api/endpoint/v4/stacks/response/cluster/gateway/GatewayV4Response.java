@@ -46,6 +46,8 @@ public class GatewayV4Response implements JsonEntity {
     @ApiModelProperty(value = GatewayModelDescription.KNOX_SSO_TYPE, allowableValues = "SSO_PROVIDER,SSO_PROVIDER_FROM_UMS,NONE,PAM")
     private SSOType ssoType;
 
+    private String gatewaySigningPublicKey;
+
     public String getPath() {
         return path;
     }
@@ -92,5 +94,13 @@ public class GatewayV4Response implements JsonEntity {
 
     public void setSsoType(SSOType ssoType) {
         this.ssoType = ssoType;
+    }
+
+    public String getGatewaySigningPublicKey() {
+        return gatewaySigningPublicKey;
+    }
+
+    public void setGatewaySigningPublicKey(String gatewaySigningPublicKey) {
+        this.gatewaySigningPublicKey = gatewaySigningPublicKey;
     }
 }
