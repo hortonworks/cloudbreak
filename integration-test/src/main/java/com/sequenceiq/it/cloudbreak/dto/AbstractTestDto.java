@@ -189,6 +189,11 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
                 String.format("The entity(%s) must be implement the then(List<Assertion<T, U>>, List<RunningParameter>) method.", getClass()));
     }
 
+    public <E extends Exception> T thenException(Assertion<T, U> assertion, Class<E> expectedException, RunningParameter runningParameter) {
+        throw new NotImplementedException(
+                String.format("The entity(%s) must be implement the thenException(Assertion<T, U>, Class<E>, RunningParameter) method.", getClass()));
+    }
+
     public <O extends CloudbreakTestDto> O given(String key, Class<O> clss) {
         return getTestContext().given(key, clss);
     }

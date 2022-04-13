@@ -393,6 +393,36 @@ public abstract class TestContext implements ApplicationContextAware {
         return entity;
     }
 
+    public <E extends Exception, T extends CloudbreakTestDto> T thenException(T entity, Class<? extends MicroserviceClient> clientClass,
+            Assertion<T, ? extends MicroserviceClient> assertion, Class<E> expectedException, RunningParameter runningParameter) {
+        checkShutdown();
+        String key = getKey(assertion.getClass(), runningParameter);
+
+        if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
+            LOGGER.info("Should be skipped because of previous error. when [{}]", key);
+            return entity;
+        }
+
+        CloudbreakUser who = setActingUser(runningParameter);
+
+        Log.then(LOGGER, assertion.getClass().getSimpleName() + " exception assertion on " + entity + " by " + who);
+        try {
+            String message = String.format("Expected exception with message (%s) has not been thrown!", runningParameter.getExpectedMessage());
+            CloudbreakTestDto cloudbreakTestDto = resourceNames.get(key);
+            if (cloudbreakTestDto != null) {
+                assertion.doAssertion(this, (T) cloudbreakTestDto, getMicroserviceClient(entity.getClass(), who.getAccessKey()));
+            } else {
+                assertion.doAssertion(this, entity, getMicroserviceClient(entity.getClass(), who.getAccessKey()));
+            }
+            getExceptionMap().put("thenException", new TestFailException(message));
+            LOGGER.error(message);
+            htmlLoggerForExceptionValidation(message, "thenException");
+        } catch (Exception e) {
+            exceptionValidation(expectedException, e, key, runningParameter, "thenException");
+        }
+        return entity;
+    }
+
     public TestContext as() {
         return as(getActingUser());
     }

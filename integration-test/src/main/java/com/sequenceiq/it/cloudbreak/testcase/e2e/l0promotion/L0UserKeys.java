@@ -4,6 +4,8 @@ public class L0UserKeys {
 
     public static final String USER_ACCOUNT_ADMIN = "cloudbreak-qe@cloudera.com";
 
+    public static final String USER_ENV_CREATOR = "cb-qe-a-envcreator@cloudera.com";
+
     public static final String ENV_CREATOR_A = "cb-qe-machine-envcreator-a";
 
     public static final String ENV_CREATOR_B = "cb-qe-machine-envcreator-b";
