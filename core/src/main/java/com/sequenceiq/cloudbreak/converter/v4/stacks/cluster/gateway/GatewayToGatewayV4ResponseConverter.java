@@ -21,6 +21,7 @@ public class GatewayToGatewayV4ResponseConverter {
         response.setGatewayType(source.getGatewayType());
         response.setPath(source.getPath());
         response.setSsoProvider(source.getSsoProvider());
+        response.setGatewaySigningPublicKey(source.getSignPub());
         response.setSsoType(source.getSsoType());
         response.setTokenCert(source.getTokenCert());
         response.setTopologies(source.getTopologies().stream()
