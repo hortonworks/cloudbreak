@@ -34,6 +34,8 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, UserManag
 
     private static final String IAM_GROUP_ADMIN = "crn:altus:iam:us-west-1:altus:resourceRole:IamGroupAdmin";
 
+    private static final String ENVIRONMENT_PRIVILEGED_USER = "crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentPrivilegedUser";
+
     public UmsTestDto(TestContext testContext) {
         super(new AssignResourceRequest(), testContext);
     }
@@ -80,6 +82,11 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, UserManag
 
     public UmsTestDto withGroupAdmin() {
         getRequest().setRoleCrn(IAM_GROUP_ADMIN);
+        return this;
+    }
+
+    public UmsTestDto withEnvironmentPrivilegedUser() {
+        getRequest().setRoleCrn(ENVIRONMENT_PRIVILEGED_USER);
         return this;
     }
 

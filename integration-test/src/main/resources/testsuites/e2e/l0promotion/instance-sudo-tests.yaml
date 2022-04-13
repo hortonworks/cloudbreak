@@ -1,0 +1,5 @@
+name: "ssh-tests"
+tests:
+  - name: "ssh_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.EnvironmentPrivilegedUserTest

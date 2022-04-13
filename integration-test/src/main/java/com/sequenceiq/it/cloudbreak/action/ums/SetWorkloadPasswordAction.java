@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
@@ -30,8 +31,16 @@ public class SetWorkloadPasswordAction implements Action<UmsTestDto, UmsClient> 
     @Override
     public UmsTestDto action(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
         String userCrn = testContext.getActingUserCrn().toString();
-        String workloadUsername = client.getDefaultClient().getUserDetails(userCrn, Optional.of(""),
-                regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
+        String accountId = testContext.getActingUserCrn().getAccountId();
+        Crn.ResourceType resourceType = testContext.getActingUserCrn().getResourceType();
+        String workloadUsername;
+        if (resourceType.equals(Crn.ResourceType.MACHINE_USER)) {
+            workloadUsername = client.getDefaultClient().getMachineUserDetails(userCrn, accountId, Optional.of(""),
+                    regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
+        } else {
+            workloadUsername = client.getDefaultClient().getUserDetails(userCrn, Optional.of(""),
+                    regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
+        }
         LOGGER.info("Setting new workload password '{}' for user '{}' with workload username '{}'", newPassword, userCrn, workloadUsername);
         Log.when(LOGGER, format(" Setting new workload password '%s' for user '%s' workload username '%s' ", newPassword, userCrn, workloadUsername));
         client.getDefaultClient().setActorWorkloadPassword(userCrn, newPassword, Optional.of(""),

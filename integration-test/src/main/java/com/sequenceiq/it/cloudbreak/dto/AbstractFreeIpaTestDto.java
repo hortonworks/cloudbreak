@@ -104,6 +104,11 @@ public abstract class AbstractFreeIpaTestDto<R, S, T extends CloudbreakTestDto> 
         return getTestContext().then((T) this, FreeIpaClient.class, assertions.get(assertions.size() - 1), runningParameters.get(runningParameters.size() - 1));
     }
 
+    @Override
+    public <E extends Exception> T thenException(Assertion<T, FreeIpaClient> assertion, Class<E> expectedException, RunningParameter runningParameter) {
+        return getTestContext().thenException((T) this, FreeIpaClient.class, assertion, expectedException, runningParameter);
+    }
+
     public FlowUtil getFlowUtil() {
         return flowUtil;
     }
