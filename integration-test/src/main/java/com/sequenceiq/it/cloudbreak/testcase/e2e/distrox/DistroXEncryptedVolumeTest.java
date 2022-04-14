@@ -200,6 +200,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
 
         testContext
                 .given(EnvironmentNetworkTestDto.class)
+                    .withServiceEndpoints()
                 .given("telemetry", TelemetryTestDto.class)
                     .withLogging()
                     .withReportClusterLogs()
@@ -211,6 +212,10 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                     .withTunnel(Tunnel.CLUSTER_PROXY)
                     .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
+                .then((context, dto, client) -> {
+                    context.getCloudProviderAssertion().assertServiceEndpoint(dto);
+                    return dto;
+                })
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
                     .withEnvironment()

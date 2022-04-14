@@ -160,6 +160,7 @@ integrationtest:
       subnetIds:
         - cloud-daily.internal.1.westus2
         - cloud-daily.internal.0.westus2
+      databasePrivateDnsZoneId:
     credential:
       appId:
       appPassword:
