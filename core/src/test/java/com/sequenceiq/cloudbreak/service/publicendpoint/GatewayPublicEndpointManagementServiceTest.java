@@ -620,7 +620,7 @@ class GatewayPublicEndpointManagementServiceTest {
         when(dnsManagementService.createOrUpdateDnsEntryWithCloudDns(eq("123"), eq(lbEndpointName), eq(envName), eq(cloudDns),
                 eq(hostedZoneId))).thenReturn(Boolean.TRUE);
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
-        when(loadBalancerConfigService.selectLoadBalancer(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
 
         boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
@@ -677,7 +677,7 @@ class GatewayPublicEndpointManagementServiceTest {
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq("123"), eq(lbEndpointName), eq(envName), eq(Boolean.FALSE),
                 eq(List.of(lbIp)))).thenReturn(Boolean.TRUE);
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
-        when(loadBalancerConfigService.selectLoadBalancer(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
 
         boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
@@ -716,7 +716,7 @@ class GatewayPublicEndpointManagementServiceTest {
         when(dnsManagementService.deleteDnsEntryWithCloudDns(eq("123"), eq(lbEndpointName), eq(envName), eq(cloudDns),
                 eq(hostedZoneId))).thenReturn(Boolean.TRUE);
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
-        when(loadBalancerConfigService.selectLoadBalancer(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deleteLoadBalancerDnsEntry(stack, envName));
 
@@ -743,7 +743,7 @@ class GatewayPublicEndpointManagementServiceTest {
         when(dnsManagementService.deleteDnsEntryWithIp(eq("123"), eq(lbEndpointName), eq(envName), eq(Boolean.FALSE),
                 eq(List.of(ip)))).thenReturn(Boolean.TRUE);
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
-        when(loadBalancerConfigService.selectLoadBalancer(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deleteLoadBalancerDnsEntry(stack, envName));
 
@@ -789,7 +789,7 @@ class GatewayPublicEndpointManagementServiceTest {
                 .build();
 
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
-        when(loadBalancerConfigService.selectLoadBalancer(any(), any())).thenReturn(Optional.of(loadBalancer));
+        when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
         when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
         when(dnsManagementService.createOrUpdateDnsEntryWithCloudDns(any(), any(), any(), any(), any())).thenReturn(Boolean.TRUE);
 

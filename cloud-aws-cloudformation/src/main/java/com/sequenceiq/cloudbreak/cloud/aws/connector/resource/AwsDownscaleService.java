@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -30,6 +31,10 @@ import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsLoadBalancerScheme;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.AwsTargetGroup;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerTypeConverter;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
@@ -40,6 +45,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 
 @Service
 public class AwsDownscaleService {
@@ -62,6 +69,12 @@ public class AwsDownscaleService {
 
     @Inject
     private AwsCloudWatchService awsCloudWatchService;
+
+    @Inject
+    private LoadBalancerTypeConverter loadBalancerTypeConverter;
+
+    @Inject
+    private LoadBalancerService loadBalancerService;
 
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vmsToDownscale) {
         if (!vmsToDownscale.isEmpty()) {
@@ -98,11 +111,24 @@ public class AwsDownscaleService {
 
             updateAutoscalingGroups(auth, amazonASClient, downscaledGroupsWithCloudInstances);
 
-            for (CloudLoadBalancer loadBalancer : stack.getLoadBalancers()) {
-                cfStackUtil.removeLoadBalancerTargets(auth, loadBalancer, resourcesToDownscale);
-            }
+            List<String> targetGroupArns = getTargetGroupArns(stack.getLoadBalancers(), auth);
+            loadBalancerService.removeLoadBalancerTargets(auth, targetGroupArns, resourcesToDownscale);
         }
         return awsResourceConnector.check(auth, resources);
+    }
+
+    private List<String> getTargetGroupArns(List<CloudLoadBalancer> loadBalancers, AuthenticatedContext auth) {
+        List<String> targetGroupArns = new ArrayList<>();
+        for (CloudLoadBalancer loadBalancer : loadBalancers) {
+            for (Map.Entry<TargetGroupPortPair, Set<Group>> entry : loadBalancer.getPortToTargetGroupMapping().entrySet()) {
+                String region = auth.getCloudContext().getLocation().getRegion().value();
+                AwsLoadBalancerScheme scheme = loadBalancerTypeConverter.convert(loadBalancer.getType());
+                String targetGroupArn = cfStackUtil.getResourceArnByLogicalId(auth, AwsTargetGroup.getTargetGroupName(entry.getKey().getTrafficPort(), scheme),
+                        region);
+                targetGroupArns.add(targetGroupArn);
+            }
+        }
+        return targetGroupArns;
     }
 
     private List<String> terminateInstances(AuthenticatedContext auth, AmazonAutoScalingClient amazonASClient, AmazonEc2Client amazonEC2Client, Map<String,

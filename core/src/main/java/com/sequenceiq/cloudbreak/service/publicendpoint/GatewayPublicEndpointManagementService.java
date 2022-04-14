@@ -311,7 +311,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             LOGGER.info("No load balancers in stack {}", stack.getId());
             loadBalancerOptional = Optional.empty();
         } else {
-            loadBalancerOptional = loadBalancerConfigService.selectLoadBalancer(loadBalancers, LoadBalancerType.PUBLIC);
+            loadBalancerOptional = loadBalancerConfigService.selectLoadBalancerForFrontend(loadBalancers, LoadBalancerType.PUBLIC);
 
             if (loadBalancerOptional.isEmpty()) {
                 LOGGER.error("Unable to determine load balancer type. Load balancer public domain name will not be registered.");

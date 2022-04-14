@@ -158,7 +158,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         // Loop here to ensure we're really choosing the private load balancer every time, and not just
         // coincidentally choosing it because it shows up first in the set.
         for (int i = 1; i <= 10; i++) {
-            Optional<LoadBalancer> loadBalancer = underTest.selectLoadBalancer(createLoadBalancers(), LoadBalancerType.PRIVATE);
+            Optional<LoadBalancer> loadBalancer = underTest.selectLoadBalancerForFrontend(createLoadBalancers(), LoadBalancerType.PRIVATE);
             assert loadBalancer.isPresent();
             assert LoadBalancerType.PRIVATE.equals(loadBalancer.get().getType());
         }
@@ -169,9 +169,27 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
         // Loop here to ensure we're really choosing the private load balancer every time, and not just
         // coincidentally choosing it because it shows up first in the set.
         for (int i = 1; i <= 10; i++) {
-            Optional<LoadBalancer> loadBalancer = underTest.selectLoadBalancer(createLoadBalancers(), LoadBalancerType.PUBLIC);
+            Optional<LoadBalancer> loadBalancer = underTest.selectLoadBalancerForFrontend(createLoadBalancers(), LoadBalancerType.PUBLIC);
             assert loadBalancer.isPresent();
             assert LoadBalancerType.PUBLIC.equals(loadBalancer.get().getType());
+        }
+    }
+
+    @Test
+    public void testNeverSelectOutboundLoadBalancer() {
+        // Loop here to ensure we're really choosing the correct load balancer every time, and not just
+        // coincidentally choosing it because it shows up first in the set.
+        // Note that we recreate the load balancer every loop to ensure the order is random. If the order
+        // isn't random this test can erroneously pass.
+        for (int i = 1; i <= 100; i++) {
+            Optional<LoadBalancer> loadBalancer = underTest.selectLoadBalancerForFrontend(createLoadBalancersWithOutbound(), LoadBalancerType.PUBLIC);
+            assert loadBalancer.isPresent();
+            assert LoadBalancerType.PUBLIC.equals(loadBalancer.get().getType());
+        }
+        for (int i = 1; i <= 100; i++) {
+            Optional<LoadBalancer> loadBalancer = underTest.selectLoadBalancerForFrontend(createLoadBalancersWithOutboundNoPublic(), LoadBalancerType.PUBLIC);
+            assert loadBalancer.isPresent();
+            assert LoadBalancerType.PRIVATE.equals(loadBalancer.get().getType());
         }
     }
 
@@ -558,7 +576,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
     @Test
     public void testGetLoadBalancerUserFacingFQDNPrivateOnly() {
-        Set<LoadBalancer> loadBalancers = createLoadBalancers(true, false);
+        Set<LoadBalancer> loadBalancers = createPrivateOnlyLoadBalancer();
 
         when(loadBalancerPersistenceService.findByStackId(0L)).thenReturn(loadBalancers);
 
@@ -598,7 +616,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
     @Test
     public void testGetLoadBalancerUserFacingFQDNNoPublicPrivateMissingFQDN() {
-        Set<LoadBalancer> loadBalancers = createLoadBalancers(true, false);
+        Set<LoadBalancer> loadBalancers = createPrivateOnlyLoadBalancer();
         LoadBalancer privateLoadBalancer = loadBalancers.stream()
                 .filter(lb -> LoadBalancerType.PRIVATE.equals(lb.getType()))
                 .findFirst().get();
@@ -613,7 +631,7 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
     @Test
     public void testGetLoadBalancerUserFacingFQDNNoPublicPrivateMissingFQDNNoDNS() {
-        Set<LoadBalancer> loadBalancers = createLoadBalancers(true, false);
+        Set<LoadBalancer> loadBalancers = createPrivateOnlyLoadBalancer();
         LoadBalancer privateLoadBalancer = loadBalancers.stream()
                 .filter(lb -> LoadBalancerType.PRIVATE.equals(lb.getType()))
                 .findFirst().get();
@@ -997,10 +1015,22 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
     }
 
     private Set<LoadBalancer> createLoadBalancers() {
-        return createLoadBalancers(true, true);
+        return createLoadBalancers(true, true, false);
     }
 
-    private Set<LoadBalancer> createLoadBalancers(boolean createPrivate, boolean createPublic) {
+    private Set<LoadBalancer> createPrivateOnlyLoadBalancer() {
+        return createLoadBalancers(true, false, false);
+    }
+
+    private Set<LoadBalancer> createLoadBalancersWithOutbound() {
+        return createLoadBalancers(true, true, true);
+    }
+
+    private Set<LoadBalancer> createLoadBalancersWithOutboundNoPublic() {
+        return createLoadBalancers(true, false, true);
+    }
+
+    private Set<LoadBalancer> createLoadBalancers(boolean createPrivate, boolean createPublic, boolean createOutbound) {
         Set<LoadBalancer> loadBalancers = new HashSet<>();
         if (createPrivate) {
             LoadBalancer privateLoadBalancer = new LoadBalancer();
@@ -1017,6 +1047,11 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
             publicLoadBalancer.setDns(PUBLIC_DNS);
             publicLoadBalancer.setIp(PUBLIC_IP);
             loadBalancers.add(publicLoadBalancer);
+        }
+        if (createOutbound) {
+            LoadBalancer outboundLoadBalancer = new LoadBalancer();
+            outboundLoadBalancer.setType(LoadBalancerType.OUTBOUND);
+            loadBalancers.add(outboundLoadBalancer);
         }
         return loadBalancers;
     }

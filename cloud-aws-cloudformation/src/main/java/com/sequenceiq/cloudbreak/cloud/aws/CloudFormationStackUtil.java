@@ -36,13 +36,10 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsRequest;
 import com.amazonaws.services.elasticfilesystem.model.DescribeFileSystemsResult;
 import com.amazonaws.services.elasticfilesystem.model.FileSystemDescription;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsRequest;
-import com.amazonaws.services.elasticloadbalancingv2.model.DeregisterTargetsResult;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersResult;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeTargetHealthResult;
-import com.amazonaws.services.elasticloadbalancingv2.model.InvalidTargetException;
 import com.amazonaws.services.elasticloadbalancingv2.model.LoadBalancer;
 import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsRequest;
 import com.amazonaws.services.elasticloadbalancingv2.model.RegisterTargetsResult;
@@ -258,35 +255,6 @@ public class CloudFormationStackUtil {
         }
     }
 
-    public void removeLoadBalancerTargets(AuthenticatedContext ac, CloudLoadBalancer loadBalancer, List<CloudResource> resourcesToRemove) {
-        String region = ac.getCloudContext().getLocation().getRegion().value();
-        AmazonElasticLoadBalancingClient amazonElbClient =
-                awsClient.createElasticLoadBalancingClient(new AwsCredentialView(ac.getCloudCredential()), region);
-
-        for (Map.Entry<TargetGroupPortPair, Set<Group>> entry : loadBalancer.getPortToTargetGroupMapping().entrySet()) {
-            // Get a list of the instance ids to remove
-            Set<String> instancesToRemove = getInstanceIdsForGroups(resourcesToRemove, entry.getValue());
-
-            // Find target group ARN
-            AwsLoadBalancerScheme scheme = loadBalancerTypeConverter.convert(loadBalancer.getType());
-            String targetGroupArn = getResourceArnByLogicalId(ac, AwsTargetGroup.getTargetGroupName(entry.getKey().getTrafficPort(), scheme), region);
-
-            // Deregister any instances that no longer exist
-            if (!instancesToRemove.isEmpty()) {
-                try {
-                    List<TargetDescription> targetsToRemove = instancesToRemove.stream()
-                            .map(instanceId -> new TargetDescription().withId(instanceId))
-                            .collect(Collectors.toList());
-                    DeregisterTargetsResult deregisterTargetsResult = amazonElbClient.deregisterTargets(new DeregisterTargetsRequest()
-                            .withTargetGroupArn(targetGroupArn)
-                            .withTargets(targetsToRemove));
-                } catch (InvalidTargetException ignored) {
-                    // no-op - we tried to remove a target that wasn't in the target group, which is fine
-                }
-            }
-        }
-    }
-
     public FileSystemDescription getEfsByFileSystemId(AuthenticatedContext ac, String fileSystemId) {
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AmazonEfsClient amazonEfsClient =
@@ -322,7 +290,7 @@ public class CloudFormationStackUtil {
                 .collect(Collectors.toSet());
     }
 
-    private String getResourceArnByLogicalId(AuthenticatedContext ac, String logicalId, String region) {
+    public String getResourceArnByLogicalId(AuthenticatedContext ac, String logicalId, String region) {
         String cFStackName = getCfStackName(ac);
         AmazonCloudFormationClient amazonCfClient =
                 awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), region);

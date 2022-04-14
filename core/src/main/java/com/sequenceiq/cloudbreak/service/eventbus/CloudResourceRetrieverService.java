@@ -64,4 +64,10 @@ public class CloudResourceRetrieverService implements ResourceRetriever {
                 instanceGroup);
         return resources.stream().map(resource -> cloudResourceConverter.convert(resource)).collect(Collectors.toList());
     }
+
+    @Override
+    public List<CloudResource> findAllByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
+        List<Resource> resources = resourceService.findAllByResourceStatusAndResourceTypeAndStackId(status, resourceType, stackId);
+        return resources.stream().map(resource -> cloudResourceConverter.convert(resource)).collect(Collectors.toList());
+    }
 }
