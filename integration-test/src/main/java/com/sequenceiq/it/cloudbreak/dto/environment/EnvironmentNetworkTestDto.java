@@ -1,8 +1,5 @@
 package com.sequenceiq.it.cloudbreak.dto.environment;
 
-import static com.sequenceiq.it.cloudbreak.PrivateEndpointTest.PRIVATE_ENDPOINT_ENABLED;
-import static com.sequenceiq.it.cloudbreak.PrivateEndpointTest.PRIVATE_ENDPOINT_USAGE;
-
 import java.util.Set;
 
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
@@ -37,8 +34,7 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
 
     public EnvironmentNetworkTestDto valid() {
         return getCloudProvider()
-                .network(this)
-                .withTryUseServiceEndpoints();
+                .network(this);
     }
 
     public EnvironmentNetworkTestDto withAzure(EnvironmentNetworkAzureParams azure) {
@@ -74,14 +70,6 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
 
     public EnvironmentNetworkTestDto withPrivateSubnets() {
         getRequest().setPrivateSubnetCreation(PrivateSubnetCreation.ENABLED);
-        return this;
-    }
-
-    public EnvironmentNetworkTestDto withTryUseServiceEndpoints() {
-        if (PRIVATE_ENDPOINT_ENABLED.equals(getTestParameter().get(PRIVATE_ENDPOINT_USAGE))) {
-            LOGGER.debug("Private endpoints enabled via environment parameters");
-            withServiceEndpoints();
-        }
         return this;
     }
 
