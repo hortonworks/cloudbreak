@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.service.CrnChecker.warnIfAcco
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -56,6 +57,7 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Remov
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RightsCheck;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.User;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.WorkloadAdministrationGroup;
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsAuthenticationException;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -1040,13 +1042,6 @@ public class UmsClient {
         return response.getMetadata();
     }
 
-    public UserManagementProto.ListRolesResponse listRoles(String requestId, String accountId) {
-        validateAccountIdWithWarning(accountId);
-        return newStub(requestId).listRoles(UserManagementProto.ListRolesRequest.newBuilder()
-                .setAccountId(accountId)
-                .build());
-    }
-
     public UserManagementProto.SetWorkloadAdministrationGroupNameResponse setWorkloadAdministrationGroupName(String requestId, String accountId,
             String right, String resource) {
         validateAccountIdWithWarning(accountId);
@@ -1154,6 +1149,39 @@ public class UmsClient {
                 .addAllRightsCheck(rightsChecks)
                 .build();
         return newStub(requestId).getUserSyncStateModel(request);
+    }
+
+    public Set<String> listResourceRoles(String requestId, String accountId) {
+        UserManagementBlockingStub stub = newStub(requestId);
+        UserManagementProto.ListResourceRolesResponse response = stub.listResourceRoles(UserManagementProto.ListResourceRolesRequest.newBuilder()
+                .setAccountId(accountId)
+                .build());
+        Set<String> resourceRoles = Sets.newHashSet();
+        resourceRoles.addAll(response.getResourceRoleList().stream().map(resourceRole -> resourceRole.getCrn()).collect(Collectors.toSet()));
+        while (response.hasNextPageToken()) {
+            response = stub.listResourceRoles(UserManagementProto.ListResourceRolesRequest.newBuilder()
+                            .setAccountId(accountId)
+                            .setPageToken(response.getNextPageToken())
+                            .build());
+            resourceRoles.addAll(response.getResourceRoleList().stream().map(resourceRole -> resourceRole.getCrn()).collect(Collectors.toSet()));
+        }
+        return resourceRoles;
+    }
+
+    public Set<String> listRoles(String requestId, String accountId) {
+        UserManagementBlockingStub stub = newStub(requestId);
+        UserManagementProto.ListRolesResponse response = stub.listRoles(UserManagementProto.ListRolesRequest.newBuilder()
+                .setAccountId(accountId)
+                .build());
+        Set<String> roles = Sets.newHashSet();
+        roles.addAll(response.getRoleList().stream().map(role -> role.getCrn()).collect(Collectors.toSet()));
+        while (response.hasNextPageToken()) {
+            response = stub.listRoles(UserManagementProto.ListRolesRequest.newBuilder()
+                    .setAccountId(accountId)
+                    .build());
+            roles.addAll(response.getRoleList().stream().map(role -> role.getCrn()).collect(Collectors.toSet()));
+        }
+        return roles;
     }
 
     private void validateAccountIdWithWarning(String accountId) {

@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -111,6 +112,9 @@ public class CredentialAuthorizationIntegrationTest {
         });
         lenient().when(grpcUmsClient.checkAccountRight(anyString(), anyString(), any(), any())).thenReturn(true);
         mockPermissions();
+        when(grpcUmsClient.getResourceRoles(any(), any())).thenReturn(Set.of(
+                "crn:altus:iam:us-west-1:altus:resourceRole:Owner",
+                "crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"));
     }
 
     @AfterEach
