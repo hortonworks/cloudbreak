@@ -13,7 +13,7 @@ WORKDIR /
 RUN apt-get install unzip
 
 # install the consumption app
-ADD ${REPO_URL}/com/sequenceiq/consumption/$VERSION/consumption-$VERSION.jar /consumption.jar
+ADD ${REPO_URL}/com/sequenceiq/cloud-consumption/$VERSION/consumption-$VERSION.jar /consumption.jar
 
 # add jmx exporter
 ADD jmx_prometheus_javaagent-0.16.1.jar /jmx_prometheus_javaagent.jar
