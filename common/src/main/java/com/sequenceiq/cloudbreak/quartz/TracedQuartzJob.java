@@ -4,6 +4,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 
@@ -24,7 +25,7 @@ public abstract class TracedQuartzJob extends QuartzJobBean {
 
     @Override
     protected final void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        fillMdcContext();
+        fillMdcContext(context);
         Span span = TracingUtil.initSpan(tracer, "Quartz", jobName);
         TracingUtil.setTagsFromMdc(span);
         try (Scope ignored = tracer.activateSpan(span)) {
@@ -35,9 +36,10 @@ public abstract class TracedQuartzJob extends QuartzJobBean {
         }
     }
 
-    protected void fillMdcContext() {
+    protected void fillMdcContext(JobExecutionContext context) {
         MDCBuilder.buildMdcContext(getMdcContextObject());
-        MDCBuilder.getOrGenerateRequestId();
+        String requestId = MDCBuilder.getOrGenerateRequestId();
+        context.put(LoggerContextKey.REQUEST_ID.toString(), requestId);
     }
 
     protected abstract Object getMdcContextObject();
