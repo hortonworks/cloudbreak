@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 : ${SECURE_RANDOM:=true}
 : ${EXPOSE_JMX_METRICS:=false}
 : ${EXPOSE_JMX_METRICS_PORT:=20105}
