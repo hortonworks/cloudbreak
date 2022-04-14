@@ -121,6 +121,7 @@ import org.springframework.security.jwt.crypto.sign.MacSigner;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementImplBase;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKey;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyType;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
@@ -609,7 +610,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                 .setPolicyDefinition(policyDefinition)
                 .build();
         Role powerUserRole = Role.newBuilder()
-                .setCrn(mockCrnService.createCrn(ACCOUNT_ID_ALTUS, CrnResourceDescriptor.ROLE, "PowerUser").toString())
+                .setCrn("crn:altus:iam:us-west-1:altus:role:PowerUser")
                 .setCreationDateMs(CREATION_DATE_MS)
                 .addPolicy(powerUserPolicy)
                 .build();
@@ -1308,10 +1309,24 @@ public class MockUserManagementService extends UserManagementImplBase {
         mockGroupManagementService.deleteWorkloadAdministrationGroupName(request, responseObserver);
     }
 
+    @Override
+    public void listResourceRoles(UserManagementProto.ListResourceRolesRequest request,
+            StreamObserver<UserManagementProto.ListResourceRolesResponse> responseObserver) {
+        responseObserver.onNext(UserManagementProto.ListResourceRolesResponse.newBuilder()
+                .addResourceRole(UserManagementProto.ResourceRole.newBuilder()
+                        .setCrn("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin")
+                        .build())
+                .addResourceRole(UserManagementProto.ResourceRole.newBuilder()
+                        .setCrn("crn:altus:iam:us-west-1:altus:resourceRole:Owner")
+                        .build())
+                .build());
+        responseObserver.onCompleted();
+    }
+
     private ResourceAssignee createResourceAssignee(String resourceCrn) {
         return ResourceAssignee.newBuilder()
                 .setAssigneeCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
-                .setResourceRoleCrn(mockCrnService.createCrn(resourceCrn, CrnResourceDescriptor.RESOURCE_ROLE, "WorkspaceManager").toString())
+                .setResourceRoleCrn("crn:altus:iam:us-west-1:altus:resourceRole:WorkspaceManager")
                 .build();
     }
 
@@ -1319,7 +1334,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         String resourceCrn = mockCrnService.createCrn(assigneeCrn, CrnResourceDescriptor.CREDENTIAL, Crn.fromString(assigneeCrn).getAccountId()).toString();
         return ResourceAssignment.newBuilder()
                 .setResourceCrn(resourceCrn)
-                .setResourceRoleCrn(mockCrnService.createCrn(assigneeCrn, CrnResourceDescriptor.RESOURCE_ROLE, "WorkspaceManager").toString())
+                .setResourceRoleCrn("crn:altus:iam:us-west-1:altus:resourceRole:WorkspaceManager")
                 .build();
     }
 
