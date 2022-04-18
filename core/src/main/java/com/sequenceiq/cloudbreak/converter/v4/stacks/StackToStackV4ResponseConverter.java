@@ -168,6 +168,9 @@ public class StackToStackV4ResponseConverter {
         datalakeService.addSharedServiceResponse(source, response);
         filterExposedServicesByType(source.getType(), response.getCluster());
         response.setLoadBalancers(convertLoadBalancers(source.getId()));
+        if (!source.getLoadBalancers().isEmpty()) {
+            response.setEnableLoadBalancer(true);
+        }
         return response;
     }
 

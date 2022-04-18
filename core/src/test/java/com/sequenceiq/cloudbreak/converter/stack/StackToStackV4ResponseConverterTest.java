@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.stack;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
@@ -244,9 +245,12 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         given(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any(), any())).willReturn(new DatabaseResponse());
         given(loadBalancerService.findByStackId(any())).willReturn(loadBalancers);
         // WHEN
+        source.setLoadBalancers(loadBalancers);
         StackV4Response result = underTest.convert(source);
         // THEN
         assertNotNull(result.getLoadBalancers());
+        assertTrue(result.isEnableLoadBalancer());
+
         verify(restRequestThreadLocalService).setWorkspace(source.getWorkspace());
     }
 
