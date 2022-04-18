@@ -26,7 +26,7 @@ public class EnvironmentNetworkAzureParams {
 
     @Size(max = 255)
     @ApiModelProperty(value = EnvironmentModelDescription.AZURE_PRIVATE_DNS_ZONE_ID)
-    private String databasePrivateDnsZoneId;
+    private String privateDnsZoneId;
 
     @NotNull
     @ApiModelProperty(EnvironmentModelDescription.AZURE_NO_PUBLIC_IP)
@@ -56,12 +56,12 @@ public class EnvironmentNetworkAzureParams {
         this.noPublicIp = noPublicIp;
     }
 
-    public String getDatabasePrivateDnsZoneId() {
-        return databasePrivateDnsZoneId;
+    public String getPrivateDnsZoneId() {
+        return privateDnsZoneId;
     }
 
-    public void setDatabasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
-        this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
+    public void setPrivateDnsZoneId(String privateDnsZoneId) {
+        this.privateDnsZoneId = privateDnsZoneId;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class EnvironmentNetworkAzureParams {
         return "EnvironmentNetworkAzureParams{" +
                 "networkId='" + networkId + '\'' +
                 ", resourceGroupName='" + resourceGroupName + '\'' +
-                ", databasePrivateDnsZoneId='" + databasePrivateDnsZoneId + '\'' +
+                ", databasePrivateDnsZoneId='" + privateDnsZoneId + '\'' +
                 ", noPublicIp=" + noPublicIp +
                 '}';
     }
@@ -115,7 +115,7 @@ public class EnvironmentNetworkAzureParams {
             environmentNetworkAzureParams.setNetworkId(networkId);
             environmentNetworkAzureParams.setResourceGroupName(resourceGroupName);
             environmentNetworkAzureParams.setNoPublicIp(noPublicIp);
-            environmentNetworkAzureParams.setDatabasePrivateDnsZoneId(databasePrivateDnsZoneId);
+            environmentNetworkAzureParams.setPrivateDnsZoneId(databasePrivateDnsZoneId);
             return environmentNetworkAzureParams;
         }
     }

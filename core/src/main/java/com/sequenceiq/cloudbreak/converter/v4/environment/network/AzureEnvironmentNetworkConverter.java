@@ -30,7 +30,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     }
 
     private String getDatabasePrivateDnsZoneId(EnvironmentNetworkAzureParams azure) {
-        return StringUtils.isNotEmpty(azure.getDatabasePrivateDnsZoneId()) ? azure.getDatabasePrivateDnsZoneId() : "";
+        return StringUtils.isNotEmpty(azure.getPrivateDnsZoneId()) ? azure.getPrivateDnsZoneId() : "";
     }
 
     @Override
