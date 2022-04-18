@@ -141,6 +141,9 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
     @ApiModelProperty(StackModelDescription.LOAD_BALANCER)
     private List<LoadBalancerResponse> loadBalancers;
 
+    @ApiModelProperty(StackModelDescription.ENABLE_LOAD_BALANCER)
+    private boolean enableLoadBalancer;
+
     public Long getId() {
         return id;
     }
@@ -402,6 +405,14 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     public void setLoadBalancers(List<LoadBalancerResponse> loadBalancers) {
         this.loadBalancers = loadBalancers;
+    }
+
+    public boolean isEnableLoadBalancer() {
+        return enableLoadBalancer;
+    }
+
+    public void setEnableLoadBalancer(boolean enableLoadBalancer) {
+        this.enableLoadBalancer = enableLoadBalancer;
     }
 
     public boolean isGovCloud() {
