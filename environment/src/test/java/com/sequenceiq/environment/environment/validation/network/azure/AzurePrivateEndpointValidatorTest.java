@@ -251,7 +251,7 @@ public class AzurePrivateEndpointValidatorTest {
         return AzureParams.builder()
                 .withNetworkId(NETWORK_ID)
                 .withResourceGroupName("networkResourceGroupName")
-                .withPrivateDnsZoneId(privateDnsZoneId)
+                .withDatabasePrivateDnsZoneId(privateDnsZoneId)
                 .build();
     }
 

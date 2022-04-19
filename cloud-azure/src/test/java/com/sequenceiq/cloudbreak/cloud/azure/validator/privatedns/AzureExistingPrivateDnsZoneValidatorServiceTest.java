@@ -42,7 +42,7 @@ public class AzureExistingPrivateDnsZoneValidatorServiceTest {
     @Test
     void testValidate() {
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        ResourceId privateDnsZoneId = getPrivateDnsZoneResourceId();
+        ResourceId privateDnsZoneId = PrivateDnsZoneValidationTestConstants.getPrivateDnsZoneResourceId();
         Map<AzurePrivateDnsZoneServiceEnum, String> serviceToPrivateDnsZoneId = Map.of(AzurePrivateDnsZoneServiceEnum.POSTGRES, privateDnsZoneId.id());
 
         resultBuilder = underTest.validate(azureClient, NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME, serviceToPrivateDnsZoneId, resultBuilder);
@@ -73,7 +73,7 @@ public class AzureExistingPrivateDnsZoneValidatorServiceTest {
     @Test
     void testValidateWhenValidAndInvalidPrivateDnsZoneResourceId() {
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
-        ResourceId privateDnsZoneIdPostgres = getPrivateDnsZoneResourceId();
+        ResourceId privateDnsZoneIdPostgres = PrivateDnsZoneValidationTestConstants.getPrivateDnsZoneResourceId();
         String privateDnsZoneIdStorage = "invalidPrivateDnsZoneId";
         Map<AzurePrivateDnsZoneServiceEnum, String> serviceToPrivateDnsZoneId = Map.of(
                 AzurePrivateDnsZoneServiceEnum.POSTGRES, privateDnsZoneIdPostgres.id(),

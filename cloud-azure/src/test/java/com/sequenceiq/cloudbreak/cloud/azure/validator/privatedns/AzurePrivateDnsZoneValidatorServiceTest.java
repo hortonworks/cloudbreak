@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.Private
 import static com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.PrivateDnsZoneValidationTestConstants.NETWORK_RESOURCE_ID;
 import static com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.PrivateDnsZoneValidationTestConstants.SINGLE_RESOURCE_GROUP_NAME;
 import static com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.PrivateDnsZoneValidationTestConstants.ZONE_NAME_POSTGRES;
-import static com.sequenceiq.cloudbreak.cloud.azure.validator.privatedns.PrivateDnsZoneValidationTestConstants.getPrivateDnsZoneResourceId;
 import static com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsView.SUBSCRIPTION_ID;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -53,7 +52,8 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
     void testExistingPrivateDnsZoneNamesAreSupportedWhenSupportedDnsZoneName() {
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
 
-        resultBuilder = underTest.existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneServiceEnum.POSTGRES, getPrivateDnsZoneResourceId(), resultBuilder);
+        resultBuilder = underTest.existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneServiceEnum.POSTGRES,
+                PrivateDnsZoneValidationTestConstants.getPrivateDnsZoneResourceId(), resultBuilder);
 
         assertFalse(resultBuilder.build().hasError());
     }
@@ -63,7 +63,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
         ValidationResult.ValidationResultBuilder resultBuilder = new ValidationResult.ValidationResultBuilder();
 
         resultBuilder = underTest.existingPrivateDnsZoneNameIsSupported(AzurePrivateDnsZoneServiceEnum.POSTGRES,
-                getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME, "another.zone.name"), resultBuilder);
+                PrivateDnsZoneValidationTestConstants.getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME, "another.zone.name"), resultBuilder);
 
         ValidationTestUtil.checkErrorsPresent(resultBuilder, List.of(
                 "The provided private DNS zone /subscriptions/subscriptionId/resourceGroups/a-resource-group-name/providers/Microsoft.Network/privateDnsZones" +
@@ -78,7 +78,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
         privateZones.add(getPrivateDnsZone(null, ZONE_NAME_POSTGRES, null));
         when(azureClient.getPrivateDnsZonesByResourceGroup(SUBSCRIPTION_ID, SINGLE_RESOURCE_GROUP_NAME)).thenReturn(privateZones);
 
-        resultBuilder = underTest.privateDnsZoneExists(azureClient, getPrivateDnsZoneResourceId(), resultBuilder);
+        resultBuilder = underTest.privateDnsZoneExists(azureClient, PrivateDnsZoneValidationTestConstants.getPrivateDnsZoneResourceId(), resultBuilder);
 
         ValidationResult result = resultBuilder.build();
         assertFalse(result.hasError());
@@ -90,7 +90,8 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
         PagedList<PrivateZone> privateZones = new TestPagedList<>();
         when(azureClient.getPrivateDnsZonesByResourceGroup(SUBSCRIPTION_ID, A_RESOURCE_GROUP_NAME)).thenReturn(privateZones);
 
-        resultBuilder = underTest.privateDnsZoneExists(azureClient, getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME), resultBuilder);
+        resultBuilder = underTest.privateDnsZoneExists(azureClient, PrivateDnsZoneValidationTestConstants.getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME),
+                resultBuilder);
 
         ValidationTestUtil.checkErrorsPresent(resultBuilder, List.of(
                 "The provided private DNS zone /subscriptions/subscriptionId/resourceGroups/a-resource-group-name/providers/Microsoft.Network/privateDnsZones" +
@@ -107,7 +108,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
         when(azureClient.listNetworkLinksByPrivateDnsZoneName(SUBSCRIPTION_ID, A_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES)).thenReturn(virtualNetworkLinks);
 
         resultBuilder = underTest.privateDnsZoneConnectedToNetwork(azureClient, NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME,
-                getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME), resultBuilder);
+                PrivateDnsZoneValidationTestConstants.getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME), resultBuilder);
 
         assertFalse(resultBuilder.build().hasError());
     }
@@ -121,7 +122,7 @@ public class AzurePrivateDnsZoneValidatorServiceTest {
         when(azureClient.listNetworkLinksByPrivateDnsZoneName(SUBSCRIPTION_ID, A_RESOURCE_GROUP_NAME, ZONE_NAME_POSTGRES)).thenReturn(virtualNetworkLinks);
 
         resultBuilder = underTest.privateDnsZoneConnectedToNetwork(azureClient, NETWORK_RESOURCE_GROUP_NAME, NETWORK_NAME,
-                getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME), resultBuilder);
+                PrivateDnsZoneValidationTestConstants.getPrivateDnsZoneResourceId(A_RESOURCE_GROUP_NAME), resultBuilder);
 
         assertTrue(resultBuilder.build().hasError());
         ValidationTestUtil.checkErrorsPresent(resultBuilder, List.of(
