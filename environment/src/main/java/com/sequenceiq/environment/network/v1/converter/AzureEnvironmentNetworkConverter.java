@@ -44,7 +44,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
             azureNetwork.setResourceGroupName(azureParams.getResourceGroupName());
             azureNetwork.setNoPublicIp(azureParams.isNoPublicIp());
             if (ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT.equals(network.getServiceEndpointCreation())) {
-                azureNetwork.setPrivateDnsZoneId(azureParams.getPrivateDnsZoneId());
+                azureNetwork.setDatabasePrivateDnsZoneId(azureParams.getPrivateDnsZoneId());
             }
         }
         return azureNetwork;
@@ -81,7 +81,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                                 .withNetworkId(azureNetwork.getNetworkId())
                                 .withResourceGroupName(azureNetwork.getResourceGroupName())
                                 .withNoPublicIp(azureNetwork.getNoPublicIp())
-                                .withPrivateDnsZoneId(azureNetwork.getPrivateDnsZoneId())
+                                .withPrivateDnsZoneId(azureNetwork.getDatabasePrivateDnsZoneId())
                                 .build())
                 .build();
     }
@@ -112,7 +112,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
         Map<String, Object> param = new HashMap<>();
         param.put(RG_NAME, azureNetwork.getResourceGroupName());
         param.put(NETWORK_ID, azureNetwork.getNetworkId());
-        param.put(PRIVATE_DNS_ZONE_ID, azureNetwork.getPrivateDnsZoneId());
+        param.put(PRIVATE_DNS_ZONE_ID, azureNetwork.getDatabasePrivateDnsZoneId());
         return new Network(null, param);
     }
 }

@@ -25,12 +25,12 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
                 "networkId", azure.getNetworkId(),
                 "resourceGroupName", azure.getResourceGroupName(),
                 "noPublicIp", azure.getNoPublicIp(),
-                "privateDnsZoneId", getPrivateDnsZoneId(azure)
+                "privateDnsZoneId", getDatabasePrivateDnsZoneId(azure)
         );
     }
 
-    private String getPrivateDnsZoneId(EnvironmentNetworkAzureParams azure) {
-        return StringUtils.isNotEmpty(azure.getPrivateDnsZoneId()) ? azure.getPrivateDnsZoneId() : "";
+    private String getDatabasePrivateDnsZoneId(EnvironmentNetworkAzureParams azure) {
+        return StringUtils.isNotEmpty(azure.getDatabasePrivateDnsZoneId()) ? azure.getDatabasePrivateDnsZoneId() : "";
     }
 
     @Override

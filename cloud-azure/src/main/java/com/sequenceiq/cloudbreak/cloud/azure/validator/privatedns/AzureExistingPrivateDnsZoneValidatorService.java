@@ -24,16 +24,16 @@ public class AzureExistingPrivateDnsZoneValidatorService {
 
     public ValidationResult.ValidationResultBuilder validate(AzureClient azureClient, String networkResourceGroupName,
             String networkName, Map<AzurePrivateDnsZoneServiceEnum, String> serviceToPrivateDnsZoneId, ValidationResult.ValidationResultBuilder resultBuilder) {
-        serviceToPrivateDnsZoneId.forEach((service, privateDnsZoneId) -> {
+        serviceToPrivateDnsZoneId.forEach((service, databasePrivateDnsZoneId) -> {
             try {
-                ResourceId privateDnsZoneResourceId = ResourceId.fromString(privateDnsZoneId);
+                ResourceId privateDnsZoneResourceId = ResourceId.fromString(databasePrivateDnsZoneId);
                 azurePrivateDnsZoneValidatorService.existingPrivateDnsZoneNameIsSupported(service, privateDnsZoneResourceId, resultBuilder);
                 azurePrivateDnsZoneValidatorService.privateDnsZoneExists(azureClient, privateDnsZoneResourceId, resultBuilder);
                 azurePrivateDnsZoneValidatorService.privateDnsZoneConnectedToNetwork(azureClient, networkResourceGroupName, networkName,
                         privateDnsZoneResourceId, resultBuilder);
             } catch (InvalidParameterException e) {
                 String validationMessage = String.format("The provided private DNS zone id %s for service %s is not a valid azure resource id.",
-                        privateDnsZoneId, service.getResourceType());
+                        databasePrivateDnsZoneId, service.getResourceType());
                 LOGGER.warn(validationMessage);
                 resultBuilder.error(validationMessage);
             }
