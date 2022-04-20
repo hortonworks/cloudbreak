@@ -107,18 +107,16 @@ check_support_dbus_connection:
   cmd.run:
     - name: "curl {{ telemetry.databusCurlConnectOpts }} -s -k {{ filecollector.dbusUrl }} > /dev/null"
     - failhard: True{% if filecollector.proxyUrl %}
-    - env: {% if filecollector.proxyProtocol == "https" %}
-       - https_proxy: {{ filecollector.proxyUrl }}{% else %}
-       - http_proxy: {{ filecollector.proxyUrl }}{% endif %}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+    - env:
+       - https_proxy: {{ filecollector.proxyUrl }}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
        - no_proxy: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
 {% if filecollector.dbusS3Url %}
 check_support_dbus_s3_connection:
   cmd.run:
     - name: "curl {{ telemetry.databusCurlConnectOpts }} -s -k {{ filecollector.dbusS3Url }} > /dev/null"
     - failhard: True{% if filecollector.proxyUrl %}
-    - env: {% if filecollector.proxyProtocol == "https" %}
-       - https_proxy: {{ filecollector.proxyUrl }}{% else %}
-       - http_proxy: {{ filecollector.proxyUrl }}{% endif %}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+    - env:
+       - https_proxy: {{ filecollector.proxyUrl }}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
        - no_proxy: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
 {% endif %}
 {% endif %}
