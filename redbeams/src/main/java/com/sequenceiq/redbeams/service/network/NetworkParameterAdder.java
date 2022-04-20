@@ -35,7 +35,7 @@ public class NetworkParameterAdder {
 
     private static final String SUBNET_FOR_PRIVATE_ENDPOINT = "subnetForPrivateEndpoint";
 
-    private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingPrivateDnsZoneId";
+    private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingDatabasePrivateDnsZoneId";
 
     private static final String SUBNETS = "subnets";
 
@@ -80,7 +80,7 @@ public class NetworkParameterAdder {
                 parameters.put(ENDPOINT_TYPE, privateEndpointType);
                 if (PrivateEndpointType.USE_PRIVATE_ENDPOINT == privateEndpointType) {
                     parameters.put(SUBNET_FOR_PRIVATE_ENDPOINT, getAzureSubnetToUseWithPrivateEndpoint(environmentResponse, dbStack));
-                    parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, environmentResponse.getNetwork().getAzure().getPrivateDnsZoneId());
+                    parameters.put(EXISTING_PRIVATE_DNS_ZONE_ID, environmentResponse.getNetwork().getAzure().getDatabasePrivateDnsZoneId());
                 }
                 break;
             case GCP:

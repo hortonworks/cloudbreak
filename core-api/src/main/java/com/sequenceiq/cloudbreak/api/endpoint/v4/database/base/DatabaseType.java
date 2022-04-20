@@ -13,7 +13,6 @@ public enum DatabaseType {
     REGISTRY,
     HIVE_DAS,
     HUE,
-    QUERY_PROCESSOR,
     STREAMS_MESSAGING_MANAGER,
     PROFILER_AGENT,
     PROFILER_METRIC,
