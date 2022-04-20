@@ -605,20 +605,6 @@
       "visibleForDatahub": true
     },
     {
-      "name": "QUERY_PROCESSOR",
-      "displayName": "Hue Query Processor",
-      "serviceName": "QUERY_PROCESSOR",
-      "knoxService": "QUERY_PROCESSOR",
-      "knoxUrl": "/query_processor/",
-      "ssoSupported": true,
-      "port": 30700,
-      "tlsPort": 30700,
-      "apiOnly": true,
-      "apiIncluded": true,
-      "visibleForDatalake": false,
-      "visibleForDatahub": false
-    },
-    {
       "name": "KUDU",
       "displayName": "Kudu Master",
       "serviceName": "KUDU_MASTER",
