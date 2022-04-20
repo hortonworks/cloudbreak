@@ -6,6 +6,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -25,16 +28,10 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ParcelUrlProviderTest {
-
-    private static final String IMAGE_CATALOG_URL = "image-catalog-url";
-
-    private static final String IMAGE_CATALOG_NAME = "image-catalog-name";
 
     private static final String IMAGE_ID = "image-id";
 
@@ -42,11 +39,12 @@ public class ParcelUrlProviderTest {
 
     private static final String STACK_REPO_VERSION = "2.7.6";
 
-    @Mock
-    private ParcelService parcelService;
+    private static final String PRE_WARM_CSD = "http://spark3.jar";
+
+    private static final String OS_TYPE = "redhat7";
 
     @Mock
-    private ImageCatalogService imageCatalogService;
+    private ParcelService parcelService;
 
     @InjectMocks
     private ParcelUrlProvider underTest;
@@ -54,22 +52,23 @@ public class ParcelUrlProviderTest {
     @Test
     public void testGetRequiredParcelsFromImageWhenTheStackTypeIsWorkload() {
         Stack stack = createStack(StackType.WORKLOAD);
-        StatedImage image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
+        Image image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
 
-        when(parcelService.getComponentsByImage(stack, image.getImage())).thenReturn(createClusterComponents());
+        when(parcelService.getComponentsByImage(stack, image)).thenReturn(createClusterComponents());
 
         Set<String> actual = underTest.getRequiredParcelsFromImage(image, stack);
 
-        assertEquals(2, actual.size());
+        assertEquals(3, actual.size());
         assertTrue(actual.contains("http://testCDH-2.7.6-el7.parcel"));
         assertTrue(actual.contains("http://test/spark/SPARK3-el7.parcel"));
-        verify(parcelService).getComponentsByImage(stack, image.getImage());
+        assertTrue(actual.contains(PRE_WARM_CSD));
+        verify(parcelService).getComponentsByImage(stack, image);
     }
 
     @Test
     public void testGetRequiredParcelsFromImageWhenTheStackTypeIsDataLake() {
         Stack stack = createStack(StackType.DATALAKE);
-        StatedImage image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
+        Image image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
 
         Set<String> actual = underTest.getRequiredParcelsFromImage(image, stack);
 
@@ -78,13 +77,26 @@ public class ParcelUrlProviderTest {
         verifyNoInteractions(parcelService);
     }
 
+    @Test
+    public void testGetCmRpmUrlShouldReturnTheUrlFromTheImage() {
+        Image image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
+        String actual = underTest.getCmRpmUrl(image);
+        assertEquals("http://cm/yumRPMS/x86_64/cloudera-manager-server-7.2.4-14450219.el7.x86_64.rpm", actual);
+    }
+
     private Set<ClusterComponent> createClusterComponents() {
         return Collections.singleton(new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, "SPARK3", null, null));
     }
 
-    private StatedImage createImage(StackRepoDetails stackRepoDetails) {
-        return StatedImage.statedImage(new Image(null, null, null, null, null, IMAGE_ID, null, null, null, new ImageStackDetails(null, stackRepoDetails, null),
-                null, null, createPreWarmParcels(), null, null, false, null, null), IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
+    private Image createImage(StackRepoDetails stackRepoDetails) {
+        return new Image(null, null, null, null, null, IMAGE_ID, null, Map.of(OS_TYPE, "http://cm/yum"), null,
+                new ImageStackDetails(null, stackRepoDetails, null),
+                OS_TYPE, Map.of(CM.getKey(), "7.2.4", CM_BUILD_NUMBER.getKey(), "14450219"), createPreWarmParcels(), createPreWarmCsdUrls(), null, false, null,
+                null);
+    }
+
+    private List<String> createPreWarmCsdUrls() {
+        return List.of(PRE_WARM_CSD);
     }
 
     private List<List<String>> createPreWarmParcels() {

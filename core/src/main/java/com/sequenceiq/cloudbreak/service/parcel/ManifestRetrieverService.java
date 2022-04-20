@@ -26,7 +26,7 @@ public class ManifestRetrieverService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ManifestRetrieverService.class);
 
-    private static final int MANIFEST_READ_TIMEOUT = 5000;
+    private static final int MANIFEST_READ_TIMEOUT_IN_MS = 5000;
 
     @Inject
     private PaywallCredentialPopulator paywallCredentialPopulator;
@@ -39,8 +39,8 @@ public class ManifestRetrieverService {
         String manifestUrl = StringUtils.stripEnd(baseUrl, "/") + "/manifest.json";
         try {
             Client client = restClientFactory.getOrCreateDefault();
-            client.property(ClientProperties.CONNECT_TIMEOUT, MANIFEST_READ_TIMEOUT);
-            client.property(ClientProperties.READ_TIMEOUT, MANIFEST_READ_TIMEOUT);
+            client.property(ClientProperties.CONNECT_TIMEOUT, MANIFEST_READ_TIMEOUT_IN_MS);
+            client.property(ClientProperties.READ_TIMEOUT, MANIFEST_READ_TIMEOUT_IN_MS);
             LOGGER.debug("Trying to retrieve manifest {}", manifestUrl);
             WebTarget target = client.target(manifestUrl);
             addPaywallCredentialsIfNecessary(baseUrl, target);

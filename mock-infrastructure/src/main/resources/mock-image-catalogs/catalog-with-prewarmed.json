@@ -16,6 +16,7 @@
         "defaultImage": true,
         "package-versions": {
           "cm": "CM_VERSION",
+          "cm-build-number": "14450219",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
           "stack": "CDH_RUNTIME"
@@ -23,7 +24,7 @@
         "stack-details": {
           "repo": {
             "stack": {
-              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1454941/cdh/7.x/parcels/",
+              "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel",
               "repoid": "CDH-CDH_RUNTIME",
               "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME.p0.1454941"
             },
@@ -32,29 +33,29 @@
           "version": "CDH_RUNTIME"
         },
         "repo": {
-          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1455819/cm7/CM_VERSION/redhat7/yum/"
+          "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
         },
         "version": "CM_VERSION",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.0.3.0.0.0-21-el7.parcel",
-            "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel"
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
           ],
           [
             "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-21-el7.parcel",
-            "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel"
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
           ],
           [
             "CFM-2.0.0.0-el7.parcel",
-            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel"
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
           ]
         ],
         "pre_warm_csd": [
-          "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/SCHEMAREGISTRY-0.8.0.jar",
-          "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
-          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFI-1.10.0.2.0.0.0-23.jar",
-          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFICA-1.10.0.2.0.0.0-23.jar",
-          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-23.jar"
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/SCHEMAREGISTRY-0.8.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFI-1.10.0.2.0.0.0-23.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.10.0.2.0.0.0-23.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-23.jar"
         ]
       },
       {
@@ -71,6 +72,7 @@
         "uuid": "NON_DEFAULT_IMAGE_UUID",
         "package-versions": {
           "cm": "CM_VERSION_NEXT",
+          "cm-build-number": "14450219",
           "salt": "2017.7.5",
           "salt-bootstrap": "0.13.0-2018-05-03T07:39:07",
           "stack": "CDH_RUNTIME_NEXT"
@@ -78,7 +80,7 @@
         "stack-details": {
           "repo": {
             "stack": {
-              "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1454941/cdh/7.x/parcels/",
+              "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel/",
               "repoid": "CDH-CDH_RUNTIME_NEXT",
               "repository-version": "CDH_RUNTIME-1.cdhCDH_RUNTIME_NEXT.p0.1454941"
             },
@@ -87,29 +89,29 @@
           "version": "CDH_RUNTIME_NEXT"
         },
         "repo": {
-          "redhat7": "http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/1455819/cm7/CDH_RUNTIME_NEXT/redhat7/yum/"
+          "redhat7": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
         },
         "version": "CM_VERSION_NEXT",
         "pre_warm_parcels": [
           [
             "SCHEMAREGISTRY-0.8.0.3.0.0.0-21-el7.parcel",
-            "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel"
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
           ],
           [
             "STREAMS_MESSAGING_MANAGER-2.1.0.3.0.0.0-21-el7.parcel",
-            "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel"
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
           ],
           [
             "CFM-2.0.0.0-el7.parcel",
-            "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel"
+            "https://MOCK_SERVER_ADDRESS/mock-parcel"
           ]
         ],
         "pre_warm_csd": [
-          "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/SCHEMAREGISTRY-0.8.0.jar",
-          "http://s3.amazonaws.com/dev.hortonworks.com/CSP/centos7/3.x/BUILDS/3.0.0.0-21/tars/parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
-          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFI-1.10.0.2.0.0.0-23.jar",
-          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFICA-1.10.0.2.0.0.0-23.jar",
-          "http://s3.amazonaws.com/dev.hortonworks.com/CFM/centos7/2.x/BUILDS/2.0.0.0-23/tars/parcel/NIFIREGISTRY-0.5.0.2.0.0.0-23.jar"
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/SCHEMAREGISTRY-0.8.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/STREAMS_MESSAGING_MANAGER-2.1.0.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFI-1.10.0.2.0.0.0-23.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFICA-1.10.0.2.0.0.0-23.jar",
+          "https://MOCK_SERVER_ADDRESS/mock-parcel/NIFIREGISTRY-0.5.0.2.0.0.0-23.jar"
         ]
       }
     ]

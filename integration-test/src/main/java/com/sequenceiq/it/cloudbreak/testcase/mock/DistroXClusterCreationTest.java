@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.it.cloudbreak.CloudbreakTest.IMAGE_CATALOG_MOCK_SERVER_ROOT;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.pollingInterval;
@@ -19,6 +20,7 @@ import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatahubAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
@@ -85,6 +87,9 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
+    private TestParameter testParameter;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -187,7 +192,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .mockCm().cmImportClusterTemplate().post()
                 .bodyContains(String.format("\"clusterName\":\"%s\"", testContext.get(DistroXTestDto.class).getName()), 1).verify()
                 .mockCm().cmImportClusterTemplate().post().bodyContains("repositories", 1).verify()
-                .mockCm().cmImportClusterTemplate().post().bodyContains("http://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/", 1).verify()
+                .mockCm().cmImportClusterTemplate().post().bodyContains(testParameter.get(IMAGE_CATALOG_MOCK_SERVER_ROOT), 4).verify()
                 .validate();
     }
 
