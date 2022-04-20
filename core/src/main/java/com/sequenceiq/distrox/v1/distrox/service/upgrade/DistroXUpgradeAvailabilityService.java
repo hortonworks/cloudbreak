@@ -1,6 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_12;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_10;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_7;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.common.model.UpgradeShowAvailableImages.LATEST_ONLY;
@@ -108,7 +108,7 @@ public class DistroXUpgradeAvailabilityService {
         }
 
         String runtimeVersion = runtimeVersionService.getRuntimeVersion(stack.getCluster().getId()).orElse("");
-        boolean razRuntimeSupport = isVersionNewerOrEqualThanLimited(runtimeVersion, CLOUDERA_STACK_VERSION_7_2_12);
+        boolean razRuntimeSupport = isVersionNewerOrEqualThanLimited(runtimeVersion, CLOUDERA_STACK_VERSION_7_2_10);
         if (razRuntimeSupport) {
             LOGGER.debug("Runtime version [{}] is supported for RAZ cluster upgrades", runtimeVersion);
             return filteredCandidates;
