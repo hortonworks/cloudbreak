@@ -51,7 +51,7 @@ public class NetworkParameterAdderTest {
 
     private static final String SUBNET_FOR_PRIVATE_ENDPOINT = "subnetForPrivateEndpoint";
 
-    private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingPrivateDnsZoneId";
+    private static final String EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID = "existingDatabasePrivateDnsZoneId";
 
     private static final String SUBNETS = "subnets";
 
@@ -130,7 +130,7 @@ public class NetworkParameterAdderTest {
         assertThat(parameters, IsMapContaining.hasEntry(ENDPOINT_TYPE, PrivateEndpointType.USE_PRIVATE_ENDPOINT));
         assertThat(parameters, IsMapContaining.hasEntry(SUBNET_FOR_PRIVATE_ENDPOINT,
                 "/subscriptions/mySubscription/resourceGroups/myResourceGroup/providers/Microsoft.Network/virtualNetworks/networkId/subnets/mySubnet"));
-        assertThat(parameters, IsMapContaining.hasEntry(EXISTING_PRIVATE_DNS_ZONE_ID, "privateDnsZoneId"));
+        assertThat(parameters, IsMapContaining.hasEntry(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID, "databasePrivateDsZoneId"));
     }
 
     @Test
@@ -164,7 +164,7 @@ public class NetworkParameterAdderTest {
                                 EnvironmentNetworkAzureParams.EnvironmentNetworkAzureParamsBuilder.anEnvironmentNetworkAzureParams()
                                         .withResourceGroupName("myResourceGroup")
                                         .withNetworkId("networkId")
-                                        .withPrivateDnsZoneId("privateDnsZoneId")
+                                        .withDatabasePrivateDnsZoneId("databasePrivateDsZoneId")
                                         .build()
                         )
                         .build())

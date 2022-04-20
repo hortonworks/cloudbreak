@@ -39,8 +39,7 @@ filecollector_upload_to_support:
     - name: "cdp-telemetry databus upload -p '{{ filecollector.compressedFilePattern }}' -c /opt/cdp-telemetry/conf/support_bundle_databus.conf --stream {{ filecollector.supportBundleDbusStreamName }} --url {{ filecollector.dbusUrl }} {{ extra_dbus_header_file_param }} {{ filecollector.supportBundleDbusHeaders}}"
     - failhard: True
     - env:
-        - CDP_TELEMETRY_LOGGER_FILENAME: "upload.log"{% if filecollector.proxyUrl %}{% if filecollector.proxyProtocol == "https" %}
-        - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% else %}
-        - HTTP_PROXY: {{ filecollector.proxyUrl }}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
-        - NO_PROXY: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}{% endif %}
+        - CDP_TELEMETRY_LOGGER_FILENAME: "upload.log"{% if filecollector.proxyUrl %}
+        - HTTPS_PROXY: {{ filecollector.proxyUrl }}{% if filecollector.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+        - NO_PROXY: {{ filecollector.noProxyHosts }}{% endif %}{% endif %}
 {% endif %}

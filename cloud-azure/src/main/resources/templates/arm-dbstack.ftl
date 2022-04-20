@@ -281,8 +281,8 @@
                     {
                         "name": "dns-${privateEndpointName}",
                         "properties": {
-                            <#if existingPrivateDnsZoneId??>
-                            "privateDnsZoneId": "${existingPrivateDnsZoneId}"
+                            <#if existingDatabasePrivateDnsZoneId??>
+                            "privateDnsZoneId": "${existingDatabasePrivateDnsZoneId}"
                             <#else>
                             "privateDnsZoneId": "[resourceId('Microsoft.Network/privateDnsZones', 'privatelink.postgres.database.azure.com')]"
                             </#if>

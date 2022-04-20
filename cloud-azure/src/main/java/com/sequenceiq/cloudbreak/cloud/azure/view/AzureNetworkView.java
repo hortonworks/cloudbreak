@@ -16,7 +16,7 @@ public class AzureNetworkView {
 
     private static final String ENDPOINT_TYPE = "endpointType";
 
-    private static final String EXISTING_PRIVATE_DNS_ZONE_ID = "existingPrivateDnsZoneId";
+    private static final String EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID = "existingDatabasePrivateDnsZoneId";
 
     private String networkId;
 
@@ -103,7 +103,7 @@ public class AzureNetworkView {
         return network.getStringParameter(SUBNET_FOR_PRIVATE_ENDPOINT);
     }
 
-    public String getExistingPrivateDnsZoneId() {
-        return network.getStringParameter(EXISTING_PRIVATE_DNS_ZONE_ID);
+    public String getExistingDatabasePrivateDnsZoneId() {
+        return network.getStringParameter(EXISTING_DATABASE_PRIVATE_DNS_ZONE_ID);
     }
 }

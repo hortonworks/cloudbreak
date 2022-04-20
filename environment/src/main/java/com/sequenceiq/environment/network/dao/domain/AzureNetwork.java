@@ -12,7 +12,7 @@ public class AzureNetwork extends BaseNetwork {
 
     private Boolean noPublicIp;
 
-    private String privateDnsZoneId;
+    private String databasePrivateDnsZoneId;
 
     public String getNetworkId() {
         return networkId;
@@ -38,12 +38,12 @@ public class AzureNetwork extends BaseNetwork {
         this.noPublicIp = noPublicIp;
     }
 
-    public String getPrivateDnsZoneId() {
-        return privateDnsZoneId;
+    public String getDatabasePrivateDnsZoneId() {
+        return databasePrivateDnsZoneId;
     }
 
-    public void setPrivateDnsZoneId(String privateDnsZoneId) {
-        this.privateDnsZoneId = privateDnsZoneId;
+    public void setDatabasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
+        this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
     }
 
     @Override
@@ -52,7 +52,7 @@ public class AzureNetwork extends BaseNetwork {
                 "networkId='" + networkId + '\'' +
                 ", resourceGroupName='" + resourceGroupName + '\'' +
                 ", noPublicIp=" + noPublicIp +
-                ", privateDnsZoneId='" + privateDnsZoneId + '\'' +
+                ", databasePrivateDnsZoneId='" + databasePrivateDnsZoneId + '\'' +
                 "} " + super.toString();
     }
 }

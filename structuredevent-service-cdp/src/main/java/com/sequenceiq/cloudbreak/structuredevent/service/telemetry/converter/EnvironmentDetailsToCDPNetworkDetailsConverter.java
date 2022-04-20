@@ -102,7 +102,7 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
 
         if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
             boolean postgresPrivateDnsZonePresent = Optional.ofNullable(networkDto.getAzure())
-                    .map(AzureParams::getPrivateDnsZoneId)
+                    .map(AzureParams::getDatabasePrivateDnsZoneId)
                     .map(StringUtils::isNotEmpty)
                     .orElse(false);
             builder.setPostgres(postgresPrivateDnsZonePresent);
