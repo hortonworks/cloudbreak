@@ -2,21 +2,22 @@ package com.sequenceiq.consumption.service;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
-import java.util.Optional;
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionScheduleRequest;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionUnscheduleRequest;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.configuration.repository.ConsumptionRepository;
+import com.sequenceiq.consumption.flow.ConsumptionReactorFlowManager;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
@@ -26,14 +27,11 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsumptionService.class);
 
-    @Value("${consumption.admin.group.default.prefix:}")
-    private String adminGroupNamePrefix;
+    @Inject
+    private ConsumptionReactorFlowManager flowManager;
 
-    private final ConsumptionRepository consumptionRepository;
-
-    public ConsumptionService(ConsumptionRepository consumptionRepository) {
-        this.consumptionRepository = consumptionRepository;
-    }
+    @Inject
+    private ConsumptionRepository consumptionRepository;
 
     @Override
     public Long getResourceIdByResourceCrn(String resourceCrn) {
@@ -65,8 +63,9 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
     protected void prepareCreation(Consumption resource) {
     }
 
-    public Optional<Consumption> getById(Long environmentId) {
-        return Optional.empty();
+    public Consumption findConsumptionById(Long id) {
+        return consumptionRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(String.format("Consumption with ID [%s] not found", id)));
     }
 
     public void scheduleStorageConsumptionCollection(StorageConsumptionScheduleRequest request) {

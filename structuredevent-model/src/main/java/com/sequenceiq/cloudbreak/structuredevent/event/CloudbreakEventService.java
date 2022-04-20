@@ -25,6 +25,8 @@ public interface CloudbreakEventService {
 
     String LEGACY_RESOURCE_TYPE = "stacks";
 
+    String CONSUMPTION_RESOURCE_TYPE = "consumption";
+
     void fireCloudbreakEvent(Long entityId, String eventType, ResourceEvent resourceEvent);
 
     void fireCloudbreakEvent(Long entityId, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs);
