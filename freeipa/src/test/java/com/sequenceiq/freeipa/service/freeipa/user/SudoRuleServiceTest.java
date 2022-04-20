@@ -85,7 +85,7 @@ public class SudoRuleServiceTest {
     @Test
     public void shouldThrowFreeIpaClientExceptionInCaseOfMissinGroup() throws FreeIpaClientException {
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS.getRight()))).thenReturn(GROUP);
+        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS))).thenReturn(GROUP);
         when(freeIpaClient.groupShow(GROUP)).thenThrow(new FreeIpaClientException(null));
 
         assertThrows(FreeIpaClientException.class, () -> victim.setupSudoRule(stack, freeIpaClient));
@@ -96,7 +96,7 @@ public class SudoRuleServiceTest {
         Optional<SudoRule> sudoRule = Optional.of(new SudoRule());
 
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS.getRight()))).thenReturn(GROUP);
+        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS))).thenReturn(GROUP);
         when(freeIpaClient.groupShow(GROUP)).thenReturn(mock(Group.class));
         when(freeIpaClient.sudoRuleShow(RULE_NAME)).thenReturn(sudoRule);
 
@@ -108,7 +108,7 @@ public class SudoRuleServiceTest {
         SudoRule sudoRule = aValidSudoRule();
 
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS.getRight()))).thenReturn(GROUP);
+        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS))).thenReturn(GROUP);
         when(freeIpaClient.groupShow(GROUP)).thenReturn(mock(Group.class));
         when(freeIpaClient.sudoRuleShow(RULE_NAME)).thenReturn(Optional.empty());
         when(freeIpaClient.sudoRuleAdd(RULE_NAME, true)).thenReturn(sudoRule);
@@ -132,7 +132,7 @@ public class SudoRuleServiceTest {
         Optional<SudoRule> sudoRule = Optional.of(aValidSudoRule());
 
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS.getRight()))).thenReturn(GROUP);
+        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS))).thenReturn(GROUP);
         when(freeIpaClient.groupShow(GROUP)).thenReturn(mock(Group.class));
         when(freeIpaClient.sudoRuleShow(RULE_NAME)).thenReturn(sudoRule);
         when(freeIpaClient.sudoCommandFindAll()).thenReturn(Set.of());
@@ -157,7 +157,7 @@ public class SudoRuleServiceTest {
         sudoRule.get().setDenySudoCommands(List.of(DENY_COMMAND1));
 
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS.getRight()))).thenReturn(GROUP);
+        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS))).thenReturn(GROUP);
         when(freeIpaClient.groupShow(GROUP)).thenReturn(mock(Group.class));
         when(freeIpaClient.sudoRuleShow(RULE_NAME)).thenReturn(sudoRule);
         when(freeIpaClient.sudoCommandFindAll()).thenReturn(Set.of(aSudoCommand(ALLOW_COMMAND1), aSudoCommand(DENY_COMMAND1)));
@@ -180,7 +180,7 @@ public class SudoRuleServiceTest {
         sudoRule.get().setUserGroups(List.of(GROUP));
 
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS.getRight()))).thenReturn(GROUP);
+        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS))).thenReturn(GROUP);
         when(freeIpaClient.groupShow(GROUP)).thenReturn(mock(Group.class));
         when(freeIpaClient.sudoRuleShow(RULE_NAME)).thenReturn(sudoRule);
         when(freeIpaClient.sudoCommandFindAll()).thenReturn(Set.of(
@@ -197,7 +197,7 @@ public class SudoRuleServiceTest {
     @Test
     public void shouldNotPerformSudoSetupInCaseOfMissingVirtualGroup() throws Exception {
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS.getRight()))).thenReturn("");
+        when(virtualGroupService.getVirtualGroup(any(), eq(UmsVirtualGroupRight.ALLOW_PRIVILEGED_OS_OPERATIONS))).thenReturn("");
 
         victim.setupSudoRule(stack, freeIpaClient);
 

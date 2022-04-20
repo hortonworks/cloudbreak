@@ -93,7 +93,7 @@ public class SudoRuleService {
 
     private String getSudoGroupName(String environmentCrn) {
         VirtualGroupRequest virtualGroupRequest = new VirtualGroupRequest(environmentCrn, null);
-        return virtualGroupService.getVirtualGroup(virtualGroupRequest, ALLOW_PRIVILEGED_OS_OPERATIONS.getRight());
+        return virtualGroupService.getVirtualGroup(virtualGroupRequest, ALLOW_PRIVILEGED_OS_OPERATIONS);
     }
 
     private void createMissingSudoCommands(SudoRule sudoRule, FreeIpaClient freeIpaClient) throws Exception {

@@ -120,6 +120,10 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, entitledFor);
     }
 
+    public boolean isEntitledForVirtualGroupRight(String accountId, UmsVirtualGroupRight right) {
+        return right.getEntitlement().isEmpty() || isEntitlementRegistered(accountId, right.getEntitlement().get());
+    }
+
     public boolean isFmsToFreeipaBatchCallEnabled(String accountId) {
         return isEntitlementRegistered(accountId, FMS_FREEIPA_BATCH_CALL);
     }

@@ -728,7 +728,7 @@ public class ClusterHostServiceRunner {
             gateway.put("signkey", clusterGateway.getSignKey());
             gateway.put("tokencert", clusterGateway.getTokenCert());
             gateway.put("mastersecret", clusterGateway.getKnoxMasterSecret());
-            gateway.put("envAccessGroup", virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.ENVIRONMENT_ACCESS.getRight()));
+            gateway.put("envAccessGroup", virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.ENVIRONMENT_ACCESS));
             List<Map<String, Object>> topologies = getTopologies(clusterGateway, cluster.getBlueprint().getStackVersion());
             gateway.put("topologies", topologies);
             if (cluster.getBlueprint() != null) {
