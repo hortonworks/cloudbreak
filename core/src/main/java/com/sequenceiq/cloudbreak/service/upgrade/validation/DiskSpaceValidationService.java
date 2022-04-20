@@ -19,9 +19,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -50,11 +48,7 @@ public class DiskSpaceValidationService {
     @Inject
     private ResourceService resourceService;
 
-    @Inject
-    private ParcelSizeService parcelSizeService;
-
-    public void validateFreeSpaceForUpgrade(Stack stack, StatedImage targetImage) throws CloudbreakException {
-        long requiredFreeSpace = parcelSizeService.getRequiredFreeSpace(targetImage, stack);
+    public void validateFreeSpaceForUpgrade(Stack stack, long requiredFreeSpace) {
         Map<String, String> freeDiskSpaceByNodes = getFreeDiskSpaceByNodes(stack);
         LOGGER.debug("Required free space for parcels {} KB. Free space by nodes in KB: {}", requiredFreeSpace, freeDiskSpaceByNodes);
         Map<String, String> notEligibleNodes = getNotEligibleNodes(freeDiskSpaceByNodes, requiredFreeSpace,

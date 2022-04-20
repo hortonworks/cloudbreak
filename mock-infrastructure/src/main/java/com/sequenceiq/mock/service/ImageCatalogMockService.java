@@ -1,6 +1,5 @@
 package com.sequenceiq.mock.service;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -18,7 +17,7 @@ public class ImageCatalogMockService {
     private static final String NON_DEFAULT_IMAGE_UUID = "1a6eadd2-5B95-4EC9-B300-13dc43208b64";
 
     public String getImageCatalogByName(String name, String cbVersion, String runtimeVersion, String cmVersion, String defaultImageUuid,
-            String nonDefaultImageUuid) {
+            String nonDefaultImageUuid, String mockServerAddress) {
         String catalog = FileReaderUtils.readFileFromClasspathQuietly(String.format("mock-image-catalogs/%s.json", name));
         String nextRuntimeVersion = getNextRuntimeVersion(runtimeVersion);
         return catalog.replace("CB_VERSION", cbVersion)
@@ -27,7 +26,8 @@ public class ImageCatalogMockService {
                 .replace("CM_VERSION_NEXT", Objects.requireNonNullElse(cmVersion, nextRuntimeVersion))
                 .replace("CM_VERSION", Objects.requireNonNullElse(cmVersion, runtimeVersion))
                 .replace("NON_DEFAULT_IMAGE_UUID", Objects.requireNonNullElse(nonDefaultImageUuid, NON_DEFAULT_IMAGE_UUID))
-                .replace("DEFAULT_IMAGE_UUID", Objects.requireNonNullElse(defaultImageUuid, DEFAULT_IMAGE_UUID));
+                .replace("DEFAULT_IMAGE_UUID", Objects.requireNonNullElse(defaultImageUuid, DEFAULT_IMAGE_UUID))
+                .replace("MOCK_SERVER_ADDRESS", mockServerAddress);
     }
 
     private String getNextRuntimeVersion(String runtime) {

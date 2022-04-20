@@ -33,6 +33,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeUpdateCheckFailedToClusterUpgradeValidationFailureEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeValidationEventToClusterUpgradeDiskSpaceValidationEventConverter;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent;
@@ -128,7 +130,7 @@ public class ClusterUpgradeValidationActions {
                 variables.put(TARGET_IMAGE, targetImage);
                 CloudStack cloudStack = context.getCloudStack().replaceImage(targetImage);
                 ClusterUpgradeImageValidationEvent event = new ClusterUpgradeImageValidationEvent(payload.getResourceId(), payload.getImageId(), cloudStack,
-                        context.getCloudCredential(), context.getCloudContext());
+                        context.getCloudCredential(), context.getCloudContext(), upgradeImageInfo.getTargetStatedImage().getImage());
                 sendEvent(context, event.selector(), event);
             }
 
@@ -142,19 +144,24 @@ public class ClusterUpgradeValidationActions {
 
     @Bean(name = "CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_STATE")
     public Action<?, ?> clusterUpgradeDiskSpaceValidation() {
-        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeValidationEvent.class) {
+        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeDiskSpaceValidationEvent.class) {
 
             @Override
-            protected void doExecute(StackContext context, ClusterUpgradeValidationEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, ClusterUpgradeDiskSpaceValidationEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Starting disk space validation.");
-                ClusterUpgradeValidationEvent event = new ClusterUpgradeValidationEvent(VALIDATE_DISK_SPACE_EVENT.name(),
-                        payload.getResourceId(), payload.getImageId());
+                ClusterUpgradeDiskSpaceValidationEvent event = new ClusterUpgradeDiskSpaceValidationEvent(VALIDATE_DISK_SPACE_EVENT.name(),
+                        payload.getResourceId(), payload.getRequiredFreeSpace());
                 sendEvent(context, event.selector(), event);
             }
 
             @Override
-            protected Object getFailurePayload(ClusterUpgradeValidationEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ClusterUpgradeDiskSpaceValidationEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 return new ClusterUpgradeDiskSpaceValidationFinishedEvent(payload.getResourceId());
+            }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<ClusterUpgradeDiskSpaceValidationEvent>> payloadConverters) {
+                payloadConverters.add(new ClusterUpgradeValidationEventToClusterUpgradeDiskSpaceValidationEventConverter());
             }
         };
     }

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 
 public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidationEvent {
@@ -15,12 +16,15 @@ public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidation
 
     private final CloudContext cloudContext;
 
+    private final Image targetImage;
+
     public ClusterUpgradeImageValidationEvent(Long resourceId, String imageId, CloudStack cloudStack, CloudCredential cloudCredential,
-            CloudContext cloudContext) {
+            CloudContext cloudContext, Image targetImage) {
         super(VALIDATE_IMAGE_EVENT.selector(), resourceId, imageId);
         this.cloudStack = cloudStack;
         this.cloudCredential = cloudCredential;
         this.cloudContext = cloudContext;
+        this.targetImage = targetImage;
     }
 
     public CloudCredential getCloudCredential() {
@@ -33,6 +37,10 @@ public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidation
 
     public CloudContext getCloudContext() {
         return cloudContext;
+    }
+
+    public Image getTargetImage() {
+        return targetImage;
     }
 
     @Override

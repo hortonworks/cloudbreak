@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
 import static java.util.Collections.emptySet;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
@@ -25,9 +26,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -48,12 +47,6 @@ public class DiskSpaceValidationServiceTest {
 
     @Mock
     private ResourceService resourceService;
-
-    @Mock
-    private ParcelSizeService parcelSizeService;
-
-    @Mock
-    private StatedImage targetImage;
 
     @InjectMocks
     private DiskSpaceValidationService underTest;
@@ -80,42 +73,32 @@ public class DiskSpaceValidationServiceTest {
     }
 
     @Test
-    public void testValidateFreeSpaceForUpgradeShouldNotThrowExceptionWhenThereAreEnoughFreeSpaceForUpgrade() throws CloudbreakException {
-        when(parcelSizeService.getRequiredFreeSpace(targetImage, stack)).thenReturn(9000L);
-
-        underTest.validateFreeSpaceForUpgrade(stack, targetImage);
-
+    public void testValidateFreeSpaceForUpgradeShouldNotThrowExceptionWhenThereAreEnoughFreeSpaceForUpgrade() {
+        underTest.validateFreeSpaceForUpgrade(stack, 9000L);
         verifyMocks();
     }
 
     @Test
-    public void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInMb() throws CloudbreakException {
-        when(parcelSizeService.getRequiredFreeSpace(targetImage, stack)).thenReturn(920000L);
-
+    public void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInMb() {
         Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> {
-            underTest.validateFreeSpaceForUpgrade(stack, targetImage);
+            underTest.validateFreeSpaceForUpgrade(stack, 920000L);
         });
         assertEquals("There is not enough free space on the nodes to perform upgrade operation. The required free space by nodes: host1: 2.2 GB, host2: 3.1 GB",
                 exception.getMessage());
-
         verifyMocks();
     }
 
     @Test
-    public void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInGb() throws CloudbreakException {
-        when(parcelSizeService.getRequiredFreeSpace(targetImage, stack)).thenReturn(1750000L);
-
+    public void testValidateFreeSpaceForUpgradeShouldThrowExceptionWhenThereAreNoEnoughFreeSpaceAndTheRequiredSpaceIsReturnedInGb() {
         Exception exception = assertThrows(UpgradeValidationFailedException.class, () -> {
-            underTest.validateFreeSpaceForUpgrade(stack, targetImage);
+            underTest.validateFreeSpaceForUpgrade(stack, 1750000L);
         });
         assertEquals("There is not enough free space on the nodes to perform upgrade operation. The required free space by nodes: host1: 4.2 GB, host2: 5.8 GB",
                 exception.getMessage());
-
         verifyMocks();
     }
 
-    private void verifyMocks() throws CloudbreakException {
-        verify(parcelSizeService).getRequiredFreeSpace(targetImage, stack);
+    private void verifyMocks() {
         verify(resourceService).getAllByStackId(STACK_ID);
         verify(stackUtil).collectNodesWithDiskData(stack);
         verify(gatewayConfigService).getAllGatewayConfigs(stack);

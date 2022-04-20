@@ -13,15 +13,15 @@ import org.springframework.stereotype.Component;
 @Component
 public class PaywallCredentialPopulator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PaywallCredentialPopulator.class);
+    public static final Pattern ARCHIVE_URL_PATTERN = Pattern.compile("http[s]?://archive\\.cloudera\\.com.+");
 
-    private static final Pattern URL_PATTERN = Pattern.compile("http[s]?://archive\\.cloudera\\.com.+");
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaywallCredentialPopulator.class);
 
     @Inject
     private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
 
     public void populateWebTarget(String baseUrl, WebTarget target) {
-        if (URL_PATTERN.matcher(baseUrl).find()) {
+        if (ARCHIVE_URL_PATTERN.matcher(baseUrl).find()) {
             LOGGER.debug("Adding Paywall credential to request to access {}.", baseUrl);
             String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
             JsonCMLicense license = clouderaManagerLicenseProvider.getLicense(userCrn);

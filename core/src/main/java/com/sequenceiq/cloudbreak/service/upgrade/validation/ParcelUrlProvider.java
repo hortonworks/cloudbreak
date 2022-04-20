@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -10,6 +13,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -17,23 +22,35 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 
 @Component
-class ParcelUrlProvider {
+public class ParcelUrlProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ParcelUrlProvider.class);
 
     @Inject
     private ParcelService parcelService;
 
-    Set<String> getRequiredParcelsFromImage(StatedImage targetImage, Stack stack) {
-        String cdhParcelUrl = getCdhParcelUrl(targetImage);
-        return StackType.DATALAKE.equals(stack.getType()) ? Collections.singleton(cdhParcelUrl) : getAllParcel(cdhParcelUrl, targetImage, stack);
+    public Set<String> getRequiredParcelsFromImage(Image image, Stack stack) {
+        LOGGER.debug("Retrieving parcel URLs from image {}", image.getUuid());
+        String cdhParcelUrl = getCdhParcelUrl(image);
+        return StackType.DATALAKE.equals(stack.getType()) ? Collections.singleton(cdhParcelUrl) : getAllParcel(cdhParcelUrl, image, stack);
     }
 
-    private String getCdhParcelUrl(StatedImage targetImage) {
-        Map<String, String> stack = targetImage.getImage().getStackDetails().getRepo().getStack();
-        String imageId = targetImage.getImage().getUuid();
+    public String getCmRpmUrl(Image image) {
+        LOGGER.debug("Retrieving CM RPM package URL from image {}", image.getUuid());
+        return image.getRepo().get(image.getOsType())
+                .concat("RPMS/x86_64/cloudera-manager-server-")
+                .concat(image.getPackageVersions().get(CM.getKey()))
+                .concat("-")
+                .concat(image.getPackageVersions().get(CM_BUILD_NUMBER.getKey()))
+                .concat(".el7.x86_64.rpm");
+    }
+
+    private String getCdhParcelUrl(Image image) {
+        Map<String, String> stack = image.getStackDetails().getRepo().getStack();
+        String imageId = image.getUuid();
         return getCdhBaseUrl(stack, imageId).concat("CDH-").concat(getRepoVersion(stack, imageId)).concat("-el7.parcel");
     }
 
@@ -47,19 +64,26 @@ class ParcelUrlProvider {
                 .orElseThrow(() -> new CloudbreakServiceException(String.format("Stack repository version is not found on image: %s", imageId)));
     }
 
-    private Set<String> getAllParcel(String cdhRepoUrl, StatedImage targetImage, Stack stack) {
-        Set<String> preWarmParcelUrls = getPreWarmParcelUrls(targetImage, stack);
-        preWarmParcelUrls.add(cdhRepoUrl);
-        return preWarmParcelUrls;
+    private Set<String> getAllParcel(String cdhRepoUrl, Image image, Stack stack) {
+        Set<String> requiredParcelNames = getRequiredParcelNames(stack, image);
+        Set<String> parcelUrls = getPreWarmParcelUrls(image, requiredParcelNames);
+        parcelUrls.addAll(getPreWarmCsdUrls(image, requiredParcelNames));
+        parcelUrls.add(cdhRepoUrl);
+        return parcelUrls;
     }
 
-    private Set<String> getPreWarmParcelUrls(StatedImage targetImage, Stack stack) {
-        Set<String> requiredParcelNames = getRequiredParcelNames(stack, targetImage.getImage());
-        return targetImage.getImage()
-                .getPreWarmParcels()
+    private Set<String> getPreWarmParcelUrls(Image image, Set<String> requiredParcelNames) {
+        return image.getPreWarmParcels()
                 .stream()
-                .filter(filterRequiresParcels(requiredParcelNames))
+                .filter(filterRequiredParcels(requiredParcelNames))
                 .map(list -> removeUnnecessaryCharacters(getPreWarmParcelBaseUrl(list)).concat("/").concat(getPreWarmParcelName(list)))
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> getPreWarmCsdUrls(Image image, Set<String> requiredParcelNames) {
+        return image.getPreWarmCsd()
+                .stream()
+                .filter(csdUrl -> requiredParcelNames.stream().anyMatch(parcelName -> csdUrl.toLowerCase().contains(parcelName.toLowerCase())))
                 .collect(Collectors.toSet());
     }
 
@@ -77,7 +101,7 @@ class ParcelUrlProvider {
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Parcel url not found in list: %s", list)));
     }
 
-    private Predicate<List<String>> filterRequiresParcels(Set<String> requiredParcelNames) {
+    private Predicate<List<String>> filterRequiredParcels(Set<String> requiredParcelNames) {
         return list -> list.stream().anyMatch(parcelName -> requiredParcelNames.stream().anyMatch(parcelName::startsWith));
     }
 

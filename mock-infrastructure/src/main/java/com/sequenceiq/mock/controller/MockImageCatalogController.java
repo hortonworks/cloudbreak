@@ -22,7 +22,8 @@ public class MockImageCatalogController {
             @RequestParam("runtime") String runtime,
             @RequestParam(name = "cm", required = false) String cm,
             @RequestParam(name = "default-image-uuid", required = false) String defaultImageUuid,
-            @RequestParam(name = "non-default-image-uuid", required = false) String nonDefaultImageUuid) {
-        return imageCatalogMockService.getImageCatalogByName(name, cbVersion, runtime, cm, defaultImageUuid, nonDefaultImageUuid);
+            @RequestParam(name = "non-default-image-uuid", required = false) String nonDefaultImageUuid,
+            @RequestParam("mock-server-address") String mockServerAddress) {
+        return imageCatalogMockService.getImageCatalogByName(name, cbVersion, runtime, cm, defaultImageUuid, nonDefaultImageUuid, mockServerAddress);
     }
 }
