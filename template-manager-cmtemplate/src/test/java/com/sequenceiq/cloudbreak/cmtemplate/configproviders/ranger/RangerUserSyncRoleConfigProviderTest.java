@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoles.RANGER_USERSYNC;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ public class RangerUserSyncRoleConfigProviderTest {
 
     @Before
     public void setup() {
-        when(virtualGroupService.createOrGetVirtualGroup(any(), anyString())).thenReturn("mockAdmin");
+        when(virtualGroupService.createOrGetVirtualGroup(any(), any())).thenReturn("mockAdmin");
     }
 
     @Test

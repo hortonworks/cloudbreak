@@ -115,7 +115,7 @@ public class ClouderaManagerLdapServiceTest {
         apiAuthRoleMetadataList.addItemsItem(
                 new ApiAuthRoleMetadata().displayName("ROLE_DASHBOARD_USER").uuid("uuid").role("ROLE_DASHBOARD_USER"));
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(apiAuthRoleMetadataList);
-        when(virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN.getRight())).thenReturn("virtualGroup");
+        when(virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN)).thenReturn("virtualGroup");
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig, virtualGroupRequest);
         // THEN
@@ -142,7 +142,7 @@ public class ClouderaManagerLdapServiceTest {
         apiAuthRoleMetadataList.addItemsItem(
                 new ApiAuthRoleMetadata().displayName("ROLE_ADMIN").uuid("uuid").role("ROLE_ADMIN"));
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(apiAuthRoleMetadataList);
-        when(virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN.getRight())).thenReturn("virtualGroup");
+        when(virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN)).thenReturn("virtualGroup");
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig, ldapConfig, virtualGroupRequest);
         // THEN

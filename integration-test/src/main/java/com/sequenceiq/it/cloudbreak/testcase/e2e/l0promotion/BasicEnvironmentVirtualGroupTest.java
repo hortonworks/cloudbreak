@@ -246,7 +246,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
         for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
             try {
                 virtualGroup = client.getDefaultClient().getWorkloadAdministrationGroupName(accountId, MDCUtils.getRequestId(),
-                        right.getRight(), environmentCrn, regionAwareInternalCrnGeneratorFactory);
+                        right, environmentCrn, regionAwareInternalCrnGeneratorFactory);
             } catch (StatusRuntimeException ex) {
                 if (Status.Code.NOT_FOUND != ex.getStatus().getCode()) {
                     LOGGER.info(String.format(" Virtual groups is missing for right: '%s' ", right.getRight()));
