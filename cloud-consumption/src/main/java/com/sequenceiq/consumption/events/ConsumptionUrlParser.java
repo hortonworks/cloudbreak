@@ -1,4 +1,4 @@
-package com.sequenceiq.consumption.configuration.events;
+package com.sequenceiq.consumption.events;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,7 +59,7 @@ public class ConsumptionUrlParser extends CDPRestUrlParser {
 
     @Override
     protected String getResourceType(Matcher matcher) {
-        return CloudbreakEventService.ENVIRONMENT_RESOURCE_TYPE;
+        return CloudbreakEventService.CONSUMPTION_RESOURCE_TYPE;
     }
 
     @Override
