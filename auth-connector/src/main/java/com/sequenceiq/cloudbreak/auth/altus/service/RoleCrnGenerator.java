@@ -1,11 +1,16 @@
 package com.sequenceiq.cloudbreak.auth.altus.service;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.ws.rs.InternalServerErrorException;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -13,6 +18,8 @@ import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 @Service
 public class RoleCrnGenerator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RoleCrnGenerator.class);
 
     @Inject
     private GrpcUmsClient grpcUmsClient;
@@ -42,7 +49,9 @@ public class RoleCrnGenerator {
     }
 
     public Crn getResourceRoleCrn(String resourceRoleName, String accountId) {
-        return grpcUmsClient.getResourceRoles(accountId, MDCUtils.getRequestId()).stream()
+        Set<String> resourceRoles = grpcUmsClient.getResourceRoles(accountId, MDCUtils.getRequestId());
+        LOGGER.info("Resource roles in account {} are {}", accountId, Joiner.on(",").join(resourceRoles));
+        return resourceRoles.stream()
                 .map(Crn::safeFromString)
                 .filter(crn -> StringUtils.equals(crn.getResource(), resourceRoleName))
                 .findFirst()
@@ -50,7 +59,9 @@ public class RoleCrnGenerator {
     }
 
     public Crn getRoleCrn(String roleName, String accountId) {
-        return grpcUmsClient.getRoles(accountId, MDCUtils.getRequestId()).stream()
+        Set<String> roles = grpcUmsClient.getRoles(accountId, MDCUtils.getRequestId());
+        LOGGER.info("Roles in account {} are {}", accountId, Joiner.on(",").join(roles));
+        return roles.stream()
                 .map(Crn::safeFromString)
                 .filter(crn -> StringUtils.equals(crn.getResource(), roleName))
                 .findFirst()
