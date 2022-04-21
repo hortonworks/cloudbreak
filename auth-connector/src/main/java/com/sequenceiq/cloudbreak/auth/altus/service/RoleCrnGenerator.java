@@ -17,8 +17,8 @@ public class RoleCrnGenerator {
     @Inject
     private GrpcUmsClient grpcUmsClient;
 
-    public String getBuiltInDatabusRoleCrn(String accountId) {
-        return getRoleCrn("DbusUploader", accountId).toString();
+    public String getBuiltInDatabusRoleCrn() {
+        return getRoleCrn("DbusUploader").toString();
     }
 
     public String getBuiltInOwnerResourceRoleCrn() {
@@ -30,23 +30,15 @@ public class RoleCrnGenerator {
     }
 
     public Crn getResourceRoleCrn(String resourceRoleName) {
-        return getResourceRoleCrn(resourceRoleName, ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    public Crn getRoleCrn(String roleName) {
-        return getRoleCrn(roleName, ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    public Crn getResourceRoleCrn(String resourceRoleName, String accountId) {
-        return grpcUmsClient.getResourceRoles(accountId, MDCUtils.getRequestId()).stream()
+        return grpcUmsClient.getResourceRoles(ThreadBasedUserCrnProvider.getAccountId(), MDCUtils.getRequestId()).stream()
                 .map(Crn::safeFromString)
                 .filter(crn -> StringUtils.equals(crn.getResource(), resourceRoleName))
                 .findFirst()
                 .orElseThrow(() -> new InternalServerErrorException(String.format("There is no resource role in UMS with name %s", resourceRoleName)));
     }
 
-    public Crn getRoleCrn(String roleName, String accountId) {
-        return grpcUmsClient.getRoles(accountId, MDCUtils.getRequestId()).stream()
+    public Crn getRoleCrn(String roleName) {
+        return grpcUmsClient.getRoles(ThreadBasedUserCrnProvider.getAccountId(), MDCUtils.getRequestId()).stream()
                 .map(Crn::safeFromString)
                 .filter(crn -> StringUtils.equals(crn.getResource(), roleName))
                 .findFirst()

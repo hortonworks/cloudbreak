@@ -44,7 +44,7 @@ public class AltusIAMService {
                 machineUserName,
                 actorCrn,
                 accountId,
-                roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId),
+                roleCrnGenerator.getBuiltInDatabusRoleCrn(),
                 regionAwareInternalCrnGeneratorFactory);
     }
 
@@ -57,7 +57,7 @@ public class AltusIAMService {
                         machineUserName,
                         actorCrn,
                         accountId,
-                        roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId),
+                        roleCrnGenerator.getBuiltInDatabusRoleCrn(),
                         UserManagementProto.AccessKeyType.Value.ED25519,
                         regionAwareInternalCrnGeneratorFactory)));
     }
@@ -94,7 +94,7 @@ public class AltusIAMService {
                 LOGGER.debug("Access and secret keys are set manually application wide for Databus, skip machine user cleanup.");
             } else {
                 umsClient.clearMachineUserWithAccessKeysAndRole(machineUserName, actorCrn, accountId,
-                        roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId), regionAwareInternalCrnGeneratorFactory);
+                        roleCrnGenerator.getBuiltInDatabusRoleCrn(), regionAwareInternalCrnGeneratorFactory);
             }
         } catch (Exception e) {
             LOGGER.warn("Cluster Databus resource cleanup failed (fluent - databus user). It is not a fatal issue, "
