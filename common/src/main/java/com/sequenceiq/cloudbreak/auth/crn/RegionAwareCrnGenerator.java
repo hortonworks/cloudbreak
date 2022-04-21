@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.auth.crn;
 
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +19,7 @@ public class RegionAwareCrnGenerator {
         return Crn.builder()
                 .setAccountId(ACCOUNT_IN_IAM_CRNS)
                 .setResource(resource)
-                .setPartition(StringUtils.equals(Crn.Partition.CDP_GOV.getName(), partition) ? Crn.Partition.CDP_GOV : Crn.Partition.ALTUS)
+                .setPartition(Crn.Partition.ALTUS)
                 .setRegion(Crn.Region.safeFromString(getRegion()))
                 .setService(resourceDescriptor.getServiceType())
                 .setResourceType(resourceDescriptor.getResourceType())
