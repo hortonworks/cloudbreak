@@ -20,7 +20,7 @@ class NullUtilTest {
 
     @Test
     void testAllNullWhenInputArrayIsNullThenTrueShouldReturn() {
-        assertTrue(NullUtil.allNull(null));
+        assertTrue(NullUtil.allNull((Object) null));
     }
 
     @Test

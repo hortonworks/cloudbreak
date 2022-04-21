@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.service;
 
+import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
+import static com.sequenceiq.cloudbreak.util.TestConstants.CRN;
+import static com.sequenceiq.cloudbreak.util.TestConstants.USER;
+import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
@@ -24,7 +28,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mockito;
 
-import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
@@ -32,6 +35,10 @@ import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager
 import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
 
 public class EnvironmentDeletionServiceTest {
+
+    private static final boolean CASCADE = true;
+
+    private static final boolean NON_CASCADE = !CASCADE;
 
     private final EnvironmentViewService environmentService = Mockito.mock(EnvironmentViewService.class);
 
@@ -59,67 +66,98 @@ public class EnvironmentDeletionServiceTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"true", "false"})
-    public void deleteByNameAndAccountId(String valueString) {
-        boolean cascading = Boolean.parseBoolean(valueString);
-
+    @ValueSource(booleans = {true, false})
+    public void deleteByNameAndAccountId(boolean cascading) {
         EnvironmentDeletionService environmentDeletionServiceWired = spy(environmentDeletionService);
         when(environmentService
-                .getByNameAndAccountId(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(TestConstants.ACCOUNT_ID)))
+                .getByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID)))
                 .thenReturn(environmentView);
         when(environmentDtoConverter.environmentViewToViewDto(any(EnvironmentView.class))).thenReturn(environmentViewDto);
         assertEquals(environmentViewDto, environmentDeletionServiceWired
-                .deleteByNameAndAccountId(EnvironmentTestData.ENVIRONMENT_NAME, TestConstants.ACCOUNT_ID, TestConstants.USER, cascading, true));
-        verify(environmentDeletionServiceWired).delete(eq(environmentView), eq(TestConstants.USER), anyBoolean(), anyBoolean());
+                .deleteByNameAndAccountId(ENVIRONMENT_NAME, ACCOUNT_ID, USER, cascading, true));
+        verify(environmentDeletionServiceWired).delete(eq(environmentView), eq(USER), anyBoolean(), anyBoolean());
         if (cascading) {
-            verify(reactorFlowManager).triggerCascadingDeleteFlow(eq(environmentView), eq(TestConstants.USER), eq(true));
+            verify(reactorFlowManager).triggerCascadingDeleteFlow(eq(environmentView), eq(USER), eq(true));
             verify(reactorFlowManager, never()).triggerDeleteFlow(any(), any(), anyBoolean());
         } else {
-            verify(reactorFlowManager).triggerDeleteFlow(eq(environmentView), eq(TestConstants.USER), eq(true));
+            verify(reactorFlowManager).triggerDeleteFlow(eq(environmentView), eq(USER), eq(true));
             verify(reactorFlowManager, never()).triggerCascadingDeleteFlow(any(), any(), anyBoolean());
         }
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"true", "false"})
-    public void deleteByCrnAndAccountId(String valueString) {
-        boolean cascading = Boolean.parseBoolean(valueString);
-
+    @ValueSource(booleans = {true, false})
+    public void deleteByCrnAndAccountId(boolean cascading) {
         EnvironmentDeletionService environmentDeletionServiceWired = spy(environmentDeletionService);
-        when(environmentService.getByCrnAndAccountId(eq(TestConstants.CRN), eq(TestConstants.ACCOUNT_ID)))
+        when(environmentService.getByCrnAndAccountId(eq(CRN), eq(ACCOUNT_ID)))
                 .thenReturn(environmentView);
         when(environmentDtoConverter.environmentViewToViewDto(any(EnvironmentView.class))).thenReturn(environmentViewDto);
         assertEquals(environmentViewDto, environmentDeletionServiceWired
-                .deleteByCrnAndAccountId(TestConstants.CRN, TestConstants.ACCOUNT_ID, TestConstants.USER, cascading, true));
-        verify(environmentDeletionServiceWired).delete(eq(environmentView), eq(TestConstants.USER), anyBoolean(), anyBoolean());
+                .deleteByCrnAndAccountId(CRN, ACCOUNT_ID, USER, cascading, true));
+        verify(environmentDeletionServiceWired).delete(eq(environmentView), eq(USER), anyBoolean(), anyBoolean());
         verify(environmentJobService).unschedule(environmentView.getId());
         if (cascading) {
-            verify(reactorFlowManager).triggerCascadingDeleteFlow(eq(environmentView), eq(TestConstants.USER), eq(true));
+            verify(reactorFlowManager).triggerCascadingDeleteFlow(eq(environmentView), eq(USER), eq(true));
             verify(reactorFlowManager, never()).triggerDeleteFlow(any(), any(), anyBoolean());
         } else {
-            verify(reactorFlowManager).triggerDeleteFlow(eq(environmentView), eq(TestConstants.USER), eq(true));
+            verify(reactorFlowManager).triggerDeleteFlow(eq(environmentView), eq(USER), eq(true));
             verify(reactorFlowManager, never()).triggerCascadingDeleteFlow(any(), any(), anyBoolean());
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void deleteByNameAndAccountIdWithForceDelete(boolean forceDelete) {
+        EnvironmentDeletionService environmentDeletionServiceWired = spy(environmentDeletionService);
+        when(environmentService.getByNameAndAccountId(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(environmentView);
+        when(environmentDtoConverter.environmentViewToViewDto(any(EnvironmentView.class))).thenReturn(environmentViewDto);
+        assertEquals(environmentViewDto, environmentDeletionServiceWired.deleteByNameAndAccountId(ENVIRONMENT_NAME, ACCOUNT_ID, USER, NON_CASCADE, forceDelete));
+        verify(environmentDeletionServiceWired).delete(eq(environmentView), eq(USER), anyBoolean(), anyBoolean());
+        if (forceDelete) {
+            verify(environmentResourceDeletionService, never()).getConnectedExperienceAmount(any());
+            verify(environmentResourceDeletionService, never()).getConnectedExperienceAmount(environmentView);
+        } else {
+            verify(environmentResourceDeletionService, times(1)).getConnectedExperienceAmount(any());
+            verify(environmentResourceDeletionService, times(1)).getConnectedExperienceAmount(environmentView);
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    public void deleteByCrnAndAccountIdWithForceDelete(boolean forceDelete) {
+        EnvironmentDeletionService environmentDeletionServiceWired = spy(environmentDeletionService);
+        when(environmentService.getByCrnAndAccountId(eq(CRN), eq(ACCOUNT_ID))).thenReturn(environmentView);
+        when(environmentDtoConverter.environmentViewToViewDto(any(EnvironmentView.class))).thenReturn(environmentViewDto);
+        assertEquals(environmentViewDto, environmentDeletionServiceWired.deleteByCrnAndAccountId(CRN, ACCOUNT_ID, USER, NON_CASCADE, forceDelete));
+        verify(environmentDeletionServiceWired).delete(eq(environmentView), eq(USER), anyBoolean(), anyBoolean());
+        verify(environmentJobService).unschedule(environmentView.getId());
+        if (forceDelete) {
+            verify(environmentResourceDeletionService, never()).getConnectedExperienceAmount(any());
+            verify(environmentResourceDeletionService, never()).getConnectedExperienceAmount(environmentView);
+        } else {
+            verify(environmentResourceDeletionService, times(1)).getConnectedExperienceAmount(any());
+            verify(environmentResourceDeletionService, times(1)).getConnectedExperienceAmount(environmentView);
         }
     }
 
     @Test
     public void delete() {
-        assertEquals(environmentView, environmentDeletionService.delete(environmentView, TestConstants.USER, false, false));
-        verify(reactorFlowManager).triggerDeleteFlow(eq(environmentView), eq(TestConstants.USER), eq(false));
+        assertEquals(environmentView, environmentDeletionService.delete(environmentView, USER, false, false));
+        verify(reactorFlowManager).triggerDeleteFlow(eq(environmentView), eq(USER), eq(false));
     }
 
     @Test
     public void deleteFailedDistroXesAreAttached() {
         when(environmentResourceDeletionService.getAttachedDistroXClusterNames(eq(environmentView))).thenReturn(Set.of("notempty"));
-        assertThrows(BadRequestException.class, () -> environmentDeletionService.delete(environmentView, TestConstants.USER, false, false));
-        verify(reactorFlowManager, never()).triggerDeleteFlow(eq(environmentView), eq(TestConstants.USER), eq(false));
+        assertThrows(BadRequestException.class, () -> environmentDeletionService.delete(environmentView, USER, false, false));
+        verify(reactorFlowManager, never()).triggerDeleteFlow(eq(environmentView), eq(USER), eq(false));
     }
 
     @Test
     public void deleteFailedDataLakesAreAttached() {
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(eq(environmentView))).thenReturn(Set.of("notempty"));
-        assertThrows(BadRequestException.class, () -> environmentDeletionService.delete(environmentView, TestConstants.USER, false, false));
-        verify(reactorFlowManager, never()).triggerDeleteFlow(eq(environmentView), eq(TestConstants.USER), eq(false));
+        assertThrows(BadRequestException.class, () -> environmentDeletionService.delete(environmentView, USER, false, false));
+        verify(reactorFlowManager, never()).triggerDeleteFlow(eq(environmentView), eq(USER), eq(false));
     }
 
     @Test
@@ -134,16 +172,16 @@ public class EnvironmentDeletionServiceTest {
         EnvironmentDeletionService environmentDeletionServiceWired = spy(environmentDeletionService);
 
         when(environmentService
-                .findByNamesInAccount(eq(names), eq(TestConstants.ACCOUNT_ID))).thenReturn(envs);
+                .findByNamesInAccount(eq(names), eq(ACCOUNT_ID))).thenReturn(envs);
         assertEquals(expected, environmentDeletionServiceWired
-                .deleteMultipleByNames(names, TestConstants.ACCOUNT_ID, TestConstants.USER, false, false).size());
-        verify(environmentDeletionServiceWired, times(expected)).delete(any(), eq(TestConstants.USER), anyBoolean(), anyBoolean());
+                .deleteMultipleByNames(names, ACCOUNT_ID, USER, false, false).size());
+        verify(environmentDeletionServiceWired, times(expected)).delete(any(), eq(USER), anyBoolean(), anyBoolean());
     }
 
     @Test
     public void deleteMultipleByCrns() {
         environmentDeletionService
-                .deleteMultipleByCrns(Set.of("crn1", "crn2"), TestConstants.ACCOUNT_ID, TestConstants.USER, false, false);
+                .deleteMultipleByCrns(Set.of("crn1", "crn2"), ACCOUNT_ID, USER, false, false);
 
         Set<String> names = Set.of("crn1", "crn2");
         EnvironmentView e1 = new EnvironmentView();
@@ -154,10 +192,10 @@ public class EnvironmentDeletionServiceTest {
         int expected = envs.size();
         EnvironmentDeletionService environmentDeletionServiceWired = spy(environmentDeletionService);
 
-        when(environmentService.findByResourceCrnsInAccount(eq(names), eq(TestConstants.ACCOUNT_ID))).thenReturn(envs);
-        assertEquals(expected, environmentDeletionServiceWired.deleteMultipleByCrns(names, TestConstants.ACCOUNT_ID, TestConstants.USER,
+        when(environmentService.findByResourceCrnsInAccount(eq(names), eq(ACCOUNT_ID))).thenReturn(envs);
+        assertEquals(expected, environmentDeletionServiceWired.deleteMultipleByCrns(names, ACCOUNT_ID, USER,
                 false, false).size());
-        verify(environmentDeletionServiceWired, times(expected)).delete(any(), eq(TestConstants.USER), anyBoolean(), anyBoolean());
+        verify(environmentDeletionServiceWired, times(expected)).delete(any(), eq(USER), anyBoolean(), anyBoolean());
     }
 
     @Test
@@ -183,6 +221,6 @@ public class EnvironmentDeletionServiceTest {
         when(environmentService.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(environmentView.getAccountId(), environmentView.getId()))
                 .thenReturn(singletonList("child name"));
 
-        assertThrows(BadRequestException.class, () -> environmentDeletionService.delete(environmentView, TestConstants.USER, false, false));
+        assertThrows(BadRequestException.class, () -> environmentDeletionService.delete(environmentView, USER, false, false));
     }
 }

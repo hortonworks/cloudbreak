@@ -76,7 +76,11 @@ public class EnvironmentDeletionService {
         if (cascading) {
             reactorFlowManager.triggerCascadingDeleteFlow(environment, userCrn, forced);
         } else {
-            checkIsEnvironmentDeletable(environment);
+            if (!forced) {
+                checkIsEnvironmentDeletable(environment);
+            } else {
+                LOGGER.debug("Checking whether the environment has any experience dependency or not is cancelled since force deletion was requested.");
+            }
             reactorFlowManager.triggerDeleteFlow(environment, userCrn, forced);
         }
         return environment;
