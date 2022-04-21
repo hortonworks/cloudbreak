@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -951,6 +952,20 @@ public class GrpcUmsClient {
         String generatedRequestId = RequestIdUtil.getOrGenerate(requestId);
         LOGGER.debug("Retrieving user sync state model for account {} using request ID {}", accountId, generatedRequestId);
         return client.getUserSyncStateModel(generatedRequestId, accountId, rightsChecks, skipCredentials);
+    }
+
+    @Cacheable(cacheNames = "umsRolesCache", key = "{ #accountId }")
+    public Set<String> getResourceRoles(String accountId, Optional<String> requestId) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
+        String generatedRequestId = RequestIdUtil.getOrGenerate(requestId);
+        return client.listResourceRoles(generatedRequestId, accountId);
+    }
+
+    @Cacheable(cacheNames = "umsRolesCache", key = "{ #accountId }")
+    public Set<String> getRoles(String accountId, Optional<String> requestId) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
+        String generatedRequestId = RequestIdUtil.getOrGenerate(requestId);
+        return client.listRoles(generatedRequestId, accountId);
     }
 
     protected boolean isReadRight(String action) {

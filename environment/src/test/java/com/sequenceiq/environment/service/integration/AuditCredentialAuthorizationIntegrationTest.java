@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -94,6 +95,9 @@ public class AuditCredentialAuthorizationIntegrationTest {
         secondUserClient = getClient(SECOND_USER_CRN);
         doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any(), any());
         mockPermissions();
+        when(grpcUmsClient.getResourceRoles(any(), any())).thenReturn(Set.of(
+                "crn:altus:iam:us-west-1:altus:resourceRole:Owner",
+                "crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"));
     }
 
     @AfterEach
