@@ -26,7 +26,7 @@ public class ZeppelinRoleConfigProvider extends AbstractRoleConfigProvider {
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject templatePreparationObject) {
-        String adminGroup = virtualGroupService.createOrGetVirtualGroup(templatePreparationObject.getVirtualGroupRequest(), ZEPPELIN_ADMIN.getRight());
+        String adminGroup = virtualGroupService.createOrGetVirtualGroup(templatePreparationObject.getVirtualGroupRequest(), ZEPPELIN_ADMIN);
         return List.of(config(ZEPPELIN_ADMIN_GROUP, adminGroup));
     }
 
