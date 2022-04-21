@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,9 +26,6 @@ import com.sequenceiq.cloudbreak.job.instancemetadata.ArchiveInstanceMetaDataCon
 import com.sequenceiq.cloudbreak.repository.ArchivedInstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.flow.domain.FlowLog;
-import com.sequenceiq.flow.service.FlowRetryService;
 
 @Service
 public class ArchiveInstanceMetaDataService {
@@ -45,12 +41,6 @@ public class ArchiveInstanceMetaDataService {
     private ArchivedInstanceMetaDataRepository archivedInstanceMetaDataRepository;
 
     @Inject
-    private FlowLogService flowLogService;
-
-    @Inject
-    private FlowRetryService flowRetryService;
-
-    @Inject
     private TransactionService transactionService;
 
     @Inject
@@ -63,30 +53,17 @@ public class ArchiveInstanceMetaDataService {
     private InstanceMetadataToArchivedInstanceMetadataConverter converter;
 
     public void archive(StackView stack) throws ArchiveInstanceMetaDataException {
-        if (flowLogService.isOtherFlowRunning(stack.getId())) {
-            String message = String.format("Another flow is running for stack %s, skipping archiving terminated InstanceMetaData to let the flow finish",
+        try {
+            LOGGER.info("Starting to archive terminated InstanceMetaData on stack {}", stack.getResourceCrn());
+            checkedMeasure(() -> doArchive(stack), LOGGER, "Archiving terminated InstanceMetaData took {} ms for stack {}.",
                     stack.getResourceCrn());
-            throw new ArchiveInstanceMetaDataException(message);
-        } else {
-            Optional<FlowLog> lastRetryableFailedFlow = flowRetryService.getLastRetryableFailedFlow(stack.getId());
-            if (lastRetryableFailedFlow.isEmpty()) {
-                try {
-                    LOGGER.info("Starting to archive terminated InstanceMetaData on stack {}", stack.getResourceCrn());
-                    checkedMeasure(() -> doArchive(stack), LOGGER, "Archiving terminated InstanceMetaData took {} ms for stack {}.",
-                            stack.getResourceCrn());
-                    LOGGER.info("InstanceMetaData archivation finished successfully for stack {}", stack.getResourceCrn());
-                } catch (ArchiveInstanceMetaDataException e) {
-                    throw e;
-                } catch (Exception e) {
-                    String message = String.format("Something unexpected went wrong with stack %s while archiving terminated InstanceMetaData",
-                            stack.getResourceCrn());
-                    throw new ArchiveInstanceMetaDataException(message, e);
-                }
-            } else {
-                String message = String.format("Stack %s has a retryable failed flow, " +
-                        "skipping archiving terminated InstanceMetaData to preserve possible retry", stack.getResourceCrn());
-                throw new ArchiveInstanceMetaDataException(message);
-            }
+            LOGGER.info("InstanceMetaData archivation finished successfully for stack {}", stack.getResourceCrn());
+        } catch (ArchiveInstanceMetaDataException e) {
+            throw e;
+        } catch (Exception e) {
+            String message = String.format("Something unexpected went wrong with stack %s while archiving terminated InstanceMetaData",
+                    stack.getResourceCrn());
+            throw new ArchiveInstanceMetaDataException(message, e);
         }
     }
 
