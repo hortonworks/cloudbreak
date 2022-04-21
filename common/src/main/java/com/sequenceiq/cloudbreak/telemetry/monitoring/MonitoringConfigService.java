@@ -57,7 +57,8 @@ public class MonitoringConfigService {
             if (areAuthConfigsValid(cmAuthConfig)) {
                 builder
                         .withCMUsername(cmAuthConfig.getUsername())
-                        .withCMPassword(cmAuthConfig.getPassword());
+                        .withCMPassword(cmAuthConfig.getPassword())
+                        .withCMMetricsExporterPort(monitoringConfiguration.getClouderaManager().getMetricsExporterPort());
                 LOGGER.debug("Monitoring for Cloudera Manager has been setup correctly.");
             } else {
                 LOGGER.debug("Monitoring for Cloudera Manager has invalid authentication configs, Monitoring will be disabled.");

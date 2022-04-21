@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cm.util.ConfigUtils.makeApiConfigList;
 import static java.util.stream.Collectors.joining;
+import static java.lang.module.ModuleDescriptor.Version;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 
@@ -39,6 +41,8 @@ import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 public class ClouderaManagerMgmtTelemetryService {
 
     static final String TELEMETRYPUBLISHER = "TELEMETRYPUBLISHER";
+
+    private static final String SERVICE_MONITOR = "SERVICEMONITOR";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerMgmtTelemetryService.class);
 
@@ -85,6 +89,14 @@ public class ClouderaManagerMgmtTelemetryService {
 
     private static final String TELEMETRY_WA_DEFAULT_CLUSTER_TYPE = "DATALAKE";
 
+    private static final String CM_SMON_SUPPORT_FROM_VERSION = "7.2.15";
+
+    private static final String SMON_PROMETHEUS_PORT = "prometheus_metrics_endpoint_port";
+
+    private static final String SMON_PROMETHEUS_USERNAME = "prometheus_metrics_endpoint_username";
+
+    private static final String SMON_PROMETHEUS_PASSWORD =  "prometheus_metrics_endpoint_password";
+
     @Inject
     private ClouderaManagerExternalAccountService externalAccountService;
 
@@ -99,6 +111,9 @@ public class ClouderaManagerMgmtTelemetryService {
 
     @Inject
     private DataBusEndpointProvider dataBusEndpointProvider;
+
+    @Inject
+    private MonitoringConfiguration monitoringConfiguration;
 
     public void setupTelemetryRole(final Stack stack, final ApiClient client, final ApiHostRef cmHostRef,
             final ApiRoleList mgmtRoles, final Telemetry telemetry) throws ApiException {
@@ -139,6 +154,28 @@ public class ClouderaManagerMgmtTelemetryService {
                     sdxContextName, sdxStackCrn, proxyConfig);
             mgmtRoleConfigGroupsResourceApi.updateConfig(String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, TELEMETRYPUBLISHER),
                     "Set configs for Telemetry publisher by CB", configList);
+        }
+    }
+
+    public void updateServiceMonitorConfigs(final Stack stack, final ApiClient client,
+            final Telemetry telemetry) throws ApiException {
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        if (isMonitoringSupported(stack, telemetry, accountId)) {
+            Version cmSmonVersion = Version.parse(CM_SMON_SUPPORT_FROM_VERSION);
+            Version runtimeVersion = Version.parse(stack.getStackVersion());
+            if (runtimeVersion.compareTo(cmSmonVersion) >= 0) {
+                String monitoringUser = stack.getCluster().getCloudbreakClusterManagerMonitoringUser();
+                String monitoringPassword = stack.getCluster().getCloudbreakClusterManagerMonitoringPassword();
+                Integer exporterPort = monitoringConfiguration.getClouderaManager().getMetricsExporterPort();
+                MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(client);
+                Map<String, String> configsToUpdate = new HashMap<>();
+                configsToUpdate.put(SMON_PROMETHEUS_USERNAME, monitoringUser);
+                configsToUpdate.put(SMON_PROMETHEUS_PASSWORD, monitoringPassword);
+                configsToUpdate.put(SMON_PROMETHEUS_PORT, String.valueOf(exporterPort));
+                ApiConfigList configList = makeApiConfigList(configsToUpdate);
+                mgmtRoleConfigGroupsResourceApi.updateConfig(String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, SERVICE_MONITOR),
+                        "Set service monitoring configs for CM metrics exporter by CB", configList);
+            }
         }
     }
 
@@ -205,5 +242,12 @@ public class ClouderaManagerMgmtTelemetryService {
         return telemetry != null
                 && telemetry.getWorkloadAnalytics() != null
                 && !StackType.DATALAKE.equals(stack.getType());
+    }
+
+    private boolean isMonitoringSupported(Stack stack, Telemetry telemetry, String accountId) {
+        return monitoringConfiguration.isEnabled()
+                && telemetry.isMonitoringFeatureEnabled()
+                && (monitoringConfiguration.isPaasSupport() || entitlementService.isCdpSaasEnabled(accountId))
+                && StringUtils.isNotBlank(stack.getStackVersion());
     }
 }

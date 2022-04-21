@@ -35,6 +35,9 @@ telemetry:
       username: ""
       password: ""
       token: ""
+    cloudera-manager:
+      monitoring-user: cmmonitoring
+      metrics-exporter-port: 61010
   upgrade:
     enabled: false
     cdp-telemetry:

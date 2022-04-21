@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
+import com.cloudera.api.swagger.MgmtRoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.client.ApiResponse;
@@ -34,11 +36,16 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.ClouderaManagerMonitoringConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.WorkloadAnalytics;
 
 public class ClouderaManagerMgmtTelemetryServiceTest {
+
+    private static final Integer EXPORTER_PORT = 61010;
 
     @InjectMocks
     private ClouderaManagerMgmtTelemetryService underTest;
@@ -59,14 +66,23 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
     private ClouderaManagerResourceApi cmResourceApi;
 
     @Mock
+    private MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi;
+
+    @Mock
     private EntitlementService entitlementService;
 
     @Mock
     private DataBusEndpointProvider dataBusEndpointProvider;
 
+    @Mock
+    private MonitoringConfiguration monitoringConfiguration;
+
+    @Mock
+    private ClouderaManagerMonitoringConfiguration cmMonitoringConfiguration;
+
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -252,6 +268,31 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         // THEN
         assertEquals(safetyValveMap.get("databus.header.sdx.id"), "mySdxId");
         assertEquals(safetyValveMap.get("databus.header.sdx.name"), "mySdxName");
+    }
+
+    @Test
+    public void testUpdateServiceMonitorConfigs() throws ApiException {
+        // GIVEN
+        Stack stack = new Stack();
+        stack.setStackVersion("7.2.16");
+        stack.setResourceCrn("crn:cdp:datahub:us-west-1:accountId:cluster:name");
+        Cluster cluster = new Cluster();
+        cluster.setCloudbreakClusterManagerMonitoringUser("admin");
+        cluster.setCloudbreakClusterManagerMonitoringPassword("admin123");
+        stack.setCluster(cluster);
+        Telemetry telemetry = new Telemetry();
+        Features features = new Features();
+        features.addMonitoring(true);
+        telemetry.setFeatures(features);
+        given(monitoringConfiguration.isEnabled()).willReturn(true);
+        given(monitoringConfiguration.getClouderaManager()).willReturn(cmMonitoringConfiguration);
+        given(monitoringConfiguration.isPaasSupport()).willReturn(true);
+        given(cmMonitoringConfiguration.getMetricsExporterPort()).willReturn(EXPORTER_PORT);
+        given(clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(apiClient)).willReturn(mgmtRoleConfigGroupsResourceApi);
+        // WHEN
+        underTest.updateServiceMonitorConfigs(stack, apiClient, telemetry);
+        // THEN
+        verify(mgmtRoleConfigGroupsResourceApi, times(1)).updateConfig(any(), anyString(), any());
     }
 
     private boolean containsConfigWithValue(ApiConfigList configList, String configKey, String configValue) {

@@ -29,3 +29,18 @@ scrape_configs:
         target_label: instance
       - target_label: __address__
         replacement: 127.0.0.1:9115
+{%- if monitoring.type == "cloudera_manager" and "manager_server" in grains.get('roles', []) %}
+  - job_name: 'smon_health'
+    scheme: 'https'
+    static_configs:
+      - targets: ['localhost:{{ monitoring.cmMetricsExporterPort }}']
+        labels:
+          resource_crn: {{ telemetry.clusterCrn }}
+          platform: {{ telemetry.platform }}
+          hostname: {{ hostname }}
+    basic_auth:
+      username: {{ monitoring.cmUsername }}
+      password: {{ monitoring.cmPassword }}
+    tls_config:
+      insecure_skip_verify: true
+{%- endif %}

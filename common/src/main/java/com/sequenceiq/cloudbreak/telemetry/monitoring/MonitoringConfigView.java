@@ -12,6 +12,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private static final String EMPTY_CONFIG_DEFAULT = "";
 
+    private static final Integer DEFAULT_CM_SMON_PORT = 61010;
+
     private final boolean enabled;
 
     private final String type;
@@ -19,6 +21,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
     private final String cmUsername;
 
     private final char[] cmPassword;
+
+    private Integer cmMetricsExporterPort;
 
     private final String remoteWriteUrl;
 
@@ -39,6 +43,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.type = builder.type;
         this.cmUsername = builder.cmUsername;
         this.cmPassword = builder.cmPassword;
+        this.cmMetricsExporterPort = builder.cmMetricsExporterPort;
         this.clusterDetails = builder.clusterDetails;
         this.remoteWriteUrl = builder.remoteWriteUrl;
         this.scrapeIntervalSeconds = builder.scrapeIntervalSeconds;
@@ -58,6 +63,10 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     public char[] getCmPassword() {
         return cmPassword;
+    }
+
+    public Integer getCmMetricsExporterPort() {
+        return cmMetricsExporterPort;
     }
 
     public String getType() {
@@ -102,6 +111,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("type", ObjectUtils.defaultIfNull(this.type, EMPTY_CONFIG_DEFAULT));
         map.put("cmUsername", ObjectUtils.defaultIfNull(this.cmUsername, EMPTY_CONFIG_DEFAULT));
         map.put("cmPassword", ObjectUtils.defaultIfNull(this.cmPassword, EMPTY_CONFIG_DEFAULT));
+        map.put("cmMetricsExporterPort", ObjectUtils.defaultIfNull(this.cmMetricsExporterPort, DEFAULT_CM_SMON_PORT));
         map.put("username", ObjectUtils.defaultIfNull(this.username, EMPTY_CONFIG_DEFAULT));
         map.put("password", this.password != null ? new String(this.password) : EMPTY_CONFIG_DEFAULT);
         map.put("token", this.token != null ? new String(this.token) : EMPTY_CONFIG_DEFAULT);
@@ -132,6 +142,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
         private String cmUsername;
 
         private char[] cmPassword;
+
+        private Integer cmMetricsExporterPort;
 
         private TelemetryClusterDetails clusterDetails;
 
@@ -186,6 +198,11 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withCMPassword(char[] cmPassword) {
             this.cmPassword = cmPassword;
+            return this;
+        }
+
+        public Builder withCMMetricsExporterPort(Integer cmMetricsExporterPort) {
+            this.cmMetricsExporterPort = cmMetricsExporterPort;
             return this;
         }
 

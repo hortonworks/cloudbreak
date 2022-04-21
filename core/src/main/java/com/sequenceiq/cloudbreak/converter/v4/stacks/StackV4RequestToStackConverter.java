@@ -100,7 +100,7 @@ public class StackV4RequestToStackConverter {
     @Value("${cb.cm.mgmt.username:cmmgmt}")
     private String cmMgmtUsername;
 
-    @Value("${cb.cm.monitoring.username:cmmonitoring}")
+    @Value("${telemetry.monitoring.cloudera-manager.monitoring-user}")
     private String cmMonitoringUser;
 
     @Inject
