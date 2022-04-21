@@ -47,7 +47,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUploadWithPermission;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConcurrentParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ParameterizedStateRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateAllRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
@@ -161,22 +160,6 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         Callable<Boolean> saltJobRunBootstrapRunner =
                 saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, telemetrySaltRetryConfig.getCloudStorageValidation(), false);
         saltJobRunBootstrapRunner.call();
-    }
-
-    @Override
-    public void installAndStartMonitoring(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel)
-            throws CloudbreakOrchestratorFailedException {
-        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateways);
-        Set<String> targetHostnames = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            StateAllRunner stateAllJobRunner = new StateAllRunner(targetHostnames, nodes, MONITORING_INIT);
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateAllJobRunner);
-            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel);
-            saltJobRunBootstrapRunner.call();
-        } catch (Exception e) {
-            LOGGER.info("Error occurred during cluster monitoring start", e);
-            throw new CloudbreakOrchestratorFailedException(e);
-        }
     }
 
     @Override

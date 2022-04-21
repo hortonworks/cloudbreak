@@ -9,6 +9,7 @@ base:
     - recipes.runner
     - telemetry
     - fluent
+    - monitoring
     - metering
     - logrotate
     - ntp

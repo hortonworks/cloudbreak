@@ -20,6 +20,7 @@
 {% set password = salt['pillar.get']('monitoring:password') %}
 {% set token = salt['pillar.get']('monitoring:token') %}
 {% set scrape_interval_seconds = salt['pillar.get']('monitoring:scrapeIntervalSeconds') %}
+{% set cm_metrics_exporter_port = salt['pillar.get']('monitoring:cmMetricsExporterPort', 61010) %}
 
 {%- if use_dev_stack %}
   {%- if salt['pillar.get']('cloudera-manager:address') %}
@@ -49,5 +50,6 @@
     "cmUsername": cm_username,
     "cmPassword": cm_password,
     "cmClusterType": cm_cluster_type,
+    "cmMetricsExporterPort": cm_metrics_exporter_port,
     "useDevStack": use_dev_stack
 }) %}

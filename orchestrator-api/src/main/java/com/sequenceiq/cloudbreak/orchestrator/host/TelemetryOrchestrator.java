@@ -15,9 +15,6 @@ public interface TelemetryOrchestrator {
     void stopTelemetryAgent(List<GatewayConfig> allGateway, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException;
 
-    void installAndStartMonitoring(List<GatewayConfig> allGateway, Set<Node> nodes, ExitCriteriaModel exitModel)
-            throws CloudbreakOrchestratorFailedException;
-
     void initDiagnosticCollection(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
 

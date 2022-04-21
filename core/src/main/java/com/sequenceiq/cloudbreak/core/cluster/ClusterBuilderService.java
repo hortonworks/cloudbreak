@@ -35,7 +35,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.FinalizeClusterInstallHandlerService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
-import com.sequenceiq.cloudbreak.service.cluster.flow.telemetry.ClusterMonitoringEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -74,9 +73,6 @@ public class ClusterBuilderService {
 
     @Inject
     private RecipeEngine recipeEngine;
-
-    @Inject
-    private ClusterMonitoringEngine clusterMonitoringEngine;
 
     @Inject
     private DatalakeService datalakeService;
@@ -186,19 +182,6 @@ public class ClusterBuilderService {
                 stackService.getByIdWithListsInTransaction(stackId),
                 hostGroupService.getByClusterWithRecipes(
                         stackService.getByIdWithListsInTransaction(stackId).getCluster().getId()));
-    }
-
-    public void setupMonitoring(Long stackId) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-
-        if (componentConfigProviderService.getTelemetry(stackId).isMonitoringFeatureEnabled()) {
-            clusterApiConnectors.getConnector(stack)
-                    .clusterSecurityService()
-                    .setupMonitoringUser();
-            clusterMonitoringEngine.installAndStartMonitoring(
-                    stack,
-                    componentConfigProviderService.getTelemetry(stackId));
-        }
     }
 
     public void prepareExtendedTemplate(Long stackId) {

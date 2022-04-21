@@ -19,11 +19,16 @@ import com.sequenceiq.common.api.telemetry.model.Monitoring;
 @ExtendWith(MockitoExtension.class)
 public class MonitoringConfigServiceTest {
 
+    private static final Integer DEFAULT_CM_SMON_PORT = 61010;
+
     @InjectMocks
     private MonitoringConfigService underTest;
 
     @Mock
     private MonitoringConfiguration monitoringConfiguration;
+
+    @Mock
+    private ClouderaManagerMonitoringConfiguration cmMonitoringConfiguration;
 
     @Mock
     private MonitoringGlobalAuthConfig monitoringGlobalAuthConfig;
@@ -44,6 +49,8 @@ public class MonitoringConfigServiceTest {
         MonitoringAuthConfig authConfig = new MonitoringAuthConfig("user", "pass".toCharArray());
         given(monitoringConfiguration.isEnabled()).willReturn(true);
         given(monitoringConfiguration.isDevStack()).willReturn(false);
+        given(monitoringConfiguration.getClouderaManager()).willReturn(cmMonitoringConfiguration);
+        given(cmMonitoringConfiguration.getMetricsExporterPort()).willReturn(DEFAULT_CM_SMON_PORT);
         given(monitoring.getRemoteWriteUrl()).willReturn("https://myendpoint/api/v1/receive");
         // WHEN
         MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, true);
@@ -51,6 +58,7 @@ public class MonitoringConfigServiceTest {
         assertTrue(result.isEnabled());
         assertEquals("https://myendpoint/api/v1/receive", result.getRemoteWriteUrl());
         assertEquals("false", result.toMap().get("useDevStack").toString());
+        assertEquals(DEFAULT_CM_SMON_PORT, result.getCmMetricsExporterPort());
     }
 
     @Test
@@ -60,6 +68,7 @@ public class MonitoringConfigServiceTest {
         MonitoringAuthConfig authConfig = new MonitoringAuthConfig("user", "pass".toCharArray());
         given(monitoringConfiguration.isEnabled()).willReturn(true);
         given(monitoringConfiguration.isDevStack()).willReturn(false);
+        given(monitoringConfiguration.getClouderaManager()).willReturn(cmMonitoringConfiguration);
         given(monitoring.getRemoteWriteUrl()).willReturn("https://myendpoint/api/v1/receive");
         given(monitoringGlobalAuthConfig.isEnabled()).willReturn(true);
         given(monitoringGlobalAuthConfig.getToken()).willReturn("my-token");
@@ -78,6 +87,7 @@ public class MonitoringConfigServiceTest {
         MonitoringAuthConfig authConfig = new MonitoringAuthConfig("user", "pass".toCharArray());
         given(monitoringConfiguration.isEnabled()).willReturn(true);
         given(monitoringConfiguration.isDevStack()).willReturn(true);
+        given(monitoringConfiguration.getClouderaManager()).willReturn(cmMonitoringConfiguration);
         given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("https://myendpoint/$accountid");
         // WHEN
         MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, true);
@@ -93,6 +103,7 @@ public class MonitoringConfigServiceTest {
         MonitoringClusterType clusterType = MonitoringClusterType.CLOUDERA_MANAGER;
         MonitoringAuthConfig authConfig = new MonitoringAuthConfig("user", "pass".toCharArray());
         given(monitoringConfiguration.isEnabled()).willReturn(true);
+        given(monitoringConfiguration.getClouderaManager()).willReturn(cmMonitoringConfiguration);
         given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("https://myendpoint/$accountid");
         // WHEN
         MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, false);
@@ -107,6 +118,7 @@ public class MonitoringConfigServiceTest {
         MonitoringAuthConfig authConfig = new MonitoringAuthConfig("user", "pass".toCharArray());
         given(monitoringConfiguration.isEnabled()).willReturn(true);
         given(monitoringConfiguration.isPaasSupport()).willReturn(true);
+        given(monitoringConfiguration.getClouderaManager()).willReturn(cmMonitoringConfiguration);
         given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("https://myendpoint/$accountid");
         // WHEN
         MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, false);

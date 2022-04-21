@@ -17,6 +17,8 @@ public class MonitoringConfiguration {
 
     private boolean paasSupport;
 
+    private ClouderaManagerMonitoringConfiguration clouderaManager;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -55,5 +57,13 @@ public class MonitoringConfiguration {
 
     public void setPaasSupport(boolean paasSupport) {
         this.paasSupport = paasSupport;
+    }
+
+    public ClouderaManagerMonitoringConfiguration getClouderaManager() {
+        return clouderaManager;
+    }
+
+    public void setClouderaManager(ClouderaManagerMonitoringConfiguration clouderaManager) {
+        this.clouderaManager = clouderaManager;
     }
 }
