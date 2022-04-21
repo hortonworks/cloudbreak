@@ -32,7 +32,7 @@ public class HbaseServiceConfigProvider implements CmTemplateComponentConfigProv
         String cmVersion = templateProcessor.getCmVersion().orElse("");
         if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_0)) {
             VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
-            String adminGroup = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.HBASE_ADMIN.getRight());
+            String adminGroup = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.HBASE_ADMIN);
             configList.add(config(SPNEGO_ADMIN_GROUP, adminGroup));
         }
         return configList;

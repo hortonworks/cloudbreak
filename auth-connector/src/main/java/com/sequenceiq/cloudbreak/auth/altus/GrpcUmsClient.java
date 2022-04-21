@@ -867,24 +867,24 @@ public class GrpcUmsClient {
         }
     }
 
-    public String setWorkloadAdministrationGroupName(String accountId, Optional<String> requestId, String right, String resource,
+    public String setWorkloadAdministrationGroupName(String accountId, Optional<String> requestId, UmsVirtualGroupRight right, String resource,
         RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         return client.setWorkloadAdministrationGroupName(RequestIdUtil.getOrGenerate(requestId),
-                accountId, right, resource).getWorkloadAdministrationGroupName();
+                accountId, right.getRight(), resource).getWorkloadAdministrationGroupName();
     }
 
-    public String getWorkloadAdministrationGroupName(String accountId, Optional<String> requestId, String right, String resource,
+    public String getWorkloadAdministrationGroupName(String accountId, Optional<String> requestId, UmsVirtualGroupRight right, String resource,
         RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         return client.getWorkloadAdministrationGroupName(RequestIdUtil.getOrGenerate(requestId),
-                accountId, right, resource).getWorkloadAdministrationGroupName();
+                accountId, right.getRight(), resource).getWorkloadAdministrationGroupName();
     }
 
-    public void deleteWorkloadAdministrationGroupName(String accountId, Optional<String> requestId, String right, String resource,
+    public void deleteWorkloadAdministrationGroupName(String accountId, Optional<String> requestId, UmsVirtualGroupRight right, String resource,
         RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
-        client.deleteWorkloadAdministrationGroupName(RequestIdUtil.getOrGenerate(requestId), accountId, right, resource);
+        client.deleteWorkloadAdministrationGroupName(RequestIdUtil.getOrGenerate(requestId), accountId, right.getRight(), resource);
     }
 
     public List<WorkloadAdministrationGroup> listWorkloadAdministrationGroups(String accountId, Optional<String> requestId,

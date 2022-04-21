@@ -103,7 +103,7 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
         String masterSecret = gateway != null ? gateway.getMasterSecret() : generalClusterConfigs.getPassword();
         String topologyName = gateway != null && gateway.getExposedServices() != null ? gateway.getTopologyName() : DEFAULT_TOPOLOGY;
         VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
-        String adminGroup = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.KNOX_ADMIN.getRight());
+        String adminGroup = virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.KNOX_ADMIN);
 
         switch (roleType) {
             case KnoxRoles.KNOX_GATEWAY:

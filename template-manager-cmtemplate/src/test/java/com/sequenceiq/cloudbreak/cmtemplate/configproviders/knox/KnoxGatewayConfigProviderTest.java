@@ -175,7 +175,7 @@ public class KnoxGatewayConfigProviderTest {
                         .withName("CDH")))
                 .withIdBroker(idBroker)
                 .build();
-        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN.getRight())).thenReturn("");
+        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(true);
 
         assertEquals(
@@ -236,7 +236,7 @@ public class KnoxGatewayConfigProviderTest {
                         .withName("CDH")))
                 .withIdBroker(idBroker)
                 .build();
-        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN.getRight())).thenReturn("");
+        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(false);
 
         assertEquals(
@@ -288,7 +288,7 @@ public class KnoxGatewayConfigProviderTest {
                         .withVersion("7.2.10")
                         .withName("CDH")))
                 .build();
-        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN.getRight())).thenReturn("");
+        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("");
         assertEquals(
                 List.of(
                         config("idbroker_master_secret", "supersecret"),
@@ -338,7 +338,7 @@ public class KnoxGatewayConfigProviderTest {
                         .withName("CDH")))
                 .withIdBroker(idBroker)
                 .build();
-        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
+        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("knox_admins");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(true);
 
         assertEquals(
@@ -395,7 +395,7 @@ public class KnoxGatewayConfigProviderTest {
                         .withName("CDH")))
                 .withIdBroker(idBroker)
                 .build();
-        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
+        when(virtualGroupService.createOrGetVirtualGroup(source.getVirtualGroupRequest(), UmsVirtualGroupRight.KNOX_ADMIN)).thenReturn("knox_admins");
         when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(false);
 
         assertEquals(
