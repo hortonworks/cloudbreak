@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import com.sequenceiq.cloudbreak.cloud.VersionComparator;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
 
 @Service

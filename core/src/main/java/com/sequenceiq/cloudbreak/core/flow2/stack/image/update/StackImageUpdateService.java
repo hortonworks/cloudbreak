@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.cloud.VersionComparator;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;

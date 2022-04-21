@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -46,6 +45,7 @@ import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;

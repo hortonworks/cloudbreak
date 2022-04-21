@@ -3,7 +3,7 @@ package com.sequenceiq.freeipa.util;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.VersionComparator;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.freeipa.entity.Stack;
 

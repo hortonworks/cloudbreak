@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud;
+package com.sequenceiq.cloudbreak.util;
 
 import static org.junit.Assert.assertEquals;
 
@@ -17,34 +17,34 @@ public class VersionComparatorTest {
 
     @Test
     public void testEquals() {
-        Assert.assertEquals(0L, underTest.compare(new VersionString("2.4.0.0-770"), new VersionString("2.4.0.0-770")));
+        Assert.assertEquals(0L, underTest.compare(() -> "2.4.0.0-770", () -> "2.4.0.0-770"));
     }
 
     @Test
     public void testGreater() {
-        Assert.assertEquals(1L, underTest.compare(new VersionString("2.4.0.0-880"), new VersionString("2.4.0.0-770")));
-        Assert.assertEquals(1L, underTest.compare(new VersionString("2.4.0.0-1000"), new VersionString("2.4.0.0-770")));
-        Assert.assertEquals(1L, underTest.compare(new VersionString("2.5.0.0-1000"), new VersionString("2.4.0.0-1000")));
-        Assert.assertEquals(1L, underTest.compare(new VersionString("2.15.0.0-1000"), new VersionString("2.5.0.0-1000")));
+        Assert.assertEquals(1L, underTest.compare(() -> "2.4.0.0-880", () -> "2.4.0.0-770"));
+        Assert.assertEquals(1L, underTest.compare(() -> "2.4.0.0-1000", () -> "2.4.0.0-770"));
+        Assert.assertEquals(1L, underTest.compare(() -> "2.5.0.0-1000", () -> "2.4.0.0-1000"));
+        Assert.assertEquals(1L, underTest.compare(() -> "2.15.0.0-1000", () -> "2.5.0.0-1000"));
     }
 
     @Test
     public void testGreaterNonEqualLength() {
-        Assert.assertEquals(1L, underTest.compare(new VersionString("2.4.0.0"), new VersionString("2.4.0.0-770")));
-        Assert.assertEquals(1L, underTest.compare(new VersionString("2.5.0.0"), new VersionString("2.5.0.0-770")));
-        Assert.assertEquals(1L, underTest.compare(new VersionString("7.2.9.1"), new VersionString("7.2.9-1000")));
+        Assert.assertEquals(1L, underTest.compare(() -> "2.4.0.0", () -> "2.4.0.0-770"));
+        Assert.assertEquals(1L, underTest.compare(() -> "2.5.0.0", () -> "2.5.0.0-770"));
+        Assert.assertEquals(1L, underTest.compare(() -> "7.2.9.1", () -> "7.2.9-1000"));
     }
 
     @Test
     public void testSmaller() {
-        Assert.assertEquals(-1L, underTest.compare(new VersionString("2.4.0.0-770"), new VersionString("2.4.0.0-880")));
-        Assert.assertEquals(-1L, underTest.compare(new VersionString("2.4.0.0-770"), new VersionString("2.4.0.0-1000")));
-        Assert.assertEquals(-1L, underTest.compare(new VersionString("2.4.0.0-1000"), new VersionString("2.5.0.0-1000")));
-        Assert.assertEquals(-1L, underTest.compare(new VersionString("2.5.0.0-1000"), new VersionString("2.15.0.0-1000")));
-        Assert.assertEquals(-1L, underTest.compare(new VersionString("7.2.9"), new VersionString("7.2.9.1")));
-        Assert.assertEquals(-1L, underTest.compare(new VersionString("7.2.9-1000"), new VersionString("7.2.9.1")));
-        Assert.assertEquals(-1L, underTest.compare(new VersionString("7.2.9-1"), new VersionString("7.2.9.1-200")));
-        Assert.assertEquals(-1L, underTest.compare(new VersionString("7.2.9"), new VersionString("7.2.9.1-1000")));
+        Assert.assertEquals(-1L, underTest.compare(() -> "2.4.0.0-770", () -> "2.4.0.0-880"));
+        Assert.assertEquals(-1L, underTest.compare(() -> "2.4.0.0-770", () -> "2.4.0.0-1000"));
+        Assert.assertEquals(-1L, underTest.compare(() -> "2.4.0.0-1000", () -> "2.5.0.0-1000"));
+        Assert.assertEquals(-1L, underTest.compare(() -> "2.5.0.0-1000", () -> "2.15.0.0-1000"));
+        Assert.assertEquals(-1L, underTest.compare(() -> "7.2.9", () -> "7.2.9.1"));
+        Assert.assertEquals(-1L, underTest.compare(() -> "7.2.9-1000", () -> "7.2.9.1"));
+        Assert.assertEquals(-1L, underTest.compare(() -> "7.2.9-1", () -> "7.2.9.1-200"));
+        Assert.assertEquals(-1L, underTest.compare(() -> "7.2.9", () -> "7.2.9.1-1000"));
     }
 
     @Test
@@ -73,7 +73,7 @@ public class VersionComparatorTest {
 
     @Test
     public void testSmallerNonEqualLength() {
-        Assert.assertEquals(-1, underTest.compare(new VersionString("2.4.0.0"), new VersionString("2.5.0.0-770")));
+        Assert.assertEquals(-1, underTest.compare(() -> "2.4.0.0", () -> "2.5.0.0-770"));
     }
 
     @Test
