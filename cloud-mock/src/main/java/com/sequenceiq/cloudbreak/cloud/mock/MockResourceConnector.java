@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
 import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED;
+import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.DELETED;
 import static java.util.Collections.emptyList;
 
 import java.util.ArrayList;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -35,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -118,7 +121,8 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> cloudResources) {
         try (Response ignore = mockUrlFactory.get(authenticatedContext, "/spi/terminate").delete()) {
         }
-        return emptyList();
+        cloudResources.forEach(r -> resourceNotifier.notifyDeletion(r, authenticatedContext.getCloudContext()));
+        return cloudResources.stream().map(r -> new CloudResourceStatus(r, DELETED)).collect(Collectors.toList());
     }
 
     @Override
@@ -174,13 +178,12 @@ public class MockResourceConnector implements ResourceConnector<Object> {
         List<CloudResourceStatus> ret = new ArrayList<>();
         for (CloudVmInstanceStatus cloudVmInstanceStatus : resize) {
             CloudInstance cloudInstance = cloudVmInstanceStatus.getCloudInstance();
-            CloudResource instanceResource = generateResource("cloudinstance" + ret.size(), cloudContext, cloudInstance, cloudInstance.getInstanceId(),
-                    ResourceType.MOCK_INSTANCE);
+            CloudResource instanceResource = generateResource("cloudinstance" + cloudInstance.getTemplate().getPrivateId(), cloudContext, cloudInstance,
+                    cloudInstance.getInstanceId(), ResourceType.MOCK_INSTANCE);
             List<Volume> volumes = cloudInstance.getTemplate().getVolumes();
             for (int i = 0; i < volumes.size(); i++) {
                 UUID uuid = UUID.randomUUID();
-                String volumeId = cloudInstance.getInstanceId() + "_" + uuid;
-                CloudResource volumeResource = generateResource("cloudvolume" + uuid, cloudContext, cloudInstance, volumeId,
+                CloudResource volumeResource = generateResource("cloudvolume" + uuid, cloudContext, cloudInstance, cloudInstance.getInstanceId(),
                         ResourceType.MOCK_VOLUME);
                 ret.add(new CloudResourceStatus(volumeResource, CREATED, cloudInstance.getTemplate().getPrivateId()));
             }
@@ -199,7 +202,11 @@ public class MockResourceConnector implements ResourceConnector<Object> {
                 .params(cloudInstance.getParameters())
                 .persistent(true)
                 .build();
-        resourceNotifier.notifyAllocation(resource, cloudContext);
+        ResourcePersisted resourcePersisted = resourceNotifier.notifyAllocation(resource, cloudContext);
+        if (resourcePersisted.getException() != null) {
+            LOGGER.error("Cannot persist resource, reason: {}", resourcePersisted.getStatusReason(), resourcePersisted.getException());
+            throw new CloudConnectorException("Cannot persist resource, reason: " + resourcePersisted.getStatusReason(), resourcePersisted.getException());
+        }
         return resource;
     }
 
@@ -213,7 +220,15 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             List<CloudInstance> vms, Object resourcesToRemove) {
         mockUrlFactory.get(authenticatedContext, "/spi/terminate_instances").post(Entity.entity(vms, MediaType.APPLICATION_JSON_TYPE), String.class);
-        return emptyList();
+        List<String> instanceIdsToDownscale = new ArrayList<>();
+        for (CloudInstance vm : vms) {
+            instanceIdsToDownscale.add(vm.getInstanceId());
+        }
+        List<CloudResource> resourcesToDownscale = resources.stream()
+                .filter(resource -> instanceIdsToDownscale.contains(resource.getInstanceId()))
+                .collect(Collectors.toList());
+        resourcesToDownscale.forEach(r -> resourceNotifier.notifyDeletion(r, authenticatedContext.getCloudContext()));
+        return resourcesToDownscale.stream().map(r -> new CloudResourceStatus(r, DELETED)).collect(Collectors.toList());
     }
 
     @Override
