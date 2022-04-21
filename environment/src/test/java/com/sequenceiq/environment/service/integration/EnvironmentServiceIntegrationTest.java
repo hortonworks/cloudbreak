@@ -18,7 +18,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -180,9 +179,6 @@ public class EnvironmentServiceIntegrationTest {
         Map<String, Boolean> rightCheckMap = Maps.newHashMap();
         rightCheckMap.put(credential.getResourceCrn(), true);
         when(umsResourceAuthorizationService.getRightOfUserOnResources(anyString(), any(), anyList())).thenReturn(rightCheckMap);
-        when(grpcUmsClient.getResourceRoles(any(), any())).thenReturn(Set.of(
-                "crn:altus:iam:us-west-1:altus:resourceRole:Owner",
-                "crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"));
     }
 
     @AfterEach

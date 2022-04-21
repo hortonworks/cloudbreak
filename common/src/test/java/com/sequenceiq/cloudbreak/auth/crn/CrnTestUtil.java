@@ -19,6 +19,7 @@ public class CrnTestUtil {
         lenient().when(regionAwareCrnGenerator.generateCrnWithUuid(any(), anyString())).thenCallRealMethod();
         lenient().when(regionAwareCrnGenerator.generateCrnString(any(), anyString(), anyString())).thenCallRealMethod();
         lenient().when(regionAwareCrnGenerator.generateCrn(any(), anyString(), anyString())).thenCallRealMethod();
+        lenient().when(regionAwareCrnGenerator.generateAltusCrn(any(), anyString())).thenCallRealMethod();
     }
 
     public static Crn.Builder getCustomCrnBuilder(CrnResourceDescriptor resourceDescriptor) {
