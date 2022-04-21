@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
+import com.sequenceiq.cloudbreak.quartz.JobDataMapProvider;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchService;
@@ -37,6 +38,9 @@ public class ExistingStackPatcherJobService {
 
     @Inject
     private ExistingStackPatcherServiceProvider existingStackPatcherServiceProvider;
+
+    @Inject
+    private JobDataMapProvider jobDataMapProvider;
 
     public void schedule(Long stackId, StackPatchType stackPatchType) {
         JobResource jobResource = stackService.getJobResource(stackId);
@@ -81,7 +85,7 @@ public class ExistingStackPatcherJobService {
         return JobBuilder.newJob(ExistingStackPatcherJob.class)
                 .withIdentity(resource.getJobResource().getLocalId(), JOB_GROUP)
                 .withDescription("Patching existing stack: " + resource.getJobResource().getRemoteResourceId())
-                .usingJobData(resource.toJobDataMap())
+                .usingJobData(jobDataMapProvider.provide(resource))
                 .storeDurably()
                 .build();
     }
