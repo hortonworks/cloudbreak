@@ -8,6 +8,8 @@ public enum CrnResourceDescriptor {
     MACHINE_USER(Crn.ResourceType.MACHINE_USER, Crn.Service.IAM),
     POLICY(Crn.ResourceType.POLICY, Crn.Service.IAM),
     PUBLIC_KEY(Crn.ResourceType.PUBLIC_KEY, Crn.Service.IAM),
+    RESOURCE_ROLE(Crn.ResourceType.RESOURCE_ROLE, Crn.Service.IAM),
+    ROLE(Crn.ResourceType.ROLE, Crn.Service.IAM),
     USER(Crn.ResourceType.USER, Crn.Service.IAM),
     // Environment service
     ACCOUNT_TAG(Crn.ResourceType.ACCOUNT_TAG, Crn.Service.ACCOUNTTAG),

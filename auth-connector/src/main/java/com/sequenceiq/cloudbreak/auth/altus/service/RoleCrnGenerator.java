@@ -1,21 +1,18 @@
 package com.sequenceiq.cloudbreak.auth.altus.service;
 
 import javax.inject.Inject;
-import javax.ws.rs.InternalServerErrorException;
 
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 
 @Service
 public class RoleCrnGenerator {
 
     @Inject
-    private GrpcUmsClient grpcUmsClient;
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     public String getBuiltInDatabusRoleCrn() {
         return getRoleCrn("DbusUploader").toString();
@@ -30,18 +27,12 @@ public class RoleCrnGenerator {
     }
 
     public Crn getResourceRoleCrn(String resourceRoleName) {
-        return grpcUmsClient.getResourceRoles(ThreadBasedUserCrnProvider.getAccountId(), MDCUtils.getRequestId()).stream()
-                .map(Crn::safeFromString)
-                .filter(crn -> StringUtils.equals(crn.getResource(), resourceRoleName))
-                .findFirst()
-                .orElseThrow(() -> new InternalServerErrorException(String.format("There is no resource role in UMS with name %s", resourceRoleName)));
+        // we need to find out the proper partition and region in case of every cdp deployment, we stick to altus partition and current region
+        return regionAwareCrnGenerator.generateAltusCrn(CrnResourceDescriptor.RESOURCE_ROLE, resourceRoleName);
     }
 
     public Crn getRoleCrn(String roleName) {
-        return grpcUmsClient.getRoles(ThreadBasedUserCrnProvider.getAccountId(), MDCUtils.getRequestId()).stream()
-                .map(Crn::safeFromString)
-                .filter(crn -> StringUtils.equals(crn.getResource(), roleName))
-                .findFirst()
-                .orElseThrow(() -> new InternalServerErrorException(String.format("There is no role in UMS with name %s", roleName)));
+        // we need to find out the proper partition and region in case of every cdp deployment, we stick to altus partition and current region
+        return regionAwareCrnGenerator.generateAltusCrn(CrnResourceDescriptor.ROLE, roleName);
     }
 }
