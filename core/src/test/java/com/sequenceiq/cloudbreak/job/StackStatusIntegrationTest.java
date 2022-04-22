@@ -218,7 +218,7 @@ class StackStatusIntegrationTest {
         ClusterApi clusterApi = Mockito.mock(ClusterApi.class);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
 
-        when(clusterApiConnectors.getConnectorWithShortTimeouts(stack)).thenReturn(clusterApi);
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
 
         hostStatuses = new HashMap<>();
 
@@ -374,7 +374,7 @@ class StackStatusIntegrationTest {
 
     private void setUpClusterStatus(ClusterStatus clusterStatus) {
         when(clusterStatusService.getStatus(anyBoolean())).thenReturn(new ClusterStatusResult(clusterStatus, ""));
-        when(clusterStatusService.isClusterManagerRunning()).thenReturn(true);
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(true);
     }
 
     private void setUpHealthForInstance(String fqdn, HealthCheckResult healthCheckResult) {

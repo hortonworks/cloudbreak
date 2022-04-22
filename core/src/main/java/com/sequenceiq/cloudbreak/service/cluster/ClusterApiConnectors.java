@@ -25,13 +25,7 @@ public class ClusterApiConnectors {
     public ClusterApi getConnector(Stack stack) {
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(),
                 stack.getClusterManagerIp(), stack.cloudPlatform());
-        return (ClusterApi) applicationContext.getBean(stack.getCluster().getVariant(), stack, httpClientConfig, false);
-    }
-
-    public ClusterApi getConnectorWithShortTimeouts(Stack stack) {
-        HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(),
-                stack.getClusterManagerIp(), stack.cloudPlatform());
-        return (ClusterApi) applicationContext.getBean(stack.getCluster().getVariant(), stack, httpClientConfig, true);
+        return (ClusterApi) applicationContext.getBean(stack.getCluster().getVariant(), stack, httpClientConfig);
     }
 
     public ClusterPreCreationApi getConnector(Cluster cluster) {

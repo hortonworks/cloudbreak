@@ -125,11 +125,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     private final HttpClientConfig clientConfig;
 
-    @Value("${cb.cm.client.connect.quicktimeout.seconds:5}")
+    @Value("${cb.cm.client.connect.quicktimeout.seconds:15}")
     private Integer connectQuickTimeoutSeconds;
-
-    @Value("${cb.cm.client.read.quicktimeout.seconds:15}")
-    private Integer readQuickTimeoutSeconds;
 
     @Inject
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
@@ -146,14 +143,13 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     @Inject
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
-    private boolean useShortTimeouts;
-
     private ApiClient client;
 
-    ClouderaManagerClusterStatusService(Stack stack, HttpClientConfig clientConfig, boolean useShortTimeouts) {
+    private ApiClient fastClient;
+
+    ClouderaManagerClusterStatusService(Stack stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
-        this.useShortTimeouts = useShortTimeouts;
     }
 
     private static Map<ClusterStatus, List<String>> groupServicesByState(Collection<ApiService> services) {
@@ -256,10 +252,9 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         try {
             client = clouderaManagerApiClientProvider
                     .getV31Client(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
-            if (useShortTimeouts) {
-                client.getHttpClient().setConnectTimeout(connectQuickTimeoutSeconds, TimeUnit.SECONDS);
-                client.getHttpClient().setReadTimeout(readQuickTimeoutSeconds, TimeUnit.SECONDS);
-            }
+            fastClient = clouderaManagerApiClientProvider
+                    .getV31Client(stack.getGatewayPort(), cloudbreakAmbariUser, cloudbreakAmbariPassword, clientConfig);
+            fastClient.getHttpClient().setConnectTimeout(connectQuickTimeoutSeconds, TimeUnit.SECONDS);
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
@@ -435,6 +430,17 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     public boolean isClusterManagerRunning() {
         try {
             cmApiRetryTemplate.execute(context -> clouderaManagerApiFactory.getClouderaManagerResourceApi(client).getVersion());
+            return true;
+        } catch (ApiException e) {
+            LOGGER.info("Failed to get version from CM", e);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isClusterManagerRunningQuickCheck() {
+        try {
+            clouderaManagerApiFactory.getClouderaManagerResourceApi(fastClient).getVersion();
             return true;
         } catch (ApiException e) {
             LOGGER.info("Failed to get version from CM", e);

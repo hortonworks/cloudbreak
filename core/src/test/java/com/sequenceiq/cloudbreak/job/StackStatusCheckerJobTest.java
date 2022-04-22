@@ -230,7 +230,7 @@ public class StackStatusCheckerJobTest {
     @Test
     public void testInstanceSyncCMRunning() throws JobExecutionException {
         setupForCM();
-        when(clusterApiConnectors.getConnectorWithShortTimeouts(stack)).thenReturn(clusterApi);
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
@@ -250,7 +250,7 @@ public class StackStatusCheckerJobTest {
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
         when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.STOPPED);
         when(instanceMetaData.getDiscoveryFQDN()).thenReturn("host1");
-        when(clusterApiConnectors.getConnectorWithShortTimeouts(stack)).thenReturn(clusterApi);
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
@@ -296,7 +296,7 @@ public class StackStatusCheckerJobTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(instanceHgName);
         when(instanceMetaData.getInstanceGroup()).thenReturn(instanceGroup);
-        when(clusterApiConnectors.getConnectorWithShortTimeouts(stack)).thenReturn(clusterApi);
+        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
         Set<String> computeGroups = new HashSet<>();
@@ -330,7 +330,7 @@ public class StackStatusCheckerJobTest {
     private void setupForCM() {
         setStackStatus(DetailedStackStatus.AVAILABLE);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
-        when(clusterStatusService.isClusterManagerRunning()).thenReturn(true);
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(true);
         Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.HEALTHY, Optional.empty()),
                 new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty()));
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), healthChecks));

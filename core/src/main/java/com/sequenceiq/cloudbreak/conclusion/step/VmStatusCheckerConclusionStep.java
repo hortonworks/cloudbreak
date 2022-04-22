@@ -56,7 +56,7 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
     @Override
     public Conclusion check(Long resourceId) {
         Stack stack = stackService.getById(resourceId);
-        ClusterApi connector = clusterApiConnectors.getConnectorWithShortTimeouts(stack);
+        ClusterApi connector = clusterApiConnectors.getConnector(stack);
         Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId());
         if (isClusterManagerRunning(stack, connector)) {
             return checkCMForInstanceStatuses(connector, runningInstances, stack.getCluster().getId());
@@ -119,6 +119,6 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
     }
 
     private boolean isCMRunning(ClusterApi connector) {
-        return connector.clusterStatusService().isClusterManagerRunning();
+        return connector.clusterStatusService().isClusterManagerRunningQuickCheck();
     }
 }
