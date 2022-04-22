@@ -1238,7 +1238,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
-        return getByNameInAccount(ThreadBasedUserCrnProvider.getUserCrn(), resourceName).getCrn();
+        return getByNameInAccountAllowDetached(ThreadBasedUserCrnProvider.getUserCrn(), resourceName).getCrn();
     }
 
     @Override
