@@ -97,7 +97,7 @@ public class ClouderaManagerClusterStatusServiceTest {
         stack.setName(CLUSTER_NAME);
         stack.setCluster(cluster);
 
-        subject = new ClouderaManagerClusterStatusService(stack, clientConfig, false);
+        subject = new ClouderaManagerClusterStatusService(stack, clientConfig);
 
         MockitoAnnotations.initMocks(this);
 

@@ -28,12 +28,9 @@ public class ClouderaManagerConnector implements ClusterApi {
 
     private final HttpClientConfig clientConfig;
 
-    private final boolean useShortTimeouts;
-
-    public ClouderaManagerConnector(Stack stack, HttpClientConfig clientConfig, boolean useShortTimeouts) {
+    public ClouderaManagerConnector(Stack stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
-        this.useShortTimeouts = useShortTimeouts;
     }
 
     @Override
@@ -53,7 +50,7 @@ public class ClouderaManagerConnector implements ClusterApi {
 
     @Override
     public ClusterStatusService clusterStatusService() {
-        return applicationContext.getBean(ClouderaManagerClusterStatusService.class, stack, clientConfig, useShortTimeouts);
+        return applicationContext.getBean(ClouderaManagerClusterStatusService.class, stack, clientConfig);
     }
 
     @Override

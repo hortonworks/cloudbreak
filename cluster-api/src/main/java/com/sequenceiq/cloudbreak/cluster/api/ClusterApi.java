@@ -9,17 +9,19 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public interface ClusterApi {
 
     String CLOUDERA_MANAGER = "CLOUDERA_MANAGER";
 
-    default void waitForServer(boolean defaultClusterManagerAuth) throws CloudbreakException, ClusterClientInitException {
+    default void waitForServer(Stack stack, boolean defaultClusterManagerAuth) throws CloudbreakException, ClusterClientInitException {
         clusterSetupService().waitForServer(defaultClusterManagerAuth);
     }
 
@@ -33,6 +35,22 @@ public interface ClusterApi {
 
     default void waitForServices(int requestId) throws CloudbreakException {
         clusterSetupService().waitForServices(requestId);
+    }
+
+    default void replaceUserNamePassword(String newUserName, String newPassword) throws CloudbreakException {
+        clusterSecurityService().replaceUserNamePassword(newUserName, newPassword);
+    }
+
+    default void updateUserNamePassword(String newPassword) throws CloudbreakException {
+        clusterSecurityService().updateUserNamePassword(newPassword);
+    }
+
+    default void prepareSecurity() {
+        clusterSecurityService().prepareSecurity();
+    }
+
+    default void disableSecurity() {
+        clusterSecurityService().disableSecurity();
     }
 
     default void changeOriginalCredentialsAndCreateCloudbreakUser(boolean ldapConfigured) throws CloudbreakException {
@@ -98,6 +116,10 @@ public interface ClusterApi {
 
     default void startComponents(Map<String, String> components, String hostname) throws CloudbreakException {
         clusterModificationService().startComponents(components, hostname);
+    }
+
+    default void cleanupCluster(Telemetry telemetry) throws CloudbreakException {
+        clusterModificationService().cleanupCluster(telemetry);
     }
 
     default void restartAll(boolean withMgmtServices) throws CloudbreakException {

@@ -81,14 +81,14 @@ class VmStatusCheckerConclusionStepTest {
         cluster.setId(2L);
         stack.setCluster(cluster);
         when(stackService.getById(anyLong())).thenReturn(stack);
-        when(clusterApiConnectors.getConnectorWithShortTimeouts(any(Stack.class))).thenReturn(connector);
+        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(connector);
         when(connector.clusterStatusService()).thenReturn(clusterStatusService);
         lenient().when(runtimeVersionService.getRuntimeVersion(anyLong())).thenReturn(Optional.of("7.2.11"));
     }
 
     @Test
     public void checkShouldBeSuccessfulIfCMIsRunningAndAllInstanceIsHealthy() {
-        when(clusterStatusService.isClusterManagerRunning()).thenReturn(Boolean.TRUE);
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
         when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong()))
                 .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(createExtendedHostStatuses(true));
@@ -102,7 +102,7 @@ class VmStatusCheckerConclusionStepTest {
 
     @Test
     public void checkShouldFailIfCMIsRunningAndUnhealthyOrUnknownInstanceExists() {
-        when(clusterStatusService.isClusterManagerRunning()).thenReturn(Boolean.TRUE);
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
         when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong()))
                 .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2"), createInstanceMetadata("host3")));
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(createExtendedHostStatuses(false));
@@ -118,7 +118,7 @@ class VmStatusCheckerConclusionStepTest {
 
     @Test
     public void checkShouldBeSuccessfulIfCMIsNotRunningAndAllInstanceIsHealthy() {
-        when(clusterStatusService.isClusterManagerRunning()).thenReturn(Boolean.FALSE);
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
         when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong()))
                 .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
         when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
@@ -133,7 +133,7 @@ class VmStatusCheckerConclusionStepTest {
 
     @Test
     public void checkShouldFailIfCMIsNotRunningAndUnhealthyInstanceExists() {
-        when(clusterStatusService.isClusterManagerRunning()).thenReturn(Boolean.FALSE);
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
         when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong()))
                 .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
         when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
@@ -150,7 +150,7 @@ class VmStatusCheckerConclusionStepTest {
 
     @Test
     public void checkShouldHandleMissingFqdns() {
-        when(clusterStatusService.isClusterManagerRunning()).thenReturn(Boolean.FALSE);
+        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceId("1");
         when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).thenReturn(Set.of(instanceMetaData));

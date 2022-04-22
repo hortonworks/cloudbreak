@@ -6,12 +6,6 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 public class AwsInstanceStatusMapper {
 
-    public static final String RUNNING = "running";
-
-    public static final String STOPPED = "stopped";
-
-    public static final String TERMINATED = "terminated";
-
     private AwsInstanceStatusMapper() {
     }
 
@@ -21,20 +15,16 @@ public class AwsInstanceStatusMapper {
 
     public static InstanceStatus getInstanceStatusByAwsStateAndReason(InstanceState state, StateReason stateReason) {
         switch (state.getName().toLowerCase()) {
-            case STOPPED:
+            case "stopped":
                 return InstanceStatus.STOPPED;
-            case RUNNING:
+            case "running":
                 return InstanceStatus.STARTED;
-            case TERMINATED:
+            case "terminated":
                 return stateReason != null && "Server.SpotInstanceTermination".equals(stateReason.getCode())
                         ? InstanceStatus.TERMINATED_BY_PROVIDER
                         : InstanceStatus.TERMINATED;
             default:
                 return InstanceStatus.IN_PROGRESS;
         }
-    }
-
-    public static boolean isTerminated(InstanceState instanceState) {
-        return TERMINATED.equalsIgnoreCase(instanceState.getName());
     }
 }

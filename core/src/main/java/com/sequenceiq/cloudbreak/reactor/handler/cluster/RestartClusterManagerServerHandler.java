@@ -70,7 +70,7 @@ public class RestartClusterManagerServerHandler  extends ExceptionCatcherEventHa
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             restartCMServer(stack);
-            clusterApiConnectors.getConnector(stack).waitForServer(request.isDefaultClusterManagerAuth());
+            clusterApiConnectors.getConnector(stack).waitForServer(stack, request.isDefaultClusterManagerAuth());
             response = new RestartClusterManagerServerSuccess(stackId);
         } catch (Exception e) {
             LOGGER.info("Cluster Manager restart failed", e);
