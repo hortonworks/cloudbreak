@@ -4,7 +4,7 @@
 {% set metering_service_name = 'metering-heartbeat-application' %}
 {% set metering_package_name = 'thunderhead-metering-heartbeat-application' %}
 {% set metering_package_version = '0.1-SNAPSHOT' %}
-{% set metering_rmp_repo_url = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/thunderhead-metering-heartbeat-application/clients/'%}
+{% set metering_rmp_repo_url = 'https://archive.cloudera.com/cp_clients/'%}
 {% set metering_rpm_location = metering_rmp_repo_url + metering_package_name + '-' + metering_package_version + '.x86_64.rpm' %}
 
 {%- if os == "RedHat" or os == "CentOS" %}
