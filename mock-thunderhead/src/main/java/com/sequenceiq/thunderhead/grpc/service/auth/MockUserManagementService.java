@@ -1182,10 +1182,10 @@ public class MockUserManagementService extends UserManagementImplBase {
     public void listRoles(ListRolesRequest request, StreamObserver<ListRolesResponse> responseObserver) {
         LOGGER.info("List roles for account: {}", request.getAccountId());
         responseObserver.onNext(ListRolesResponse.newBuilder()
-                        .addRole(Role.newBuilder()
-                                .setCrn("crn:altus:iam:us-west-1:altus:role:DbusUploader")
-                                .build())
-                        .build());
+                .addRole(Role.newBuilder()
+                        .setCrn("crn:altus:iam:us-west-1:altus:role:DbusUploader")
+                        .build())
+                .build());
         responseObserver.onCompleted();
     }
 
