@@ -90,11 +90,12 @@ public class UmsClient {
 
     /**
      * Constructor.
-     *  @param channel  the managed channel.
-     * @param tracer tracer
+     *
+     * @param channel the managed channel.
+     * @param tracer  tracer
      */
     UmsClient(ManagedChannel channel, UmsClientConfig umsClientConfig, Tracer tracer,
-        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.channel = checkNotNull(channel, "channel should not be null.");
         this.umsClientConfig = checkNotNull(umsClientConfig, "umsClientConfig should not be null.");
         this.tracer = tracer;
@@ -104,10 +105,10 @@ public class UmsClient {
     /**
      * Create new user group if it does not exist.
      *
-     * @param requestId          the request ID for the request
-     * @param accountId          the account ID
-     * @param groupName          the newly created group name
-     * @return                   the new or existing user group.
+     * @param requestId the request ID for the request
+     * @param accountId the account ID
+     * @param groupName the newly created group name
+     * @return the new or existing user group.
      */
     public Group createGroup(String requestId, String accountId, String groupName) {
         checkNotNull(requestId, "requestId should not be null.");
@@ -143,9 +144,9 @@ public class UmsClient {
     /**
      * Delete user group if it exist.
      *
-     * @param requestId          the request ID for the request
-     * @param accountId          the account ID
-     * @param groupName          the newly created group name
+     * @param requestId the request ID for the request
+     * @param accountId the account ID
+     * @param groupName the newly created group name
      */
     public void deleteGroup(String requestId, String accountId, String groupName) {
         checkNotNull(requestId, "requestId should not be null.");
@@ -172,10 +173,10 @@ public class UmsClient {
     /**
      * Add member to the selected user group if it exist.
      *
-     * @param requestId          the request ID for the request
-     * @param accountId          the account ID
-     * @param groupName          the group where user is going to be assigned
-     * @param memberCrn          member (e.g., user) CRN
+     * @param requestId the request ID for the request
+     * @param accountId the account ID
+     * @param groupName the group where user is going to be assigned
+     * @param memberCrn member (e.g., user) CRN
      */
     public void addMemberToGroup(String requestId, String accountId, String groupName, String memberCrn) {
         checkNotNull(requestId, "requestId should not be null.");
@@ -218,10 +219,10 @@ public class UmsClient {
     /**
      * Remove member from the selected user group if it is exist.
      *
-     * @param requestId          the request ID for the request
-     * @param accountId          the account ID
-     * @param groupName          the group where user is going to be assigned
-     * @param memberCrn          member (e.g., user) CRN
+     * @param requestId the request ID for the request
+     * @param accountId the account ID
+     * @param groupName the group where user is going to be assigned
+     * @param memberCrn member (e.g., user) CRN
      */
     public void removeMemberFromGroup(String requestId, String accountId, String groupName, String memberCrn) {
         checkNotNull(requestId, "requestId should not be null.");
@@ -262,10 +263,10 @@ public class UmsClient {
     /**
      * List members from the selected user group if it is exist.
      *
-     * @param requestId          the request ID for the request
-     * @param accountId          the account ID
-     * @param groupName          the group where user is going to be assigned
-     * @return                   list of user group member CRNs or NULL if the user group does not exist.
+     * @param requestId the request ID for the request
+     * @param accountId the account ID
+     * @param groupName the group where user is going to be assigned
+     * @return list of user group member CRNs or NULL if the user group does not exist.
      */
     public List<String> listMembersFromGroup(String requestId, String accountId, String groupName) {
         checkNotNull(requestId, "requestId should not be null.");
@@ -471,10 +472,10 @@ public class UmsClient {
     /**
      * Wraps calls to ListMachineUsers with an Account ID.
      *
-     * @param requestId                the request ID for the request
-     * @param accountId                the account ID
-     * @param machineUserNameOrCrnList a list of users to list. If null or empty then all users will be listed
-     * @param includeInternal          whether to include internal machine users
+     * @param requestId                   the request ID for the request
+     * @param accountId                   the account ID
+     * @param machineUserNameOrCrnList    a list of users to list. If null or empty then all users will be listed
+     * @param includeInternal             whether to include internal machine users
      * @param includeWorkloadMachineUsers whether to include workload machine users
      * @return the list of machine users
      */
@@ -562,7 +563,7 @@ public class UmsClient {
      * @param userCrn         actor identifier
      * @param machineUserName machine user to remove
      */
-    public void deleteMachineUser(String requestId, String userCrn, String  accountId, String machineUserName) {
+    public void deleteMachineUser(String requestId, String userCrn, String accountId, String machineUserName) {
         checkNotNull(requestId, "requestId should not be null.");
         checkNotNull(userCrn, "userCrn should not be null.");
         checkNotNull(machineUserName, "machineUserName should not be null.");
@@ -586,9 +587,9 @@ public class UmsClient {
     /**
      * Wraps a call to ListServicePrincipalCloudIdentities.
      *
-     * @param requestId   the request ID for the request
-     * @param accountId   the account id
-     * @param environmentCrn   the environment crn
+     * @param requestId      the request ID for the request
+     * @param accountId      the account id
+     * @param environmentCrn the environment crn
      * @return the list of service principal cloud identities
      */
     public ListServicePrincipalCloudIdentitiesResponse listServicePrincipalCloudIdentities(
@@ -621,11 +622,11 @@ public class UmsClient {
     /**
      * Assign a resource role to an assignee
      *
-     * @param requestId         id of the request
-     * @param assigneeCrn       user CRN who is going to be own the selected role on the resource
-     * @param resourceCrn       resource CRN where the resource role is going to be assigned to the user
-     * @param resourceRoleCrn   selected resource role CRN for user
-     * @return                  AssignResourceRoleResponse
+     * @param requestId       id of the request
+     * @param assigneeCrn     user CRN who is going to be own the selected role on the resource
+     * @param resourceCrn     resource CRN where the resource role is going to be assigned to the user
+     * @param resourceRoleCrn selected resource role CRN for user
+     * @return AssignResourceRoleResponse
      */
     public UserManagementProto.AssignResourceRoleResponse assignResourceRole(String requestId, String assigneeCrn, String resourceCrn,
             String resourceRoleCrn) {
@@ -646,11 +647,11 @@ public class UmsClient {
     /**
      * Unassign a resource role from an assignee
      *
-     * @param requestId         id of the request
-     * @param assigneeCrn       user CRN whom resource role is going to be revoked
-     * @param resourceCrn       resource CRN where the resource role is going to be revoked from the user
-     * @param resourceRoleCrn   selected resource role CRN for user
-     * @return                  UnassignResourceRoleResponse
+     * @param requestId       id of the request
+     * @param assigneeCrn     user CRN whom resource role is going to be revoked
+     * @param resourceCrn     resource CRN where the resource role is going to be revoked from the user
+     * @param resourceRoleCrn selected resource role CRN for user
+     * @return UnassignResourceRoleResponse
      */
     public UserManagementProto.UnassignResourceRoleResponse unassignResourceRole(String requestId, String assigneeCrn, String resourceCrn,
             String resourceRoleCrn) {
@@ -745,16 +746,16 @@ public class UmsClient {
 
     public List<UserManagementProto.ResourceAssignment> listAssigmentsOfUser(String requestId, String userCrn) {
         return newStub(requestId).getAssigneeAuthorizationInformation(UserManagementProto.GetAssigneeAuthorizationInformationRequest.newBuilder()
-                .setAssigneeCrn(userCrn)
-                .build())
+                        .setAssigneeCrn(userCrn)
+                        .build())
                 .getResourceAssignmentList();
     }
 
     public List<UserManagementProto.ResourceAssignee> listResourceAssigneesForResource(String requestId, String resourceCrn) {
         return newStub(requestId).listResourceAssignees(UserManagementProto.ListResourceAssigneesRequest.newBuilder()
-                .setAccountId(Crn.fromString(resourceCrn).getAccountId())
-                .setResourceCrn(resourceCrn)
-                .build())
+                        .setAccountId(Crn.fromString(resourceCrn).getAccountId())
+                        .setResourceCrn(resourceCrn)
+                        .build())
                 .getResourceAssigneeList();
     }
 
@@ -795,9 +796,9 @@ public class UmsClient {
         checkNotNull(password, "password should not be null.");
         UserManagementProto.SetActorWorkloadCredentialsResponse response = newStub(requestId).setActorWorkloadCredentials(
                 UserManagementProto.SetActorWorkloadCredentialsRequest.newBuilder()
-                .setActorCrn(userCrn)
-                .setPassword(password)
-                .build()
+                        .setActorCrn(userCrn)
+                        .setPassword(password)
+                        .build()
         );
         response.getAllFields().forEach((key, value) -> {
             LOGGER.info("Workload '{}' credential value is '{}' after password update.", key, value);
@@ -845,8 +846,8 @@ public class UmsClient {
     /**
      * Wraps a call to listWorkloadAdministrationGroupsForMember.
      *
-     * @param requestId   the request ID for the request
-     * @param memberCrn   the member CRN
+     * @param requestId the request ID for the request
+     * @param memberCrn the member CRN
      * @return the workload administration groups for the member
      */
     public ListWorkloadAdministrationGroupsForMemberResponse listWorkloadAdministrationGroupsForMember(
@@ -1097,8 +1098,8 @@ public class UmsClient {
     /**
      * Wraps calls to ListWorkloadAdministrationGroups with an Account ID.
      *
-     * @param requestId          the request ID for the request
-     * @param accountId          the account ID
+     * @param requestId the request ID for the request
+     * @param accountId the account ID
      * @return the list of workload administration groups
      */
     public List<WorkloadAdministrationGroup> listWorkloadAdministrationGroups(String requestId, String accountId) {
@@ -1123,7 +1124,7 @@ public class UmsClient {
     /**
      * Wraps calls to Assignee with an Assignee CRN.
      *
-     * @param assigneeCrn          the assignee CRN
+     * @param assigneeCrn the assignee CRN
      * @return the Assignee based on the provided CRN
      */
     private UserManagementProto.Assignee getAssignee(String assigneeCrn) {
@@ -1152,10 +1153,10 @@ public class UmsClient {
     /**
      * Retrieves user sync state model from the UMS.
      *
-     * @param requestId          the request ID for the request
-     * @param accountId          the account ID
-     * @param rightsChecks       list of rights checks for resources. A List is used to preserve order.
-     * @param skipCredentials    whether to skip including credentials in the response
+     * @param requestId       the request ID for the request
+     * @param accountId       the account ID
+     * @param rightsChecks    list of rights checks for resources. A List is used to preserve order.
+     * @param skipCredentials whether to skip including credentials in the response
      * @return the user sync state model
      */
     public GetUserSyncStateModelResponse getUserSyncStateModel(
@@ -1171,34 +1172,27 @@ public class UmsClient {
 
     public Set<String> listResourceRoles(String requestId, String accountId) {
         UserManagementBlockingStub stub = newStub(requestId);
-        UserManagementProto.ListResourceRolesResponse response = stub.listResourceRoles(UserManagementProto.ListResourceRolesRequest.newBuilder()
-                .setAccountId(accountId)
-                .build());
+        UserManagementProto.ListResourceRolesRequest.Builder requestBuilder = UserManagementProto.ListResourceRolesRequest.newBuilder().setAccountId(accountId);
+        UserManagementProto.ListResourceRolesResponse response;
         Set<String> resourceRoles = Sets.newHashSet();
-        resourceRoles.addAll(response.getResourceRoleList().stream().map(resourceRole -> resourceRole.getCrn()).collect(Collectors.toSet()));
-        while (response.hasNextPageToken()) {
-            response = stub.listResourceRoles(UserManagementProto.ListResourceRolesRequest.newBuilder()
-                            .setAccountId(accountId)
-                            .setPageToken(response.getNextPageToken())
-                            .build());
-            resourceRoles.addAll(response.getResourceRoleList().stream().map(resourceRole -> resourceRole.getCrn()).collect(Collectors.toSet()));
-        }
+        do {
+            response = stub.listResourceRoles(requestBuilder.build());
+            resourceRoles.addAll(response.getResourceRoleList().stream().map(UserManagementProto.ResourceRole::getCrn).collect(Collectors.toSet()));
+            requestBuilder.setPageToken(response.getNextPageToken());
+        } while (response.hasNextPageToken());
         return resourceRoles;
     }
 
     public Set<String> listRoles(String requestId, String accountId) {
         UserManagementBlockingStub stub = newStub(requestId);
-        UserManagementProto.ListRolesResponse response = stub.listRoles(UserManagementProto.ListRolesRequest.newBuilder()
-                .setAccountId(accountId)
-                .build());
+        UserManagementProto.ListRolesRequest.Builder requestBuilder = UserManagementProto.ListRolesRequest.newBuilder().setAccountId(accountId);
+        UserManagementProto.ListRolesResponse response;
         Set<String> roles = Sets.newHashSet();
-        roles.addAll(response.getRoleList().stream().map(role -> role.getCrn()).collect(Collectors.toSet()));
-        while (response.hasNextPageToken()) {
-            response = stub.listRoles(UserManagementProto.ListRolesRequest.newBuilder()
-                    .setAccountId(accountId)
-                    .build());
-            roles.addAll(response.getRoleList().stream().map(role -> role.getCrn()).collect(Collectors.toSet()));
-        }
+        do {
+            response = stub.listRoles(requestBuilder.build());
+            roles.addAll(response.getRoleList().stream().map(UserManagementProto.Role::getCrn).collect(Collectors.toSet()));
+            requestBuilder.setPageToken(response.getNextPageToken());
+        } while (response.hasNextPageToken());
         return roles;
     }
 

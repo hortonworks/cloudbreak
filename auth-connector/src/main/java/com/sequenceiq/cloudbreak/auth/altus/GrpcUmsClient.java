@@ -954,7 +954,7 @@ public class GrpcUmsClient {
         return client.getUserSyncStateModel(generatedRequestId, accountId, rightsChecks, skipCredentials);
     }
 
-    @Cacheable(cacheNames = "umsRolesCache", key = "{ #accountId }")
+    @Cacheable(cacheNames = "umsResourceRolesCache", key = "{ #accountId }")
     public Set<String> getResourceRoles(String accountId, Optional<String> requestId) {
         UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
         String generatedRequestId = RequestIdUtil.getOrGenerate(requestId);
