@@ -56,7 +56,7 @@
           "attachedVolumes": [
             {
               "size": 500,
-              "count": 1,
+              "count": 0,
               "type": "StandardSSD_LRS"
             }
           ],
