@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.recipe;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 
@@ -31,9 +33,12 @@ public class UpdateRecipeService {
 
     private final HostGroupService hostGroupService;
 
-    public UpdateRecipeService(RecipeService recipeService, HostGroupService hostGroupService) {
+    private final GeneratedRecipeService generatedRecipeService;
+
+    public UpdateRecipeService(RecipeService recipeService, HostGroupService hostGroupService, GeneratedRecipeService generatedRecipeService) {
         this.recipeService = recipeService;
         this.hostGroupService = hostGroupService;
+        this.generatedRecipeService = generatedRecipeService;
     }
 
     /**
@@ -86,8 +91,19 @@ public class UpdateRecipeService {
                         .collect(Collectors.toSet());
                 attachHostGroupRecipesOpt = collectAttachHostGroupRecipes(hostGroupName, existingRecipeNames, updateRecipes);
                 detachHostGroupRecipesOpt = collectDetachHostGroupRecipes(hostGroupName, recipesForHostGroup, existingRecipes);
+                Set<GeneratedRecipe> generatedRecipeToDeleteSet = new HashSet<>();
+                if (detachHostGroupRecipesOpt.isPresent()) {
+                    UpdateHostGroupRecipes detachHostGroupRecipes = detachHostGroupRecipesOpt.get();
+                    generatedRecipeToDeleteSet = hostGroup.getGeneratedRecipes().stream()
+                            .filter(gr -> recipeNamesMatchForGeneratedRecipe(gr, detachHostGroupRecipes.getRecipeNames()))
+                            .collect(Collectors.toSet());
+                    hostGroup.getGeneratedRecipes().removeAll(generatedRecipeToDeleteSet);
+                }
                 hostGroup.setRecipes(updateRecipes);
                 hostGroupService.save(hostGroup);
+                if (detachHostGroupRecipesOpt.isPresent() && !generatedRecipeToDeleteSet.isEmpty()) {
+                    generatedRecipeService.deleteAll(generatedRecipeToDeleteSet);
+                }
             }
         }
         return new UpdateHostGroupRecipesPair(attachHostGroupRecipesOpt.orElse(null), detachHostGroupRecipesOpt.orElse(null));
@@ -176,10 +192,20 @@ public class UpdateRecipeService {
                             .filter(r -> !r.getName().equals(recipeName))
                             .collect(Collectors.toSet())
             );
+            Optional<GeneratedRecipe> generatedRecipeToDelete =
+                    hostGroup.getGeneratedRecipes().stream()
+                            .filter(gr -> recipeNamesMatchForGeneratedRecipe(gr, Set.of(recipeName)))
+                            .findFirst();
+            generatedRecipeToDelete.ifPresent(generatedRecipe -> hostGroup.getGeneratedRecipes().remove(generatedRecipe));
             hostGroupService.save(hostGroup);
+            generatedRecipeToDelete.ifPresent(generatedRecipe -> generatedRecipeService.deleteAll(Set.of(generatedRecipe)));
         } else {
             LOGGER.debug("Recipe {} already detached from host group {}. ", recipeName, hostGroupName);
         }
+    }
+
+    private boolean recipeNamesMatchForGeneratedRecipe(GeneratedRecipe gr, Set<String> recipeNames) {
+        return gr.getRecipe() != null && recipeNames != null && recipeNames.contains(gr.getRecipe().getName());
     }
 
     private void validate(Set<String> recipesToFind, Set<Recipe> recipes) {
