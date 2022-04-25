@@ -54,17 +54,21 @@ public class AwsParameterValidator implements ParameterValidator {
             LOGGER.debug("No aws parameters defined.");
             return validationResultBuilder.build();
         }
-        if (StringUtils.isNotBlank(awsParametersDto.getS3GuardTableName())) {
-            LOGGER.debug("S3Guard table name defined: {}", awsParametersDto.getS3GuardTableName());
-            boolean tableAlreadyAttached = isTableAlreadyAttached(environmentDto, awsParametersDto);
-            if (tableAlreadyAttached) {
-                validationResultBuilder.error(String.format("S3Guard Dynamo table '%s' is already attached to another active environment. "
-                        + "Please select another unattached table or specify a non-existing name to create it. "
-                        + "Refer to Cloudera documentation at %s for the required setup.",
-                        awsParametersDto.getS3GuardTableName(),
-                        DocumentationLinkProvider.awsDynamoDbSetupLink()));
-            } else {
-                determineAwsParameters(environmentDto, parametersDto);
+        //This flag is introduced to skip S3Guard Table validation in case of UpdateAwsDiskEncryptionParameters call.
+        boolean validateOnlyAwsEncryptionParameters = validateOnlyAwsEncryptionParameters(environmentDto);
+        if (Objects.isNull(awsParametersDto.getAwsDiskEncryptionParametersDto()) && !validateOnlyAwsEncryptionParameters) {
+            if (StringUtils.isNotBlank(awsParametersDto.getS3GuardTableName())) {
+                LOGGER.debug("S3Guard table name defined: {}", awsParametersDto.getS3GuardTableName());
+                boolean tableAlreadyAttached = isTableAlreadyAttached(environmentDto, awsParametersDto);
+                if (tableAlreadyAttached) {
+                    validationResultBuilder.error(String.format("S3Guard Dynamo table '%s' is already attached to another active environment. "
+                                    + "Please select another unattached table or specify a non-existing name to create it. "
+                                    + "Refer to Cloudera documentation at %s for the required setup.",
+                            awsParametersDto.getS3GuardTableName(),
+                            DocumentationLinkProvider.awsDynamoDbSetupLink()));
+                } else {
+                    determineAwsParameters(environmentDto, parametersDto);
+                }
             }
         }
         AwsDiskEncryptionParametersDto awsDiskEncryptionParametersDto = awsParametersDto.getAwsDiskEncryptionParametersDto();
@@ -81,6 +85,16 @@ public class AwsParameterValidator implements ParameterValidator {
             validationResultBuilder.error(String.format("FreeIpa spot percentage must be between %d and %d.", PERCENTAGE_MIN, PERCENTAGE_MAX));
         }
         return validationResultBuilder.build();
+    }
+
+    private boolean validateOnlyAwsEncryptionParameters(EnvironmentDto environmentDto) {
+        boolean validateOnlyAwsEncryptionParameters = false;
+        if (Objects.nonNull(environmentDto.getParameters()) &&
+                Objects.nonNull(environmentDto.getParameters().getAwsParametersDto()) &&
+                Objects.isNull(environmentDto.getParameters().getAwsParametersDto().getAwsDiskEncryptionParametersDto())) {
+            validateOnlyAwsEncryptionParameters = true;
+        }
+        return validateOnlyAwsEncryptionParameters;
     }
 
     @Override
