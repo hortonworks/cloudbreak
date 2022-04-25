@@ -28,7 +28,7 @@ public class FreeIpaPollerService {
     @Value("${env.stop.polling.attempt:90}")
     private Integer attempt;
 
-    @Value("${env.stop.polling.sleep.time:5}")
+    @Value("${env.stop.polling.sleep.time:10}")
     private Integer sleeptime;
 
     private final FreeIpaService freeIpaService;

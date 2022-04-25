@@ -84,6 +84,11 @@ freeipa:
   intermediate.threadpool:
     core.size: 100
     capacity.size: 4000
+  delayed:
+    stop-start-sec: 300
+    threadpool:
+      core:
+        size: 25
   passwordpolicy:
     min-password-lenght: 4
     max-password-lenght: 64

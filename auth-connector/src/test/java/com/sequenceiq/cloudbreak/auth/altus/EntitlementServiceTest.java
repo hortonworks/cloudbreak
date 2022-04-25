@@ -221,7 +221,10 @@ class EntitlementServiceTest {
                 {"WORKLOAD_IAM_SYNC", (EntitlementCheckFunction) EntitlementService::isWorkloadIamSyncEnabled, true},
 
                 {"CDP_FMS_USERSYNC_THREAD_TIMEOUT", (EntitlementCheckFunction) EntitlementService::isUserSyncThreadTimeoutEnabled, false},
-                {"CDP_FMS_USERSYNC_THREAD_TIMEOUT", (EntitlementCheckFunction) EntitlementService::isUserSyncThreadTimeoutEnabled, true}
+                {"CDP_FMS_USERSYNC_THREAD_TIMEOUT", (EntitlementCheckFunction) EntitlementService::isUserSyncThreadTimeoutEnabled, true},
+
+                {"CDP_FMS_DELAYED_STOP_START", (EntitlementCheckFunction) EntitlementService::isFmsDelayedStopStartEnabled, false},
+                {"CDP_FMS_DELAYED_STOP_START", (EntitlementCheckFunction) EntitlementService::isFmsDelayedStopStartEnabled, true}
         };
     }
 

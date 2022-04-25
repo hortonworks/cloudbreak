@@ -9,10 +9,13 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.event.instance.DelayedStopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -29,6 +32,7 @@ import com.sequenceiq.freeipa.flow.stack.stop.StackStopContext;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopService;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopState;
+import com.sequenceiq.freeipa.service.freeipa.PrimaryGatewayFirstThenSortByFqdnComparator;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 
 @Configuration
@@ -50,6 +54,13 @@ public class StackStopActions {
     @Bean(name = "STOP_STATE")
     public Action<?, ?> stackStopAction() {
         return new AbstractStackStopAction<>(StackEvent.class) {
+
+            @Value("${freeipa.delayed.stop-start-sec}")
+            private long delayInSec;
+
+            @Inject
+            private EntitlementService entitlementService;
+
             @Override
             protected void doExecute(StackStopContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackStopService.startStackStop(context);
@@ -59,10 +70,16 @@ public class StackStopActions {
             @Override
             protected Selectable createRequest(StackStopContext context) {
                 List<CloudInstance> cloudInstances = StreamSupport.stream(context.getInstanceMetaData().spliterator(), false)
+                        .sorted(new PrimaryGatewayFirstThenSortByFqdnComparator().reversed())
                         .map(i -> instanceMetaDataToCloudInstanceConverter.convert(i))
                         .collect(Collectors.toList());
                 List<CloudResource> cloudResources = getCloudResources(context.getStack().getId());
-                return new StopInstancesRequest<StopInstancesResult>(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
+                if (entitlementService.isFmsDelayedStopStartEnabled(context.getStack().getAccountId())) {
+                    return new DelayedStopInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources,
+                            cloudInstances, delayInSec);
+                } else {
+                    return new StopInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
+                }
             }
         };
     }

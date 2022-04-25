@@ -22,6 +22,7 @@ auth:
       select.instance.type.enable: true
       batch.call.enable: true
       usersync.thread.timeout.enable: true
+      delayedstopstart.enable: true
     cloudstoragevalidation.enable:
       global: true
       aws: true
