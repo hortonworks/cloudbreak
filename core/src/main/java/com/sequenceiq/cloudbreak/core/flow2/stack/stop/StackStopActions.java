@@ -80,7 +80,7 @@ public class StackStopActions {
                         .map(s -> resourceToCloudResourceConverter.convert(s))
                         .collect(Collectors.toList());
                 cloudInstances.forEach(instance -> stack.getParameters().forEach(instance::putParameter));
-                return new StopInstancesRequest<StopInstancesResult>(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
+                return new StopInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
             }
         };
     }

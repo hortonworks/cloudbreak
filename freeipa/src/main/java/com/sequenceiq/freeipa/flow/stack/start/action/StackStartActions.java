@@ -8,12 +8,15 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.DelayedStartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -25,6 +28,8 @@ import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
+import com.sequenceiq.freeipa.flow.stack.HealthCheckRequest;
+import com.sequenceiq.freeipa.flow.stack.HealthCheckSuccess;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureContext;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
@@ -32,8 +37,7 @@ import com.sequenceiq.freeipa.flow.stack.start.StackStartContext;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartEvent;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartService;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartState;
-import com.sequenceiq.freeipa.flow.stack.HealthCheckRequest;
-import com.sequenceiq.freeipa.flow.stack.HealthCheckSuccess;
+import com.sequenceiq.freeipa.service.freeipa.PrimaryGatewayFirstThenSortByFqdnComparator;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 
 @Configuration
@@ -58,6 +62,13 @@ public class StackStartActions {
     @Bean(name = "START_STATE")
     public Action<?, ?> stackStartAction() {
         return new AbstractStackStartAction<>(StackEvent.class) {
+
+            @Value("${freeipa.delayed.stop-start-sec}")
+            private long delayInSec;
+
+            @Inject
+            private EntitlementService entitlementService;
+
             @Override
             protected void doExecute(StackStartContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackStartService.startStack(context.getStack());
@@ -69,10 +80,16 @@ public class StackStartActions {
                 Stack stack = context.getStack();
                 LOGGER.debug("Assembling start request for stack: {}", stack);
                 List<CloudInstance> cloudInstances = stack.getNotDeletedInstanceMetaDataSet().stream()
+                        .sorted(new PrimaryGatewayFirstThenSortByFqdnComparator())
                         .map(i -> metadataConverter.convert(i))
                         .collect(Collectors.toList());
                 List<CloudResource> cloudResources = getCloudResources(stack.getId());
-                return new StartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
+                if (entitlementService.isFmsDelayedStopStartEnabled(context.getStack().getAccountId())) {
+                    return new DelayedStartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances,
+                            delayInSec);
+                } else {
+                    return new StartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances);
+                }
             }
         };
     }
