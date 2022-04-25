@@ -21,7 +21,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.environment.experience.config.ExperiencePathConfig;
 
-class CommonExperienceWebTargetProviderTest {
+class CommonExperienceExperienceWebTargetProviderTest {
 
     private static final String MISSING_COMPONENT_TO_REPLACE_EXCEPTION_MSG = "Component what should be replaced in experience path must not be empty or null.";
 

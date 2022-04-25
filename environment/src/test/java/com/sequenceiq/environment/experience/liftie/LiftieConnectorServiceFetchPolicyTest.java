@@ -50,9 +50,9 @@ class LiftieConnectorServiceFetchPolicyTest extends LiftieConnectorServiceTestBa
 
         assertThrows(ExperienceOperationFailedException.class, () -> getUnderTest().getPolicy(TEST_CLOUD_PLATFORM));
 
-        verify(getMockRetryableWebTarget(), times(ONCE)).get(any());
-        verify(getMockRetryableWebTarget(), times(ONCE)).get(getMockInvocationBuilder());
-        verify(getMockResponseReader(), times(ONCE)).read(LIFTIE_CLUSTER_ENDPOINT_PATH, null, ExperiencePolicyResponse.class);
+        verify(getMockRetryableWebTarget(), times(FIVE_TIMES)).get(any());
+        verify(getMockRetryableWebTarget(), times(FIVE_TIMES)).get(getMockInvocationBuilder());
+        verify(getMockResponseReader(), times(FIVE_TIMES)).read(LIFTIE_CLUSTER_ENDPOINT_PATH, null, ExperiencePolicyResponse.class);
     }
 
     @Test

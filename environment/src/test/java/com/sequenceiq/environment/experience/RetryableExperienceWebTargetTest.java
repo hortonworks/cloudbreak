@@ -10,13 +10,14 @@ import java.lang.reflect.Method;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Response;
 
+import com.sequenceiq.environment.experience.call.retry.ExperienceWebTarget;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 
-class RetryableWebTargetTest {
+class RetryableExperienceWebTargetTest {
 
     private static final long RETRYABLE_BACKOFF_DELAY = 500L;
 
@@ -26,11 +27,11 @@ class RetryableWebTargetTest {
 
     private static final String DELETE_METHOD_NAME = "delete";
 
-    private RetryableWebTarget underTest;
+    private ExperienceWebTarget underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new RetryableWebTarget();
+        underTest = new ExperienceWebTarget();
     }
 
     @Test

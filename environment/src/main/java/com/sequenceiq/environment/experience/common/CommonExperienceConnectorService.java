@@ -11,7 +11,6 @@ import java.util.concurrent.Callable;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -23,7 +22,7 @@ import com.sequenceiq.environment.exception.ExperienceOperationFailedException;
 import com.sequenceiq.environment.experience.InvocationBuilderProvider;
 import com.sequenceiq.environment.experience.QueryParamInjectorUtil;
 import com.sequenceiq.environment.experience.ResponseReader;
-import com.sequenceiq.environment.experience.RetryableWebTarget;
+import com.sequenceiq.environment.experience.call.retry.ExperienceWebTarget;
 import com.sequenceiq.environment.experience.api.CommonExperienceApi;
 import com.sequenceiq.environment.experience.common.responses.CpInternalCluster;
 import com.sequenceiq.environment.experience.common.responses.CpInternalEnvironmentResponse;
@@ -40,26 +39,26 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
 
     private final InvocationBuilderProvider invocationBuilderProvider;
 
-    private final RetryableWebTarget retryableWebTarget;
+    private final ExperienceWebTarget experienceWebTarget;
 
     private final ResponseReader responseReader;
 
-    public CommonExperienceConnectorService(RetryableWebTarget retryableWebTarget, CommonExperienceResponseReader commonExperienceResponseReader,
+    public CommonExperienceConnectorService(ExperienceWebTarget experienceWebTarget, CommonExperienceResponseReader commonExperienceResponseReader,
             CommonExperienceWebTargetProvider commonExperienceWebTargetProvider, InvocationBuilderProvider invocationBuilderProvider) {
         this.commonExperienceWebTargetProvider = commonExperienceWebTargetProvider;
         this.invocationBuilderProvider = invocationBuilderProvider;
         this.responseReader = commonExperienceResponseReader;
-        this.retryableWebTarget = retryableWebTarget;
+        this.experienceWebTarget = experienceWebTarget;
     }
 
     @NotNull
     @Override
     public Set<CpInternalCluster> getExperienceClustersConnectedToEnv(String experienceBasePath, String environmentCrn) {
-        WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForClusterFetch(experienceBasePath, environmentCrn);
+        javax.ws.rs.client.WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForClusterFetch(experienceBasePath, environmentCrn);
         LOGGER.info("WebTarget has created for getting workspaces for environment [crn: {}]: {}",
                 environmentCrn, webTarget.toString());
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
-        Optional<Response> result = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call));
+        Optional<Response> result = executeCall(webTarget.getUri(), () -> experienceWebTarget.get(call));
         if (result.isPresent()) {
             Status status = Status.fromStatusCode(result.get().getStatus());
             if (status != NOT_FOUND) {
@@ -78,23 +77,23 @@ public class CommonExperienceConnectorService implements CommonExperienceApi {
 
     @Override
     public void deleteWorkspaceForEnvironment(String experienceBasePath, String environmentCrn, boolean force) {
-        WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForClusterFetch(experienceBasePath, environmentCrn);
+        javax.ws.rs.client.WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForClusterFetch(experienceBasePath, environmentCrn);
         LOGGER.info("WebTarget has created for deleting workspaces for environment [crn: {}]: {}",
                 environmentCrn, webTarget.toString());
         if (force) {
             webTarget = QueryParamInjectorUtil.setQueryParams(webTarget, Map.of("force", "true"));
         }
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilder(webTarget);
-        executeCall(webTarget.getUri(), () -> retryableWebTarget.delete(call))
+        executeCall(webTarget.getUri(), () -> experienceWebTarget.delete(call))
                 .ifPresentOrElse(this::throwExceptionIfResultIsUnsuccessful, this::throwExperienceOperationFailedException);
     }
 
     @Override
     public ExperiencePolicyResponse collectPolicy(String experienceBasePath, String cloudPlatform) {
-        WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForPolicyFetch(experienceBasePath, cloudPlatform);
+        javax.ws.rs.client.WebTarget webTarget = commonExperienceWebTargetProvider.createWebTargetForPolicyFetch(experienceBasePath, cloudPlatform);
         LOGGER.info("WebTarget has created for collecting policies: {}", webTarget.toString());
         Invocation.Builder call = invocationBuilderProvider.createInvocationBuilderForInternalActor(webTarget);
-        Optional<Response> response = executeCall(webTarget.getUri(), () -> retryableWebTarget.get(call));
+        Optional<Response> response = executeCall(webTarget.getUri(), () -> experienceWebTarget.get(call));
         if (response.isPresent()) {
             return responseReader.read(webTarget.getUri().toString(), response.get(), ExperiencePolicyResponse.class)
                     .orElseThrow(() -> new ExperienceOperationFailedException(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG));

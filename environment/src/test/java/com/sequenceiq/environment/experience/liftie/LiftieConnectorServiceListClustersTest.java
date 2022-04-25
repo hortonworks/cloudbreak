@@ -25,6 +25,8 @@ class LiftieConnectorServiceListClustersTest extends LiftieConnectorServiceTestB
 
     private static final String LIFTIE_CLUSTER_ENDPOINT_PATH = "somewhereOverTheRainbow";
 
+    private static final ListClustersResponse RESPONSE = new ListClustersResponse();
+
     private static final String TENANT_QUERY_PARAM_KEY = "tenant";
 
     private static final String PAGE_QUERY_PARAM_KEY = "page";
@@ -35,7 +37,7 @@ class LiftieConnectorServiceListClustersTest extends LiftieConnectorServiceTestB
 
     private static final String TEST_ENV_NAME = "someEnv";
 
-    private static final ListClustersResponse EMPTY_RESPONSE = new ListClustersResponse();
+    private static final int MAX_RETRY_COUNT = 5;
 
     @Override
     @BeforeEach
@@ -45,7 +47,7 @@ class LiftieConnectorServiceListClustersTest extends LiftieConnectorServiceTestB
         when(getMockClient().target(LIFTIE_CLUSTER_ENDPOINT_PATH)).thenReturn(getMockWebTarget());
         when(getMockWebTarget().queryParam(anyString(), anyString())).thenReturn(getMockWebTarget());
         lenient().when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), ListClustersResponse.class))
-                .thenReturn(Optional.of(EMPTY_RESPONSE));
+                .thenReturn(Optional.of(RESPONSE));
         when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(getMockResponse());
     }
 
@@ -90,8 +92,7 @@ class LiftieConnectorServiceListClustersTest extends LiftieConnectorServiceTestB
         doThrow(RuntimeException.class).when(getMockResponseReader()).read(any(), any(), any());
 
         assertThatThrownBy(() -> getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null))
-                .isExactlyInstanceOf(ExperienceOperationFailedException.class)
-                .hasCauseExactlyInstanceOf(RuntimeException.class);
+                .isExactlyInstanceOf(ExperienceOperationFailedException.class);
     }
 
     @Test
@@ -100,8 +101,17 @@ class LiftieConnectorServiceListClustersTest extends LiftieConnectorServiceTestB
         when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), ListClustersResponse.class)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null))
-                .isExactlyInstanceOf(ExperienceOperationFailedException.class)
-                .hasCauseExactlyInstanceOf(ExperienceOperationFailedException.class);
+                .isExactlyInstanceOf(ExperienceOperationFailedException.class);
+    }
+
+    @Test
+    void testWhenResponseReaderReturnsValidResultButOnTheSixthAttemptThenItThrowsIllegalStateException() {
+        when(getMockRetryableWebTarget().get(getMockInvocationBuilder())).thenReturn(getMockResponse());
+        when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), ListClustersResponse.class))
+                .thenReturn(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.of(RESPONSE));
+
+        assertThatThrownBy(() -> getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null))
+                .isExactlyInstanceOf(ExperienceOperationFailedException.class);
     }
 
     @Test
@@ -110,7 +120,22 @@ class LiftieConnectorServiceListClustersTest extends LiftieConnectorServiceTestB
 
         ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
 
-        assertEquals(EMPTY_RESPONSE, result);
+        assertEquals(RESPONSE, result);
+    }
+
+    @Test
+    void testWhenResponseReaderReturnsNonEmptyResultButNotOnTheFirstTryThenThatShouldReturn() {
+        for (int i = 2; i < MAX_RETRY_COUNT; i++) {
+            Optional<ListClustersResponse>[] inputs = new Optional[i];
+            inputs[inputs.length - 1] = Optional.of(RESPONSE);
+            when(getMockWebTarget().getUri()).thenReturn(URI.create(LIFTIE_CLUSTER_ENDPOINT_PATH));
+            when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), ListClustersResponse.class))
+                    .thenReturn(Optional.empty(), inputs);
+
+            ListClustersResponse result = getUnderTest().listClusters(TEST_ENV_NAME, TEST_TENANT, null, null);
+
+            assertEquals(RESPONSE, result, "Not the expected result has arrived when the first " + (i - 1) + " should be is empty.");
+        }
     }
 
 }

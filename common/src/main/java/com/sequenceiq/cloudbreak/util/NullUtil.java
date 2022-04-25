@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.util;
 
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -23,6 +24,18 @@ public class NullUtil {
         }
     }
 
+    public static <T> void doIfNotNullOtherwise(T value, Consumer<T> consumer, Runnable callableUponNull) {
+        if (value != null) {
+            consumer.accept(value);
+        } else {
+            try {
+                callableUponNull.run();
+            } catch (Exception e) {
+                throw new IllegalStateException("Unable to execute secondary action due to: ", e);
+            }
+        }
+    }
+
     public static <T, R> R getIfNotNull(T value, Function<T, R> consumer) {
         if (value != null) {
             return consumer.apply(value);
@@ -33,6 +46,13 @@ public class NullUtil {
     public static <T, R> R getIfNotNullOtherwise(T value, Function<T, R> consumer, R toReturnIfValueIsNull) {
         if (value != null) {
             return consumer.apply(value);
+        }
+        return toReturnIfValueIsNull;
+    }
+
+    public static <R> R getIfNotNullOtherwise(R value, R toReturnIfValueIsNull) {
+        if (value != null) {
+            return value;
         }
         return toReturnIfValueIsNull;
     }

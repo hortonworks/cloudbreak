@@ -49,9 +49,9 @@ class LiftieConnectorServiceDeleteClusterTest extends LiftieConnectorServiceTest
 
         Assertions.assertThrows(ExperienceOperationFailedException.class, () -> getUnderTest().deleteCluster(TEST_CLUSTER_ID));
 
-        verify(getMockRetryableWebTarget(), times(ONCE)).delete(any());
-        verify(getMockRetryableWebTarget(), times(ONCE)).delete(getMockInvocationBuilder());
-        verify(getMockResponseReader(), times(ONCE)).read(LIFTIE_CLUSTER_ENDPOINT_PATH, null, DeleteClusterResponse.class);
+        verify(getMockRetryableWebTarget(), times(FIVE_TIMES)).delete(any());
+        verify(getMockRetryableWebTarget(), times(FIVE_TIMES)).delete(getMockInvocationBuilder());
+        verify(getMockResponseReader(), times(FIVE_TIMES)).read(LIFTIE_CLUSTER_ENDPOINT_PATH, null, DeleteClusterResponse.class);
     }
 
     @Test

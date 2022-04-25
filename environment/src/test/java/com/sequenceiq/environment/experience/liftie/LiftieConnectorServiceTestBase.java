@@ -7,7 +7,6 @@ import java.net.URI;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,12 +16,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.environment.experience.InvocationBuilderProvider;
-import com.sequenceiq.environment.experience.RetryableWebTarget;
+import com.sequenceiq.environment.experience.call.retry.ExperienceWebTarget;
 
 @ExtendWith(MockitoExtension.class)
 class LiftieConnectorServiceTestBase {
 
     protected static final int ONCE = 1;
+
+    protected static final int FIVE_TIMES = 5;
 
     protected static final String LIFTIE_CLUSTER_ENDPOINT_PATH = "somewhereOverTheRainbow";
 
@@ -33,7 +34,7 @@ class LiftieConnectorServiceTestBase {
     private InvocationBuilderProvider mockInvocationBuilderProvider;
 
     @Mock
-    private RetryableWebTarget mockRetryableWebTarget;
+    private ExperienceWebTarget mockRetryableExperienceWebTarget;
 
     @Mock
     private LiftiePathProvider mockLiftiePathProvider;
@@ -45,7 +46,7 @@ class LiftieConnectorServiceTestBase {
     private LiftieResponseReader mockResponseReader;
 
     @Mock
-    private WebTarget mockWebTarget;
+    private javax.ws.rs.client.WebTarget mockWebTarget;
 
     @Mock
     private Response mockResponse;
@@ -69,8 +70,8 @@ class LiftieConnectorServiceTestBase {
         return mockInvocationBuilderProvider;
     }
 
-    public RetryableWebTarget getMockRetryableWebTarget() {
-        return mockRetryableWebTarget;
+    public ExperienceWebTarget getMockRetryableWebTarget() {
+        return mockRetryableExperienceWebTarget;
     }
 
     public LiftiePathProvider getMockLiftiePathProvider() {
@@ -85,7 +86,7 @@ class LiftieConnectorServiceTestBase {
         return mockResponseReader;
     }
 
-    public WebTarget getMockWebTarget() {
+    public javax.ws.rs.client.WebTarget getMockWebTarget() {
         return mockWebTarget;
     }
 
