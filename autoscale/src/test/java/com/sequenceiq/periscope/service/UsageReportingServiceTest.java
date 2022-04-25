@@ -145,6 +145,8 @@ public class UsageReportingServiceTest {
         cluster.setClusterPertain(clusterPertain);
         cluster.setStackName("testCluster");
         cluster.setStackCrn("testStackCrn");
+        cluster.setAutoscalingEnabled(Boolean.TRUE);
+        cluster.setStopStartScalingEnabled(Boolean.TRUE);
 
         underTest.reportAutoscalingConfigChanged("testUserCrn", cluster);
 
@@ -157,5 +159,7 @@ public class UsageReportingServiceTest {
         assertEquals("CluterCrn should match", "testStackCrn", actual.getClusterCrn());
         assertEquals("AccountId should match", "testAccount", actual.getAccountId());
         assertEquals("Policy Count should match", 2, actual.getAutoscalingPolicyDefinitionCount());
+        assertEquals("Autoscaling enabled should match", Boolean.TRUE, actual.getAutoscalingEnabled());
+        assertEquals("Stopstart scaling enabled should match", Boolean.TRUE, actual.getStopStartScalingEnabled());
     }
 }

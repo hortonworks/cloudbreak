@@ -2338,6 +2338,8 @@ message CDPDatahubAutoscaleConfigChanged {
   string clusterName = 5;
   // The cluster crn.
   string clusterCrn = 6;
+  // True if stop-start scaling is enabled for the cluster.
+  bool stopStartScalingEnabled = 7;
 }
 
 // Holds network check result

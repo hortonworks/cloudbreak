@@ -57,7 +57,7 @@ public class UsageReportingService {
         Stream.of(cluster.getLoadAlerts(), cluster.getTimeAlerts())
                 .flatMap(Set::stream)
                 .forEach(alert -> cdpAutoscaleConfigChangedBuilder.addAutoscalingPolicyDefinition(withAlert(alert)));
-
+        cdpAutoscaleConfigChangedBuilder.setStopStartScalingEnabled(cluster.isStopStartScalingEnabled());
         usageReporter.cdpDatahubAutoscaleConfigChanged(cdpAutoscaleConfigChangedBuilder.build());
     }
 
