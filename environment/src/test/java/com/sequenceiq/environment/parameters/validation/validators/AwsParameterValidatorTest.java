@@ -44,6 +44,9 @@ class AwsParameterValidatorTest {
     private static final Long ENV_ID = 1L;
 
     @Mock
+    private static Credential credential;
+
+    @Mock
     private NoSqlTableCreationModeDeterminerService noSqlTableCreationModeDeterminerService;
 
     @Mock
@@ -92,6 +95,54 @@ class AwsParameterValidatorTest {
         verify(noSqlTableCreationModeDeterminerService, never()).determineCreationMode(any(), any());
     }
 
+    @Test
+    void validateNoS3GuardCheckOnUpdateAwsDiskEncryptionParameters() {
+        AwsParametersDto awsParameters = AwsParametersDto.builder()
+                .withDynamoDbTableName("tablename")
+                .build();
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAwsParameters(awsParameters)
+                .build();
+        EnvironmentDto environmentDto = new AwsParameterValidatorTest.EnvironmentDtoBuilder()
+                .withAwsParameters(AwsParametersDto.builder()
+                        .withDynamoDbTableName("tablename")
+                        .build())
+                        .build();
+        environmentValidationDto.setEnvironmentDto(environmentDto);
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
+        assertFalse(validationResult.hasError());
+        verify(parametersService, never()).isS3GuardTableUsed(any(), any(), any(), any());
+    }
+
+    @Test
+    void validateS3GuardCheckWhenAWSDiskEncryptionParametersAlreadyPresent() {
+        AwsParametersDto awsParameters = AwsParametersDto.builder()
+                .withDynamoDbTableName("tablename")
+                .build();
+
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAwsParameters(awsParameters)
+                .build();
+
+        EnvironmentDto environmentDto = new AwsParameterValidatorTest.EnvironmentDtoBuilder()
+                .withAwsParameters(AwsParametersDto.builder()
+                        .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                                .withEncryptionKeyArn("dummy-key-arn")
+                                .build())
+                        .build())
+                .build();
+        environmentValidationDto.setEnvironmentDto(environmentDto);
+        when(parametersService.isS3GuardTableUsed(any(), any(), any(), any())).thenReturn(true);
+        ValidationResult validationResult = underTest.validate(environmentValidationDto, parametersDto, ValidationResult.builder());
+
+        assertTrue(validationResult.hasError());
+        assertEquals(1L, validationResult.getErrors().size());
+        assertEquals("S3Guard Dynamo table 'tablename' is already attached to another active environment. "
+                + "Please select another unattached table or specify a non-existing name to create it. Refer to "
+                + "Cloudera documentation at https://docs.cloudera.com/cdp/latest/requirements-aws/topics/mc-aws-req-dynamodb.html " +
+                "for the required setup.", validationResult.getErrors().get(0));
+    }
+
     @ParameterizedTest
     @EnumSource(value = S3GuardTableCreation.class, names = {"USE_EXISTING", "CREATE_NEW"})
     void validateAndDetermineAwsParametersUseExisting(S3GuardTableCreation creation) {
@@ -138,9 +189,9 @@ class AwsParameterValidatorTest {
         when(entitlementService.isAWSDiskEncryptionWithCMKEnabled(anyString())).thenReturn(false);
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
         assertTrue(validationResult.hasError());
-        assertEquals(String.format("You specified encryptionKeyArn to use Server Side Encryption for AWS Managed disks with CMK, "
+        assertEquals("You specified encryptionKeyArn to use Server Side Encryption for AWS Managed disks with CMK, "
                         + "but that feature is currently disabled. Get 'CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK' " +
-                        "enabled for your account to use SSE with CMK."),
+                        "enabled for your account to use SSE with CMK.",
                 validationResult.getFormattedErrors());
     }
 
@@ -192,6 +243,8 @@ class AwsParameterValidatorTest {
 
         private static final String ACCOUNT_ID = "accountId";
 
+        private static final String REGION = "dummyRegion";
+
         private final EnvironmentDto environmentDto = new EnvironmentDto();
 
         private final ParametersDto.Builder parametersDtoBuilder = ParametersDto.builder();
@@ -205,6 +258,8 @@ class AwsParameterValidatorTest {
             ParametersDto parametersDto = parametersDtoBuilder.build();
             environmentDto.setParameters(parametersDto);
             environmentDto.setAccountId(ACCOUNT_ID);
+            environmentDto.setCredential(credential);
+            environmentDto.setLocation(LocationDto.builder().withName(REGION).build());
             return environmentDto;
         }
     }

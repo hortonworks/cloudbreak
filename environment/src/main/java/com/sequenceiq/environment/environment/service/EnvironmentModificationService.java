@@ -21,7 +21,6 @@ import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
-import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
@@ -31,7 +30,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
-import com.sequenceiq.environment.environment.dto.UpdateAwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
@@ -41,13 +39,11 @@ import com.sequenceiq.environment.environment.validation.EnvironmentValidatorSer
 import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
-import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
-import com.sequenceiq.environment.parameters.dao.repository.AwsParametersRepository;
 import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
@@ -74,17 +70,12 @@ public class EnvironmentModificationService {
 
     private final EnvironmentEncryptionService environmentEncryptionService;
 
-    private final EnvironmentViewConverter environmentViewConverter;
-
-    private final AwsParametersRepository awsParametersRepository;
-
     private final AzureParametersRepository azureParametersRepository;
 
     public EnvironmentModificationService(EnvironmentDtoConverter environmentDtoConverter, EnvironmentService environmentService,
             CredentialService credentialService, NetworkService networkService, AuthenticationDtoConverter authenticationDtoConverter,
             ParametersService parametersService, EnvironmentFlowValidatorService environmentFlowValidatorService,
             EnvironmentResourceService environmentResourceService, EnvironmentEncryptionService environmentEncryptionService,
-            EnvironmentViewConverter environmentViewConverter, AwsParametersRepository awsParametersRepository,
             AzureParametersRepository azureParametersRepository) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
@@ -95,8 +86,6 @@ public class EnvironmentModificationService {
         this.environmentFlowValidatorService = environmentFlowValidatorService;
         this.environmentResourceService = environmentResourceService;
         this.environmentEncryptionService = environmentEncryptionService;
-        this.environmentViewConverter = environmentViewConverter;
-        this.awsParametersRepository = awsParametersRepository;
         this.azureParametersRepository = azureParametersRepository;
     }
 
@@ -143,21 +132,6 @@ public class EnvironmentModificationService {
         return updateAzureResourceEncryptionParameters(accountId, crn, dto.getAzureResourceEncryptionParametersDto(), environment);
     }
 
-    public EnvironmentDto updateAwsDiskEncryptionParametersByEnvironmentName(String accountId, String environmentName,
-            UpdateAwsDiskEncryptionParametersDto dto) {
-        Environment environment = environmentService
-                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
-        return updateAwsDiskEncryptionParameters(accountId, environmentName, dto.getAwsDiskEncryptionParametersDto(), environment);
-    }
-
-    public EnvironmentDto updateAwsDiskEncryptionParametersByEnvironmentCrn(String accountId, String crn, UpdateAwsDiskEncryptionParametersDto dto) {
-        Environment environment = environmentService
-                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("No environment found with CRN '%s'", crn)));
-        return updateAwsDiskEncryptionParameters(accountId, crn, dto.getAwsDiskEncryptionParametersDto(), environment);
-    }
-
     public EnvironmentDto changeTelemetryFeaturesByEnvironmentName(String accountId, String environmentName,
             EnvironmentFeatures features) {
         Environment environment = environmentService
@@ -200,38 +174,6 @@ public class EnvironmentModificationService {
         Environment saved = environmentService.save(environment);
         return environmentDtoConverter.environmentToDto(saved);
     }
-
-    private EnvironmentDto updateAwsDiskEncryptionParameters(String accountId, String environmentNameOrCrn, AwsDiskEncryptionParametersDto dto,
-            Environment environment) {
-            if (dto.getEncryptionKeyArn() != null) {
-                ValidationResult validateKey = environmentService.getValidatorService().validateEncryptionKeyArn(dto.getEncryptionKeyArn(),
-                        accountId);
-                if (!validateKey.hasError()) {
-                    if (environment.getParameters() == null) {
-                        AwsParameters awsParameters = new AwsParameters();
-                        awsParameters.setEncryptionKeyArn(dto.getEncryptionKeyArn());
-                        awsParameters.setAccountId(accountId);
-                        awsParameters.setId(environment.getId());
-                        awsParameters.setName(environment.getName());
-                        awsParameters.setEnvironment(environmentViewConverter.convert(environment));
-                        environment.setParameters(awsParameters);
-                    } else {
-                        AwsParameters awsParameters = (AwsParameters) environment.getParameters();
-                        if (awsParameters.getEncryptionKeyArn() == null) {
-                            awsParameters.setEncryptionKeyArn(dto.getEncryptionKeyArn());
-                        } else {
-                            throw new BadRequestException("The environment already has an encryption key set and could not be updated");
-                        }
-                    }
-                    LOGGER.debug("Successfully updated the encryption key ARN for the environment {}.", environmentNameOrCrn);
-                } else {
-                    throw new BadRequestException(validateKey.getFormattedErrors());
-                }
-                AwsParameters awsParameters = (AwsParameters) environment.getParameters();
-                awsParametersRepository.save(awsParameters);
-            }
-            return environmentDtoConverter.environmentToDto(environment);
-        }
 
     private EnvironmentDto updateAzureResourceEncryptionParameters(String accountId, String environmentName, AzureResourceEncryptionParametersDto dto,
             Environment environment) {
