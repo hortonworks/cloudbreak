@@ -28,8 +28,10 @@ import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
+import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
@@ -38,6 +40,8 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartE
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxOperationRepository;
+import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -77,6 +81,12 @@ public class SdxBackupRestoreServiceTest {
 
     @Mock
     private SdxClusterRepository sdxClusterRepository;
+
+    @Mock
+    private EnvironmentClientService environmentClientService;
+
+    @Mock
+    private DatalakeDrConfig datalakeDrConfig;
 
     @InjectMocks
     private SdxBackupRestoreService sdxBackupRestoreService;
@@ -175,6 +185,80 @@ public class SdxBackupRestoreServiceTest {
     }
 
     @Test
+    public void testShouldSdxBackupBePerformed() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform("AWS");
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+        SdxCluster sdxCluster = getValidSdxCluster("7.2.14");
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        when(datalakeDrConfig.isConfigured()).thenReturn(true);
+
+        assertTrue(sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster, true));
+
+        sdxCluster = getValidSdxCluster("7.2.0");
+        assertTrue(!sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster, true));
+
+        sdxCluster = getValidSdxCluster("7.2.0");
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.GCS);
+        assertTrue(!sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster, true));
+
+
+        sdxCluster = getValidSdxCluster("7.2.1");
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.ADLS_GEN_2);
+        assertTrue(!sdxBackupRestoreService.shouldSdxBackupBePerformed(sdxCluster, true));
+    }
+
+    @Test
+    public void testShouldSdxRestoreBePerformed() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform("AWS");
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(datalakeDrConfig.isConfigured()).thenReturn(true);
+
+        SdxCluster sdxCluster = getValidSdxCluster("7.2.13");
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+
+        sdxCluster = getValidSdxCluster("7.2.14");
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+
+        sdxCluster = getValidSdxCluster("7.2.15");
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+
+        detailedEnvironmentResponse.setCloudPlatform("AZURE");
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.ADLS_GEN_2);
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+
+
+        detailedEnvironmentResponse.setCloudPlatform("AWS");
+        sdxCluster = getValidSdxCluster("7.2.13");
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        sdxCluster.setRangerRazEnabled(true);
+        assertTrue(!sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+
+        detailedEnvironmentResponse.setCloudPlatform("AWS");
+        sdxCluster = getValidSdxCluster("7.2.14");
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        sdxCluster.setRangerRazEnabled(true);
+        assertTrue(!sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+
+        detailedEnvironmentResponse.setCloudPlatform("AWS");
+        sdxCluster = getValidSdxCluster("7.2.15");
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        sdxCluster.setRangerRazEnabled(true);
+        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+
+        detailedEnvironmentResponse.setCloudPlatform("AZURE");
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.ADLS_GEN_2);
+        sdxCluster.setRangerRazEnabled(true);
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+        assertTrue(sdxBackupRestoreService.shouldSdxRestoreBePerformed(sdxCluster, true));
+    }
+
+    @Test
     public void testWhenSuccessfulBackupDoesNotExistThenThrowError() {
 
         when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.empty())).thenReturn(null);
@@ -190,6 +274,17 @@ public class SdxBackupRestoreServiceTest {
         sdxCluster.setCrn("crn:sdxcluster");
         sdxCluster.setDatabaseCrn("crn:sdxcluster");
         sdxCluster.setId(1L);
+        return sdxCluster;
+    }
+
+    private SdxCluster getValidSdxCluster(String runtime) {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("test-sdx-cluster");
+        sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
+        sdxCluster.setEnvName("test-env");
+        sdxCluster.setId(1L);
+        sdxCluster.setAccountId("accountid");
+        sdxCluster.setRuntime(runtime);
         return sdxCluster;
     }
 

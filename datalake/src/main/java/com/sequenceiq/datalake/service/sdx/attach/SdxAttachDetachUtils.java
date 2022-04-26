@@ -33,14 +33,14 @@ public class SdxAttachDetachUtils {
         sdxCluster.setStackCrn(newCrn);
     }
 
-    public void updateStack(String originalName, String newName, String newCrn) {
+    public void updateStack(String originalName, String newName, String newCrn, boolean retainOriginalName) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         ThreadBasedUserCrnProvider.doAsInternalActor(
             regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
             () -> {
                 try {
                     stackV4Endpoint.updateNameAndCrn(
-                            0L, originalName, initiatorUserCrn, newName, newCrn
+                            0L, originalName, initiatorUserCrn, newName, newCrn, retainOriginalName
                     );
                 } catch (NotFoundException e) {
                     LOGGER.warn("Stack not found for original name: '" + originalName +

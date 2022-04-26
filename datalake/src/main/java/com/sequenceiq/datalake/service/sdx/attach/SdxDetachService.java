@@ -76,7 +76,7 @@ public class SdxDetachService {
      */
     public void detachStack(SdxCluster cluster, String originalName) {
         LOGGER.info("Started detaching stack of SDX cluster with ID: {}.", cluster.getId());
-        sdxAttachDetachUtils.updateStack(originalName, cluster.getClusterName(), cluster.getCrn());
+        sdxAttachDetachUtils.updateStack(originalName, cluster.getClusterName(), cluster.getCrn(), true);
         jobService.schedule(cluster.getId(), SdxClusterJobAdapter.class);
         LOGGER.info("Finished detaching stack of SDX cluster with ID: {}.", cluster.getId());
     }

@@ -27,7 +27,8 @@ public class AzureResourceGroupMetadataProvider {
 
     public String getStackName(CloudContext cloudContext) {
         return Splitter.fixedLength(maxResourceNameLength - cloudContext.getId().toString().length())
-                .splitToList(cloudContext.getName()).get(0) + cloudContext.getId();
+                .splitToList(cloudContext.getOriginalName() == null ? cloudContext.getName() : cloudContext.getOriginalName())
+                .get(0) + cloudContext.getId();
     }
 
     public String getResourceGroupName(CloudContext cloudContext, CloudStack cloudStack) {

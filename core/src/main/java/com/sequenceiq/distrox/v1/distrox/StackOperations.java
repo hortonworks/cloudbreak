@@ -290,9 +290,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         stackCommonService.deleteWithKerberosInWorkspace(nameOrCrn, workspaceId, forced);
     }
 
-    public void updateNameAndCrn(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String newName, String newCrn) {
+    public void updateNameAndCrn(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String newName, String newCrn, boolean retainOriginalName) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        stackUpdateService.updateNameAndCrn(stack, newName, newCrn);
+        stackUpdateService.updateNameAndCrn(stack, newName, newCrn, retainOriginalName);
     }
 
     public StackV4Request getRequest(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
