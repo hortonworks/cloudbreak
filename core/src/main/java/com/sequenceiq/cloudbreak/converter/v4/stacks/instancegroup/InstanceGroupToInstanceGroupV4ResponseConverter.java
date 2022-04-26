@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -13,6 +14,8 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.network.Insta
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup.SecurityGroupToSecurityGroupResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.TemplateToInstanceTemplateV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataDto;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 
 @Component
@@ -63,4 +66,40 @@ public class InstanceGroupToInstanceGroupV4ResponseConverter {
         instanceGroupResponse.setScalabilityOption(source.getScalabilityOption() == null ? ScalabilityOption.ALLOWED : source.getScalabilityOption());
         return instanceGroupResponse;
     }
+
+    public InstanceGroupV4Response convert(InstanceGroupDto source, List<InstanceMetadataDto> instanceMetadataDtos) {
+        InstanceGroupV4Response instanceGroupResponse = new InstanceGroupV4Response();
+        instanceGroupResponse.setId(source.getId());
+        if (source.getTemplate() != null) {
+            instanceGroupResponse.setTemplate(templateToInstanceTemplateV4ResponseConverter
+                    .convert(source.getTemplate()));
+        }
+        instanceGroupResponse.setMetadata(
+                instanceMetadataDtos.stream()
+                        .map(s -> instanceMetaDataToInstanceMetaDataV4ResponseConverter.convert(s, source))
+                        .collect(Collectors.toSet()));
+        if (source.getSecurityGroup() != null) {
+            instanceGroupResponse.setSecurityGroup(securityGroupToSecurityGroupResponseConverter.convert(source.getSecurityGroup()));
+        }
+        Json attributes = source.getAttributes();
+        if (attributes != null) {
+            providerParameterCalculator.parse(attributes.getMap(), instanceGroupResponse);
+        }
+        instanceGroupResponse.setNodeCount(instanceMetadataDtos.size());
+        instanceGroupResponse.setName(source.getGroupName());
+        instanceGroupResponse.setMinimumNodeCount(source.getMinimumNodeCount());
+        instanceGroupResponse.setType(source.getInstanceGroupType());
+        if (source.getInstanceGroupNetwork() != null) {
+            instanceGroupResponse.setNetwork(
+                    instanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter.convert(source.getInstanceGroupNetwork()));
+        }
+        instanceGroupResponse.setAvailabilityZones(source.getAvailabilityZones());
+        /*
+        instanceGroupResponse.setAvailabilityZones(
+                getIfNotNull(source.getAvailabilityZones(), az -> az.stream().map(AvailabiltyZone::getAvailabiltyZone).collect(Collectors.toSet())));
+         */
+        instanceGroupResponse.setScalabilityOption(source.getScalabilityOption() == null ? ScalabilityOption.ALLOWED : source.getScalabilityOption());
+        return instanceGroupResponse;
+    }
+
 }

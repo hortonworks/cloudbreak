@@ -17,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
@@ -183,7 +182,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService, Cl
                 instanceGroupName);
 
         StackV4Response stackV4Response = stackV4ResponseConverter.convert(stack);
-        stackV4Response = stackResponseDecorator.decorate(stackV4Response, stack, List.of(StackResponseEntries.HARDWARE_INFO.getEntryName()));
+//        stackV4Response = stackResponseDecorator.decorate(stackV4Response, stack, List.of(StackResponseEntries.HARDWARE_INFO.getEntryName()));
         CloudbreakCompositeEvent compositeEvent = new CloudbreakCompositeEvent(
                 resourceEvent,
                 eventMessageArgs,

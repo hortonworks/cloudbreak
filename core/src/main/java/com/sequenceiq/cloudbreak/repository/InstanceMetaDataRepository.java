@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -23,6 +24,9 @@ import com.sequenceiq.cloudbreak.domain.projection.InstanceMetaDataGroupView;
 import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.InstanceMetaDataView;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataDto;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
 @EntityType(entityClass = InstanceMetaData.class)
@@ -54,6 +58,70 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
             "AND i.instanceStatus <> 'DELETED_BY_PROVIDER' " +
             "ORDER BY i.privateId")
     List<InstanceMetaData> findNotTerminatedAsOrderedListForStack(@Param("stackId") Long stackId);
+
+    @Query("SELECT i FROM InstanceMetaDataView i " +
+            "LEFT JOIN i.instanceGroup ig " +
+            "LEFT JOIN ig.stack s " +
+            "WHERE s.id= :stackId " +
+            "AND i.instanceStatus <> 'TERMINATED' " +
+            "AND i.instanceStatus <> 'DELETED_ON_PROVIDER_SIDE' " +
+            "AND i.instanceStatus <> 'DELETED_BY_PROVIDER' ")
+    List<InstanceMetaDataView> findNotTerminatedAsOrderedListForStackWithoutEntityGraph(@Param("stackId") Long stackId);
+
+    @Query("SELECT i.id as id, " +
+            "ig.id as instanceGroupId, " +
+            "i.instanceStatus as instanceStatus, " +
+            "i.instanceName as instanceName, " +
+            "i.statusReason as statusReason, " +
+            "i.privateId as privateId, " +
+            "i.privateIp as privateIp, " +
+            "i.publicIp as publicIp, " +
+            "i.sshPort as sshPort, " +
+            "i.instanceId as instanceId, " +
+            "i.ambariServer as ambariServer, " +
+            "i.clusterManagerServer as clusterManagerServer, " +
+            "i.discoveryFQDN as discoveryFQDN, " +
+            "i.instanceMetadataType as instanceMetadataType, " +
+            "i.localityIndicator as localityIndicator, " +
+            "i.startDate as startDate, " +
+            "i.terminationDate as terminationDate, " +
+            "i.subnetId as subnetId, " +
+            "i.availabilityZone as availabilityZone, " +
+            "i.image as image, " +
+            "i.rackId as rackId, " +
+            "i.lifeCycle as lifeCycle, " +
+            "i.variant as variant " +
+//            "ig as instanceGroup " +
+            "FROM InstanceMetaDataView i " +
+            "LEFT JOIN i.instanceGroup ig " +
+            "LEFT JOIN ig.stack s " +
+            "WHERE s.id= :stackId " +
+            "AND i.instanceStatus <> 'TERMINATED' " +
+            "AND i.instanceStatus <> 'DELETED_ON_PROVIDER_SIDE' " +
+            "AND i.instanceStatus <> 'DELETED_BY_PROVIDER' ")
+    List<InstanceMetadataDto> findNotTerminatedInstanaceMetadataDtoByStackId(@Param("stackId") Long stackId);
+
+    @Query("SELECT ig.id as id, " +
+            "ig.groupName as groupName, " +
+            "ig.instanceGroupType as instanceGroupType, " +
+            "ig.template as template, " +
+            "ig.securityGroup as securityGroup, " +
+            "ig.attributes as attributes, " +
+            "ig.minimumNodeCount as minimumNodeCount, " +
+            "ig.instanceGroupNetwork as instanceGroupNetwork, " +
+            "ig.scalabilityOption as scalabilityOption, " +
+            "az.availabilityZone as availabilityZones " +
+//            "i as instanceMetadata " +
+            "FROM InstanceGroup ig " +
+//            "LEFT JOIN ig.instanceMetaData i " +
+            "LEFT JOIN ig.stack s " +
+            "LEFT JOIN ig.availabilityZones az " +
+            "WHERE s.id= :stackId "
+//            "AND i.instanceStatus <> 'TERMINATED' " +
+//            "AND i.instanceStatus <> 'DELETED_ON_PROVIDER_SIDE' " +
+//            "AND i.instanceStatus <> 'DELETED_BY_PROVIDER' "
+            )
+    List<InstanceGroupDto> findInstanceGroupDtoByStackId(@Param("stackId") Long stackId);
 
     @Query("SELECT i FROM InstanceMetaData i " +
             "WHERE i.instanceGroup.stack.id= :stackId " +
@@ -122,9 +190,15 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     Optional<String> getServerCertByStackId(@Param("stackId") Long stackId);
 
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
-    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceStatus <> 'TERMINATED' "
-            + "AND i.instanceGroup.stack.id= :stackId")
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceStatus <> 'TERMINATED' " +
+            "AND i.instanceGroup.stack.id= :stackId")
     Optional<InstanceMetaData> getPrimaryGatewayInstanceMetadata(@Param("stackId") Long stackId);
+
+    @Query("SELECT i.privateIp as privateIp, i.publicIp as publicIp FROM InstanceMetaData i " +
+            "WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' " +
+            "AND i.instanceStatus <> 'TERMINATED' " +
+            "AND i.instanceGroup.stack.id= :stackId")
+    Optional<Map<String, String>> getPrimaryGatewayIp(@Param("stackId") Long stackId);
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.discoveryFQDN = :discoveryFQDN AND i.instanceStatus = 'TERMINATED' AND i.instanceId IS NOT null "
             + "AND i.instanceGroup.stack.id= :stackId ORDER BY i.terminationDate DESC")
@@ -178,5 +252,7 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
             "AND i.terminationDate < :thresholdTerminationDate ORDER BY i.terminationDate ASC")
     Page<InstanceMetaData> findTerminatedInstanceMetadataByStackIdAndTerminatedBefore(@Param("stackId") Long stackId,
             @Param("thresholdTerminationDate") Long thresholdTerminationDate, Pageable pageable);
+
+
 
 }

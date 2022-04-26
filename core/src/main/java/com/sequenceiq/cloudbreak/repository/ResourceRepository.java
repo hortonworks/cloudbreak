@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -28,6 +29,12 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
 
     @Query("SELECT r FROM Resource r WHERE r.stack.id = :stackId")
     List<Resource> findAllByStackId(@Param("stackId") long stackId);
+
+    @Query("SELECT r FROM Resource r " +
+            "LEFT JOIN r.stack s " +
+            "WHERE s.id = :stackId " +
+            "AND r.resourceStatus in :statuses")
+    List<Resource> findAllByStackIdAndStatusIn(@Param("stackId") long stackId, @Param("statuses") Collection<CommonStatus> statuses);
 
     @Query("SELECT r FROM Resource r WHERE r.stack.id = :stackId AND (r.resourceType NOT LIKE '%INSTANCE%' OR r.resourceType NOT LIKE '%DISK%')")
     Set<Resource> findAllByStackIdNotInstanceOrDisk(@Param("stackId") Long stackId);

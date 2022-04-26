@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -85,9 +84,8 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     @ManyToMany(mappedBy = "instanceGroups", fetch = FetchType.LAZY)
     private Set<TargetGroup> targetGroups = new HashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Column(name = "availabilityzone")
-    private Set<String> availabilityZones = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "instanceGroup")
+    private Set<AvailabilityZone> availabilityZones = new HashSet<>();
 
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     private InstanceGroupNetwork instanceGroupNetwork;
@@ -289,10 +287,10 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     }
 
     public Set<String> getAvailabilityZones() {
-        return availabilityZones;
+        return availabilityZones.stream().map(AvailabilityZone::getAvailabilityZone).collect(Collectors.toSet());
     }
 
-    public void setAvailabilityZones(Set<String> availabilityZones) {
+    public void setAvailabilityZones(Set<AvailabilityZone> availabilityZones) {
         this.availabilityZones = availabilityZones;
     }
 

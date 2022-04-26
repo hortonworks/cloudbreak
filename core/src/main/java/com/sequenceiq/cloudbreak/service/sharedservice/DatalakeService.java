@@ -91,17 +91,17 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
         clusterResponse.setSharedServiceResponse(sharedServiceResponse);
     }
 
-    public void addSharedServiceResponse(Stack stack, StackV4Response stackResponse) {
+    public void addSharedServiceResponse(String datalakeCrn, StackV4Response stackResponse) {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
-        if (!Strings.isNullOrEmpty(stack.getDatalakeCrn())) {
+        if (!Strings.isNullOrEmpty(datalakeCrn)) {
             LOGGER.debug("Checking datalake through the datalakeCrn.");
-            Optional<ResourceBasicView> resourceBasicView = stackService.getResourceBasicViewByResourceCrn(stack.getDatalakeCrn());
+            Optional<ResourceBasicView> resourceBasicView = stackService.getResourceBasicViewByResourceCrn(datalakeCrn);
             if (resourceBasicView.isPresent()) {
                 ResourceBasicView s = resourceBasicView.get();
                 sharedServiceResponse.setSharedClusterId(s.getId());
                 sharedServiceResponse.setSharedClusterName(s.getName());
             } else {
-                LOGGER.debug("Unable to find datalake with CRN {}", stack.getDatalakeCrn());
+                LOGGER.debug("Unable to find datalake with CRN {}", datalakeCrn);
             }
         }
         stackResponse.setSharedService(sharedServiceResponse);

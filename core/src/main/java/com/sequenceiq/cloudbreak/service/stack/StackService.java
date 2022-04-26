@@ -15,7 +15,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -70,6 +69,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.converter.stack.AutoscaleStackToAutoscaleStackResponseJsonConverter;
 import com.sequenceiq.cloudbreak.converter.stack.StackIdViewToStackResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.StackDtoToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.StackToStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -235,10 +235,16 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     private StackToStackV4ResponseConverter stackToStackV4ResponseConverter;
 
     @Inject
+    private StackDtoToStackV4ResponseConverter stackDtoToStackV4ResponseConverter;
+
+    @Inject
     private StackToStackV4RequestConverter stackToStackV4RequestConverter;
 
     @Inject
     private AutoscaleStackToAutoscaleStackResponseJsonConverter autoscaleStackToAutoscaleStackResponseJsonConverter;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Value("${cb.nginx.port}")
     private Integer nginxPort;
@@ -256,7 +262,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                 : findByCrnAndWorkspaceIdWithLists(nameOrCrn.getCrn(), workspaceId);
     }
 
-    public StackV4Response getJsonById(Long id, Collection<String> entry) {
+   /* public StackV4Response getJsonById(Long id, Collection<String> entry) {
         try {
             return transactionService.required(() -> {
                 Stack stack = getByIdWithLists(id);
@@ -267,14 +273,13 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
-    }
+    }*/
 
-    public StackV4Response getJsonByCrn(String crn, Collection<String> entry) {
+    public StackV4Response getJsonByCrn(String crn) {
         try {
             return transactionService.required(() -> {
                 Stack stack = getByCrnWithLists(crn);
                 StackV4Response stackResponse = stackToStackV4ResponseConverter.convert(stack);
-                stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entry);
                 return stackResponse;
             });
         } catch (TransactionExecutionException e) {
@@ -387,6 +392,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stack;
     }
 
+    public StackProxy getStackProxyById(Long id) {
+        return stackDtoService.getById(id);
+    }
+
     public Stack getByIdWithGatewayInTransaction(Long id) {
         Stack stack;
         try {
@@ -467,11 +476,11 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             return transactionService.required(() -> {
                 Workspace workspace = workspaceService.get(workspaceId, user);
                 ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
-                Optional<Stack> stack = findByNameAndWorkspaceIdWithLists(name, workspace.getId(), stackType, showTerminatedClustersAfterConfig);
+                Optional<StackProxy> stack = findByNameAndWorkspaceIdWithLists(name, workspace.getId(), stackType, showTerminatedClustersAfterConfig);
                 if (stack.isEmpty()) {
                     throw new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name));
                 }
-                StackV4Response stackResponse = stackToStackV4ResponseConverter.convert(stack.get());
+                StackV4Response stackResponse = stackDtoToStackV4ResponseConverter.convert(stack.get());
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack.get(), entries);
                 return stackResponse;
             });
@@ -485,11 +494,11 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             return transactionService.required(() -> {
                 Workspace workspace = workspaceService.get(workspaceId, user);
                 ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
-                Optional<Stack> stack = findByCrnAndWorkspaceIdWithLists(crn, workspace.getId(), stackType, showTerminatedClustersAfterConfig);
+                Optional<StackProxy> stack = findByCrnAndWorkspaceIdWithLists(crn, workspace.getId(), stackType, showTerminatedClustersAfterConfig);
                 if (stack.isEmpty()) {
                     throw new NotFoundException(format("Stack not found by crn '%s'", crn));
                 }
-                StackV4Response stackResponse = stackToStackV4ResponseConverter.convert(stack.get());
+                StackV4Response stackResponse = stackDtoToStackV4ResponseConverter.convert(stack.get());
                 stackResponse = stackResponseDecorator.decorate(stackResponse, stack.get(), entries);
                 return stackResponse;
             });
@@ -794,19 +803,14 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return findStackAsPayloadContext(resourceId).orElse(null);
     }
 
-    private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
-        Optional<Stack> stack = stackType == null
-                ? stackRepository.findByNameAndWorkspaceIdWithLists(name, workspaceId, config.isActive(), config.showAfterMillisecs())
-                : stackRepository.findByNameAndWorkspaceIdWithLists(name, stackType, workspaceId, config.isActive(), config.showAfterMillisecs());
-
-        return stack.map(st -> st.resources(new HashSet<>(resourceService.getAllByStackId(st.getId()))))
-                .map(st -> st.instanceGroups(instanceGroupService.findNotTerminatedByStackId(st.getId())));
+    private Optional<StackProxy> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
+        StackProxy stackProxy = stackDtoService.getByNameOrCrn(workspaceId, NameOrCrn.ofName(name), stackType, config);
+        return Optional.ofNullable(stackProxy);
     }
 
-    private Optional<Stack> findByCrnAndWorkspaceIdWithLists(String crn, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
-        return stackType == null
-                ? stackRepository.findByCrnAndWorkspaceIdWithLists(crn, workspaceId, config.isActive(), config.showAfterMillisecs())
-                : stackRepository.findByCrnAndWorkspaceIdWithLists(crn, stackType, workspaceId, config.isActive(), config.showAfterMillisecs());
+    private Optional<StackProxy> findByCrnAndWorkspaceIdWithLists(String crn, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
+        StackProxy stackProxy = stackDtoService.getByNameOrCrn(workspaceId, NameOrCrn.ofName(crn), stackType, config);
+        return Optional.ofNullable(stackProxy);
     }
 
     private Optional<Stack> findByNameOrCrnAndWorkspaceIdWithLists(NameOrCrn nameOrCrn, Long workspaceId) {

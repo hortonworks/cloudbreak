@@ -10,7 +10,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -147,12 +146,12 @@ public class StackCommonService {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
     }
 
-    public StackV4Response get(Long id, Set<String> entries) {
-        return stackService.getJsonById(id, entries);
-    }
+//    public StackV4Response get(Long id, Set<String> entries) {
+//        return stackService.getJsonById(id, entries);
+//    }
 
-    public StackV4Response getByCrn(String crn, Set<String> entries) {
-        return stackService.getJsonByCrn(crn, entries);
+    public StackV4Response getByCrn(String crn) {
+        return stackService.getJsonByCrn(crn);
     }
 
     public StackV4Response findStackByNameOrCrnAndWorkspaceId(NameOrCrn nameOrCrn, Long workspaceId, Set<String> entries, StackType stackType) {
@@ -438,7 +437,9 @@ public class StackCommonService {
 
     @VisibleForTesting
     void validateNetworkScaleRequest(Stack stack, NetworkScaleV4Request stackNetworkScaleV4Request) {
-        if (stackNetworkScaleV4Request != null && CollectionUtils.isNotEmpty(stackNetworkScaleV4Request.getPreferredSubnetIds())) {
+        if (stackNetworkScaleV4Request != null
+                && stackNetworkScaleV4Request.getPreferredSubnetIds() != null
+                && stackNetworkScaleV4Request.getPreferredSubnetIds().stream().anyMatch(StringUtils::isNotBlank)) {
             String platformVariant = stack.getPlatformVariant();
             boolean supportedVariant = multiAzValidator.supportedVariant(platformVariant);
             if (!supportedVariant) {

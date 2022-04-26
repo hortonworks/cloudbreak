@@ -313,6 +313,15 @@ public class InstanceMetaDataService {
         }
     }
 
+    public Optional<Map<String, String>> getPrimaryGatewayIp(long stackId) {
+        try {
+            return repository.getPrimaryGatewayIp(stackId);
+        } catch (AccessDeniedException ignore) {
+            LOGGER.debug("No primary gateway for stack [{}]", stackId);
+            return Optional.empty();
+        }
+    }
+
     public Optional<InstanceMetaData> getTerminatedInstanceMetadataWithInstanceIdByFQDNOrdered(long stackId, String hostName) {
         try {
             List<InstanceMetaData> result = repository.getTerminatedInstanceMetadataWithInstanceIdByFQDNOrdered(stackId, hostName, PageRequest.of(0, 1));

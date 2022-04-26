@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
 import com.sequenceiq.cloudbreak.converter.v4.workspaces.WorkspaceToWorkspaceResourceV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 
@@ -41,6 +42,24 @@ public class RDSConfigToDatabaseV4ResponseConverter {
         json.setClusterNames(clusterService.findNamesByRdsConfig(source.getId()));
         json.setType(source.getType());
         json.setWorkspace(workspaceToWorkspaceResourceV4ResponseConverter.convert(source.getWorkspace()));
+        return json;
+    }
+
+    public DatabaseV4Response convert(RdsConfigWithoutCluster source) {
+        DatabaseV4Response json = new DatabaseV4Response();
+        json.setId(source.getId());
+        json.setName(source.getName());
+        json.setDescription(source.getDescription());
+        json.setConnectionURL(source.getConnectionURL());
+        json.setDatabaseEngine(source.getDatabaseEngine().name());
+        json.setConnectionDriver(source.getConnectionDriver());
+        json.setConnectionUserName(stringToSecretResponseConverter.convert(source.getConnectionUserName().getSecret()));
+        json.setConnectionPassword(stringToSecretResponseConverter.convert(source.getConnectionPassword().getSecret()));
+        json.setDatabaseEngineDisplayName(source.getDatabaseEngine().displayName());
+        json.setCreationDate(source.getCreationDate());
+        json.setClusterNames(clusterService.findNamesByRdsConfig(source.getId()));
+        json.setType(source.getType());
+//        json.setWorkspace(workspaceToWorkspaceResourceV4ResponseConverter.convert(source.getWorkspace()));
         return json;
     }
 }

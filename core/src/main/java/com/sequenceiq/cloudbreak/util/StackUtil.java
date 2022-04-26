@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.stack.ClusterDto;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 
 @Service
@@ -240,9 +241,22 @@ public class StackUtil {
         return extractClusterManagerIp(stack.getId());
     }
 
+    public String extractClusterManagerIp(ClusterDto clusterDto, long stackId) {
+        if (!isEmpty(clusterDto.getClusterManagerIp())) {
+            return clusterDto.getClusterManagerIp();
+        }
+        return extractClusterManagerIp(stackId);
+    }
+
     private String extractClusterManagerIp(long stackId) {
         AtomicReference<String> result = new AtomicReference<>(null);
-        instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stackId).ifPresent(imd -> result.set(imd.getPublicIpWrapper()));
+        instanceMetaDataService.getPrimaryGatewayIp(stackId).ifPresent(imd -> {
+            String publicIp = imd.get("publicIp");
+            if (publicIp == null) {
+                publicIp = imd.get("privateIp");
+            }
+            result.set(publicIp);
+        });
         return result.get();
     }
 
@@ -263,7 +277,36 @@ public class StackUtil {
         return extractClusterManagerIp(stack.getId());
     }
 
+    public String extractClusterManagerAddress(ClusterDto clusterDto, long stackId) {
+        String fqdn = loadBalancerConfigService.getLoadBalancerUserFacingFQDN(stackId);
+        fqdn = isEmpty(fqdn) ? clusterDto.getFqdn() : fqdn;
+
+        if (isNotEmpty(fqdn)) {
+            return fqdn;
+        }
+
+        String clusterManagerIp = clusterDto.getClusterManagerIp();
+
+        if (isNotEmpty(clusterManagerIp)) {
+            return clusterManagerIp;
+        }
+
+        return extractClusterManagerIp(stackId);
+    }
+
     public long getUptimeForCluster(Cluster cluster, boolean addUpsinceToUptime) {
+        Duration uptime = Duration.ZERO;
+        if (StringUtils.isNotBlank(cluster.getUptime())) {
+            uptime = Duration.parse(cluster.getUptime());
+        }
+        if (cluster.getUpSince() != null && addUpsinceToUptime) {
+            long now = new Date().getTime();
+            uptime = uptime.plusMillis(now - cluster.getUpSince());
+        }
+        return uptime.toMillis();
+    }
+
+    public long getUptimeForCluster(ClusterDto cluster, boolean addUpsinceToUptime) {
         Duration uptime = Duration.ZERO;
         if (StringUtils.isNotBlank(cluster.getUptime())) {
             uptime = Duration.parse(cluster.getUptime());

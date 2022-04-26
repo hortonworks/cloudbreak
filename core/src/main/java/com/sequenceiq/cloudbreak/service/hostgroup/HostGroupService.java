@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.hostgroup;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.projection.HostGroupRepairView;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -29,6 +31,10 @@ public class HostGroupService {
 
     public boolean hasHostGroupInCluster(Long clusterId, String hostGroupName) {
         return hostGroupRepository.hasHostGroupInCluster(clusterId, hostGroupName);
+    }
+
+    public RecoveryMode getRecoveryMode(Long clusterId, String hostGroupName) {
+        return hostGroupRepository.getRecoveryMode(clusterId, hostGroupName);
     }
 
     public HostGroup save(HostGroup hostGroup) {
@@ -67,4 +73,7 @@ public class HostGroupService {
         return hostGroupRepository.findHostGroupInClusterByNameWithRecipes(clusterId, hostGroupName);
     }
 
+    public List<Recipe> getRecipesForHostGroup(Long clusterId, String groupName) {
+        return hostGroupRepository.findRecipesForHostGroup(clusterId, groupName);
+    }
 }

@@ -36,4 +36,8 @@ public class RdsConfigWithoutClusterService {
         return rdsConfigWithoutClusterRepository.findByClusterIdAndStatusInAndTypeIn(id, statuses,
                 databaseTypes.stream().map(Enum::name).collect(Collectors.toSet()));
     }
+
+    public List<RdsConfigWithoutCluster> findByClusterIdAndStatusIn(Long id, Set<ResourceStatus> statuses) {
+        return rdsConfigWithoutClusterRepository.findByClusterIdAndStatusIn(id, statuses);
+    }
 }

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller.v4;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -185,7 +184,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     @InternalOnly
     public StackV4Response get(@TenantAwareParam String crn) {
-        return stackCommonService.getByCrn(crn, Collections.emptySet());
+        return stackCommonService.getByCrn(crn);
     }
 
     @Override

@@ -66,4 +66,11 @@ public interface RdsConfigWithoutClusterRepository extends CrudRepository<RDSCon
     List<RdsConfigWithoutCluster> findByClusterIdAndStatusInAndTypeIn(@Param("clusterId") Long id,
             @Param("statuses") Set<ResourceStatus> statuses,
             @Param("databaseTypes") Set<String> databaseTypes);
+
+    @Query("SELECT DISTINCT " + PROJECTION + " FROM RDSConfig r " +
+            "INNER JOIN r.clusters c " +
+            "WHERE c.id= :clusterId " +
+            "AND r.status in (:statuses)")
+    List<RdsConfigWithoutCluster> findByClusterIdAndStatusIn(@Param("clusterId") Long id,
+            @Param("statuses") Set<ResourceStatus> statuses);
 }

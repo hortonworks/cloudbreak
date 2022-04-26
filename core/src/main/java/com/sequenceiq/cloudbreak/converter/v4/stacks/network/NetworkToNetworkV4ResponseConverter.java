@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.stack.StackProxy;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
@@ -51,7 +52,7 @@ public class NetworkToNetworkV4ResponseConverter {
             networkResp.setSubnetCIDR(network.get().getSubnetCIDR());
             if (network.get().getAttributes() != null) {
                 Map<String, Object> parameters = cleanMap(network.get().getAttributes().getMap());
-                putNetworkResourcesIntoResponse(source, parameters);
+                putNetworkResourcesIntoResponse(source.getResources(), parameters);
                 providerParameterCalculator.parse(parameters, networkResp);
             }
         }
@@ -60,9 +61,26 @@ public class NetworkToNetworkV4ResponseConverter {
         return networkResp;
     }
 
-    private void putNetworkResourcesIntoResponse(Stack stack, Map<String, Object> parameters) {
-        Set<Resource> resources = stack.getResources();
+    @Nullable
+    public NetworkV4Response convert(StackProxy source) {
+        LOGGER.debug("Converting {} to {} from the content of: {}", Stack.class.getSimpleName(), NetworkV4Response.class.getSimpleName(), source);
+        NetworkV4Response networkResp = null;
+        Optional<Network> network = source != null ? ofNullable(source.getNetwork()) : empty();
+        if (network.isPresent()) {
+            networkResp = new NetworkV4Response();
+            networkResp.setSubnetCIDR(network.get().getSubnetCIDR());
+            if (network.get().getAttributes() != null) {
+                Map<String, Object> parameters = cleanMap(network.get().getAttributes().getMap());
+                putNetworkResourcesIntoResponse(source.getResources(), parameters);
+                providerParameterCalculator.parse(parameters, networkResp);
+            }
+        }
+        LOGGER.debug("Conversion from {} to {} is done with the result of: {}",
+                Stack.class.getSimpleName(), NetworkV4Response.class.getSimpleName(), networkResp);
+        return networkResp;
+    }
 
+    private void putNetworkResourcesIntoResponse(Set<Resource> resources, Map<String, Object> parameters) {
         for (Resource aResource : resources) {
             if (ResourceType.AWS_VPC.equals(aResource.getResourceType())) {
                 parameters.put("vpcId", aResource.getResourceName());
