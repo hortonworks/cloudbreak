@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.service.stack.flow.SyncConfig;
+import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowLogService;
 
@@ -234,8 +235,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId());
         try {
             if (isClusterManagerRunning(stack, connector)) {
-                ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses(
-                        runtimeVersionService.getRuntimeVersion(stack.getCluster().getId()));
+                ExtendedHostStatuses extendedHostStatuses = getExtendedHostStatuses(stack, connector);
                 Map<HostName, Set<HealthCheck>> hostStatuses = extendedHostStatuses.getHostsHealth();
                 LOGGER.debug("Cluster '{}' state check, host certicates expiring: [{}], cm running, hoststates: {}",
                         stack.getId(), extendedHostStatuses.isAnyCertExpiring(), hostStatuses);
@@ -329,7 +329,16 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private boolean isCMRunning(ClusterApi connector) {
-        return connector.clusterStatusService().isClusterManagerRunningQuickCheck();
+        return Benchmark.measureAndWarnIfLong(() -> connector.clusterStatusService().isClusterManagerRunningQuickCheck(),
+                LOGGER,
+                "Checking Cloudera Manager is running");
+    }
+
+    private ExtendedHostStatuses getExtendedHostStatuses(Stack stack, ClusterApi connector) {
+        return Benchmark.measureAndWarnIfLong(() -> connector.clusterStatusService()
+                        .getExtendedHostStatuses(runtimeVersionService.getRuntimeVersion(stack.getCluster().getId())),
+                LOGGER,
+                "Getting extended host statuses");
     }
 
     private Set<String> getNewHealthyHostNames(ExtendedHostStatuses hostStatuses, Set<InstanceMetaData> runningInstances) {
