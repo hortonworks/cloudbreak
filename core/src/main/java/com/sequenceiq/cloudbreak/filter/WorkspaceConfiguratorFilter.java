@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -46,12 +47,20 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
         CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();
         try {
             if (cloudbreakUser != null) {
+                if (ThreadBasedUserCrnProvider.getUserCrn() != null && !ThreadBasedUserCrnProvider.getUserCrn().equals(cloudbreakUser.getUserCrn())) {
+                    LOGGER.debug("Before:There is a difference between:: Spring security context: {} and header-based-actor: '{}'",
+                            cloudbreakUser, ThreadBasedUserCrnProvider.getUserCrn());
+                }
                 User user = userService.getOrCreate(cloudbreakUser);
                 String accountId = Crn.fromString(cloudbreakUser.getUserCrn()).getAccountId();
                 // default workspaceName is always the accountId
                 Optional<Workspace> tenantDefaultWorkspace = workspaceService.getByName(accountId, user);
                 if (!tenantDefaultWorkspace.isPresent()) {
                     throw new IllegalStateException("Tenant default workspace does not exist!");
+                }
+                if (ThreadBasedUserCrnProvider.getUserCrn() != null && !ThreadBasedUserCrnProvider.getUserCrn().equals(user.getUserCrn())) {
+                    LOGGER.debug("Before:There is a difference between:: CB user context: {} and and header-based-actor: '{}'",
+                            user, ThreadBasedUserCrnProvider.getUserCrn());
                 }
                 Long workspaceId = tenantDefaultWorkspace.get().getId();
                 restRequestThreadLocalService.setRequestedWorkspaceId(workspaceId);
