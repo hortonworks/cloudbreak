@@ -533,21 +533,16 @@ public class ClusterOperationService {
     }
 
     public FlowIdentifier restartClusterServices(Stack stack) {
-        Cluster cluster = stack.getCluster();
-        if (cluster == null) {
+        if (stack.getCluster() == null) {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
         }
-        FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
-        if (!stack.isAvailable()) {
-            throw NotAllowedStatusUpdate
-                    .cluster(stack)
-                    .to(STOPPED)
-                    .expectedIn(AVAILABLE)
-                    .badRequest();
-        } else {
-            flowIdentifier = flowManager.triggerClusterServicesRestart(stack.getId());
+        // Allow stack to be in NODE_FAILURE state in order to potentially fix unhealthy clusters via restart of their services.
+        if (!stack.isAvailable() && !stack.hasNodeFailure()) {
+            throw new BadRequestException(String.format(
+                    "Stack '%s' has state '%s' which is not supported for restarting the cluster services.", stack.getName(), stack.getStatus()
+            ));
         }
-        return flowIdentifier;
+        return flowManager.triggerClusterServicesRestart(stack.getId());
     }
 
     private FlowIdentifier triggerClusterInstall(Stack stack) {

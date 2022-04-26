@@ -61,8 +61,11 @@ public class DistroxService {
 
     public void restartAttachedDistroxClusters(String envCrn) {
         Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envCrn);
+
+        // We allow the refresh of DHs in NODE_FAILURE states to "fix" clusters that end up in this state due to their
+        // services being unable to communicate with the DL due to a migration process or some other flow.
         Collection<StackViewV4Response> availableClusters = attachedDistroXClusters.stream()
-                .filter(cluster -> cluster.getStatus() == Status.AVAILABLE)
+                .filter(cluster -> cluster.getStatus() == Status.AVAILABLE || cluster.getStatus() == Status.NODE_FAILURE)
                 .collect(Collectors.toList());
         ArrayList<String> pollingCrnList = availableClusters.stream().map(StackViewV4Response::getCrn).collect(Collectors.toCollection(ArrayList::new));
         if (!pollingCrnList.isEmpty()) {
