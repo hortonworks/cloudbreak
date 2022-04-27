@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExt
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -47,6 +48,9 @@ public class TerminateExternalDatabaseHandler implements EventHandler<TerminateE
     @Inject
     private EnvironmentClientService environmentClientService;
 
+    @Inject
+    private StackService stackService;
+
     @Override
     public String selector() {
         return "TerminateExternalDatabaseRequest";
@@ -56,7 +60,7 @@ public class TerminateExternalDatabaseHandler implements EventHandler<TerminateE
     public void accept(Event<TerminateExternalDatabaseRequest> terminateExternalDatabaseRequest) {
         LOGGER.debug("In TerminateExternalDatabaseHandler.accept");
         TerminateExternalDatabaseRequest request = terminateExternalDatabaseRequest.getData();
-        Stack stack = request.getStack();
+        Stack stack = stackService.getById(request.getResourceId());
         DatabaseAvailabilityType externalDatabase = ObjectUtils.defaultIfNull(stack.getExternalDatabaseCreationType(), DatabaseAvailabilityType.NONE);
         LOGGER.debug("External database: {} for stack {}", externalDatabase.name(), stack.getName());
         Selectable result;

@@ -43,7 +43,7 @@ public class ExternalDatabaseStartActions {
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
                 Stack stack = context.getStack();
-                return new StartExternalDatabaseRequest(stack.getId(), "StartExternalDatabaseRequest", stack.getName(), stack.getResourceCrn(), stack);
+                return new StartExternalDatabaseRequest(stack.getId(), "StartExternalDatabaseRequest", stack.getName(), stack.getResourceCrn());
             }
         };
     }
