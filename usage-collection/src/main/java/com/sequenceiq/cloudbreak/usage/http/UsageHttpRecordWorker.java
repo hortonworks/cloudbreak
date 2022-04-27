@@ -50,7 +50,7 @@ public class UsageHttpRecordWorker extends RecordWorker<UsageHttpRecordProcessor
             HttpResponse<String> response = getHttpClient().send(httpRequest, HttpResponse.BodyHandlers.ofString());
             Response.Status.Family statusFamily = Response.Status.Family.familyOf(response.statusCode());
             if (Response.Status.Family.SUCCESSFUL.equals(statusFamily) || Response.Status.Family.REDIRECTION.equals(statusFamily)) {
-                LOGGER.debug("Record has been sent successfully to usage http endpoint.\n{}", payload.get());
+                LOGGER.debug("Record has been sent successfully to usage http endpoint: {}", getConfiguration().getEndpoint());
             } else {
                 throw new StreamProcessingException(String.format("Usage could not be uploaded to %s (status code: %s)",
                         getConfiguration().getEndpoint(), response.statusCode()));
