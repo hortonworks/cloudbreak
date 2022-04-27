@@ -141,8 +141,12 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public void updateNameAndCrn(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn, String newName, String newCrn) {
-        stackOperations.updateNameAndCrn(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), newName, newCrn);
+    public void updateNameAndCrn(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn, String newName, String newCrn,
+            boolean retainOriginalName) {
+        stackOperations.updateNameAndCrn(
+                NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), newName, newCrn,
+                retainOriginalName
+        );
     }
 
     @Override
