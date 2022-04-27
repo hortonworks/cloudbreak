@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
@@ -12,7 +12,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES_REPORTED_HOST_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_IGNORED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.lang.Math.abs;
@@ -482,10 +481,10 @@ public class ClusterOperationService {
                 flowIdentifier = sync(stack);
                 break;
             case STOPPED:
-                flowIdentifier = stop(stack, cluster);
+                flowIdentifier = stop(stack);
                 break;
             case STARTED:
-                flowIdentifier = start(stack, cluster);
+                flowIdentifier = start(stack);
                 break;
             default:
                 throw new BadRequestException("Cannot update the status of cluster because status request not valid");
@@ -493,14 +492,13 @@ public class ClusterOperationService {
         return flowIdentifier;
     }
 
-    private FlowIdentifier stop(Stack stack, Cluster cluster) {
+    private FlowIdentifier stop(Stack stack) {
         StopRestrictionReason reason = stackStopRestrictionService.isInfrastructureStoppable(stack);
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         if (stack.isStopped()) {
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), CLUSTER_STOP_IGNORED);
         } else if (reason != StopRestrictionReason.NONE) {
-            throw new BadRequestException(
-                    String.format("Cannot stop a cluster '%s'. Reason: %s", cluster.getId(), reason.getReason()));
+            throw new BadRequestException(String.format("Cannot stop the cluster. Reason: %s", reason.getReason()));
         } else if (!stack.isReadyForStop() && !stack.isStopFailed()) {
             throw NotAllowedStatusUpdate
                     .cluster(stack)
@@ -508,28 +506,23 @@ public class ClusterOperationService {
                     .expectedIn(AVAILABLE)
                     .badRequest();
         } else {
-            clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
             flowIdentifier = flowManager.triggerClusterStop(stack.getId());
         }
         return flowIdentifier;
     }
 
-    private FlowIdentifier start(Stack stack, Cluster cluster) {
+    private FlowIdentifier start(Stack stack) {
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
-        if (stack.isStartInProgress()) {
-            eventService.fireCloudbreakEvent(stack.getId(), START_REQUESTED.name(), CLUSTER_START_REQUESTED);
-            clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.START_REQUESTED);
-        } else {
+        if (!stack.isStartInProgress()) {
             if (stack.isAvailable()) {
                 eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), CLUSTER_START_IGNORED);
             } else if (!stack.isReadyForStart() && !stack.isStartFailed()) {
                 throw NotAllowedStatusUpdate
                         .cluster(stack)
-                        .to(START_REQUESTED)
+                        .to(START_IN_PROGRESS)
                         .expectedIn(STOPPED)
                         .badRequest();
             } else {
-                clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.START_REQUESTED);
                 flowIdentifier = flowManager.triggerClusterStart(stack.getId());
             }
         }
