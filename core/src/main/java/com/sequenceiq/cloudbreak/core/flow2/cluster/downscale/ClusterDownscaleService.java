@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.cluster.service.NodeIsBusyException;
 import com.sequenceiq.cloudbreak.cluster.service.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -117,7 +118,7 @@ public class ClusterDownscaleService {
         String errorDetails = error.getMessage();
         LOGGER.warn("Error during Cluster downscale flow: ", error);
         DetailedStackStatus detailedStackStatus = DetailedStackStatus.DOWNSCALE_FAILED;
-        if (error instanceof NotEnoughNodeException) {
+        if (error instanceof NotEnoughNodeException || error instanceof NodeIsBusyException) {
             detailedStackStatus = DetailedStackStatus.AVAILABLE;
         }
         stackUpdater.updateStackStatus(stackId, detailedStackStatus, "Node(s) could not be removed from the cluster: " + errorDetails);

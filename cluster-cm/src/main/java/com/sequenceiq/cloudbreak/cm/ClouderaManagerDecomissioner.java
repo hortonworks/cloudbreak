@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
+
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -39,15 +41,21 @@ import com.cloudera.api.swagger.model.ApiHostTemplate;
 import com.cloudera.api.swagger.model.ApiHostTemplateList;
 import com.cloudera.api.swagger.model.ApiHostsToRemoveArgs;
 import com.cloudera.api.swagger.model.ApiRole;
+import com.cloudera.api.swagger.model.ApiRoleRef;
+import com.cloudera.api.swagger.model.ApiRoleState;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.cluster.service.NodeIsBusyException;
 import com.sequenceiq.cloudbreak.cluster.service.NotEnoughNodeException;
+import com.sequenceiq.cloudbreak.cluster.status.HostServiceStatus;
+import com.sequenceiq.cloudbreak.cluster.status.HostServiceStatuses;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
@@ -110,10 +118,54 @@ public class ClouderaManagerDecomissioner {
                             .count());
                     verifyNodeCount(replication, removableSizeFromTheRunning, runningInstances.size(),
                             0, stack);
+                    Set<String> removableInstanceFqdn = removableInstances.stream()
+                            .map(InstanceMetaData::getDiscoveryFQDN)
+                            .filter(org.apache.commons.lang3.StringUtils::isNoneBlank)
+                            .collect(Collectors.toSet());
+                    verifyNodeNotBusy(removableInstanceFqdn, client);
                 }
             }
         } catch (ApiException ex) {
             throw new CloudbreakServiceException("Could not verify if nodes are removable or not", ex);
+        }
+    }
+
+    private void verifyNodeNotBusy(Collection<String> hosts, ApiClient client) {
+        HostServiceStatuses hostServiceStates = getHostServiceStatuses(hosts, client);
+        if (hostServiceStates.anyHostBusy()) {
+            Set<String> busyHostNames = hostServiceStates.getBusyHosts();
+            LOGGER.info("Cannot downscale, some nodes are is BUSY state : ", busyHostNames);
+            throw new NodeIsBusyException(String.format("Node is in 'busy' state, cannot be decommissioned right now. " +
+                    "Please try to remove the node later. Busy hosts: %s", busyHostNames));
+        }
+    }
+
+    private HostServiceStatuses getHostServiceStatuses(Collection<String> checkHosts, ApiClient client) {
+        List<ApiHost> apiHostList = getHostsFromCM(client);
+        Map<HostName, HostServiceStatus> hostStates = apiHostList.stream()
+                .filter(apiHost -> checkHosts.contains(apiHost.getHostname()))
+                .collect(Collectors.toMap(
+                        apiHost -> hostName(apiHost.getHostname()), apiHost -> getHostServiceStatusAggregate(apiHost)));
+        LOGGER.debug("Query aggregated host service states: {}", hostStates);
+        return new HostServiceStatuses(hostStates);
+    }
+
+    private HostServiceStatus getHostServiceStatusAggregate(ApiHost apiHost) {
+        boolean stateAggregateNotBusy = apiHost.getRoleRefs().stream()
+                .map(ApiRoleRef::getRoleStatus)
+                .noneMatch(state -> state == ApiRoleState.BUSY);
+        return stateAggregateNotBusy ? HostServiceStatus.OK : HostServiceStatus.BUSY;
+    }
+
+    private List<ApiHost> getHostsFromCM(ApiClient client) {
+        HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
+        try {
+            ApiHostList apiHostList = api.readHosts(null, null, "FULL_WITH_HEALTH_CHECK_EXPLANATION");
+            LOGGER.trace("Response from CM for readHosts call: {}", apiHostList);
+            return apiHostList.getItems();
+        } catch (ApiException e) {
+            LOGGER.info("Failed to get hosts from CM", e);
+            throw new RuntimeException("Failed to get hosts from CM due to: " + e.getMessage(), e);
         }
     }
 
@@ -350,7 +402,7 @@ public class ClouderaManagerDecomissioner {
             List<String> removableHosts, String hostGroupName) throws ApiException {
         ApiCommand apiCommand = apiInstance.hostsDecommissionCommand(body);
         ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
-            .startPollingCmHostDecommissioning(stack, client, apiCommand.getId(), true, removableHosts.size());
+                .startPollingCmHostDecommissioning(stack, client, apiCommand.getId(), true, removableHosts.size());
         if (pollingResult.isExited()) {
             throw new CancellationException("Cluster was terminated while waiting for host decommission");
         } else if (pollingResult.isTimeout()) {
