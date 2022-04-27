@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExtern
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -50,6 +51,9 @@ public class CreateExternalDatabaseHandler implements EventHandler<CreateExterna
     @Inject
     private EnvironmentValidator environmentValidator;
 
+    @Inject
+    private StackService stackService;
+
     @Override
     public String selector() {
         return "CreateExternalDatabaseRequest";
@@ -59,7 +63,7 @@ public class CreateExternalDatabaseHandler implements EventHandler<CreateExterna
     public void accept(Event<CreateExternalDatabaseRequest> createExternalDatabaseRequest) {
         LOGGER.debug("In CreateExternalDatabaseHandler.accept");
         CreateExternalDatabaseRequest request = createExternalDatabaseRequest.getData();
-        Stack stack = request.getStack();
+        Stack stack = stackService.getById(request.getResourceId());
         DatabaseAvailabilityType externalDatabase = ObjectUtils.defaultIfNull(stack.getExternalDatabaseCreationType(), DatabaseAvailabilityType.NONE);
         LOGGER.debug("External database: {} for stack {}", externalDatabase.name(), stack.getName());
         Selectable result;

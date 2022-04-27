@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.externaldatabase.start.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExterna
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 import reactor.bus.Event;
@@ -71,6 +73,9 @@ class StartExternalDatabaseHandlerTest {
     @Mock
     private ExternalDatabaseConfig externalDatabaseConfig;
 
+    @Mock
+    private StackService stackService;
+
     @InjectMocks
     private StartExternalDatabaseHandler underTest;
 
@@ -94,8 +99,9 @@ class StartExternalDatabaseHandlerTest {
         Stack stack = buildStack(DatabaseAvailabilityType.HA);
         stack.setType(StackType.WORKLOAD);
         stack.getCluster().setDatabaseServerCrn(DATABASE_CRN);
+        when(stackService.getById(anyLong())).thenReturn(stack);
         StartExternalDatabaseRequest request =
-                new StartExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", stack);
+                new StartExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn");
         Event<StartExternalDatabaseRequest> event = new Event<>(EVENT_HEADERS, request);
 
         underTest.accept(event);
@@ -124,8 +130,9 @@ class StartExternalDatabaseHandlerTest {
         Stack stack = buildStack(DatabaseAvailabilityType.HA);
         stack.setType(StackType.DATALAKE);
         stack.getCluster().setDatabaseServerCrn(DATABASE_CRN);
+        when(stackService.getById(anyLong())).thenReturn(stack);
         StartExternalDatabaseRequest request =
-                new StartExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", stack);
+                new StartExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn");
         Event<StartExternalDatabaseRequest> event = new Event<>(EVENT_HEADERS, request);
 
         underTest.accept(event);
@@ -143,8 +150,9 @@ class StartExternalDatabaseHandlerTest {
 
         Stack stack = buildStack(DatabaseAvailabilityType.NONE);
         stack.setType(StackType.WORKLOAD);
+        when(stackService.getById(anyLong())).thenReturn(stack);
         StartExternalDatabaseRequest request =
-                new StartExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", stack);
+                new StartExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn");
         Event<StartExternalDatabaseRequest> event = new Event<>(EVENT_HEADERS, request);
 
         underTest.accept(event);
@@ -164,8 +172,9 @@ class StartExternalDatabaseHandlerTest {
         Stack stack = buildStack(DatabaseAvailabilityType.HA);
         stack.setType(StackType.WORKLOAD);
         stack.getCluster().setDatabaseServerCrn(DATABASE_CRN);
+        when(stackService.getById(anyLong())).thenReturn(stack);
         StartExternalDatabaseRequest request =
-                new StartExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", stack);
+                new StartExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn");
         Event<StartExternalDatabaseRequest> event = new Event<>(EVENT_HEADERS, request);
 
         underTest.accept(event);
@@ -185,8 +194,9 @@ class StartExternalDatabaseHandlerTest {
         Stack stack = buildStack(DatabaseAvailabilityType.HA);
         stack.setType(StackType.WORKLOAD);
         stack.getCluster().setDatabaseServerCrn(DATABASE_CRN);
+        when(stackService.getById(anyLong())).thenReturn(stack);
         StartExternalDatabaseRequest request =
-                new StartExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", stack);
+                new StartExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn");
         Event<StartExternalDatabaseRequest> event = new Event<>(EVENT_HEADERS, request);
 
         underTest.accept(event);

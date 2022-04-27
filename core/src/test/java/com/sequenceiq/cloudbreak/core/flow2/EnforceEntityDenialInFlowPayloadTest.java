@@ -8,7 +8,6 @@ public class EnforceEntityDenialInFlowPayloadTest {
     public void enforceDenialOfEntitiesInFlowPayload() {
         // TODO CB-16709
         // TODO CB-16714
-        // TODO CB-16727
         //EnforceEntityDenialUtil.denyEntity();
     }
 }

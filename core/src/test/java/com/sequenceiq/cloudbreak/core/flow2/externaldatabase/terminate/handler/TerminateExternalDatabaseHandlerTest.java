@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 import reactor.bus.Event;
@@ -67,6 +69,9 @@ class TerminateExternalDatabaseHandlerTest {
     @Mock
     private EnvironmentClientService environmentClientService;
 
+    @Mock
+    private StackService stackService;
+
     @InjectMocks
     private TerminateExternalDatabaseHandler underTest;
 
@@ -86,9 +91,9 @@ class TerminateExternalDatabaseHandlerTest {
         environment.setCloudPlatform("cloudplatform");
         when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
 
-        Stack stack = buildStack(DatabaseAvailabilityType.HA);
+        when(stackService.getById(anyLong())).thenReturn(buildStack(DatabaseAvailabilityType.HA));
         TerminateExternalDatabaseRequest request =
-                new TerminateExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", stack, true);
+                new TerminateExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", true);
         Event<TerminateExternalDatabaseRequest> event = new Event<>(EVENT_HEADERS, request);
 
         underTest.accept(event);
@@ -117,9 +122,9 @@ class TerminateExternalDatabaseHandlerTest {
             return null;
         }).when(terminationService).terminateDatabase(any(), any(), any(), anyBoolean());
 
-        Stack stack = buildStack(DatabaseAvailabilityType.HA);
+        when(stackService.getById(anyLong())).thenReturn(buildStack(DatabaseAvailabilityType.HA));
         TerminateExternalDatabaseRequest request =
-                new TerminateExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", stack, needHA);
+                new TerminateExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", needHA);
         Event<TerminateExternalDatabaseRequest> event = new Event<>(EVENT_HEADERS, request);
 
         underTest.accept(event);
@@ -142,9 +147,9 @@ class TerminateExternalDatabaseHandlerTest {
 
     @Test
     void acceptDbNone() {
-        Stack stack = buildStack(DatabaseAvailabilityType.NONE);
+        when(stackService.getById(anyLong())).thenReturn(buildStack(DatabaseAvailabilityType.NONE));
         TerminateExternalDatabaseRequest request =
-                new TerminateExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", stack, false);
+                new TerminateExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", false);
         Event<TerminateExternalDatabaseRequest> event = new Event<>(EVENT_HEADERS, request);
 
         underTest.accept(event);

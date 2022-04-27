@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 import reactor.bus.Event;
@@ -69,6 +71,9 @@ class CreateExternalDatabaseHandlerTest {
     @Mock
     private EnvironmentValidator environmentValidator;
 
+    @Mock
+    private StackService stackService;
+
     @InjectMocks
     private CreateExternalDatabaseHandler underTest;
 
@@ -88,9 +93,9 @@ class CreateExternalDatabaseHandlerTest {
         environment.setCloudPlatform("cloudplatform");
         when(environmentClientService.getByCrn(anyString())).thenReturn(environment);
 
-        Stack stack = buildStack(DatabaseAvailabilityType.HA);
+        when(stackService.getById(anyLong())).thenReturn(buildStack(DatabaseAvailabilityType.HA));
         CreateExternalDatabaseRequest request =
-                new CreateExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", stack);
+                new CreateExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn");
         Event<CreateExternalDatabaseRequest> event = new Event<>(EVENT_HEADERS, request);
 
         underTest.accept(event);
@@ -120,9 +125,9 @@ class CreateExternalDatabaseHandlerTest {
             return null;
         }).when(provisionService).provisionDatabase(any(), any(), any());
 
-        Stack stack = buildStack(DatabaseAvailabilityType.HA);
+        when(stackService.getById(anyLong())).thenReturn(buildStack(DatabaseAvailabilityType.HA));
         CreateExternalDatabaseRequest request =
-                new CreateExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", stack);
+                new CreateExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn");
         Event<CreateExternalDatabaseRequest> event = new Event<>(EVENT_HEADERS, request);
 
         underTest.accept(event);
@@ -146,9 +151,9 @@ class CreateExternalDatabaseHandlerTest {
 
     @Test
     void acceptDbNone() {
-        Stack stack = buildStack(DatabaseAvailabilityType.NONE);
+        when(stackService.getById(anyLong())).thenReturn(buildStack(DatabaseAvailabilityType.NONE));
         CreateExternalDatabaseRequest request =
-                new CreateExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn", stack);
+                new CreateExternalDatabaseRequest(STACK_ID, "selector", "resourceName", "crn");
         Event<CreateExternalDatabaseRequest> event = new Event<>(EVENT_HEADERS, request);
 
         underTest.accept(event);

@@ -43,7 +43,7 @@ public class ExternalDatabaseStopActions {
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
                 Stack stack = context.getStack();
-                return new StopExternalDatabaseRequest(stack.getId(), "StopExternalDatabaseRequest", stack.getName(), stack.getResourceCrn(), stack);
+                return new StopExternalDatabaseRequest(stack.getId(), "StopExternalDatabaseRequest", stack.getName(), stack.getResourceCrn());
             }
         };
     }

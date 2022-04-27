@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExterna
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StartExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -50,6 +51,9 @@ public class StartExternalDatabaseHandler extends ExceptionCatcherEventHandler<S
     @Inject
     private ExternalDatabaseConfig externalDatabaseConfig;
 
+    @Inject
+    private StackService stackService;
+
     @Override
     public String selector() {
         return "StartExternalDatabaseRequest";
@@ -57,7 +61,7 @@ public class StartExternalDatabaseHandler extends ExceptionCatcherEventHandler<S
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<StartExternalDatabaseRequest> event) {
-        Stack stack = event.getData().getStack();
+        Stack stack = stackService.getById(event.getData().getResourceId());
         LOGGER.error(String.format("Exception during DB 'start' for stack/cluster: %s", stack.getName()), e);
         return startFailedEvent(stack, e);
     }
@@ -66,7 +70,7 @@ public class StartExternalDatabaseHandler extends ExceptionCatcherEventHandler<S
     protected Selectable doAccept(HandlerEvent<StartExternalDatabaseRequest> event) {
         LOGGER.debug("In StartExternalDatabaseHandler.doAccept");
         StartExternalDatabaseRequest request = event.getData();
-        Stack stack = request.getStack();
+        Stack stack = stackService.getById(request.getResourceId());
         DatabaseAvailabilityType externalDatabase = ObjectUtils.defaultIfNull(stack.getExternalDatabaseCreationType(), DatabaseAvailabilityType.NONE);
         LOGGER.debug("External database: {} for stack {}", externalDatabase.name(), stack.getName());
         LOGGER.debug("Getting environment CRN for stack {}", stack.getName());
