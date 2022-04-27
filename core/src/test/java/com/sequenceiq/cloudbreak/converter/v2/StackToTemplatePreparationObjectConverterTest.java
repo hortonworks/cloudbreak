@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v2;
 
 import static com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight.CLOUDER_MANAGER_ADMIN;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -70,6 +71,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.exception.CustomConfigurationsRuntimeVersionException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -527,6 +529,33 @@ public class StackToTemplatePreparationObjectConverterTest {
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getCustomConfigurationsView().isPresent()).isFalse();
+    }
+
+    @Test
+    public void testConvertWhenClusterHasCustomConfigsWithEmptyRuntime() {
+        CustomConfigurationsView expected = new CustomConfigurationsView("test-name", "test-crn", "", Collections.emptySet());
+        when(customConfigurationsViewProvider.getCustomConfigurationsView(customConfigurations)).thenReturn(expected);
+        when(stackMock.getType()).thenReturn(StackType.WORKLOAD);
+        when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+
+        TemplatePreparationObject result = underTest.convert(stackMock);
+
+        assertThat(result.getCustomConfigurationsView().isPresent()).isTrue();
+        assertThat(result.getCustomConfigurationsView()).isEqualTo(Optional.of(expected));
+        verify(customConfigurationsViewProvider, times(1)).getCustomConfigurationsView(customConfigurations);
+    }
+
+    @Test
+    public void testConvertWhenClusterHasCustomConfigsWithMismatchedRuntime() {
+        CustomConfigurationsView expected = new CustomConfigurationsView("test-name", "test-crn", "7.2.14", Collections.emptySet());
+        when(customConfigurationsViewProvider.getCustomConfigurationsView(customConfigurations)).thenReturn(expected);
+        when(stackMock.getType()).thenReturn(StackType.WORKLOAD);
+        when(stackMock.getStackVersion()).thenReturn("7.2.15");
+        when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+
+        assertThatThrownBy(() -> underTest.convert(stackMock))
+                .isInstanceOf(CustomConfigurationsRuntimeVersionException.class)
+                .hasMessage("Custom Configurations runtime version mismatch!");
     }
 
     @Test
