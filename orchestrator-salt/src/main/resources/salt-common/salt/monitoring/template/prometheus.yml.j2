@@ -10,7 +10,9 @@ scrape_configs:
        labels:
          resource_crn: {{ telemetry.clusterCrn }}
          platform: {{ telemetry.platform }}
-         hostname: {{ hostname }}
+    relabel_configs:
+      - target_label: instance
+        replacement: {{ hostname }}:9100
   - job_name: 'blackbox'
     metrics_path: /probe
     params:
@@ -21,14 +23,15 @@ scrape_configs:
         labels:
           resource_crn: {{ telemetry.clusterCrn }}
           platform: {{ telemetry.platform }}
-          hostname: {{ hostname }}
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
       - source_labels: [__param_target]
-        target_label: instance
+        target_label: address
       - target_label: __address__
         replacement: 127.0.0.1:9115
+      - target_label: instance
+        replacement: {{ hostname }}:9115
 {%- if monitoring.type == "cloudera_manager" and "manager_server" in grains.get('roles', []) %}
   - job_name: 'smon_health'
     scheme: 'https'
@@ -37,7 +40,9 @@ scrape_configs:
         labels:
           resource_crn: {{ telemetry.clusterCrn }}
           platform: {{ telemetry.platform }}
-          hostname: {{ hostname }}
+    relabel_configs:
+      - target_label: instance
+        replacement: {{ hostname }}:{{ monitoring.cmMetricsExporterPort }}
     basic_auth:
       username: {{ monitoring.cmUsername }}
       password: {{ monitoring.cmPassword }}
