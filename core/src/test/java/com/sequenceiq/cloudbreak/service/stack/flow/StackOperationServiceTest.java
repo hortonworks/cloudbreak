@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_UPGRADE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -128,7 +127,7 @@ public class StackOperationServiceTest {
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
         stack.setId(1L);
 
-        underTest.start(stack, null, false);
+        underTest.start(stack);
 
         verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
     }
@@ -151,9 +150,9 @@ public class StackOperationServiceTest {
         underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true);
 
         if (stackStatus == STOP_FAILED) {
-            verify(stackUpdater).updateStackStatus(stack.getId(), STOP_REQUESTED);
+            verify(flowManager).triggerStackStop(stack.getId());
         } else {
-            verify(stackUpdater).updateStackStatus(stack.getId(), STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
+            verify(clusterOperationService).updateStatus(stack.getId(), StatusRequest.STOPPED);
         }
     }
 
@@ -163,10 +162,9 @@ public class StackOperationServiceTest {
         stack.setStackStatus(new StackStatus(stack, STOPPED));
         stack.setId(1L);
 
-        underTest.start(stack, null, false);
+        underTest.start(stack);
 
         verify(flowManager, times(1)).triggerStackStart(stack.getId());
-        verify(stackUpdater, times(1)).updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
     }
 
     @Test
@@ -175,10 +173,9 @@ public class StackOperationServiceTest {
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.START_FAILED));
         stack.setId(1L);
 
-        underTest.start(stack, null, false);
+        underTest.start(stack);
 
         verify(flowManager, times(1)).triggerStackStart(stack.getId());
-        verify(stackUpdater, times(1)).updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
     }
 
     @Test
@@ -188,8 +185,8 @@ public class StackOperationServiceTest {
         stack.setId(1L);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.start(stack, null, false));
-        assertEquals("Cannot update the status of the stack to START_REQUESTED when stack is in STOP_FAILED state.",
+                () -> underTest.start(stack));
+        assertEquals("Can't start the cluster because it is in STOP_FAILED state.",
                 badRequestException.getMessage());
     }
 
@@ -200,9 +197,8 @@ public class StackOperationServiceTest {
         stack.setStackStatus(new StackStatus(stack, Status.STOPPED, "", STOPPED));
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
-        underTest.start(stack, cluster, false);
+        underTest.start(stack);
         verify(flowManager, times(1)).triggerStackStart(stack.getId());
-        verify(stackUpdater, times(1)).updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
     }
 
     @Test
@@ -228,7 +224,7 @@ public class StackOperationServiceTest {
         stack.setStackStatus(new StackStatus(stack, STOPPED));
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
-        underTest.start(stack, cluster, false);
+        underTest.start(stack);
         verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.startable());
     }
 

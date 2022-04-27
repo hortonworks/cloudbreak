@@ -34,7 +34,9 @@ public enum Status {
     DELETED_ON_PROVIDER_SIDE(StatusKind.FINAL),
     DELETE_COMPLETED(StatusKind.FINAL),
     STOPPED(StatusKind.FINAL),
+    @Deprecated
     STOP_REQUESTED(StatusKind.PROGRESS),
+    @Deprecated
     START_REQUESTED(StatusKind.PROGRESS),
     STOP_IN_PROGRESS(StatusKind.PROGRESS),
     START_IN_PROGRESS(StatusKind.PROGRESS),
@@ -115,14 +117,6 @@ public enum Status {
 
     public boolean isStopped() {
         return STOPPED == this;
-    }
-
-    public boolean isStartState() {
-        return AVAILABLE.equals(this)
-                || UPDATE_IN_PROGRESS.equals(this)
-                || START_FAILED.equals(this)
-                || START_REQUESTED.equals(this)
-                || START_IN_PROGRESS.equals(this);
     }
 
     public boolean isStopState() {

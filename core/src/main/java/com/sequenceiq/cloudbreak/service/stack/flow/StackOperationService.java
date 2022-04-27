@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -202,7 +204,7 @@ public class StackOperationService {
             case STOPPED:
                 return stop(stack, cluster, updateCluster);
             case STARTED:
-                return start(stack, cluster, updateCluster);
+                return start(stack);
             default:
                 throw new BadRequestException("Cannot update the status of stack because status request not valid.");
         }
@@ -225,7 +227,7 @@ public class StackOperationService {
                         .to(STOPPED)
                         .badRequest();
             } else if (stack.isReadyForStop() || stack.isStopFailed()) {
-                setStackStatusToStopRequested(stack);
+                sendStopRequestedEvent(stack);
                 return clusterOperationService.updateStatus(stack.getId(), StatusRequest.STOPPED);
             } else {
                 throw NotAllowedStatusUpdate
@@ -234,7 +236,6 @@ public class StackOperationService {
                         .badRequest();
             }
         } else {
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
             return flowManager.triggerStackStop(stack.getId());
         }
     }
@@ -274,7 +275,7 @@ public class StackOperationService {
 
     private FlowIdentifier stop(Stack stack, Cluster cluster, boolean updateCluster) {
         if (cluster != null && stack.isStopInProgress()) {
-            setStackStatusToStopRequested(stack);
+            sendStopRequestedEvent(stack);
             return FlowIdentifier.notTriggered();
         } else {
             return triggerStackStopIfNeeded(stack, cluster, updateCluster);
@@ -371,23 +372,18 @@ public class StackOperationService {
     }
 
     @VisibleForTesting
-    FlowIdentifier start(Stack stack, Cluster cluster, boolean updateCluster) {
+    FlowIdentifier start(Stack stack) {
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.startable());
         dataLakeStatusCheckerService.validateRunningState(stack);
         if (stack.isAvailable()) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
         } else if (stack.isReadyForStart() || stack.isStartFailed()) {
-            Stack startStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowIdentifier = flowManager.triggerStackStart(stack.getId());
-            if (updateCluster && cluster != null) {
-                clusterOperationService.updateStatus(startStack, StatusRequest.STARTED);
-            }
         } else {
-            throw NotAllowedStatusUpdate
-                    .stack(stack)
-                    .to(DetailedStackStatus.START_REQUESTED)
-                    .badRequest();
+            throw new BadRequestException(String.format("Can't start the cluster because it is in %s state.", Optional.ofNullable(stack.getStatus())
+                    .map(Status::name)
+                    .orElse("N/A")));
         }
         return flowIdentifier;
     }
@@ -436,8 +432,7 @@ public class StackOperationService {
         return clusterService.isRangerRazEnabledOnCluster(stack);
     }
 
-    private void setStackStatusToStopRequested(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
+    private void sendStopRequestedEvent(Stack stack) {
         eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), STACK_STOP_REQUESTED);
     }
 }
