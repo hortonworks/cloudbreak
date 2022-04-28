@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.flow.redbeams.provision.handler;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -42,6 +43,7 @@ import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateData
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificateSyncService;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 import reactor.bus.Event;
 
@@ -81,6 +83,9 @@ class UpdateDatabaseServerRegistrationHandlerTest {
 
     @Mock
     private DatabaseServerSslCertificateSyncService databaseServerSslCertificateSyncService;
+
+    @Mock
+    private DBStackService dbStackService;
 
     @InjectMocks
     private UpdateDatabaseServerRegistrationHandler underTest;
@@ -137,7 +142,8 @@ class UpdateDatabaseServerRegistrationHandlerTest {
     @Test
     void doAcceptTestWhenFailureDatabaseServerConfigNotFound() throws Exception {
         DBStack dbStack = getDBStack();
-        UpdateDatabaseServerRegistrationRequest request = getRequest(dbStack);
+        when(dbStackService.getById(anyLong())).thenReturn(dbStack);
+        UpdateDatabaseServerRegistrationRequest request = getRequest();
         when(event.getData()).thenReturn(request);
 
         when(databaseServerConfigService.getByCrn(CRN)).thenReturn(Optional.empty());
@@ -153,7 +159,8 @@ class UpdateDatabaseServerRegistrationHandlerTest {
     @Test
     void doAcceptTestWhenFailureCloudResourceHostnameNotFound() throws Exception {
         DBStack dbStack = getDBStack();
-        UpdateDatabaseServerRegistrationRequest request = getRequest(dbStack);
+        when(dbStackService.getById(anyLong())).thenReturn(dbStack);
+        UpdateDatabaseServerRegistrationRequest request = getRequest();
         when(event.getData()).thenReturn(request);
 
         when(cloudResourceHelper.getResourceTypeFromList(eq(ResourceType.RDS_HOSTNAME), any())).thenReturn(Optional.empty());
@@ -171,7 +178,8 @@ class UpdateDatabaseServerRegistrationHandlerTest {
     @Test
     void doAcceptTestWhenFailureCloudResourcePortNotFound() throws Exception {
         DBStack dbStack = getDBStack();
-        UpdateDatabaseServerRegistrationRequest request = getRequest(dbStack);
+        when(dbStackService.getById(anyLong())).thenReturn(dbStack);
+        UpdateDatabaseServerRegistrationRequest request = getRequest();
         when(event.getData()).thenReturn(request);
 
         when(cloudResourceHelper.getResourceTypeFromList(eq(ResourceType.RDS_HOSTNAME), any())).thenReturn(Optional.of(mock(CloudResource.class)));
@@ -192,11 +200,12 @@ class UpdateDatabaseServerRegistrationHandlerTest {
     void doAcceptTestWhenSuccess() throws Exception {
         DBStack dbStack = getDBStack();
         dbStack.setCloudPlatform(CloudPlatform.AZURE.toString());
+        when(dbStackService.getById(anyLong())).thenReturn(dbStack);
         addDatabaseServerToDBStack(dbStack);
-        setupMocksMinimal(dbStack);
+        setupMocksMinimal();
 
         when(userGeneratorService.updateUserName(ROOT_USER_NAME, Optional.of(CloudPlatform.AZURE), DB_HOST_NAME))
-            .thenReturn(ROOT_USER_NAME + "@" + DB_SHORT_HOST_NAME);
+                .thenReturn(ROOT_USER_NAME + "@" + DB_SHORT_HOST_NAME);
 
         Selectable selectable = new ExceptionCatcherEventHandlerTestSupport<>(underTest).doAccept(event);
 
@@ -219,11 +228,12 @@ class UpdateDatabaseServerRegistrationHandlerTest {
     void doAcceptTestWhenFailureSslCertificateSyncError() throws Exception {
         DBStack dbStack = getDBStack();
         dbStack.setCloudPlatform(CloudPlatform.AZURE.toString());
+        when(dbStackService.getById(anyLong())).thenReturn(dbStack);
         addDatabaseServerToDBStack(dbStack);
-        setupMocksMinimal(dbStack);
+        setupMocksMinimal();
 
         when(userGeneratorService.updateUserName(ROOT_USER_NAME, Optional.of(CloudPlatform.AZURE), DB_HOST_NAME))
-            .thenReturn(ROOT_USER_NAME + "@" + DB_SHORT_HOST_NAME);
+                .thenReturn(ROOT_USER_NAME + "@" + DB_SHORT_HOST_NAME);
 
         Exception e = new Exception();
         doThrow(e).when(databaseServerSslCertificateSyncService).syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
@@ -240,8 +250,8 @@ class UpdateDatabaseServerRegistrationHandlerTest {
         assertThat(databaseServerConfig.getConnectionUserName()).isEqualTo(ROOT_USER_NAME + "@" + DB_SHORT_HOST_NAME);
     }
 
-    private void setupMocksMinimal(DBStack dbStack) {
-        UpdateDatabaseServerRegistrationRequest request = getRequest(dbStack);
+    private void setupMocksMinimal() {
+        UpdateDatabaseServerRegistrationRequest request = getRequest();
         when(event.getData()).thenReturn(request);
 
         setupCloudResourceMock(DB_HOST_NAME, ResourceType.RDS_HOSTNAME);
@@ -284,9 +294,9 @@ class UpdateDatabaseServerRegistrationHandlerTest {
         return originalDatabaseServerConfig;
     }
 
-    private UpdateDatabaseServerRegistrationRequest getRequest(DBStack dbStack) {
+    private UpdateDatabaseServerRegistrationRequest getRequest() {
         when(cloudContext.getId()).thenReturn(RESOURCE_ID);
-        return new UpdateDatabaseServerRegistrationRequest(cloudContext, cloudCredential, dbStack, databaseStack, List.of());
+        return new UpdateDatabaseServerRegistrationRequest(cloudContext, cloudCredential, databaseStack, List.of());
     }
 
 }

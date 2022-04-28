@@ -16,22 +16,20 @@ import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.Deregi
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister.DeregisterDatabaseServerSuccess;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class DeregisterDatabaseServerHandler extends ExceptionCatcherEventHandler<DeregisterDatabaseServerRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DeregisterDatabaseServerHandler.class);
 
-    private static final long DEFAULT_WORKSPACE = 0L;
-
-    @Inject
-    private EventBus eventBus;
-
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
+
+    @Inject
+    private DBStackService dbStackService;
 
     @Override
     public String selector() {
@@ -46,14 +44,13 @@ public class DeregisterDatabaseServerHandler extends ExceptionCatcherEventHandle
     @Override
     protected Selectable doAccept(HandlerEvent<DeregisterDatabaseServerRequest> event) {
         DeregisterDatabaseServerRequest request = event.getData();
-        Selectable response = new DeregisterDatabaseServerSuccess(request.getResourceId());
 
-        DBStack dbStack = request.getDbStack();
+        DBStack dbStack = dbStackService.getById(request.getResourceId());
 
         try {
             databaseServerConfigService.getByCrn(Crn.safeFromString(dbStack.getResourceCrn()))
                     .ifPresent(dsc -> databaseServerConfigService.delete(dsc));
-            return response;
+            return new DeregisterDatabaseServerSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.warn("Error deregistering database:", e);
             return new DeregisterDatabaseServerFailed(request.getResourceId(), e);

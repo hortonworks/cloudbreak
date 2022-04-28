@@ -126,7 +126,6 @@ class RedbeamsProvisionActionsTest {
         assertThat(allocateDatabaseServerRequest.getResourceId()).isEqualTo(RESOURCE_ID);
         assertThat(allocateDatabaseServerRequest.getCloudContext()).isSameAs(cloudContext);
         assertThat(allocateDatabaseServerRequest.getCloudCredential()).isSameAs(cloudCredential);
-        assertThat(allocateDatabaseServerRequest.getDbStack()).isSameAs(dbStack);
         assertThat(allocateDatabaseServerRequest.getDatabaseStack()).isSameAs(databaseStack);
     }
 
@@ -167,7 +166,6 @@ class RedbeamsProvisionActionsTest {
         assertThat(updateDatabaseServerRegistrationRequest.getResourceId()).isEqualTo(RESOURCE_ID);
         assertThat(updateDatabaseServerRegistrationRequest.getCloudContext()).isSameAs(cloudContext);
         assertThat(updateDatabaseServerRegistrationRequest.getCloudCredential()).isSameAs(cloudCredential);
-        assertThat(updateDatabaseServerRegistrationRequest.getDBStack()).isSameAs(dbStack);
         assertThat(updateDatabaseServerRegistrationRequest.getDatabaseStack()).isSameAs(databaseStack);
         assertThat(updateDatabaseServerRegistrationRequest.getDbResources()).isEqualTo(List.of(cloudResource));
     }

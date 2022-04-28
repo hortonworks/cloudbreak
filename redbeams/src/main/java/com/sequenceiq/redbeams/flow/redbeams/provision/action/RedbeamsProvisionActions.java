@@ -69,7 +69,6 @@ public class RedbeamsProvisionActions {
                 return new AllocateDatabaseServerRequest(
                         context.getCloudContext(),
                         context.getCloudCredential(),
-                        context.getDBStack(),
                         context.getDatabaseStack()
                 );
             }
@@ -89,7 +88,6 @@ public class RedbeamsProvisionActions {
                         new UpdateDatabaseServerRegistrationRequest(
                                 context.getCloudContext(),
                                 context.getCloudCredential(),
-                                context.getDBStack(),
                                 context.getDatabaseStack(),
                                 ResourceLists.transform(dbResourcesList)
                         )

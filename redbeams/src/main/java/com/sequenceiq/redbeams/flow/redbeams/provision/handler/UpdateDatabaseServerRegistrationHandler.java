@@ -27,6 +27,7 @@ import com.sequenceiq.redbeams.flow.redbeams.provision.event.register.UpdateData
 import com.sequenceiq.redbeams.service.UserGeneratorService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificateSyncService;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 import reactor.bus.Event;
 
@@ -47,17 +48,20 @@ public class UpdateDatabaseServerRegistrationHandler extends ExceptionCatcherEve
     @Inject
     private DatabaseServerSslCertificateSyncService databaseServerSslCertificateSyncService;
 
+    @Inject
+    private DBStackService dbStackService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(UpdateDatabaseServerRegistrationRequest.class);
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent handlerEvent) {
+    protected Selectable doAccept(HandlerEvent<UpdateDatabaseServerRegistrationRequest> handlerEvent) {
         Event<UpdateDatabaseServerRegistrationRequest> event = handlerEvent.getEvent();
         LOGGER.debug("Received event: {}", event);
         UpdateDatabaseServerRegistrationRequest request = event.getData();
-        DBStack dbStack = request.getDBStack();
+        DBStack dbStack = dbStackService.getById(request.getResourceId());
         List<CloudResource> dbResources = request.getDbResources();
 
         Selectable response;
