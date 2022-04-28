@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.service.freeipa;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,6 +22,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.environment.environment.poller.FreeIpaPollerProvider;
+import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -27,6 +30,9 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaPollerServiceTest {
@@ -48,8 +54,10 @@ public class FreeIpaPollerServiceTest {
 
     @BeforeEach
     void setup() {
-        ReflectionTestUtils.setField(underTest, "attempt", 1);
-        ReflectionTestUtils.setField(underTest, "sleeptime", 1);
+        ReflectionTestUtils.setField(underTest, "startStopAttempt", 1);
+        ReflectionTestUtils.setField(underTest, "upgradeccmAttempt", 1);
+        ReflectionTestUtils.setField(underTest, "startStopSleeptime", 1);
+        ReflectionTestUtils.setField(underTest, "upgradeccmSleeptime", 1);
     }
 
     @Test
@@ -128,6 +136,30 @@ public class FreeIpaPollerServiceTest {
         underTest.waitForSynchronizeUsers(ENV_ID, ENV_CRN);
 
         verify(freeIpaService, never()).synchronizeAllUsersInEnvironment(ENV_CRN);
+    }
+
+    @Test
+    void testWaitForCcmUpgrade() {
+        OperationStatus status = new OperationStatus("123", OperationType.UPGRADE_CCM, OperationState.REQUESTED, null, null, null, 0, null);
+        when(freeIpaService.upgradeCcm(any())).thenReturn(status);
+        when(freeipaPollerProvider.upgradeCcmPoller(ENV_ID, ENV_CRN, "123")).thenReturn(AttemptResults.justFinish());
+
+        underTest.waitForCcmUpgrade(ENV_ID, ENV_CRN);
+
+        verify(freeIpaService).upgradeCcm(ENV_CRN);
+    }
+
+    @Test
+    void testWaitForCcmUpgradeFailed() {
+        OperationStatus status = new OperationStatus("123", OperationType.UPGRADE_CCM, OperationState.REQUESTED, null, null, null, 0, null);
+        when(freeIpaService.upgradeCcm(any())).thenReturn(status);
+        when(freeipaPollerProvider.upgradeCcmPoller(ENV_ID, ENV_CRN, "123")).thenThrow(new RuntimeException("error"));
+
+        assertThatThrownBy(() -> underTest.waitForCcmUpgrade(ENV_ID, ENV_CRN))
+                .hasMessageContaining("FreeIPA upgrade of Cluster Connectivity Manager timed out or error happened")
+                .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
+
+        verify(freeIpaService).upgradeCcm(ENV_CRN);
     }
 
     private static SyncOperationStatus createStatus(SynchronizationStatus syncStatus, String error) {

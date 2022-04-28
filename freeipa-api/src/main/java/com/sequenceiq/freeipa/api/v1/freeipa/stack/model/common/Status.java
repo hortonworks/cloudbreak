@@ -58,6 +58,10 @@ public enum Status {
 
     public static final Collection<Status> FREEIPA_STOPPED_STATUSES = List.of(STOPPED);
 
+    public static final Collection<Status> FREEIPA_CCM_UPGRADEABLE_STATUSES = List.of(AVAILABLE, UPGRADE_CCM_FAILED);
+
+    public static final Collection<Status> FREEIPA_CCM_UPGRADE_IN_PROGRESS_STATUSES = List.of(UPGRADE_CCM_IN_PROGRESS);
+
     public boolean isRemovableStatus() {
         return REMOVABLE_STATUSES.contains(this);
     }
@@ -97,4 +101,9 @@ public enum Status {
     public Boolean isStoppedPhase() {
         return FREEIPA_STOPPED_STATUSES.contains(this);
     }
+
+    public boolean isCcmUpgradeablePhase() {
+        return FREEIPA_CCM_UPGRADEABLE_STATUSES.contains(this);
+    }
+
 }

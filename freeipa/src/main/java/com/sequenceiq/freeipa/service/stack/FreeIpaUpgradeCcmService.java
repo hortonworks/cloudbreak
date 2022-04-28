@@ -79,7 +79,7 @@ public class FreeIpaUpgradeCcmService {
     }
 
     private void validateCcmUpgrade(Stack stack) {
-        if (!stack.isAvailable()) {
+        if (!stack.getStackStatus().getStatus().isCcmUpgradeablePhase()) {
             throw new BadRequestException(
                     String.format("FreeIPA stack '%s' must be AVAILABLE to start Cluster Connectivity Manager upgrade.", stack.getName()));
         }

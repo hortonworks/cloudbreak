@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment;
 
-import java.util.List;
 import java.util.Set;
 
 public enum EnvironmentStatus {
@@ -131,6 +130,8 @@ public enum EnvironmentStatus {
     UPGRADE_CCM_VALIDATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_VALIDATION_FAILED),
     UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS),
     UPGRADE_CCM_ON_FREEIPA_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_FAILED),
+    UPGRADE_CCM_TUNNEL_UPDATE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_TUNNEL_UPDATE_IN_PROGRESS),
+    UPGRADE_CCM_TUNNEL_UPDATE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_TUNNEL_UPDATE_FAILED),
     UPGRADE_CCM_ON_DATALAKE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_DATALAKE_IN_PROGRESS),
     UPGRADE_CCM_ON_DATALAKE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_DATALAKE_FAILED),
     UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS),
@@ -147,6 +148,33 @@ public enum EnvironmentStatus {
             FREEIPA_CREATION_IN_PROGRESS,
             AVAILABLE);
 
+    public static final Set<EnvironmentStatus> DELETE_IN_PROGRESS_STATES = Set.of(
+            NETWORK_DELETE_IN_PROGRESS,
+            FREEIPA_DELETE_IN_PROGRESS,
+            RDBMS_DELETE_IN_PROGRESS,
+            IDBROKER_MAPPINGS_DELETE_IN_PROGRESS,
+            S3GUARD_TABLE_DELETE_IN_PROGRESS,
+            CLUSTER_DEFINITION_DELETE_PROGRESS,
+            UMS_RESOURCE_DELETE_IN_PROGRESS,
+            DELETE_INITIATED,
+            DATAHUB_CLUSTERS_DELETE_IN_PROGRESS,
+            DATALAKE_CLUSTERS_DELETE_IN_PROGRESS,
+            PUBLICKEY_DELETE_IN_PROGRESS,
+            EXPERIENCE_DELETE_IN_PROGRESS,
+            ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS,
+            ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED
+    );
+
+    public static final Set<EnvironmentStatus> CCM_UPGRADEABLE_STATES = Set.of(
+            AVAILABLE,
+            UPGRADE_CCM_VALIDATION_FAILED,
+            UPGRADE_CCM_ON_FREEIPA_FAILED,
+            UPGRADE_CCM_TUNNEL_UPDATE_FAILED,
+            UPGRADE_CCM_ON_DATALAKE_FAILED,
+            UPGRADE_CCM_ON_DATAHUB_FAILED,
+            UPGRADE_CCM_FAILED
+    );
+
     private final com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus responseStatus;
 
     EnvironmentStatus(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus responseStatus) {
@@ -158,25 +186,14 @@ public enum EnvironmentStatus {
     }
 
     public boolean isDeleteInProgress() {
-        return List.of(
-                NETWORK_DELETE_IN_PROGRESS,
-                FREEIPA_DELETE_IN_PROGRESS,
-                RDBMS_DELETE_IN_PROGRESS,
-                IDBROKER_MAPPINGS_DELETE_IN_PROGRESS,
-                S3GUARD_TABLE_DELETE_IN_PROGRESS,
-                CLUSTER_DEFINITION_DELETE_PROGRESS,
-                UMS_RESOURCE_DELETE_IN_PROGRESS,
-                DELETE_INITIATED,
-                DATAHUB_CLUSTERS_DELETE_IN_PROGRESS,
-                DATALAKE_CLUSTERS_DELETE_IN_PROGRESS,
-                PUBLICKEY_DELETE_IN_PROGRESS,
-                EXPERIENCE_DELETE_IN_PROGRESS,
-                ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS,
-                ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED
-        ).contains(this);
+        return DELETE_IN_PROGRESS_STATES.contains(this);
     }
 
     public boolean isSuccessfullyDeleted() {
         return ARCHIVED == this;
+    }
+
+    public boolean isCcmUpgradeablePhase() {
+        return CCM_UPGRADEABLE_STATES.contains(this);
     }
 }

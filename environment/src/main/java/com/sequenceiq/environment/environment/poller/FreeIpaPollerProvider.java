@@ -17,6 +17,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
 @Component
 public class FreeIpaPollerProvider {
@@ -118,4 +120,40 @@ public class FreeIpaPollerProvider {
     private boolean freeIpaUsersSynchronized(SyncOperationStatus freeIpaResponse) {
         return SynchronizationStatus.COMPLETED.equals(freeIpaResponse.getStatus());
     }
+
+    public AttemptResult<Void> upgradeCcmPoller(Long envId, String envCrn, String operationId) {
+        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+            LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);
+            return AttemptResults.breakFor("FreeIpa polling cancelled in inmemory store, id: " + envId);
+        }
+        OperationStatus operationStatus = freeIpaService.getOperationStatus(operationId);
+        LOGGER.debug("Operation status: {}", operationStatus);
+        if (operationCompleted(operationStatus)) {
+            return AttemptResults.finishWith(null);
+        } else {
+            return checkUpgradeCcmStatus(operationStatus);
+        }
+    }
+
+    private boolean operationCompleted(OperationStatus operationStatus) {
+        return OperationState.COMPLETED == operationStatus.getStatus();
+    }
+
+    private AttemptResult<Void> checkUpgradeCcmStatus(OperationStatus operationStatus) {
+        OperationState state = operationStatus.getStatus();
+        switch (state) {
+            case REQUESTED:
+            case RUNNING:
+                return AttemptResults.justContinue();
+            case TIMEDOUT:
+                return AttemptResults.breakFor("FreeIpa Upgrade CCM failed: timeout.");
+            case REJECTED:
+                return AttemptResults.breakFor("FreeIpa Upgrade CCM operation request was rejected.");
+            case FAILED:
+                return AttemptResults.breakFor("FreeIpa Upgrade CCM failed.");
+            default:
+                return AttemptResults.breakFor("FreeIpa Upgrade CCM failed: unexpected operation status returned: " + state);
+        }
+    }
+
 }

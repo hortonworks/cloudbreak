@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.flow.upgrade.ccm;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmHandlerSelectors.UPGRADE_CCM_DATAHUB_HANDLER;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmHandlerSelectors.UPGRADE_CCM_DATALAKE_HANDLER;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmHandlerSelectors.UPGRADE_CCM_FREEIPA_HANDLER;
+import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmHandlerSelectors.UPGRADE_CCM_TUNNEL_UPDATE_HANDLER;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmHandlerSelectors.UPGRADE_CCM_VALIDATION_HANDLER;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.FINALIZE_UPGRADE_CCM_EVENT;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.HANDLED_FAILED_UPGRADE_CCM_EVENT;
@@ -65,6 +66,19 @@ public class UpgradeCcmActions {
         };
     }
 
+    @Bean(name = "UPGRADE_CCM_TUNNEL_UPDATE_STATE")
+    public Action<?, ?> upgradeCcmUpdateTunnelAction() {
+        return new AbstractUpgradeCcmAction<>(UpgradeCcmEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, UpgradeCcmEvent payload, Map<Object, Object> variables) {
+                EnvironmentDto envDto = environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.UPGRADE_CCM_TUNNEL_UPDATE_IN_PROGRESS,
+                                ResourceEvent.ENVIRONMENT_UPGRADE_CCM_TUNNEL_UPDATE_STARTED, UpgradeCcmState.UPGRADE_CCM_TUNNEL_UPDATE_STATE);
+                sendEvent(context, UPGRADE_CCM_TUNNEL_UPDATE_HANDLER.selector(), envDto);
+            }
+        };
+    }
+
     @Bean(name = "UPGRADE_CCM_DATALAKE_STATE")
     public Action<?, ?> upgradeCcmInDataLakeAction() {
         return new AbstractUpgradeCcmAction<>(UpgradeCcmEvent.class) {
@@ -123,6 +137,8 @@ public class UpgradeCcmActions {
                 switch (status) {
                     case UPGRADE_CCM_VALIDATION_FAILED:
                         return ResourceEvent.ENVIRONMENT_UPGRADE_CCM_VALIDATION_FAILED;
+                    case UPGRADE_CCM_TUNNEL_UPDATE_FAILED:
+                        return ResourceEvent.ENVIRONMENT_UPGRADE_CCM_TUNNEL_UPDATE_FAILED;
                     case UPGRADE_CCM_ON_FREEIPA_FAILED:
                         return ResourceEvent.ENVIRONMENT_UPGRADE_CCM_ON_FREEIPA_FAILED;
                     case UPGRADE_CCM_ON_DATALAKE_FAILED:

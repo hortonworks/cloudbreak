@@ -19,6 +19,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStat
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
 @Service
 public class FreeIpaPollerService {
@@ -26,10 +27,16 @@ public class FreeIpaPollerService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaPollerService.class);
 
     @Value("${env.stop.polling.attempt:90}")
-    private Integer attempt;
+    private Integer startStopAttempt;
+
+    @Value("${env.upgradeccm.freeipa.polling.attempt:360}")
+    private Integer upgradeccmAttempt;
 
     @Value("${env.stop.polling.sleep.time:10}")
-    private Integer sleeptime;
+    private Integer startStopSleeptime;
+
+    @Value("${env.upgradeccm.freeipa.polling.sleeptime:5}")
+    private Integer upgradeccmSleeptime;
 
     private final FreeIpaService freeIpaService;
 
@@ -53,15 +60,28 @@ public class FreeIpaPollerService {
                 opId -> freeipaPollerProvider.syncUsersPoller(envId, envCrn, opId), AvailabilityStatus::isAvailable);
     }
 
+    public void waitForCcmUpgrade(Long envId, String envCrn) {
+        OperationStatus status = freeIpaService.upgradeCcm(envCrn);
+        try {
+            Polling.stopAfterAttempt(upgradeccmAttempt)
+                    .stopIfException(true)
+                    .waitPeriodly(upgradeccmSleeptime, TimeUnit.SECONDS)
+                    .run(() -> freeipaPollerProvider.upgradeCcmPoller(envId, envCrn, status.getOperationId()));
+        } catch (PollerStoppedException e) {
+            LOGGER.info("FreeIPA Upgrade CCM timed out or error happened.", e);
+            throw new FreeIpaOperationFailedException("FreeIPA upgrade of Cluster Connectivity Manager timed out or error happened: " + e.getMessage());
+        }
+    }
+
     private void executeFreeIpaOperationAndStartPolling(String envCrn, Consumer<String> freeIpaOperation, AttemptMaker<Void> attemptMaker,
             Function<Status, Boolean> shouldRun) {
         Optional<DescribeFreeIpaResponse> freeIpaResponse = freeIpaService.describe(envCrn);
         if (freeIpaResponse.isPresent() && shouldRun.apply(freeIpaResponse.get().getStatus())) {
             freeIpaOperation.accept(envCrn);
             try {
-                Polling.stopAfterAttempt(attempt)
+                Polling.stopAfterAttempt(startStopAttempt)
                         .stopIfException(true)
-                        .waitPeriodly(sleeptime, TimeUnit.SECONDS)
+                        .waitPeriodly(startStopSleeptime, TimeUnit.SECONDS)
                         .run(attemptMaker);
             } catch (PollerStoppedException e) {
                 LOGGER.info("Error while sending resource definition request", e);
@@ -78,13 +98,13 @@ public class FreeIpaPollerService {
                 shouldRun.apply(freeIpaResponse.get().getAvailabilityStatus())) {
             SyncOperationStatus status = freeIpaSyncOperation.apply(envCrn);
             try {
-                Polling.stopAfterAttempt(attempt)
+                Polling.stopAfterAttempt(startStopAttempt)
                         .stopIfException(true)
-                        .waitPeriodly(sleeptime, TimeUnit.SECONDS)
+                        .waitPeriodly(startStopSleeptime, TimeUnit.SECONDS)
                         .run(attemptMaker.apply(status.getOperationId()));
             } catch (PollerStoppedException e) {
-                LOGGER.info("Freeipa syncing timed out");
-                throw new FreeIpaOperationFailedException("Freeipa syncing timed out");
+                LOGGER.info("FreeIPA syncing timed out", e);
+                throw new FreeIpaOperationFailedException("FreeIPA syncing timed out");
             }
         }
     }

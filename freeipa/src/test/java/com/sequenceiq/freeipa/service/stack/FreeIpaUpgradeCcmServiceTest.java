@@ -182,7 +182,7 @@ class FreeIpaUpgradeCcmServiceTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(value = Status.class, names = { "AVAILABLE" }, mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = Status.class, names = { "AVAILABLE", "UPGRADE_CCM_FAILED" }, mode = EnumSource.Mode.EXCLUDE)
     void upgradeCcmTestWhenNotAvailable(Status status) {
         Stack stack = createStack(status);
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
