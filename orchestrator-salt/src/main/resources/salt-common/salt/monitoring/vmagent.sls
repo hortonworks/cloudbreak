@@ -10,6 +10,13 @@ install_vmagent:
     - onlyif: "test -f /etc/yum.repos.d/cdp-infra-tools.repo && ! rpm -q cdp-vmagent"
 {%- endif %}
 
+/opt/cdp-vmagent/noproxy_check.py:
+  file.managed:
+    - source: salt://monitoring/scripts/noproxy_check.py
+    - user: "root"
+    - group: "root"
+    - mode: 750
+
 /etc/systemd/system/cdp-vmagent.service:
   file.managed:
     - source: salt://monitoring/systemd/cdp-vmagent.service.j2

@@ -7,6 +7,7 @@ After=network-online.target
 Type=simple
 User=root
 Group=root
+EnvironmentFile=/opt/blackbox_exporter/blackbox.env
 ExecStart=/opt/blackbox_exporter/blackbox_exporter \
     --config.file=/opt/blackbox_exporter/blackbox.yml
 

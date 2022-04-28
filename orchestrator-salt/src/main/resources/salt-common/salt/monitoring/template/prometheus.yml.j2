@@ -23,6 +23,7 @@ scrape_configs:
         labels:
           resource_crn: {{ telemetry.clusterCrn }}
           platform: {{ telemetry.platform }}
+          proxy: {%- if telemetry.proxyUrl %}yes{%- else %}no{%- endif %}
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
