@@ -27,6 +27,14 @@
     - group: "root"
     - mode: 640
 
+/opt/blackbox_exporter/blackbox.env:
+  file.managed:
+    - source: salt://monitoring/template/blackbox.env.j2
+    - template: jinja
+    - user: "root"
+    - group: "root"
+    - mode: 600
+
 start_node_exporter:
   service.running:
     - enable: True
@@ -40,6 +48,7 @@ start_blackbox_exporter:
     - name: "cdp-blackbox-exporter"
     - watch:
       - file: /opt/blackbox_exporter/blackbox.yml
+      - file: /opt/blackbox_exporter/blackbox.env
       - file: /etc/systemd/system/cdp-blackbox-exporter.service
 
 {%- endif %}

@@ -1,4 +1,19 @@
+{%- from 'telemetry/settings.sls' import telemetry with context %}
 {%- from 'monitoring/settings.sls' import monitoring with context %}
+{%- if telemetry.proxyUrl %}
+  {%- if telemetry.noProxyHosts %}
+    {%- set proxy_bypass = salt.cmd.run('python3 /opt/cdp-vmagent/noproxy_check.py ' + monitoring.remoteWriteUrl + ' ' + telemetry.noProxyHosts) %}
+    {%- if proxy_bypass == "true" %}
+      {%- set use_proxy = False %}
+    {%- else %}
+      {%- set use_proxy = True %}
+    {%- endif %}
+  {%- else %}
+    {%- set use_proxy = True %}
+  {%- endif %}
+{%- else %}
+  {%- set use_proxy = False %}
+{%- endif %}
 [Unit]
 Description=CDP VM agent for collecting metrics
 Wants=network-online.target
@@ -16,6 +31,9 @@ ExecStart=/opt/cdp-vmagent/bin/vmagent-prod -remoteWrite.url={{ monitoring.remot
 {%- endif %}
 {%- elif monitoring.token %}
      -remoteWrite.bearerTokenFile=/opt/cdp-vmagent/remote_token_file \
+{%- endif %}
+{%- if use_proxy %}
+     -remoteWrite.proxyURL={{ telemetry.proxyUrl }} \
 {%- endif %}
      -promscrape.config=/opt/cdp-vmagent/prometheus.yml
 Restart=always
