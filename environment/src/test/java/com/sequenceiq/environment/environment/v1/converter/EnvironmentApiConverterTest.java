@@ -49,7 +49,6 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnviro
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.S3GuardRequestParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.UpdateAwsDiskEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -68,7 +67,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
-import com.sequenceiq.environment.environment.dto.UpdateAwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
@@ -401,17 +399,6 @@ public class EnvironmentApiConverterTest {
 
         assertEquals(KEY_URL, actual.getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
         assertEquals(KEY_URL_RESOURCE_GROUP, actual.getAzureResourceEncryptionParametersDto().getEncryptionKeyResourceGroupName());
-    }
-
-    @Test
-    void testConvertUpdateAwsDiskEncryptionParametersDto() {
-        UpdateAwsDiskEncryptionParametersRequest request = UpdateAwsDiskEncryptionParametersRequest.builder()
-                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParameters.builder()
-                        .withEncryptionKeyArn(ENCRYPTION_KEY_ARN)
-                        .build())
-                .build();
-        UpdateAwsDiskEncryptionParametersDto actual = underTest.convertUpdateAwsDiskEncryptionParametersDto(request);
-        assertEquals(ENCRYPTION_KEY_ARN, actual.getAwsDiskEncryptionParametersDto().getEncryptionKeyArn());
     }
 
     private void assertLocation(LocationRequest request, LocationDto actual) {
