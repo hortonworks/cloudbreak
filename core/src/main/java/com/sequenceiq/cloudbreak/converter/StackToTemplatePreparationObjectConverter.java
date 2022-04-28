@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.google.common.base.Strings;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -335,7 +336,8 @@ public class StackToTemplatePreparationObjectConverter {
         if (StackType.WORKLOAD.equals(source.getType()) && source.getCluster().getCustomConfigurations() != null) {
             customConfigurationsView = customConfigurationsViewProvider.getCustomConfigurationsView(customConfigurationsService
                     .getByNameOrCrn(NameOrCrn.ofCrn(clusterService.findOneWithCustomConfigurations(cluster.getId()).getCustomConfigurations().getCrn())));
-            if (customConfigurationsView.getRuntimeVersion() != null && !source.getStackVersion().equals(customConfigurationsView.getRuntimeVersion())) {
+            if (!Strings.isNullOrEmpty(customConfigurationsView.getRuntimeVersion()) &&
+                    !source.getStackVersion().equals(customConfigurationsView.getRuntimeVersion())) {
                 throw new CustomConfigurationsRuntimeVersionException("Custom Configurations runtime version mismatch!");
             }
         }
