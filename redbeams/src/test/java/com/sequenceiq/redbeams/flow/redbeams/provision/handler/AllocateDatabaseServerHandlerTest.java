@@ -3,7 +3,9 @@ package com.sequenceiq.redbeams.flow.redbeams.provision.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,6 +47,7 @@ import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDa
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 import reactor.bus.Event;
 
@@ -75,6 +78,9 @@ class AllocateDatabaseServerHandlerTest {
 
     @Mock
     private DatabaseServerSslCertificatePrescriptionService databaseServerSslCertificatePrescriptionService;
+
+    @Mock
+    private DBStackService dbStackService;
 
     @InjectMocks
     private AllocateDatabaseServerHandler underTest;
@@ -117,6 +123,7 @@ class AllocateDatabaseServerHandlerTest {
     void setUp() {
         dbStack = new DBStack();
         dbStack.setCloudPlatform(CloudPlatform.AWS.name());
+        lenient().when(dbStackService.getById(anyLong())).thenReturn(dbStack);
         databaseStack = new DatabaseStack(null, null, Map.of(), "");
     }
 
@@ -303,7 +310,7 @@ class AllocateDatabaseServerHandlerTest {
         when(cloudContext.getId()).thenReturn(RESOURCE_ID);
         when(cloudContext.getPlatformVariant()).thenReturn(cloudPlatformVariant);
 
-        AllocateDatabaseServerRequest request = new AllocateDatabaseServerRequest(cloudContext, cloudCredential, dbStack, databaseStack);
+        AllocateDatabaseServerRequest request = new AllocateDatabaseServerRequest(cloudContext, cloudCredential, databaseStack);
         when(event.getData()).thenReturn(request);
 
         when(cloudPlatformConnectors.get(cloudPlatformVariant)).thenReturn(cloudConnector);

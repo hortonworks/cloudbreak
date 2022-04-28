@@ -2,7 +2,6 @@ package com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
-import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
 /**
@@ -14,13 +13,10 @@ public class DeregisterDatabaseServerRequest extends RedbeamsEvent {
 
     private final DatabaseStack databaseStack;
 
-    private final DBStack dbStack;
-
-    public DeregisterDatabaseServerRequest(CloudContext cloudContext, DatabaseStack databaseStack, DBStack dbStack) {
+    public DeregisterDatabaseServerRequest(CloudContext cloudContext, DatabaseStack databaseStack) {
         super(cloudContext != null ? cloudContext.getId() : null);
         this.cloudContext = cloudContext;
         this.databaseStack = databaseStack;
-        this.dbStack = dbStack;
     }
 
     public CloudContext getCloudContext() {
@@ -29,9 +25,5 @@ public class DeregisterDatabaseServerRequest extends RedbeamsEvent {
 
     public DatabaseStack getDatabaseStack() {
         return databaseStack;
-    }
-
-    public DBStack getDbStack() {
-        return dbStack;
     }
 }

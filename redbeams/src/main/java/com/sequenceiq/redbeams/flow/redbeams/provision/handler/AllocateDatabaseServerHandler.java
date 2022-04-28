@@ -29,10 +29,12 @@ import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerFailed;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerRequest;
 import com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate.AllocateDatabaseServerSuccess;
 import com.sequenceiq.redbeams.service.sslcertificate.DatabaseServerSslCertificatePrescriptionService;
+import com.sequenceiq.redbeams.service.stack.DBStackService;
 
 import reactor.bus.Event;
 
@@ -58,13 +60,16 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
     @Inject
     private DatabaseServerSslCertificatePrescriptionService databaseServerSslCertificatePrescriptionService;
 
+    @Inject
+    private DBStackService dbStackService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(AllocateDatabaseServerRequest.class);
     }
 
     @Override
-    protected Selectable doAccept(HandlerEvent handlerEvent) {
+    protected Selectable doAccept(HandlerEvent<AllocateDatabaseServerRequest> handlerEvent) {
         Event<AllocateDatabaseServerRequest> event = handlerEvent.getEvent();
         LOGGER.debug("Received event: {}", event);
         AllocateDatabaseServerRequest request = event.getData();
@@ -75,7 +80,8 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
             CloudCredential cloudCredential = request.getCloudCredential();
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
             DatabaseStack databaseStack = request.getDatabaseStack();
-            databaseServerSslCertificatePrescriptionService.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, request.getDbStack(), databaseStack);
+            DBStack dbStack = dbStackService.getById(request.getResourceId());
+            databaseServerSslCertificatePrescriptionService.prescribeSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
             List<CloudResourceStatus> resourceStatuses = connector.resources().launchDatabaseServer(ac, databaseStack, persistenceNotifier);
             List<CloudResource> resources = ResourceLists.transform(resourceStatuses);
 
@@ -86,12 +92,10 @@ public class AllocateDatabaseServerHandler extends ExceptionCatcherEventHandler<
             }
             validateResourcesState(cloudContext, statePollerResult);
             response = new AllocateDatabaseServerSuccess(request.getResourceId());
-            // request.getResult().onNext(success);
             LOGGER.debug("Launching the database stack successfully finished for {}", cloudContext);
         } catch (Exception e) {
             response = new AllocateDatabaseServerFailed(request.getResourceId(), e);
             LOGGER.warn("Error launching the database stack:", e);
-            // request.getResult().onNext(failure);
         }
         return response;
     }
