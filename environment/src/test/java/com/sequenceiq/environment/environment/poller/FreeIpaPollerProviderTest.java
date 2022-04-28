@@ -30,6 +30,9 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 
 class FreeIpaPollerProviderTest {
 
@@ -89,6 +92,17 @@ class FreeIpaPollerProviderTest {
         Assertions.assertEquals(message, result.getMessage());
     }
 
+    @ParameterizedTest
+    @MethodSource("upgradeCcmStatuses")
+    void testUpgradeCcmPoller(OperationState operationState, AttemptState attemptState, String message) {
+        OperationStatus status = new OperationStatus("123", OperationType.UPGRADE_CCM, operationState, null, null, null, 0, null);
+        when(freeIpaService.getOperationStatus("123")).thenReturn(status);
+        AttemptResult<Void> result = underTest.upgradeCcmPoller(ENV_ID, CRN, "123");
+
+        Assertions.assertEquals(attemptState, result.getState());
+        Assertions.assertEquals(message, result.getMessage());
+    }
+
     private static Stream<Arguments> freeIpaStopStatuses() {
         return Stream.of(
                 Arguments.of(STOPPED, AttemptState.FINISH, ""),
@@ -113,6 +127,17 @@ class FreeIpaPollerProviderTest {
                 Arguments.of(createStatus(SynchronizationStatus.FAILED, "failed"), AttemptState.BREAK, getSyncErrorMessage("failed")),
                 Arguments.of(createStatus(SynchronizationStatus.REJECTED, "rejected"), AttemptState.BREAK, getSyncErrorMessage("rejected")),
                 Arguments.of(createStatus(SynchronizationStatus.TIMEDOUT, "timeout"), AttemptState.BREAK, getSyncErrorMessage("timeout"))
+        );
+    }
+
+    public static Stream<Arguments> upgradeCcmStatuses() {
+        return Stream.of(
+                Arguments.of(OperationState.COMPLETED, AttemptState.FINISH, ""),
+                Arguments.of(OperationState.FAILED, AttemptState.BREAK, "FreeIpa Upgrade CCM failed."),
+                Arguments.of(OperationState.REJECTED, AttemptState.BREAK, "FreeIpa Upgrade CCM operation request was rejected."),
+                Arguments.of(OperationState.REQUESTED, AttemptState.CONTINUE, ""),
+                Arguments.of(OperationState.RUNNING, AttemptState.CONTINUE, ""),
+                Arguments.of(OperationState.TIMEDOUT, AttemptState.BREAK, "FreeIpa Upgrade CCM failed: timeout.")
         );
     }
 

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,7 +27,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
@@ -38,6 +42,10 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
+import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaServiceTest {
@@ -49,6 +57,11 @@ class FreeIpaServiceTest {
             .setResource("env")
             .build().toString();
 
+    private static final String USERCRN = CrnTestUtil.getUserCrnBuilder()
+            .setAccountId("acc")
+            .setResource("user")
+            .build().toString();
+
     @Mock
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
 
@@ -56,7 +69,13 @@ class FreeIpaServiceTest {
     private UserV1Endpoint userV1Endpoint;
 
     @Mock
+    private OperationV1Endpoint operationV1Endpoint;
+
+    @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @InjectMocks
     private FreeIpaService underTest;
@@ -111,9 +130,9 @@ class FreeIpaServiceTest {
     @Test
     void internalDescribeFreeipaNotFoundTest() {
         ExceptionResponse exceptionResponse = new ExceptionResponse("Freeipa not found");
-        final Response response = Mockito.mock(Response.class);
+        final Response response = mock(Response.class);
         Mockito.when(response.readEntity(Mockito.any(Class.class))).thenReturn(exceptionResponse);
-        NotFoundException notFoundException = Mockito.mock(NotFoundException.class);
+        NotFoundException notFoundException = mock(NotFoundException.class);
         when(notFoundException.getResponse()).thenReturn(response);
         when(freeIpaV1Endpoint.describeInternal(eq(ENVCRN), eq("1111"))).thenThrow(notFoundException);
         Optional<DescribeFreeIpaResponse> describeFreeIpaResponse = underTest.internalDescribe(ENVCRN, "1111");
@@ -138,4 +157,48 @@ class FreeIpaServiceTest {
         return new SyncOperationStatus(OPERATION, SyncOperationType.USER_SYNC, syncStatus,
                 List.of(), failureDetails, error, System.currentTimeMillis(), null);
     }
+
+    @Test
+    void getOperationStatusTest() {
+        OperationStatus status = new OperationStatus();
+        status.setStatus(OperationState.RUNNING);
+        when(operationV1Endpoint.getOperationStatus("operationId", "acc")).thenReturn(status);
+
+        OperationStatus result = ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.getOperationStatus("operationId"));
+        assertThat(result).isEqualTo(status);
+    }
+
+    @Test
+    void getOperationStatusFailureTest() {
+        when(operationV1Endpoint.getOperationStatus("operationId", "acc")).thenThrow(new WebApplicationException("not found"));
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
+
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.getOperationStatus("operationId")))
+                .hasMessage("custom error")
+                .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
+    }
+
+    @Test
+    void upgradeCcmTest() {
+        OperationStatus status = new OperationStatus("123", OperationType.UPGRADE_CCM, OperationState.REQUESTED, null, null, null, 0, null);
+        when(freeIpaV1Endpoint.upgradeCcmInternal(ENVCRN, USERCRN)).thenReturn(status);
+        RegionAwareInternalCrnGenerator iamGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(iamGenerator);
+        when(iamGenerator.getInternalCrnForServiceAsString()).thenReturn(USERCRN);
+        OperationStatus result = ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.upgradeCcm(ENVCRN));
+        assertThat(result).isEqualTo(status);
+    }
+
+    @Test
+    void upgradeCcmFailureTest() {
+        when(freeIpaV1Endpoint.upgradeCcmInternal(ENVCRN, USERCRN)).thenThrow(new WebApplicationException("Houston..."));
+        RegionAwareInternalCrnGenerator iamGenerator = mock(RegionAwareInternalCrnGenerator.class);
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(iamGenerator);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
+        when(iamGenerator.getInternalCrnForServiceAsString()).thenReturn(USERCRN);
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.upgradeCcm(ENVCRN)))
+                .hasMessage("custom error")
+                .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
+    }
+
 }

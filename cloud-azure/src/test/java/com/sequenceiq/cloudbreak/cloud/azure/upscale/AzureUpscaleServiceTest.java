@@ -169,7 +169,7 @@ public class AzureUpscaleServiceTest {
                 "%223ddda1c7-d1f5-4e7b-ac81-0523f483b3b3%22,%22command%22:%22openQuotaApprovalBlade%22,%22quotas%22:[%7B%22location%22:%22westus2%22,%22" +
                 "providerId%22:%22Microsoft.Compute%22,%22resourceName%22:%22standardNCPromoFamily%22,%22quotaRequest%22:%7B%22properties%22:%7B%22limit%22:" +
                 "624,%22unit%22:%22Count%22,%22name%22:%7B%22value%22:%22standardNCPromoFamily%22%7D%7D%7D%7D]%7D by specifying parameters listed in the " +
-                "‘Details’ section for deployment to succeed. Please read more about quota limits at https://docs.microsoft.com/en-us/azure/" +
+                "'Details' section for deployment to succeed. Please read more about quota limits at https://docs.microsoft.com/en-us/azure/" +
                 "azure-supportability/per-vm-quota-requests");
         cloudError.details().add(quotaError);
         CloudException cloudException = new CloudException("", null, cloudError);

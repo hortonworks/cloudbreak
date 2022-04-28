@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.flow.upgrade.ccm;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmHandlerSelectors.UPGRADE_CCM_DATAHUB_HANDLER;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmHandlerSelectors.UPGRADE_CCM_DATALAKE_HANDLER;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmHandlerSelectors.UPGRADE_CCM_FREEIPA_HANDLER;
+import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmHandlerSelectors.UPGRADE_CCM_TUNNEL_UPDATE_HANDLER;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmHandlerSelectors.UPGRADE_CCM_VALIDATION_HANDLER;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.FINALIZE_UPGRADE_CCM_EVENT;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.HANDLED_FAILED_UPGRADE_CCM_EVENT;
@@ -198,6 +199,21 @@ class UpgradeCcmActionsTest {
     @Test
     void upgradeFreeIpaNoEnvironment() {
         testNoEnvironment(underTest::upgradeCcmInFreeIpaAction, FAILURE_EVENT);
+    }
+
+    @Test
+    void upgradeTunnelUpdateHappyPath() {
+        testUpgradeActionHappyPath(underTest::upgradeCcmUpdateTunnelAction, UPGRADE_CCM_TUNNEL_UPDATE_HANDLER.selector());
+        verify(environmentStatusUpdateService)
+                .updateEnvironmentStatusAndNotify(any(), any(),
+                        eq(EnvironmentStatus.UPGRADE_CCM_TUNNEL_UPDATE_IN_PROGRESS),
+                        eq(ResourceEvent.ENVIRONMENT_UPGRADE_CCM_TUNNEL_UPDATE_STARTED),
+                        any());
+    }
+
+    @Test
+    void upgradeTunnelUpdateEnvironment() {
+        testNoEnvironment(underTest::upgradeCcmUpdateTunnelAction, FAILURE_EVENT);
     }
 
     @Test

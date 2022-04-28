@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.Collection;
@@ -43,8 +44,10 @@ import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareReso
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.domain.RegionWrapper;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -410,6 +413,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
                 EnvironmentStatus.UPGRADE_CCM_ON_DATALAKE_FAILED,
                 EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS,
                 EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_FAILED,
+                EnvironmentStatus.UPGRADE_CCM_TUNNEL_UPDATE_IN_PROGRESS,
+                EnvironmentStatus.UPGRADE_CCM_TUNNEL_UPDATE_FAILED,
                 EnvironmentStatus.UPGRADE_CCM_VALIDATION_IN_PROGRESS,
                 EnvironmentStatus.UPGRADE_CCM_VALIDATION_FAILED,
                 EnvironmentStatus.UPGRADE_CCM_ROLLING_BACK
@@ -447,4 +452,19 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     public Optional<Environment> getById(Long environmentId) {
         return environmentRepository.findById(environmentId);
     }
+
+    public Environment updateTunnelByEnvironmentId(Long environmentId, Tunnel tunnel) {
+        Optional<Environment> optEnv = getById(environmentId);
+        if (optEnv.isPresent()) {
+            Environment env = optEnv.get();
+            ExperimentalFeatures experimentalFeatures = env.getExperimentalFeaturesJson();
+            LOGGER.debug("Updating tunnel type from {} to {} in environment {}", experimentalFeatures.getTunnel(), tunnel, env.getName());
+            experimentalFeatures.setTunnel(tunnel);
+            env.setExperimentalFeaturesJson(experimentalFeatures);
+            return save(env);
+        } else {
+            throw notFoundException("Environment with ID: ", environmentId.toString());
+        }
+    }
+
 }

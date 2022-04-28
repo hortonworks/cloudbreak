@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -25,6 +27,7 @@ import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -37,8 +40,10 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.TestConstants;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.RegionWrapper;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
@@ -74,7 +79,7 @@ class EnvironmentServiceTest {
     private EnvironmentDto environmentDto;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         lenient().when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn())
                 .thenReturn("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin");
         environment = new Environment();
@@ -82,7 +87,7 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void getByNameAndAccountIdNotFound() {
+    void getByNameAndAccountIdNotFound() {
         when(environmentRepository
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(TestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.empty());
@@ -91,7 +96,7 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void testListByCrnInternal() {
+    void testListByCrnInternal() {
         when(environmentRepository.findOneByResourceCrnEvenIfDeleted(anyString())).thenReturn(
                 Optional.of(new Environment())
         );
@@ -102,7 +107,7 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void getByNameAndAccountIdFound() {
+    void getByNameAndAccountIdFound() {
         when(environmentRepository
                 .findByNameAndAccountIdAndArchivedIsFalse(eq(EnvironmentTestData.ENVIRONMENT_NAME), eq(TestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
@@ -112,7 +117,7 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void getByCrnAndAccountIdNotFound() {
+    void getByCrnAndAccountIdNotFound() {
         when(environmentRepository
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(TestConstants.CRN), eq(TestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.empty());
@@ -121,7 +126,7 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void getByCrnAndAccountId() {
+    void getByCrnAndAccountId() {
         when(environmentRepository
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(TestConstants.CRN), eq(TestConstants.ACCOUNT_ID)))
                 .thenReturn(Optional.of(environment));
@@ -131,7 +136,7 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void listByAccountId() {
+    void listByAccountId() {
         Set<Environment> twoEnvironment = Set.of(new Environment(), new Environment());
         final int twoInvocations = 2;
         when(environmentRepository.findByAccountId(eq(TestConstants.ACCOUNT_ID))).thenReturn(twoEnvironment);
@@ -141,20 +146,20 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void findEnvironmentByIdEmpty() {
+    void findEnvironmentByIdEmpty() {
         assertTrue(environmentServiceUnderTest.findEnvironmentById(1L).isEmpty());
         verify(environmentRepository).findById(eq(1L));
     }
 
     @Test
-    public void findEnvironmentById() {
+    void findEnvironmentById() {
         when(environmentRepository.findById(eq(1L))).thenReturn(Optional.of(environment));
         assertEquals(environment, environmentServiceUnderTest.findEnvironmentById(1L).get());
         verify(environmentRepository).findById(eq(1L));
     }
 
     @Test
-    public void findById() {
+    void findById() {
         when(environmentDtoConverter.environmentToDto(eq(environment))).thenReturn(environmentDto);
         when(environmentRepository.findById(eq(1L))).thenReturn(Optional.of(environment));
         assertEquals(environmentDto, environmentServiceUnderTest.findById(1L).get());
@@ -162,14 +167,14 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void findByIdEmpty() {
+    void findByIdEmpty() {
         when(environmentRepository.findById(eq(1L))).thenReturn(Optional.empty());
         assertTrue(environmentServiceUnderTest.findById(1L).isEmpty());
         verify(environmentRepository).findById(eq(1L));
     }
 
     @Test
-    public void setRegions() {
+    void setRegions() {
         environmentServiceUnderTest.setRegions(environment, Set.of("r1"), EnvironmentTestData.getCloudRegions());
         String resultText = environment.getRegions().getValue();
         assertTrue(resultText.contains("{\"name\":\"region-1\",\"displayName\":\"Here\"}"));
@@ -177,7 +182,7 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void setRegionsTwoRegions() {
+    void setRegionsTwoRegions() {
         environmentServiceUnderTest.setRegions(environment, Set.of("r1", "r2"), EnvironmentTestData.getCloudRegions());
         String resultText = environment.getRegions().getValue();
         assertTrue(resultText.contains("{\"name\":\"region-1\",\"displayName\":\"Here\"}"));
@@ -185,27 +190,27 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void setLocationByCoordinates() {
+    void setLocationByCoordinates() {
         RegionWrapper location = new RegionWrapper("r1", "Somewhere else", 1.2, 1.3, Collections.emptySet());
         environmentServiceUnderTest.setLocation(environment, location, EnvironmentTestData.getCloudRegions());
         assertEquals("Here", environment.getLocationDisplayName());
     }
 
     @Test
-    public void setLocationByLocation() {
+    void setLocationByLocation() {
         RegionWrapper location = new RegionWrapper("r3", "Somewhere else", 1.2, 1.3, Collections.emptySet());
         environmentServiceUnderTest.setLocation(environment, location, EnvironmentTestData.getCloudRegions());
         assertEquals("Somewhere else", environment.getLocationDisplayName());
     }
 
     @Test
-    public void setLocationLocationCoordinatesAreInvalid() {
+    void setLocationLocationCoordinatesAreInvalid() {
         RegionWrapper location = new RegionWrapper("r3", "Somewhere else", null, 1.3, Collections.emptySet());
         assertThrows(BadRequestException.class, () -> environmentServiceUnderTest.setLocation(environment, location, EnvironmentTestData.getCloudRegions()));
     }
 
     @Test
-    public void findAllByIdInAndStatusIn() {
+    void findAllByIdInAndStatusIn() {
         Set<Long> resourceIds = Set.of(1L, 2L);
         Set<EnvironmentStatus> statuses = Set.of(EnvironmentStatus.AVAILABLE, EnvironmentStatus.CREATION_INITIATED);
         List<Environment> qresult = List.of(environment);
@@ -217,7 +222,7 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void findAllByStatusIn() {
+    void findAllByStatusIn() {
         when(environmentDtoConverter.environmentToDto(eq(environment))).thenReturn(environmentDto);
         when(environmentRepository
                 .findAllByStatusInAndArchivedIsFalse(eq(Set.of(EnvironmentStatus.AVAILABLE, EnvironmentStatus.CREATION_INITIATED))))
@@ -228,7 +233,7 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void testRoleAssignment() {
+    void testRoleAssignment() {
         ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
             environmentServiceUnderTest.assignEnvironmentAdminRole(TestConstants.CRN, "envCrn");
         });
@@ -238,7 +243,7 @@ class EnvironmentServiceTest {
     }
 
     @Test
-    public void testRoleAssignmentFail() {
+    void testRoleAssignmentFail() {
         doThrow(new RuntimeException("Bad"))
                 .when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any(), any());
 
@@ -249,6 +254,28 @@ class EnvironmentServiceTest {
         verify(grpcUmsClient)
                 .assignResourceRole(eq(TestConstants.CRN), eq("envCrn"), eq("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"), any(), any());
         verifyNoMoreInteractions(grpcUmsClient);
+    }
+
+    @Test
+    void updateTunnelByEnvironmentId() {
+        ExperimentalFeatures expFeat = environment.getExperimentalFeaturesJson();
+        expFeat.setTunnel(Tunnel.CCM);
+        environment.setExperimentalFeaturesJson(expFeat);
+        Optional<Environment> optEnv = Optional.of(environment);
+        when(environmentRepository.findById(123L)).thenReturn(optEnv);
+        environmentServiceUnderTest.updateTunnelByEnvironmentId(123L, Tunnel.CCMV2_JUMPGATE);
+        ArgumentCaptor<Environment> envCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentRepository).save(envCaptor.capture());
+        Environment captured = envCaptor.getValue();
+        assertThat(captured.getExperimentalFeaturesJson().getTunnel()).isEqualTo(Tunnel.CCMV2_JUMPGATE);
+    }
+
+    @Test
+    void updateTunnelByEnvironmentIdNotFound() {
+        Optional<Environment> env = Optional.empty();
+        when(environmentRepository.findById(123L)).thenReturn(env);
+        assertThatThrownBy(() -> environmentServiceUnderTest.updateTunnelByEnvironmentId(123L, Tunnel.CCMV2_JUMPGATE))
+                .isInstanceOf(NotFoundException.class);
     }
 
     @Configuration

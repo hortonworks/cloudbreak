@@ -81,6 +81,8 @@ public enum EnvironmentStatus {
     UPGRADE_CCM_VALIDATION_FAILED("Validation for CCM upgrade failed"),
     UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS("Upgrading CCM on FreeIPA"),
     UPGRADE_CCM_ON_FREEIPA_FAILED("Upgrading CCM on FreeIPA failed"),
+    UPGRADE_CCM_TUNNEL_UPDATE_IN_PROGRESS("Updating CCM tunnel type of the environment"),
+    UPGRADE_CCM_TUNNEL_UPDATE_FAILED("Updating CCM tunnel type of the environment failed"),
     UPGRADE_CCM_ON_DATALAKE_IN_PROGRESS("Upgrading CCM on Data Lake"),
     UPGRADE_CCM_ON_DATALAKE_FAILED("Upgrading CCM on Data Lake failed"),
     UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS("Upgrading CCM on Data Hub clusters"),

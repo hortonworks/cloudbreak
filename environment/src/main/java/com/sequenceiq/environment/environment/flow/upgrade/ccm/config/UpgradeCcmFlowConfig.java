@@ -7,6 +7,7 @@ import static com.sequenceiq.environment.environment.flow.upgrade.ccm.UpgradeCcm
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_FREEIPA_STATE;
+import static com.sequenceiq.environment.environment.flow.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_TUNNEL_UPDATE_STATE;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.UpgradeCcmState.UPGRADE_CCM_VALIDATION_STATE;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.FAILED_UPGRADE_CCM_EVENT;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.FINALIZE_UPGRADE_CCM_EVENT;
@@ -15,6 +16,7 @@ import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.Upgr
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.UPGRADE_CCM_DATAHUB_EVENT;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.UPGRADE_CCM_DATALAKE_EVENT;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.UPGRADE_CCM_FREEIPA_EVENT;
+import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.UPGRADE_CCM_TUNNEL_UPDATE_EVENT;
 import static com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors.UPGRADE_CCM_VALIDATION_EVENT;
 
 import java.util.List;
@@ -40,7 +42,10 @@ public class UpgradeCcmFlowConfig extends AbstractFlowConfiguration<UpgradeCcmSt
             .from(UPGRADE_CCM_VALIDATION_STATE).to(UPGRADE_CCM_FREEIPA_STATE)
             .event(UPGRADE_CCM_FREEIPA_EVENT).defaultFailureEvent()
 
-            .from(UPGRADE_CCM_FREEIPA_STATE).to(UPGRADE_CCM_DATALAKE_STATE)
+            .from(UPGRADE_CCM_FREEIPA_STATE).to(UPGRADE_CCM_TUNNEL_UPDATE_STATE)
+            .event(UPGRADE_CCM_TUNNEL_UPDATE_EVENT).defaultFailureEvent()
+
+            .from(UPGRADE_CCM_TUNNEL_UPDATE_STATE).to(UPGRADE_CCM_DATALAKE_STATE)
             .event(UPGRADE_CCM_DATALAKE_EVENT).defaultFailureEvent()
 
             .from(UPGRADE_CCM_DATALAKE_STATE).to(UPGRADE_CCM_DATAHUB_STATE)

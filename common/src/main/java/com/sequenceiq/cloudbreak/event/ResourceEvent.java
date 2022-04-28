@@ -148,6 +148,8 @@ public enum ResourceEvent {
     ENVIRONMENT_UPGRADE_CCM_VALIDATION_FAILED("environment.upgrade.ccm.validation.failed"),
     ENVIRONMENT_UPGRADE_CCM_ON_FREEIPA_STARTED("environment.upgrade.ccm.freeipa.started"),
     ENVIRONMENT_UPGRADE_CCM_ON_FREEIPA_FAILED("environment.upgrade.ccm.freeipa.failed"),
+    ENVIRONMENT_UPGRADE_CCM_TUNNEL_UPDATE_STARTED("environment.upgrade.ccm.tunnelupdate.started"),
+    ENVIRONMENT_UPGRADE_CCM_TUNNEL_UPDATE_FAILED("environment.upgrade.ccm.tunnelupdate.failed"),
     ENVIRONMENT_UPGRADE_CCM_ON_DATALAKE_STARTED("environment.upgrade.ccm.datalake.started"),
     ENVIRONMENT_UPGRADE_CCM_ON_DATALAKE_FAILED("environment.upgrade.ccm.datalake.failed"),
     ENVIRONMENT_UPGRADE_CCM_ON_DATAHUB_STARTED("environment.upgrade.ccm.datahub.started"),
