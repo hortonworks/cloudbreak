@@ -117,14 +117,14 @@
       "displayName": "AWS GovCloud (US-West)",
       "latitude": "37.29998293",
       "longitude": "-121.8499891",
-      "k8sSupported": false
+      "k8sSupported": true
     },
     {
       "name": "us-gov-east-1",
       "displayName": "AWS GovCloud (US-East)",
       "latitude": "37.29998293",
       "longitude": "-121.8499891",
-      "k8sSupported": false
+      "k8sSupported": true
     },
     {
       "name": "af-south-1",
