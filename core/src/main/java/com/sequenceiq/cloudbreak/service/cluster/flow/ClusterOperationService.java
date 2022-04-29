@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DECOMMISSION_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
@@ -20,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -372,7 +375,7 @@ public class ClusterOperationService {
     private void updateNewHealthyNodes(Cluster cluster, Set<String> newHealthyNodes) throws TransactionExecutionException {
         if (!newHealthyNodes.isEmpty()) {
             Map<String, Optional<String>> hostNamesWithReason = newHealthyNodes.stream().collect(Collectors.toMap(host -> host, host -> Optional.empty()));
-            Set<InstanceStatus> expectedStates = Set.of(SERVICES_UNHEALTHY, SERVICES_RUNNING);
+            Set<InstanceStatus> expectedStates = EnumSet.of(SERVICES_UNHEALTHY, SERVICES_RUNNING, DECOMMISSION_FAILED, FAILED);
             InstanceStatus newState = SERVICES_HEALTHY;
             ResourceEvent clusterEvent = CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT;
             updateChangedHosts(cluster, hostNamesWithReason, expectedStates, newState, clusterEvent, Optional.empty());
