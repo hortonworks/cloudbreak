@@ -17,6 +17,10 @@ install_vmagent:
     - group: "root"
     - mode: 750
 
+generate_vmagent_cert_and_key:
+  cmd.run:
+    - name: "/opt/salt/scripts/cert-helper.sh -b /opt/cdp-vmagent/conf/vmagent"
+
 /etc/systemd/system/cdp-vmagent.service:
   file.managed:
     - source: salt://monitoring/systemd/cdp-vmagent.service.j2

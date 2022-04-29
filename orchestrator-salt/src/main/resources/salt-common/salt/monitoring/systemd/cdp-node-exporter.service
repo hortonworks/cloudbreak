@@ -7,7 +7,7 @@ After=network-online.target
 Type=simple
 User=root
 Group=root
-ExecStart=/opt/node_exporter/node_exporter
+ExecStart=/opt/node_exporter/node_exporter --web.config=/opt/node_exporter/node_exporter-web-config.yml
 
 Restart=always
 

@@ -1,0 +1,22 @@
+/opt/salt/scripts/cdp_resources_check.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://monitoring/scripts/cdp_resources_check.sh
+
+/opt/salt/scripts/cert-helper.sh:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://monitoring/scripts/cert-helper.sh
+
+/etc/cron.d/cdp_resources_check:
+  file.managed:
+    - user: root
+    - group: root
+    - mode: 600
+    - source: salt://monitoring/cron/cdp_resources_check

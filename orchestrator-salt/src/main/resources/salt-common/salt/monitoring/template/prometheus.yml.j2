@@ -5,6 +5,7 @@ global:
   scrape_interval: {{ monitoring.scrapeIntervalSeconds }}s
 scrape_configs:
   - job_name: node_exporter
+    scheme: 'https'
     static_configs:
      - targets: ['localhost:9100']
        labels:
@@ -13,8 +14,11 @@ scrape_configs:
     relabel_configs:
       - target_label: instance
         replacement: {{ hostname }}:9100
+    tls_config:
+       insecure_skip_verify: true
   - job_name: 'blackbox'
     metrics_path: /probe
+    scheme: 'https'
     params:
       module: [http_2xx]
     static_configs:
@@ -23,7 +27,7 @@ scrape_configs:
         labels:
           resource_crn: {{ telemetry.clusterCrn }}
           platform: {{ telemetry.platform }}
-          proxy: {%- if telemetry.proxyUrl %}yes{%- else %}no{%- endif %}
+          proxy: {% if telemetry.proxyUrl %}yes{%- else %}no{% endif %}
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -33,6 +37,8 @@ scrape_configs:
         replacement: 127.0.0.1:9115
       - target_label: instance
         replacement: {{ hostname }}:9115
+    tls_config:
+      insecure_skip_verify: true
 {%- if monitoring.type == "cloudera_manager" and "manager_server" in grains.get('roles', []) %}
   - job_name: 'smon_health'
     scheme: 'https'
