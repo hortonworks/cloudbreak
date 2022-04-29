@@ -35,6 +35,7 @@ ExecStart=/opt/cdp-vmagent/bin/vmagent-prod -remoteWrite.url={{ monitoring.remot
 {%- if use_proxy %}
      -remoteWrite.proxyURL={{ telemetry.proxyUrl }} \
 {%- endif %}
+     -tls -tlsCertFile=/opt/cdp-vmagent/conf/vmagent.crt -tlsKeyFile=/opt/cdp-vmagent/conf/vmagent.key \
      -promscrape.config=/opt/cdp-vmagent/prometheus.yml
 Restart=always
 
