@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.job;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DECOMMISSION_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED;
@@ -28,6 +30,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.gs.collections.impl.factory.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -347,11 +350,19 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .map(HostName::value)
                 .collect(toSet());
         Set<String> unhealthyStoredHosts = runningInstances.stream()
-                .filter(i -> i.getInstanceStatus() == SERVICES_UNHEALTHY || i.getInstanceStatus() == SERVICES_RUNNING)
+                .filter(i -> statesFromHealthyAllowed().contains(i.getInstanceStatus()))
                 .filter(i -> i.getDiscoveryFQDN() != null)
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(toSet());
         return Sets.intersect(healthyHosts, unhealthyStoredHosts);
+    }
+
+    private EnumSet<InstanceStatus> statesFromHealthyAllowed() {
+        return EnumSet.of(
+                SERVICES_UNHEALTHY,
+                SERVICES_RUNNING,
+                DECOMMISSION_FAILED,
+                FAILED);
     }
 
     private Map<InstanceMetaData, Optional<String>> getFailedInstancesInstanceMetadata(ExtendedHostStatuses hostStatuses,
