@@ -121,6 +121,7 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolv
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
@@ -1021,5 +1022,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     public Optional<ResourceBasicView> getResourceBasicViewByResourceCrn(String resourceCrn) {
         return stackRepository.findResourceBasicViewByResourceCrn(resourceCrn);
+    }
+
+    public int setTunnelByStackId(Long stackId, Tunnel tunnel) {
+        return stackRepository.setTunnelByStackId(stackId, tunnel);
     }
 }

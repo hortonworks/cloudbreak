@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.ccm;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.CcmUpgradeEvent.CCM_UPGRADE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_EVENT;
 
 import javax.inject.Inject;
 
@@ -36,7 +36,7 @@ public class StackCcmUpgradeService {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("CCM upgrade has been initiated for stack {}", nameOrCrn.getNameOrCrn());
-        String selector = CCM_UPGRADE_EVENT.event();
+        String selector = UPGRADE_CCM_EVENT.event();
         return reactorNotifier.notify(stack.getId(), selector, new StackEvent(selector, stack.getId()));
     }
 }

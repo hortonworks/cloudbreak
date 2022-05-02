@@ -427,11 +427,13 @@ public enum ResourceEvent {
     CLUSTER_EXTERNAL_DATABASE_STOP_FAILED("cluster.externaldatabase.stop.failed"),
     CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED("cluster.externaldatabase.stop.finished"),
 
-    CLUSTER_CCM_UPGRADE_PREPARATION("cluster.ccm.upgrade.preparation"),
-    CLUSTER_CCM_UPGRADE_REREGISTER("cluster.ccm.upgrade.reregister"),
-    CLUSTER_CCM_UPGRADE_REMOVE_AUTOSSH("cluster.ccm.upgrade.remove.autossh"),
-    CLUSTER_CCM_UPGRADE_UNREGISTER_HOSTS("cluster.ccm.upgrade.unregister.hosts"),
-    CLUSTER_CCM_UPGRADE_PREPARATION_FAILED("cluster.ccm.upgrade.preparation.failed"),
+    CLUSTER_CCM_UPGRADE_TUNNEL_UPDATE("cluster.ccm.upgrade.tunnel.update"),
+    CLUSTER_CCM_UPGRADE_PUSH_SALT_STATES("cluster.ccm.upgrade.push.salt.states"),
+    CLUSTER_CCM_UPGRADE_RECONFIGURE_NGINX("cluster.ccm.upgrade.reconfigure.nginx"),
+    CLUSTER_CCM_UPGRADE_REGISTER_CLUSTER_PROXY("cluster.ccm.upgrade.register.clusterproxy"),
+    CLUSTER_CCM_UPGRADE_HEALTH_CHECK("cluster.ccm.upgrade.health.check"),
+    CLUSTER_CCM_UPGRADE_REMOVE_AGENT("cluster.ccm.upgrade.remove.agent"),
+    CLUSTER_CCM_UPGRADE_DEREGISTER_AGENT("cluster.ccm.upgrade.deregister.agent"),
     CLUSTER_CCM_UPGRADE_FAILED("cluster.ccm.upgrade.failed"),
     CLUSTER_CCM_UPGRADE_FINISHED("cluster.ccm.upgrade.finished"),
 

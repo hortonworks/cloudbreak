@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.CcmUpgradeEvent.CCM_UPGRADE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_EVENT;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -19,6 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.quartz.Scheduler;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -50,10 +52,13 @@ import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.CcmRemoveAutoSshHandler;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.CcmReregisterClusterToClusterProxyHandler;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.CcmUnregisterHostsHandler;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.CcmUpgradePreparationHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.HealthCheckHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.PushSaltStateHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.ReconfigureNginxHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RemoveAgentHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RegisterClusterProxyHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.DeregisterAgentHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.TunnelUpdateHandler;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
@@ -86,7 +91,7 @@ import reactor.core.dispatch.MpscDispatcher;
 
 @ActiveProfiles("integration-test")
 @ExtendWith(SpringExtension.class)
-class CcmUpgradeFlowIntegrationTest {
+class UpgradeCcmFlowIntegrationTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
@@ -105,7 +110,7 @@ class CcmUpgradeFlowIntegrationTest {
     private StackService stackService;
 
     @SpyBean
-    private CcmUpgradeService ccmUpgradeService;
+    private UpgradeCcmService upgradeCcmService;
 
     private Stack stack;
 
@@ -121,48 +126,58 @@ class CcmUpgradeFlowIntegrationTest {
 
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
-        Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(f -> f.getFinalized()), "flow has not finalized");
-        verify(ccmUpgradeService, times(1)).reregister(STACK_ID);
-        verify(ccmUpgradeService, times(1)).unregister(STACK_ID);
-        verify(ccmUpgradeService, times(1)).prepare(STACK_ID);
-        verify(ccmUpgradeService, times(1)).removeAutoSsh(STACK_ID);
-        verify(ccmUpgradeService, never()).ccmUpgradeFailed(STACK_ID);
+        Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
+        InOrder inOrder = Mockito.inOrder(upgradeCcmService);
+        inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).pushSaltState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).reconfigureNginx(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).registerClusterProxy(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).healthCheck(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).removeAgent(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).deregisterAgent(STACK_ID);
+        verify(upgradeCcmService, never()).ccmUpgradeFailed(STACK_ID);
     }
 
     @Test
-    public void testCcmUpgradeWhenPrepFail() {
-        doThrow(new BadRequestException()).when(ccmUpgradeService).prepare(STACK_ID);
+    public void testCcmUpgradeWhenTunnelUpdateFail() {
+        doThrow(new BadRequestException()).when(upgradeCcmService).updateTunnel(STACK_ID);
 
         FlowIdentifier flowIdentifier = triggerFlow();
         letItFlow(flowIdentifier);
 
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
-        Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(f -> f.getFinalized()), "flow has not finalized");
-        verify(ccmUpgradeService, times(1)).prepare(STACK_ID);
-        verify(ccmUpgradeService, times(1)).ccmUpgradePreparationFailed(STACK_ID);
-        verify(ccmUpgradeService, never()).ccmUpgradeFailed(STACK_ID);
-        verify(ccmUpgradeService, never()).reregister(STACK_ID);
-        verify(ccmUpgradeService, never()).unregister(STACK_ID);
-        verify(ccmUpgradeService, never()).removeAutoSsh(STACK_ID);
+        Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
+        InOrder inOrder = Mockito.inOrder(upgradeCcmService);
+        inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID);
+        verify(upgradeCcmService, never()).pushSaltState(STACK_ID);
+        verify(upgradeCcmService, never()).reconfigureNginx(STACK_ID);
+        verify(upgradeCcmService, never()).registerClusterProxy(STACK_ID);
+        verify(upgradeCcmService, never()).healthCheck(STACK_ID);
+        verify(upgradeCcmService, never()).deregisterAgent(STACK_ID);
+        verify(upgradeCcmService, never()).removeAgent(STACK_ID);
     }
 
     @Test
-    public void testCcmUpgradeWhenReRegisterFail() {
-        doThrow(new BadRequestException()).when(ccmUpgradeService).reregister(STACK_ID);
+    public void testCcmUpgradeWhenRegisterClusterProxyFail() {
+        doThrow(new BadRequestException()).when(upgradeCcmService).registerClusterProxy(STACK_ID);
 
         FlowIdentifier flowIdentifier = triggerFlow();
         letItFlow(flowIdentifier);
 
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
-        Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(f -> f.getFinalized()), "flow has not finalized");
-        verify(ccmUpgradeService, times(1)).prepare(STACK_ID);
-        verify(ccmUpgradeService, times(1)).ccmUpgradeFailed(STACK_ID);
-        verify(ccmUpgradeService, times(1)).reregister(STACK_ID);
-        verify(ccmUpgradeService, never()).ccmUpgradePreparationFailed(STACK_ID);
-        verify(ccmUpgradeService, never()).unregister(STACK_ID);
-        verify(ccmUpgradeService, never()).removeAutoSsh(STACK_ID);
+        Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
+        InOrder inOrder = Mockito.inOrder(upgradeCcmService);
+        inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).pushSaltState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).reconfigureNginx(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).registerClusterProxy(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID);
+        verify(upgradeCcmService, never()).healthCheckState(STACK_ID);
+        verify(upgradeCcmService, never()).deregisterAgent(STACK_ID);
+        verify(upgradeCcmService, never()).removeAgent(STACK_ID);
     }
 
     @Test
@@ -170,7 +185,7 @@ class CcmUpgradeFlowIntegrationTest {
         StackStatus stackStatus = new StackStatus(stack, Status.CREATE_FAILED, "no reason at all",
                 DetailedStackStatus.PROVISION_FAILED);
         stack.setStackStatus(stackStatus);
-        FlowNotTriggerableException actualException = Assertions.assertThrows(FlowNotTriggerableException.class, () -> triggerFlow());
+        FlowNotTriggerableException actualException = Assertions.assertThrows(FlowNotTriggerableException.class, this::triggerFlow);
         Assertions.assertTrue(actualException.getMessage().contains("Cluster Connectivity Manager upgrade could not "
                 + "be triggered, because the cluster's state is not available."), "FlowNotTriggerableException exception message is not right");
     }
@@ -216,7 +231,7 @@ class CcmUpgradeFlowIntegrationTest {
     }
 
     private FlowIdentifier triggerFlow() {
-        String selector = CCM_UPGRADE_EVENT.event();
+        String selector = UPGRADE_CCM_EVENT.event();
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> reactorNotifier.notify(STACK_ID, selector, new StackEvent(selector, STACK_ID)));
@@ -231,12 +246,15 @@ class CcmUpgradeFlowIntegrationTest {
             Clock.class,
             CbEventParameterFactory.class,
             ReactorNotifier.class,
-            CcmUpgradeActions.class,
-            CcmUpgradeFlowConfig.class,
-            CcmRemoveAutoSshHandler.class,
-            CcmReregisterClusterToClusterProxyHandler.class,
-            CcmUnregisterHostsHandler.class,
-            CcmUpgradePreparationHandler.class,
+            UpgradeCcmActions.class,
+            UpgradeCcmFlowConfig.class,
+            TunnelUpdateHandler.class,
+            PushSaltStateHandler.class,
+            ReconfigureNginxHandler.class,
+            RegisterClusterProxyHandler.class,
+            HealthCheckHandler.class,
+            RemoveAgentHandler.class,
+            DeregisterAgentHandler.class,
             CcmUpgradeFlowTriggerCondition.class,
     })
     @ComponentScan(basePackages = {
@@ -317,4 +335,5 @@ class CcmUpgradeFlowIntegrationTest {
             return new ConsumerCheckerEventBus(eventBus);
         }
     }
+
 }

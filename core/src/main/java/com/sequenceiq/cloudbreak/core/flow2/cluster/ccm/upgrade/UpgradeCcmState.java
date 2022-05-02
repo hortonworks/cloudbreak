@@ -5,26 +5,27 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
-public enum CcmUpgradeState implements FlowState {
+public enum UpgradeCcmState implements FlowState {
     INIT_STATE,
-    CCM_UPGRADE_FAILED_STATE,
-    CCM_UPGRADE_PREPARATION_FAILED,
-
-    CCM_UPGRADE_PREPARATION_STATE,
-    CCM_UPGRADE_RE_REGISTER_TO_CP,
-    CCM_UPGRADE_REMOVE_AUTOSSH,
-    CCM_UPGRADE_UNREGISTER_HOSTS,
-    CCM_UPGRADE_FINISHED_STATE,
+    UPGRADE_CCM_FAILED_STATE,
+    UPGRADE_CCM_TUNNEL_UPDATE_STATE,
+    UPGRADE_CCM_PUSH_SALT_STATES_STATE,
+    UPGRADE_CCM_RECONFIGURE_NGINX_STATE,
+    UPGRADE_CCM_REGISTER_CLUSTER_PROXY_STATE,
+    UPGRADE_CCM_HEALTH_CHECK_STATE,
+    UPGRADE_CCM_REMOVE_AGENT_STATE,
+    UPGRADE_CCM_DEREGISTER_AGENT_STATE,
+    UPGRADE_CCM_FINISHED_STATE,
 
     FINAL_STATE;
 
     private Class<? extends DefaultRestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 
-    CcmUpgradeState() {
+    UpgradeCcmState() {
 
     }
 
-    CcmUpgradeState(Class<? extends DefaultRestartAction> restartAction) {
+    UpgradeCcmState(Class<? extends DefaultRestartAction> restartAction) {
         this.restartAction = restartAction;
     }
 
