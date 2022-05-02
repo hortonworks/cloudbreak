@@ -109,6 +109,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
+import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTemplateDeploymentParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
@@ -186,6 +187,15 @@ public class AzureClient {
                 .withRegion(region)
                 .withTags(tags)
                 .create());
+    }
+
+    public Deployment createTemplateDeployment(AzureTemplateDeploymentParameters azureTemplateDeploymentParameters) {
+        return createTemplateDeployment(
+                azureTemplateDeploymentParameters.getResourceGroupName(),
+                azureTemplateDeploymentParameters.getTemplateName(),
+                azureTemplateDeploymentParameters.getTemplateContent(),
+                azureTemplateDeploymentParameters.getTemplateParameters()
+        );
     }
 
     public Deployment createTemplateDeployment(String resourceGroupName, String deploymentName, String templateContent, String parameterContent) {

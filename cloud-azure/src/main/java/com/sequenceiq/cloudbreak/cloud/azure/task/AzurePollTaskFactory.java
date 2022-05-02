@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.cloud.azure.task.networkinterface.NetworkInterf
 import com.sequenceiq.cloudbreak.cloud.azure.task.networkinterface.NetworkInterfaceDetachCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.task.storageaccount.StorageAccountChecker;
 import com.sequenceiq.cloudbreak.cloud.azure.task.storageaccount.StorageAccountCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.azure.task.database.AzureDatabaseTemplateDeploymentContext;
+import com.sequenceiq.cloudbreak.cloud.azure.task.database.AzureDatabaseTemplateDeploymentPollTask;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -55,6 +57,10 @@ public class AzurePollTaskFactory {
     public PollTask<DiskEncryptionSetInner> diskEncryptionSetCreationCheckerTask(AuthenticatedContext authenticatedContext,
             DiskEncryptionSetCreationCheckerContext checkerContext) {
         return createPollTask(DiskEncryptionSetCreationCheckerTask.NAME, authenticatedContext, checkerContext);
+    }
+
+    public PollTask<Boolean> databaseCreationPollTask(AuthenticatedContext authenticatedContext, AzureDatabaseTemplateDeploymentContext deploymentContext) {
+        return createPollTask(AzureDatabaseTemplateDeploymentPollTask.NAME, authenticatedContext, deploymentContext);
     }
 
     @SuppressWarnings("unchecked")

@@ -28,6 +28,10 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.ResourceGroupUsage;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.task.database.AzureDatabaseTemplateDeploymentContext;
+import com.sequenceiq.cloudbreak.cloud.azure.task.database.AzureDatabaseTemplateDeploymentPoller;
+import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTemplateCreatorService;
+import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTemplateDeploymentParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTransientDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -69,6 +73,12 @@ public class AzureDatabaseResourceService {
     @Inject
     private AzureTransientDeploymentService azureTransientDeploymentService;
 
+    @Inject
+    private AzureTemplateCreatorService azureTemplateCreatorService;
+
+    @Inject
+    private AzureDatabaseTemplateDeploymentPoller databaseTemplateDeploymentPoller;
+
     public List<CloudResourceStatus> buildDatabaseResourcesForLaunch(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier persistenceNotifier) {
         CloudContext cloudContext = ac.getCloudContext();
         AzureClient client = ac.getParameter(AzureClient.class);
@@ -92,8 +102,7 @@ public class AzureDatabaseResourceService {
         createTemplateResource(persistenceNotifier, cloudContext, stackName);
         Deployment deployment;
         try {
-            String parametersMapAsString = new Json(Map.of()).getValue();
-            client.createTemplateDeployment(resourceGroupName, stackName, template, parametersMapAsString);
+            createOrPollDatabaseCreation(ac, client, stackName, resourceGroupName, template);
         } catch (CloudException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Database stack provisioning");
         } catch (Exception e) {
@@ -112,6 +121,14 @@ public class AzureDatabaseResourceService {
         return databaseResources.stream()
                 .map(resource -> new CloudResourceStatus(resource, ResourceStatus.CREATED))
                 .collect(Collectors.toList());
+    }
+
+    private void createOrPollDatabaseCreation(AuthenticatedContext ac, AzureClient client, String stackName, String resourceGroupName, String template)
+            throws Exception {
+        AzureTemplateDeploymentParameters deploymentParameters = new AzureTemplateDeploymentParameters(resourceGroupName, stackName, template,
+                new Json(Map.of()).getValue());
+        azureTemplateCreatorService.createOrPollTemplateDeployment(client, deploymentParameters,
+                () -> databaseTemplateDeploymentPoller.startPolling(ac, new AzureDatabaseTemplateDeploymentContext(client, deploymentParameters)));
     }
 
     private void createTemplateResource(PersistenceNotifier persistenceNotifier, CloudContext cloudContext, String stackName) {
