@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.common.api.type.Tunnel;
 
 @EntityType(entityClass = Stack.class)
 @Transactional(TxType.REQUIRED)
@@ -438,4 +439,8 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             "AND s.name in (:names) " +
             "AND w.id = :workspaceId")
     List<ResourceBasicView> findAllResourceBasicViewByNamesAndWorkspaceId(@Param("names") Collection<String> names, @Param("workspaceId") Long workspaceId);
+
+    @Modifying
+    @Query("UPDATE Stack s SET s.tunnel = :tunnel WHERE s.id = :id")
+    int setTunnelByStackId(@Param("id") Long id, @Param("tunnel") Tunnel tunnel);
 }

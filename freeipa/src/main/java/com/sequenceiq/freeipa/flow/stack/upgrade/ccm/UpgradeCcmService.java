@@ -108,7 +108,7 @@ public class UpgradeCcmService {
 
     public void obtainAgentDataState(Long stackId) {
         DetailedStackStatus detailedStatus = UPGRADE_CCM_IN_PROGRESS;
-        String statusReason = "Changing tunnel type in database";
+        String statusReason = "Provisioning connectivity agent";
         stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
     }
 
