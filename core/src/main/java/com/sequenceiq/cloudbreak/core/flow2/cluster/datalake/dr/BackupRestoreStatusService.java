@@ -43,7 +43,7 @@ public class BackupRestoreStatusService {
     }
 
     public void backupDatabaseFinished(long stackId) {
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_BACKUP_FINISHED, "Database was successfully backed up.");
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DATABASE_BACKUP_IN_PROGRESS, "Database was successfully backed up.");
         flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), DATALAKE_DATABASE_BACKUP_FINISHED);
     }
 

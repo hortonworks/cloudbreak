@@ -77,7 +77,7 @@ public class BackupRestoreStatusServiceTest {
     public void testBackupFinished() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.backupDatabaseFinished(STACK_ID);
-        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_BACKUP_FINISHED,
+        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_BACKUP_IN_PROGRESS,
                 "Database was successfully backed up.");
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.AVAILABLE.name()), captor.capture());
         assertEquals(DATALAKE_DATABASE_BACKUP_FINISHED, captor.getValue());

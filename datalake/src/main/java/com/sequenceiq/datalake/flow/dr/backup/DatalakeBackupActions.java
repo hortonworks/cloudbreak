@@ -143,9 +143,6 @@ public class DatalakeBackupActions {
             protected void doExecute(SdxContext context, DatalakeDatabaseBackupStartEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Datalake database backup has been started for {}", payload.getResourceId());
 
-                SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_DATABASE_BACKUP);
-
                 sdxBackupRestoreService.databaseBackup(payload.getDrStatus(),
                         payload.getResourceId(),
                         payload.getBackupRequest());
