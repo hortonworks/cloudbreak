@@ -22,7 +22,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
@@ -221,16 +220,6 @@ class DistroXClusterToClusterConverterTest {
     }
 
     @Test
-    void testConvertWithoutEnvTheExecutionTypeShouldBeSetToDefault() {
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        ClusterV4Request result = testConvertDistroXV1Request();
-
-        assertNotNull(result);
-        assertEquals(ExecutorType.DEFAULT, result.getExecutorType());
-    }
-
-    @Test
     void testConvertWithoutEnvTheCloudStorageShouldBeSetBasedOnTheInputs() {
         CloudStorageRequest decoratorResult = new CloudStorageRequest();
         when(cloudStorageDecorator.decorate(
@@ -392,16 +381,6 @@ class DistroXClusterToClusterConverterTest {
         assertNull(result.getCm());
 
         verify(cmConverter, never()).convert(any(ClouderaManagerV1Request.class));
-    }
-
-    @Test
-    void testConvertWithEnvTheExecutionTypeShouldBeSetToDefault() {
-        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
-        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
-
-        assertNotNull(result);
-        assertEquals(ExecutorType.DEFAULT, result.getExecutorType());
     }
 
     @Test

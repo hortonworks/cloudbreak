@@ -38,7 +38,6 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Accou
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
@@ -425,7 +424,6 @@ public class ClusterHostServiceRunner {
 
         saveSssdAdPillar(servicePillar, kerberosConfig);
         servicePillar.putAll(saveSssdIpaPillar(kerberosConfig, serviceLocations, stack.getEnvironmentCrn()));
-        saveDockerPillar(cluster.getExecutorType(), servicePillar);
 
         Map<String, Map<String, String>> mountPathMap = stack.getInstanceGroups().stream().flatMap(group -> group.getInstanceMetaDataSet().stream()
                         .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
@@ -859,14 +857,6 @@ public class ClusterHostServiceRunner {
         if (ldapView != null) {
             servicePillar.put("ldap", new SaltPillarProperties("/gateway/ldap.sls", singletonMap("ldap", ldapView)));
         }
-    }
-
-    private void saveDockerPillar(ExecutorType executorType, Map<String, SaltPillarProperties> servicePillar) {
-        Map<String, Object> dockerMap = new HashMap<>();
-
-        dockerMap.put("enableContainerExecutor", ExecutorType.CONTAINER.equals(executorType));
-
-        servicePillar.put("docker", new SaltPillarProperties("/docker/init.sls", singletonMap("docker", dockerMap)));
     }
 
     private Map<String, String> collectUpscaleCandidates(Long clusterId, Map<String, Integer> hostGroupWithAdjustment) {
