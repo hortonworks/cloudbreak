@@ -4,7 +4,6 @@ import static org.mockito.Mockito.mock;
 
 import java.util.Optional;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
@@ -23,7 +22,6 @@ public class RecipeTestUtil {
         generalClusterConfigs.setInstanceGroupsPresented(true);
         generalClusterConfigs.setGatewayInstanceMetadataPresented(false);
         generalClusterConfigs.setClusterName("clustername");
-        generalClusterConfigs.setExecutorType(ExecutorType.DEFAULT);
         generalClusterConfigs.setStackName("clustername");
         generalClusterConfigs.setUuid("111-222-333-444");
         generalClusterConfigs.setUserName("username");
@@ -40,7 +38,6 @@ public class RecipeTestUtil {
         generalClusterConfigs.setInstanceGroupsPresented(true);
         generalClusterConfigs.setGatewayInstanceMetadataPresented(true);
         generalClusterConfigs.setClusterName(cluster.getName());
-        generalClusterConfigs.setExecutorType(cluster.getExecutorType());
         generalClusterConfigs.setStackName(cluster.getName());
         generalClusterConfigs.setUuid("111-222-333-444");
         generalClusterConfigs.setUserName(cluster.getUserName());
