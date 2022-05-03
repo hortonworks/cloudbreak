@@ -52,6 +52,7 @@ integrationtest:
     secretkey: nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g=
     crn:
     name:
+    workloadPassword: "Admin@123"
   userGroup:
     adminGroupName: testgroupa
     adminGroupCrn: "crn:altus:iam:us-west-1:f8e2f110-fc7e-4e46-ae55-381aacc6718c:group:testgroupa/ebc27aff-7d91-4f76-bf98-e81dbbd615e9"

@@ -207,6 +207,8 @@ public class CommonCloudProperties {
 
         private String name;
 
+        private String workloadPassword;
+
         public String getAccessKey() {
             return accesskey;
         }
@@ -237,6 +239,14 @@ public class CommonCloudProperties {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        public String getWorkloadPassword() {
+            return workloadPassword;
+        }
+
+        public void setWorkloadPassword(String workloadPassword) {
+            this.workloadPassword = workloadPassword;
         }
     }
 }

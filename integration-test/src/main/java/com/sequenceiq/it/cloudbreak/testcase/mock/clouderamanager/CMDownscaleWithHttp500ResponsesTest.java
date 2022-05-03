@@ -50,7 +50,7 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractClouderaManager
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithFreeIpaAndDatalake(testContext);
+        createDefaultDatalake(testContext);
         createCmBlueprint(testContext);
     }
 

@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -40,13 +41,16 @@ public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Value("${integrationtest.user.workloadPassword:}")
+    private String workloadPassword;
+
     @Override
     protected void setupTest(TestContext testContext) {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithFreeIpaAndDatalake(testContext);
+        createDefaultDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -61,7 +65,6 @@ public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
     public void testSdxSshAndCmAccessWithNewWorkloadPassword(TestContext testContext) {
         String filePath = "/var/lib/cloudera-scm-agent";
         String fileName = "uuid";
-        String newWorkloadPassword = "Admin@123";
         String userCrn = testContext.getActingUserCrn().toString();
         String workloadUsername = testContext.given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .when(umsTestClient.getUserDetails(userCrn, regionAwareInternalCrnGeneratorFactory)).getResponse().getWorkloadUsername();
@@ -73,15 +76,15 @@ public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)
                 .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.setWorkloadPassword(newWorkloadPassword, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.setWorkloadPassword(workloadPassword, regionAwareInternalCrnGeneratorFactory))
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
                 .given(SdxInternalTestDto.class)
                 .then((tc, testDto, client) -> sshJUtil.checkFilesOnHostByNameAndPath(testDto, getInstanceGroups(testDto, client), List.of(MASTER.getName()),
-                            filePath, fileName, 1, workloadUsername, newWorkloadPassword))
+                            filePath, fileName, 1, workloadUsername, workloadPassword))
                 .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerKnoxIDBrokerRoleConfigGroups(testDto, workloadUsername,
-                        newWorkloadPassword))
+                        workloadPassword))
                 .validate();
     }
 }

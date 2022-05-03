@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.util.gcp;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -11,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
@@ -106,5 +108,16 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     @Override
     public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
         return gcpUtil.getDataHubLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    @Override
+    public void checkMountedDisks(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        LOGGER.debug("Currently not implemented for GCP!");
+    }
+
+    @Override
+    public Set<String> getVolumeMountPoints(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        LOGGER.debug("Currently not implemented for GCP!");
+        return Collections.emptySet();
     }
 }

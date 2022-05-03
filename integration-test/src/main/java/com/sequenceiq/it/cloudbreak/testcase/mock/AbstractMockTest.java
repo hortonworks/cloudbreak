@@ -73,7 +73,7 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
     }
 
     @Override
-    protected void createEnvironmentWithFreeIpaAndDatalake(TestContext testContext) {
+    protected void createDefaultDatalake(TestContext testContext) {
         createDefaultEnvironment(testContext);
         createDefaultFreeIpa(testContext);
         createDatalake(testContext);

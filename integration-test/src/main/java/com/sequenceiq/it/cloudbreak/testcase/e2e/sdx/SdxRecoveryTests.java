@@ -95,7 +95,7 @@ public class SdxRecoveryTests extends PreconditionSdxE2ETest {
     }
 
     private SdxTestDto executeCommandToCauseUpgradeFailure(SdxTestDto testDto, SdxClient client) {
-        Map<String, Pair<Integer, String>> hostsAppenderCmdResultByIpsMap = sshJClientActions.executeSshCommand(getInstanceGroups(testDto, client),
+        Map<String, Pair<Integer, String>> hostsAppenderCmdResultByIpsMap = sshJClientActions.executeSshCommandOnHost(getInstanceGroups(testDto, client),
                 List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()), INJECT_UPGRADE_FAILURE_CMD, false);
         LOGGER.debug("SSH hosts file edit result: " + hostsAppenderCmdResultByIpsMap);
         return testDto;

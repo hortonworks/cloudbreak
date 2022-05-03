@@ -90,11 +90,10 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
         createCmBlueprint(testContext);
-        createDatalake(testContext);
+        createDefaultDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -103,7 +102,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
             when = "a DistroX with Cloudera Manager is created",
             then = "the cluster should be available")
     public void testCreateNewRegularDistroXCluster(MockedTestContext testContext) {
-        createDefaultFreeIpa(testContext);
         testContext
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
@@ -139,7 +137,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
             then = "its creation should not be started due to the unavailability of the environment")
     public void testWhenEnvIsStoppedUnableToCreateDistroX(MockedTestContext testContext) {
         EnvironmentTestDto environment = testContext.get(EnvironmentTestDto.class);
-        createDefaultFreeIpa(testContext);
         givenAnEnvironmentInStoppedState(testContext)
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
@@ -166,7 +163,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
             when = "a DistroX cluster has created",
             then = "the cluster should be available AND the generated cm template should contain the expected values")
     public void testCreateNewRegularDistroXClusterWhileValidatingCMTemplate(MockedTestContext testContext) {
-        createDefaultFreeIpa(testContext);
         testContext
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
@@ -310,7 +306,6 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
             when = "a DistroX with Cloudera Manager is created",
             then = "the cluster should be available AND internal distrox crn should be equal with non-internal distrox response crn")
     public void testInternalDistroXResponse(MockedTestContext testContext) {
-        createDefaultFreeIpa(testContext);
         testContext
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
