@@ -31,9 +31,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
         createDefaultCredential(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
-        createDefaultEnvironment(testContext);
-        createDatalake(testContext);
-        createDefaultFreeIpa(testContext);
+        createDefaultDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

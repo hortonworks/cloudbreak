@@ -2,10 +2,12 @@ package com.sequenceiq.it.cloudbreak.util;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 public interface CloudFunctionality {
@@ -117,4 +119,16 @@ public interface CloudFunctionality {
     default String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
         return "/cluster-logs/datahub/" + clusterName + "_" + Crn.fromString(crn).getResource();
     }
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
+    void checkMountedDisks(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames);
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
+    Set<String> getVolumeMountPoints(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames);
 }

@@ -38,7 +38,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithFreeIpaAndDatalake(testContext);
+        createDefaultDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)

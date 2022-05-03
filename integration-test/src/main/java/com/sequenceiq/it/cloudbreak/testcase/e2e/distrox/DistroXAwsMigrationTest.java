@@ -33,7 +33,7 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
-        createEnvironmentWithFreeIpaAndDatalake(testContext);
+        createDefaultDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)

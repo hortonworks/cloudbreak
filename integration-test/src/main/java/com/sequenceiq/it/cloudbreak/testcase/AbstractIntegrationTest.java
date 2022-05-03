@@ -30,6 +30,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -175,8 +176,14 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
     }
 
     protected void createDefaultDatahub(TestContext testContext) {
-        createEnvironmentWithFreeIpaAndDatalake(testContext);
+        createDefaultDatalake(testContext);
         initiateDefaultDatahubCreation(testContext);
+        waitForDefaultDatahubCreation(testContext);
+    }
+
+    protected void createStorageOptimizedDatahub(TestContext testContext) {
+        createDefaultDatalake(testContext);
+        initiateStorageOptimizedDatahubCreation(testContext);
         waitForDefaultDatahubCreation(testContext);
     }
 
@@ -192,6 +199,17 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .when(distroXTestClient.get())
+                .validate();
+    }
+
+    protected void initiateStorageOptimizedDatahubCreation(TestContext testContext) {
+        testContext
+                .given(DistroXTestDto.class)
+                .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
+                        .defaultHostGroup()
+                        .withStorageOptimizedInstancetype()
+                        .build())
+                .when(distroXTestClient.create())
                 .validate();
     }
 
@@ -280,7 +298,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
-    protected void createEnvironmentWithFreeIpaAndDatalake(TestContext testContext) {
+    protected void createDefaultDatalake(TestContext testContext) {
         initiateEnvironmentCreation(testContext);
         initiateDatalakeCreation(testContext);
         waitForEnvironmentCreation(testContext);

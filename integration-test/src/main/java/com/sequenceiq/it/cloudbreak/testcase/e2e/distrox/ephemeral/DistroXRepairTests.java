@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.SanitizerUtil;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -28,7 +29,6 @@ import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 /**
  * Since [CB-15474 removed ephemeral disk tests from azure-longrunning-e2e-tests] this test suite is
@@ -48,16 +48,13 @@ public class DistroXRepairTests extends AbstractE2ETest {
     @Inject
     private ClouderaManagerUtil clouderaManagerUtil;
 
-    @Inject
-    private SshJClientActions sshJClientActions;
-
     @Override
     protected void setupTest(TestContext testContext) {
         assertSupportedCloudPlatform(CloudPlatform.AWS);
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithFreeIpaAndDatalake(testContext);
+        createDefaultDatalake(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -84,10 +81,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .when(distroXTestClient.create(), key(distrox))
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    verifyMountPointsUsedForTemporalDisks(testDto, "ephfs", "ephfs1");
-                    return testDto;
-                })
+                .then(this::verifyMountedDisks)
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
                     List<String> instancesToDelete = distroxUtil.getInstanceIds(testDto, client, MASTER.getName());
@@ -99,10 +93,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .when(distroXTestClient.repair(MASTER), key(distrox))
                 .await(STACK_AVAILABLE, key(distrox))
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    verifyMountPointsUsedForTemporalDisks(testDto, "ephfs", "ephfs1");
-                    return testDto;
-                })
+                .then(this::verifyMountedDisks)
                 .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, sanitizedUserName,
                         MOCK_UMS_PASSWORD))
                 .then((tc, testDto, client) -> {
@@ -115,16 +106,10 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .validate();
     }
 
-    private void verifyMountPointsUsedForTemporalDisks(DistroXTestDto testDto, String awsMountPrefix, String azureMountDir) {
+    private DistroXTestDto verifyMountedDisks(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
+        CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         List<InstanceGroupV4Response> instanceGroups = testDto.getResponse().getInstanceGroups();
-        if (activeCloudPlatform(CloudPlatform.AWS)) {
-            sshJClientActions.checkAwsEphemeralDisksMounted(instanceGroups, List.of(HostGroupType.WORKER.getName()), awsMountPrefix);
-        } else if (activeCloudPlatform(CloudPlatform.AZURE)) {
-            sshJClientActions.checkAzureTemporalDisksMounted(instanceGroups, List.of(HostGroupType.WORKER.getName()), azureMountDir);
-        }
-    }
-
-    private boolean activeCloudPlatform(CloudPlatform cloudPlatform) {
-        return cloudPlatform.name().equalsIgnoreCase(commonCloudProperties().getCloudProvider());
+        cloudFunctionality.checkMountedDisks(instanceGroups, List.of(HostGroupType.WORKER.getName()));
+        return testDto;
     }
 }

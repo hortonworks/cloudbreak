@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.aws;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -9,9 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.aws.amazonec2.AmazonEC2Util;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.AmazonS3Util;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 
 @Component
 public class AwsCloudFunctionality implements CloudFunctionality {
@@ -23,6 +26,9 @@ public class AwsCloudFunctionality implements CloudFunctionality {
 
     @Inject
     private AmazonS3Util amazonS3Util;
+
+    @Inject
+    private SshJUtil sshJUtil;
 
     @Override
     public List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds) {
@@ -97,5 +103,15 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     @Override
     public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
         return amazonS3Util.getDataHubLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    @Override
+    public void checkMountedDisks(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        sshJUtil.checkAwsMountedDisks(instanceGroups, hostGroupNames);
+    }
+
+    @Override
+    public Set<String> getVolumeMountPoints(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        return sshJUtil.getAwsVolumeMountPoints(instanceGroups, hostGroupNames);
     }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
@@ -22,7 +24,6 @@ import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
-import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
@@ -33,7 +34,7 @@ import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.VolumeUtils;
 import com.sequenceiq.it.cloudbreak.util.clouderamanager.ClouderaManagerUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
-import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 
 /**
  * Based on the [CB-15474 removed ephemeral disk tests from azure-longrunning-e2e-tests]:
@@ -52,7 +53,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
     private ClouderaManagerUtil clouderaManagerUtil;
 
     @Inject
-    private SshJClientActions sshJClientActions;
+    private SshJUtil sshJUtil;
 
     @Inject
     private UmsTestClient umsTestClient;
@@ -63,13 +64,23 @@ public class DistroXRepairTests extends AbstractE2ETest {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Value("${integrationtest.user.workloadPassword:}")
+    private String workloadPassword;
+
     @Override
     protected void setupTest(TestContext testContext) {
         assertSupportedCloudPlatform(CloudPlatform.AZURE);
-        createDefaultUser(testContext);
-        createDefaultCredential(testContext);
+        useRealUmsUser(testContext, L0UserKeys.USER_ACCOUNT_ADMIN);
         initializeDefaultBlueprints(testContext);
-        createEnvironmentWithFreeIpaAndDatalake(testContext);
+        useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
+        createDefaultCredential(testContext);
+        createStorageOptimizedDatahub(testContext);
+    }
+
+    @Override
+    public void tearDownSpotValidateTags(Object[] data) {
+        useRealUmsUser((TestContext) data[0], L0UserKeys.ENV_CREATOR_A);
+        super.tearDownSpotValidateTags(data);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -84,36 +95,35 @@ public class DistroXRepairTests extends AbstractE2ETest {
         String distrox = resourcePropertyProvider().getName();
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
-        String newWorkloadPassword = "Admin@123";
-        String userCrn = testContext.getActingUserCrn().toString();
-        String workloadUsername = testContext
-                .given(UmsTestDto.class)
-                .assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.getUserDetails(userCrn, regionAwareInternalCrnGeneratorFactory))
-                .getResponse().getWorkloadUsername();
 
         testContext
-                .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
-                .given(FreeIpaUserSyncTestDto.class)
-                .when(freeIpaTestClient.getLastSyncOperationStatus())
-                .await(OperationState.COMPLETED)
-                .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.setWorkloadPassword(newWorkloadPassword, regionAwareInternalCrnGeneratorFactory))
+                .given(UmsTestDto.class)
+                .assignTarget(EnvironmentTestDto.class.getSimpleName())
+                .withEnvironmentAdmin()
+                .when(umsTestClient.assignResourceRole(L0UserKeys.USER_ENV_CREATOR, regionAwareInternalCrnGeneratorFactory))
+                .validate();
+
+        String workloadUsername = testContext.getRealUmsUserByKey(L0UserKeys.USER_ENV_CREATOR).getWorkloadUserName();
+        useRealUmsUser(testContext, L0UserKeys.USER_ENV_CREATOR);
+
+        testContext
+                .given(UmsTestDto.class)
+                    .assignTarget(EnvironmentTestDto.class.getSimpleName())
+                .when(umsTestClient.setWorkloadPassword(workloadPassword, regionAwareInternalCrnGeneratorFactory))
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
-                .given(distrox, DistroXTestDto.class)
-                .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
-                        .defaultHostGroup()
-                        .withStorageOptimizedInstancetype()
-                        .build())
-                .when(distroXTestClient.create(), key(distrox))
-                .await(STACK_AVAILABLE)
-                .awaitForHealthyInstances()
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .validate();
+
+        testContext
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.get())
+                .then(this::verifyMountedDisks)
                 .then((tc, testDto, client) -> {
-                    verifyMountPointsUsedForTemporalDisks(testDto, "ephfs", "ephfs1");
-                    return testDto;
+                    List<InstanceGroupV4Response> instanceGroups = testDto.getResponse().getInstanceGroups();
+                    return sshJUtil.checkMeteringStatus(testDto, instanceGroups, List.of(MASTER.getName()));
                 })
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
@@ -126,12 +136,9 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .when(distroXTestClient.repair(MASTER), key(distrox))
                 .await(STACK_AVAILABLE, key(distrox))
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    verifyMountPointsUsedForTemporalDisks(testDto, "ephfs", "ephfs1");
-                    return testDto;
-                })
+                .then(this::verifyMountedDisks)
                 .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerYarnNodemanagerRoleConfigGroups(testDto, workloadUsername,
-                        newWorkloadPassword))
+                        workloadPassword))
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
                     List<String> instanceIds = distroxUtil.getInstanceIds(testDto, client, MASTER.getName());
@@ -142,16 +149,10 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .validate();
     }
 
-    private void verifyMountPointsUsedForTemporalDisks(DistroXTestDto testDto, String awsMountPrefix, String azureMountDir) {
+    private DistroXTestDto verifyMountedDisks(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
+        CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         List<InstanceGroupV4Response> instanceGroups = testDto.getResponse().getInstanceGroups();
-        if (activeCloudPlatform(CloudPlatform.AWS)) {
-            sshJClientActions.checkAwsEphemeralDisksMounted(instanceGroups, List.of(HostGroupType.WORKER.getName()), awsMountPrefix);
-        } else if (activeCloudPlatform(CloudPlatform.AZURE)) {
-            sshJClientActions.checkAzureTemporalDisksMounted(instanceGroups, List.of(HostGroupType.WORKER.getName()), azureMountDir);
-        }
-    }
-
-    private boolean activeCloudPlatform(CloudPlatform cloudPlatform) {
-        return cloudPlatform.name().equalsIgnoreCase(commonCloudProperties().getCloudProvider());
+        cloudFunctionality.checkMountedDisks(instanceGroups, List.of(HostGroupType.WORKER.getName()));
+        return testDto;
     }
 }

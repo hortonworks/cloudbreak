@@ -3,15 +3,18 @@ package com.sequenceiq.it.cloudbreak.util.azure;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.it.cloudbreak.util.azure.azurevm.action.AzureClientActions;
+import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 
 @Component
 public class AzureCloudFunctionality implements CloudFunctionality {
@@ -21,6 +24,9 @@ public class AzureCloudFunctionality implements CloudFunctionality {
 
     @Inject
     private AzureCloudBlobUtil azureCloudBlobUtil;
+
+    @Inject
+    private SshJUtil sshJUtil;
 
     @Override
     public List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds) {
@@ -104,5 +110,15 @@ public class AzureCloudFunctionality implements CloudFunctionality {
 
     public void deleteResourceGroup(String resourceGroupName) {
         azureClientActions.deleteResourceGroup(resourceGroupName);
+    }
+
+    @Override
+    public void checkMountedDisks(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        sshJUtil.checkAzureMountedDisks(instanceGroups, hostGroupNames);
+    }
+
+    @Override
+    public Set<String> getVolumeMountPoints(List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        return Set.of("/mnt/resource", "/hadoopfs/ephfs1");
     }
 }

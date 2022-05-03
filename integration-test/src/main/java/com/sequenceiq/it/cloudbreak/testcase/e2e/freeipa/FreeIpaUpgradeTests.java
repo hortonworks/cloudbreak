@@ -358,7 +358,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 .findFirst().orElseThrow(() -> new TestFailException("FreeIPA upgrade DNS lookups test failed, idbroker instance group was not found."));
         try {
             String cmd = String.format(CHECK_DNS_LOOKUPS_CMD, instanceGroupMetadata.getDiscoveryFQDN(), instanceGroupMetadata.getPrivateIp());
-            Map<String, Pair<Integer, String>> results = sshJClientActions.executeSshCommand(getInstanceGroups(sdxTestDto, sdxClient),
+            Map<String, Pair<Integer, String>> results = sshJClientActions.executeSshCommandOnHost(getInstanceGroups(sdxTestDto, sdxClient),
                     List.of(HostGroupType.MASTER.getName()), cmd, false);
             results.values().forEach(result -> Assertions.assertEquals(0, result.getLeft()));
         } catch (Exception e) {

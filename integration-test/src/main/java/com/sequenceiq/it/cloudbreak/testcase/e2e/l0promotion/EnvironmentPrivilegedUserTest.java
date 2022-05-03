@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
@@ -37,7 +38,8 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
 
     private static final String SSSD_STATUS = "systemctl status sssd.service";
 
-    private static final String WORKLOAD_PASSWORD = "Admin@123";
+    @Value("${integrationtest.user.workloadPassword:}")
+    private String workloadPassword;
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -57,11 +59,16 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         useRealUmsUser(testContext, L0UserKeys.USER_ACCOUNT_ADMIN);
         initializeDefaultBlueprints(testContext);
+
         useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
-
         createDefaultCredential(testContext);
+        createDefaultDatalake(testContext);
+    }
 
-        createEnvironmentWithFreeIpaAndDatalake(testContext);
+    @Override
+    public void tearDownSpotValidateTags(Object[] data) {
+        useRealUmsUser((TestContext) data[0], L0UserKeys.ENV_CREATOR_A);
+        super.tearDownSpotValidateTags(data);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -69,7 +76,7 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
             given = "there is an up and running SDX cluster ",
             when = "the current user tries to run sudo commands on any VM in the cluster ",
             then = "execution should fail in case of EnvironmentPrivilegedUser role is not assigned ",
-            and = "execution should pass in case of assigned EnvironmentPrivilegedUser role but changing the user to root should fail"
+                and = "execution should pass in case of assigned EnvironmentPrivilegedUser role but changing the user to root should fail"
     )
     public void testSudoCommands(TestContext testContext) {
         testContext
@@ -80,19 +87,18 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                 .validate();
 
         String workloadUsernameEnvCreator = testContext.getRealUmsUserByKey(L0UserKeys.USER_ENV_CREATOR).getWorkloadUserName();
-
         useRealUmsUser(testContext, L0UserKeys.USER_ENV_CREATOR);
 
         testContext
                 .given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .when(umsTestClient.setWorkloadPassword(WORKLOAD_PASSWORD, regionAwareInternalCrnGeneratorFactory))
+                .when(umsTestClient.setWorkloadPassword(workloadPassword, regionAwareInternalCrnGeneratorFactory))
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .thenException((tc, testDto, client) -> {
-                    sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, WORKLOAD_PASSWORD, LIST_RULES_FLAG);
+                    sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, workloadPassword, LIST_RULES_FLAG);
                     return testDto;
                 }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'."))
                 .given(UmsTestDto.class)
@@ -105,16 +111,14 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                     Set<String> ipAddresses = getIpAddresses(tc);
                     sshSudoCommandActions.executeCommand(ipAddresses, null, null, SSSD_RESTART, SSSD_STATUS);
                     tc.waitingFor(Duration.ofMinutes(2), "Waiting for SSSD to be synchronized has been interrupted");
-                    sshSudoCommandActions.executeCommand(ipAddresses, workloadUsernameEnvCreator, WORKLOAD_PASSWORD, LIST_RULES_FLAG);
+                    sshSudoCommandActions.executeCommand(ipAddresses, workloadUsernameEnvCreator, workloadPassword, LIST_RULES_FLAG);
                     return testDto;
                 })
                 .thenException((tc, testDto, client) -> {
-                    sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, WORKLOAD_PASSWORD, CHANGE_USER_TO_ROOT_COMMAND);
+                    sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, workloadPassword, CHANGE_USER_TO_ROOT_COMMAND);
                     return testDto;
                 }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'."))
                 .validate();
-
-        useRealUmsUser(testContext, L0UserKeys.USER_ACCOUNT_ADMIN);
     }
 
     private Set<String> getIpAddresses(TestContext testContext) {
