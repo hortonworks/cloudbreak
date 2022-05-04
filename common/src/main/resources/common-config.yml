@@ -35,9 +35,18 @@ telemetry:
       username: ""
       password: ""
       token: ""
-    cloudera-manager:
-      monitoring-user: cmmonitoring
-      metrics-exporter-port: 61010
+    agent:
+      user: vmagent
+      port: 8429
+    node-exporter:
+      user: nodeuser
+      port: 9100
+    blackbox-exporter:
+      user: blackboxuser
+      port: 9115
+    cloudera-manager-exporter:
+      user: cmmonitoring
+      port: 61010
   upgrade:
     enabled: false
     cdp-telemetry:

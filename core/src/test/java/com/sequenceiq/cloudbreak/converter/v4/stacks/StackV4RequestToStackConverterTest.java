@@ -73,6 +73,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -128,6 +129,9 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
 
     @Mock
     private Workspace workspace;
+
+    @Mock
+    private MonitoringConfiguration monitoringConfiguration;
 
     @Mock
     private User user;
@@ -403,7 +407,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         instanceGroup.setSecurityGroup(securityGroup);
         instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         instanceGroup.setGroupName("master");
-
+        given(monitoringConfiguration.isEnabled()).willReturn(true);
         given(stackAuthenticationV4RequestToStackAuthenticationConverter.convert(any(StackAuthenticationV4Request.class))).willReturn(new StackAuthentication());
         given(instanceGroupV4RequestToInstanceGroupConverter.convert(any(InstanceGroupV4Request.class), anyString())).willReturn(instanceGroup);
     }

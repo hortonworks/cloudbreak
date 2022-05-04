@@ -166,7 +166,7 @@ public class ClouderaManagerMgmtTelemetryService {
             if (runtimeVersion.compareTo(cmSmonVersion) >= 0) {
                 String monitoringUser = stack.getCluster().getCloudbreakClusterManagerMonitoringUser();
                 String monitoringPassword = stack.getCluster().getCloudbreakClusterManagerMonitoringPassword();
-                Integer exporterPort = monitoringConfiguration.getClouderaManager().getMetricsExporterPort();
+                Integer exporterPort = monitoringConfiguration.getClouderaManagerExporter().getPort();
                 MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(client);
                 Map<String, String> configsToUpdate = new HashMap<>();
                 configsToUpdate.put(SMON_PROMETHEUS_USERNAME, monitoringUser);

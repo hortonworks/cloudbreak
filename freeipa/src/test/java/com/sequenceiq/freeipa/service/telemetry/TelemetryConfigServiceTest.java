@@ -108,7 +108,8 @@ public class TelemetryConfigServiceTest {
         given(fluentConfigService.createFluentConfigs(any(), anyBoolean(), anyBoolean(), isNull(), any()))
                 .willReturn(new FluentConfigView.Builder().build());
         given(nodeStatusConfigService.createNodeStatusConfig(isNull(), isNull(), anyBoolean())).willReturn(new NodeStatusConfigView.Builder().build());
-        given(monitoringConfigService.createMonitoringConfig(isNull(), any(), isNull(), anyBoolean())).willReturn(new MonitoringConfigView.Builder().build());
+        given(monitoringConfigService.createMonitoringConfig(isNull(), any(), isNull(), isNull(), anyBoolean()))
+                .willReturn(new MonitoringConfigView.Builder().build());
         // WHEN
         Map<String, SaltPillarProperties> result = underTest.createTelemetryConfigs(STACK_ID, Set.of(TelemetryComponentType.CDP_TELEMETRY));
         // THEN

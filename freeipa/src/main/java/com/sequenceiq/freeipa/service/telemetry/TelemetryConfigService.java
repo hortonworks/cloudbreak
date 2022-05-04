@@ -115,22 +115,26 @@ public class TelemetryConfigService implements TelemetryConfigProvider {
             Map<String, SaltPillarProperties> servicePillarConfig = new HashMap<>();
             servicePillarConfig.putAll(getTelemetryCommonPillarConfig(stack, telemetry, databusEndpoint, databusEndpointValidation));
             servicePillarConfig.putAll(getFluentPillarConfig(stack, telemetry, databusEnabled));
-            servicePillarConfig.putAll(getMonitoringPillarConfig(stack, telemetry, cdpSaasEnabled));
             servicePillarConfig.putAll(getDatabusPillarConfig(stack, databusEndpoint, databusEnabled));
-            servicePillarConfig.putAll(getCdpNodeStatusPillarConfig(stack));
+            char[] passwordInput = null;
+            if (StringUtils.isNotBlank(stack.getCdpNodeStatusMonitorPassword())) {
+                passwordInput = stack.getCdpNodeStatusMonitorPassword().toCharArray();
+            }
+            servicePillarConfig.putAll(getMonitoringPillarConfig(stack, telemetry, passwordInput, cdpSaasEnabled));
+            servicePillarConfig.putAll(getCdpNodeStatusPillarConfig(stack, passwordInput));
             return servicePillarConfig;
         } else {
             return Map.of();
         }
     }
 
-    private Map<String, SaltPillarProperties> getMonitoringPillarConfig(Stack stack, Telemetry telemetry, boolean cdpSaasEnabled) {
+    private Map<String, SaltPillarProperties> getMonitoringPillarConfig(Stack stack, Telemetry telemetry, char[] passwordInput, boolean cdpSaasEnabled) {
         Map<String, Object> config = new HashMap<>();
         if (telemetry.isMonitoringFeatureEnabled()) {
             Monitoring monitoring = telemetry.getMonitoring();
             LOGGER.debug("Monitoring is enabled, filling configs ...");
             MonitoringConfigView configView = monitoringConfigService.createMonitoringConfig(monitoring,
-                    MonitoringClusterType.FREEIPA, null, cdpSaasEnabled);
+                    MonitoringClusterType.FREEIPA, null, passwordInput, cdpSaasEnabled);
             config = configView.toMap();
         }
         return Map.of("monitoring",
@@ -198,11 +202,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider {
         return fluentConfigService.createFluentConfigs(clusterDetails, databusEnabled, false, stack.getRegion(), telemetry);
     }
 
-    private Map<String, ? extends SaltPillarProperties> getCdpNodeStatusPillarConfig(Stack stack) {
-        char[] passwordInput = null;
-        if (StringUtils.isNotBlank(stack.getCdpNodeStatusMonitorPassword())) {
-            passwordInput = stack.getCdpNodeStatusMonitorPassword().toCharArray();
-        }
+    private Map<String, ? extends SaltPillarProperties> getCdpNodeStatusPillarConfig(Stack stack, char[] passwordInput) {
         boolean saltPingEnabled = entitlementService.nodestatusSaltPingEnabled(stack.getAccountId());
         NodeStatusConfigView nodeStatusConfigs = nodeStatusConfigService.createNodeStatusConfig(
                 stack.getCdpNodeStatusMonitorUser(), passwordInput, saltPingEnabled);

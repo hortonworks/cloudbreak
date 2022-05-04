@@ -1,3 +1,10 @@
+{%- from 'monitoring/settings.sls' import monitoring with context %}
 tls_server_config:
   cert_file: /opt/node_exporter/node_exporter.crt
   key_file: /opt/node_exporter/node_exporter.key
+{%- if monitoring.exporterPassword %}
+{%- set command = '/opt/salt/scripts/monitoring-secret-handler.sh ' + monitoring.nodeExporterUser + ' /opt/node_exporter/node_pwd /opt/node_exporter/basic_auth_cred' %}
+{%- set basic_auth_str = salt['cmd.run'](command)  %}
+basic_auth_users:
+  {{ monitoring.nodeExporterUser }}: {{ basic_auth_str }}
+{%- endif %}

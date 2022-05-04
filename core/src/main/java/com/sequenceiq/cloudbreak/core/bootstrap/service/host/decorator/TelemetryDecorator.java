@@ -185,8 +185,12 @@ public class TelemetryDecorator {
         }
         boolean cdpSaasEnabled = entitlementService.isCdpSaasEnabled(accountId);
         setupMetering(servicePillar, stack, serviceType, meteringEnabled);
-        setupMonitoring(servicePillar, cdpSaasEnabled, stack, telemetry);
-        setupNodeStatusMonitor(servicePillar, stack);
+        char[] nodePasswordInput = null;
+        if (StringUtils.isNotBlank(stack.getCluster().getCdpNodeStatusMonitorPassword())) {
+            nodePasswordInput = stack.getCluster().getCdpNodeStatusMonitorPassword().toCharArray();
+        }
+        setupMonitoring(servicePillar, cdpSaasEnabled, stack, telemetry, nodePasswordInput);
+        setupNodeStatusMonitor(servicePillar, stack, nodePasswordInput);
         return servicePillar;
     }
 
@@ -224,7 +228,7 @@ public class TelemetryDecorator {
     }
 
     private void setupMonitoring(Map<String, SaltPillarProperties> servicePillar, boolean cdpSaasEnabled, Stack stack,
-            Telemetry telemetry) {
+            Telemetry telemetry, char[] passwordInput) {
         if (telemetry.isMonitoringFeatureEnabled()) {
             LOGGER.debug("Filling monitoring configs.");
             MonitoringAuthConfig cmAuthConfig = null;
@@ -235,7 +239,7 @@ public class TelemetryDecorator {
                 cmAuthConfig = new MonitoringAuthConfig(cmMonitoringUser, cmMonitoringPassword);
             }
             MonitoringConfigView monitoringConfigView = monitoringConfigService.createMonitoringConfig(telemetry.getMonitoring(),
-                    MonitoringClusterType.CLOUDERA_MANAGER, cmAuthConfig, cdpSaasEnabled);
+                    MonitoringClusterType.CLOUDERA_MANAGER, cmAuthConfig, passwordInput, cdpSaasEnabled);
             if (monitoringConfigView.isEnabled()) {
                 Map<String, Object> monitoringConfig = monitoringConfigView.toMap();
                 servicePillar.put("monitoring",
@@ -258,11 +262,7 @@ public class TelemetryDecorator {
         }
     }
 
-    private void setupNodeStatusMonitor(Map<String, SaltPillarProperties> servicePillar, Stack stack) {
-        char[] passwordInput = null;
-        if (StringUtils.isNotBlank(stack.getCluster().getCdpNodeStatusMonitorPassword())) {
-            passwordInput = stack.getCluster().getCdpNodeStatusMonitorPassword().toCharArray();
-        }
+    private void setupNodeStatusMonitor(Map<String, SaltPillarProperties> servicePillar, Stack stack, char[] passwordInput) {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         boolean saltPingEnabled = entitlementService.nodestatusSaltPingEnabled(accountId);
         NodeStatusConfigView nodeStatusConfigView = nodeStatusConfigService
