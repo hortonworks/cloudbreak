@@ -22,7 +22,21 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private final char[] cmPassword;
 
-    private Integer cmMetricsExporterPort;
+    private final char[] exporterPassword;
+
+    private final Integer cmMetricsExporterPort;
+
+    private final String nodeExporterUser;
+
+    private final Integer nodeExporterPort;
+
+    private final String blackboxExporterUser;
+
+    private final Integer blackboxExporterPort;
+
+    private final Integer agentPort;
+
+    private final String agentUser;
 
     private final String remoteWriteUrl;
 
@@ -44,6 +58,13 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.cmUsername = builder.cmUsername;
         this.cmPassword = builder.cmPassword;
         this.cmMetricsExporterPort = builder.cmMetricsExporterPort;
+        this.exporterPassword = builder.exporterPassword;
+        this.nodeExporterUser = builder.nodeExporterUser;
+        this.nodeExporterPort = builder.nodeExporterPort;
+        this.blackboxExporterUser = builder.blackboxExporterUser;
+        this.blackboxExporterPort = builder.blackboxExporterPort;
+        this.agentUser = builder.agentUser;
+        this.agentPort = builder.agentPort;
         this.clusterDetails = builder.clusterDetails;
         this.remoteWriteUrl = builder.remoteWriteUrl;
         this.scrapeIntervalSeconds = builder.scrapeIntervalSeconds;
@@ -85,6 +106,34 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return scrapeIntervalSeconds;
     }
 
+    public char[] getExporterPassword() {
+        return exporterPassword;
+    }
+
+    public String getNodeExporterUser() {
+        return nodeExporterUser;
+    }
+
+    public Integer getNodeExporterPort() {
+        return nodeExporterPort;
+    }
+
+    public String getBlackboxExporterUser() {
+        return blackboxExporterUser;
+    }
+
+    public Integer getBlackboxExporterPort() {
+        return blackboxExporterPort;
+    }
+
+    public String getAgentUser() {
+        return agentUser;
+    }
+
+    public Integer getAgentPort() {
+        return agentPort;
+    }
+
     public boolean isUseDevStack() {
         return useDevStack;
     }
@@ -112,6 +161,13 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("cmUsername", ObjectUtils.defaultIfNull(this.cmUsername, EMPTY_CONFIG_DEFAULT));
         map.put("cmPassword", ObjectUtils.defaultIfNull(this.cmPassword, EMPTY_CONFIG_DEFAULT));
         map.put("cmMetricsExporterPort", ObjectUtils.defaultIfNull(this.cmMetricsExporterPort, DEFAULT_CM_SMON_PORT));
+        map.put("exporterPassword", this.exporterPassword != null ? new String(this.exporterPassword) : EMPTY_CONFIG_DEFAULT);
+        map.put("nodeExporterUser", ObjectUtils.defaultIfNull(this.nodeExporterUser, EMPTY_CONFIG_DEFAULT));
+        map.put("nodeExporterPort", this.nodeExporterPort);
+        map.put("blackboxExporterUser", ObjectUtils.defaultIfNull(this.blackboxExporterUser, EMPTY_CONFIG_DEFAULT));
+        map.put("blackboxExporterPort", this.blackboxExporterPort);
+        map.put("agentUser", ObjectUtils.defaultIfNull(this.agentUser, EMPTY_CONFIG_DEFAULT));
+        map.put("agentPort", this.agentPort);
         map.put("username", ObjectUtils.defaultIfNull(this.username, EMPTY_CONFIG_DEFAULT));
         map.put("password", this.password != null ? new String(this.password) : EMPTY_CONFIG_DEFAULT);
         map.put("token", this.token != null ? new String(this.token) : EMPTY_CONFIG_DEFAULT);
@@ -143,7 +199,21 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         private char[] cmPassword;
 
+        private char[] exporterPassword;
+
         private Integer cmMetricsExporterPort;
+
+        private String nodeExporterUser;
+
+        private Integer nodeExporterPort;
+
+        private String blackboxExporterUser;
+
+        private Integer blackboxExporterPort;
+
+        private String agentUser;
+
+        private Integer agentPort;
 
         private TelemetryClusterDetails clusterDetails;
 
@@ -208,6 +278,41 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withClusterDetails(TelemetryClusterDetails clusterDetails) {
             this.clusterDetails = clusterDetails;
+            return this;
+        }
+
+        public Builder withExporterPassword(char[] exporterPassword) {
+            this.exporterPassword = exporterPassword;
+            return this;
+        }
+
+        public Builder withNodeExporterUser(String nodeExporterUser) {
+            this.nodeExporterUser = nodeExporterUser;
+            return this;
+        }
+
+        public Builder withNodeExporterPort(Integer nodeExporterPort) {
+            this.nodeExporterPort = nodeExporterPort;
+            return this;
+        }
+
+        public Builder withBlackboxExporterUser(String blackboxExporterUser) {
+            this.blackboxExporterUser = blackboxExporterUser;
+            return this;
+        }
+
+        public Builder withBlackboxExporterPort(Integer blackboxExporterPort) {
+            this.blackboxExporterPort = blackboxExporterPort;
+            return this;
+        }
+
+        public Builder withAgentPort(Integer agentPort) {
+            this.agentPort = agentPort;
+            return this;
+        }
+
+        public Builder withAgentUser(String agentUser) {
+            this.agentUser = agentUser;
             return this;
         }
     }

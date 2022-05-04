@@ -17,7 +17,13 @@ public class MonitoringConfiguration {
 
     private boolean paasSupport;
 
-    private ClouderaManagerMonitoringConfiguration clouderaManager;
+    private MonitoringAgentConfiguration agent;
+
+    private ExporterConfiguration clouderaManagerExporter;
+
+    private ExporterConfiguration nodeExporter;
+
+    private ExporterConfiguration blackboxExporter;
 
     public boolean isEnabled() {
         return enabled;
@@ -59,11 +65,35 @@ public class MonitoringConfiguration {
         this.paasSupport = paasSupport;
     }
 
-    public ClouderaManagerMonitoringConfiguration getClouderaManager() {
-        return clouderaManager;
+    public ExporterConfiguration getClouderaManagerExporter() {
+        return clouderaManagerExporter;
     }
 
-    public void setClouderaManager(ClouderaManagerMonitoringConfiguration clouderaManager) {
-        this.clouderaManager = clouderaManager;
+    public void setClouderaManagerExporter(ExporterConfiguration clouderaManagerExporter) {
+        this.clouderaManagerExporter = clouderaManagerExporter;
+    }
+
+    public ExporterConfiguration getNodeExporter() {
+        return nodeExporter;
+    }
+
+    public void setNodeExporter(ExporterConfiguration nodeExporter) {
+        this.nodeExporter = nodeExporter;
+    }
+
+    public ExporterConfiguration getBlackboxExporter() {
+        return blackboxExporter;
+    }
+
+    public void setBlackboxExporter(ExporterConfiguration blackboxExporter) {
+        this.blackboxExporter = blackboxExporter;
+    }
+
+    public MonitoringAgentConfiguration getAgent() {
+        return agent;
+    }
+
+    public void setAgent(MonitoringAgentConfiguration agent) {
+        this.agent = agent;
     }
 }

@@ -19,6 +19,13 @@
 {% set username = salt['pillar.get']('monitoring:username') %}
 {% set password = salt['pillar.get']('monitoring:password') %}
 {% set token = salt['pillar.get']('monitoring:token') %}
+{% set agent_user = salt['pillar.get']('monitoring:agentUser', 'vmagent') %}
+{% set agent_port = salt['pillar.get']('monitoring:agentPort', 8429) %}
+{% set node_exporter_user = salt['pillar.get']('monitoring:nodeExporterUser', 'nodeuser') %}
+{% set node_exporter_port = salt['pillar.get']('monitoring:nodeExporterPort', 9100) %}
+{% set blackbox_exporter_user = salt['pillar.get']('monitoring:blackboxExporterUser', 'blackboxuser') %}
+{% set blackbox_exporter_port = salt['pillar.get']('monitoring:blackboxExporterPort', 9115) %}
+{% set exporter_password = salt['pillar.get']('monitoring:exporterPassword') %}
 {% set scrape_interval_seconds = salt['pillar.get']('monitoring:scrapeIntervalSeconds') %}
 {% set cm_metrics_exporter_port = salt['pillar.get']('monitoring:cmMetricsExporterPort', 61010) %}
 
@@ -51,5 +58,12 @@
     "cmPassword": cm_password,
     "cmClusterType": cm_cluster_type,
     "cmMetricsExporterPort": cm_metrics_exporter_port,
+    "agentUser": agent_user,
+    "agentPort": agent_port,
+    "nodeExporterUser": node_exporter_user,
+    "nodeExporterPort": node_exporter_port,
+    "blackboxExporterUser": blackbox_exporter_user,
+    "blackboxExporterPort": blackbox_exporter_port,
+    "exporterPassword": exporter_password,
     "useDevStack": use_dev_stack
 }) %}

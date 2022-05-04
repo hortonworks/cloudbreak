@@ -1,0 +1,16 @@
+{%- from 'monitoring/settings.sls' import monitoring with context %}
+[Unit]
+Description=CDP Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/opt/node_exporter/node_exporter --web.config=/opt/node_exporter/node_exporter-web-config.yml --web.listen-address=:{{ monitoring.nodeExporterPort }}
+
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

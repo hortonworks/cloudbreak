@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -100,9 +101,6 @@ public class StackV4RequestToStackConverter {
     @Value("${cb.cm.mgmt.username:cmmgmt}")
     private String cmMgmtUsername;
 
-    @Value("${telemetry.monitoring.cloudera-manager.monitoring-user}")
-    private String cmMonitoringUser;
-
     @Inject
     private WorkspaceService workspaceService;
 
@@ -111,6 +109,9 @@ public class StackV4RequestToStackConverter {
 
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
+
+    @Inject
+    private MonitoringConfiguration monitoringConfiguration;
 
     @Inject
     private Clock clock;
@@ -393,8 +394,10 @@ public class StackV4RequestToStackConverter {
             cluster.setPassword(source.getCluster().getPassword());
             cluster.setCloudbreakUser(ambariUserName);
             cluster.setCloudbreakPassword(PasswordUtil.generatePassword());
-            cluster.setCloudbreakClusterManagerMonitoringUser(cmMonitoringUser);
-            cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
+            if (monitoringConfiguration.isEnabled() && monitoringConfiguration.getClouderaManagerExporter() != null) {
+                cluster.setCloudbreakClusterManagerMonitoringUser(monitoringConfiguration.getClouderaManagerExporter().getUser());
+                cluster.setCloudbreakClusterManagerMonitoringPassword(PasswordUtil.generatePassword());
+            }
             cluster.setCdpNodeStatusMonitorUser(UUID.randomUUID().toString());
             cluster.setCdpNodeStatusMonitorPassword(PasswordUtil.generatePassword());
             cluster.setDpUser(cmMgmtUsername);

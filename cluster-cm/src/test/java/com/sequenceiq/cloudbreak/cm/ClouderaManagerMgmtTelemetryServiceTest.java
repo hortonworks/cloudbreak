@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.ClouderaManagerMonitoringConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.monitoring.ExporterConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -78,7 +78,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
     private MonitoringConfiguration monitoringConfiguration;
 
     @Mock
-    private ClouderaManagerMonitoringConfiguration cmMonitoringConfiguration;
+    private ExporterConfiguration cmMonitoringConfiguration;
 
     @Before
     public void setUp() {
@@ -285,9 +285,9 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         features.addMonitoring(true);
         telemetry.setFeatures(features);
         given(monitoringConfiguration.isEnabled()).willReturn(true);
-        given(monitoringConfiguration.getClouderaManager()).willReturn(cmMonitoringConfiguration);
+        given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
         given(monitoringConfiguration.isPaasSupport()).willReturn(true);
-        given(cmMonitoringConfiguration.getMetricsExporterPort()).willReturn(EXPORTER_PORT);
+        given(cmMonitoringConfiguration.getPort()).willReturn(EXPORTER_PORT);
         given(clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(apiClient)).willReturn(mgmtRoleConfigGroupsResourceApi);
         // WHEN
         underTest.updateServiceMonitorConfigs(stack, apiClient, telemetry);

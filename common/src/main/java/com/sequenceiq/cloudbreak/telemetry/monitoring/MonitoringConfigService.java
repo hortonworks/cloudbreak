@@ -22,7 +22,7 @@ public class MonitoringConfigService {
     }
 
     public MonitoringConfigView createMonitoringConfig(Monitoring monitoring, MonitoringClusterType clusterType,
-            MonitoringAuthConfig cmAuthConfig, boolean cdpSaasEnabled) {
+            MonitoringAuthConfig cmAuthConfig, char[] exporterPassword, boolean cdpSaasEnabled) {
         final MonitoringConfigView.Builder builder = new MonitoringConfigView.Builder();
         boolean enabled = isMonitoringEnabled(cdpSaasEnabled);
         LOGGER.debug("Tyring to set monitoring configurations.");
@@ -36,6 +36,9 @@ public class MonitoringConfigService {
                 builder.withRemoteWriteUrl(monitoring.getRemoteWriteUrl());
             }
             builder.withScrapeIntervalSeconds(monitoringConfiguration.getScrapeIntervalSeconds());
+            builder.withAgentPort(monitoringConfiguration.getAgent().getPort());
+            builder.withAgentUser(monitoringConfiguration.getAgent().getUser());
+            fillExporterConfigs(builder, exporterPassword);
         }
         if (monitoringGlobalAuthConfig.isEnabled()) {
             builder.withUsername(monitoringGlobalAuthConfig.getUsername());
@@ -51,6 +54,18 @@ public class MonitoringConfigService {
                 .build();
     }
 
+    private void fillExporterConfigs(MonitoringConfigView.Builder builder, char[] exporterPassword) {
+        builder.withExporterPassword(exporterPassword);
+        if (monitoringConfiguration.getNodeExporter() != null) {
+            builder.withNodeExporterUser(monitoringConfiguration.getNodeExporter().getUser())
+                    .withNodeExporterPort(monitoringConfiguration.getNodeExporter().getPort());
+        }
+        if (monitoringConfiguration.getBlackboxExporter() != null) {
+                builder.withBlackboxExporterUser(monitoringConfiguration.getBlackboxExporter().getUser())
+                .withBlackboxExporterPort(monitoringConfiguration.getBlackboxExporter().getPort());
+        }
+    }
+
     private void fillCMAuthConfigs(MonitoringClusterType clusterType, MonitoringAuthConfig cmAuthConfig, MonitoringConfigView.Builder builder) {
         if (MonitoringClusterType.CLOUDERA_MANAGER.equals(clusterType)) {
             LOGGER.debug("Setting up monitoring configurations for Cloudera Manager");
@@ -58,7 +73,7 @@ public class MonitoringConfigService {
                 builder
                         .withCMUsername(cmAuthConfig.getUsername())
                         .withCMPassword(cmAuthConfig.getPassword())
-                        .withCMMetricsExporterPort(monitoringConfiguration.getClouderaManager().getMetricsExporterPort());
+                        .withCMMetricsExporterPort(monitoringConfiguration.getClouderaManagerExporter().getPort());
                 LOGGER.debug("Monitoring for Cloudera Manager has been setup correctly.");
             } else {
                 LOGGER.debug("Monitoring for Cloudera Manager has invalid authentication configs, Monitoring will be disabled.");

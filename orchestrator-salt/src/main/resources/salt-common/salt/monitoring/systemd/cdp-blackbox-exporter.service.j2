@@ -1,3 +1,4 @@
+{%- from 'monitoring/settings.sls' import monitoring with context %}
 [Unit]
 Description=CDP BlackBox Exporter
 Wants=network-online.target
@@ -10,7 +11,7 @@ Group=root
 EnvironmentFile=/opt/blackbox_exporter/blackbox.env
 ExecStart=/opt/blackbox_exporter/blackbox_exporter \
     --web.config.file=/opt/blackbox_exporter/blackbox_exporter-web-config.yml \
-    --config.file=/opt/blackbox_exporter/blackbox.yml
+    --config.file=/opt/blackbox_exporter/blackbox.yml --web.listen-address=:{{ monitoring.blackboxExporterPort }}
 
 Restart=always
 

@@ -5,7 +5,7 @@
 
 /etc/systemd/system/cdp-node-exporter.service:
   file.managed:
-    - source: salt://monitoring/systemd/cdp-node-exporter.service
+    - source: salt://monitoring/systemd/cdp-node-exporter.service.j2
     - template: jinja
     - user: "root"
     - group: "root"
@@ -13,7 +13,7 @@
 
 /etc/systemd/system/cdp-blackbox-exporter.service:
   file.managed:
-    - source: salt://monitoring/systemd/cdp-blackbox-exporter.service
+    - source: salt://monitoring/systemd/cdp-blackbox-exporter.service.j2
     - template: jinja
     - user: "root"
     - group: "root"
@@ -42,6 +42,37 @@ generate_node_exporter_cert_and_key:
 generate_blackbox_exporter_cert_and_key:
   cmd.run:
     - name: "/opt/salt/scripts/cert-helper.sh -b /opt/blackbox_exporter/blackbox_exporter"
+
+{%- if monitoring.exporterPassword %}
+/opt/node_exporter/node_pwd:
+  file.managed:
+    - source: salt://monitoring/template/exporter_pwd_file.j2
+    - template: jinja
+    - user: "root"
+    - group: "root"
+    - mode: 600
+
+/opt/blackbox_exporter/blackbox_pwd:
+  file.managed:
+    - source: salt://monitoring/template/exporter_pwd_file.j2
+    - template: jinja
+    - user: "root"
+    - group: "root"
+    - mode: 600
+{%- else %}
+remove_node_exporter_auth:
+  file.absent:
+    - name: /opt/node_exporter/basic_auth_cred
+remove_blackbox_exporter_auth:
+  file.absent:
+    - name: /opt/blackbox_exporter/basic_auth_cred
+remove_node_exporter_pwd:
+  file.absent:
+    - name: /opt/node_exporter/node_pwd
+remove_blackbox_exporter_pwd:
+  file.absent:
+    - name: /opt/blackbox_exporter/blackbox_pwd
+{%- endif %}
 
 /opt/node_exporter/node_exporter-web-config.yml:
   file.managed:
