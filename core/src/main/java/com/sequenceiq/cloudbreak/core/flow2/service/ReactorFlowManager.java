@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackLoadBalancerUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.clusterproxy.reregister.ClusterProxyReRegistrationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -379,6 +380,11 @@ public class ReactorFlowManager {
         String selector = STACK_LOAD_BALANCER_UPDATE_EVENT.event();
         StackLoadBalancerUpdateTriggerEvent stackLoadBalancerUpdateTriggerEvent = new StackLoadBalancerUpdateTriggerEvent(selector, stackId);
         return reactorNotifier.notify(stackId, selector, stackLoadBalancerUpdateTriggerEvent);
+    }
+
+    public FlowIdentifier triggerClusterProxyConfigReRegistration(Long stackId) {
+        String selector = ClusterProxyReRegistrationEvent.CLUSTER_PROXY_RE_REGISTRATION_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
     private NetworkScaleDetails getStackNetworkScaleDetails(InstanceGroupAdjustmentV4Request instanceGroupAdjustment) {

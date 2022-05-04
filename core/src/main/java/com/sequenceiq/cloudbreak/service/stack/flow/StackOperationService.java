@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.validation.constraints.NotNull;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -434,5 +435,10 @@ public class StackOperationService {
 
     private void sendStopRequestedEvent(Stack stack) {
         eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), STACK_STOP_REQUESTED);
+    }
+
+    public FlowIdentifier reRegisterClusterProxyConfig(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        Stack stack = stackService.getNotTerminatedByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId);
+        return flowManager.triggerClusterProxyConfigReRegistration(stack.getId());
     }
 }

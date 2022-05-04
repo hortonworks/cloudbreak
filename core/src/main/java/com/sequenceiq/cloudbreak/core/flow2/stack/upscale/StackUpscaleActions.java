@@ -277,7 +277,7 @@ public class StackUpscaleActions {
                             context.getCloudCredential(), gatewayInstance);
                     sendEvent(context, sshFingerPrintReq);
                 } else {
-                    BootstrapNewNodesEvent bootstrapPayload = new BootstrapNewNodesEvent(context.getStack().getId());
+                    StackEvent bootstrapPayload = new StackEvent(context.getStack().getId());
                     sendEvent(context, StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT.event(), bootstrapPayload);
                 }
             }
@@ -310,8 +310,8 @@ public class StackUpscaleActions {
                     sendEvent(context);
                 } else {
                     LOGGER.info("Cluster Proxy integration is DISABLED, skipping re-registering with Cluster Proxy service");
-                    BootstrapNewNodesEvent bootstrapNewNodesEvent =
-                            new BootstrapNewNodesEvent(StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT.event(), payload.getResourceId());
+                    StackEvent bootstrapNewNodesEvent =
+                            new StackEvent(StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT.event(), payload.getResourceId());
                     sendEvent(context, bootstrapNewNodesEvent);
                 }
             }
@@ -319,17 +319,17 @@ public class StackUpscaleActions {
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
                 return new ClusterProxyReRegistrationRequest(context.getStack().getId(),
-                        context.getHostGroupWithAdjustment().keySet(),
-                        context.getStack().getCloudPlatform());
+                        context.getStack().getCloudPlatform(),
+                        StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT.event());
             }
         };
     }
 
     @Bean(name = "BOOTSTRAP_NEW_NODES_STATE")
     public Action<?, ?> bootstrapNewNodes() {
-        return new AbstractStackUpscaleAction<>(BootstrapNewNodesEvent.class) {
+        return new AbstractStackUpscaleAction<>(StackEvent.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(StackScalingFlowContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackUpscaleService.bootstrappingNewNodes(context.getStack());
                 Map<String, Set<String>> hostgroupWithHostnames = context.getHostgroupWithHostnames();
                 Selectable request = new BootstrapNewNodesRequest(context.getStack().getId(),

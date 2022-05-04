@@ -9,9 +9,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
-import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.BootstrapNewNodesEvent;
-import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -53,13 +52,13 @@ public class ClusterProxyReRegistrationHandler implements EventHandler<ClusterPr
     private Selectable registerCluster(ClusterProxyReRegistrationRequest request) {
         if (!clusterProxyEnablementService.isClusterProxyApplicable(request.getCloudPlatform())) {
             LOGGER.info("Cluster Proxy integration is DISABLED, skipping re-registering with Cluster Proxy service");
-            return new BootstrapNewNodesEvent(StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT.event(), request.getResourceId());
+            return new StackEvent(request.getFinishedEvent(), request.getResourceId());
         }
 
         Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
         try {
             clusterProxyService.reRegisterCluster(stack);
-            return new BootstrapNewNodesEvent(StackUpscaleEvent.CLUSTER_PROXY_RE_REGISTRATION_FINISHED_EVENT.event(), stack.getId());
+            return new StackEvent(request.getFinishedEvent(), stack.getId());
         } catch (Exception e) {
             LOGGER.error("Error occurred re-registering cluster {} in environment {} to cluster proxy",
                     stack.getCluster().getId(), stack.getEnvironmentCrn(), e);

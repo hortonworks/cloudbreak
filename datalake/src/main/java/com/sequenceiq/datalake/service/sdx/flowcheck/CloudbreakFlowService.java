@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.flowcheck;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
@@ -59,16 +58,10 @@ public class CloudbreakFlowService {
                 FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
                         regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> flowEndpoint.hasFlowRunningByChainId(sdxCluster.getLastCbFlowChainId()));
-                logCbFlowChainStatus(sdxCluster, flowCheckResponse.getHasActiveFlow());
+                logCbFlowChainStatus(sdxCluster.getLastCbFlowChainId(), flowCheckResponse.getHasActiveFlow());
                 return flowCheckResponseToFlowStateConverter.convert(flowCheckResponse);
             } else if (sdxCluster.getLastCbFlowId() != null) {
-                LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW, sdxCluster.getLastCbFlowId());
-                FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
-                        regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                        () ->
-                        flowEndpoint.hasFlowRunningByFlowId(sdxCluster.getLastCbFlowId()));
-                logCbFlowStatus(sdxCluster, flowCheckResponse.getHasActiveFlow());
-                return flowCheckResponseToFlowStateConverter.convert(flowCheckResponse);
+                return getLastKnownFlowStateByFlowId(sdxCluster.getLastCbFlowId());
             }
             return FlowState.UNKNOWN;
         } catch (NotFoundException e) {
@@ -78,6 +71,16 @@ public class CloudbreakFlowService {
             LOGGER.error("Exception occured during checking if there is a flow for cluster {} in CB: {}", sdxCluster.getClusterName(), e.getMessage());
             return FlowState.UNKNOWN;
         }
+    }
+
+    public FlowState getLastKnownFlowStateByFlowId(String flowId) {
+        LOGGER.info("Checking cloudbreak {} {}", FlowType.FLOW, flowId);
+        FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                () -> flowEndpoint.hasFlowRunningByFlowId(flowId)
+        );
+        logCbFlowStatus(flowId, flowCheckResponse.getHasActiveFlow());
+        return flowCheckResponseToFlowStateConverter.convert(flowCheckResponse);
     }
 
     public void saveLastCloudbreakFlowChainId(SdxCluster sdxCluster, FlowIdentifier flowIdentifier) {
@@ -139,19 +142,19 @@ public class CloudbreakFlowService {
         sdxCluster.setLastCbFlowChainId(null);
     }
 
-    private void logCbFlowChainStatus(SdxCluster sdxCluster, Boolean hasActiveFlow) {
-        logActiveStatus(FlowType.FLOW_CHAIN, hasActiveFlow, sdxCluster::getLastCbFlowChainId);
+    private void logCbFlowChainStatus(String flowChainId, Boolean hasActiveFlow) {
+        logActiveStatus(FlowType.FLOW_CHAIN, hasActiveFlow, flowChainId);
     }
 
-    private void logCbFlowStatus(SdxCluster sdxCluster, Boolean hasActiveFlow) {
-        logActiveStatus(FlowType.FLOW, hasActiveFlow, sdxCluster::getLastCbFlowId);
+    private void logCbFlowStatus(String flowId, Boolean hasActiveFlow) {
+        logActiveStatus(FlowType.FLOW, hasActiveFlow, flowId);
     }
 
-    private void logActiveStatus(FlowType flowType, Boolean hasActiveFlow, Supplier<String> idSupplier) {
+    private void logActiveStatus(FlowType flowType, Boolean hasActiveFlow, String id) {
         if (hasActiveFlow == null || !hasActiveFlow) {
-            LOGGER.info("Cloudbreak {} {} is NOT ACTIVE", flowType, idSupplier.get());
+            LOGGER.info("Cloudbreak {} {} is NOT ACTIVE", flowType, id);
         } else {
-            LOGGER.info("Cloudbreak {} {} is ACTIVE", flowType, idSupplier.get());
+            LOGGER.info("Cloudbreak {} {} is ACTIVE", flowType, id);
         }
     }
 
