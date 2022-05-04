@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FAILED;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
+import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.UNKNOWN;
 
 import java.util.Set;
 
@@ -71,7 +72,11 @@ public class CloudbreakPoller {
                 Status.getAvailableStatuses(), Sets.immutableEnumSet(Status.UPGRADE_CCM_FAILED));
     }
 
-    public void waitForState(
+    public void pollFlowStateByFlowIdUntilComplete(String process, String flowId, Long sdxId, PollingConfig pollingConfig) {
+        waitForFlowStateByFlowId(process, flowId, sdxId, pollingConfig, Sets.immutableEnumSet(FINISHED), Sets.immutableEnumSet(FAILED, UNKNOWN));
+    }
+
+    private void waitForState(
             String process,
             SdxCluster sdxCluster,
             PollingConfig pollingConfig,
@@ -83,10 +88,10 @@ public class CloudbreakPoller {
                 .run(() -> checkClusterStatus(process, sdxCluster, targetStatuses, failedStatuses));
     }
 
-    public AttemptResult<StackStatusV4Response> checkClusterStatus(
+    private AttemptResult<StackStatusV4Response> checkClusterStatus(
             String process,
             SdxCluster sdxCluster,
-            Set<Status> targetSatuses,
+            Set<Status> targetStatuses,
             Set<Status> failedStatuses) {
         LOGGER.info("{} polling cloudbreak for stack status: '{}' in '{}' env", process, sdxCluster.getClusterName(), sdxCluster.getEnvName());
         try {
@@ -99,7 +104,7 @@ public class CloudbreakPoller {
                 LOGGER.info("{} polling will continue, cluster has an active flow in Cloudbreak.", process);
                 return AttemptResults.justContinue();
             } else {
-                return getStackResponseAttemptResult(process, sdxCluster, flowState, targetSatuses, failedStatuses);
+                return getStackResponseAttemptResult(process, sdxCluster, flowState, targetStatuses, failedStatuses);
             }
         } catch (NotFoundException e) {
             LOGGER.debug("Stack not found on CB side " + sdxCluster.getClusterName(), e);
@@ -111,7 +116,7 @@ public class CloudbreakPoller {
             String process,
             SdxCluster sdxCluster,
             FlowState flowState,
-            Set<Status> targetSatuses,
+            Set<Status> targetStatuses,
             Set<Status> failedStatuses) {
         StackStatusV4Response statusResponse = getStackAndClusterStatusWithInternalActor(sdxCluster);
         LOGGER.info("Response from cloudbreak: {}", statusResponse);
@@ -119,8 +124,8 @@ public class CloudbreakPoller {
             String message = sdxStatusService.getShortStatusMessage(statusResponse);
             LOGGER.info("{} flow finished, but failed. {}", process, message);
             return failedPolling(process, sdxCluster, message);
-        } else if (oneOf(statusResponse.getStatus(), targetSatuses)
-                && oneOf(statusResponse.getClusterStatus(), targetSatuses)) {
+        } else if (oneOf(statusResponse.getStatus(), targetStatuses)
+                && oneOf(statusResponse.getClusterStatus(), targetStatuses)) {
             return AttemptResults.finishWith(statusResponse);
         } else if (oneOf(statusResponse.getStatus(), failedStatuses)) {
             LOGGER.info("{} failed. Stack is in {} status.", process, statusResponse.getStatus());
@@ -150,5 +155,39 @@ public class CloudbreakPoller {
     private AttemptResult<StackStatusV4Response> failedPolling(String processDescription, SdxCluster sdxCluster, String statusReason) {
         LOGGER.info("{} failed: {}, ", processDescription, statusReason);
         return AttemptResults.breakFor(processDescription + " failed on '" + sdxCluster.getClusterName() + "' cluster. Reason: " + statusReason);
+    }
+
+    private void waitForFlowStateByFlowId(
+            String process,
+            String flowId,
+            Long sdxId,
+            PollingConfig pollingConfig,
+            Set<FlowState> targetStates,
+            Set<FlowState> failedStates) {
+        Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
+                .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
+                .run(() -> checkFlowStateByFlowId(process, flowId, sdxId, targetStates, failedStates));
+    }
+
+    private AttemptResult<FlowState> checkFlowStateByFlowId(
+            String process,
+            String flowId,
+            Long sdxId,
+            Set<FlowState> targetStates,
+            Set<FlowState> failedStates) {
+        LOGGER.info("Polling CB for flow state of process '{}' with flow ID '{}'.", process, flowId);
+        if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxId))) {
+            LOGGER.info("{} polling cancelled in inmemory store, id: {}", process, sdxId);
+            return AttemptResults.breakFor(process + " polling cancelled for flowId '" + flowId + "'.");
+        }
+        FlowState flowState = cloudbreakFlowService.getLastKnownFlowStateByFlowId(flowId);
+        if (failedStates.contains(flowState)) {
+            return AttemptResults.breakFor(process + " had flow with ID '" + flowId + "' fail with flow state: " + flowState.toString());
+        } else if (targetStates.contains(flowState)) {
+            return AttemptResults.finishWith(flowState);
+        } else {
+            return AttemptResults.justContinue();
+        }
     }
 }

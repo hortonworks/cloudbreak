@@ -1,19 +1,23 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
 
-import java.util.Set;
+import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformRequest;
 
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleRequest;
-
-public class ClusterProxyReRegistrationRequest extends AbstractClusterScaleRequest {
-
+public class ClusterProxyReRegistrationRequest extends ClusterPlatformRequest {
     private String cloudPlatform;
 
-    public ClusterProxyReRegistrationRequest(Long stackId, Set<String> hostGroups, String cloudPlatform) {
-        super(stackId, hostGroups);
+    private String finishedEvent;
+
+    public ClusterProxyReRegistrationRequest(Long stackId, String cloudPlatform, String finishedEvent) {
+        super(stackId);
         this.cloudPlatform = cloudPlatform;
+        this.finishedEvent = finishedEvent;
     }
 
     public String getCloudPlatform() {
         return cloudPlatform;
+    }
+
+    public String getFinishedEvent() {
+        return finishedEvent;
     }
 }

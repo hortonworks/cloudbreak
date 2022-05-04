@@ -68,7 +68,6 @@ import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse.Builder;
-import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
 
 @Controller
 @WorkspaceEntityType(Stack.class)
@@ -478,8 +477,6 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier renewInternalCertificate(Long workspaceId, @TenantAwareParam String crn) {
         try {
             return stackOperationService.renewInternalCertificate(crn);
-        } catch (FlowNotTriggerableException e) {
-            throw new BadRequestException(e.getMessage());
         } catch (Exception e) {
             throw new BadRequestException(e.getMessage());
         }
@@ -511,5 +508,11 @@ public class StackV4Controller extends NotificationController implements StackV4
         CloudbreakImageCatalogV3 imageCatalog = stackOperations.generateImageCatalog(NameOrCrn.ofName(name),
                 restRequestThreadLocalService.getRequestedWorkspaceId());
         return new GenerateImageCatalogV4Response(imageCatalog);
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier reRegisterClusterProxyConfig(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperationService.reRegisterClusterProxyConfig(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
     }
 }

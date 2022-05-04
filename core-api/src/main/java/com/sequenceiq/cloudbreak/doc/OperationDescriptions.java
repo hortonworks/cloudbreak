@@ -85,6 +85,7 @@ public class OperationDescriptions {
         public static final String CHANGE_IMAGE_CATALOG = "Changes image catalog of the cluster";
         public static final String RANGER_RAZ_ENABLED = "Determines if Ranger Raz is present in the cluster.";
         public static final String GENERATE_IMAGE_CATALOG = "Generates an image catalog that only contains the currently used image for creating instances";
+        public static final String RE_REGISTER_CLUSTER_PROXY_CONFIG = "Re-registers the cluster proxy config for the cluster if needed.";
     }
 
     public static class ClusterOpDescription {
