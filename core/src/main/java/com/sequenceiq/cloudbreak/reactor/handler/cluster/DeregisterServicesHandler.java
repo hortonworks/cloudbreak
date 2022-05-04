@@ -66,8 +66,8 @@ public class DeregisterServicesHandler implements EventHandler<DeregisterService
                         DatalakeDto.DatalakeDtoBuilder.aDatalakeDto()
                                 .withGatewayPort(dataLake.getGatewayPort())
                                 .withHttpClientConfig(httpClientConfig)
-                                .withPassword(dataLake.getCluster().getPassword())
-                                .withUser(dataLake.getCluster().getUserName())
+                                .withPassword(dataLake.getCluster().getCloudbreakAmbariPassword())
+                                .withUser(dataLake.getCluster().getCloudbreakAmbariUser())
                                 .withName(dataLake.getName())
                                 .build()
                 );
