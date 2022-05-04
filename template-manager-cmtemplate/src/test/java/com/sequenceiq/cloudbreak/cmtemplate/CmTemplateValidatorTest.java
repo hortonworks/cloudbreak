@@ -260,6 +260,34 @@ public class CmTemplateValidatorTest {
     }
 
     @Test
+    public void testValidationIfKafkaUpgradedTo7211PresentedAndUpScaleThenValidationShouldThrowError() {
+        Blueprint blueprint = readBlueprint("input/kafka.bp");
+
+        String hostGroup = "broker";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.2.11");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+
+        assertThrows(BadRequestException.class, () -> subject
+            .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of()));
+    }
+
+    @Test
+    public void testValidationIfKafkaUpgradedTo7212PresentedAndUpScaleThenValidationShouldNOTThrowError() {
+        Blueprint blueprint = readBlueprint("input/kafka.bp");
+
+        String hostGroup = "broker";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.2.12");
+
+        when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
+
+        assertDoesNotThrow(() -> subject
+            .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of()));
+    }
+
+    @Test
     public void testValidationIfKafka7212PresentedAndDownScaleThenValidationShouldNOTThrowError() {
         Blueprint blueprint = readBlueprint("input/kafka-cc_7_2_12.bp");
 
@@ -270,7 +298,7 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
         assertDoesNotThrow(() -> subject
-                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of()));
+            .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of()));
     }
 
     @Test
