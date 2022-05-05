@@ -4,7 +4,6 @@ import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmS
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmService;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmEvent;
 
@@ -44,12 +42,8 @@ class UpgradeCcmCheckPrerequisitesHandlerTest {
 
     @BeforeEach
     void setUp() {
-        UpgradeCcmEvent upgradeCcmEvent = new UpgradeCcmEvent("selector", STACK_ID, null);
+        UpgradeCcmEvent upgradeCcmEvent = new UpgradeCcmEvent("selector", STACK_ID, Tunnel.CCM);
             event = new Event<>(upgradeCcmEvent);
-        Stack stack = new Stack();
-        stack.setId(STACK_ID);
-        stack.setTunnel(Tunnel.CCM);
-        when(upgradeCcmService.checkPrerequsities(STACK_ID)).thenReturn(stack);
     }
 
     @Test

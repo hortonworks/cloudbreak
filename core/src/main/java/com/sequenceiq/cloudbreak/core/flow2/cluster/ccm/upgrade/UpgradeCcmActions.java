@@ -136,7 +136,7 @@ public class UpgradeCcmActions {
     }
 
     @Bean(name = "UPGRADE_CCM_DEREGISTER_AGENT_STATE")
-    public Action<?, ?> unregisterHosts() {
+    public Action<?, ?> deregisterAgent() {
         return new AbstractClusterAction<>(UpgradeCcmRemoveAgentResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, UpgradeCcmRemoveAgentResult payload, Map<Object, Object> variables) {
