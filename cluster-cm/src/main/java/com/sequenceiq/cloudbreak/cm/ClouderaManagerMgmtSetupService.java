@@ -117,7 +117,7 @@ public class ClouderaManagerMgmtSetupService {
             }
         }
         cmConfigService.setConfigs(stack, mgmtRoles);
-        telemetryService.setupTelemetryRole(stack, apiClient, cmHostRef, mgmtRoles, telemetry);
+        telemetryService.setupTelemetryRole(stack, apiClient, cmHostRef, mgmtRoles, telemetry, sdxStackCrn);
         createMgmtRoles(mgmtRolesResourceApi, mgmtRoles);
         telemetryService.updateTelemetryConfigs(stack, apiClient, telemetry, sdxContextName, sdxStackCrn, proxyConfig);
         telemetryService.updateServiceMonitorConfigs(stack, apiClient, telemetry);

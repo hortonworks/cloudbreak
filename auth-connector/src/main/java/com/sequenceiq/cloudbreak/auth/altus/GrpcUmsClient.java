@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -682,6 +683,24 @@ public class GrpcUmsClient {
         }
     }
 
+    @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
+    public void assignMachineUserResourceRole(String accountId, String machineUserCrn, String resourceRoleCrn, String resourceCrn,
+            Optional<String> requestId, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        try {
+            UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
+            client.assignMachineUserResourceRole(RequestIdUtil.getOrGenerate(requestId), accountId, machineUserCrn, resourceRoleCrn, resourceCrn);
+        } catch (StatusRuntimeException ex) {
+            if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
+                String errMessage = String.format("Cannot assign resource role '%s' to machine user '%s' and resource '%s' as " +
+                        "UMS API is UNAVAILABLE at the moment", machineUserCrn, resourceRoleCrn, resourceCrn);
+                LOGGER.debug(errMessage, ex);
+                throw new UmsOperationException(errMessage, ex);
+            } else {
+                throw ex;
+            }
+        }
+    }
+
     /**
      * Remove machine user role
      *
@@ -736,8 +755,8 @@ public class GrpcUmsClient {
      * @return credential (access/secret keypair)
      */
     public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn, String accountId, String roleCrn,
-        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
-        return createMachineUserAndGenerateKeys(machineUserName, userCrn, accountId, roleCrn, AccessKeyType.Value.UNSET,
+        Map<String, String> resourceRoles, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        return createMachineUserAndGenerateKeys(machineUserName, userCrn, accountId, roleCrn, resourceRoles, AccessKeyType.Value.UNSET,
                 regionAwareInternalCrnGeneratorFactory);
     }
 
@@ -753,12 +772,19 @@ public class GrpcUmsClient {
      */
     @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
     public AltusCredential createMachineUserAndGenerateKeys(String machineUserName, String userCrn, String accountId,
-            String roleCrn, AccessKeyType.Value accessKeyType, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            String roleCrn, Map<String, String> resourceRoles, AccessKeyType.Value accessKeyType,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         Optional<String> machineUserCrn = createMachineUser(machineUserName, userCrn, accountId,
                 MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
         if (StringUtils.isNotEmpty(roleCrn)) {
             assignMachineUserRole(userCrn, accountId, machineUserCrn.orElse(null), roleCrn,
                     MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
+        }
+        if (MapUtils.isNotEmpty(resourceRoles) && machineUserCrn.isPresent()) {
+            resourceRoles.forEach((resourceCrn, resourceRoleCrn) -> {
+                assignMachineUserResourceRole(accountId, machineUserCrn.get(), resourceRoleCrn, resourceCrn, MDCUtils.getRequestId(),
+                        regionAwareInternalCrnGeneratorFactory);
+            });
         }
         return generateAccessSecretKeyPair(userCrn, accountId, machineUserCrn.orElse(null),
                 MDCUtils.getRequestId(), accessKeyType, regionAwareInternalCrnGeneratorFactory);

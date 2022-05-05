@@ -17,6 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -221,5 +222,31 @@ public class GrpcUmsClientTest {
                         .setRight("right")
                         .build()),
                 rightChecks);
+    }
+
+    @Test
+    public void testAssignMachineUserResourceRole() {
+        underTest.assignMachineUserResourceRole("accountId", "machineUserCrn", "resourceRoleCrn", "resourceCrn",
+                Optional.of("requestId"), regionAwareInternalCrnGeneratorFactory);
+
+        verify(umsClient, times(1)).assignMachineUserResourceRole(eq("requestId"), eq("accountId"), eq("machineUserCrn"),
+                eq("resourceRoleCrn"), eq("resourceCrn"));
+    }
+
+    @Test
+    public void testCreateMachineUserAndGenerateKeysWithResourceRoles() {
+        when(umsClient.createMachineUser(any(), eq("userCrn"), eq("accountId"), eq("machineUserName"))).thenReturn(Optional.of("machineUserCrn"));
+        UserManagementProto.CreateAccessKeyResponse createAccessKeyResponse = UserManagementProto.CreateAccessKeyResponse.newBuilder()
+                .setAccessKey(UserManagementProto.AccessKey.newBuilder().setAccessKeyId("accessKeyId").build())
+                .setPrivateKey("privateKey")
+                .build();
+        when(umsClient.createAccessPrivateKeyPair(any(), eq("userCrn"), eq("accountId"), eq("machineUserCrn"), any())).thenReturn(createAccessKeyResponse);
+
+        underTest.createMachineUserAndGenerateKeys("machineUserName", "userCrn", "accountId", "roleCrn",
+                Map.of("resourceCrn", "resourceRoleCrn"), regionAwareInternalCrnGeneratorFactory);
+        verify(umsClient, times(1)).createMachineUser(any(), eq("userCrn"), eq("accountId"), eq("machineUserName"));
+        verify(umsClient, times(1)).assignMachineUserRole(any(), eq("userCrn"), eq("accountId"), eq("machineUserCrn"), eq("roleCrn"));
+        verify(umsClient, times(1)).assignMachineUserResourceRole(any(), eq("accountId"), eq("machineUserCrn"), eq("resourceRoleCrn"),
+                eq("resourceCrn"));
     }
 }

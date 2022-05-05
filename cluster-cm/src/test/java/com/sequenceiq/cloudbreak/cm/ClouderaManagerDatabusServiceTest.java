@@ -12,6 +12,8 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
+import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -21,6 +23,8 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 public class ClouderaManagerDatabusServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:accountId:user:name";
+
+    private static final String SDX_STACK_CRN = "crn:cdp:sdx:us-west-1:1234:sdxcluster:mystack";
 
     @InjectMocks
     private ClouderaManagerDatabusService underTest;
@@ -33,6 +37,12 @@ public class ClouderaManagerDatabusServiceTest {
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    @Mock
+    private RoleCrnGenerator roleCrnGenerator;
+
+    @Mock
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     private Stack stack;
 
@@ -53,11 +63,13 @@ public class ClouderaManagerDatabusServiceTest {
     public void testGetAltusCredential() {
         // GIVEN
         AltusCredential credential = new AltusCredential("accessKey", "secretKey".toCharArray());
-        when(iamService.generateMachineUserWithAccessKeyForLegacyCm(any(), any(), any())).thenReturn(credential);
+        when(iamService.generateMachineUserWithAccessKeyForLegacyCm(any(), any(), any(), any())).thenReturn(credential);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        when(roleCrnGenerator.getBuiltInWXMClusterAdminResourceRoleCrn(any())).thenReturn("resourceRoleCrn");
+        when(regionAwareCrnGenerator.generateCrnString(any(), any(), any())).thenReturn("resourceCrn");
         // WHEN
-        AltusCredential result = underTest.getAltusCredential(stack);
+        AltusCredential result = underTest.getAltusCredential(stack, SDX_STACK_CRN);
         // THEN
         assertEquals("secretKey", new String(result.getPrivateKey()));
     }

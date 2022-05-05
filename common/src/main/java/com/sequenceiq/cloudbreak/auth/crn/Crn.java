@@ -375,7 +375,8 @@ public class Crn {
         DATAHUB_AUTOSCALE_CONFIG("datahubAutoscaleConfig"),
         PROXY_CONIFG("proxyConfig"),
         SERVICE("service"),
-        AGENT("agent");
+        AGENT("agent"),
+        WXM_ENVIRONMENT("wxm_environment");
 
         private static final ImmutableMap<String, ResourceType> FROM_STRING;
 

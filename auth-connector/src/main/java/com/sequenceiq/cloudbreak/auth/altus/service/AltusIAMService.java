@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.auth.altus.service;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -39,12 +41,14 @@ public class AltusIAMService {
     /**
      * Generate machine user with access keys
      */
-    public AltusCredential generateMachineUserWithAccessKeyForLegacyCm(String machineUserName, String actorCrn, String accountId) {
+    public AltusCredential generateMachineUserWithAccessKeyForLegacyCm(String machineUserName, String actorCrn, String accountId,
+            Map<String, String> resourceRoles) {
         return umsClient.createMachineUserAndGenerateKeys(
                 machineUserName,
                 actorCrn,
                 accountId,
                 roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId),
+                resourceRoles,
                 regionAwareInternalCrnGeneratorFactory);
     }
 
@@ -58,6 +62,7 @@ public class AltusIAMService {
                         actorCrn,
                         accountId,
                         roleCrnGenerator.getBuiltInDatabusRoleCrn(accountId),
+                        Collections.emptyMap(),
                         UserManagementProto.AccessKeyType.Value.ED25519,
                         regionAwareInternalCrnGeneratorFactory)));
     }
