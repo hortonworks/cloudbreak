@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -130,9 +131,47 @@ public class ClusterUpgradeAvailabilityServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private InstanceMetaDataService instanceMetaDataService;
+
     private boolean lockComponents;
 
     private final Map<String, String> activatedParcels = new HashMap<>();
+
+    @Test
+    public void testCheckForUpgradesByNameAndSomeInstancesAreStopped()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Stack stack = createStack(createStackStatus(Status.AVAILABLE), StackType.WORKLOAD);
+        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
+        ImageCatalog imageCatalogDomain = createImageCatalogDomain();
+        Image currentImageFromCatalog = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        Image properImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        Image otherImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        CloudbreakImageCatalogV3 imageCatalog = createImageCatalog(List.of(properImage, otherImage, currentImageFromCatalog));
+        ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImageFromCatalog);
+        UpgradeV4Response response = new UpgradeV4Response();
+
+        when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS)).thenReturn(imageFilterParams);
+        when(imageService.getImage(stack.getId())).thenReturn(currentImage);
+        when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
+        when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
+        ImageFilterResult filteredImages = createFilteredImages(properImage);
+        when(clusterUpgradeImageFilter.filter(ACCOUNT_ID, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
+        when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
+                currentImage.getImageCatalogName())).thenReturn(response);
+        when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
+        when(instanceMetaDataService.anyInstanceStopped(stack.getId())).thenReturn(true);
+
+        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS);
+
+        assertEquals("Cannot upgrade cluster because there is stopped instance.", actual.getReason());
+        assertEquals(response, actual);
+        verify(imageService).getImage(stack.getId());
+        verify(imageCatalogProvider).getImageCatalogV3(CATALOG_URL);
+        verify(clusterUpgradeImageFilter).filter(ACCOUNT_ID, imageCatalog, imageFilterParams);
+        verify(upgradeOptionsResponseFactory).createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
+                currentImage.getImageCatalogName());
+    }
 
     @Test
     public void testCheckForUpgradesByNameShouldReturnImagesWhenThereAreAvailableImagesUsingImageCatalogByName()
@@ -159,6 +198,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
+        when(instanceMetaDataService.anyInstanceStopped(stack.getId())).thenReturn(false);
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS);
 
@@ -194,6 +234,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
+        when(instanceMetaDataService.anyInstanceStopped(stack.getId())).thenReturn(false);
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS);
 
@@ -227,6 +268,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
+        when(instanceMetaDataService.anyInstanceStopped(stack.getId())).thenReturn(false);
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, false, INTERNAL_UPGRADE_SETTINGS);
 
@@ -322,6 +364,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         String validationError = "External RDS is not attached.";
         when(result.getError()).thenReturn(repairValidation);
         when(repairValidation.getValidationErrors()).thenReturn(Collections.singletonList(validationError));
+        when(instanceMetaDataService.anyInstanceStopped(stack.getId())).thenReturn(false);
 
         UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS);
 

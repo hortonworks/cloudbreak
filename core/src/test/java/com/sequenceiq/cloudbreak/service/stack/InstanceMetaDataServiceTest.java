@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -368,6 +369,20 @@ class InstanceMetaDataServiceTest {
         String actual = underTest.getAzFromDiskOrNullIfRepair(stack, true, "ig", "hostname");
         assertThat(actual).isNull();
         verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig");
+    }
+
+    @Test
+    public void testAnyInstanceStoppedAndZeroStopped() {
+        when(repository.countStoppedForStack(any())).thenReturn(0L);
+        boolean anyInstanceStopped = underTest.anyInstanceStopped(1L);
+        Assertions.assertFalse(anyInstanceStopped);
+    }
+
+    @Test
+    public void testAnyInstanceStoppedAnd2Stopped() {
+        when(repository.countStoppedForStack(any())).thenReturn(2L);
+        boolean anyInstanceStopped = underTest.anyInstanceStopped(1L);
+        Assertions.assertTrue(anyInstanceStopped);
     }
 
     private Stack stack(int instanceGroupCount) {

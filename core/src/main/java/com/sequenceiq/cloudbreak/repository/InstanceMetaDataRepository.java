@@ -179,4 +179,7 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     Page<InstanceMetaData> findTerminatedInstanceMetadataByStackIdAndTerminatedBefore(@Param("stackId") Long stackId,
             @Param("thresholdTerminationDate") Long thresholdTerminationDate, Pageable pageable);
 
+    @Query("SELECT COUNT(i) FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceStatus = 'STOPPED'")
+    long countStoppedForStack(@Param("stackId") Long stackId);
+
 }

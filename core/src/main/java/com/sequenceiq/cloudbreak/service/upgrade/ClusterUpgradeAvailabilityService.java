@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -75,12 +76,18 @@ public class ClusterUpgradeAvailabilityService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
+
     public UpgradeV4Response checkForUpgradesByName(Stack stack, boolean lockComponents, boolean replaceVms, InternalUpgradeSettings internalUpgradeSettings) {
         UpgradeV4Response upgradeOptions = checkForUpgrades(stack, lockComponents, internalUpgradeSettings);
         upgradeOptions.setReplaceVms(replaceVms);
         if (StringUtils.isEmpty(upgradeOptions.getReason())) {
             if (!stack.getStatus().isAvailable()) {
                 upgradeOptions.setReason(String.format("Cannot upgrade cluster because it is in %s state.", stack.getStatus()));
+                LOGGER.warn(upgradeOptions.getReason());
+            } else if (instanceMetaDataService.anyInstanceStopped(stack.getId())) {
+                upgradeOptions.setReason("Cannot upgrade cluster because there is stopped instance.");
                 LOGGER.warn(upgradeOptions.getReason());
             } else if (shouldValidateForRepair(lockComponents, replaceVms)) {
                 LOGGER.debug("Validate for repair");
