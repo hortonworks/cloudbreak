@@ -40,6 +40,10 @@ public class RoleCrnGenerator {
         return getResourceRoleCrn("EnvironmentUser").toString();
     }
 
+    public String getBuiltInWXMClusterAdminResourceRoleCrn(String accountId) {
+        return getResourceRoleCrn("WXMClusterAdmin", accountId).toString();
+    }
+
     public Crn getResourceRoleCrn(String resourceRoleName) {
         return getResourceRoleCrn(resourceRoleName, ThreadBasedUserCrnProvider.getAccountId());
     }

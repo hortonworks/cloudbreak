@@ -36,7 +36,8 @@ public enum CrnResourceDescriptor {
     ALERT(Crn.ResourceType.DATAHUB_AUTOSCALE_CONFIG, Crn.Service.AUTOSCALE),
     // DFX service
     DFX_INTERIM(Crn.ResourceType.ENVIRONMENT, Crn.Service.DF),
-    DFX(Crn.ResourceType.SERVICE, Crn.Service.DF);
+    DFX(Crn.ResourceType.SERVICE, Crn.Service.DF),
+    WXM_ENVIRONMENT(Crn.ResourceType.WXM_ENVIRONMENT, Crn.Service.ENVIRONMENTS);
 
     private Crn.ResourceType resourceType;
 

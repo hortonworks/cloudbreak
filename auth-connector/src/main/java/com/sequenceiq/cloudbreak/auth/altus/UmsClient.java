@@ -707,6 +707,45 @@ public class UmsClient {
     }
 
     /**
+     * Add a resource role (to machine user) - if resource role does not exist
+     *
+     * @param requestId       id of the request
+     * @param accountId       account id for user
+     * @param machineUserCrn  machine user identifier
+     * @param resourceRoleCrn resource role identifier
+     * @param resourceCrn     resource identifier
+     */
+    public void assignMachineUserResourceRole(String requestId, String accountId, String machineUserCrn, String resourceRoleCrn,
+            String resourceCrn) {
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(machineUserCrn, "machineUserCrn should not be null.");
+        checkNotNull(resourceRoleCrn, "resourceRoleCrn should not be null.");
+        checkNotNull(resourceCrn, "resourceCrn should not be null.");
+        validateAccountIdWithWarning(accountId);
+        try {
+            newStub(requestId).assignResourceRole(
+                    UserManagementProto.AssignResourceRoleRequest.newBuilder()
+                            .setActor(UserManagementProto.Actor.newBuilder()
+                                    .setAccountId(accountId)
+                                    .setMachineUserNameOrCrn(machineUserCrn)
+                                    .build())
+                            .setAssignee(UserManagementProto.Assignee.newBuilder()
+                                    .setAccountId(accountId)
+                                    .setMachineUserNameOrCrn(machineUserCrn)
+                                    .build())
+                            .setResourceRoleCrn(resourceRoleCrn)
+                            .setResourceCrn(resourceCrn)
+                            .build());
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode().equals(Status.ALREADY_EXISTS.getCode())) {
+                LOGGER.info("Resource role ({}) for machine user ({}) and resource ({}) already assigned.", resourceRoleCrn, machineUserCrn, resourceCrn);
+            } else {
+                throw e;
+            }
+        }
+    }
+
+    /**
      * Remove a role (from machine user) - if role exists
      *
      * @param requestId      id of the request

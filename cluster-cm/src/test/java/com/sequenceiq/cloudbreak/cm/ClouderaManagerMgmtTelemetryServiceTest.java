@@ -47,6 +47,8 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
 
     private static final Integer EXPORTER_PORT = 61010;
 
+    private static final String SDX_STACK_CRN = "crn:cdp:sdx:us-west-1:1234:sdxcluster:mystack";
+
     @InjectMocks
     private ClouderaManagerMgmtTelemetryService underTest;
 
@@ -103,14 +105,14 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         when(entitlementService.useDataBusCNameEndpointEnabled(anyString())).thenReturn(false);
         when(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).thenReturn("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
         when(apiClient.execute(any(), any())).thenReturn(response);
-        when(clouderaManagerDatabusService.getAltusCredential(stack)).thenReturn(credential);
+        when(clouderaManagerDatabusService.getAltusCredential(stack, SDX_STACK_CRN)).thenReturn(credential);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(cmResourceApi);
         when(cmResourceApi.updateConfig(anyString(), any())).thenReturn(apiConfigList);
         // WHEN
-        underTest.setupTelemetryRole(stack, apiClient, null, new ApiRoleList(), telemetry);
+        underTest.setupTelemetryRole(stack, apiClient, null, new ApiRoleList(), telemetry, SDX_STACK_CRN);
         // THEN
         verify(externalAccountService, times(1)).createExternalAccount(anyString(), anyString(), anyString(), anyMap(), any(ApiClient.class));
-        verify(clouderaManagerDatabusService, times(1)).getAltusCredential(stack);
+        verify(clouderaManagerDatabusService, times(1)).getAltusCredential(stack, SDX_STACK_CRN);
     }
 
     @Test
@@ -120,7 +122,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         stack.setType(StackType.WORKLOAD);
         Telemetry telemetry = new Telemetry();
         // WHEN
-        underTest.setupTelemetryRole(stack, null, null, null, telemetry);
+        underTest.setupTelemetryRole(stack, null, null, null, telemetry, SDX_STACK_CRN);
         // THEN
         verify(externalAccountService, times(0)).createExternalAccount(anyString(), anyString(), anyString(), anyMap(), any(ApiClient.class));
     }
@@ -136,7 +138,7 @@ public class ClouderaManagerMgmtTelemetryServiceTest {
         when(entitlementService.useDataBusCNameEndpointEnabled(anyString())).thenReturn(false);
         when(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).thenReturn("https://dbusapi.us-west-1.sigma.altus.cloudera.com");
         // WHEN
-        underTest.setupTelemetryRole(stack, null, null, null, telemetry);
+        underTest.setupTelemetryRole(stack, null, null, null, telemetry, SDX_STACK_CRN);
         // THEN
         verify(externalAccountService, times(0)).createExternalAccount(anyString(), anyString(), anyString(), anyMap(), any(ApiClient.class));
     }
