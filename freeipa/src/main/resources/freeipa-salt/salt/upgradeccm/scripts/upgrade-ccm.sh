@@ -7,7 +7,6 @@ check_agent_state() {
     echo "Probing for a running jumpgate-agent..."
     for attempt in {1..3}
     do
-        systemctl is-active -q jumpgate-agent
         if systemctl is-active -q jumpgate-agent
         then
           echo "jumpgate-agent is running."

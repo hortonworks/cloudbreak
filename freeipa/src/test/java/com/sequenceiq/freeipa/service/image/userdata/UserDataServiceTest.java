@@ -59,11 +59,11 @@ class UserDataServiceTest {
     @Test
     void updateJumpgateFlagOnly() {
         ImageEntity image = new ImageEntity();
-        image.setUserdata("IS_CCM_V2_JUMPGATE_ENABLED=false");
+        image.setUserdata("FLAG=foo\nIS_CCM_V2_JUMPGATE_ENABLED=false\nOTHER_FLAG=bar");
         when(imageService.getByStackId(STACK_ID)).thenReturn(image);
         underTest.updateJumpgateFlagOnly(STACK_ID);
         ArgumentCaptor<ImageEntity> imageCaptor = ArgumentCaptor.forClass(ImageEntity.class);
         verify(imageService, times(1)).save(imageCaptor.capture());
-        assertThat(imageCaptor.getValue().getUserdata()).isEqualTo("IS_CCM_V2_JUMPGATE_ENABLED=true");
+        assertThat(imageCaptor.getValue().getUserdata()).isEqualTo("FLAG=foo\nIS_CCM_V2_JUMPGATE_ENABLED=true\nOTHER_FLAG=bar");
     }
 }

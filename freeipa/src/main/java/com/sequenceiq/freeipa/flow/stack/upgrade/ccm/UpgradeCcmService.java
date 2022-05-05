@@ -79,7 +79,7 @@ public class UpgradeCcmService {
     @Inject
     private UpgradeService upgradeService;
 
-    public Stack checkPrerequsities(Long stackId) {
+    public void checkPrerequsities(Long stackId) {
         Stack stack = stackService.getStackById(stackId);
         ImageEntity stackImage = imageService.getByStackId(stackId);
         FreeIpaUpgradeOptions freeIpaUpgradeOptions = upgradeService.collectUpgradeOptions(stack.getAccountId(), stack.getEnvironmentCrn(),
@@ -87,7 +87,6 @@ public class UpgradeCcmService {
         if (!freeIpaUpgradeOptions.getImages().isEmpty()) {
             throw new CloudbreakServiceException("FreeIPA is not on the latest available image. Please upgrade that first. CCM upgrade is not possible yet.");
         }
-        return stack;
     }
 
     public void checkPrerequisitesState(Long stackId) {
@@ -144,7 +143,7 @@ public class UpgradeCcmService {
 
     public void reconfigureNginxState(Long stackId) {
         DetailedStackStatus detailedStatus = UPGRADE_CCM_IN_PROGRESS;
-        String statusReason = "Reconfiguring NGiNX on nodes";
+        String statusReason = "Reconfiguring NGINX on nodes";
         stackUpdater.updateStackStatus(stackId, detailedStatus, statusReason);
     }
 

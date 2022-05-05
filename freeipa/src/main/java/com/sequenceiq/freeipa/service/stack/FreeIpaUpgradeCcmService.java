@@ -86,8 +86,8 @@ public class FreeIpaUpgradeCcmService {
 
         if (!Tunnel.getUpgradables().contains(stack.getTunnel())) {
             throw new BadRequestException(
-                    String.format("FreeIPA stack '%s' has a tunnel type '%s' and thus Cluster Connectivity Manager upgrade is not possible.",
-                            stack.getName(), stack.getTunnel()));
+                    String.format("FreeIPA stack '%s' has a tunnel type '%s' and thus Cluster Connectivity Manager upgrade is not possible.%n" +
+                                    "Allowed original tunnel types are: %s", stack.getName(), stack.getTunnel(), Tunnel.getUpgradables()));
         }
     }
 

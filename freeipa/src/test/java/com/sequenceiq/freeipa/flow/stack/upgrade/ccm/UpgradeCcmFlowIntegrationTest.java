@@ -19,6 +19,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.MockReset;
@@ -108,7 +110,6 @@ class UpgradeCcmFlowIntegrationTest {
         stack.setId(STACK_ID);
         stack.setTunnel(Tunnel.CCM);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(upgradeCcmService.checkPrerequsities(STACK_ID)).thenReturn(stack);
     }
 
     @Test
@@ -206,26 +207,27 @@ class UpgradeCcmFlowIntegrationTest {
         final int[] expected = new int[ALL_CALLED_ONCE];
         Arrays.fill(expected, 0, calledOnceCount, 1);
         int i = 0;
-        verify(upgradeCcmService, times(expected[i++])).checkPrerequisitesState(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).checkPrerequsities(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).changeTunnelState(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).changeTunnel(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).obtainAgentDataState(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).obtainAgentData(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).pushSaltStatesState(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).pushSaltStates(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).upgradeState(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).upgrade(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).reconfigureNginxState(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).reconfigureNginx(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).registerClusterProxyState(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).registerClusterProxy(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).healthCheckState(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).healthCheck(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).removeMinaState(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).removeMina(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).deregisterMinaState(STACK_ID);
-        verify(upgradeCcmService, times(expected[i++])).deregisterMina(STACK_ID);
+        InOrder inOrder = Mockito.inOrder(upgradeCcmService);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).checkPrerequisitesState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).checkPrerequsities(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).changeTunnelState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).changeTunnel(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).obtainAgentDataState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).obtainAgentData(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).pushSaltStatesState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).pushSaltStates(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).upgradeState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).upgrade(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).reconfigureNginxState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).reconfigureNginx(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxyState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).registerClusterProxy(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).healthCheckState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).healthCheck(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).removeMinaState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).removeMina(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).deregisterMinaState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(expected[i++])).deregisterMina(STACK_ID);
     }
 
     private void flowFinishedSuccessfully() {
