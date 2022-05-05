@@ -8,13 +8,16 @@ import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.RETRI
 import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.SYNC_CLOUD_IDENTITIES;
 import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.USER_SYNC_DELETE;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -36,6 +39,9 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UsersStateDifference;
 public class UserSyncForStackService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserSyncForStackService.class);
+
+    @Value("${freeipa.usersync.scale.large-group-size}")
+    private int largeGroupLogThreshold;
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -62,6 +68,7 @@ public class UserSyncForStackService {
         MDCBuilder.buildMdcContext(stack);
         String environmentCrn = stack.getEnvironmentCrn();
         Multimap<String, String> warnings = ArrayListMultimap.create();
+        logLargeGroupMembershipSizes(environmentCrn, umsUsersState);
         try {
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
             UsersStateDifference usersStateDifferenceBeforeSync = compareUmsAndFreeIpa(umsUsersState, options, freeIpaClient);
@@ -96,6 +103,24 @@ public class UserSyncForStackService {
         } catch (Exception e) {
             LOGGER.warn("Failed to synchronize environment {}", environmentCrn, e);
             return SyncStatusDetail.fail(environmentCrn, e.getLocalizedMessage(), warnings);
+        }
+    }
+
+    private void logLargeGroupMembershipSizes(String envCrn, UmsUsersState umsUsersState) {
+        if (LOGGER.isDebugEnabled()) {
+            List<Integer> largeGroupSizes = umsUsersState.getUsersState().getGroupMembership()
+                    .asMap().values().stream()
+                    .map(collection -> collection.size())
+                    .filter(size -> size >= largeGroupLogThreshold)
+                    .sorted()
+                    .collect(Collectors.toList());
+            if (!largeGroupSizes.isEmpty()) {
+                LOGGER.debug("Environment {} has {} groups with size >= {}. {}",
+                        envCrn,
+                        largeGroupSizes.size(),
+                        largeGroupLogThreshold,
+                        largeGroupSizes);
+            }
         }
     }
 
