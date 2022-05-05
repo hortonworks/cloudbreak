@@ -92,6 +92,7 @@ public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedR
         String dynamodbTableName = "tableName";
 
         Map<String, String> expectedPolicyJsonReplacements = Map.ofEntries(
+                Map.entry("${ARN_PARTITION}", "aws"),
                 Map.entry("${STORAGE_LOCATION_BASE}", storageLocationBaseStr),
                 Map.entry("${DATALAKE_BUCKET}", bucket),
                 Map.entry("${DYNAMODB_TABLE_NAME}", dynamodbTableName)
@@ -101,6 +102,7 @@ public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedR
         storageLocationBase.setValue(storageLocationBaseStr);
         CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.ID_BROKER);
         cloudFileSystem.setS3GuardDynamoTableName(dynamodbTableName);
+        cloudFileSystem.setInstanceProfile("arn:aws:iam::11111111111:instance-profile/instanceprofile");
         Map<String, String> policyJsonReplacements = awsDataAccessRolePermissionValidator
                 .getPolicyJsonReplacements(storageLocationBase,
                         cloudFileSystem);
@@ -115,17 +117,19 @@ public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedR
         String bucket = "bucket";
 
         Map<String, String> expectedPolicyJsonReplacements = Map.ofEntries(
-            Map.entry("${STORAGE_LOCATION_BASE}", storageLocationBaseStr),
-            Map.entry("${DATALAKE_BUCKET}", bucket),
-            Map.entry("${DYNAMODB_TABLE_NAME}", "")
+                Map.entry("${ARN_PARTITION}", "aws"),
+                Map.entry("${STORAGE_LOCATION_BASE}", storageLocationBaseStr),
+                Map.entry("${DATALAKE_BUCKET}", bucket),
+                Map.entry("${DYNAMODB_TABLE_NAME}", "")
         );
 
         StorageLocationBase storageLocationBase = new StorageLocationBase();
         storageLocationBase.setValue(storageLocationBaseStr);
         CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.ID_BROKER);
+        cloudFileSystem.setInstanceProfile("arn:aws:iam::11111111111:instance-profile/instanceprofile");
         Map<String, String> policyJsonReplacements = awsDataAccessRolePermissionValidator
-                                                        .getPolicyJsonReplacements(storageLocationBase,
-                                                            cloudFileSystem);
+                .getPolicyJsonReplacements(storageLocationBase,
+                        cloudFileSystem);
 
         assertThat(policyJsonReplacements).isEqualTo(expectedPolicyJsonReplacements);
     }
@@ -140,6 +144,7 @@ public class AwsDataAccessRolePermissionValidatorTest extends AwsIDBrokerMappedR
         storageLocationBase1.setType(CloudStorageCdpService.HIVE_METASTORE_WAREHOUSE);
         storageLocationBase1.setValue("s3a://bucket/cluster/hive/metadata");
         cloudFileSystem.setLocations(List.of(storageLocationBase1));
+        cloudFileSystem.setInstanceProfile("arn:aws:iam::11111111111:instance-profile/instanceprofile");
 
         List<Policy> policies = getValidator().collectPolicies(cloudFileSystem, List.of("policyFile1"));
 

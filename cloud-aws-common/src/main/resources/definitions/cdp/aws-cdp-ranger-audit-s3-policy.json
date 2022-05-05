@@ -8,7 +8,7 @@
         "s3:GetObject",
         "s3:PutObject"
       ],
-      "Resource": "arn:aws:s3:::${STORAGE_LOCATION_BASE}/ranger/audit/*"
+      "Resource": "arn:${ARN_PARTITION}:s3:::${STORAGE_LOCATION_BASE}/ranger/audit/*"
     },
     {
       "Sid": "LimitedAccessToDataLakeBucket",
@@ -18,7 +18,7 @@
         "s3:ListBucket",
         "s3:ListBucketMultipartUploads"
       ],
-      "Resource": "arn:aws:s3:::${DATALAKE_BUCKET}"
+      "Resource": "arn:${ARN_PARTITION}:s3:::${DATALAKE_BUCKET}"
     }
   ]
 }

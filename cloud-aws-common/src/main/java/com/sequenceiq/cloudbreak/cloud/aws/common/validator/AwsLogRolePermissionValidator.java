@@ -18,6 +18,7 @@ import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.Arn;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
@@ -38,10 +39,13 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
             CloudS3View cloudFileSystem, String logLocationBase, ValidationResultBuilder validationResultBuilder) {
         SortedSet<String> failedActions = new TreeSet<>();
         SortedSet<String> warnings = new TreeSet<>();
+        Arn instanceProfileArn = Arn.of(instanceProfile.getArn());
         if (logLocationBase == null) {
             return;
         }
+
         Map<String, String> replacements = Map.ofEntries(
+                Map.entry("${ARN_PARTITION}", instanceProfileArn.getPartition()),
                 Map.entry("${LOGS_LOCATION_BASE}", removeProtocol(logLocationBase)),
                 Map.entry("${LOGS_BUCKET}", locationHelper.parseS3BucketName(logLocationBase))
         );

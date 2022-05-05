@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -20,6 +21,7 @@ import com.amazonaws.services.identitymanagement.model.AmazonIdentityManagementE
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
 import com.amazonaws.services.identitymanagement.model.Role;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.Arn;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
@@ -149,10 +151,19 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractA
         String dynamodbTableName = cloudFileSystem.getS3GuardDynamoTableName() != null ?
                 cloudFileSystem.getS3GuardDynamoTableName() : "";
         return Map.ofEntries(
+                Map.entry("${ARN_PARTITION}", getAwsPartition(cloudFileSystem)),
                 Map.entry("${STORAGE_LOCATION_BASE}", storageLocationBase),
                 Map.entry("${DATALAKE_BUCKET}", datalakeBucket),
                 Map.entry("${DYNAMODB_TABLE_NAME}", dynamodbTableName)
         );
+    }
+
+    private String getAwsPartition(CloudS3View cloudFileSystem) {
+        return Optional.ofNullable(cloudFileSystem)
+                .map(CloudS3View::getInstanceProfile)
+                .map(Arn::of)
+                .map(Arn::getPartition)
+                .orElse("aws");
     }
 
     /**
