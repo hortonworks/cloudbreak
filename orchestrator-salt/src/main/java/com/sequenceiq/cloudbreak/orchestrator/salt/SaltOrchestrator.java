@@ -995,7 +995,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 runSyncAll(sc, allHostnames, responsiveNodesUnderStopping, exitCriteriaModel);
 
                 saveHostsPillar(stack, exitCriteriaModel, getGatewayPrivateIps(Collections.singleton(gatewayConfig)), sc);
-                runNewService(sc, new HighStateAllRunner(allHostnames, responsiveNodesUnderStopping), exitCriteriaModel, maxRetry, true);
+                runNewService(sc, new HighStateRunner(allHostnames, responsiveNodesUnderStopping), exitCriteriaModel, maxRetry, true);
 
                 saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodesUnderStopping, "roles",
                         "cloudera_manager_agent_stop"), exitCriteriaModel, exitCriteria);

@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.NODE_FAILURE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,20 +24,26 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterCommonServiceTest {
@@ -51,8 +60,52 @@ public class ClusterCommonServiceTest {
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Mock
+    private ClusterOperationService clusterOperationService;
+
     @BeforeEach
     public void setUp() {
+    }
+
+    @Test
+    public void testRotateAutoTlsCertificatesWithStoppedInstances() {
+        NameOrCrn cluster = NameOrCrn.ofName("cluster");
+        Stack stack = new Stack();
+        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        when(instanceMetaDataService.anyInstanceStopped(any())).thenReturn(true);
+        when(stackService.getByNameOrCrnInWorkspace(cluster, 1L)).thenReturn(stack);
+        CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.rotateAutoTlsCertificates(cluster, 1L, certificatesRotationV4Request));
+        assertEquals("Please start all stopped instances. Certificates rotation can only be made when all your nodes in running state.",
+                badRequestException.getMessage());
+    }
+
+    @Test
+    public void testRotateAutoTls() {
+        NameOrCrn cluster = NameOrCrn.ofName("cluster");
+        Stack stack = new Stack();
+        stack.setName("cluster");
+        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
+        when(clusterOperationService.rotateAutoTlsCertificates(stack, certificatesRotationV4Request)).thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
+        when(stackService.getByNameOrCrnInWorkspace(cluster, 1L)).thenReturn(stack);
+        underTest.rotateAutoTlsCertificates(cluster, 1L, certificatesRotationV4Request);
+        verify(clusterOperationService, times(1)).rotateAutoTlsCertificates(stack, certificatesRotationV4Request);
+    }
+
+    @Test
+    public void testRotateAutoTlsCertificatesWithNodeFailure() {
+        NameOrCrn cluster = NameOrCrn.ofName("cluster");
+        Stack stack = new Stack();
+        stack.setName("cluster");
+        stack.setStackStatus(new StackStatus(stack, NODE_FAILURE));
+        when(stackService.getByNameOrCrnInWorkspace(cluster, 1L)).thenReturn(stack);
+        CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.rotateAutoTlsCertificates(cluster, 1L, certificatesRotationV4Request));
+        assertEquals("Stack 'cluster' is currently in 'NODE_FAILURE' state. Certificates rotation can only be made when the underlying stack is 'AVAILABLE'.",
+                badRequestException.getMessage());
     }
 
     @Test

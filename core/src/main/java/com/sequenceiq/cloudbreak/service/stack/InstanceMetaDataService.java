@@ -419,6 +419,10 @@ public class InstanceMetaDataService {
         return repository.findAllByInstanceGroupAndInstanceStatusOrderByPrivateIdAsc(instanceGroup, status);
     }
 
+    public boolean anyInstanceStopped(Long stackId) {
+        return repository.countStoppedForStack(stackId) > 0;
+    }
+
     public Optional<InstanceMetaData> findByHostname(Long stackId, String hostName) {
         return repository.findHostInStack(stackId, hostName);
     }

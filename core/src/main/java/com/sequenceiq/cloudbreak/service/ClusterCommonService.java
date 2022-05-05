@@ -322,6 +322,9 @@ public class ClusterCommonService {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. %s can only be made when the underlying stack is 'AVAILABLE'.",
                     stack.getName(), stack.getStatus(), operationDescription));
+        } else if (instanceMetaDataService.anyInstanceStopped(stack.getId())) {
+            throw new BadRequestException(String.format("Please start all stopped instances. %s can only be made when all your nodes in running state.",
+                    operationDescription));
         }
     }
 }
