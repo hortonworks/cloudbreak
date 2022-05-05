@@ -52,7 +52,7 @@ public class UmsUsersStateProviderDispatcher {
         try {
             return bulkUmsUsersStateProvider.get(accountId, environmentCrns, requestIdOptional);
         } catch (RuntimeException e) {
-            LOGGER.debug("Failed to retrieve UMS user sync state through bulk request. Falling back on default approach");
+            LOGGER.debug("Failed to retrieve UMS user sync state through bulk request. Falling back on default approach.", e);
             return dispatchDefault(accountId, environmentCrns, userCrns, machineUserCrns,
                     requestIdOptional, fullSync);
         }
