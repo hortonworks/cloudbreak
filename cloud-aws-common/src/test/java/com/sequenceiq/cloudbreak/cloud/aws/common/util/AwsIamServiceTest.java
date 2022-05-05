@@ -228,11 +228,11 @@ public class AwsIamServiceTest {
         Policy expectedPolicyNoReplacements = new Policy().withStatements(
                 new Statement(Effect.Allow).withId("FullObjectAccessUnderAuditDir")
                         .withActions(S3Actions.GetObject, S3Actions.PutObject)
-                        .withResources(new Resource("arn:aws:s3:::${STORAGE_LOCATION_BASE}/ranger/audit/*")),
+                        .withResources(new Resource("arn:${ARN_PARTITION}:s3:::${STORAGE_LOCATION_BASE}/ranger/audit/*")),
                 new Statement(Effect.Allow).withId("LimitedAccessToDataLakeBucket")
                         .withActions(S3Actions.AbortMultipartUpload, S3Actions.ListObjects,
                                 S3Actions.ListBucketMultipartUploads)
-                        .withResources(new Resource("arn:aws:s3:::${DATALAKE_BUCKET}"))
+                        .withResources(new Resource("arn:${ARN_PARTITION}:s3:::${DATALAKE_BUCKET}"))
         );
         assertThat(awsIamService.getPolicy("aws-cdp-ranger-audit-s3-policy.json",
                 Collections.emptyMap()).toJson()).isEqualTo(expectedPolicyNoReplacements.toJson());
@@ -240,14 +240,15 @@ public class AwsIamServiceTest {
         Policy expectedPolicyWithReplacements = new Policy().withStatements(
                 new Statement(Effect.Allow).withId("FullObjectAccessUnderAuditDir")
                         .withActions(S3Actions.GetObject, S3Actions.PutObject)
-                        .withResources(new Resource("arn:aws:s3:::mybucket/mycluster/ranger/audit/*")),
+                        .withResources(new Resource("arn:aws-us-gov:s3:::mybucket/mycluster/ranger/audit/*")),
                 new Statement(Effect.Allow).withId("LimitedAccessToDataLakeBucket")
                         .withActions(S3Actions.AbortMultipartUpload, S3Actions.ListObjects,
                                 S3Actions.ListBucketMultipartUploads)
-                        .withResources(new Resource("arn:aws:s3:::mybucket"))
+                        .withResources(new Resource("arn:aws-us-gov:s3:::mybucket"))
         );
 
         Map<String, String> policyReplacements = new HashMap<>();
+        policyReplacements.put("${ARN_PARTITION}", "aws-us-gov");
         policyReplacements.put("${STORAGE_LOCATION_BASE}", "mybucket/mycluster");
         policyReplacements.put("${DATALAKE_BUCKET}", "mybucket");
         assertThat(awsIamService.getPolicy("aws-cdp-ranger-audit-s3-policy.json",

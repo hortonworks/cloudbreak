@@ -100,6 +100,7 @@ public class AwsRangerAuditRolePermissionValidatorTest extends AwsIDBrokerMapped
         String dynamodbTableName = "tableName";
 
         Map<String, String> expectedPolicyJsonReplacements = Map.ofEntries(
+                Map.entry("${ARN_PARTITION}", "aws"),
                 Map.entry("${STORAGE_LOCATION_BASE}", storageLocationBaseStr),
                 Map.entry("${DATALAKE_BUCKET}", bucket),
                 Map.entry("${DYNAMODB_TABLE_NAME}", dynamodbTableName)
@@ -108,6 +109,7 @@ public class AwsRangerAuditRolePermissionValidatorTest extends AwsIDBrokerMapped
         StorageLocationBase storageLocationBase = new StorageLocationBase();
         storageLocationBase.setValue(storageLocationBaseStr);
         CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.ID_BROKER);
+        cloudFileSystem.setInstanceProfile("arn:aws:iam::11111111111:instance-profile/instanceprofile");
         cloudFileSystem.setS3GuardDynamoTableName(dynamodbTableName);
         Map<String, String> policyJsonReplacements = awsRangerAuditRolePermissionValidator
                 .getPolicyJsonReplacements(storageLocationBase,
@@ -123,17 +125,19 @@ public class AwsRangerAuditRolePermissionValidatorTest extends AwsIDBrokerMapped
         String bucket = "bucket";
 
         Map<String, String> expectedPolicyJsonReplacements = Map.ofEntries(
-            Map.entry("${STORAGE_LOCATION_BASE}", storageLocationBaseStr),
-            Map.entry("${DATALAKE_BUCKET}", bucket),
-            Map.entry("${DYNAMODB_TABLE_NAME}", "")
+                Map.entry("${ARN_PARTITION}", "aws"),
+                Map.entry("${STORAGE_LOCATION_BASE}", storageLocationBaseStr),
+                Map.entry("${DATALAKE_BUCKET}", bucket),
+                Map.entry("${DYNAMODB_TABLE_NAME}", "")
         );
 
         StorageLocationBase storageLocationBase = new StorageLocationBase();
         storageLocationBase.setValue(storageLocationBaseStr);
         CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.ID_BROKER);
+        cloudFileSystem.setInstanceProfile("arn:aws:iam::11111111111:instance-profile/instanceprofile");
         Map<String, String> policyJsonReplacements = awsRangerAuditRolePermissionValidator
-                                                        .getPolicyJsonReplacements(storageLocationBase,
-                                                            cloudFileSystem);
+                .getPolicyJsonReplacements(storageLocationBase,
+                        cloudFileSystem);
 
         assertThat(policyJsonReplacements).isEqualTo(expectedPolicyJsonReplacements);
     }
@@ -144,6 +148,7 @@ public class AwsRangerAuditRolePermissionValidatorTest extends AwsIDBrokerMapped
         ArgumentCaptor<Map<String, String>> replacementsCaptor = ArgumentCaptor.forClass(Map.class);
         when(awsIamService.getPolicy(anyString(), replacementsCaptor.capture())).thenReturn(new Policy());
         CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.ID_BROKER);
+        cloudFileSystem.setInstanceProfile("arn:aws:iam::11111111111:instance-profile/instanceprofile");
         StorageLocationBase storageLocationBase1 = new StorageLocationBase();
         storageLocationBase1.setType(CloudStorageCdpService.RANGER_AUDIT);
         storageLocationBase1.setValue("s3a://bucket/cluster/ranger/audit");
