@@ -125,6 +125,7 @@ dependencies {
     implementation project(':notification-sender')
     implementation project(':cloud-consumption-api')
     implementation project(':cloud-common')
+    implementation project(':environment-api')
 }
 
 bootRun {

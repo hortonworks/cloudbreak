@@ -4,7 +4,6 @@ import com.sequenceiq.flow.core.FlowEvent;
 
 public enum StorageConsumptionCollectionHandlerSelectors implements FlowEvent {
 
-    GET_CLOUD_CREDENTIAL_HANDLER,
     STORAGE_CONSUMPTION_COLLECTION_HANDLER,
     SEND_CONSUMPTION_EVENT_HANDLER;
 

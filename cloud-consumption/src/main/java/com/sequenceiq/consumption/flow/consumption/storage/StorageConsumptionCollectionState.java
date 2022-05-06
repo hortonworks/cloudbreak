@@ -6,7 +6,6 @@ import com.sequenceiq.flow.core.RestartAction;
 
 public enum StorageConsumptionCollectionState implements FlowState {
     INIT_STATE,
-    GET_CLOUD_CREDENTIAL_STATE,
     STORAGE_CONSUMPTION_COLLECTION_STATE,
     SEND_CONSUMPTION_EVENT_STATE,
     STORAGE_CONSUMPTION_COLLECTION_FINISHED_STATE,

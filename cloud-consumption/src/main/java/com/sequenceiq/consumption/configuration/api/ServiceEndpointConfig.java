@@ -24,6 +24,21 @@ public class ServiceEndpointConfig {
     @Value("${consumption.db.serviceId:}")
     private String databaseId;
 
+    @Value("${consumption.environment.url}")
+    private String environmentServiceUrl;
+
+    @Value("${consumption.environment.contextPath}")
+    private String environmentRootContextPath;
+
+    @Value("${consumption.cloudbreak.url}")
+    private String cloudbreakUrl;
+
+    @Value("${consumption.cloudbreak.contextPath}")
+    private String cbRootContextPath;
+
+    @Value("${consumption.cloudbreak.serviceId:}")
+    private String cloudbreakServiceId;
+
     @Bean
     public ServiceAddressResolver serviceAddressResolver() {
         return new RetryingServiceAddressResolver(new DNSServiceAddressResolver(), resolvingTimeout);
@@ -32,5 +47,15 @@ public class ServiceEndpointConfig {
     @Bean
     public String databaseAddress() throws ServiceAddressResolvingException {
         return serviceAddressResolver().resolveHostPort(dbHost, dbPort, databaseId);
+    }
+
+    @Bean
+    public String environmentServiceUrl() throws ServiceAddressResolvingException {
+        return serviceAddressResolver().resolveUrl(environmentServiceUrl + environmentRootContextPath, "", null);
+    }
+
+    @Bean
+    public String cloudbreakServerUrl(ServiceAddressResolver serviceAddressResolver) throws ServiceAddressResolvingException {
+        return serviceAddressResolver().resolveUrl(cloudbreakUrl + cbRootContextPath, "http", cloudbreakServiceId);
     }
 }

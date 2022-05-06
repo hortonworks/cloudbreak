@@ -1,6 +1,6 @@
 package com.sequenceiq.consumption.flow;
 
-import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.GET_CLOUD_CREDENTIAL_EVENT;
+import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.STORAGE_CONSUMPTION_COLLECTION_START_EVENT;
 
 import java.util.Map;
 
@@ -31,14 +31,13 @@ public class ConsumptionReactorFlowManager {
         return Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
     }
 
-    public void triggerStorageConsumptionCollectionFlow(Consumption consumption, String environmentCrn, String storageLocation, String userCrn) {
-        LOGGER.info("Storage consumption collection flow triggered for environment {} and location {}", environmentCrn, storageLocation);
+    public void triggerStorageConsumptionCollectionFlow(Consumption consumption, String userCrn) {
+        LOGGER.info("Storage consumption collection flow triggered for environment {} and location {}", consumption.getEnvironmentCrn(),
+                consumption.getStorageLocation());
         StorageConsumptionCollectionEvent event = StorageConsumptionCollectionEvent.builder()
                 .withResourceCrn(consumption.getResourceCrn())
                 .withResourceId(consumption.getId())
-                .withEnvironmentCrn(environmentCrn)
-                .withStorageLocation(storageLocation)
-                .withSelector(GET_CLOUD_CREDENTIAL_EVENT.event())
+                .withSelector(STORAGE_CONSUMPTION_COLLECTION_START_EVENT.event())
                 .withAccepted(new Promise<>())
                 .build();
         eventSender.sendEvent(event, new Event.Headers(getFlowTriggerUsercrn(userCrn)));

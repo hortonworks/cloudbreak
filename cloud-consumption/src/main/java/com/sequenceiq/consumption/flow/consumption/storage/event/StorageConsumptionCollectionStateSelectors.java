@@ -3,8 +3,7 @@ package com.sequenceiq.consumption.flow.consumption.storage.event;
 import com.sequenceiq.flow.core.FlowEvent;
 
 public enum StorageConsumptionCollectionStateSelectors implements FlowEvent {
-    GET_CLOUD_CREDENTIAL_EVENT,
-    STORAGE_CONSUMPTION_COLLECTION_EVENT,
+    STORAGE_CONSUMPTION_COLLECTION_START_EVENT,
     SEND_CONSUMPTION_EVENT_EVENT,
     STORAGE_CONSUMPTION_COLLECTION_FINISH_EVENT,
     STORAGE_CONSUMPTION_COLLECTION_FINALIZED_EVENT,
