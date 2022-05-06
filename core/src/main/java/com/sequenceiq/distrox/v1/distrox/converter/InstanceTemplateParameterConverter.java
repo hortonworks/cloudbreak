@@ -55,10 +55,11 @@ public class InstanceTemplateParameterConverter {
 
     private AwsEncryptionV4Parameters convert(AwsEncryptionV1Parameters source, DetailedEnvironmentResponse environment) {
         AwsEncryptionV4Parameters response = new AwsEncryptionV4Parameters();
+        String dataHubEncryptionKey = source.getKey();
         EncryptionType dataHubEncryptionKeyType = source.getType();
         if (EncryptionType.CUSTOM.equals(dataHubEncryptionKeyType)) {
-            response.setKey(source.getKey());
-            response.setType(source.getType());
+            response.setKey(dataHubEncryptionKey);
+            response.setType(dataHubEncryptionKeyType);
         } else {
             String environmentEncryptionKeyArn = Optional.ofNullable(environment)
                     .map(DetailedEnvironmentResponse::getAws)
@@ -69,8 +70,7 @@ public class InstanceTemplateParameterConverter {
                 response.setKey(environmentEncryptionKeyArn);
                 response.setType(EncryptionType.CUSTOM);
             } else {
-                response.setKey(source.getKey());
-                response.setType(source.getType());
+                response.setType(EncryptionType.DEFAULT);
             }
         }
         return response;
