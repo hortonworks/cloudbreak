@@ -299,14 +299,16 @@ public class ClusterProxyService {
                 : com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration.disabled();
     }
 
-    public void reRegisterCluster(Long stackId) {
+    public Optional<ConfigRegistrationResponse> reRegisterCluster(Long stackId) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         if (clusterProxyEnablementService.isClusterProxyApplicable(stack.getCloudPlatform())) {
             LOGGER.info("Cluster Proxy integration is ENABLED, starting re-registering with Cluster Proxy service");
-            reRegisterCluster(stack);
+            ConfigRegistrationResponse registrationResult = reRegisterCluster(stack);
             LOGGER.info("Cluster has been re-registered with Cluster Proxy service successfully.");
+            return Optional.of(registrationResult);
         } else {
             LOGGER.debug("Cluster Proxy integration is DISABLED, skipping re-registering with Cluster Proxy service");
+            return Optional.empty();
         }
     }
 }

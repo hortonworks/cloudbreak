@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -18,6 +20,8 @@ import reactor.bus.Event;
 @Component
 public class PushSaltStateHandler extends ExceptionCatcherEventHandler<UpgradeCcmPushSaltStatesRequest> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PushSaltStateHandler.class);
+
     @Inject
     private UpgradeCcmService upgradeCcmService;
 
@@ -28,14 +32,17 @@ public class PushSaltStateHandler extends ExceptionCatcherEventHandler<UpgradeCc
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmPushSaltStatesRequest> event) {
-        return new UpgradeCcmFailedEvent(resourceId, e);
+        LOGGER.error("Pushing salt states for CCM upgrade has failed", e);
+        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), e);
     }
 
     @Override
     public Selectable doAccept(HandlerEvent<UpgradeCcmPushSaltStatesRequest> event) {
         UpgradeCcmPushSaltStatesRequest request = event.getData();
         Long stackId = request.getResourceId();
-        upgradeCcmService.pushSaltState(stackId);
-        return new UpgradeCcmPushSaltStatesResult(stackId);
+        Long clusterId = request.getClusterId();
+        LOGGER.info("Pushing salt states for CCM upgrade...");
+        upgradeCcmService.pushSaltState(stackId, clusterId);
+        return new UpgradeCcmPushSaltStatesResult(stackId, clusterId, request.getOldTunnel());
     }
 }

@@ -1,13 +1,11 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm;
 
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.common.api.type.Tunnel;
 
-public class UpgradeCcmPushSaltStatesResult extends StackEvent {
-    public UpgradeCcmPushSaltStatesResult(Long stackId) {
-        super(stackId);
+public class UpgradeCcmPushSaltStatesResult extends AbstractUpgradeCcmEvent {
+
+    public UpgradeCcmPushSaltStatesResult(Long stackId, Long clusterId, Tunnel oldTunnel) {
+        super(stackId, clusterId, oldTunnel);
     }
 
-    public UpgradeCcmPushSaltStatesResult(String selector, Long stackId) {
-        super(selector, stackId);
-    }
 }

@@ -4,4 +4,4 @@
     - group: root
     - mode: 750
     - source: salt://ccm/scripts/socket-wait-cleanup.sh
-    - unless: test ! -f /cdp/bin/reverse-tunnel-values-GATEWAY.sh
+    - unless: test ! -f /cdp/bin/reverse-tunnel-values-GATEWAY.sh || test -f /cdp/bin/reverse-tunnel-values-GATEWAY.sh.bak

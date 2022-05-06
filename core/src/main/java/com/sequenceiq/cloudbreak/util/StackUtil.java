@@ -97,6 +97,17 @@ public class StackUtil {
         return agents;
     }
 
+    public Set<Node> collectGatewayNodes(Stack stack) {
+        Set<Node> agents = stack.getInstanceGroups().stream()
+                .filter(ig -> ig.getNodeCount() != 0)
+                .flatMap(ig -> ig.getNotDeletedInstanceMetaDataSet().stream())
+                .filter(imd -> imd.getDiscoveryFQDN() != null && imd.isGateway())
+                .map(imd -> new Node(imd.getPrivateIp(), imd.getPublicIp(), imd.getInstanceId(), imd.getInstanceGroup().getTemplate().getInstanceType(),
+                        imd.getDiscoveryFQDN(), imd.getInstanceGroupName()))
+                .collect(Collectors.toSet());
+        return agents;
+    }
+
     public Set<Node> collectReachableNodesByInstanceStates(Stack stack) {
         return stack.getInstanceGroups()
                 .stream()

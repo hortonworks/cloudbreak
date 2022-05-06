@@ -37,11 +37,15 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.ccm.termination.CcmResourceTerminationListener;
+import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow2.CloudbreakFlowInformation;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.core.flow2.service.CbEventParameterFactory;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -51,13 +55,14 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmTriggerRequest;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.DeregisterAgentHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.HealthCheckHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.PushSaltStateHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.ReconfigureNginxHandler;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RemoveAgentHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RegisterClusterProxyHandler;
-import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.DeregisterAgentHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.RemoveAgentHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.TunnelUpdateHandler;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -66,7 +71,10 @@ import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointMan
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.ccm.HealthCheckService;
+import com.sequenceiq.cloudbreak.service.upgrade.ccm.UpgradeCcmOrchestratorService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
@@ -97,6 +105,8 @@ class UpgradeCcmFlowIntegrationTest {
 
     private static final long STACK_ID = 1L;
 
+    private static final long CLUSTER_ID = 1234L;
+
     @Inject
     private ReactorNotifier reactorNotifier;
 
@@ -120,7 +130,7 @@ class UpgradeCcmFlowIntegrationTest {
     }
 
     @Test
-    public void testCcmUpgradeWhenSuccessful() {
+    public void testCcmUpgradeWhenSuccessful() throws CloudbreakOrchestratorException {
         FlowIdentifier flowIdentifier = triggerFlow();
         letItFlow(flowIdentifier);
 
@@ -129,17 +139,17 @@ class UpgradeCcmFlowIntegrationTest {
         Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
         InOrder inOrder = Mockito.inOrder(upgradeCcmService);
         inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).pushSaltState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).pushSaltState(STACK_ID, CLUSTER_ID);
         inOrder.verify(upgradeCcmService, times(1)).reconfigureNginx(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).registerClusterProxy(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).healthCheck(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).removeAgent(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).deregisterAgent(STACK_ID);
-        verify(upgradeCcmService, never()).ccmUpgradeFailed(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).removeAgent(STACK_ID, Tunnel.CCM);
+        inOrder.verify(upgradeCcmService, times(1)).deregisterAgent(STACK_ID, Tunnel.CCM);
+        verify(upgradeCcmService, never()).ccmUpgradeFailed(STACK_ID, CLUSTER_ID, Tunnel.CCM);
     }
 
     @Test
-    public void testCcmUpgradeWhenTunnelUpdateFail() {
+    public void testCcmUpgradeWhenTunnelUpdateFail() throws CloudbreakOrchestratorException {
         doThrow(new BadRequestException()).when(upgradeCcmService).updateTunnel(STACK_ID);
 
         FlowIdentifier flowIdentifier = triggerFlow();
@@ -150,17 +160,17 @@ class UpgradeCcmFlowIntegrationTest {
         Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
         InOrder inOrder = Mockito.inOrder(upgradeCcmService);
         inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID);
-        verify(upgradeCcmService, never()).pushSaltState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        verify(upgradeCcmService, never()).pushSaltState(STACK_ID, CLUSTER_ID);
         verify(upgradeCcmService, never()).reconfigureNginx(STACK_ID);
         verify(upgradeCcmService, never()).registerClusterProxy(STACK_ID);
         verify(upgradeCcmService, never()).healthCheck(STACK_ID);
-        verify(upgradeCcmService, never()).deregisterAgent(STACK_ID);
-        verify(upgradeCcmService, never()).removeAgent(STACK_ID);
+        verify(upgradeCcmService, never()).deregisterAgent(STACK_ID, Tunnel.CCM);
+        verify(upgradeCcmService, never()).removeAgent(STACK_ID, Tunnel.CCM);
     }
 
     @Test
-    public void testCcmUpgradeWhenRegisterClusterProxyFail() {
+    public void testCcmUpgradeWhenRegisterClusterProxyFail() throws CloudbreakOrchestratorException {
         doThrow(new BadRequestException()).when(upgradeCcmService).registerClusterProxy(STACK_ID);
 
         FlowIdentifier flowIdentifier = triggerFlow();
@@ -171,13 +181,13 @@ class UpgradeCcmFlowIntegrationTest {
         Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
         InOrder inOrder = Mockito.inOrder(upgradeCcmService);
         inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).pushSaltState(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).pushSaltState(STACK_ID, CLUSTER_ID);
         inOrder.verify(upgradeCcmService, times(1)).reconfigureNginx(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).registerClusterProxy(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID);
+        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID, CLUSTER_ID, Tunnel.CCM);
         verify(upgradeCcmService, never()).healthCheckState(STACK_ID);
-        verify(upgradeCcmService, never()).deregisterAgent(STACK_ID);
-        verify(upgradeCcmService, never()).removeAgent(STACK_ID);
+        verify(upgradeCcmService, never()).deregisterAgent(STACK_ID, Tunnel.CCM);
+        verify(upgradeCcmService, never()).removeAgent(STACK_ID, Tunnel.CCM);
     }
 
     @Test
@@ -208,6 +218,7 @@ class UpgradeCcmFlowIntegrationTest {
         when(stackView.getClusterView()).thenReturn(clusterView);
         when(stackView.getId()).thenReturn(1L);
         when(stackView.isStartInProgress()).thenReturn(true);
+        when(clusterView.getId()).thenReturn(CLUSTER_ID);
 
         return stackView;
     }
@@ -215,10 +226,13 @@ class UpgradeCcmFlowIntegrationTest {
     private Stack mockStack() {
         stack = new Stack();
         stack.setId(STACK_ID);
+        stack.setResourceCrn("crn:cdp:datalake:us-west-1:tenant:datalake:resourceCrn");
         stack.setName("stackname");
         StackStatus stackStatus = new StackStatus(stack, Status.AVAILABLE, "no reason at all", DetailedStackStatus.AVAILABLE);
         stack.setStackStatus(stackStatus);
-        stack.setCluster(new Cluster());
+        Cluster cluster = new Cluster();
+        cluster.setId(CLUSTER_ID);
+        stack.setCluster(cluster);
 
         return stack;
     }
@@ -226,6 +240,7 @@ class UpgradeCcmFlowIntegrationTest {
     private void mockStackService() {
         StackView stackView = mockStackView();
         Stack stack = mockStack();
+        when(stackService.getById(STACK_ID)).thenReturn(stack);
         when(stackService.getByIdWithTransaction(STACK_ID)).thenReturn(stack);
         when(stackService.getViewByIdWithoutAuth(STACK_ID)).thenReturn(stackView);
     }
@@ -234,7 +249,7 @@ class UpgradeCcmFlowIntegrationTest {
         String selector = UPGRADE_CCM_EVENT.event();
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
-                () -> reactorNotifier.notify(STACK_ID, selector, new StackEvent(selector, STACK_ID)));
+                () -> reactorNotifier.notify(STACK_ID, selector, new UpgradeCcmTriggerRequest(STACK_ID, CLUSTER_ID, Tunnel.CCM)));
     }
 
     @Profile("integration-test")
@@ -312,6 +327,24 @@ class UpgradeCcmFlowIntegrationTest {
 
         @MockBean
         private CloudbreakFlowInformation cloudbreakFlowInformation;
+
+        @MockBean
+        private ClusterServiceRunner clusterServiceRunner;
+
+        @MockBean
+        private UpgradeCcmOrchestratorService upgradeCcmOrchestratorService;
+
+        @MockBean
+        private CcmResourceTerminationListener ccmResourceTerminationListener;
+
+        @MockBean
+        private CcmV2AgentTerminationListener ccmV2AgentTerminationListener;
+
+        @MockBean
+        private ClusterProxyService clusterProxyService;
+
+        @MockBean
+        private HealthCheckService healthCheckService;
 
         @Bean
         public io.opentracing.Tracer jaegerTracer() {

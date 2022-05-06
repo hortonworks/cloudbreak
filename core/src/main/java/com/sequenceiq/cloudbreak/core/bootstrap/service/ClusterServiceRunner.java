@@ -92,6 +92,20 @@ public class ClusterServiceRunner {
         hostRunner.redeployGatewayCertificate(stack, cluster);
     }
 
+    public void redeployGatewayPillar(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Long clusterId = stack.getCluster().getId();
+        Cluster cluster = clusterService.findOneWithLists(clusterId).orElseThrow(NotFoundException.notFound("Cluster", clusterId));
+        hostRunner.redeployGatewayPillarOnly(stack, cluster);
+    }
+
+    public void redeployStates(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        Long clusterId = stack.getCluster().getId();
+        Cluster cluster = clusterService.findOneWithLists(clusterId).orElseThrow(NotFoundException.notFound("Cluster", clusterId));
+        hostRunner.redeployStates(stack, cluster);
+    }
+
     public String changePrimaryGateway(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         return hostRunner.changePrimaryGateway(stack);

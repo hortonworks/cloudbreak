@@ -1027,7 +1027,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Callable<Boolean> saltPillarRunner = saltRunner.runnerWithUsingErrorCount(gatewayPillarSave, exitCriteria, exitModel);
             saltPillarRunner.call();
         } catch (Exception e) {
-            LOGGER.info("Error occurred during gateway pillar upload for certificate renewal", e);
+            LOGGER.info("Error occurred during gateway pillar upload", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1350,4 +1350,19 @@ public class SaltOrchestrator implements HostOrchestrator {
         });
         return new NodeReachabilityResult(responsiveNodes, unresponsiveNodes);
     }
+
+    @Override
+    public void uploadStates(List<GatewayConfig> allGatewayConfigs, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
+        LOGGER.debug("Start upload to gateways: {}", allGatewayConfigs);
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            uploadSaltConfig(sc, gatewayTargets, exitModel);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during the salt state upload", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+        LOGGER.debug("Upload state finished");
+    }
+
 }

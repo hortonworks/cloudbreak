@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
+import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -377,7 +378,9 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public void redeployGatewayCertificate(@Nonnull Stack stack, @Nonnull Cluster cluster) {
+    public void redeployGatewayCertificate(Stack stack, Cluster cluster) {
+        throwIfNull(stack, () -> new IllegalArgumentException("Stack should not be null"));
+        throwIfNull(cluster, () -> new IllegalArgumentException("Cluster should not be null"));
         try {
             Set<Node> allNodes = stackUtil.collectNodes(stack);
             Set<Node> reachableNodes = stackUtil.collectReachableNodes(stack);
@@ -390,6 +393,44 @@ public class ClusterHostServiceRunner {
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
+    public void redeployGatewayPillarOnly(Stack stack, Cluster cluster) {
+        throwIfNull(stack, () -> new IllegalArgumentException("Stack should not be null"));
+        throwIfNull(cluster, () -> new IllegalArgumentException("Cluster should not be null"));
+        try {
+            Set<Node> allNodes = stackUtil.collectNodes(stack);
+            Set<Node> reachableNodes = stackUtil.collectReachableNodes(stack);
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, reachableNodes);
+            SaltConfig saltConfig = createSaltConfigWithGatewayPillarOnly(stack, cluster, grainsProperties);
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            LOGGER.debug("Calling orchestrator to upload gateway pillar");
+            hostOrchestrator.uploadGatewayPillar(gatewayConfigs, allNodes, exitCriteriaModel, saltConfig);
+        } catch (CloudbreakOrchestratorCancelledException e) {
+            LOGGER.debug("Orchestration cancelled during redeploying gateway pillar", e);
+            throw new CancellationException(e.getMessage());
+        } catch (CloudbreakOrchestratorException | IOException e) {
+            LOGGER.debug("Orchestration exception during redeploying gateway pillar", e);
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
+    public void redeployStates(Stack stack, Cluster cluster) {
+        throwIfNull(stack, () -> new IllegalArgumentException("Stack should not be null"));
+        throwIfNull(cluster, () -> new IllegalArgumentException("Cluster should not be null"));
+        try {
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            LOGGER.debug("Calling orchestrator to upload states");
+            hostOrchestrator.uploadStates(gatewayConfigs, exitCriteriaModel);
+        } catch (CloudbreakOrchestratorCancelledException e) {
+            LOGGER.debug("Orchestration cancelled during redeploying states", e);
+            throw new CancellationException(e.getMessage());
+        } catch (CloudbreakOrchestratorException e) {
+            LOGGER.debug("Orchestration exception during redeploying states", e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
@@ -441,6 +482,28 @@ public class ClusterHostServiceRunner {
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
 
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
+
+        return new SaltConfig(servicePillar, grainsProperties);
+    }
+
+    private SaltConfig createSaltConfigWithGatewayPillarOnly(Stack stack, Cluster cluster, List<GrainProperties> grainsProperties)
+            throws IOException, CloudbreakOrchestratorException {
+
+        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        String virtualGroupsEnvironmentCrn = environmentConfigProvider.getParentEnvironmentCrn(stack.getEnvironmentCrn());
+        ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
+        Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
+        LOGGER.debug("Getting LDAP config for Gateway pillar");
+        Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
+        VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
+        LOGGER.debug("Getting kerberos config for Gateway pillar");
+        KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
+        ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
+
+        LOGGER.debug("Creating gateway pillar");
+        Map<String, SaltPillarProperties> servicePillar =
+                new HashMap<>(createGatewayPillar(primaryGatewayConfig, cluster, stack, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
+                        clouderaManagerRepo));
 
         return new SaltConfig(servicePillar, grainsProperties);
     }
