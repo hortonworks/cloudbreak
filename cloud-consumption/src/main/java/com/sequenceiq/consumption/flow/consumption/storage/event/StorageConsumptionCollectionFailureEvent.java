@@ -6,8 +6,8 @@ public class StorageConsumptionCollectionFailureEvent extends StorageConsumption
 
     private final Exception exception;
 
-    public StorageConsumptionCollectionFailureEvent(Long resourceId, Exception exception, String resourceCrn, String environmentCrn, String storageLocation) {
-        super(STORAGE_CONSUMPTION_COLLECTION_FAILED_EVENT.name(), resourceId, resourceCrn, environmentCrn, storageLocation, null);
+    public StorageConsumptionCollectionFailureEvent(Long resourceId, Exception exception, String resourceCrn) {
+        super(STORAGE_CONSUMPTION_COLLECTION_FAILED_EVENT.name(), resourceId, resourceCrn, null);
         this.exception = exception;
     }
 
@@ -18,5 +18,12 @@ public class StorageConsumptionCollectionFailureEvent extends StorageConsumption
 
     public Exception getException() {
         return exception;
+    }
+
+    @Override
+    public String toString() {
+        return "StorageConsumptionCollectionHandlerEvent{" +
+                "exception=" + exception +
+                "} " + super.toString();
     }
 }

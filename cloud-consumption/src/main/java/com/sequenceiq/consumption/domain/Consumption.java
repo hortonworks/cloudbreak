@@ -158,6 +158,7 @@ public class Consumption implements AuthResource, AccountAwareResource {
                 ", monitoredResourceType='" + monitoredResourceType.name() + '\'' +
                 ", monitoredResourceCrn='" + monitoredResourceCrn + '\'' +
                 ", consumptionType='" + consumptionType.name() + '\'' +
+                ", storageLocation='" + storageLocation + '\'' +
                 '}';
     }
 }
