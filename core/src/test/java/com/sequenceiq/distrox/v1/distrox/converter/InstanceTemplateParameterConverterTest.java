@@ -176,8 +176,7 @@ class InstanceTemplateParameterConverterTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("convertTestAwsInstanceTemplateV1ParametersToAwsInstanceTemplateV4ParametersWhenEncryptionDataProvided")
     void convertTestAwsInstanceTemplateV1ParametersToAwsInstanceTemplateV4ParametersWhenEncryption(String testCaseName, boolean withAws,
-            boolean withResourceEncryption, String dataHubEncryptionKey, String environmentEncryptionKey,
-            boolean expectedEncryption, String expectedEncryptionKey) {
+            boolean withResourceEncryption, String dataHubEncryptionKey, String environmentEncryptionKey, String expectedEncryptionKey) {
         AwsInstanceTemplateV1Parameters source = new AwsInstanceTemplateV1Parameters();
         String finalEncryptionKey = null;
         if (dataHubEncryptionKey != null) {
@@ -187,6 +186,8 @@ class InstanceTemplateParameterConverterTest {
             if (environmentEncryptionKey != null) {
                 source.setEncryption(encryption(EncryptionType.CUSTOM, ENVIRONMENT_ENCRYPTION_KEY));
                 finalEncryptionKey = ENVIRONMENT_ENCRYPTION_KEY;
+            } else  {
+                source.setEncryption(encryption(null, null));
             }
         }
         DetailedEnvironmentResponse environment = createDetailedEnvironmentResponseForAwsEncryption(withAws, withResourceEncryption, finalEncryptionKey);
@@ -195,12 +196,12 @@ class InstanceTemplateParameterConverterTest {
         assertThat(awsInstanceTemplateV4Parameters).isNotNull();
 
         AwsEncryptionV4Parameters encryption = awsInstanceTemplateV4Parameters.getEncryption();
-        if (expectedEncryption) {
-            assertThat(encryption).isNotNull();
+        assertThat(encryption).isNotNull();
+        if (dataHubEncryptionKey != null || environmentEncryptionKey != null) {
             assertThat(encryption.getType()).isEqualTo(EncryptionType.CUSTOM);
             assertThat(encryption.getKey()).isEqualTo(expectedEncryptionKey);
         } else {
-            assertThat(encryption).isNull();
+            assertThat(encryption.getType()).isEqualTo(EncryptionType.DEFAULT);
         }
 
     }
@@ -214,8 +215,7 @@ class InstanceTemplateParameterConverterTest {
         assertThat(awsInstanceTemplateV4Parameters).isNotNull();
         AwsEncryptionV4Parameters encryption = awsInstanceTemplateV4Parameters.getEncryption();
         assertThat(encryption).isNotNull();
-        assertThat(encryption.getType()).isNull();
-        assertThat(encryption.getKey()).isNull();
+        assertThat(encryption.getType()).isEqualTo(EncryptionType.DEFAULT);
     }
 
     @Test
@@ -246,16 +246,20 @@ class InstanceTemplateParameterConverterTest {
 
     static Object[][] convertTestAwsInstanceTemplateV1ParametersToAwsInstanceTemplateV4ParametersWhenEncryptionDataProvided() {
         return new Object[][]{
-                // testCaseName withAws withResourceEncryption dataHubEncryptionKey environmentEncryptionKey expectedEncryption expectedEncryptionKey
-                {"withAws=false", false, false, null, null, false, null},
-                {"withAws=true, withResourceEncryption=false", true, false, null, null, false, null},
-                {"withAws=true, withResourceEncryption=true, encryptionKey=null", true, true, null, null, false, null},
+                // testCaseName withAws withResourceEncryption dataHubEncryptionKey environmentEncryptionKey,
+                // expectedEncryptionKey
+                {"withAws=false", false, false, null, null, null},
+                {"withAws=true, withResourceEncryption=false", true, false, null, null,  null, null},
+                {"withAws=true, withResourceEncryption=true, encryptionKey=null", true, true, null, null, null, null},
                 {"withAws=true, withResourceEncryption=true, encryptionKey=DATAHUB_ENCRYPTION_KEY",
-                        true, true, DATAHUB_ENCRYPTION_KEY, null, true, DATAHUB_ENCRYPTION_KEY},
+                        true, true, DATAHUB_ENCRYPTION_KEY, null, DATAHUB_ENCRYPTION_KEY},
                 {"withAws=true, withResourceEncryption=true, encryptionKey=DATAHUB_ENCRYPTION_KEY&&ENVIRONMENT_ENCRYPTION_KEY",
-                        true, true, DATAHUB_ENCRYPTION_KEY, ENVIRONMENT_ENCRYPTION_KEY, true, DATAHUB_ENCRYPTION_KEY},
+                        true, true, DATAHUB_ENCRYPTION_KEY, ENVIRONMENT_ENCRYPTION_KEY, DATAHUB_ENCRYPTION_KEY},
                 {"withAws=true, withResourceEncryption=true, encryptionKey=ENVIRONMENT_ENCRYPTION_KEY",
-                        true, true, null, ENVIRONMENT_ENCRYPTION_KEY, true, ENVIRONMENT_ENCRYPTION_KEY}
+                        true, true, null, ENVIRONMENT_ENCRYPTION_KEY, ENVIRONMENT_ENCRYPTION_KEY},
+                {"withAws=true, withResourceEncryption=true, encryptionKey=DEFAULT_ENCRYPTION_KEY",
+                        true, true, null, null, null}
+
         };
     }
 
