@@ -50,7 +50,6 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCl
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.UpdateAwsDiskEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
@@ -67,7 +66,6 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
-import com.sequenceiq.environment.environment.dto.UpdateAwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.service.EnvironmentCreationService;
@@ -333,26 +331,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         UpdateAzureResourceEncryptionDto dto = environmentApiConverter.convertUpdateAzureResourceEncryptionDto(request);
         EnvironmentDto result = environmentModificationService.updateAzureResourceEncryptionParametersByEnvironmentName(accountId, environmentName, dto);
-        return environmentResponseConverter.dtoToDetailedResponse(result);
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPDATE_AWS_DISK_ENCRYPTION_PARAMETERS)
-    public DetailedEnvironmentResponse updateAwsDiskEncryptionParametersByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
-    @ResourceCrn String crn, @RequestObject @Valid UpdateAwsDiskEncryptionParametersRequest request) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        UpdateAwsDiskEncryptionParametersDto dto = environmentApiConverter.convertUpdateAwsDiskEncryptionParametersDto(request);
-        EnvironmentDto result = environmentModificationService.updateAwsDiskEncryptionParametersByEnvironmentCrn(accountId, crn, dto);
-        return environmentResponseConverter.dtoToDetailedResponse(result);
-    }
-
-    @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPDATE_AWS_DISK_ENCRYPTION_PARAMETERS)
-    public DetailedEnvironmentResponse updateAwsDiskEncryptionParametersByEnvironmentName(@ResourceName String environmentName,
-            @RequestObject @Valid UpdateAwsDiskEncryptionParametersRequest request) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        UpdateAwsDiskEncryptionParametersDto dto = environmentApiConverter.convertUpdateAwsDiskEncryptionParametersDto(request);
-        EnvironmentDto result = environmentModificationService.updateAwsDiskEncryptionParametersByEnvironmentName(accountId, environmentName, dto);
         return environmentResponseConverter.dtoToDetailedResponse(result);
     }
 

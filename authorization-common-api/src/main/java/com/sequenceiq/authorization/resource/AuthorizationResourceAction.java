@@ -96,7 +96,6 @@ public enum AuthorizationResourceAction {
     LIST_ASSIGNED_ROLES("iam/listAssignedResourceRoles", null),
     STRUCTURED_EVENTS_READ("structured_events/read", AuthorizationResourceType.STRUCTURED_EVENT),
     UPDATE_AZURE_ENCRYPTION_RESOURCES("environments/updateAzureEncryptionResources", AuthorizationResourceType.ENVIRONMENT),
-    UPDATE_AWS_DISK_ENCRYPTION_PARAMETERS("environments/updateAwsDiskEncryptionParameters", AuthorizationResourceType.ENVIRONMENT),
     ENVIRONMENT_CHANGE_FREEIPA_IMAGE("environments/changeFreeipaImageCatalog", AuthorizationResourceType.ENVIRONMENT),
     // deprecated actions, please do not use them
     ENVIRONMENT_READ("environments/read", AuthorizationResourceType.ENVIRONMENT),
