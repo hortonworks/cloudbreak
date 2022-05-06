@@ -105,10 +105,11 @@ public class StackUpgradeOperations {
         if (replaceVms) {
             StackInstanceCount stackInstanceCount = instanceMetaDataService.countByStackId(stack.getId());
             Integer upgradeNodeCountLimit = limitConfiguration.getUpgradeNodeCountLimit();
-            if (stackInstanceCount.getInstanceCount() > upgradeNodeCountLimit) {
+            LOGGER.debug("Instance count: {} and limit: [{}]", stackInstanceCount == null ? "null" : stackInstanceCount.asString(), upgradeNodeCountLimit);
+            if (stackInstanceCount != null && stackInstanceCount.getInstanceCount() > upgradeNodeCountLimit) {
                 throw new BadRequestException(
                         String.format("There are %s nodes in the cluster. Upgrade has a limit of %s nodes, above the limit it is unstable. " +
-                                "Please downscale the cluster below the limit and retry the upgrade.",
+                                        "Please downscale the cluster below the limit and retry the upgrade.",
                                 stackInstanceCount.getInstanceCount(), upgradeNodeCountLimit));
             }
         }
