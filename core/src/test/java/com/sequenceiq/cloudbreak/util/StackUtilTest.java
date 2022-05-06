@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -17,15 +18,16 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -46,7 +48,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.common.api.type.ResourceType;
 
-public class StackUtilTest {
+class StackUtilTest {
 
     @Mock
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -69,20 +71,20 @@ public class StackUtilTest {
     @InjectMocks
     private final StackUtil stackUtil = new StackUtil();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void testGetUptimeForClusterZero() {
+    void testGetUptimeForClusterZero() {
         Cluster cluster = new Cluster();
         long uptime = stackUtil.getUptimeForCluster(cluster, true);
         assertEquals(0L, uptime);
     }
 
     @Test
-    public void testGetUptimeForClusterNoGetUpSince() {
+    void testGetUptimeForClusterNoGetUpSince() {
         Cluster cluster = new Cluster();
         int minutes = 10;
         cluster.setUptime(Duration.ofMinutes(minutes).toString());
@@ -91,7 +93,7 @@ public class StackUtilTest {
     }
 
     @Test
-    public void testGetUptimeForCluster() {
+    void testGetUptimeForCluster() {
         Cluster cluster = new Cluster();
         int minutes = 10;
         cluster.setUptime(Duration.ofMinutes(minutes).toString());
@@ -101,7 +103,7 @@ public class StackUtilTest {
     }
 
     @Test
-    public void testGetCloudCredential() {
+    void testGetCloudCredential() {
         Stack stack = new Stack();
         stack.setEnvironmentCrn("envCrn");
         CloudCredential cloudCredential = new CloudCredential("123", "CloudCred", "account");
@@ -115,7 +117,7 @@ public class StackUtilTest {
     }
 
     @Test
-    public void testCreateInstanceToVolumeInfoMapWhenEveryVolumeSetAreAttachedToInstance() {
+    void testCreateInstanceToVolumeInfoMapWhenEveryVolumeSetAreAttachedToInstance() {
         List<Resource> volumeSets = new ArrayList<>();
         volumeSets.add(getVolumeSetResource("anInstanceId"));
         volumeSets.add(getVolumeSetResource("secInstanceId"));
@@ -127,7 +129,7 @@ public class StackUtilTest {
     }
 
     @Test
-    public void testCreateInstanceToVolumeInfoMapWhenNotEveryVolumeSetAreAttachedToInstance() {
+    void testCreateInstanceToVolumeInfoMapWhenNotEveryVolumeSetAreAttachedToInstance() {
         List<Resource> volumeSets = new ArrayList<>();
         volumeSets.add(getVolumeSetResource("anInstanceId"));
         volumeSets.add(getVolumeSetResource("secInstanceId"));
@@ -142,30 +144,8 @@ public class StackUtilTest {
     }
 
     @Test
-    public void collectAndCheckReachableNodes() throws NodesUnreachableException {
-        Stack stack = new Stack();
-        Set<InstanceGroup> instanceGroupSet = new HashSet<>();
-        InstanceGroup instanceGroup = new InstanceGroup();
-        Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
-        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
-        instanceMetaData1.setInstanceGroup(instanceGroup);
-        instanceMetaData1.setDiscoveryFQDN("node1.example.com");
-        InstanceMetaData instanceMetaData2 = new InstanceMetaData();
-        instanceMetaData2.setInstanceStatus(InstanceStatus.TERMINATED);
-        instanceMetaData2.setInstanceGroup(instanceGroup);
-        instanceMetaData2.setDiscoveryFQDN("node2.example.com");
-        InstanceMetaData instanceMetaData3 = new InstanceMetaData();
-        instanceMetaData3.setInstanceGroup(instanceGroup);
-        instanceMetaData3.setDiscoveryFQDN("node3.example.com");
-        instanceMetaDataSet.add(instanceMetaData1);
-        instanceMetaDataSet.add(instanceMetaData2);
-        instanceMetaDataSet.add(instanceMetaData3);
-        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
-        Template template = new Template();
-        template.setInstanceType("m5.xlarge");
-        instanceGroup.setTemplate(template);
-        instanceGroupSet.add(instanceGroup);
-        stack.setInstanceGroups(instanceGroupSet);
+    void collectAndCheckReachableNodes() throws NodesUnreachableException {
+        Stack stack = createStack();
         ArrayList<String> necessaryNodes = new ArrayList<>();
         necessaryNodes.add("node1.example.com");
         necessaryNodes.add("node3.example.com");
@@ -185,30 +165,8 @@ public class StackUtilTest {
     }
 
     @Test
-    public void collectAndCheckReachableNodesButSomeNodeMissing() {
-        Stack stack = new Stack();
-        Set<InstanceGroup> instanceGroupSet = new HashSet<>();
-        InstanceGroup instanceGroup = new InstanceGroup();
-        Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
-        InstanceMetaData instanceMetaData1 = new InstanceMetaData();
-        instanceMetaData1.setInstanceGroup(instanceGroup);
-        instanceMetaData1.setDiscoveryFQDN("node1.example.com");
-        InstanceMetaData instanceMetaData2 = new InstanceMetaData();
-        instanceMetaData2.setInstanceStatus(InstanceStatus.TERMINATED);
-        instanceMetaData2.setInstanceGroup(instanceGroup);
-        instanceMetaData2.setDiscoveryFQDN("node2.example.com");
-        InstanceMetaData instanceMetaData3 = new InstanceMetaData();
-        instanceMetaData3.setInstanceGroup(instanceGroup);
-        instanceMetaData3.setDiscoveryFQDN("node3.example.com");
-        instanceMetaDataSet.add(instanceMetaData1);
-        instanceMetaDataSet.add(instanceMetaData2);
-        instanceMetaDataSet.add(instanceMetaData3);
-        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
-        Template template = new Template();
-        template.setInstanceType("m5.xlarge");
-        instanceGroup.setTemplate(template);
-        instanceGroupSet.add(instanceGroup);
-        stack.setInstanceGroups(instanceGroupSet);
+    void collectAndCheckReachableNodesButSomeNodeMissing() {
+        Stack stack = createStack();
         ArrayList<String> necessaryNodes = new ArrayList<>();
         necessaryNodes.add("node1.example.com");
         necessaryNodes.add("node3.example.com");
@@ -225,7 +183,32 @@ public class StackUtilTest {
     }
 
     @Test
-    public void collectReachableNodesTest() {
+    void collectReachableNodesTest() {
+        Stack stack = createStack();
+
+        Set<Node> nodes = new HashSet<>();
+        nodes.add(new Node("1.1.1.1", "1.1.1.1", "1", "m5.xlarge", "node1.example.com", "worker"));
+        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
+
+        stackUtil.collectReachableNodes(stack);
+
+        verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any());
+        List<String> fqdns = nodesCaptor.getValue().stream().map(Node::getHostname).collect(Collectors.toList());
+        assertTrue(fqdns.contains("node1.example.com"));
+        assertFalse("Terminated node should be filtered out", fqdns.contains("node2.example.com"));
+        assertTrue(fqdns.contains("node3.example.com"));
+    }
+
+    @Test
+    void testCollectGatewayNodes() {
+        Stack stack = createStack();
+        Set<Node> result = stackUtil.collectGatewayNodes(stack);
+        assertThat(result).hasSize(1);
+        Node node = result.stream().findFirst().get();
+        assertThat(node.getHostname()).isEqualTo("node3.example.com");
+    }
+
+    private Stack createStack() {
         Stack stack = new Stack();
         Set<InstanceGroup> instanceGroupSet = new HashSet<>();
         InstanceGroup instanceGroup = new InstanceGroup();
@@ -240,6 +223,7 @@ public class StackUtilTest {
         InstanceMetaData instanceMetaData3 = new InstanceMetaData();
         instanceMetaData3.setInstanceGroup(instanceGroup);
         instanceMetaData3.setDiscoveryFQDN("node3.example.com");
+        instanceMetaData3.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
         instanceMetaDataSet.add(instanceMetaData1);
         instanceMetaDataSet.add(instanceMetaData2);
         instanceMetaDataSet.add(instanceMetaData3);
@@ -249,18 +233,7 @@ public class StackUtilTest {
         instanceGroup.setTemplate(template);
         instanceGroupSet.add(instanceGroup);
         stack.setInstanceGroups(instanceGroupSet);
-
-        Set<Node> nodes = new HashSet<>();
-        nodes.add(new Node("1.1.1.1", "1.1.1.1", "1", "m5.xlarge", "node1.example.com", "worker"));
-        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
-
-        stackUtil.collectReachableNodes(stack);
-
-        verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any());
-        List<String> fqdns = nodesCaptor.getValue().stream().map(Node::getHostname).collect(Collectors.toList());
-        assertTrue(fqdns.contains("node1.example.com"));
-        assertFalse("Terminated node should be filtered out", fqdns.contains("node2.example.com"));
-        assertTrue(fqdns.contains("node3.example.com"));
+        return stack;
     }
 
     private Resource getVolumeSetResource(String instanceID) {

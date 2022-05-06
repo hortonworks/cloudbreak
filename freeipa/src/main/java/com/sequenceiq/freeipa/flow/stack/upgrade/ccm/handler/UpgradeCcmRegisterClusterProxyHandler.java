@@ -33,7 +33,7 @@ public class UpgradeCcmRegisterClusterProxyHandler extends AbstractUpgradeCcmEve
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
-        LOGGER.error("Registering CCM for CCM upgrade has failed", e);
+        LOGGER.error("Registering cluster proxy for CCM upgrade has failed", e);
         return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId, e);
     }
 

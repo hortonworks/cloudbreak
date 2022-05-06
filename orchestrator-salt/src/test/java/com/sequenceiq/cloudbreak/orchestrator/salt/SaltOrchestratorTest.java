@@ -7,14 +7,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.inOrder;
@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.PillarSave;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltCommandTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUpload;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
@@ -133,6 +134,9 @@ public class SaltOrchestratorTest {
     @Mock
     private CompressUtil compressUtil;
 
+    @Mock
+    private Callable<Boolean> callable;
+
     @InjectMocks
     private SaltOrchestrator saltOrchestrator;
 
@@ -150,10 +154,10 @@ public class SaltOrchestratorTest {
         saltConnector = mock(SaltConnector.class);
         whenNew(SaltConnector.class).withAnyArguments().thenReturn(saltConnector);
         when(hostDiscoveryService.determineDomain("test", "test", false)).thenReturn(".example.com");
-        Callable<Boolean> callable = mock(Callable.class);
         when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class))).thenReturn(callable);
         when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class), anyInt(), anyBoolean()))
                 .thenReturn(callable);
+        when(callable.call()).thenReturn(true);
         when(saltService.createSaltConnector(any(GatewayConfig.class))).thenReturn(saltConnector);
         saltConnectors = List.of(saltConnector);
         when(saltService.createSaltConnector(anyCollection())).thenReturn(saltConnectors);
@@ -744,5 +748,17 @@ public class SaltOrchestratorTest {
 
         when(SaltStates.collectNodeStatus(eq(saltConnector))).thenThrow(new RuntimeException("connection failed"));
         saltOrchestrator.removeDeadSaltMinions(gatewayConfig);
+    }
+
+    @Test
+    public void testUploadStates() throws Exception {
+        PowerMockito.mockStatic(SaltStates.class);
+        List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
+        saltOrchestrator.uploadStates(allGatewayConfigs, exitCriteriaModel);
+        ArgumentCaptor<SaltUpload> saltUploadCaptor = ArgumentCaptor.forClass(SaltUpload.class);
+        verify(saltRunner).runner(saltUploadCaptor.capture(), eq(exitCriteria), eq(exitCriteriaModel));
+        verify(callable).call();
+        SaltUpload saltUpload = saltUploadCaptor.getValue();
+        assertEquals(Set.of(gatewayConfig.getPrivateAddress()), saltUpload.getTargets());
     }
 }

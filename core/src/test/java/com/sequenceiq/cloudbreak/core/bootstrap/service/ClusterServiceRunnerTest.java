@@ -45,7 +45,7 @@ class ClusterServiceRunnerTest {
     private ClusterServiceRunner underTest;
 
     @Test
-    public void testRedeployGatewayCertificateWhenClusterCouldNotBeFoundByStackId() {
+    void testRedeployGatewayCertificateWhenClusterCouldNotBeFoundByStackId() {
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         when(stack.getCluster()).thenReturn(cluster);
         when(clusterService.findOneWithLists(anyLong())).thenThrow(new NotFoundException("Cluster could not be found"));
@@ -54,7 +54,7 @@ class ClusterServiceRunnerTest {
     }
 
     @Test
-    public void testRedeployGatewayCertificateWhenRedeployOnHostRunnerThrowRuntimeException() {
+    void testRedeployGatewayCertificateWhenRedeployOnHostRunnerThrowRuntimeException() {
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         when(stack.getCluster()).thenReturn(cluster);
         when(clusterService.findOneWithLists(anyLong())).thenReturn(Optional.of(cluster));
@@ -64,7 +64,7 @@ class ClusterServiceRunnerTest {
     }
 
     @Test
-    public void testRedeployGatewayCertificateHappyFlow() {
+    void testRedeployGatewayCertificateHappyFlow() {
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
         when(stack.getCluster()).thenReturn(cluster);
         when(clusterService.findOneWithLists(anyLong())).thenReturn(Optional.of(cluster));
@@ -74,4 +74,21 @@ class ClusterServiceRunnerTest {
         verify(hostRunner, times(1)).redeployGatewayCertificate(any(), any());
     }
 
+    @Test
+    void testRedeployGatewayPillar() {
+        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
+        when(stack.getCluster()).thenReturn(cluster);
+        when(clusterService.findOneWithLists(any())).thenReturn(Optional.of(cluster));
+        underTest.redeployGatewayPillar(1L);
+        verify(hostRunner).redeployGatewayPillarOnly(stack, cluster);
+    }
+
+    @Test
+    void testRedeployStates() {
+        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
+        when(stack.getCluster()).thenReturn(cluster);
+        when(clusterService.findOneWithLists(any())).thenReturn(Optional.of(cluster));
+        underTest.redeployStates(1L);
+        verify(hostRunner).redeployStates(stack, cluster);
+    }
 }

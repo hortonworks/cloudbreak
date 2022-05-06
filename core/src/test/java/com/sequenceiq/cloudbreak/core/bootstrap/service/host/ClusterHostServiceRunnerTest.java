@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,9 +27,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
@@ -96,7 +100,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.Tunnel;
 
 @ExtendWith(MockitoExtension.class)
-public class ClusterHostServiceRunnerTest {
+class ClusterHostServiceRunnerTest {
 
     private static final String TEST_CLUSTER_CRN = "crn:cdp:datahub:us-west-1:datahub:cluster:f7563fc1-e8ff-486a-9260-4e54ccabbaa0";
 
@@ -214,14 +218,20 @@ public class ClusterHostServiceRunnerTest {
     @InjectMocks
     private ClusterHostServiceRunner underTest;
 
+    @Captor
+    private ArgumentCaptor<Set<Node>> allNodesCaptor;
+
+    @Captor
+    private ArgumentCaptor<List<GatewayConfig>> gatewayConfigsCaptor;
+
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         lenient().when(stack.getEnvironmentCrn()).thenReturn("envCrn");
         lenient().when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn("envCrn");
     }
 
     @Test
-    public void shouldUsecollectAndCheckReachableNodes() throws NodesUnreachableException {
+    void shouldUsecollectAndCheckReachableNodes() throws NodesUnreachableException {
         try {
             underTest.runClusterServices(stack, cluster, Map.of());
             fail();
@@ -231,7 +241,7 @@ public class ClusterHostServiceRunnerTest {
     }
 
     @Test
-    public void collectAndCheckReachableNodesThrowsException() throws NodesUnreachableException {
+    void collectAndCheckReachableNodesThrowsException() throws NodesUnreachableException {
         Set<String> unreachableNodes = new HashSet<>();
         unreachableNodes.add("node1.example.com");
         when(stackUtil.collectAndCheckReachableNodes(eq(stack), any())).thenThrow(new NodesUnreachableException("error", unreachableNodes));
@@ -243,7 +253,7 @@ public class ClusterHostServiceRunnerTest {
     }
 
     @Test
-    public void testDecoratePillarWithClouderaManagerRepo() throws IOException, CloudbreakOrchestratorFailedException {
+    void testDecoratePillarWithClouderaManagerRepo() throws IOException, CloudbreakOrchestratorFailedException {
         String license = FileReaderUtils.readFileFromClasspath("cm-license.txt");
         when(cmLicenseParser.parseLicense(license)).thenCallRealMethod();
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
@@ -263,7 +273,7 @@ public class ClusterHostServiceRunnerTest {
     }
 
     @Test
-    public void testDecoratePillarWithClouderaManagerRepoWithNoJsonLicense() throws IOException, CloudbreakOrchestratorFailedException {
+    void testDecoratePillarWithClouderaManagerRepoWithNoJsonLicense() throws IOException, CloudbreakOrchestratorFailedException {
         String license = FileReaderUtils.readFileFromClasspath("cm-license-nojson.txt");
         when(cmLicenseParser.parseLicense(license)).thenCallRealMethod();
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
@@ -283,7 +293,7 @@ public class ClusterHostServiceRunnerTest {
     }
 
     @Test
-    public void testDecoratePillarWithClouderaManagerRepoWithEmptyLicense() throws IOException, CloudbreakOrchestratorFailedException {
+    void testDecoratePillarWithClouderaManagerRepoWithEmptyLicense() throws IOException, CloudbreakOrchestratorFailedException {
         String license = FileReaderUtils.readFileFromClasspath("cm-license-empty.txt");
         when(cmLicenseParser.parseLicense(license)).thenCallRealMethod();
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
@@ -303,7 +313,7 @@ public class ClusterHostServiceRunnerTest {
     }
 
     @Test
-    public void testDecoratePillarWithMountInfoAndTargetedSaltCall() throws CloudbreakOrchestratorException, NodesUnreachableException {
+    void testDecoratePillarWithMountInfoAndTargetedSaltCall() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn3"), node("gateway1"), node("gateway3"));
         when(stackUtil.collectReachableAndUnreachableCandidateNodes(any(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
@@ -323,7 +333,7 @@ public class ClusterHostServiceRunnerTest {
     }
 
     @Test
-    public void testDecoratePillarWithMountInfo() throws CloudbreakOrchestratorException, NodesUnreachableException {
+    void testDecoratePillarWithMountInfo() throws CloudbreakOrchestratorException, NodesUnreachableException {
         setupMocksForRunClusterServices();
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
@@ -343,7 +353,34 @@ public class ClusterHostServiceRunnerTest {
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
     }
 
-    private void setupMocksForRunClusterServices() throws NodesUnreachableException {
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testRedeployGatewayPillarOnly() throws CloudbreakOrchestratorFailedException {
+        setupMocksForRunClusterServices();
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
+                node("gateway1"), node("gateway3"));
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+
+        underTest.redeployGatewayPillarOnly(stack, cluster);
+        ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
+        Set<Node> allNodes = allNodesCaptor.getValue();
+        assertEquals(5, allNodes.size());
+        SaltConfig saltConfig = saltConfigCaptor.getValue();
+        assertTrue(saltConfig.getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
+    }
+
+    @Test
+    void testRedeployStates() throws CloudbreakOrchestratorException {
+        List<GatewayConfig> gwConfigs = List.of(new GatewayConfig("addr", "endpoint", "privateAddr", 123, "instance", false));
+        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
+        underTest.redeployStates(stack, cluster);
+        verify(hostOrchestrator).uploadStates(gatewayConfigsCaptor.capture(), any());
+        List<GatewayConfig> gatewayConfigs = gatewayConfigsCaptor.getValue();
+        assertEquals(gwConfigs, gatewayConfigs);
+    }
+
+    private void setupMocksForRunClusterServices() {
         when(umsClient.getAccountDetails(any(), any(), any())).thenReturn(UserManagementProto.Account.getDefaultInstance());
         when(stackService.get(any())).thenReturn(stack);
         when(stack.getCluster()).thenReturn(cluster);

@@ -1,14 +1,11 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm;
 
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.common.api.type.Tunnel;
 
-public class UpgradeCcmDeregisterAgentResult extends StackEvent {
+public class UpgradeCcmDeregisterAgentResult extends AbstractUpgradeCcmEvent {
 
-    public UpgradeCcmDeregisterAgentResult(Long stackId) {
-        super(stackId);
+    public UpgradeCcmDeregisterAgentResult(Long stackId, Long clusterId, Tunnel oldTunnel) {
+        super(stackId, clusterId, oldTunnel);
     }
 
-    public UpgradeCcmDeregisterAgentResult(String selector, Long stackId) {
-        super(selector, stackId);
-    }
 }
