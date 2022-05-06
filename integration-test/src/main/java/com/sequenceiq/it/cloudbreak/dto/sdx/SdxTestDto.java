@@ -362,7 +362,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
                 getTestContext().getMicroserviceClient(CloudbreakClient.class),
-                CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
+                CloudbreakEventService.DATALAKE_RESOURCE_TYPE,
                 null,
                 getResponse().getCrn());
         boolean hasSpotTermination = (getResponse().getStackV4Response() == null) ? false : getResponse().getStackV4Response().getInstanceGroups().stream()

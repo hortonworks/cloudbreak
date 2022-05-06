@@ -93,7 +93,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     @Override
     public FreeIpaTestDto valid() {
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
-                .withEnvironment(getTestContext().given(EnvironmentTestDto.class).withTunnel(Tunnel.CLUSTER_PROXY))
+                .withEnvironment(getTestContext().given(EnvironmentTestDto.class).withTunnel(getTestContext().getTunnel()))
                 .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()), OptionalInt.empty(), OptionalInt.empty())
                 .withNetwork(getTestContext().given(NetworkV4TestDto.class))
@@ -101,7 +101,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
                 .withFreeIpa("ipatest.local", "ipaserver", "admin1234", "admins")
                 .withCatalog(getCloudProvider().getFreeIpaImageCatalogUrl())
-                .withTunnel(Tunnel.CLUSTER_PROXY)
+                .withTunnel(getTestContext().getTunnel())
                 .withVariant();
     }
 

@@ -27,6 +27,8 @@ public class AwsProperties {
 
     private Boolean multiaz;
 
+    private Boolean govCloud;
+
     private final Instance instance = new Instance();
 
     private final Instance storageOptimizedInstance = new Instance();
@@ -66,14 +68,19 @@ public class AwsProperties {
     }
 
     public Boolean getMultiaz() {
-        if (multiaz == null) {
-            return Boolean.FALSE;
-        }
         return multiaz;
     }
 
     public void setMultiaz(Boolean multiaz) {
         this.multiaz = multiaz;
+    }
+
+    public Boolean getGovCloud() {
+        return govCloud;
+    }
+
+    public void setGovCloud(Boolean govCloud) {
+        this.govCloud = govCloud;
     }
 
     public String getLocation() {

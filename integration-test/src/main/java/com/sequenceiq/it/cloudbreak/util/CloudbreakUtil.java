@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -45,9 +45,9 @@ public class CloudbreakUtil {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatuses, stackName, currentStatuses);
 
             sleep();
-            StackV4Endpoint stackV4Endpoint = cloudbreakClient.stackV4Endpoint();
+            DistroXV1Endpoint distroXV1Endpoint = cloudbreakClient.distroXV1Endpoint();
             try {
-                StackStatusV4Response statusResult = stackV4Endpoint.getStatusByName(workspaceId, stackName, accountId);
+                StackStatusV4Response statusResult = distroXV1Endpoint.getStatusByName(stackName);
                 for (String statusPath : desiredStatuses.keySet()) {
                     currentStatuses.put(statusPath, statusResult.getStatus().name());
                 }
