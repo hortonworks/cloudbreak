@@ -1,0 +1,8 @@
+name: "aws-gov-tests"
+tests:
+  - name: "aws_gov_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.gov.BasicFreeIpaTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.gov.BasicEnvironmentTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.gov.BasicSdxTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.gov.BasicDistroXTests

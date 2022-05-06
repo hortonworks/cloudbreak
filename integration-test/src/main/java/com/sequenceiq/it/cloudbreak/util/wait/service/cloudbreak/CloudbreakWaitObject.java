@@ -32,7 +32,6 @@ import java.util.Set;
 import org.apache.commons.collections4.ListUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -66,10 +65,6 @@ public class CloudbreakWaitObject implements WaitObject {
 
     public DistroXV1Endpoint getDistroxEndpoint() {
         return client.getDefaultClient().distroXV1Endpoint();
-    }
-
-    public StackV4Endpoint getStackEndpoint() {
-        return client.getDefaultClient().stackV4Endpoint();
     }
 
     public Long getWorkspaceId() {
@@ -126,7 +121,7 @@ public class CloudbreakWaitObject implements WaitObject {
 
     @Override
     public void fetchData() {
-        stackStatus = getStackEndpoint().getStatusByName(getWorkspaceId(), name, getAccountId());
+        stackStatus = getDistroxEndpoint().getStatusByName(name);
     }
 
     @Override

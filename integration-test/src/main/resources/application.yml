@@ -106,6 +106,8 @@ integrationtest:
 
   # aws parameters
   aws:
+    govCloud: false
+    multiaz: false
     region: eu-central-1
     location: eu-central-1
     availabilityZone: eu-central-1a

@@ -431,6 +431,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public boolean getGovCloud() {
+        return delegate.getGovCloud();
+    }
+
+    @Override
     public boolean isMultiAZ() {
         return delegate.isMultiAZ();
     }
