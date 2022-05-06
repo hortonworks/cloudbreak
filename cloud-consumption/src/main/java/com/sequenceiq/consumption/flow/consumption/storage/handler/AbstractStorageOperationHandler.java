@@ -2,17 +2,17 @@ package com.sequenceiq.consumption.flow.consumption.storage.handler;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.consumption.flow.consumption.storage.StorageConsumptionCollectionFlowException;
-import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionEvent;
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionFailureEvent;
+import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionHandlerEvent;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
 
-public abstract class AbstractStorageOperationHandler extends ExceptionCatcherEventHandler<StorageConsumptionCollectionEvent> {
+public abstract class AbstractStorageOperationHandler extends ExceptionCatcherEventHandler<StorageConsumptionCollectionHandlerEvent> {
 
     @Override
-    protected Selectable doAccept(HandlerEvent<StorageConsumptionCollectionEvent> event) {
+    protected Selectable doAccept(HandlerEvent<StorageConsumptionCollectionHandlerEvent> event) {
         try {
             return executeOperation(event);
         } catch (Exception e) {
@@ -22,12 +22,11 @@ public abstract class AbstractStorageOperationHandler extends ExceptionCatcherEv
     }
 
     @Override
-    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<StorageConsumptionCollectionEvent> event) {
-        return new StorageConsumptionCollectionFailureEvent(resourceId, e, event.getData().getResourceCrn(), event.getData().getEnvironmentCrn(),
-                event.getData().getStorageLocation());
+    protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<StorageConsumptionCollectionHandlerEvent> event) {
+        return new StorageConsumptionCollectionFailureEvent(resourceId, e, event.getData().getResourceCrn());
     }
 
-    public abstract Selectable executeOperation(HandlerEvent<StorageConsumptionCollectionEvent> data) throws Exception;
+    public abstract Selectable executeOperation(HandlerEvent<StorageConsumptionCollectionHandlerEvent> data) throws Exception;
 
     public abstract String getOperationName();
 }

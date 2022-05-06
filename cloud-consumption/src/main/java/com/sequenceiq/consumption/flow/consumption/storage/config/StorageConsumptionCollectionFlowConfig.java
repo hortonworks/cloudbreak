@@ -1,19 +1,17 @@
 package com.sequenceiq.consumption.flow.consumption.storage.config;
 
 import static com.sequenceiq.consumption.flow.consumption.storage.StorageConsumptionCollectionState.FINAL_STATE;
-import static com.sequenceiq.consumption.flow.consumption.storage.StorageConsumptionCollectionState.GET_CLOUD_CREDENTIAL_STATE;
 import static com.sequenceiq.consumption.flow.consumption.storage.StorageConsumptionCollectionState.INIT_STATE;
 import static com.sequenceiq.consumption.flow.consumption.storage.StorageConsumptionCollectionState.SEND_CONSUMPTION_EVENT_STATE;
 import static com.sequenceiq.consumption.flow.consumption.storage.StorageConsumptionCollectionState.STORAGE_CONSUMPTION_COLLECTION_FAILED_STATE;
 import static com.sequenceiq.consumption.flow.consumption.storage.StorageConsumptionCollectionState.STORAGE_CONSUMPTION_COLLECTION_FINISHED_STATE;
 import static com.sequenceiq.consumption.flow.consumption.storage.StorageConsumptionCollectionState.STORAGE_CONSUMPTION_COLLECTION_STATE;
-import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.GET_CLOUD_CREDENTIAL_EVENT;
 import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.SEND_CONSUMPTION_EVENT_EVENT;
-import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.STORAGE_CONSUMPTION_COLLECTION_EVENT;
 import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.STORAGE_CONSUMPTION_COLLECTION_FAILED_EVENT;
 import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.STORAGE_CONSUMPTION_COLLECTION_FINALIZED_EVENT;
 import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.STORAGE_CONSUMPTION_COLLECTION_FINISH_EVENT;
 import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.STORAGE_CONSUMPTION_COLLECTION_HANDLED_FAILED_EVENT;
+import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.STORAGE_CONSUMPTION_COLLECTION_START_EVENT;
 
 import java.util.List;
 
@@ -31,12 +29,8 @@ public class StorageConsumptionCollectionFlowConfig extends AbstractFlowConfigur
             = new Transition.Builder<StorageConsumptionCollectionState, StorageConsumptionCollectionStateSelectors>()
             .defaultFailureEvent(STORAGE_CONSUMPTION_COLLECTION_FAILED_EVENT)
 
-            .from(INIT_STATE).to(GET_CLOUD_CREDENTIAL_STATE)
-            .event(GET_CLOUD_CREDENTIAL_EVENT)
-            .defaultFailureEvent()
-
-            .from(GET_CLOUD_CREDENTIAL_STATE).to(STORAGE_CONSUMPTION_COLLECTION_STATE)
-            .event(STORAGE_CONSUMPTION_COLLECTION_EVENT)
+            .from(INIT_STATE).to(STORAGE_CONSUMPTION_COLLECTION_STATE)
+            .event(STORAGE_CONSUMPTION_COLLECTION_START_EVENT)
             .defaultFailureEvent()
 
             .from(STORAGE_CONSUMPTION_COLLECTION_STATE).to(SEND_CONSUMPTION_EVENT_STATE)
@@ -78,7 +72,7 @@ public class StorageConsumptionCollectionFlowConfig extends AbstractFlowConfigur
     @Override
     public StorageConsumptionCollectionStateSelectors[] getInitEvents() {
         return new StorageConsumptionCollectionStateSelectors[] {
-                GET_CLOUD_CREDENTIAL_EVENT
+                STORAGE_CONSUMPTION_COLLECTION_START_EVENT
         };
     }
 

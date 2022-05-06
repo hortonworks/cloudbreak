@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionEvent;
+import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionHandlerEvent;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
@@ -17,16 +18,14 @@ public class SendConsumptionEventHandler  extends AbstractStorageOperationHandle
     private static final Logger LOGGER = LoggerFactory.getLogger(SendConsumptionEventHandler.class);
 
     @Override
-    public Selectable executeOperation(HandlerEvent<StorageConsumptionCollectionEvent> event) throws Exception {
-        StorageConsumptionCollectionEvent data = event.getData();
+    public Selectable executeOperation(HandlerEvent<StorageConsumptionCollectionHandlerEvent> event) throws Exception {
+        StorageConsumptionCollectionHandlerEvent data = event.getData();
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
         LOGGER.debug("Sending storage consumption event started. resourceCrn: '{}'", resourceCrn);
         return StorageConsumptionCollectionEvent.builder()
                 .withResourceCrn(resourceCrn)
                 .withResourceId(resourceId)
-                .withEnvironmentCrn(data.getEnvironmentCrn())
-                .withStorageLocation(data.getStorageLocation())
                 .withSelector(STORAGE_CONSUMPTION_COLLECTION_FINISH_EVENT.selector())
                 .build();
     }

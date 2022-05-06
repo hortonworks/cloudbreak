@@ -7,29 +7,17 @@ import reactor.rx.Promise;
 
 public class StorageConsumptionCollectionEvent extends BaseFlowEvent {
 
-    private final String environmentCrn;
-
-    private final String storageLocation;
-
-    public StorageConsumptionCollectionEvent(String selector, Long resourceId, String resourceCrn, String environmentCrn, String storageLocation) {
+    public StorageConsumptionCollectionEvent(String selector, Long resourceId, String resourceCrn) {
         super(selector, resourceId, resourceCrn);
-        this.environmentCrn = environmentCrn;
-        this.storageLocation = storageLocation;
     }
 
-    public StorageConsumptionCollectionEvent(String selector, Long resourceId, String resourceCrn, String environmentCrn, String storageLocation,
-            Promise<AcceptResult> accepted) {
+    public StorageConsumptionCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted) {
         super(selector, resourceId, resourceCrn, accepted);
-        this.environmentCrn = environmentCrn;
-        this.storageLocation = storageLocation;
     }
 
-    public String getEnvironmentCrn() {
-        return environmentCrn;
-    }
-
-    public String getStorageLocation() {
-        return storageLocation;
+    @Override
+    public String toString() {
+        return "StorageConsumptionCollectionEvent{} " + super.toString();
     }
 
     public static Builder builder() {
@@ -39,10 +27,6 @@ public class StorageConsumptionCollectionEvent extends BaseFlowEvent {
     public static final class Builder {
 
         private String resourceCrn;
-
-        private String environmentCrn;
-
-        private String storageLocation;
 
         private String selector;
 
@@ -73,18 +57,8 @@ public class StorageConsumptionCollectionEvent extends BaseFlowEvent {
             return this;
         }
 
-        public Builder withEnvironmentCrn(String environmentCrn) {
-            this.environmentCrn = environmentCrn;
-            return this;
-        }
-
-        public Builder withStorageLocation(String storageLocation) {
-            this.storageLocation = storageLocation;
-            return this;
-        }
-
         public StorageConsumptionCollectionEvent build() {
-            return new StorageConsumptionCollectionEvent(selector, resourceId, resourceCrn, environmentCrn, storageLocation, accepted);
+            return new StorageConsumptionCollectionEvent(selector, resourceId, resourceCrn, accepted);
         }
     }
 }
