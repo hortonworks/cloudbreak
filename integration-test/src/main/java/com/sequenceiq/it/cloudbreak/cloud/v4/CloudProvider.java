@@ -185,5 +185,7 @@ public interface CloudProvider {
 
     void verifyVolumeEncryptionKey(List<String> volumeEncryptionKeyIds, String environmentName);
 
+    boolean getGovCloud();
+
     boolean isMultiAZ();
 }

@@ -349,7 +349,7 @@ public class EnvironmentTestDto
     public void deleteForCleanup() {
         try {
             EnvironmentClient client = getClientForCleanup();
-            client.getDefaultClient().environmentV1Endpoint().deleteByCrn(getCrn(), true, false);
+            client.getDefaultClient().environmentV1Endpoint().deleteByCrn(getCrn(), true, getCloudProvider().getGovCloud());
             getTestContext().awaitWithClient(this, Map.of("status", ARCHIVED), client);
         } catch (NotFoundException nfe) {
             LOGGER.info("resource not found, thus cleanup not needed.");

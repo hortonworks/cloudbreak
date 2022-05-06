@@ -16,7 +16,6 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.microsoft.azure.management.resources.ResourceGroup;
-import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -139,7 +138,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                     .withNetwork()
                     .withResourceEncryption()
                     .withTelemetry("telemetry")
-                    .withTunnel(Tunnel.CLUSTER_PROXY)
+                    .withTunnel(testContext.getTunnel())
                     .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
@@ -206,7 +205,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                     .withResourceGroup(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_SINGLE, resourceGroupForTest)
                     .withResourceEncryption()
                     .withTelemetry("telemetry")
-                    .withTunnel(Tunnel.CLUSTER_PROXY)
+                    .withTunnel(testContext.getTunnel())
                     .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
                 .then((context, dto, client) -> {

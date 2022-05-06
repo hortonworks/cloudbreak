@@ -316,6 +316,11 @@ public abstract class AbstractCloudProvider implements CloudProvider {
         LOGGER.warn("Disk encryption feature is not available currently");
     }
 
+    @Override
+    public boolean getGovCloud() {
+        return false;
+    }
+
     public boolean isMultiAZ() {
         return false;
     }

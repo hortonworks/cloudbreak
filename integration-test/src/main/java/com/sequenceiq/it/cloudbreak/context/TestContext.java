@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.context;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
+import static java.lang.String.format;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ import org.testng.Reporter;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.AuthDistributorClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -122,6 +124,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Value("${integrationtest.authdistributor.host:localhost}")
     private String authDistributorHost;
+
+    @Value("${integrationtest.cloudbreak.server}")
+    private String defaultServer;
 
     @Inject
     private CloudProviderProxy cloudProvider;
@@ -1281,6 +1286,23 @@ public abstract class TestContext implements ApplicationContextAware {
             LOGGER.info("Wait '{}' duration has been done.", duration.toString());
         } catch (InterruptedException e) {
             LOGGER.warn(StringUtils.join(intrMessage, e));
+        }
+    }
+
+    public Tunnel getTunnel() {
+        checkNonEmpty("integrationtest.cloudbreak.server", defaultServer);
+        if (StringUtils.containsIgnoreCase(defaultServer, "usg-1.cdp.mow-dev")) {
+            LOGGER.info(format("Tested environmet is GOV Dev at '%s'. So we are using CCM2 connection to the CDP Control Plane!", defaultServer));
+            return Tunnel.CCMV2_JUMPGATE;
+        } else {
+            return Tunnel.CLUSTER_PROXY;
+        }
+    }
+
+    public void checkNonEmpty(String name, String value) {
+        if (StringUtils.isEmpty(value)) {
+            throw new NullPointerException(format("Following variable must be set whether as environment variables or (test) application.yaml: %s",
+                    name.replaceAll("\\.", "_").toUpperCase()));
         }
     }
 

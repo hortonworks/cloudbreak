@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 import org.testng.annotations.BeforeMethod;
 
-import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -43,6 +42,7 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
@@ -162,6 +162,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     protected void createDatalakeWithoutDatabase(TestContext testContext) {
         SdxDatabaseRequest database = new SdxDatabaseRequest();
+        database.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         database.setCreate(false);
 
         testContext
@@ -283,7 +284,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .given(EnvironmentTestDto.class)
                     .withNetwork()
                     .withTelemetry("telemetry")
-                    .withTunnel(Tunnel.CLUSTER_PROXY)
+                    .withTunnel(testContext.getTunnel())
                     .withCreateFreeIpa(Boolean.TRUE)
                     .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                             commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
