@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.flow.dr.backup;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_BACKUP_FINISHED;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_BACKUP_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FAILURE_HANDLED_EVENT;
@@ -21,6 +22,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.dyngr.exception.PollerStoppedException;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
@@ -229,6 +231,7 @@ public class DatalakeBackupActions {
                 String operationId = (String) variables.get(OPERATION_ID);
                 String backupId = (String) variables.get(BACKUP_ID);
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
+                eventSenderService.sendEventAndNotification(sdxCluster, ThreadBasedUserCrnProvider.getUserCrn(), DATALAKE_DATABASE_BACKUP_FINISHED);
                 SdxDatabaseBackupStatusResponse backupStatusResponse =
                         sdxBackupRestoreService.getDatabaseBackupStatus(sdxCluster, operationId);
                 if (backupStatusResponse.getStatus().equals(DatalakeDatabaseDrStatus.INPROGRESS)) {
