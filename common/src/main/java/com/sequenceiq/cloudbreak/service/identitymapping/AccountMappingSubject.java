@@ -20,7 +20,7 @@ public class AccountMappingSubject {
      *
      * Adapted from {@code com.cloudera.thunderhead.service.idbrokermappingmanagement.server.IdBrokerMappingManagementService.BASELINE_SERVICES}.
      */
-    public static final Set<String> RANGER_AUDIT_USERS = Set.of("kafka", "solr", "knox", "atlas", "nifi", "nifiregistry");
+    public static final Set<String> RANGER_AUDIT_USERS = Set.of("kafka", "solr", "knox", "atlas", "nifi", "nifiregistry", "streamsmsgmgr");
 
     /**
      * Service user for Ranger RAZ. Never present in {@link #DATA_ACCESS_USERS} or {@link #RANGER_AUDIT_USERS}.
