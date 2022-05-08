@@ -12,6 +12,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private static final String EMPTY_CONFIG_DEFAULT = "";
 
+    private static final String AGENT_MAX_DISK_USAGE_DEFAULT = "4GB";
+
     private static final Integer DEFAULT_CM_SMON_PORT = 61010;
 
     private final boolean enabled;
@@ -37,6 +39,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
     private final Integer agentPort;
 
     private final String agentUser;
+
+    private final String agentMaxDiskUsage;
 
     private final String remoteWriteUrl;
 
@@ -65,6 +69,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.blackboxExporterPort = builder.blackboxExporterPort;
         this.agentUser = builder.agentUser;
         this.agentPort = builder.agentPort;
+        this.agentMaxDiskUsage = builder.agentMaxDiskUsage;
         this.clusterDetails = builder.clusterDetails;
         this.remoteWriteUrl = builder.remoteWriteUrl;
         this.scrapeIntervalSeconds = builder.scrapeIntervalSeconds;
@@ -134,6 +139,10 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return agentPort;
     }
 
+    public String getAgentMaxDiskUsage() {
+        return agentMaxDiskUsage;
+    }
+
     public boolean isUseDevStack() {
         return useDevStack;
     }
@@ -168,6 +177,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("blackboxExporterPort", this.blackboxExporterPort);
         map.put("agentUser", ObjectUtils.defaultIfNull(this.agentUser, EMPTY_CONFIG_DEFAULT));
         map.put("agentPort", this.agentPort);
+        map.put("agentMaxDiskUsage", ObjectUtils.defaultIfNull(this.agentUser, AGENT_MAX_DISK_USAGE_DEFAULT));
         map.put("username", ObjectUtils.defaultIfNull(this.username, EMPTY_CONFIG_DEFAULT));
         map.put("password", this.password != null ? new String(this.password) : EMPTY_CONFIG_DEFAULT);
         map.put("token", this.token != null ? new String(this.token) : EMPTY_CONFIG_DEFAULT);
@@ -214,6 +224,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
         private String agentUser;
 
         private Integer agentPort;
+
+        private String agentMaxDiskUsage;
 
         private TelemetryClusterDetails clusterDetails;
 
@@ -313,6 +325,11 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withAgentUser(String agentUser) {
             this.agentUser = agentUser;
+            return this;
+        }
+
+        public Builder withAgentMaxDiskUsage(String maxDiskUsage) {
+            this.agentMaxDiskUsage = maxDiskUsage;
             return this;
         }
     }
