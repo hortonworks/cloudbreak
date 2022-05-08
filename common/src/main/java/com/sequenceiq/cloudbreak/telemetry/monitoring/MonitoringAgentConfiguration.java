@@ -6,6 +6,8 @@ public class MonitoringAgentConfiguration {
 
     private Integer port;
 
+    private String maxDiskUsage;
+
     public Integer getPort() {
         return port;
     }
@@ -20,5 +22,13 @@ public class MonitoringAgentConfiguration {
 
     public void setUser(String user) {
         this.user = user;
+    }
+
+    public String getMaxDiskUsage() {
+        return maxDiskUsage;
+    }
+
+    public void setMaxDiskUsage(String maxDiskUsage) {
+        this.maxDiskUsage = maxDiskUsage;
     }
 }

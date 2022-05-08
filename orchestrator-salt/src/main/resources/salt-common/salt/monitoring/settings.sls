@@ -21,6 +21,7 @@
 {% set token = salt['pillar.get']('monitoring:token') %}
 {% set agent_user = salt['pillar.get']('monitoring:agentUser', 'vmagent') %}
 {% set agent_port = salt['pillar.get']('monitoring:agentPort', 8429) %}
+{% set agent_max_disk_usage = salt['pillar.get']('monitoring:agentMaxDiskUsage', '4GB') %}
 {% set node_exporter_user = salt['pillar.get']('monitoring:nodeExporterUser', 'nodeuser') %}
 {% set node_exporter_port = salt['pillar.get']('monitoring:nodeExporterPort', 9100) %}
 {% set blackbox_exporter_user = salt['pillar.get']('monitoring:blackboxExporterUser', 'blackboxuser') %}
@@ -60,6 +61,7 @@
     "cmMetricsExporterPort": cm_metrics_exporter_port,
     "agentUser": agent_user,
     "agentPort": agent_port,
+    "agentMaxDiskUsage": agent_max_disk_usage,
     "nodeExporterUser": node_exporter_user,
     "nodeExporterPort": node_exporter_port,
     "blackboxExporterUser": blackbox_exporter_user,

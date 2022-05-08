@@ -38,6 +38,7 @@ public class MonitoringConfigService {
             builder.withScrapeIntervalSeconds(monitoringConfiguration.getScrapeIntervalSeconds());
             builder.withAgentPort(monitoringConfiguration.getAgent().getPort());
             builder.withAgentUser(monitoringConfiguration.getAgent().getUser());
+            builder.withAgentMaxDiskUsage(monitoringConfiguration.getAgent().getMaxDiskUsage());
             fillExporterConfigs(builder, exporterPassword);
         }
         if (monitoringGlobalAuthConfig.isEnabled()) {

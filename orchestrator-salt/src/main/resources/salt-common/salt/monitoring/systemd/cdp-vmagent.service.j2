@@ -40,6 +40,7 @@ ExecStart=/opt/cdp-vmagent/bin/vmagent-prod -remoteWrite.url={{ monitoring.remot
      -httpAuth.username={{ monitoring.agentUser }} -httpAuth.password={{ monitoring.exporterPassword }} \
 {%- endif %}
      -tls -tlsCertFile=/opt/cdp-vmagent/conf/vmagent.crt -tlsKeyFile=/opt/cdp-vmagent/conf/vmagent.key \
+     -remoteWrite.maxDiskUsagePerURL={{ monitoring.agentMaxDiskUsage }} \
      -promscrape.config=/opt/cdp-vmagent/prometheus.yml
 Restart=always
 
