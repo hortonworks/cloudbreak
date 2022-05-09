@@ -70,7 +70,6 @@ public class ClusterV4Request implements JsonEntity {
     private String customQueue;
 
     @ApiModelProperty(ClusterModelDescription.EXECUTOR_TYPE)
-    @Deprecated
     private ExecutorType executorType = ExecutorType.DEFAULT;
 
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
@@ -99,6 +98,14 @@ public class ClusterV4Request implements JsonEntity {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public ExecutorType getExecutorType() {
+        return executorType;
+    }
+
+    public void setExecutorType(ExecutorType executorType) {
+        this.executorType = executorType;
     }
 
     public String getName() {

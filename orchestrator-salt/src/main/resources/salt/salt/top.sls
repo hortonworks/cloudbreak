@@ -5,6 +5,7 @@ base:
     - java
     - metadata
     - tags
+    - docker
     - recipes.runner
     - telemetry
     - fluent

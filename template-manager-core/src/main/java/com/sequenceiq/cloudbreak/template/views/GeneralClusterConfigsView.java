@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.template.views;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 
@@ -25,9 +26,13 @@ public class GeneralClusterConfigsView {
 
     private String cmPassword;
 
+    private ExecutorType executorType;
+
     private String clusterManagerIp;
 
     private OrchestratorType orchestratorType;
+
+    private boolean containerExecutor;
 
     private Integer nodeCount;
 
@@ -44,9 +49,11 @@ public class GeneralClusterConfigsView {
         password = generalClusterConfigs.getPassword();
         cmUserName = generalClusterConfigs.getCloudbreakAmbariUser();
         cmPassword = generalClusterConfigs.getCloudbreakAmbariPassword();
+        executorType = generalClusterConfigs.getExecutorType();
         clusterManagerIp = generalClusterConfigs.getClusterManagerIp();
         orchestratorType = generalClusterConfigs.getOrchestratorType();
         nodeCount = generalClusterConfigs.getNodeCount();
+        containerExecutor = ExecutorType.CONTAINER.equals(generalClusterConfigs.getExecutorType());
         primaryGatewayInstanceDiscoveryFQDN = generalClusterConfigs.getPrimaryGatewayInstanceDiscoveryFQDN().orElse(null);
     }
 
@@ -94,6 +101,10 @@ public class GeneralClusterConfigsView {
         this.cmPassword = cmPassword;
     }
 
+    public void setExecutorType(ExecutorType executorType) {
+        this.executorType = executorType;
+    }
+
     public void setClusterManagerIp(String clusterManagerIp) {
         this.clusterManagerIp = clusterManagerIp;
     }
@@ -138,6 +149,10 @@ public class GeneralClusterConfigsView {
         return cmPassword;
     }
 
+    public ExecutorType getExecutorType() {
+        return executorType;
+    }
+
     public String getClusterManagerIp() {
         return clusterManagerIp;
     }
@@ -164,5 +179,13 @@ public class GeneralClusterConfigsView {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public boolean getContainerExecutor() {
+        return containerExecutor;
+    }
+
+    public void setContainerExecutor(boolean containerExecutor) {
+        this.containerExecutor = containerExecutor;
     }
 }

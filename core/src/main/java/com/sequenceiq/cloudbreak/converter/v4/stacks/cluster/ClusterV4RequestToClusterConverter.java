@@ -86,6 +86,7 @@ public class ClusterV4RequestToClusterConverter {
         Cluster cluster = new Cluster();
         cluster.setName(source.getName());
         cluster.setStatus(REQUESTED);
+        cluster.setExecutorType(source.getExecutorType());
         cluster.setDatabaseServerCrn(source.getDatabaseServerCrn());
         cluster.setBlueprint(getBlueprint(source.getBlueprintName(), workspace));
         cluster.setCustomConfigurations(getCustomConfigurations(source.getCustomConfigurationsName()));
