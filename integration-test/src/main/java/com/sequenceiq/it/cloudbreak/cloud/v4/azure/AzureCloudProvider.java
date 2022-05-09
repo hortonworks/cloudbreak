@@ -34,8 +34,6 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AzureNetworkParameters;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
@@ -56,7 +54,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXRootVolumeT
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
-import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
@@ -212,25 +209,15 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public NetworkRequest networkRequest(FreeIpaTestDto dto) {
-        NetworkRequest networkRequest = new NetworkRequest();
-        AzureNetworkParameters networkParameters = new AzureNetworkParameters();
-        networkParameters.setSubnetId(getSubnetId());
-        networkParameters.setNetworkId(getNetworkId());
-        networkParameters.setNoPublicIp(getNoPublicIp());
-        networkParameters.setResourceGroupName(getResourceGroupName());
-        networkRequest.setAzure(networkParameters);
-        return networkRequest;
-    }
-
-    @Override
-    public NetworkV4TestDto network(NetworkV4TestDto network) {
+    public NetworkV4TestDto network(NetworkV4TestDto networkTestDto) {
         AzureNetworkV4Parameters parameters = new AzureNetworkV4Parameters();
-        parameters.setNoPublicIp(false);
-        parameters.setSubnetId(azureProperties.getNetwork().getSubnetIds().stream().findFirst().get());
-        parameters.setNetworkId(azureProperties.getNetwork().getNetworkId());
-        parameters.setResourceGroupName(azureProperties.getNetwork().getResourceGroupName());
-        return network.withAzure(parameters)
+        AzureProperties.Network network = azureProperties.getNetwork();
+        parameters.setNoPublicIp(network.getNoPublicIp());
+        parameters.setSubnetId(network.getSubnetIds().stream().findFirst().get());
+        parameters.setNetworkId(network.getNetworkId());
+        parameters.setResourceGroupName(network.getResourceGroupName());
+        parameters.setDatabasePrivateDnsZoneId(network.getDatabasePrivateDnsZoneId());
+        return networkTestDto.withAzure(parameters)
                 .withSubnetCIDR(getSubnetCIDR());
     }
 
@@ -238,8 +225,8 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public ServiceEndpointCreation serviceEndpoint() {
         ServiceEndpointCreation serviceEndpointCreation =
                 ResourceGroupTest.isSingleResourceGroup(getTestParameter().get(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE))
-                ? ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT
-                : ServiceEndpointCreation.DISABLED;
+                        ? ServiceEndpointCreation.ENABLED_PRIVATE_ENDPOINT
+                        : ServiceEndpointCreation.DISABLED;
         LOGGER.debug("Azure service endpoint creation: {}", serviceEndpointCreation);
         return serviceEndpointCreation;
     }
@@ -258,9 +245,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     private EnvironmentNetworkAzureParams environmentNetworkParameters() {
         EnvironmentNetworkAzureParams environmentNetworkAzureParams = new EnvironmentNetworkAzureParams();
-        environmentNetworkAzureParams.setNetworkId(getNetworkId());
-        environmentNetworkAzureParams.setNoPublicIp(getNoPublicIp());
-        environmentNetworkAzureParams.setResourceGroupName(getResourceGroupName());
+        AzureProperties.Network network = azureProperties.getNetwork();
+        environmentNetworkAzureParams.setNetworkId(network.getNetworkId());
+        environmentNetworkAzureParams.setNoPublicIp(network.getNoPublicIp());
+        environmentNetworkAzureParams.setResourceGroupName(network.getResourceGroupName());
+        environmentNetworkAzureParams.setDatabasePrivateDnsZoneId(network.getDatabasePrivateDnsZoneId());
         return environmentNetworkAzureParams;
     }
 
@@ -280,25 +269,8 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         return stackAuthenticationEntity.withPublicKey(sshPublicKey);
     }
 
-    public String getNetworkId() {
-        return azureProperties.getNetwork().getNetworkId();
-    }
-
     public Set<String> getSubnetIds() {
         return azureProperties.getNetwork().getSubnetIds();
-    }
-
-    public String getSubnetId() {
-        Set<String> subnetIDs = getSubnetIds();
-        return subnetIDs.iterator().next();
-    }
-
-    public Boolean getNoPublicIp() {
-        return azureProperties.getNetwork().getNoPublicIp();
-    }
-
-    public String getResourceGroupName() {
-        return azureProperties.getNetwork().getResourceGroupName();
     }
 
     @Override

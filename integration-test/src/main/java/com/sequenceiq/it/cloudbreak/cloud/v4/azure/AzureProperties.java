@@ -300,6 +300,16 @@ public class AzureProperties {
 
         private Set<String> subnetIds;
 
+        private String databasePrivateDnsZoneId;
+
+        public String getDatabasePrivateDnsZoneId() {
+            return databasePrivateDnsZoneId;
+        }
+
+        public void setDatabasePrivateDnsZoneId(String databasePrivateDnsZoneId) {
+            this.databasePrivateDnsZoneId = databasePrivateDnsZoneId;
+        }
+
         public Set<String> getSubnetIds() {
             return subnetIds;
         }

@@ -43,6 +43,7 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderAssertionProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -119,6 +120,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Inject
     private CloudProviderProxy cloudProvider;
+
+    @Inject
+    private CloudProviderAssertionProxy cloudProviderAssertion;
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
@@ -1235,6 +1239,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public CloudProviderProxy getCloudProvider() {
         return cloudProvider;
+    }
+
+    public CloudProviderAssertionProxy getCloudProviderAssertion() {
+        return cloudProviderAssertion;
     }
 
     public CloudPlatform getCloudPlatform() {

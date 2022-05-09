@@ -17,7 +17,6 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
@@ -168,11 +167,6 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
-    public NetworkRequest networkRequest(FreeIpaTestDto dto) {
-        return null;
-    }
-
-    @Override
     public InstanceGroupNetworkV4Request instanceGroupNetworkV4Request(SubnetId subnetId) {
         return null;
     }
@@ -310,4 +304,5 @@ public abstract class AbstractCloudProvider implements CloudProvider {
         LOGGER.warn("'freeIpaUpgradeImageCatalog' is not implemented");
         return null;
     }
+
 }
