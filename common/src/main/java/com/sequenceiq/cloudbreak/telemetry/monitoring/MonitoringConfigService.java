@@ -59,7 +59,8 @@ public class MonitoringConfigService {
         builder.withExporterPassword(exporterPassword);
         if (monitoringConfiguration.getNodeExporter() != null) {
             builder.withNodeExporterUser(monitoringConfiguration.getNodeExporter().getUser())
-                    .withNodeExporterPort(monitoringConfiguration.getNodeExporter().getPort());
+                    .withNodeExporterPort(monitoringConfiguration.getNodeExporter().getPort())
+                    .withNodeExporterCollectors(monitoringConfiguration.getNodeExporter().getCollectors());
         }
         if (monitoringConfiguration.getBlackboxExporter() != null) {
                 builder.withBlackboxExporterUser(monitoringConfiguration.getBlackboxExporter().getUser())

@@ -1,5 +1,7 @@
 {% set monitoring = {} %}
 
+{% set node_exporter_exists = salt['file.directory_exists' ]('/opt/node_exporter') %}
+{% set blackbox_exporter_exists = salt['file.directory_exists' ]('/opt/blackbox_exporter') %}
 {% if salt['pillar.get']('monitoring:enabled') %}
     {% set monitoring_enabled = True %}
 {% else %}
@@ -24,6 +26,7 @@
 {% set agent_max_disk_usage = salt['pillar.get']('monitoring:agentMaxDiskUsage', '4GB') %}
 {% set node_exporter_user = salt['pillar.get']('monitoring:nodeExporterUser', 'nodeuser') %}
 {% set node_exporter_port = salt['pillar.get']('monitoring:nodeExporterPort', 9100) %}
+{% set node_exporter_collectors = salt['pillar.get']('monitoring:nodeExporterCollectors', []) %}
 {% set blackbox_exporter_user = salt['pillar.get']('monitoring:blackboxExporterUser', 'blackboxuser') %}
 {% set blackbox_exporter_port = salt['pillar.get']('monitoring:blackboxExporterPort', 9115) %}
 {% set exporter_password = salt['pillar.get']('monitoring:exporterPassword') %}
@@ -64,8 +67,11 @@
     "agentMaxDiskUsage": agent_max_disk_usage,
     "nodeExporterUser": node_exporter_user,
     "nodeExporterPort": node_exporter_port,
+    "nodeExporterCollectors": node_exporter_collectors,
+    "nodeExporterExists": node_exporter_exists,
     "blackboxExporterUser": blackbox_exporter_user,
     "blackboxExporterPort": blackbox_exporter_port,
+    "blackboxExporterExists" : blackbox_exporter_exists,
     "exporterPassword": exporter_password,
     "useDevStack": use_dev_stack
 }) %}

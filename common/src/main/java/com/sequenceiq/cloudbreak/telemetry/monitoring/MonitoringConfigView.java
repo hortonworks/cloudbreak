@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.telemetry.monitoring;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.ObjectUtils;
@@ -31,6 +33,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
     private final String nodeExporterUser;
 
     private final Integer nodeExporterPort;
+
+    private final List<String> nodeExporterCollectors;
 
     private final String blackboxExporterUser;
 
@@ -65,6 +69,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.exporterPassword = builder.exporterPassword;
         this.nodeExporterUser = builder.nodeExporterUser;
         this.nodeExporterPort = builder.nodeExporterPort;
+        this.nodeExporterCollectors = builder.nodeExporterCollectors;
         this.blackboxExporterUser = builder.blackboxExporterUser;
         this.blackboxExporterPort = builder.blackboxExporterPort;
         this.agentUser = builder.agentUser;
@@ -123,6 +128,10 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return nodeExporterPort;
     }
 
+    public List<String> getNodeExporterCollectors() {
+        return nodeExporterCollectors;
+    }
+
     public String getBlackboxExporterUser() {
         return blackboxExporterUser;
     }
@@ -173,6 +182,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("exporterPassword", this.exporterPassword != null ? new String(this.exporterPassword) : EMPTY_CONFIG_DEFAULT);
         map.put("nodeExporterUser", ObjectUtils.defaultIfNull(this.nodeExporterUser, EMPTY_CONFIG_DEFAULT));
         map.put("nodeExporterPort", this.nodeExporterPort);
+        map.put("nodeExporterCollectors", ObjectUtils.defaultIfNull(this.nodeExporterCollectors, new ArrayList<>()));
         map.put("blackboxExporterUser", ObjectUtils.defaultIfNull(this.blackboxExporterUser, EMPTY_CONFIG_DEFAULT));
         map.put("blackboxExporterPort", this.blackboxExporterPort);
         map.put("agentUser", ObjectUtils.defaultIfNull(this.agentUser, EMPTY_CONFIG_DEFAULT));
@@ -216,6 +226,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
         private String nodeExporterUser;
 
         private Integer nodeExporterPort;
+
+        private List<String> nodeExporterCollectors;
 
         private String blackboxExporterUser;
 
@@ -305,6 +317,11 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withNodeExporterPort(Integer nodeExporterPort) {
             this.nodeExporterPort = nodeExporterPort;
+            return this;
+        }
+
+        public Builder withNodeExporterCollectors(List<String> nodeExporterCollectors) {
+            this.nodeExporterCollectors = nodeExporterCollectors;
             return this;
         }
 
