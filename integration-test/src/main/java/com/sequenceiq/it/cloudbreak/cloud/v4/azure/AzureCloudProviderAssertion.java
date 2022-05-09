@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.azure;
 
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -36,7 +37,7 @@ public class AzureCloudProviderAssertion extends AbstractCloudProviderAssertion 
 
         String databasePrivateDnsZoneIdRequest = environmentTestDto.getRequest().getNetwork().getAzure().getDatabasePrivateDnsZoneId();
         String databasePrivateDnsZoneIdResponse = environmentTestDto.getResponse().getNetwork().getAzure().getDatabasePrivateDnsZoneId();
-        if (databasePrivateDnsZoneIdRequest != null && !databasePrivateDnsZoneIdRequest.equals(databasePrivateDnsZoneIdResponse)) {
+        if (StringUtils.isNotEmpty(databasePrivateDnsZoneIdRequest) && !databasePrivateDnsZoneIdRequest.equals(databasePrivateDnsZoneIdResponse)) {
             String message = String.format("Private DNS zone id for database was requested to be %s, but is %s", databasePrivateDnsZoneIdRequest,
                     databasePrivateDnsZoneIdResponse);
             LOGGER.error(message);
