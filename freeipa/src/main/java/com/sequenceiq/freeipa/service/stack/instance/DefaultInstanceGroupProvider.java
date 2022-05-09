@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static java.util.Map.entry;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
@@ -53,6 +55,9 @@ public class DefaultInstanceGroupProvider {
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public Template createDefaultTemplate(CloudPlatform cloudPlatform, String accountId, String diskEncryptionSetId, String gcpKmsEncryptionKey,
             String awsKmsEncryptionKey) {
         Template template = new Template();
@@ -75,10 +80,22 @@ public class DefaultInstanceGroupProvider {
                         entry(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name()))));
             }
         }
-        if (cloudPlatform == AZURE && diskEncryptionSetId != null) {
-            template.setAttributes(new Json(Map.<String, Object>ofEntries(
-                    entry(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, diskEncryptionSetId),
-                    entry(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, Boolean.TRUE))));
+        if (cloudPlatform == AZURE) {
+            if (diskEncryptionSetId != null) {
+                template.setAttributes(new Json(Map.<String, Object>ofEntries(
+                        entry(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, diskEncryptionSetId),
+                        entry(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, Boolean.TRUE))));
+            }
+            if (entitlementService.isAzureEncryptionAtHostEnabled(accountId)) {
+                Map<String, Object> attributesJson;
+                if (template.getAttributes() != null) {
+                    attributesJson = template.getAttributes().getMap();
+                } else {
+                    attributesJson = new HashMap<>();
+                }
+                attributesJson.put(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED, Boolean.TRUE);
+                template.setAttributes(new Json(attributesJson));
+            }
         }
         if (cloudPlatform == CloudPlatform.GCP && gcpKmsEncryptionKey != null) {
             template.setAttributes(new Json(Map.<String, Object>ofEntries(

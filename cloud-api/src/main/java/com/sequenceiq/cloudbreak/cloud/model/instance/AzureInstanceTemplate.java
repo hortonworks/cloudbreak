@@ -48,6 +48,23 @@ public class AzureInstanceTemplate extends InstanceTemplate {
      */
     public static final String DISK_ENCRYPTION_SET_ID = "diskEncryptionSetId";
 
+    /**
+     * Key of the optional Boolean dynamic parameter denoting whether Azure virtual machines will be encrypted at host or not.
+     *
+     * <p>
+     *     Permitted values:
+     *     <ul>
+     *         <li>{@code Boolean.TRUE} instance, {@code "true"} (ignoring case): Encryption at host is enabled.</li>
+     *         <li>{@code Boolean.FALSE} instance, {@code "false"} (or any other {@code String} not equal to {@code "true"} ignoring case), {@code null}:
+     *         Encryption at host is disabled. This implies that the virtual machines will not be encrypted at host.</li>
+     *     </ul>
+     * </p>
+     *
+     * @see #putParameter(String, Object)
+     * @see Boolean#parseBoolean(String)
+     */
+    public static final String ENCRYPTION_AT_HOST_ENABLED = "encryptionAtHost";
+
     public AzureInstanceTemplate(String flavor, String groupName, Long privateId, Collection<Volume> volumes, InstanceStatus status,
             Map<String, Object> parameters, Long templateId, String imageId) {
         super(flavor, groupName, privateId, volumes, status, parameters, templateId, imageId, TemporaryStorage.ATTACHED_VOLUMES, 0L);

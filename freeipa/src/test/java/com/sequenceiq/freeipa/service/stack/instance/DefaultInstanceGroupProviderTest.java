@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Set;
@@ -11,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
@@ -48,6 +50,9 @@ class DefaultInstanceGroupProviderTest {
     @Mock
     private DefaultInstanceTypeProvider defaultInstanceTypeProvider;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private DefaultInstanceGroupProvider underTest;
 
@@ -68,6 +73,30 @@ class DefaultInstanceGroupProviderTest {
         assertThat(attributes).isNotNull();
         assertThat(attributes.<Object>getValue(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).isEqualTo("dummyDiskEncryptionSet");
         assertThat(attributes.<Object>getValue(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED)).isEqualTo(Boolean.TRUE);
+    }
+
+    @Test
+    void createDefaultTemplateTestVolumeEncryptionAddedWhenAzureAndNoDESAndEncryptionAtHostEnabled() {
+        when(entitlementService.isAzureEncryptionAtHostEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, null, null, null);
+
+        assertThat(result).isNotNull();
+        Json attributes = result.getAttributes();
+        assertThat(attributes).isNotNull();
+        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isEqualTo(Boolean.TRUE);
+    }
+
+    @Test
+    void createDefaultTemplateTestVolumeEncryptionAddedWhenAzureAndEncryptionAtHostEnabled() {
+        when(entitlementService.isAzureEncryptionAtHostEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+        Template result = underTest.createDefaultTemplate(CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", null, null);
+
+        assertThat(result).isNotNull();
+        Json attributes = result.getAttributes();
+        assertThat(attributes).isNotNull();
+        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).isEqualTo("dummyDiskEncryptionSet");
+        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED)).isEqualTo(Boolean.TRUE);
+        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isEqualTo(Boolean.TRUE);
     }
 
     @Test

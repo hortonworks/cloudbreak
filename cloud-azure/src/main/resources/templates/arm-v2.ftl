@@ -363,6 +363,11 @@
                        "hardwareProfile": {
                            "vmSize": "${instance.flavor}"
                        },
+                       <#if instance.encryptionAtHostEnabled?? && instance.encryptionAtHostEnabled == true>
+                       "securityProfile": {
+                           "encryptionAtHost": true
+                       },
+                       </#if>
                        "osProfile": {
                            "computername": "${instance.instanceName}",
                            "adminUsername": "[parameters('adminUsername')]",

@@ -418,19 +418,22 @@ public class StackRequestManifester {
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
                 .map(AzureResourceEncryptionParameters::getDiskEncryptionSetId);
-        if (encryptionKeyUrl.isPresent() && diskEncryptionSetId.isPresent()) {
-            stackRequest.getInstanceGroups().forEach(ig -> {
-                AzureInstanceTemplateV4Parameters azure = ig.getTemplate().createAzure();
-                AzureEncryptionV4Parameters encryption = azure.getEncryption();
-                if (encryption == null) {
-                    encryption = new AzureEncryptionV4Parameters();
-                    azure.setEncryption(encryption);
-                }
+        stackRequest.getInstanceGroups().forEach(ig -> {
+            AzureInstanceTemplateV4Parameters azure = ig.getTemplate().createAzure();
+            AzureEncryptionV4Parameters encryption = azure.getEncryption();
+            if (encryption == null) {
+                encryption = new AzureEncryptionV4Parameters();
+                azure.setEncryption(encryption);
+            }
+            if (encryptionKeyUrl.isPresent() && diskEncryptionSetId.isPresent()) {
                 azure.getEncryption().setKey(encryptionKeyUrl.get());
                 azure.getEncryption().setType(EncryptionType.CUSTOM);
                 azure.getEncryption().setDiskEncryptionSetId(diskEncryptionSetId.get());
-            });
-        }
+            }
+            if (entitlementService.isAzureEncryptionAtHostEnabled(environmentResponse.getAccountId())) {
+                azure.getEncryption().setEncryptionAtHostEnabled(Boolean.TRUE);
+            }
+        });
     }
 
     @VisibleForTesting

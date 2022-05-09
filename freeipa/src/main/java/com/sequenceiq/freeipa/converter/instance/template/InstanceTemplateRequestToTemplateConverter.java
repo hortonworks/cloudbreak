@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
@@ -45,6 +46,9 @@ public class InstanceTemplateRequestToTemplateConverter {
     @Inject
     private DefaultInstanceTypeProvider defaultInstanceTypeProvider;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public Template convert(InstanceTemplateRequest source, CloudPlatform cloudPlatform, String accountId,
             String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey) {
         Template template = new Template();
@@ -73,9 +77,14 @@ public class InstanceTemplateRequestToTemplateConverter {
                             }
                         }
                 );
-        if (diskEncryptionSetId != null && cloudPlatform == CloudPlatform.AZURE) {
-            attributes.put(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, diskEncryptionSetId);
-            attributes.put(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, true);
+        if (cloudPlatform == CloudPlatform.AZURE) {
+            if (diskEncryptionSetId != null) {
+                attributes.put(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, diskEncryptionSetId);
+                attributes.put(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, true);
+            }
+            if (entitlementService.isAzureEncryptionAtHostEnabled(accountId)) {
+                attributes.put(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED, true);
+            }
         }
 
         if (gcpKmsEncryptionKey != null && cloudPlatform == CloudPlatform.GCP) {
