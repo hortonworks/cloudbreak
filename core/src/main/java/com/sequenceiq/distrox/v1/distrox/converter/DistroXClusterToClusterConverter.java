@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -64,6 +65,7 @@ public class DistroXClusterToClusterConverter {
                         source.getCloudStorage(),
                         environment));
         response.setValidateBlueprint(source.getValidateBlueprint());
+        response.setExecutorType(ExecutorType.DEFAULT);
         response.setCustomContainer(null);
         response.setCustomQueue(null);
         return response;

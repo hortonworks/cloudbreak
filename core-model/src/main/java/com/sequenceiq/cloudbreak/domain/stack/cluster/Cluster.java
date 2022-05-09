@@ -80,8 +80,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     private Status status;
 
     @Convert(converter = ExecutorTypeConverter.class)
-    @Deprecated
-    private ExecutorType executorType = ExecutorType.DEFAULT;
+    private ExecutorType executorType;
 
     private Long creationStarted;
 
@@ -648,6 +647,10 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public ExecutorType getExecutorType() {
         return executorType;
+    }
+
+    public void setExecutorType(ExecutorType executorType) {
+        this.executorType = executorType;
     }
 
     public String getUptime() {

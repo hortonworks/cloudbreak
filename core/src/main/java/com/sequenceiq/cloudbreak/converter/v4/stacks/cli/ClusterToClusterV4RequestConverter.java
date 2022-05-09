@@ -33,6 +33,7 @@ public class ClusterToClusterV4RequestConverter {
         convertClusterManager(source, clusterRequest);
         clusterRequest.setBlueprintName(source.getBlueprint().getName());
         clusterRequest.setValidateBlueprint(null);
+        clusterRequest.setExecutorType(source.getExecutorType());
         clusterRequest.setUserName("");
         clusterRequest.setPassword("");
         if (source.getFileSystem() != null) {

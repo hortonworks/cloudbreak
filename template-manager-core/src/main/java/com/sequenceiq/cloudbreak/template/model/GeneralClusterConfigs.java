@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.template.model;
 
 import java.util.Optional;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.common.model.OrchestratorType;
 
 public class GeneralClusterConfigs {
@@ -25,6 +26,8 @@ public class GeneralClusterConfigs {
     private String cloudbreakAmbariUser;
 
     private String cloudbreakAmbariPassword;
+
+    private ExecutorType executorType;
 
     private String clusterManagerIp;
 
@@ -94,6 +97,10 @@ public class GeneralClusterConfigs {
         this.password = password;
     }
 
+    public void setExecutorType(ExecutorType executorType) {
+        this.executorType = executorType;
+    }
+
     public void setClusterManagerIp(String clusterManagerIp) {
         this.clusterManagerIp = clusterManagerIp;
     }
@@ -136,6 +143,10 @@ public class GeneralClusterConfigs {
 
     public String getCloudbreakAmbariPassword() {
         return cloudbreakAmbariPassword;
+    }
+
+    public ExecutorType getExecutorType() {
+        return executorType;
     }
 
     public String getClusterManagerIp() {

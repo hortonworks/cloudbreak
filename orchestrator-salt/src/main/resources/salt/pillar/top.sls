@@ -5,11 +5,10 @@ base:
     - nodes.hostattrs
 {%- endif %}
     - discovery.init
-{%- if salt['file.file_exists']('/srv/pillar/recipes/init.sls') %}
     - recipes.init
-{%- endif %}
     - unbound.forwarders
     - unbound.elimination
+    - datalake.init
     - docker
     - metadata.init
     - tags
@@ -17,17 +16,13 @@ base:
     - telemetry.init
     - databus
     - nodestatus
-{%- if salt['file.file_exists']('/srv/pillar/cloudera-manager/csd.sls') %}
     - cloudera-manager.csd
-{%- endif %}
     - cloudera-manager.settings
     - fluent
     - metering
     - monitoring.init
     - mount.disk
-{%- if salt['file.file_exists']('/srv/pillar/postgresql/root-certs.sls') %}
     - postgresql.root-certs
-{%- endif %}
 
   'G@roles:ad_member or G@roles:ad_leave':
     - match: compound
@@ -66,18 +61,16 @@ base:
 
   'roles:manager_server':
     - match: grain
-{%- if salt['file.file_exists']('/srv/pillar/cloudera-manager/license.sls') %}
+{% if salt['file.file_exists']('/srv/pillar/cloudera-manager/license.sls') %}
     - cloudera-manager.license
-{%- endif %}
-{%- if salt['file.file_exists']('/srv/pillar/cloudera-manager/cme.sls') %}
+{% endif %}
+{% if salt['file.file_exists']('/srv/pillar/cloudera-manager/cme.sls') %}
     - cloudera-manager.cme
-{%- endif %}
+{% endif %}
     - cloudera-manager.repo
     - cloudera-manager.database
     - cloudera-manager.communication
-{%- if salt['file.file_exists']('/srv/pillar/cloudera-manager/autotls.sls') %}
     - cloudera-manager.autotls
-{%- endif %}
     - gateway.init
     - gateway.ldap
     - gateway.settings

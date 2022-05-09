@@ -27,6 +27,7 @@ import org.springframework.util.ReflectionUtils;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -409,6 +410,7 @@ public class TestUtil {
         Gateway gateway = new Gateway();
         setGatewayTopology(gateway, "cb");
         cluster.setGateway(gateway);
+        cluster.setExecutorType(ExecutorType.DEFAULT);
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setId(generateUniqueId());
         Set<RDSConfig> rdsConfigs = new HashSet<>();

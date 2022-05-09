@@ -35,6 +35,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setInstanceGroupsPresented(instanceMetadataPresented);
         generalClusterConfigs.setGatewayInstanceMetadataPresented(gatewayInstanceMetadataPresented);
         generalClusterConfigs.setClusterName(cluster.getName());
+        generalClusterConfigs.setExecutorType(cluster.getExecutorType());
         generalClusterConfigs.setStackName(stack.getName());
         generalClusterConfigs.setUuid(stack.getUuid());
         generalClusterConfigs.setUserName(cluster.getUserName());
@@ -71,6 +72,7 @@ public class GeneralClusterConfigsProvider {
         }
         generalClusterConfigs.setGatewayInstanceMetadataPresented(gatewayInstanceMetadataPresented);
         generalClusterConfigs.setClusterName(stack.getName());
+        generalClusterConfigs.setExecutorType(stack.getCluster().getExecutorType());
         generalClusterConfigs.setStackName(stack.getName());
         generalClusterConfigs.setUuid(PENDING_DEFAULT_VALUE);
         generalClusterConfigs.setUserName(stack.getCluster().getUserName());
