@@ -1,4 +1,23 @@
 {%- from 'monitoring/settings.sls' import monitoring with context %}
+{%- set is_salt_master = salt['file.directory_exists' ]('/srv/salt') %}
+{%- set common_services = 'nginx|sshd|sssd|salt-bootstrap|salt-minion|cdp-logging-agent' %}
+{%- if is_salt_master %}
+  {%- set salt_services = '|salt-master|salt-api' %}
+{%- else %}
+  {%- set salt_services = '' %}
+{%- endif %}
+{%- set common_cm_services = '|cloudera-scm-agent|cloudera-scm-supervisord' %}
+{%- if monitoring.type == "cloudera_manager" and "manager_server" in grains.get('roles', []) %}
+  {%- set cm_services = common_cm_services + '|cloudera-scm-server' %}
+{%- else %}
+  {%- set cm_services = common_cm_services %}
+{%- endif %}
+{%- set freeipa_services = '|cdp-freeipa-healthagent|kadmin|krb5kdc|named-pkcs11|ipa|ipa-dnskeysyncd|ipa-custodia|sshd|sssd' %}
+{%- if monitoring.type == "freeipa" %}
+  {%- set systemd_units_include = common_services + salt_services + freeipa_services %}
+{%- else %}
+  {%- set systemd_units_include = common_services + salt_services + cm_services %}
+{%- endif %}
 [Unit]
 Description=CDP Node Exporter
 Wants=network-online.target
@@ -8,7 +27,17 @@ After=network-online.target
 Type=simple
 User=root
 Group=root
-ExecStart=/opt/node_exporter/node_exporter --web.config=/opt/node_exporter/node_exporter-web-config.yml --web.listen-address=:{{ monitoring.nodeExporterPort }}
+ExecStart=/opt/node_exporter/node_exporter --web.config=/opt/node_exporter/node_exporter-web-config.yml \
+{%- if monitoring.nodeExporterCollectors %}
+     --collector.disable-defaults \
+     {%- for collectorName in monitoring.nodeExporterCollectors %}
+     --collector.{{ collectorName }} \
+     {%- if collectorName == "systemd" %}
+     --collector.systemd.unit-include=({{ systemd_units_include }}).service \
+     {%- endif %}
+     {%- endfor %}
+{%- endif %}
+     --web.listen-address=:{{ monitoring.nodeExporterPort }}
 
 Restart=always
 

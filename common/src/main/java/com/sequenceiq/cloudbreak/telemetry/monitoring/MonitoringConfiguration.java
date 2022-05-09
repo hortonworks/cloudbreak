@@ -21,7 +21,7 @@ public class MonitoringConfiguration {
 
     private ExporterConfiguration clouderaManagerExporter;
 
-    private ExporterConfiguration nodeExporter;
+    private NodeExporterConfiguration nodeExporter;
 
     private ExporterConfiguration blackboxExporter;
 
@@ -73,11 +73,11 @@ public class MonitoringConfiguration {
         this.clouderaManagerExporter = clouderaManagerExporter;
     }
 
-    public ExporterConfiguration getNodeExporter() {
+    public NodeExporterConfiguration getNodeExporter() {
         return nodeExporter;
     }
 
-    public void setNodeExporter(ExporterConfiguration nodeExporter) {
+    public void setNodeExporter(NodeExporterConfiguration nodeExporter) {
         this.nodeExporter = nodeExporter;
     }
 

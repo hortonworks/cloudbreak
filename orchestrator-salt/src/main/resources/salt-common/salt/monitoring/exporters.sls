@@ -1,7 +1,7 @@
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {%- from 'monitoring/settings.sls' import monitoring with context %}
 
-{%- if monitoring.enabled %}
+{%- if monitoring.enabled and monitoring.nodeExporterExists and monitoring.blackboxExporterExists %}
 
 /etc/systemd/system/cdp-node-exporter.service:
   file.managed:

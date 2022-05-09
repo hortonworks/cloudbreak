@@ -1,6 +1,7 @@
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {%- from 'monitoring/settings.sls' import monitoring with context %}
 {%- set hostname = salt['grains.get']('fqdn') %}
+{%- set hostgroup = salt['grains.get']('hostgroup') %}
 global:
   scrape_interval: {{ monitoring.scrapeIntervalSeconds }}s
 scrape_configs:
@@ -11,6 +12,9 @@ scrape_configs:
        labels:
          resource_crn: {{ telemetry.clusterCrn }}
          platform: {{ telemetry.platform }}
+{%- if hostgroup %}
+         hostgroup: {{ hostgroup }}
+{%- endif %}
     relabel_configs:
       - target_label: instance
         replacement: {{ hostname }}:{{ monitoring.nodeExporterPort }}
@@ -32,6 +36,9 @@ scrape_configs:
         labels:
           resource_crn: {{ telemetry.clusterCrn }}
           platform: {{ telemetry.platform }}
+{%- if hostgroup %}
+          hostgroup: {{ hostgroup }}
+{%- endif %}
           proxy: {% if telemetry.proxyUrl %}yes{%- else %}no{% endif %}
     relabel_configs:
       - source_labels: [__address__]
