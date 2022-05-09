@@ -172,6 +172,32 @@ class InstanceTemplateRequestToTemplateConverterTest {
     }
 
     @Test
+    void shouldSetEncryptionAtHostPropertyWhenAzureAndEncryptionAtHostEnabled() {
+        InstanceTemplateRequest source = new InstanceTemplateRequest();
+        source.setInstanceType(INSTANCE_TYPE);
+        when(entitlementService.isAzureEncryptionAtHostEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+
+        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", "", "");
+
+        Json attributes = result.getAttributes();
+        assertThat(attributes).isNotNull();
+        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isEqualTo(Boolean.TRUE);
+    }
+
+    @Test
+    void shouldNotSetEncryptionAtHostPropertyWhenAzureAndEncryptionAtHostIsNotEnabled() {
+        InstanceTemplateRequest source = new InstanceTemplateRequest();
+        source.setInstanceType(INSTANCE_TYPE);
+        when(entitlementService.isAzureEncryptionAtHostEnabled(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
+
+        Template result = underTest.convert(source, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null);
+
+        Json attributes = result.getAttributes();
+        assertThat(attributes).isNotNull();
+        assertThat(attributes.<Object>getValue(AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED)).isNull();
+    }
+
+    @Test
     void shouldSetEncryptionKeyAndEncryptionMethodPropertyWhenGcpEncryptionKeyPresent() {
         InstanceTemplateRequest source = new InstanceTemplateRequest();
         source.setInstanceType(INSTANCE_TYPE);

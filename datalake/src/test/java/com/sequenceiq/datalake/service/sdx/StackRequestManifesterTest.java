@@ -307,16 +307,6 @@ public class StackRequestManifesterTest {
     }
 
     @Test
-    void setupInstanceVolumeEncryptionTestWhenAzureAndDiskEncryptionSetIdIsNotPresent() {
-        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
-        envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
-
-        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
-
-        verify(stackV4Request, never()).getInstanceGroups();
-    }
-
-    @Test
     void setupInstanceVolumeEncryptionTestWhenAzureAndDiskEncryptionSetIdAndNoInstanceGroups() {
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
@@ -396,6 +386,72 @@ public class StackRequestManifesterTest {
         underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
         verifyAzureEncryption(instanceTemplateV4Request1, EncryptionType.CUSTOM, DISK_ENCRYPTION_SET_ID, ENCRYPTION_KEY);
         verifyAzureEncryption(instanceTemplateV4Request2, EncryptionType.CUSTOM, DISK_ENCRYPTION_SET_ID, ENCRYPTION_KEY);
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAzureAndEncryptionAtHostAndNoInstanceGroups() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setAccountId(ACCOUNT_ID);
+        envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
+
+        List<InstanceGroupV4Request> instanceGroups = new ArrayList<>();
+        when(stackV4Request.getInstanceGroups()).thenReturn(instanceGroups);
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+
+        assertThat(instanceGroups).isEmpty();
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAzureAndEncryptionAtHostAndNoInstanceTemplateParameters() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setAccountId(ACCOUNT_ID);
+        envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
+        when(entitlementService.isAzureEncryptionAtHostEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+
+        InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+
+        verifyAzureEncryptionForEncryptionAtHost(instanceGroupV4Request.getTemplate(), Boolean.TRUE);
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAzureAndEncryptionAtHostAndNoEncryptionParameters() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setAccountId(ACCOUNT_ID);
+        envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
+        when(entitlementService.isAzureEncryptionAtHostEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+
+        InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
+        InstanceTemplateV4Request instanceTemplateV4Request = instanceGroupV4Request.getTemplate();
+        instanceTemplateV4Request.createAzure();
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+
+        verifyAzureEncryptionForEncryptionAtHost(instanceGroupV4Request.getTemplate(), Boolean.TRUE);
+    }
+
+    @Test
+    void setupInstanceVolumeEncryptionTestWhenAzureAndEncryptionAtHostAndTwoInstanceGroups() {
+        DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
+        envResponse.setAccountId(ACCOUNT_ID);
+        envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
+        when(entitlementService.isAzureEncryptionAtHostEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
+
+        InstanceGroupV4Request instanceGroupV4Request1 = createInstanceGroupV4Request();
+
+        InstanceGroupV4Request instanceGroupV4Request2 = createInstanceGroupV4Request();
+        InstanceTemplateV4Request instanceTemplateV4Request2 = instanceGroupV4Request2.getTemplate();
+        instanceTemplateV4Request2.createAzure().setEncryption(createAzureEncryptionV4Parameters(EncryptionType.CUSTOM, ENCRYPTION_KEY));
+
+        when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request1, instanceGroupV4Request2));
+
+        underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
+        verifyAzureEncryptionForEncryptionAtHost(instanceGroupV4Request1.getTemplate(), Boolean.TRUE);
+        verifyAzureEncryptionForEncryptionAtHost(instanceGroupV4Request2.getTemplate(), Boolean.TRUE);
     }
 
     @Test
@@ -642,6 +698,14 @@ public class StackRequestManifesterTest {
         assertThat(encryption.getType()).isEqualTo(expectedEncryptionType);
         assertThat(encryption.getKey()).isEqualTo(expectedEncryptionKeyUrl);
         assertThat(encryption.getDiskEncryptionSetId()).isEqualTo(expectedDiskEncryptionSetId);
+    }
+
+    private void verifyAzureEncryptionForEncryptionAtHost(InstanceTemplateV4Request instanceTemplateV4Request, Boolean expectedIsEncryptionAtHost) {
+        AzureInstanceTemplateV4Parameters azure = instanceTemplateV4Request.getAzure();
+        assertThat(azure).isNotNull();
+        AzureEncryptionV4Parameters encryption = azure.getEncryption();
+        assertThat(encryption).isNotNull();
+        assertThat(encryption.isEncryptionAtHostEnabled()).isEqualTo(expectedIsEncryptionAtHost);
     }
 
     private GcpEncryptionV4Parameters createGcpEncryptionV4Parameters(EncryptionType encryptionType, String encryptionKey) {
