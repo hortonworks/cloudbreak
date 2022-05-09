@@ -13,6 +13,11 @@ public class CmSyncTriggerEvent extends StackEvent {
         this.candidateImageUuids = candidateImageUuids;
     }
 
+    public CmSyncTriggerEvent(String selector, Long stackId, Set<String> candidateImageUuids) {
+        super(selector, stackId);
+        this.candidateImageUuids = candidateImageUuids;
+    }
+
     public Set<String> getCandidateImageUuids() {
         return candidateImageUuids;
     }
