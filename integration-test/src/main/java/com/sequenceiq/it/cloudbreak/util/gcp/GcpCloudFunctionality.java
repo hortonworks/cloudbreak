@@ -7,13 +7,15 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
 @Component
@@ -36,7 +38,7 @@ public class GcpCloudFunctionality implements CloudFunctionality {
 
     @Override
     public List<String> listVolumeEncryptionKeyIds(String clusterName, String resourceGroupName, List<String> instanceIds) {
-        throw new NotImplementedException("Not yet implemented on GCP");
+        return gcpUtil.listVolumeEncryptionKey(instanceIds);
     }
 
     @Override
@@ -46,8 +48,9 @@ public class GcpCloudFunctionality implements CloudFunctionality {
 
     @Override
     public Map<String, String> getInstanceSubnetMap(List<String> instanceIds) {
-        return null;
-        //TODO
+        LOGGER.warn("getInstanceSubnetMap ::: Not implemented for GCP!");
+        Log.log(LOGGER, " getInstanceSubnetMap ::: Not implemented for GCP! ");
+        return Collections.emptyMap();
     }
 
     @Override
@@ -87,6 +90,8 @@ public class GcpCloudFunctionality implements CloudFunctionality {
 
     @Override
     public Map<String, Boolean> enaSupport(List<String> instanceIds) {
+        LOGGER.warn("enaSupport ::: ENA driver is only available for AWS!");
+        Log.log(LOGGER, " enaSupport ::: ENA driver is only available at AWS! ");
         return Collections.emptyMap();
     }
 
@@ -108,6 +113,12 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     @Override
     public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
         return gcpUtil.getDataHubLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    @Override
+    public void verifyEnaDriver(StackV4Response stackV4Response, CloudbreakClient cloudbreakClient) {
+        LOGGER.warn("ENA driver is only available at AWS. So validation on GCP is not possible!");
+        Log.then(LOGGER, " ENA driver is only available at AWS. So validation on GCP is not possible! ");
     }
 
     @Override

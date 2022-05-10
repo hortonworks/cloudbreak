@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 import static com.sequenceiq.it.cloudbreak.assertion.distrox.DistroXExternalDatabaseAssertion.validateTemplateContainsExternalDatabaseHostname;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
-import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,14 +10,12 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
 import com.microsoft.azure.management.resources.ResourceGroup;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
@@ -38,6 +35,7 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsCloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.azure.AzureCloudProvider;
+import com.sequenceiq.it.cloudbreak.cloud.v4.gcp.GcpCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -49,10 +47,7 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
@@ -86,6 +81,9 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     private AzureCloudProvider azureCloudProvider;
 
     @Inject
+    private GcpCloudProvider gcpCloudProvider;
+
+    @Inject
     private FreeIpaTestClient freeIpaTestClient;
 
     @Inject
@@ -105,7 +103,6 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        assertNotSupportedCloudPlatform(CloudPlatform.GCP);
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
@@ -232,20 +229,20 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 .when(environmentTestClient.describe())
                 .then(this::verifyEnvironmentResponseDiskEncryptionKey)
                 .given(FreeIpaTestDto.class)
-                .then((context, testDto, testClient) -> verifyFreeIpaVolumeEncryptionKey(context, testDto, testClient, resourceGroupForTest))
+                .then(this::verifyFreeIpaVolumeEncryptionKey)
                 .given(SdxTestDto.class)
                     .withCloudStorage()
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
-                .then((context, testDto, testClient) -> verifySdxVolumeEncryptionKey(context, testDto, testClient, resourceGroupForTest))
+                .then(this::verifySdxVolumeEncryptionKey)
                 .given(DistroXTestDto.class)
                     .withInstanceGroupsEntity(distroXInstanceGroupTestDtos)
                     .withExternalDatabase(distroXDatabaseRequest)
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .then((context, testDto, testClient) -> verifyDistroxVolumeEncryptionKey(context, testDto, testClient, resourceGroupForTest))
+                .then(this::verifyDistroxVolumeEncryptionKey)
                 .then(this::verifyAwsEnaDriver)
                 .then(new AwsAvailabilityZoneAssertion())
                 .then(validateTemplateContainsExternalDatabaseHostname())
@@ -266,113 +263,38 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     }
 
     private DistroXTestDto verifyAwsEnaDriver(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
-        if (CloudPlatform.AWS.equals(testDto.getCloudPlatform())) {
-            sshEnaDriverCheckActions.checkEnaDriverOnAws(testDto.getResponse(), cloudbreakClient);
-        } else {
-            LOGGER.warn(format("ENA driver is only available at AWS. So validation on '%s' provider is not possible!", testDto.getCloudPlatform()));
-        }
+        testContext.getCloudProvider().getCloudFunctionality().verifyEnaDriver(testDto.getResponse(), cloudbreakClient);
         return testDto;
     }
 
     private EnvironmentTestDto verifyEnvironmentResponseDiskEncryptionKey(TestContext testContext, EnvironmentTestDto testDto,
             EnvironmentClient environmentClient) {
         DetailedEnvironmentResponse environment = environmentClient.getDefaultClient().environmentV1Endpoint().getByName(testDto.getName());
-        if (CloudPlatform.AWS.name().equals(environment.getCloudPlatform())) {
-            String encryptionKeyArn = environment.getAws().getAwsDiskEncryptionParameters().getEncryptionKeyArn();
-            verifyDiskEncryptionKey(testDto.getCloudPlatform(), encryptionKeyArn, testDto.getRequest().getName());
-        } else if (CloudPlatform.AZURE.name().equals(environment.getCloudPlatform())) {
-            String diskEncryptionSetId = environment.getAzure().getResourceEncryptionParameters().getDiskEncryptionSetId();
-            verifyDiskEncryptionKey(testDto.getCloudPlatform(), diskEncryptionSetId, testDto.getRequest().getName());
-        } else {
-            LOGGER.warn(format("Disk encryption feature is not available at '%s' provider currently!", environment.getCloudPlatform()));
-        }
+        testContext.getCloudProvider().verifyDiskEncryptionKey(environment, testDto.getRequest().getName());
         return testDto;
     }
 
-    private void verifyDiskEncryptionKey(CloudPlatform cloudPlatform, String encryptionKey, String environmentName) {
-        if (CloudPlatform.AWS.equals(cloudPlatform)) {
-            if (StringUtils.isEmpty(encryptionKey)) {
-                LOGGER.error(format("KMS key is not available for '%s' environment!", environmentName));
-                throw new TestFailException(format("KMS key is not available for '%s' environment!", environmentName));
-            } else {
-                LOGGER.info(format("Environment '%s' create has been done with '%s' KMS key.", environmentName, encryptionKey));
-                Log.then(LOGGER, format(" Environment '%s' create has been done with '%s' KMS key. ", environmentName, encryptionKey));
-            }
-        } else if (CloudPlatform.AZURE.equals(cloudPlatform)) {
-            if (StringUtils.isEmpty(encryptionKey)) {
-                LOGGER.error(format("DES key is not available for '%s' environment!", environmentName));
-                throw new TestFailException(format("DES key is not available for '%s' environment!", environmentName));
-            } else {
-                LOGGER.info(format("Environment '%s' create has been done with '%s' DES key.", environmentName, encryptionKey));
-                Log.then(LOGGER, format(" Environment '%s' create has been done with '%s' DES key. ", environmentName, encryptionKey));
-            }
-        }
-    }
-
     private FreeIpaTestDto verifyFreeIpaVolumeEncryptionKey(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient freeIpaClient) {
-        return verifyFreeIpaVolumeEncryptionKey(testContext, testDto, freeIpaClient, null);
-    }
-
-    private FreeIpaTestDto verifyFreeIpaVolumeEncryptionKey(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient freeIpaClient,
-            String resourceGroupName) {
-        CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         List<String> instanceIds = freeIpaInstanceUtil.getInstanceIds(testDto, freeIpaClient, MASTER.getName());
-        verifyVolumeEncryptionKey(testDto.getCloudPlatform(), testDto.getName(), instanceIds, cloudFunctionality,
-                testContext.given(EnvironmentTestDto.class).getRequest().getName(), resourceGroupName);
+        List<String> volumeKmsKeyIds = new ArrayList<>(testContext.getCloudProvider().getCloudFunctionality()
+                .listVolumeEncryptionKeyIds(testDto.getName(), resourceGroupForTest, instanceIds));
+        testContext.getCloudProvider().verifyVolumeEncryptionKey(volumeKmsKeyIds, testContext.given(EnvironmentTestDto.class).getRequest().getName());
         return testDto;
     }
 
     private SdxTestDto verifySdxVolumeEncryptionKey(TestContext testContext, SdxTestDto testDto, SdxClient sdxClient) {
-        return verifySdxVolumeEncryptionKey(testContext, testDto, sdxClient, null);
-    }
-
-    private SdxTestDto verifySdxVolumeEncryptionKey(TestContext testContext, SdxTestDto testDto, SdxClient sdxClient, String resourceGroupName) {
-        CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         List<String> instanceIds = sdxUtil.getInstanceIds(testDto, sdxClient, MASTER.getName());
-        verifyVolumeEncryptionKey(testDto.getCloudPlatform(), testDto.getName(), instanceIds, cloudFunctionality,
-                testContext.given(EnvironmentTestDto.class).getRequest().getName(), resourceGroupName);
+        List<String> volumeKmsKeyIds = new ArrayList<>(testContext.getCloudProvider().getCloudFunctionality()
+                .listVolumeEncryptionKeyIds(testDto.getName(), resourceGroupForTest, instanceIds));
+        testContext.getCloudProvider().verifyVolumeEncryptionKey(volumeKmsKeyIds, testContext.given(EnvironmentTestDto.class).getRequest().getName());
         return testDto;
     }
 
     private DistroXTestDto verifyDistroxVolumeEncryptionKey(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
-        return verifyDistroxVolumeEncryptionKey(testContext, testDto, cloudbreakClient, null);
-    }
-
-    private DistroXTestDto verifyDistroxVolumeEncryptionKey(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient,
-            String resourceGroupName) {
-        CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         List<String> instanceIds = distroxUtil.getInstanceIds(testDto, cloudbreakClient, MASTER.getName());
-        verifyVolumeEncryptionKey(testDto.getCloudPlatform(), testDto.getName(), instanceIds, cloudFunctionality,
-                testContext.given(EnvironmentTestDto.class).getRequest().getName(), resourceGroupName);
+        List<String> volumeKmsKeyIds = new ArrayList<>(testContext.getCloudProvider().getCloudFunctionality()
+                .listVolumeEncryptionKeyIds(testDto.getName(), resourceGroupForTest, instanceIds));
+        testContext.getCloudProvider().verifyVolumeEncryptionKey(volumeKmsKeyIds, testContext.given(EnvironmentTestDto.class).getRequest().getName());
         return testDto;
-    }
-
-    private void verifyVolumeEncryptionKey(CloudPlatform cloudPlatform, String resourceName, List<String> instanceIds,
-            CloudFunctionality cloudFunctionality, String environmentName, String resourceGroupName) {
-        if (CloudPlatform.AWS.equals(cloudPlatform)) {
-            String kmsKeyArn = awsCloudProvider.getEncryptionKeyArn(true);
-            List<String> volumeKmsKeyIds = new ArrayList<>(cloudFunctionality.listVolumeEncryptionKeyIds(resourceName, null, instanceIds));
-            if (volumeKmsKeyIds.stream().noneMatch(keyId -> keyId.equalsIgnoreCase(kmsKeyArn))) {
-                LOGGER.error(format("Volume has not been encrypted with '%s' KMS key!", kmsKeyArn));
-                throw new TestFailException(format("Volume has not been encrypted with '%s' KMS key!", kmsKeyArn));
-            } else {
-                LOGGER.info(format("Volume has been encrypted with '%s' KMS key.", kmsKeyArn));
-                Log.then(LOGGER, format(" Volume has been encrypted with '%s' KMS key. ", kmsKeyArn));
-            }
-        } else if (CloudPlatform.AZURE.equals(cloudPlatform)) {
-            String desKeyUrl = azureCloudProvider.getEncryptionKeyUrl();
-            List<String> volumesDesId = new ArrayList<>(cloudFunctionality.listVolumeEncryptionKeyIds(resourceName, resourceGroupName, instanceIds));
-            volumesDesId.forEach(desId -> {
-                if (desId.contains("diskEncryptionSets/" + environmentName)) {
-                    LOGGER.info(format("Volume has been encrypted with '%s' DES key.", desId));
-                    Log.then(LOGGER, format(" Volume has been encrypted with '%s' DES key. ", desId));
-                } else {
-                    LOGGER.error(format("Volume has not been encrypted with '%s' key!", desKeyUrl));
-                    throw new TestFailException(format("Volume has not been encrypted with '%s' key!", desKeyUrl));
-                }
-            });
-        } else {
-            LOGGER.warn(format("Disk encryption feature is not available at '%s' currently!", cloudPlatform));
-        }
     }
 }

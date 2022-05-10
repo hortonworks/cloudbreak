@@ -6,11 +6,13 @@ import java.io.IOException;
 import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -23,6 +25,7 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.AttachedDisk;
+import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.storage.Storage;
@@ -90,6 +93,30 @@ public class GcpClientActions extends GcpClient {
                 .stream()
                 .flatMap(Collection::stream)
                 .collect(Collectors.toList());
+    }
+
+    public List<String> listVolumeEncryptionKey(List<String> instanceIds) {
+        List<String> encryptionKeys = new ArrayList<>();
+        Compute compute = buildCompute();
+        for (String instanceId : instanceIds) {
+            try {
+                Instance instance = compute
+                        .instances()
+                        .get(getProjectId(), gcpProperties.getAvailabilityZone(), instanceId)
+                        .execute();
+                Optional<String> encryptionKey = instance
+                        .getDisks()
+                        .stream().findFirst()
+                        .map(AttachedDisk::getDiskEncryptionKey)
+                        .map(CustomerEncryptionKey::getKmsKeyName);
+                if (encryptionKey.isPresent()) {
+                    encryptionKeys.add(encryptionKey.get());
+                }
+            } catch (Exception e) {
+                LOGGER.warn(String.format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
+            }
+        }
+        return encryptionKeys;
     }
 
     public Map<String, String> instanceSubnet(List<String> instanceIds) {

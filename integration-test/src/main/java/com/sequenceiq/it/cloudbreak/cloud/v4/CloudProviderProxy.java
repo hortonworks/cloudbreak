@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
@@ -17,6 +19,7 @@ import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
@@ -55,6 +58,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @Component
 public class CloudProviderProxy implements CloudProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudProviderProxy.class);
 
     private CloudProvider delegate;
 
@@ -413,5 +418,15 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public String getFreeIpaUpgradeImageCatalog() {
         return delegate.getFreeIpaUpgradeImageCatalog();
+    }
+
+    @Override
+    public void verifyDiskEncryptionKey(DetailedEnvironmentResponse environment, String environmentName) {
+        delegate.verifyDiskEncryptionKey(environment, environmentName);
+    }
+
+    @Override
+    public void verifyVolumeEncryptionKey(List<String> volumeEncryptionKeyIds, String environmentName) {
+        delegate.verifyVolumeEncryptionKey(volumeEncryptionKeyIds, environmentName);
     }
 }
