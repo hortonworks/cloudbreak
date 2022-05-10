@@ -92,4 +92,7 @@
     <Match>
         <Package name="~com\.cloudera\.thunderhead\.service\.sdxsvc.*"/>
     </Match>
+    <Match>
+        <Package name="~com\.cloudera\.cdp\.servicediscovery.*"/>
+    </Match>
 </FindBugsFilter>

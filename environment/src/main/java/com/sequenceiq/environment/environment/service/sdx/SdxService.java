@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service.sdx;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -9,12 +10,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.saas.sdx.PaasRemoteDataContextSupplier;
 import com.sequenceiq.environment.exception.SdxOperationFailedException;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Service
-public class SdxService {
+public class SdxService implements PaasRemoteDataContextSupplier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxService.class);
 
@@ -67,4 +69,8 @@ public class SdxService {
         }
     }
 
+    @Override
+    public Optional<String> getPaasSdxRemoteDataContext(String sdxCrn) {
+        throw new IllegalStateException("Environment should not query remote data context for SDX.");
+    }
 }

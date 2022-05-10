@@ -19,7 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto;
+import com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.saas.client.sdx.GrpcSdxSaasClient;
@@ -57,7 +57,7 @@ public class SaasSdxServiceTest {
 
     @Test
     public void testListCrn() {
-        SDXSvcAdminProto.Instance instance = getInstance();
+        SDXSvcCommonProto.Instance instance = getInstance();
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
         when(grpcSdxSaasClient.listInstances(any(), anyString())).thenReturn(Set.of(instance));
         assertTrue(underTest.listSdxCrns("envName", ENV_CRN).contains(SAAS_CRN));
@@ -70,11 +70,11 @@ public class SaasSdxServiceTest {
 
     @Test
     public void testListStatusPairsCrn() {
-        SDXSvcAdminProto.Instance instance = getInstance();
+        SDXSvcCommonProto.Instance instance = getInstance();
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
         when(grpcSdxSaasClient.listInstances(any(), anyString())).thenReturn(Set.of(instance));
         assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN, "env", Set.of(SAAS_CRN))
-                .contains(Pair.of(SAAS_CRN, SDXSvcAdminProto.InstanceHighLevelStatus.Value.HEALTHY))));
+                .contains(Pair.of(SAAS_CRN, SDXSvcCommonProto.InstanceHighLevelStatus.Value.HEALTHY))));
         verify(grpcSdxSaasClient).listInstances(any(), anyString());
 
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.FALSE);
@@ -84,15 +84,15 @@ public class SaasSdxServiceTest {
 
     @Test
     public void testGetDeletePollingResult() {
-        assertEquals(PollingResult.IN_PROGRESS, underTest.getDeletePollingResultByStatus(SDXSvcAdminProto.InstanceHighLevelStatus.Value.HEALTHY));
-        assertEquals(PollingResult.FAILED, underTest.getDeletePollingResultByStatus(SDXSvcAdminProto.InstanceHighLevelStatus.Value.UNHEALTHY));
+        assertEquals(PollingResult.IN_PROGRESS, underTest.getDeletePollingResultByStatus(SDXSvcCommonProto.InstanceHighLevelStatus.Value.HEALTHY));
+        assertEquals(PollingResult.FAILED, underTest.getDeletePollingResultByStatus(SDXSvcCommonProto.InstanceHighLevelStatus.Value.UNHEALTHY));
     }
 
-    private SDXSvcAdminProto.Instance getInstance() {
-        return SDXSvcAdminProto.Instance.newBuilder()
+    private SDXSvcCommonProto.Instance getInstance() {
+        return SDXSvcCommonProto.Instance.newBuilder()
                 .setCrn(SAAS_CRN)
                 .addEnvironments(ENV_CRN)
-                .setStatus(SDXSvcAdminProto.InstanceHighLevelStatus.Value.HEALTHY)
+                .setStatus(SDXSvcCommonProto.InstanceHighLevelStatus.Value.HEALTHY)
                 .build();
     }
 }

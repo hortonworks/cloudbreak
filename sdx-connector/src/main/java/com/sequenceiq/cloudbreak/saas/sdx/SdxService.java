@@ -11,16 +11,25 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
+import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
 
 public interface SdxService<S> {
 
     TargetPlatform targetPlatform();
+
+    Optional<String> getRemoteDataContext(String crn);
 
     void deleteSdx(String sdxCrn, Boolean force);
 
     Set<String> listSdxCrns(String environmentName, String environmentCrn);
 
     Set<Pair<String, S>> listSdxCrnStatusPair(String environmentCrn, String environmentName, Set<String> sdxCrns);
+
+    default Set<Pair<String, StatusCheckResult>> listSdxCrnStatusCheckPair(String environmentCrn, String environmentName, Set<String> sdxCrns) {
+        return listSdxCrnStatusPair(environmentCrn, environmentName, sdxCrns).stream()
+                .map(statusPair -> Pair.of(statusPair.getKey(), getAvailabilityStatusCheckResult(statusPair.getValue())))
+                .collect(Collectors.toSet());
+    }
 
     default Map<String, PollingResult> getPollingResultForDeletion(String environmentCrn, String environmentName, Set<String> sdxCrns) {
         if (isPlatformEntitled(Crn.safeFromString(environmentCrn).getAccountId())) {
@@ -31,6 +40,8 @@ public interface SdxService<S> {
     }
 
     PollingResult getDeletePollingResultByStatus(S status);
+
+    StatusCheckResult getAvailabilityStatusCheckResult(S status);
 
     default Optional<Entitlement> getEntitlement() {
         return Optional.empty();

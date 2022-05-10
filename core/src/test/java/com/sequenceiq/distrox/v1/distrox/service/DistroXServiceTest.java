@@ -2,22 +2,21 @@ package com.sequenceiq.distrox.v1.distrox.service;
 
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.AVAILABLE;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_DATAHUB_STARTED;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
+import java.util.Set;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -28,16 +27,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.verification.VerificationMode;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -52,6 +48,8 @@ class DistroXServiceTest {
 
     private static final Long USER_ID = 123456L;
 
+    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:acc1:datalake:cluster1";
+
     @Mock
     private DistroXV1RequestToStackV4RequestConverter stackRequestConverter;
 
@@ -65,13 +63,13 @@ class DistroXServiceTest {
     private StackOperations stackOperations;
 
     @Mock
-    private StackViewService stackViewService;
-
-    @Mock
     private FreeipaClientService freeipaClientService;
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @InjectMocks
     private DistroXService underTest;
@@ -117,11 +115,11 @@ class DistroXServiceTest {
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
-        when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(createDlStackView(Status.AVAILABLE)));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
 
         underTest.post(request);
 
-        verify(stackViewService).findDatalakeViewByEnvironmentCrn(anyString());
+        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
     }
 
     @ParameterizedTest
@@ -178,7 +176,7 @@ class DistroXServiceTest {
         StackV4Request converted = new StackV4Request();
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
         when(stackRequestConverter.convert(r)).thenReturn(converted);
-        when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(createDlStackView(Status.AVAILABLE)));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
 
         underTest.post(r);
@@ -205,15 +203,16 @@ class DistroXServiceTest {
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
-        when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of());
 
         assertThrows(BadRequestException.class, () -> underTest.post(request));
 
-        verify(stackViewService).findDatalakeViewByEnvironmentCrn(anyString());
+        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
+        verifyNoMoreInteractions(platformAwareSdxConnector);
     }
 
     @Test
-    public void testIfDlIsNotRunning() throws IllegalAccessException {
+    public void testIfDlIsNotRunning() {
         String envName = "someAwesomeEnvironment";
         DistroXV1Request request = new DistroXV1Request();
         request.setEnvironmentName(envName);
@@ -225,15 +224,18 @@ class DistroXServiceTest {
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
-        when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(createDlStackView(Status.CREATE_IN_PROGRESS)));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any(), any(), any()))
+                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.NOT_AVAILABLE)));
 
         assertThrows(BadRequestException.class, () -> underTest.post(request));
 
-        verify(stackViewService).findDatalakeViewByEnvironmentCrn(anyString());
+        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());
     }
 
     @Test
-    public void testIfDlIsRunning() throws IllegalAccessException {
+    public void testIfDlIsRunning() {
         String envName = "someAwesomeEnvironment";
         DistroXV1Request request = new DistroXV1Request();
         request.setEnvironmentName(envName);
@@ -245,20 +247,14 @@ class DistroXServiceTest {
         freeipa.setStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE);
         when(freeipaClientService.getByEnvironmentCrn("crn")).thenReturn(freeipa);
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
-        when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(createDlStackView(Status.AVAILABLE)));
+        when(platformAwareSdxConnector.listSdxCrns(any(), any())).thenReturn(Set.of(DATALAKE_CRN));
+        when(platformAwareSdxConnector.listSdxCrnsWithAvailability(any(), any(), any()))
+                .thenReturn(Set.of(Pair.of(DATALAKE_CRN, StatusCheckResult.AVAILABLE)));
 
         underTest.post(request);
 
-        verify(stackViewService).findDatalakeViewByEnvironmentCrn(anyString());
-    }
-
-    private StackView createDlStackView(Status status) throws IllegalAccessException {
-        StackView stack = new StackView();
-        stack.setType(StackType.DATALAKE);
-        StackStatusView stackStatusView = new StackStatusView();
-        stackStatusView.setStatus(status);
-        FieldUtils.writeField(stack, "stackStatus", stackStatusView, true);
-        return stack;
+        verify(platformAwareSdxConnector).listSdxCrns(any(), any());
+        verify(platformAwareSdxConnector).listSdxCrnsWithAvailability(any(), any(), any());
     }
 
     private static VerificationMode calledOnce() {

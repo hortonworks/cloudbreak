@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import javax.inject.Inject;
 
 import com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto;
+import com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -15,7 +16,7 @@ import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 
 @Prototype
-public class SdxSaasTestDto extends AbstractTestDto<SDXSvcAdminProto.CreateInstanceRequest, SDXSvcAdminProto.Instance, SdxSaasTestDto, SdxSaasItClient> {
+public class SdxSaasTestDto extends AbstractTestDto<SDXSvcAdminProto.CreateInstanceRequest, SDXSvcCommonProto.Instance, SdxSaasTestDto, SdxSaasItClient> {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -48,7 +49,7 @@ public class SdxSaasTestDto extends AbstractTestDto<SDXSvcAdminProto.CreateInsta
 
     private SDXSvcAdminProto.CreateInstanceRequest defaultRequest(String environmentCrn) {
         SDXSvcAdminProto.CreateInstanceRequest request = SDXSvcAdminProto.CreateInstanceRequest.newBuilder()
-                .setCloudPlatform(SDXSvcAdminProto.CloudPlatform.Value.AWS)
+                .setCloudPlatform(SDXSvcCommonProto.CloudPlatform.Value.AWS)
                 .setCloudRegion(regionAwareInternalCrnGeneratorFactory.getRegion())
                 .setEnvironment(environmentCrn)
                 .setAccountId(Crn.safeFromString(environmentCrn).getAccountId())

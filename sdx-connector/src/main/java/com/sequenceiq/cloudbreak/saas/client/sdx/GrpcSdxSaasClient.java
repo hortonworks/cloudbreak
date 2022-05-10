@@ -4,15 +4,13 @@ import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto;
+import com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto;
 import com.google.common.base.Preconditions;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -53,12 +51,10 @@ public class GrpcSdxSaasClient {
         sdxSaasClient.deleteInstance(generatedRequestId, sdxInstanceCrn);
     }
 
-    public Set<SDXSvcAdminProto.Instance> listInstances(Optional<String> requestId, String environmentCrn) {
+    public Set<SDXSvcCommonProto.Instance> listInstances(Optional<String> requestId, String environmentCrn) {
         SdxSaasClient sdxSaasClient = makeClient();
         String generatedRequestId = requestId.orElse(MDCBuilder.getOrGenerateRequestId());
-        return sdxSaasClient.listInstances(generatedRequestId, Crn.safeFromString(environmentCrn).getAccountId()).stream()
-                .filter(instance -> instance.getEnvironmentsList().contains(environmentCrn))
-                .collect(Collectors.toSet());
+        return sdxSaasClient.listInstances(generatedRequestId, environmentCrn);
     }
 
     SdxSaasClient makeClient() {
