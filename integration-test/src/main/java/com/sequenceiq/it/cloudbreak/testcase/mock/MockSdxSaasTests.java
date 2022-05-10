@@ -5,10 +5,12 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxSaasTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxSaasTestDto;
 
@@ -19,6 +21,9 @@ public class MockSdxSaasTests extends AbstractMockTest {
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
+
+    @Inject
+    private DistroXTestClient distroXTestClient;
 
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -39,6 +44,9 @@ public class MockSdxSaasTests extends AbstractMockTest {
         testContext
                 .given(SdxSaasTestDto.class)
                 .when(sdxSaasTestClient.create())
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .awaitForFlow()
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.cascadingDelete())
                 .await(EnvironmentStatus.ARCHIVED)

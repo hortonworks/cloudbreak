@@ -28,10 +28,10 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
+import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -96,10 +96,10 @@ class ClusterBuilderServiceTest {
     private InstanceMetaData mockInstanceMetaData;
 
     @Mock
-    private DatalakeService datalakeService;
+    private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
 
     @Mock
-    private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @BeforeEach
     void setUp() {
@@ -113,11 +113,11 @@ class ClusterBuilderServiceTest {
         when(mockHostGroup.getInstanceGroup()).thenReturn(mockInstanceGroup);
 
         when(mockStackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(mockStack);
-        when(datalakeService.getDatalakeStackByStackEnvironmentCrn(any())).thenReturn(Optional.of(mockStack));
         when(mockClusterApiConnectors.getConnector(mockStack)).thenReturn(mockClusterApi);
         when(mockClusterApi.clusterSetupService()).thenReturn(mockClusterSetupService);
         when(mockHostGroupService.getByClusterWithRecipes(CLUSTER_ID)).thenReturn(Set.of(mockHostGroup));
         when(mockInstanceMetaDataService.findAliveInstancesInInstanceGroup(INSTANCE_GROUP_ID)).thenReturn(List.of(mockInstanceMetaData));
+        when(platformAwareSdxConnector.getRemoteDataContext(anyString())).thenReturn(Optional.empty());
     }
 
     @Test

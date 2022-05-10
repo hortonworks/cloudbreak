@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminGrpc;
 import com.cloudera.thunderhead.service.sdxsvcadmin.SDXSvcAdminProto;
+import com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
@@ -43,10 +44,10 @@ public class SdxSaasClient {
                         new AltusMetadataInterceptor(requestId, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString()));
     }
 
-    public SDXSvcAdminProto.Instance createInstance(String requestId, String sdxInstanceName, String environmentCrn, String region) {
+    public SDXSvcCommonProto.Instance createInstance(String requestId, String sdxInstanceName, String environmentCrn, String region) {
         checkNotNull(requestId, "requestId should not be null.");
         SDXSvcAdminProto.CreateInstanceRequest request = SDXSvcAdminProto.CreateInstanceRequest.newBuilder()
-                .setCloudPlatform(SDXSvcAdminProto.CloudPlatform.Value.AWS)
+                .setCloudPlatform(SDXSvcCommonProto.CloudPlatform.Value.AWS)
                 .setCloudRegion(region)
                 .setEnvironment(environmentCrn)
                 .setName(sdxInstanceName)
@@ -54,7 +55,7 @@ public class SdxSaasClient {
         return newStub(requestId).createInstance(request).getInstance();
     }
 
-    public SDXSvcAdminProto.Instance deleteInstance(String requestId, String sdxInstanceCrn) {
+    public SDXSvcCommonProto.Instance deleteInstance(String requestId, String sdxInstanceCrn) {
         checkNotNull(requestId, "requestId should not be null.");
         SDXSvcAdminProto.DeleteInstanceRequest request = SDXSvcAdminProto.DeleteInstanceRequest.newBuilder()
                 .setInstance(sdxInstanceCrn)
@@ -62,18 +63,20 @@ public class SdxSaasClient {
         return newStub(requestId).deleteInstance(request).getInstance();
     }
 
-    public Set<SDXSvcAdminProto.Instance> listInstances(String requestId, String accountId) {
+    public Set<SDXSvcCommonProto.Instance> listInstances(String requestId, String environmentCrn) {
         checkNotNull(requestId, "requestId should not be null.");
-        // TODO request filter for environment
-        SDXSvcAdminProto.ListInstancesRequest.Builder requestBuilder = SDXSvcAdminProto.ListInstancesRequest.newBuilder().setAccountId(accountId);
+        SDXSvcAdminProto.FindInstancesRequest.Builder requestBuilder = SDXSvcAdminProto.FindInstancesRequest.newBuilder()
+                .setSearchByEnvironment(SDXSvcCommonProto.SearchByEnvironment.newBuilder()
+                        .setEnvironment(environmentCrn)
+                        .build());
         SDXSvcAdminGrpc.SDXSvcAdminBlockingStub stub = newStub(requestId);
-        SDXSvcAdminProto.ListInstancesResponse listInstancesResponse;
-        Set<SDXSvcAdminProto.Instance> instances = Sets.newHashSet();
+        SDXSvcAdminProto.FindInstancesResponse findInstancesResponse;
+        Set<SDXSvcCommonProto.Instance> instances = Sets.newHashSet();
         do {
-            listInstancesResponse = stub.listInstances(requestBuilder.build());
-            instances.addAll(listInstancesResponse.getInstancesList());
-            requestBuilder.setStartingToken(listInstancesResponse.getNextToken());
-        } while (StringUtils.isNotEmpty(listInstancesResponse.getNextToken()));
+            findInstancesResponse = stub.findInstances(requestBuilder.build());
+            instances.addAll(findInstancesResponse.getInstancesList());
+            requestBuilder.setPageToken(findInstancesResponse.getNextPageToken());
+        } while (StringUtils.isNotEmpty(findInstancesResponse.getNextPageToken()));
         return instances;
     }
 }

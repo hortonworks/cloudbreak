@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.saas.sdx;
 
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETE_FAILED;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
+import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -25,6 +27,14 @@ public class PaasSdxService extends AbstractSdxService<SdxClusterStatusResponse>
 
     @Inject
     private SdxEndpoint sdxEndpoint;
+
+    @Inject
+    private PaasRemoteDataContextSupplier remoteDataContextSupplier;
+
+    @Override
+    public Optional<String> getRemoteDataContext(String crn) {
+        return remoteDataContextSupplier.getPaasSdxRemoteDataContext(crn);
+    }
 
     @Override
     public TargetPlatform targetPlatform() {
@@ -54,7 +64,20 @@ public class PaasSdxService extends AbstractSdxService<SdxClusterStatusResponse>
     }
 
     @Override
+    public Set<Pair<String, StatusCheckResult>> listSdxCrnStatusCheckPair(String environmentCrn, String environmentName, Set<String> sdxCrns) {
+        return listSdxCrnStatusPair(environmentCrn, environmentName, sdxCrns).stream()
+                .map(statusPair -> Pair.of(statusPair.getKey(), getAvailabilityStatusCheckResult(statusPair.getValue())))
+                .collect(Collectors.toSet());
+    }
+
+    @Override
     public PollingResult getDeletePollingResultByStatus(SdxClusterStatusResponse status) {
         return DELETE_FAILED.equals(status) ? PollingResult.FAILED : PollingResult.IN_PROGRESS;
     }
+
+    @Override
+    public StatusCheckResult getAvailabilityStatusCheckResult(SdxClusterStatusResponse status) {
+        return SdxClusterStatusResponse.RUNNING.equals(status) ? StatusCheckResult.AVAILABLE : StatusCheckResult.NOT_AVAILABLE;
+    }
+
 }

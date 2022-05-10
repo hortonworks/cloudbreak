@@ -6,6 +6,7 @@ option java_package = "com.cloudera.thunderhead.service.sdxsvcadmin";
 option java_outer_classname = "SDXSvcAdminProto";
 
 import "options.proto";
+import "sdxsvccommon.proto";
 
 option (options.FileExtension.audit) = true;
 
@@ -30,11 +31,45 @@ service SDXSvcAdmin {
     description: "SDX Services control functions."
   };
   option (options.ServiceExtension.tagGroup) = {
-    name: "Resource Registration",
-    description: "Functions to control Resource Registration of SDX Resources."
+    name: "Operational Environments",
+    description: "Functions to control the Operational Environments Resources."
+  };
+  option (options.ServiceExtension.tagGroup) = {
+    name: "Indexers",
+    description: "Functions to control the Indexer Resources."
+  };
+  option (options.ServiceExtension.tagGroup) = {
+    name: "RDBMS",
+    description: "Functions to control the RDBMS Resources."
+  };
+  option (options.ServiceExtension.tagGroup) = {
+    name: "Storage",
+    description: "Functions to control the Storage Resources."
+  };
+  option (options.ServiceExtension.tagGroup) = {
+    name: "Utilities",
+    description: "General utility functions."
   };
 
-  // Add an SDX Service to a running SDX Instance. :: Add an SDX Service to a running SDX Instance.
+  /*********** Utility Functions ****************/
+
+  // List the currently supported Cloud Regions. :: List the currently supported Cloud Regions.
+  rpc ListSupportedCloudRegions (ListSupportedCloudRegionsRequest)
+      returns (ListSupportedCloudRegionsResponse){
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.tag) = "Utilities";
+  }
+
+  // List the currently supported Cloud Platforms. :: List the currently supported Cloud Platforms.
+  rpc ListSupportedCloudPlatforms (ListSupportedCloudPlatformsRequest)
+      returns (ListSupportedCloudPlatformsResponse){
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.tag) = "Utilities";
+  }
+
+  /*********** Services Functions ****************/
+
+  // Add an SDX Service instance to a running SDX Instance. :: Add an SDX Service instance to a running SDX Instance.
   rpc AddService (AddServiceRequest)
       returns(AddServiceResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
@@ -43,20 +78,22 @@ service SDXSvcAdmin {
 
   }
 
-  // Remove a SDX Service instance from an SDX Instance. :: Remove a SDX Service instance from an SDX Instance.
+  // Remove an SDX Service instance from an SDX Instance. :: Remove an SDX Service instance from an SDX Instance.
   rpc RemoveService (RemoveServiceRequest)
       returns(RemoveServiceResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
     option (options.MethodExtension.mutating) = true;
     option (options.MethodExtension.tag) = "Services";
   }
-  // Describe an SDX service. :: Describe an SDX service.
+
+  // Describe an SDX Service instance in an SDX Instance. :: Describe an SDX Service instance in an SDX Instance.
   rpc DescribeService (DescribeServiceRequest)
       returns(DescribeServiceResponse) {
+    option (options.MethodExtension.mutating) = false;
     option (options.MethodExtension.tag) = "Services";
   }
 
-  // Restart an SDX Service in an Instance. :: Restart an SDX Service in an Instance.
+  // Restart an SDX Service instance in an SDX Instance. :: Restart an SDX Service instance in an SDX Instance.
   rpc RequestServiceRestart (RequestServiceRestartRequest)
       returns(RequestServiceRestartResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
@@ -64,7 +101,7 @@ service SDXSvcAdmin {
     option (options.MethodExtension.tag) = "Services";
   }
 
-  // Suspend an SDX Service in an Instance. :: Suspend an SDX Service in an Instance.
+  // Suspend an SDX Service instance in an SDX Instance. :: Suspend an SDX Service instance in an SDX Instance.
   rpc RequestServiceSuspend (RequestServiceSuspendRequest)
       returns(RequestServiceSuspendResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
@@ -72,7 +109,7 @@ service SDXSvcAdmin {
     option (options.MethodExtension.tag) = "Services";
   }
 
-  // Start an SDX Service in an Instance. :: Start an SDX Service in an Instance.
+  // Start an SDX Service instance in an SDX Instance. :: Start an SDX Service instance in an SDX Instance.
   rpc RequestServiceStart (RequestServiceStartRequest)
       returns(RequestServiceStartResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
@@ -80,7 +117,7 @@ service SDXSvcAdmin {
     option (options.MethodExtension.tag) = "Services";
   }
 
-  // Upgrade an SDX Service in an Instance. :: Upgrade an SDX Service in an Instance.
+  // Upgrade an SDX Service instance in an SDX Instance. :: Upgrade an SDX Service instance in an SDX Instance.
   rpc RequestServiceUpgrade (RequestServiceUpgradeRequest)
       returns(RequestServiceUpgradeResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
@@ -88,21 +125,23 @@ service SDXSvcAdmin {
     option (options.MethodExtension.tag) = "Services";
   }
 
-  // List all available versions of a SDX Service. :: List all available versions of a SDX Service.
+  // Check a request on an SDX Service instance. :: Check a request on an SDX Service instance.
+  rpc CheckServiceRequest (CheckServiceRequestRequest)
+      returns(CheckServiceRequestResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.tag) = "Services";
+  }
+
+  // List all available versions of an SDX Service. :: List all available versions of an SDX Service.
   rpc ListServiceVersions (ListServiceVersionsRequest)
       returns(ListServiceVersionsResponse) {
+    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
     option (options.MethodExtension.paginates) = true;
     option (options.MethodExtension.pagingDefaultMaxItems) = 20;
     option (options.MethodExtension.tag) = "Services";
   }
 
-  // Request to move the SDX Instance to a different Operational Environment. :: Request to move the SDX Instance to a different Operational Environment.
-  rpc RequestMoveInstanceToOperationalEnvironment(RequestMoveInstanceToOperationalEnvironmentRequest)
-      returns (RequestMoveInstanceToOperationalEnvironmentResponse) {
-    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
-    option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Services";
-  }
+  /*********** Instances Functions ****************/
 
   // Create an SDX Instance. :: Create an SDX Instance.
   rpc CreateInstance (CreateInstanceRequest)
@@ -112,7 +151,15 @@ service SDXSvcAdmin {
     option (options.MethodExtension.tag) = "Instances";
   }
 
-  // Pair a CDP Environment to an SDX Instance. :: Pair a CDP Environment to a SDX Instance.
+  // Request to move the SDX Instance to a different Operational Environment. :: Request to move the SDX Instance to a different Operational Environment.
+  rpc RequestMoveInstanceToOperationalEnvironment(RequestMoveInstanceToOperationalEnvironmentRequest)
+      returns (RequestMoveInstanceToOperationalEnvironmentResponse) {
+    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.tag) = "Instances";
+  }
+
+  // Pair a CDP Environment to an SDX Instance. :: Pair a CDP Environment to an SDX Instance.
   rpc PairEnvironmentToInstance (PairEnvironmentToInstanceRequest)
       returns (PairEnvironmentToInstanceResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
@@ -139,8 +186,10 @@ service SDXSvcAdmin {
   // Describe an SDX Instance. :: Describe an SDX Instance.
   rpc DescribeInstance (DescribeInstanceRequest)
       returns (DescribeInstanceResponse) {
+    option (options.MethodExtension.mutating) = false;
     option (options.MethodExtension.tag) = "Instances";
   }
+
   // List all SDX Instances. :: List all SDX Instances.
   rpc ListInstances (ListInstancesRequest)
       returns (ListInstancesResponse) {
@@ -148,6 +197,49 @@ service SDXSvcAdmin {
     option (options.MethodExtension.pagingDefaultMaxItems) = 20;
     option (options.MethodExtension.tag) = "Instances";
   }
+
+  // Find SDX Instances based on criteria. :: Find SDX Instances based on criteria.
+  rpc FindInstances (FindInstancesRequest)
+      returns (FindInstancesResponse) {
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.tag) = "Instances";
+  }
+
+  // Request the stop of all SDX Services in an SDX Instance. :: Request the stop of all SDX Services in an SDX Instance.
+  rpc RequestInstanceStop (RequestInstanceStopRequest)
+      returns(RequestInstanceStopResponse) {
+    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.tag) = "Instances";
+  }
+
+  // Request the start of all SDX Services in an SDX Instance. :: Request the start of all SDX Services in an SDX Instance.
+  rpc RequestInstanceStart (RequestInstanceStartRequest)
+      returns (RequestInstanceStartResponse) {
+    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.tag) = "Instances";
+  }
+
+  // Request the restart of all SDX Services in an SDX Instance. :: Request the restart of all SDX Services in an SDX Instance.
+  rpc RequestInstanceRestart (RequestInstanceRestartRequest)
+      returns (RequestInstanceRestartResponse) {
+    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.tag) = "Instances";
+  }
+
+  // Check a request on an SDX Instance.  :: Check a request on an SDX Instance.
+  rpc CheckInstanceRequest (CheckInstanceRequestRequest)
+      returns(CheckInstanceRequestResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.tag) = "Instances";
+  }
+
+
+
+  /*********** Connections Functions ****************/
 
   // Create an AWS PrivateLink Connection. :: Create a connection to SDX as a Service via AWS PrivateLink.
   rpc CreateAwsPrivatelinkConnection (CreateAwsPrivatelinkConnectionRequest)
@@ -177,11 +269,11 @@ service SDXSvcAdmin {
   // Describe an SDX Connection. :: Describe an SDX Connection.
   rpc DescribeConnection (DescribeConnectionRequest)
       returns (DescribeConnectionResponse) {
-    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
+    option (options.MethodExtension.mutating) = false;
     option (options.MethodExtension.tag) = "Connections";
   }
 
-  // List all SDX Connections. :: List all SDX Connections.
+  // Lists all SDX Connections. :: Lists all SDX Connections.
   rpc ListConnections (ListConnectionsRequest)
       returns (ListConnectionsResponse) {
     option (options.MethodExtension.paginates) = true;
@@ -189,12 +281,14 @@ service SDXSvcAdmin {
     option (options.MethodExtension.tag) = "Connections";
   }
 
+  /*********** Operational Environment Functions ****************/
+
   // Register an Operational Environment with the SDX Resource Manager. :: Register an Operational Environment with the SDX Resource Manager.
   rpc RegisterOperationalEnvironment (RegisterOperationalEnvironmentRequest)
       returns (RegisterOperationalEnvironmentResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
     option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Resource Registration";
+    option (options.MethodExtension.tag) = "Operational Environments";
   }
 
   // Unregister an Operational Environment from the SDX Resource Manager. :: Unregister an Operational Environment from the SDX Resource Manager.
@@ -202,530 +296,580 @@ service SDXSvcAdmin {
       returns (UnregisterOperationalEnvironmentResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
     option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Resource Registration";
+    option (options.MethodExtension.tag) = "Operational Environments";
   }
 
-  // Register an AWS PrivateLink Endpoint Service with the SDX Resource Manager. :: Register an AWS PrivateLink Endpoint Service with the SDX Resource Manager.
-  rpc RegisterAwsEndpointService (RegisterAwsEndpointServiceRequest)
-      returns (RegisterAwsEndpointServiceResponse) {
-    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
-    option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Resource Registration";
+  // Describe an Operational Environment. :: Describe an Operational Environment.
+  rpc DescribeOperationalEnvironment (DescribeOperationalEnvironmentRequest)
+      returns (DescribeOperationalEnvironmentResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.tag) = "Operational Environments";
   }
 
-  // Unregister an AWS PrivateLink Endpoint Service with the SDX Resource Manager. :: Unregister an AWS PrivateLink Endpoint Service with the SDX Resource Manager.
-  rpc UnregisterAwsEndpointService (UnregisterAwsEndpointServiceRequest)
-      returns (UnregisterAwsEndpointServiceResponse) {
-    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
-    option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Resource Registration";
+  // Lists the registered Operational Environments. :: Lists the registered Operation Environments.
+  rpc ListOperationalEnvironments (ListOperationalEnvironmentsRequest)
+      returns (ListOperationalEnvironmentsResponse) {
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.tag) = "Operational Environments";
   }
 
-  // Register an AWS ALB as a Traffic Steering Proxy. :: Register an AWS ALB as a Traffic Steering Proxy.
-  rpc RegisterAwsAlbTrafficSteeringProxy (RegisterAwsAlbTrafficSteeringProxyRequest)
-      returns (RegisterAwsAlbTrafficSteeringProxyResponse) {
-    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
-    option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Resource Registration";
+  // Find the registered Operational Environments based on criteria. :: Find the registered Operational Environments based on criteria.
+  rpc FindOperationalEnvironments (FindOperationalEnvironmentsRequest)
+      returns (FindOperationalEnvironmentsResponse) {
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.tag) = "Operational Environments";
   }
 
-  // Unregister an AWS ALB as a Traffic Steering Proxy. :: Unregister an AWS ALB as a Traffic Steering Proxy.
-  rpc UnregisterAwsAlbTrafficSteeringProxy (UnregisterAwsAlbTrafficSteeringProxyRequest)
-      returns (UnregisterAwsAlbTrafficSteeringProxyResponse) {
+  // Set the assignability flag of an Operational Environment. :: Set the assignability flag of an Operational Environment.
+  rpc SetOperationalEnvironmentAssignability (SetOperationalEnvironmentAssignabilityRequest)
+      returns (SetOperationalEnvironmentAssignabilityResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
     option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Resource Registration";
+    option (options.MethodExtension.tag) = "Operational Environments";
   }
 
-  // Register an AWS RDBMS as a shared Database Storage Provider. :: Register an AWS RDBMS as a shared Database Storage Provider.
-  rpc RegisterAwsRdbms (RegisterAwsRdbmsRequest)
-      returns (RegisterAwsRdbmsResponse) {
+  /*********** Indexer Messages ****************/
+
+  // Register an AWS OpenSearch instance as a shared indexer. :: Register an AWS OpenSearch instance as a shared indexer.
+  rpc RegisterAwsOpenSearchIndexer (RegisterAwsOpenSearchIndexerRequest)
+      returns (RegisterAwsOpenSearchIndexerResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
     option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Resource Registration";
+    option (options.MethodExtension.tag) = "Indexers";
   }
 
-  // Unregister an AWS RDBMS as a shared Database Storage Provider. :: Unregister an AWS RDBMS as a shared Database Storage Provider.
-  rpc UnregisterAwsRdbms (UnregisterAwsRdbmsRequest)
-      returns (UnregisterAwsRdbmsResponse) {
+  // Unregister an Indexer instance as a shared indexer. :: Unregister an Indexer instance as a shared indexer.
+  rpc UnregisterIndexer (UnregisterIndexerRequest)
+      returns (UnregisterIndexerResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
     option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Resource Registration";
+    option (options.MethodExtension.tag) = "Indexers";
   }
 
-  // Register an AWS Opensearch instance as a shared indexer. :: Register an AWS Opensearch instance as a shared indexer.
-  rpc RegisterAwsOpensearch (RegisterAwsOpensearchRequest)
-      returns (RegisterAwsOpensearchResponse) {
-    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
-    option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Resource Registration";
+  // Describe an Indexer instance. :: Describe an Indexer instance.
+  rpc DescribeIndexer (DescribeIndexerRequest)
+      returns (DescribeIndexerResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.tag) = "Indexers";
   }
 
-  // Unregister an AWS Opensearch instance as a shared indexer. :: Unregister an AWS Opensearch instance as a shared indexer.
-  rpc UnregisterAwsOpensearch (UnregisterAwsOpensearchRequest)
-      returns (UnregisterAwsOpensearchResponse) {
+  // List Indexer instances.  :: List Indexer instances.
+  rpc ListIndexers (ListIndexersRequest)
+      returns (ListIndexersResponse) {
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.tag) = "Indexers";
+  }
+
+  // Find Indexer instances based on criteria. :: Find Indexer instances based on criteria.
+  rpc FindIndexers (FindIndexersRequest)
+      returns (FindIndexersResponse) {
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.tag) = "Indexers";
+  }
+
+  // Set the assignability flag of a shared Indexer. :: Set the assignability flag of a shared Indexer.
+  rpc SetIndexerAssignability (SetIndexerAssignabilityRequest)
+      returns (SetIndexerAssignabilityResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
     option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Resource Registration";
+    option (options.MethodExtension.tag) = "Indexers";
   }
+
+
+  /*********** Storage Functions ****************/
 
   // Register an AWS Object Storage root. :: Register an AWS Object Storage root.
   rpc RegisterAwsObjectStorageRoot (RegisterAwsObjectStorageRootRequest)
       returns (RegisterAwsObjectStorageRootResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
     option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Resource Registration";
+    option (options.MethodExtension.tag) = "Storage";
   }
 
-  // Unregister an AWS Object Storage root. :: Unregister an AWS Object Storage root.
-  rpc UnregisterAwsObjectStorageRoot (UnregisterAwsObjectStorageRootRequest)
-      returns (UnregisterAwsObjectStorageRootResponse) {
+  // Unregister a Storage Root. :: Unregister a Storage Root.
+  rpc UnregisterStorageRoot (UnregisterStorageRootRequest)
+      returns (UnregisterStorageRootResponse) {
     option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
     option (options.MethodExtension.mutating) = true;
-    option (options.MethodExtension.tag) = "Resource Registration";
+    option (options.MethodExtension.tag) = "Storage";
+  }
+
+  // Describe a Storage Root instance. :: Describe a Storage Root instance.
+  rpc DescribeStorageRoot (DescribeStorageRootRequest)
+      returns (DescribeStorageRootResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.tag) = "Storage";
+  }
+
+  // List Storage Root instances.  :: List Storage Root instances.
+  rpc ListStorageRoots (ListStorageRootsRequest)
+      returns (ListStorageRootsResponse) {
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.tag) = "Storage";
+  }
+
+  // Find Storage Root instances based on criteria. :: Find Storage Root instances based on criteria.
+  rpc FindStorageRoots (FindStorageRootsRequest)
+      returns (FindStorageRootsResponse) {
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.tag) = "Storage";
+  }
+
+  // Set the assignability flag of a Storage Root. :: Set the assignability flag of a Storage Root.
+  rpc SetStorageRootAssignability (SetStorageRootAssignabilityRequest)
+      returns (SetStorageRootAssignabilityResponse) {
+    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.tag) = "Storage";
+  }
+
+
+  /*********** RDBMS Functions ****************/
+
+  // Register an AWS RDBMS as a shared Database Storage Provider. :: Register an AWS RDBMS as a shared Database Storage Provider.
+  rpc RegisterAwsRdbms (RegisterAwsRdbmsRequest)
+      returns (RegisterAwsRdbmsResponse) {
+    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.tag) = "RDBMS";
+  }
+
+  // Unregister a RDBMS as a shared Database Storage Provider. :: Unregister a RDBMS as a shared Database Storage Provider.
+  rpc UnregisterRdbms (UnregisterRdbmsRequest)
+      returns (UnregisterRdbmsResponse) {
+    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.tag) = "RDBMS";
+  }
+
+  // Describe a registered RDBMS instance. :: Describe a registered RDBMS instance.
+  rpc DescribeRdbms (DescribeRdbmsRequest)
+      returns (DescribeRdbmsResponse) {
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.tag) = "RDBMS";
+  }
+
+  // Find the registered RDBMS instances based on criteria. :: Find the registered RDBMS instances based on criteria.
+  rpc FindRdbms (FindRdbmsRequest)
+      returns (FindRdbmsResponse) {
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.tag) = "RDBMS";
+  }
+
+  // List the registered RDBMS instances. :: List the registered RDBMS instances.
+  rpc ListRdbms (ListRdbmsRequest)
+      returns (ListRdbmsResponse){
+    option (options.MethodExtension.mutating) = false;
+    option (options.MethodExtension.paginates) = true;
+    option (options.MethodExtension.pagingDefaultMaxItems) = 20;
+    option (options.MethodExtension.tag) = "RDBMS";
+  }
+
+  // Set the assignability flag of a shared RDBMS instance. :: Set the assignability flag of a shared RDBMS instance.
+  rpc SetRdbmsAssignability (SetRdbmsAssignabilityRequest)
+      returns (SetRdbmsAssignabilityResponse) {
+    option (options.MethodExtension.right) = "altusadmin/callProtectedAdminAPIs";
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.tag) = "RDBMS";
   }
 
 }
 
-
-// SDX Cloud Platforms
-message CloudPlatform {
-  enum Value {
-    // AWS Cloud Platform.
-    AWS = 0;
-  }
+// Request object for listing currently supported cloud regions.
+message ListSupportedCloudRegionsRequest {
 }
 
-// SDX Connection types.
-message ConnectionType {
-  enum Value {
-    // AWS PrivateLink Endpoint connection.
-    AWS_PRIVATELINK = 0;
-    AWS_PRIVATELINK_FOR_HMS_DATABASE = 1 [(options.EnumValueExtension.hidden) = true];
-  }
+// Response object for listing currently supported cloud regions.
+message ListSupportedCloudRegionsResponse {
+  // Regions information.
+  repeated sdxsvccommon.CloudPlatformRegion regions = 1;
 }
 
-// Status of an SDX Service
-message ServiceStatus {
-  enum Value {
-    // Service is being prepared
-    PROVISIONING = 0;
-    // Service is healthy
-    HEALTHY = 1;
-    // Service is unhealthy
-    UNHEALTHY = 2;
-    // Service is upgrading
-    UPGRADING = 3;
-    // Service is being removed.
-    REMOVING = 4;
-    // Service is stopped.
-    STOPPED = 5;
-    // Service is in an Unknown State
-    UNKNOWN = 6;
-  }
+// Request object for listing currently supported cloud platforms.
+message ListSupportedCloudPlatformsRequest {
 }
 
-// Status of an SDX Instance
-message InstanceHighLevelStatus {
-  enum Value {
-    // Instance is being provisioned.
-    PROVISIONING = 0;
-    // Instance is healthy
-    HEALTHY = 1;
-    // Instance is unhealthy
-    UNHEALTHY = 2;
-    // Instance is being deleted.
-    DELETING = 3;
-    // Instance is stopped.
-    STOPPED = 4;
-    // Instance is in an Unknown State
-    UNKNOWN = 5;
-  }
+// Response object for listing currently supported cloud platforms.
+message ListSupportedCloudPlatformsResponse {
+  // Platforms information.
+  repeated sdxsvccommon.CloudPlatform.Value platforms = 1;
 }
 
-
-// SDX Instance and service history event.
-message Event {
-  // The event id.
-  string id = 1;
-  // The request the event is for.
-  string requestId = 2;
-  // The status when the event occurred.
-  string status = 3;
-  // The timestamp the history event occurred at.
-  int64 occurredAt = 4 [(options.FieldExtension.datetime) = true];
-  // The message associated with the history event.
-  string message = 5;
-  // The details of the event.
-  string details = 6;
-}
-
-// Generic key-value type
-message KeyValuePair {
-  // Key
-  string key = 1;
-  // Value
-  string value = 2;
-}
-
-// Deployment information about an SDX Instance.
-message InstanceDeployment {
-  // The OE the SDX Instance runs in.
-  string operationalEnvironment = 1;
-  // The percent of traffic going to this OE.
-  int32 percentTraffic = 2;
-  // The SDX Services deployed in the SDX Instance.
-  repeated Service services = 3;
-}
-
-
-// A SDX Service deployment in an SDX Instance.
-message Service {
-  // The base type of the SDX Service
-  string serviceType = 1;
-  // The deployed name of the SDX Service.
-  string name = 2;
-  // The CRN of the SDX Service instance.
-  string crn = 3;
-  // The namespace the SDX Service runs in.
-  string namespace = 4;
-  // The version of the SDX Service running.
-  string version = 5;
-  // The helm deployment name for the SDX Service.
-  string helmDeployment = 6;
-  // The status of the SDX Service.
-  ServiceStatus.Value status = 7;
-  // The history events for the SDX Service.
-  repeated Event history = 8;
-}
-
-// An SDX Instance object.
-message Instance {
-  // Name of the SDX Instance.
-  string name = 1;
-  // CRN of the SDX Instance.
-  string crn = 2;
-  // Status of the SDX Instance.
-  InstanceHighLevelStatus.Value status = 3;
-  // Cloud platform of the SDX Instance.
-  CloudPlatform.Value cloudPlatform = 4;
-  // Cloud region the SDX Instance is in.
-  string cloudRegion = 5;
-  // Description of the SDX Instance.
-  string description = 6;
-  // Creation time of the SDX Instance.
-  int64 created = 7 [(options.FieldExtension.datetime) = true];
-  // Hostname to reach the SDX Instance
-  string hostname = 8;
-  // Port to reach the SDX Instance
-  int32 port = 9;
-  // The environments the SDX Instance is associated with.
-  repeated string environments = 10;
-  // Deployment info for SDX instances
-  repeated InstanceDeployment deployments = 11;
-  // Event history of the Instance.
-  repeated Event history = 12;
-}
-
-// An SDX Connection object.
-message Connection {
-  // The name of the SDX Conneciton
-  string name = 1;
-  // CRN of the SDX Connection.
-  string crn = 2;
-  // Status of the SDX Connection.
-  string status = 3;
-  // The type of SDX Connection.
-  ConnectionType.Value type = 4;
-  // Cloud platform of the SDX Connection.
-  string cloudPlatform = 5;
-  // Cloud platforms region for the SDX Connection
-  string cloudRegion = 6;
-  // The cloud platforms identifier for the SDX Connection.
-  string cloudId = 7;
-  // IP Addresses for the SDX Connection
-  repeated string cloudIpAddresses = 8;
-  // Creation time of the SDX Instance.
-  int64 created = 9 [(options.FieldExtension.datetime) = true];
-  // The history events for the SDX Service.
-  repeated Event history = 10;
-}
-
-
-// Request object for an SDX Service upgrade request.
-message RequestServiceUpgradeRequest {
-  // The name or CRN of the SDX Instance to upgrade the service in.
+/*********** Service Messages ****************/
+// Request object for adding an SDX Service instance to an SDX Instance.
+message AddServiceRequest {
+  // The name or CRN of the SDX Instance to add the service in.
   string instance = 1 [(options.FieldExtension.required) = true];
-  // The name of the SDX Service in the Instance to upgrade.
-  string service = 2 [(options.FieldExtension.required) = true];
-  // The version of the SDX Service to upgrade do.  If blank its the latest.
-  string serviceVersion = 3;
-  // The account ID.
-  string accountId = 4;
+  // The type of the SDX Service to add.
+  string serviceType = 2 [(options.FieldExtension.required) = true];
+  // The name of the SDX Service to add. Must be unique inside the SDX Instance.
+  string name = 3 [(options.FieldExtension.required) = true];
+  // The version of the SDX Service to add. If left blank, the default is the latest.
+  string serviceVersion = 4;
+  // The account Id.
+  string accountId = 5;
 }
 
-// Response object for an SDX Service upgrade request.
-message RequestServiceUpgradeResponse {
-  // The request id of the upgrade
+// Response object for adding an SDX Service instance to an SDX Instance.
+message AddServiceResponse {
+  // The information about the Service
+  sdxsvccommon.Service service = 1;
+}
+
+// Request object for removing an SDX Service instance from an SDX Instance.
+message RemoveServiceRequest {
+  // The name or CRN of the SDX Instance to remove the SDX Service from.
+  string instance = 1 [(options.FieldExtension.required) = true];
+  // The name or CRN of the SDX Service in the SDX Instance.
+  string service = 2 [(options.FieldExtension.required) = true];
+  // The account Id for the SDX Instance.
+  string accountId = 3;
+}
+
+// Response object for removing an SDX Service instance from an SDX Instance.
+message RemoveServiceResponse {
+  // The request Id.
   string requestId = 1;
 }
 
-// Request object for the describe of an SDX Service.
+// Request object for describing an SDX Service instance in an SDX Instance.
 message DescribeServiceRequest {
-  // The name or CRN of the SDX Instance to check the status on.
+  // The name or CRN of the SDX Instance, in which the SDX Service is.
   string instance = 1 [(options.FieldExtension.required) = true];
   // The name or CRN of the SDX Service.
   string service = 2 [(options.FieldExtension.required) = true];
-  // The account ID.
+  // The account Id.
   string accountId = 3;
 }
 
-// Response object for the describe of an SDX Service.
+// Response object for describing an SDX Service instance in an SDX Instance.
 message DescribeServiceResponse {
-  // The account ID.
+  // The account Id.
   string accountId = 1;
-  // The CRN of the SDX Instance to check the status on.
+  // The CRN of the SDX Instance, in which the SDX Service is.
   string instance = 2;
   // The information about the SDX Service.
-  Service service = 3;
-}
-
-// Request object for pairing of a CDP Environment to an SDX Instance
-message PairEnvironmentToInstanceRequest {
-  // The name or CRN of the Environment to pair.
-  string environment = 1 [(options.FieldExtension.required) = true];
-  // The name or CRN of the SDX Instance to pair to.
-  string instance = 2 [(options.FieldExtension.required) = true];
-  // The account ID.
-  string accountId = 3;
-}
-
-// Reponse object for pairing of a CDP Environment to an SDX Instance
-message PairEnvironmentToInstanceResponse {
-}
-
-// Request object for unpairing of a CDP Environment from an SDX Instance
-message UnpairEnvironmentFromInstanceRequest {
-  // The name or CRN of the Environment to unpair.
-  string environment = 1 [(options.FieldExtension.required) = true];
-  // The name or CRN of the SDX Instance to unpair from.
-  string instance = 2 [(options.FieldExtension.required) = true];
-  // The account ID.
-  string accountId = 3;
-}
-// Response object for unpairing of a CDP Environment from an SDX Instance
-message UnpairEnvironmentFromInstanceResponse {
+  sdxsvccommon.Service service = 3;
 }
 
 // Request object for an SDX Service restart request.
 message RequestServiceRestartRequest {
   // The name or CRN of the SDX Instance to restart the service in.
   string instance = 1 [(options.FieldExtension.required) = true];
-  // The name or CRN of the SDX Service in the Instance.
+  // The name or CRN of the SDX Service in the SDX Instance.
   string service = 2 [(options.FieldExtension.required) = true];
-  // The account ID.
+  // The account Id.
   string accountId = 3;
 }
 
 // Response object for an SDX Service restart request.
 message RequestServiceRestartResponse {
-  // The request id of the upgrade
+  // The request Id of the upgrade
   string requestId = 1;
 }
 
-// Request object for an SDX Service suspend request.
+
+// Request object for suspending an SDX Service instant.
 message RequestServiceSuspendRequest {
   // The name or CRN of the SDX Instance to suspend the service in.
   string instance = 1 [(options.FieldExtension.required) = true];
-  // The name or CRN of the SDX Service in the Instance.
+  // The name or CRN of the SDX Service in the SDX Instance.
   string service = 2 [(options.FieldExtension.required) = true];
-  // The account ID.
+  // The account Id.
   string accountId = 3;
 }
 
-// Response object for an SDX Service suspend request.
+// Response object for suspending an SDX Service instant.
 message RequestServiceSuspendResponse {
-  // The request id of the upgrade
+  // The request Id of the upgrade
   string requestId = 1;
 }
 
-// Request object for an SDX Service start request.
+// Request object for starting an SDX Service instance.
 message RequestServiceStartRequest {
   // The name or CRN of the SDX Instance to start the service in.
   string instance = 1 [(options.FieldExtension.required) = true];
-  // The name or CRN of the SDX Service in the Instance.
+  // The name or CRN of the SDX Service in the SDX Instance.
   string service = 2 [(options.FieldExtension.required) = true];
-  // The account ID.
+  // The account Id.
   string accountId = 3;
 }
 
-// Response object for an SDX Service start request.
+// Response object for starting an SDX Service instance.
 message RequestServiceStartResponse {
-  // The request id of the upgrade
+  // The request Id of the upgrade
   string requestId = 1;
 }
 
-// Request object for adding an SDX Service instance to an SDX Instance request.
-message AddServiceRequest {
+// Request object for upgrading an SDX Service.
+message RequestServiceUpgradeRequest {
   // The name or CRN of the SDX Instance to upgrade the service in.
   string instance = 1 [(options.FieldExtension.required) = true];
-  // The type of the SDX Service in the Instance to add.
-  string serviceType = 2 [(options.FieldExtension.required) = true];
-  // The name of the SDX Service in the Instance to add. Must be unique inside the instance.
-  string name = 3 [(options.FieldExtension.required) = true];
-  // The version of the SDX Service to add. If blank its the latest.
-  string serviceVersion = 4;
-  // The account ID.
-  string accountId = 5;
-}
-
-// Response object for adding an SDX Service instance to an SDX Instance request.
-message AddServiceResponse {
-  // The information about the Service
-  Service service = 1;
-}
-
-// Request object for removing an SDX Service instance from an SDX Instance request.
-message RemoveServiceRequest {
-  // The name or CRN of the SDX Instance to upgrade the service in.
-  string instance = 1 [(options.FieldExtension.required) = true];
-  // The name or CRN of the SDX Service in the Instance.
+  // The name of the SDX Service in the SDX Instance to upgrade.
   string service = 2 [(options.FieldExtension.required) = true];
-  // The account ID for the SDX Instance.
-  string accountId = 3;
+  // The version of the SDX Service to upgrade do.  If blank its the latest.
+  string serviceVersion = 3;
+  // The account Id.
+  string accountId = 4;
 }
 
-// Response object for removing an SDX Service instance from an SDX Instance request.
-message RemoveServiceResponse {
-  // The request id.
+// Response object for upgrading an SDX Service.
+message RequestServiceUpgradeResponse {
+  // The request Id of the upgrade
   string requestId = 1;
 }
 
-// Response object for removing an SDX Service instance from an SDX Instance request.
+// Request object for checking a request on an SDX Service.
+message CheckServiceRequestRequest {
+  // The requiest Id to get teh status for
+  string requestId = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for checking a request on an SDX Service.
+message CheckServiceRequestResponse {
+  // The request status
+  string requestStatus = 1;
+}
+
+// Response object for listing SDX Service versions.
 message ListServiceVersionsRequest {
   // Cloud platform.
-  CloudPlatform.Value cloudPlatform = 1 [(options.FieldExtension.required) = true];
+  sdxsvccommon.CloudPlatform.Value cloudPlatform = 1 [(options.FieldExtension.required) = true];
   // Cloud region.
   string cloudRegion = 2 [(options.FieldExtension.required) = true];
   // The SDX Service type.
   string serviceType = 3 [(options.FieldExtension.required) = true];
   // The page size.
-  int32 pageSize = 4 [(options.FieldExtension.pagingPageSize) = true,
+  int32 pageSize = 100 [(options.FieldExtension.pagingPageSize) = true,
     (options.FieldExtension.minimum) = 5,
     (options.FieldExtension.maximum) = 20];
-  // A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-  string startingToken = 5 [(options.FieldExtension.pagingInputToken) = true];
+  // The page token.
+  string pageToken = 101 [(options.FieldExtension.pagingInputToken) = true];
 }
 
-// Response object for removing an SDX Service instance from an SDX Instance request.
+// Response object for listing SDX Service versions.
 message ListServiceVersionsResponse {
   // The versions available in the region.
   repeated string version = 1 [(options.FieldExtension.pagingResult) = true];
-  // The token to use when requesting the next set of results. If not present, there are no additional results.
-  string nextToken = 2 [(options.FieldExtension.pagingOutputToken) = true];
-
+  // The page token for requesting the next page of results.
+  string nextPageToken = 100 [(options.FieldExtension.pagingOutputToken) = true];
 }
 
-// Request object for request to move an SDX Instance to another OE.
-message RequestMoveInstanceToOperationalEnvironmentRequest {
-  // The name or CRN of the SDX Instance.
+// Request object for stopping all SDX Service instances in an SDX Instance.
+message RequestInstanceStopRequest {
+  // The name or CRN of the SDX Instance to stop the service in.
   string instance = 1 [(options.FieldExtension.required) = true];
-  // Requested operational environment.
-  string operationalEnvironment = 2;
-  // The account ID.
+}
+
+// Response object for stopping all SDX Service instances in an SDX Instance.
+message RequestInstanceStopResponse {
+  // The request Id of the upgrade
+  string requestId = 1;
+}
+
+// Request object for starting all SDX Service instances in an SDX Instance.
+message RequestInstanceStartRequest {
+  // The name or CRN of the SDX Instance to start the service in.
+  string instance = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for starting all SDX Service instances in an SDX Instance.
+message RequestInstanceStartResponse {
+  // The request Id of the upgrade
+  string requestId = 1;
+}
+
+// Request object for restarting all SDX Service instances in an SDX Instance.
+message RequestInstanceRestartRequest {
+  // The name or CRN of the SDX Instance to restart the service in.
+  string instance = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for restarting all SDX Service instances in an SDX Instance.
+message RequestInstanceRestartResponse {
+  // The request Id of the upgrade
+  string requestId = 1;
+}
+
+// Request object for pairing of a CDP Environment to an SDX Instance.
+message PairEnvironmentToInstanceRequest {
+  // The name or CRN of the CDP Environment to pair.
+  string environment = 1 [(options.FieldExtension.required) = true];
+  // The name or CRN of the SDX Instance to pair to.
+  string instance = 2 [(options.FieldExtension.required) = true];
+  // The account Id.
   string accountId = 3;
 }
 
-// Response object for request to move an SDX Instance to another OE.
+// Response object for pairing of a CDP Environment to an SDX Instance.
+message PairEnvironmentToInstanceResponse {
+}
+
+// Request object for unpairing of a CDP Environment from an SDX Instance.
+message UnpairEnvironmentFromInstanceRequest {
+  // The name or CRN of the CDP Environment to unpair.
+  string environment = 1 [(options.FieldExtension.required) = true];
+  // The name or CRN of the SDX Instance to unpair from.
+  string instance = 2 [(options.FieldExtension.required) = true];
+  // The account Id.
+  string accountId = 3;
+}
+
+// Response object for unpairing of a CDP Environment from an SDX Instance.
+message UnpairEnvironmentFromInstanceResponse {
+}
+
+
+// Request object for moving an SDX Instance to another Operational Environment.
+message RequestMoveInstanceToOperationalEnvironmentRequest {
+  // The name or CRN of the SDX Instance.
+  string instance = 1 [(options.FieldExtension.required) = true];
+  // Requested Operational Environment.
+  string operationalEnvironment = 2;
+  // The account Id.
+  string accountId = 3;
+}
+
+// Response object for moving an SDX Instance to another Operational Environment.
 message RequestMoveInstanceToOperationalEnvironmentResponse {
-  // The request id.
+  // The request Id.
   string requestId = 1;
 }
 
 
-// Request object for SDX Instance creation.
+// Request object for creating an SDX Instance.
 message CreateInstanceRequest {
-  // The name of the SDX instance. Must contain only lowercase letters, numbers and hyphens.
+  // The name of the SDX Instance. Must contain only lowercase letters, numbers or hyphens.
   string name = 1 [(options.FieldExtension.required) = true];
   // The cloud platform of the SDX Instance.
-  CloudPlatform.Value cloudPlatform = 2 [(options.FieldExtension.required) = true];
-  // The cloud region of the SDX instance.
+  sdxsvccommon.CloudPlatform.Value cloudPlatform = 2 [(options.FieldExtension.required) = true];
+  // The cloud region of the SDX Instance.
   string cloudRegion = 3 [(options.FieldExtension.required) = true];
-  // The name or CRN of the environment the SDX Instance to pair to.
-  string environment = 4;
-  // The account ID.
-  string accountId = 5;
-  // Requested service versions for creation.
+  // The name or CRN of the CDP environment the SDX Instance to pair to.
+  string environment = 4 [(options.FieldExtension.required) = true];
+  // The account Id.
+  string accountId = 5 [(options.FieldExtension.required) = true];
+  // Requested SDX Service versions for creation.
   map <string, string> serviceVersions = 6;
-  // Requested operational environment.
+  // Requested Operational Environment.
   string operationalEnvironment = 7;
+  // The SDX Instance description.
+  string description = 8;
 }
 
 
-// Response object for SDX Instance creation.
+// Response object for the created SDX Instance.
 message CreateInstanceResponse {
-  // Created instance
-  Instance instance = 1;
+  // Created instance.
+  sdxsvccommon.Instance instance = 1;
+}
+
+// The request object for checking on a request on an SDX Instance.
+message CheckInstanceRequestRequest {
+  // The request id to get the status for.
+  string requestId = 1 [(options.FieldExtension.required) = true];
+}
+
+// The response object for checking on a request on an SDX Instance.
+message CheckInstanceRequestResponse {
+  // The request status.
+  string requestStatus = 1;
 }
 
 // Request object for deleting an SDX Instance.
 message DeleteInstanceRequest {
   // The name or CRN of the SDX Instance.
   string instance = 1 [(options.FieldExtension.required) = true];
-  // The account ID.
+  // The account Id.
   string accountId = 2;
 }
 
 // Response object for deleting an SDX Instance.
 message DeleteInstanceResponse {
-  // Deleted instance
-  Instance instance = 1;
+  // Deleted SDX Instance.
+  sdxsvccommon.Instance instance = 1;
 }
 
 // Request object for describing an SDX Instance.
 message DescribeInstanceRequest {
   // The name or CRN of the SDX Instance.
   string instance = 1 [(options.FieldExtension.required) = true];
-  // The account ID.
+  // The account Id.
   string accountId = 2;
 }
 
 // Response object for describing an SDX Instance.
 message DescribeInstanceResponse {
-  // Details of instance
-  Instance instance = 1;
+  // Details of the SDX Instance.
+  sdxsvccommon.Instance instance = 1;
 }
 
-// Request object for a list SDX Instances request.
+// Request object for listing SDX Instances.
 message ListInstancesRequest {
-  // The account ID.
+  // The account Id.
   string accountId = 1;
   // The page size.
-  int32 pageSize = 2 [(options.FieldExtension.pagingPageSize) = true,
+  int32 pageSize = 100 [(options.FieldExtension.pagingPageSize) = true,
     (options.FieldExtension.minimum) = 5,
     (options.FieldExtension.maximum) = 20];
-  // A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-  string startingToken = 3 [(options.FieldExtension.pagingInputToken) = true];
+  // The page token.
+  string pageToken = 101 [(options.FieldExtension.pagingInputToken) = true];
 
 }
-// Response object for a list SDX Instances request.
+// Response object for listing SDX Instances.
 message ListInstancesResponse {
-  // The list of SDX Instances
-  repeated Instance instances = 1 [(options.FieldExtension.pagingResult) = true];
+  // The list of SDX Instances.
+  repeated sdxsvccommon.Instance instances = 1 [(options.FieldExtension.pagingResult) = true];
   // The token to use when requesting the next set of results. If not present, there are no additional results.
   string nextToken = 2 [(options.FieldExtension.pagingOutputToken) = true];
 }
 
+// Request object for finding SDX Instances.
+message FindInstancesRequest {
+  // The search by criteria.
+  oneof search_by {
+    // Search by CDP Environment
+    sdxsvccommon.SearchByEnvironment searchByEnvironment = 1;
+    // Search by Cloud Platform
+    sdxsvccommon.SearchByCloudPlatform searchByCloudPlatform = 2;
+    // Search by Cloud Region
+    sdxsvccommon.SearchByCloudRegion searchByCloudRegion = 3;
+    // Search by Operational Environment
+    sdxsvccommon.SearchByOperationalEnvironment searchByOperationalEnvironment = 4;
+  }
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 100 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 5,
+    (options.FieldExtension.maximum) = 20];
+  // The page token.
+  string pageToken = 101 [(options.FieldExtension.pagingInputToken) = true];
+}
+
+// Response object for finding SDX Instances.
+message FindInstancesResponse {
+  // The Indexer instances.
+  repeated sdxsvccommon.Instance instances = 1 [(options.FieldExtension.pagingResult) = true];
+  // See the PageToken comment in paging.proto on paging usage.
+  string nextPageToken = 100 [(options.FieldExtension.pagingOutputToken) = true];
+}
+
 // Request object for SDX Connection creation.
 message CreateAwsPrivatelinkConnectionRequest {
-  // The name of the sdx connection. Must contain only lowercase letters, numbers and hyphens.
+  // The name of the SDX Connection. Must contain only lowercase letters, numbers and hyphens.
   string name = 1 [(options.FieldExtension.required) = true];
   // The region of the SDX Connection.
   string region = 2 [(options.FieldExtension.required) = true];
-  // The ID of the VPC in which the endpoint will be used.
+  // The Id of the VPC in which the endpoint will be used.
   string vpcId = 3 [(options.FieldExtension.required) = true];
-  // The account ID.
-  string accountId = 4;
+  // The account Id.
+  string accountId = 4 [(options.FieldExtension.required) = true];
   // Indicates whether to associate a private hosted zone with the specified VPC.
   bool privateDnsEnabled = 5;
   // The security groups for the endpoint.
@@ -733,13 +877,13 @@ message CreateAwsPrivatelinkConnectionRequest {
   // The subnets for the endpoint to be deployed into.
   repeated string subnetIds = 7;
   // The tags on the endpoint.
-  repeated KeyValuePair tags = 8;
+  repeated sdxsvccommon.KeyValuePair tags = 8;
 }
 
 // Response object for SDX Connection via AWS PrivateLink creation.
 message CreateAwsPrivatelinkConnectionResponse {
   // Created Connection
-  Connection connection = 1;
+  sdxsvccommon.Connection connection = 1;
 }
 
 // Request object for SDX Connection creation to the Instances HMS database.
@@ -748,10 +892,10 @@ message CreateAwsPrivatelinkConnectionForHmsDatabaseRequest {
   string name = 1 [(options.FieldExtension.required) = true];
   // The region of the SDX Connection.
   string region = 2 [(options.FieldExtension.required) = true];
-  // The ID of the VPC in which the endpoint will be used.
+  // The Id of the VPC in which the endpoint will be used.
   string vpcId = 3 [(options.FieldExtension.required) = true];
-  // The account ID.
-  string accountId = 4;
+  // The account Id.
+  string accountId = 4 [(options.FieldExtension.required) = true];
   // Indicates whether to associate a private hosted zone with the specified VPC.
   bool privateDnsEnabled = 5;
   // The security groups for the endpoint.
@@ -759,7 +903,7 @@ message CreateAwsPrivatelinkConnectionForHmsDatabaseRequest {
   // The subnets for the endpoint to be deployed into.
   repeated string subnetIds = 7;
   // The tags on the endpoint.
-  repeated KeyValuePair tags = 8;
+  repeated sdxsvccommon.KeyValuePair tags = 8;
   // The name or CRN of the SDX Instance to link the HMS database for.
   string instance = 9;
 }
@@ -767,41 +911,39 @@ message CreateAwsPrivatelinkConnectionForHmsDatabaseRequest {
 // Response object for SDX Connection creation to the Instances HMS database.
 message CreateAwsPrivatelinkConnectionForHmsDatabaseResponse {
   // Created Connection
-  Connection connection = 1;
+  sdxsvccommon.Connection connection = 1;
 }
-
 
 // Request object for describing an SDX Connection.
 message DescribeConnectionRequest {
   // The name or CRN of the SDX Connection.
   string connection = 1 [(options.FieldExtension.required) = true];
-  // The account ID.
+  // The account Id.
   string accountId = 2;
 }
 
 // Response object for describing an SDX Connection.
 message DescribeConnectionResponse {
   // Described Connection
-  Connection connection = 1;
+  sdxsvccommon.Connection connection = 1;
 }
 
-// Request object for a list SDX Connections request.
+// Request object for getting a list of SDX Connections.
 message ListConnectionsRequest {
-  // The account ID.
+  // The account Id.
   string accountId = 1;
   // The page size.
-  int32 pageSize = 2 [(options.FieldExtension.pagingPageSize) = true,
+  int32 pageSize = 100 [(options.FieldExtension.pagingPageSize) = true,
     (options.FieldExtension.minimum) = 5,
     (options.FieldExtension.maximum) = 20];
-  // A token to specify where to start paginating. This is the nextToken from a previously truncated response.
-  string startingToken = 3 [(options.FieldExtension.pagingInputToken) = true];
-
+  // The page token.
+  string pageToken = 101 [(options.FieldExtension.pagingInputToken) = true];
 }
 
-// Response object for a list SDX Connections request.
+// Response object for getting a list of SDX Connections.
 message ListConnectionsResponse {
-  // The SDX Connections list
-  repeated Connection connections = 1 [(options.FieldExtension.pagingResult) = true];
+  // The list of SDX Connections
+  repeated sdxsvccommon.Connection connections = 1 [(options.FieldExtension.pagingResult) = true];
   // The token to use when requesting the next set of results. If not present, there are no additional results.
   string nextToken = 2 [(options.FieldExtension.pagingOutputToken) = true];
 }
@@ -810,124 +952,480 @@ message ListConnectionsResponse {
 message DeleteConnectionRequest {
   // The CRN of the SDX Connection.
   string connection = 1 [(options.FieldExtension.required) = true];
-  // The account ID.
-  string accountId = 2;
 }
 
 // Response object for deleting an SDX Connection.
 message DeleteConnectionResponse {
   // Deleted Connection
-  Connection connection = 1;
+  sdxsvccommon.Connection connection = 1;
 }
 
-// Request object for registering an operational environment.
+// Request object for registering an Operational Environment.
 message RegisterOperationalEnvironmentRequest {
+  // The name of the Operational Environment.
+  string name = 1 [(options.FieldExtension.required) = true];
+  // The cloud Id of the Operational Environment.
+  string cloudId = 2 [(options.FieldExtension.required) = true];
+  // The cloud platform.
+  sdxsvccommon.CloudPlatform.Value cloudPlatform = 3 [(options.FieldExtension.required) = true];
+  // The cloud region the Operational Environment is in
+  string cloudRegion = 4 [(options.FieldExtension.required) = true];
+  // Hostname for SDX traffic. NLB fronting the SDX ingress for the cluster.
+  string sdxTrafficHostname = 5 [(options.FieldExtension.required) = true];
+  // Admin traffic access hostname.  NLB fronting the admin ingress for the cluster.
+  string adminTrafficHostname = 6 [(options.FieldExtension.required) = true];
+  // The kube-config for the Operational Environment
+  string kubeConfig = 7 [(options.FieldExtension.required) = true];
+  // The K8s API Server Endpoint
+  string apiServerEndpoint = 8 [(options.FieldExtension.required) = true];
+  // The OpenId Connection provider endpoint
+  string openIdProviderEndpoint = 9 [(options.FieldExtension.required) = true];
+  // The CA Cert for the Cluster
+  string caCert = 10 [(options.FieldExtension.required) = true];
 }
 
-// Response object for registering an operational environment.
+// Response object for registering an Operational Environment.
 message RegisterOperationalEnvironmentResponse {
+  // The info about the Operational Environment registered.
+  sdxsvccommon.OperationalEnvironment operationalEnvironment = 1;
 }
 
-// Request object for unregistering an operational environment.
+// Request object for unregistering an Operational Environment.
 message UnregisterOperationalEnvironmentRequest {
+  // The name or Id of the Operational Environment.
+  string operationalEnvironment = 1 [(options.FieldExtension.required) = true];
 }
 
-// Response object for registering an operational environment.
+// Response object for registering an Operational Environment.
 message UnregisterOperationalEnvironmentResponse {
+  // The info about the Operational Environment registered.
+  sdxsvccommon.OperationalEnvironment operationalEnvironment = 1;
 }
 
-// Request object for registering an AWS Endpoint Service.
-message RegisterAwsEndpointServiceRequest {
+// Request object for describing an Operational Environment.
+message DescribeOperationalEnvironmentRequest {
+  // The name or Id of the Operational Environment.
+  string operationalInstance = 1 [(options.FieldExtension.required) = true];
 }
 
-// Response object for registering an operational environment.
-message RegisterAwsEndpointServiceResponse {
+// Response object for describing an Operational Environment.
+message DescribeOperationalEnvironmentResponse {
+  // The Operational Environment Info.
+  sdxsvccommon.OperationalEnvironment operationalEnvironment = 1;
 }
 
-// Request object for unregistering an AWS Endpoint Service.
-message UnregisterAwsEndpointServiceRequest {
+// Request object for listing registered Operational Environments.
+message ListOperationalEnvironmentsRequest {
+  // Optional filter region to request Operational Environments for.
+  string cloudRegion = 1;
+  // The page size.
+  int32 pageSize = 100[(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 5,
+    (options.FieldExtension.maximum) = 20];
+  // The page token.
+  string pageToken = 101 [(options.FieldExtension.pagingInputToken) = true];
 }
 
-// Response object for unregistering an operational environment.
-message UnregisterAwsEndpointServiceResponse {
+// Response object for listing registered Operational Environments.
+message ListOperationalEnvironmentsResponse {
+  // The resulting Operational Environment list
+  repeated sdxsvccommon.OperationalEnvironment operationalEnvironments = 1 [(options.FieldExtension.pagingResult) = true];
+  // The page token for requesting the next page of results.
+  string nextPageToken = 100 [(options.FieldExtension.pagingOutputToken) = true];
 }
 
-// Request object for registering an AWS ALB traffic steering proxy
-message RegisterAwsAlbTrafficSteeringProxyRequest {
-
+// Request object for finding registered Operational Environments.
+message FindOperationalEnvironmentsRequest {
+  // Search by options
+  oneof search_by {
+    // Search by SDX Instance
+    sdxsvccommon.SearchByInstance searchByInstance = 1;
+    // Search by Cloud Platform
+    sdxsvccommon.SearchByCloudPlatform searchByCloudPlatform = 2;
+    // Search by Cloud Region
+    sdxsvccommon.SearchByCloudRegion searchByCloudRegion = 3;
+    // Search by Cloud Assignability
+    sdxsvccommon.SearchByAssignability searchByAssignability = 4;
+  }
+  // The page size.
+  int32 pageSize = 100 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 5,
+    (options.FieldExtension.maximum) = 20];
+  // The page token.
+  string pageToken = 101 [(options.FieldExtension.pagingInputToken) = true];
 }
 
-// Response object for registering an AWS ALB traffic steering proxy
-message RegisterAwsAlbTrafficSteeringProxyResponse {
-
+// Response object for finding registered Operational Environments.
+message FindOperationalEnvironmentsResponse {
+  // The Operational Environments.
+  repeated sdxsvccommon.OperationalEnvironment operationalEnvironments = 1 [(options.FieldExtension.pagingResult) = true];
+  // The page token for requesting the next page of results.
+  string nextPageToken = 100 [(options.FieldExtension.pagingOutputToken) = true];
 }
 
-// Request object for unregistering an AWS ALB traffic steering proxy
-message UnregisterAwsAlbTrafficSteeringProxyRequest {
-
+// Request object to set the Availability status of an Operational Environment. ::  Request object to set the Availability status of an Operational Environment.
+message SetOperationalEnvironmentAssignabilityRequest {
+  // The name or Id of the Operational Environment.
+  string operationalEnvironmentId = 1 [(options.FieldExtension.required) = true];
+  // The flag to set the Operational Environment assignability to.
+  bool assignable = 2 [(options.FieldExtension.required) = true];
 }
 
-// Response object for unregistering an AWS ALB traffic steering proxy
-message UnregisterAwsAlbTrafficSteeringProxyResponse {
-
+// Response object to set the Availability status of an Operational Environment. ::  Response object to set the Availability status of an Operational Environment.
+message SetOperationalEnvironmentAssignabilityResponse {
+  // Info about the Operational Environment
+  sdxsvccommon.OperationalEnvironment operationalEnvironment = 1;
 }
 
-// Request object for registering an AWS RDBMS
-message RegisterAwsRdbmsRequest {
 
+/*********** Indexer Messages ****************/
+
+// Request object for registering an AWS OpenSearch Indexer
+message RegisterAwsOpenSearchIndexerRequest {
+  // The name of the Indexer.
+  string name = 1 [(options.FieldExtension.required) = true];
+  // The cloud Id of the Indexer.
+  string cloudId = 2 [(options.FieldExtension.required) = true];
+  // The cloud platform.
+  sdxsvccommon.CloudPlatform.Value cloudPlatform = 3 [(options.FieldExtension.required) = true];
+  // The cloud region the Indexer is in.
+  string cloudRegion = 4 [(options.FieldExtension.required) = true];
+  // Hostname for Indexer Endpoint.
+  string accessHostname = 5 [(options.FieldExtension.required) = true];
+  // Port for Indexer Endpoint.
+  string accessPort = 6 [(options.FieldExtension.required) = true];
+  // TLS enabled.
+  bool tlsEnabled = 7 [(options.FieldExtension.required) = true];
+  // Admin Username Vault Path.
+  string adminUsernameVaultPath = 8 [(options.FieldExtension.required) = true];
+  // Admin Password Vault Path.
+  string adminPasswordVaultPath = 9 [(options.FieldExtension.required) = true];
 }
 
-// Response object for registering an AWS RDBMS
-message RegisterAwsRdbmsResponse {
-
+// Response object for registering an AWS OpenSearch Indexer.
+message RegisterAwsOpenSearchIndexerResponse {
+  // The registered Indexer
+  sdxsvccommon.Indexer indexerInstance = 1;
 }
 
-// Request object for unregistering an AWS RDBMS
-message UnregisterAwsRdbmsRequest {
-
+// Request object for unregistering an Indexer instance.
+message UnregisterIndexerRequest {
+  // The name or Id of the Indexer instance.
+  string indexer = 1 [(options.FieldExtension.required) = true];
 }
 
-// Response object for unregistering an AWS RDBMS
-message UnregisterAwsRdbmsResponse {
-
+// Response object for unregistering an Indexer instance.
+message UnregisterIndexerResponse {
+  // The unregistered Indexer.
+  sdxsvccommon.Indexer indexerInstance = 1;
 }
 
-// Request object for registering an AWS Opensearch
-message RegisterAwsOpensearchRequest {
-
+// Request object for describing an Indexer instance.
+message DescribeIndexerRequest {
+  // The name or Id of the Indexer instance.
+  string indexer = 1 [(options.FieldExtension.required) = true];
 }
 
-// Response object for registering an AWS Opensearch
-message RegisterAwsOpensearchResponse {
-
+// Response object for describing an Indexer instance.
+message DescribeIndexerResponse {
+  // The info about the Indexer instance.
+  sdxsvccommon.Indexer indexerInstance = 1;
 }
 
-// Request object for unregistering an AWS Opensearch
-message UnregisterAwsOpensearchRequest {
-
+// Request object for listing Indexers.
+message ListIndexersRequest {
+  // optional filter cloud platform to request Indexer for
+  string cloudPlatform = 1;
+  // optional filter region to request Indexer for
+  string cloudRegion = 2;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 100 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 5,
+    (options.FieldExtension.maximum) = 20];
+  // The page token.
+  string pageToken = 101 [(options.FieldExtension.pagingInputToken) = true];
 }
 
-// Response object for unregistering an AWS Opensearch
-message UnregisterAwsOpensearchResponse {
-
+// Response object for listing Indexers.
+message ListIndexersResponse {
+  // The list of in Indexers
+  repeated sdxsvccommon.Indexer  indexerInstances = 1 [(options.FieldExtension.pagingResult) = true];
+  // See the PageToken comment in paging.proto on paging usage.
+  string nextPageToken = 100 [(options.FieldExtension.pagingOutputToken) = true];
 }
+
+// Request object to Find Indexers
+message FindIndexersRequest {
+  // The search by criteria
+  oneof search_by {
+    // Search by SDX Instance.
+    sdxsvccommon.SearchByInstance searchByInstance = 1;
+    // Search by Cloud Platform
+    sdxsvccommon.SearchByCloudPlatform searchByCloudPlatform = 2;
+    // Search by Cloud Region
+    sdxsvccommon.SearchByCloudRegion searchByCloudRegion = 3;
+    // Search by SDX Service
+    sdxsvccommon.SearchByService searchByService = 4;
+    // Search by Assignability
+    sdxsvccommon.SearchByAssignability searchByAssignability = 5;
+  }
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 100 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 5,
+    (options.FieldExtension.maximum) = 20];
+  // The page token.
+  string pageToken = 101 [(options.FieldExtension.pagingInputToken) = true];
+}
+
+// Response object to Find Indexers
+message FindIndexersResponse {
+  // The Indexer instances.
+  repeated sdxsvccommon.Indexer indexerInstances = 1 [(options.FieldExtension.pagingResult) = true];
+  // See the PageToken comment in paging.proto on paging usage.
+  string nextPageToken = 100 [(options.FieldExtension.pagingOutputToken) = true];
+}
+
+// Request object to set an Indexer's assignability.
+message SetIndexerAssignabilityRequest {
+  // The name or Id of the Operational Environment.
+  string indexerId = 1 [(options.FieldExtension.required) = true];
+  // The flag to set the Operational Environment assignability to.
+  bool assignable = 2 [(options.FieldExtension.required) = true];
+}
+
+// Response object to set an Indexer assignability.
+message SetIndexerAssignabilityResponse {
+  // Info about the indexer
+  sdxsvccommon.Indexer indexer = 1;
+}
+
+
+/*********** Storage Messages ****************/
 
 // Request object for registering an AWS Object Storage Root
 message RegisterAwsObjectStorageRootRequest{
-
+  // The name of the Storage Root.
+  string name = 1 [(options.FieldExtension.required) = true];
+  // The AWS account of the Storage Root.
+  string account = 2 [(options.FieldExtension.required) = true];
+  // The cloud region the Storage Root is in.
+  string cloudRegion = 3 [(options.FieldExtension.required) = true];
 }
 
 // Response object for registering an AWS Object Storage Root
 message RegisterAwsObjectStorageRootResponse{
+  // Info about the Storage Root
+  sdxsvccommon.StorageRoot storageRoot = 1;
+}
+
+// Request object for unregistering a Storage Root.
+message UnregisterStorageRootRequest{
+  // The name or id of the Storage root to unregister
+  string storageRoot = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for unregistering a Storage Root.
+message UnregisterStorageRootResponse{
+  // Info about the Storage Root
+  sdxsvccommon.StorageRoot storageRoot = 1;
+}
+
+// The request object for describing a Storage Root.
+message DescribeStorageRootRequest {
+  // The name or id of the Storage Root.
+  string storageRoot = 1 [(options.FieldExtension.required) = true];
+}
+
+// The response object for describing a Storage Root.
+message DescribeStorageRootResponse {
+  // The info about the Storage Root.
+  sdxsvccommon.StorageRoot storageRoot = 1;
+}
+
+// Request object for listing the Storage Roots
+message ListStorageRootsRequest {
+  // optional filter cloud platform to request Indexer for
+  string cloudPlatform = 1;
+  // optional filter region to request Indexer for
+  string cloudRegion = 2;
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 100 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 5,
+    (options.FieldExtension.maximum) = 20];
+  // The page token.
+  string pageToken = 101 [(options.FieldExtension.pagingInputToken) = true];
+}
+
+// Response object for listing the Storage Roots
+message ListStorageRootsResponse {
+  // The list of Storage Roots.
+  repeated sdxsvccommon.StorageRoot storageRoots = 1 [(options.FieldExtension.pagingResult) = true];
+  // See the PageToken comment in paging.proto on paging usage.
+  string nextPageToken = 100 [(options.FieldExtension.pagingOutputToken) = true];
+}
+
+// Request object for finding Storage Roots
+message FindStorageRootsRequest {
+  // The search by criteria
+  oneof search_by {
+    // Search by SDX Instance.
+    sdxsvccommon.SearchByInstance searchByInstance = 1;
+    // Search by Cloud Platform
+    sdxsvccommon.SearchByCloudPlatform searchByCloudPlatform = 2;
+    // Search by Cloud Region
+    sdxsvccommon.SearchByCloudRegion searchByCloudRegion = 3;
+    // Search by SDX Service
+    sdxsvccommon.SearchByService searchByService = 4;
+    // Search by Assignability
+    sdxsvccommon.SearchByAssignability searchByAssignability = 5;
+  }
+  // See the PageToken comment in paging.proto on paging usage.
+  int32 pageSize = 100 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 5,
+    (options.FieldExtension.maximum) = 20];
+  // The page token.
+  string pageToken = 101 [(options.FieldExtension.pagingInputToken) = true];
+}
+
+// Response object for finding storage roots
+message FindStorageRootsResponse {
+  // The Storage Roots.
+  repeated sdxsvccommon.StorageRoot  storageRoots = 1 [(options.FieldExtension.pagingResult) = true];
+  // See the PageToken comment in paging.proto on paging usage.
+  string nextPageToken = 100 [(options.FieldExtension.pagingOutputToken) = true];
+}
+
+// Request object for setting the storage root assignability
+message SetStorageRootAssignabilityRequest {
+  // The name or Id of the Storage Root.
+  string storageRoot = 1 [(options.FieldExtension.required) = true];
+  // The flag to set the Storage Root assignability to.
+  bool assignable = 2 [(options.FieldExtension.required) = true];
+}
+
+// Response object for setting the storage root assignability
+message SetStorageRootAssignabilityResponse {
+  // Info about the Storage Root
+  sdxsvccommon.StorageRoot storageRoot = 1;
+}
+
+
+/*********** RDBMS Messages ****************/
+
+// Request object for registering an AWS RDBMS
+message RegisterAwsRdbmsRequest {
+  // The name of the RDBMS.
+  string name = 1 [(options.FieldExtension.required) = true];
+  // The cloud Id of the RDS.
+  string cloudId = 2 [(options.FieldExtension.required) = true];
+  // The cloud region the RDS is in
+  string cloudRegion = 3 [(options.FieldExtension.required) = true];
+  // Hostname for RDBMS Endpoint.
+  string accessHostname = 4 [(options.FieldExtension.required) = true];
+  // Port for RDBMS Endpoint.
+  string accessPort = 5 [(options.FieldExtension.required) = true];
+  // Admin Username Vault Path
+  string adminUsernameVaultPath = 6 [(options.FieldExtension.required) = true];
+  // Admin Password Vault Path
+  string adminPasswordVaultPath = 7 [(options.FieldExtension.required) = true];
+  // TLS enabled
+  bool tlsEnabled = 8 [(options.FieldExtension.required) = true];
+}
+
+// Response object for registering an AWS RDBMS
+message RegisterAwsRdbmsResponse {
+  // The info about the RDBMS instance.
+  sdxsvccommon.RdbmsInstance rdbmsInstance = 1;
+}
+
+// Request object for unregistering an AWS RDBMS
+message UnregisterRdbmsRequest {
+  // Id of the RDBMS to Unregister
+  string rdbms = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for unregistering an AWS RDBMS
+message UnregisterRdbmsResponse {
+  // The info about the RDBMS instance.
+  sdxsvccommon.RdbmsInstance rdbmsInstance = 1;
+}
+
+// Request object for describing an RDBMS.
+message DescribeRdbmsRequest {
+  // The name or Id of the RDBMS instance
+  string rdbms = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for describing an RDBMS.
+message DescribeRdbmsResponse {
+  // Info about the RDBMS
+  sdxsvccommon.RdbmsInstance rdbms = 1;
+}
+
+// Request objecty for finding a registered RDBMS.
+message FindRdbmsRequest {
+  // Search by options
+  oneof search_by {
+    // Search by SDX Instance.
+    sdxsvccommon.SearchByInstance searchByInstance = 1;
+    // Search by Cloud Platform
+    sdxsvccommon.SearchByCloudPlatform searchByCloudPlatform = 2;
+    // Search by Cloud Region
+    sdxsvccommon.SearchByCloudRegion searchByCloudRegion = 3;
+    // Search by SDX Service
+    sdxsvccommon.SearchByService searchByService = 4;
+    // Search by Assignability
+    sdxsvccommon.SearchByAssignability searchByAssignability = 5;
+  }
+  // The page size.
+  int32 pageSize = 100 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 5,
+    (options.FieldExtension.maximum) = 20];
+  // The page token.
+  string pageToken = 101 [(options.FieldExtension.pagingInputToken) = true];
+}
+
+// Response object for finding a registered RDBMS.
+message FindRdbmsResponse {
+  // The RDBMS instances.
+  repeated sdxsvccommon.RdbmsInstance rdbmsInstances = 1 [(options.FieldExtension.pagingResult) = true];
+  // The page token for requesting the next page of results.
+  string nextPageToken = 100 [(options.FieldExtension.pagingOutputToken) = true];
+}
+
+// Request object to list registered RDBMS instances.
+message ListRdbmsRequest {
+  // optional filter cloud platform to request RDBMS for
+  string cloudPlatform = 1;
+  // optional filter region to request RDBMS for
+  string cloudRegion = 2;
+  // The page size.
+  int32 pageSize = 100 [(options.FieldExtension.pagingPageSize) = true,
+    (options.FieldExtension.minimum) = 5,
+    (options.FieldExtension.maximum) = 20];
+  // The page token.
+  string pageToken = 101 [(options.FieldExtension.pagingInputToken) = true];
 
 }
 
-// Request object for unregistering an AWS Object Storage Root
-message UnregisterAwsObjectStorageRootRequest{
-
+// Response object to list registered RDBMS instances.
+message ListRdbmsResponse {
+  // The RDBMS instances
+  repeated sdxsvccommon.RdbmsInstance  rdbmsInstances = 1 [(options.FieldExtension.pagingResult) = true];
+  // The page token for requesting the next page of results.
+  string nextPageToken = 100 [(options.FieldExtension.pagingOutputToken) = true];
 }
 
-// Response object for unregistering an AWS Object Storage Root
-message UnregisterAwsObjectStorageRootResponse{
+// Request object for setting the RDBMS assignability.
+message SetRdbmsAssignabilityRequest {
+  // The name or Id of the RDBMS instance.
+  string rdbms = 1 [(options.FieldExtension.required) = true];
+  // The flag to set the Storage Root assignability to.
+  bool assignable = 2 [(options.FieldExtension.required) = true];
+}
 
+// Response object for setting the RDBMS assignability.
+message SetRdbmsAssignabilityResponse {
+  // Info about the RDBMS instance
+  sdxsvccommon.RdbmsInstance rdbms = 1;
 }

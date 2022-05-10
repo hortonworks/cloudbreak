@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.saas.sdx;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -16,6 +18,7 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
+import com.sequenceiq.cloudbreak.saas.sdx.status.StatusCheckResult;
 
 @Service
 public class PlatformAwareSdxConnector {
@@ -24,6 +27,11 @@ public class PlatformAwareSdxConnector {
 
     @Inject
     private Map<TargetPlatform, SdxService<?>> platformDependentServiceMap;
+
+    public Optional<String> getRemoteDataContext(String sdxCrn) {
+        LOGGER.debug("Getting remote data context for SDX {}", sdxCrn);
+        return platformDependentServiceMap.get(TargetPlatform.getByCrn(sdxCrn)).getRemoteDataContext(sdxCrn);
+    }
 
     public void delete(String sdxCrn, Boolean force) {
         platformDependentServiceMap.get(TargetPlatform.getByCrn(sdxCrn)).deleteSdx(sdxCrn, force);
@@ -43,8 +51,8 @@ public class PlatformAwareSdxConnector {
         return Sets.union(saasSdxCrns, paasSdxCrns);
     }
 
-    public Set<String> listSdxByPlatform(String environmentName, String environmentCrn, TargetPlatform targetPlatform) {
-        return platformDependentServiceMap.get(targetPlatform).listSdxCrns(environmentName, environmentCrn);
+    public Set<Pair<String, StatusCheckResult>> listSdxCrnsWithAvailability(String environmentName, String environmentCrn, Set<String> sdxCrns) {
+        return platformDependentServiceMap.get(calculatePlatform(sdxCrns)).listSdxCrnStatusCheckPair(environmentCrn, environmentName, sdxCrns);
     }
 
     private TargetPlatform calculatePlatform(Set<String> sdxCrns) {

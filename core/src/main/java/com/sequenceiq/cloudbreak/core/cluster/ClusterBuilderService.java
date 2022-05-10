@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,8 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.saas.sdx.PaasRemoteDataContextSupplier;
+import com.sequenceiq.cloudbreak.saas.sdx.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -38,12 +41,11 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Service
-public class ClusterBuilderService {
+public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBuilderService.class);
 
@@ -75,9 +77,6 @@ public class ClusterBuilderService {
     private RecipeEngine recipeEngine;
 
     @Inject
-    private DatalakeService datalakeService;
-
-    @Inject
     private KerberosConfigService kerberosConfigService;
 
     @Inject
@@ -91,6 +90,9 @@ public class ClusterBuilderService {
 
     @Inject
     private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
+
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     public void startCluster(Long stackId) throws CloudbreakException, ClusterClientInitException {
         Stack stack = stackService.getByIdWithTransaction(stackId);
@@ -121,8 +123,8 @@ public class ClusterBuilderService {
 
         getClusterSetupService(stack).configureManagementServices(
                 stackToTemplatePreparationObjectConverter.convert(stack),
-                getSdxContext(stack),
-                getSdxStackCrn(stack),
+                getSdxContextOptional(stack.getDatalakeCrn()).orElse(null),
+                stack.getDatalakeCrn(),
                 componentConfigProviderService.getTelemetry(stackId),
                 proxyConfig.orElse(null));
     }
@@ -195,8 +197,8 @@ public class ClusterBuilderService {
                 .prepareTemplate(
                         loadInstanceMetadataForHostGroups(hostGroups),
                         stackToTemplatePreparationObjectConverter.convert(stack),
-                        getSdxContext(stack),
-                        getSdxStackCrn(stack),
+                        getSdxContextOptional(stack.getDatalakeCrn()).orElse(null),
+                        stack.getDatalakeCrn(),
                         kerberosConfigService.get(
                                 stack.getEnvironmentCrn(),
                                 stack.getName()
@@ -232,21 +234,18 @@ public class ClusterBuilderService {
         }
     }
 
-    private String getSdxStackCrn(Stack stack) {
-        return getSdxStack(stack)
-                .map(Stack::getResourceCrn)
-                .orElse(null);
+    public Optional<String> getSdxContextOptional(String sdxCrn) {
+        if (StringUtils.isNotBlank(sdxCrn)) {
+            return platformAwareSdxConnector.getRemoteDataContext(sdxCrn);
+        }
+        return Optional.empty();
     }
 
-    private String getSdxContext(Stack stack) {
-        return getSdxStack(stack)
+    @Override
+    public Optional<String> getPaasSdxRemoteDataContext(String sdxCrn) {
+        return Optional.ofNullable(stackService.getByCrnOrElseNull(sdxCrn))
                 .map(clusterApiConnectors::getConnector)
-                .map(ClusterApi::getSdxContext)
-                .orElse(null);
-    }
-
-    private Optional<Stack> getSdxStack(Stack stack) {
-        return datalakeService.getDatalakeStackByStackEnvironmentCrn(stack);
+                .map(ClusterApi::getSdxContext);
     }
 
     private ClusterSetupService getClusterSetupService(Long stackId) {
@@ -280,5 +279,4 @@ public class ClusterBuilderService {
                     "cluster creation to be able to resolve them!");
         }
     }
-
 }
