@@ -2,7 +2,7 @@
   "name": "7.2.15 - Data Mart for Google Cloud",
   "description": "",
   "type": "DATAMART",
-  "featureState": "PREVIEW",
+  "featureState": "RELEASED",
   "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {
