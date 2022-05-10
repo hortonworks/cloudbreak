@@ -239,11 +239,6 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return template;
     }
 
-    public FreeIpaTestDto withNetwork() {
-        getRequest().setNetwork(getCloudProvider().networkRequest(this));
-        return this;
-    }
-
     private FreeIpaTestDto withNetwork(NetworkV4TestDto network) {
         NetworkV4Request request = network.getRequest();
         NetworkRequest networkRequest = new NetworkRequest();
