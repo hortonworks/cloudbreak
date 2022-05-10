@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4;
 
+import java.util.List;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.StackV4ParameterBase;
@@ -10,6 +11,7 @@ import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
@@ -179,4 +181,7 @@ public interface CloudProvider {
 
     String getStorageOptimizedInstanceType();
 
+    void verifyDiskEncryptionKey(DetailedEnvironmentResponse environment, String environmentName);
+
+    void verifyVolumeEncryptionKey(List<String> volumeEncryptionKeyIds, String environmentName);
 }

@@ -32,6 +32,10 @@ public class GcpUtil {
         return gcpClientActions.listInstanceDiskNames(instanceIds);
     }
 
+    public List<String> listVolumeEncryptionKey(List<String> instanceIds) {
+        return gcpClientActions.listVolumeEncryptionKey(instanceIds);
+    }
+
     public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
         return gcpClientActions.listTagsByInstanceId(instanceIds);
     }

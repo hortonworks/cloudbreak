@@ -17,6 +17,7 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.TestParameter;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
@@ -305,4 +306,13 @@ public abstract class AbstractCloudProvider implements CloudProvider {
         return null;
     }
 
+    @Override
+    public void verifyDiskEncryptionKey(DetailedEnvironmentResponse environment, String environmentName) {
+        LOGGER.warn("Disk encryption feature is not available currently");
+    }
+
+    @Override
+    public void verifyVolumeEncryptionKey(List<String> volumeEncryptionKeyIds, String environmentName) {
+        LOGGER.warn("Disk encryption feature is not available currently");
+    }
 }

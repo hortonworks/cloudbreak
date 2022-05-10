@@ -7,9 +7,14 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.microsoft.azure.management.resources.ResourceGroup;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
@@ -18,6 +23,8 @@ import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 
 @Component
 public class AzureCloudFunctionality implements CloudFunctionality {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudFunctionality.class);
 
     @Inject
     private AzureClientActions azureClientActions;
@@ -80,13 +87,16 @@ public class AzureCloudFunctionality implements CloudFunctionality {
 
     @Override
     public Map<String, Boolean> enaSupport(List<String> instanceIds) {
+        LOGGER.warn("enaSupport ::: ENA driver is only available for AWS!");
+        Log.log(LOGGER, " enaSupport ::: ENA driver is only available at AWS! ");
         return Collections.emptyMap();
     }
 
     @Override
     public Map<String, String> getInstanceSubnetMap(List<String> instanceIds) {
-        //TODO
-        return null;
+        LOGGER.warn("getInstanceSubnetMap ::: Not implemented for AZURE!");
+        Log.log(LOGGER, " getInstanceSubnetMap ::: Not implemented for AZURE! ");
+        return Collections.emptyMap();
     }
 
     @Override
@@ -102,6 +112,12 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     @Override
     public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
         return azureCloudBlobUtil.getDataHubLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    @Override
+    public void verifyEnaDriver(StackV4Response stackV4Response, CloudbreakClient cloudbreakClient) {
+        LOGGER.warn("ENA driver is only available at AWS. So validation on AZURE is not possible!");
+        Log.then(LOGGER, " ENA driver is only available at AWS. So validation on AZURE is not possible! ");
     }
 
     public ResourceGroup createResourceGroup(String resourceGroupName, Map<String, String> tags) {

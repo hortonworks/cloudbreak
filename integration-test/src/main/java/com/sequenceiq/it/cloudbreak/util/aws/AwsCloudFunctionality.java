@@ -10,10 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.aws.amazonec2.AmazonEC2Util;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.AmazonS3Util;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshEnaDriverCheckActions;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
 
 @Component
@@ -26,6 +29,9 @@ public class AwsCloudFunctionality implements CloudFunctionality {
 
     @Inject
     private AmazonS3Util amazonS3Util;
+
+    @Inject
+    private SshEnaDriverCheckActions sshEnaDriverCheckActions;
 
     @Inject
     private SshJUtil sshJUtil;
@@ -103,6 +109,11 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     @Override
     public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
         return amazonS3Util.getDataHubLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    @Override
+    public void verifyEnaDriver(StackV4Response stackV4Response, CloudbreakClient cloudbreakClient) {
+        sshEnaDriverCheckActions.checkEnaDriverOnAws(stackV4Response, cloudbreakClient);
     }
 
     @Override

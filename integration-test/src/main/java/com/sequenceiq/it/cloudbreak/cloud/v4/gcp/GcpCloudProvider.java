@@ -10,10 +10,10 @@ import java.util.UUID;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
@@ -32,6 +32,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcp
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -108,11 +109,11 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
         SecurityAccessRequest securityAccessRequest = new SecurityAccessRequest();
         EnvironmentTestDto result = super.environment(environment);
-        if (!StringUtils.isEmpty(gcpProperties.getSecurityAccess().getDefaultSecurityGroup())) {
+        if (StringUtils.isNotBlank(gcpProperties.getSecurityAccess().getDefaultSecurityGroup())) {
             securityAccessRequest.setDefaultSecurityGroupId(gcpProperties.getSecurityAccess().getDefaultSecurityGroup());
             result.withSecurityAccess(securityAccessRequest);
         }
-        if (!StringUtils.isEmpty(gcpProperties.getSecurityAccess().getKnoxSecurityGroup())) {
+        if (StringUtils.isNotBlank(gcpProperties.getSecurityAccess().getKnoxSecurityGroup())) {
             securityAccessRequest.setSecurityGroupIdForKnox(gcpProperties.getSecurityAccess().getKnoxSecurityGroup());
             result.withSecurityAccess(securityAccessRequest);
         }
@@ -205,7 +206,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         gcpNetworkV4Parameters.setNoFirewallRules(gcpProperties.getNetwork().getNoFirewallRules());
         gcpNetworkV4Parameters.setNoPublicIp(gcpProperties.getNetwork().getNoPublicIp());
         String subnetCIDR = null;
-        if (!StringUtils.isEmpty(gcpProperties.getNetwork().getSharedProjectId())) {
+        if (StringUtils.isNotBlank(gcpProperties.getNetwork().getSharedProjectId())) {
             gcpNetworkV4Parameters.setSharedProjectId(gcpProperties.getNetwork().getSharedProjectId());
             gcpNetworkV4Parameters.setNetworkId(gcpProperties.getNetwork().getNetworkId());
             gcpNetworkV4Parameters.setSubnetId(gcpProperties.getNetwork().getSubnetId());
@@ -493,5 +494,29 @@ public class GcpCloudProvider extends AbstractCloudProvider {
         return environmentEncryption
                 ? gcpProperties.getDiskEncryption().getEnvironmentKey()
                 : gcpProperties.getDiskEncryption().getDatahubKey();
+    }
+
+    @Override
+    public void verifyDiskEncryptionKey(DetailedEnvironmentResponse environment, String environmentName) {
+        String encryptionKey = environment.getGcp().getGcpResourceEncryptionParameters().getEncryptionKey();
+        if (StringUtils.isBlank(encryptionKey)) {
+            LOGGER.error(format("KMS key is not available for '%s' environment!", environmentName));
+            throw new TestFailException(format("KMS key is not available for '%s' environment!", environmentName));
+        } else {
+            LOGGER.info(format("Environment '%s' create has been done with '%s' KMS key.", environmentName, encryptionKey));
+            Log.then(LOGGER, format(" Environment '%s' create has been done with '%s' KMS key. ", environmentName, encryptionKey));
+        }
+    }
+
+    @Override
+    public void verifyVolumeEncryptionKey(List<String> volumeKmsKeyIds, String environmentName) {
+        String kmsKey = getEncryptionKey(true);
+        if (volumeKmsKeyIds.stream().noneMatch(keyId -> StringUtils.containsIgnoreCase(keyId, kmsKey))) {
+            LOGGER.error(format("Volume has NOT been encrypted with '%s' KMS key!", kmsKey));
+            throw new TestFailException(format("Volume has NOT been encrypted with '%s' KMS key!", kmsKey));
+        } else {
+            LOGGER.info(format("Volume has been encrypted with '%s' KMS key.", kmsKey));
+            Log.then(LOGGER, format(" Volume has been encrypted with '%s' KMS key. ", kmsKey));
+        }
     }
 }

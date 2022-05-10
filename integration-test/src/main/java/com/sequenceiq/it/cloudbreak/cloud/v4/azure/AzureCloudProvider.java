@@ -34,6 +34,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.cloud.v4.AbstractCloudProvider;
@@ -472,5 +473,29 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     public String getEncryptionKeyUrl() {
         return azureProperties.getDiskEncryption().getEncryptionKeyUrl();
+    }
+
+    @Override
+    public void verifyDiskEncryptionKey(DetailedEnvironmentResponse environment, String environmentName) {
+        String diskEncryptionSetId = environment.getAzure().getResourceEncryptionParameters().getDiskEncryptionSetId();
+        if (StringUtils.isEmpty(diskEncryptionSetId)) {
+            LOGGER.error(format("DES key is not available for '%s' environment!", environmentName));
+            throw new TestFailException(format("DES key is not available for '%s' environment!", environmentName));
+        } else {
+            LOGGER.info(format("Environment '%s' create has been done with '%s' DES key.", environmentName, diskEncryptionSetId));
+            Log.then(LOGGER, format(" Environment '%s' create has been done with '%s' DES key. ", environmentName, diskEncryptionSetId));
+        }
+    }
+
+    @Override
+    public void verifyVolumeEncryptionKey(List<String> volumesDesIds, String environmentName) {
+        String desKeyUrl = getEncryptionKeyUrl();
+        if (volumesDesIds.stream().noneMatch(desId -> StringUtils.containsIgnoreCase(desId, "diskEncryptionSets/" + environmentName))) {
+            LOGGER.error(format("Volume has NOT been encrypted with '%s' DES key!", desKeyUrl));
+            throw new TestFailException(format("Volume has NOT been encrypted with '%s' DES key!", desKeyUrl));
+        } else {
+            LOGGER.info(format("Volume has been encrypted with '%s' DES key.", desKeyUrl));
+            Log.then(LOGGER, format(" Volume has been encrypted with '%s' DES key. ", desKeyUrl));
+        }
     }
 }
