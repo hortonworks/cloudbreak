@@ -23,6 +23,7 @@ import com.sequenceiq.freeipa.entity.ChildEnvironment;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState;
 import com.sequenceiq.freeipa.flow.stack.termination.event.TerminationEvent;
+import com.sequenceiq.freeipa.nodestatus.NodeStatusJobService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
@@ -47,6 +48,9 @@ public class FreeIpaDeletionService {
     private FreeipaJobService freeipaJobService;
 
     @Inject
+    private NodeStatusJobService nodeStatusJobService;
+
+    @Inject
     private FlowLogService flowLogService;
 
     @Inject
@@ -65,6 +69,7 @@ public class FreeIpaDeletionService {
         MDCBuilder.buildMdcContext(stack);
         flowCancelService.cancelTooOldTerminationFlowForResource(stack.getId(), stack.getName());
         freeipaJobService.unschedule(stack);
+        nodeStatusJobService.unschedule(stack);
         if (!stack.isDeleteCompleted()) {
             handleIfStackIsNotTerminated(stack, forced);
         } else {

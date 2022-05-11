@@ -2,8 +2,6 @@ package com.sequenceiq.freeipa.sync;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
@@ -12,8 +10,6 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobSe
 
 @Component
 public class FreeipaJobService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaJobService.class);
 
     @Inject
     private AutoSyncConfig autoSyncConfig;

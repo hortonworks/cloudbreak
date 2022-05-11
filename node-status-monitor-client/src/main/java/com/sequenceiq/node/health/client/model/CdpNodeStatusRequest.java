@@ -2,6 +2,8 @@ package com.sequenceiq.node.health.client.model;
 
 public class CdpNodeStatusRequest {
 
+    private final boolean skipObjectMapping;
+
     private final boolean metering;
 
     private final boolean cmMonitoring;
@@ -9,6 +11,7 @@ public class CdpNodeStatusRequest {
     public CdpNodeStatusRequest(Builder builder) {
         this.metering = builder.metering;
         this.cmMonitoring = builder.cmMonitoring;
+        this.skipObjectMapping = builder.skipObjectMapping;
     }
 
     public boolean isMetering() {
@@ -19,11 +22,17 @@ public class CdpNodeStatusRequest {
         return cmMonitoring;
     }
 
+    public boolean isSkipObjectMapping() {
+        return skipObjectMapping;
+    }
+
     public static class Builder {
 
         private boolean metering;
 
         private boolean cmMonitoring;
+
+        private boolean skipObjectMapping;
 
         private Builder() {
         }
@@ -43,6 +52,11 @@ public class CdpNodeStatusRequest {
 
         public Builder withCmMonitoring(boolean cmMonitoring) {
             this.cmMonitoring = cmMonitoring;
+            return this;
+        }
+
+        public Builder withSkipObjectMapping(boolean skipObjectMapping) {
+            this.skipObjectMapping = skipObjectMapping;
             return this;
         }
 
