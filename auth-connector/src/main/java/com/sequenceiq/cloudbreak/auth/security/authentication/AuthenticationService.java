@@ -7,4 +7,6 @@ import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 public interface AuthenticationService {
 
     CloudbreakUser getCloudbreakUser(Authentication auth);
+
+    CloudbreakUser getCloudbreakUser(String userCrn, String principal);
 }

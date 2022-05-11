@@ -76,11 +76,11 @@ public class WorkspaceConfiguratorFilterTest {
 
     @Test
     public void filterWithoutCloudbreakUser() throws ServletException, IOException {
-        when(authenticatedUserService.getCbUser()).thenReturn(null);
+        when(authenticatedUserService.getCbUser(any(HttpServletRequest.class))).thenReturn(null);
 
         underTest.doFilterInternal(request, response, filterChain);
 
-        verify(authenticatedUserService, times(1)).getCbUser();
+        verify(authenticatedUserService, times(1)).getCbUser(any(HttpServletRequest.class));
         verifyNoInteractions(userService, workspaceService);
         verify(cloudbreakRestRequestThreadLocalService, times(1)).removeRequestedWorkspaceId();
         verify(filterChain, times(1)).doFilter(any(), any());
@@ -89,7 +89,7 @@ public class WorkspaceConfiguratorFilterTest {
     @Test
     public void filterWhenWorkspaceExists() throws ServletException, IOException {
         CloudbreakUser cbUser = createCbUserWithCrn();
-        when(authenticatedUserService.getCbUser()).thenReturn(cbUser);
+        when(authenticatedUserService.getCbUser(any(HttpServletRequest.class))).thenReturn(cbUser);
         when(userService.getOrCreate(any())).thenReturn(new User());
         when(workspaceService.getByName(anyString(), any())).thenReturn(Optional.of(createWorkspace()));
 
@@ -102,7 +102,7 @@ public class WorkspaceConfiguratorFilterTest {
     @Test
     public void filterWhenWorkspaceDoesNotExist() {
         CloudbreakUser cbUser = createCbUserWithCrn();
-        when(authenticatedUserService.getCbUser()).thenReturn(cbUser);
+        when(authenticatedUserService.getCbUser(any(HttpServletRequest.class))).thenReturn(cbUser);
         when(userService.getOrCreate(any())).thenReturn(new User());
         when(workspaceService.getByName(anyString(), any())).thenReturn(Optional.empty());
 
@@ -116,7 +116,7 @@ public class WorkspaceConfiguratorFilterTest {
     @Test
     public void testGettingHeaders() {
         CloudbreakUser cbUser = createCbUserWithCrn();
-        when(authenticatedUserService.getCbUser()).thenReturn(cbUser);
+        when(authenticatedUserService.getCbUser(any(HttpServletRequest.class))).thenReturn(cbUser);
         when(userService.getOrCreate(any())).thenReturn(new User());
         when(workspaceService.getByName(anyString(), any())).thenReturn(Optional.of(createWorkspace()));
         when(request.getHeaderNames()).thenReturn(Collections.enumeration(Set.of("header1", "header2")));

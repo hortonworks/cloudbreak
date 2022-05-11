@@ -27,7 +27,7 @@ public class CloudbreakUserConfiguratorFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();
+        CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser(request);
         restRequestThreadLocalService.setCloudbreakUser(cloudbreakUser);
         filterChain.doFilter(request, response);
         restRequestThreadLocalService.removeCloudbreakUser();

@@ -16,4 +16,9 @@ public class DisabledAuthenticationService implements AuthenticationService {
     public CloudbreakUser getCloudbreakUser(Authentication auth) {
         return disabledAuthCbUserProvider.getCloudbreakUser();
     }
+
+    @Override
+    public CloudbreakUser getCloudbreakUser(String userCrn, String principal) {
+        return disabledAuthCbUserProvider.getCloudbreakUser();
+    }
 }

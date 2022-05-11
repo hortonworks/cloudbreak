@@ -37,6 +37,7 @@ public class UmsAuthenticationService implements AuthenticationService {
         return null;
     }
 
+    @Override
     public CloudbreakUser getCloudbreakUser(String userCrn, String principal) {
         String requestId = MDCBuilder.getOrGenerateRequestId();
         Crn crn;
