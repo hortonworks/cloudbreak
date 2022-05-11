@@ -1,21 +1,25 @@
 package com.sequenceiq.cloudbreak.auth.security.authentication;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.CrnUser;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 
 @Service
 public class AuthenticatedUserService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticatedUserService.class);
+
+    private static final String ACTOR_HEADER = "x-cdp-actor-crn";
 
     @Inject
     private AuthenticationService authenticationService;
@@ -28,16 +32,16 @@ public class AuthenticatedUserService {
         return null;
     }
 
-    public String getAccountId() {
-        CloudbreakUser cbUser = getCbUser();
-        if (cbUser == null) {
-            throw new AccessDeniedException("No authentication found in the SecurityContextHolder!");
+    public CloudbreakUser getCbUser(String userCrn) {
+        if (StringUtils.isNotBlank(userCrn) && Crn.isCrn(userCrn)) {
+            return authenticationService.getCloudbreakUser(userCrn, null);
         }
-        return cbUser.getTenant();
+        return getCbUser();
     }
 
-    public String getTokenValue(Authentication auth) {
-        return ((CrnUser) auth.getPrincipal()).getUserCrn();
+    public CloudbreakUser getCbUser(HttpServletRequest request) {
+        String userCrn = request.getHeader(ACTOR_HEADER);
+        return getCbUser(userCrn);
     }
 
     public String getServiceAccountId() {

@@ -19,6 +19,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.method.configuration.GlobalMethodSecurityConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsByNameServiceWrapper;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
@@ -113,7 +114,7 @@ public class SecurityConfig {
                     .contentTypeOptions();
 
             http.csrf().disable();
-
+            http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
             http.headers().contentTypeOptions();
         }
     }

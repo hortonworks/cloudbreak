@@ -39,8 +39,7 @@ public class AuditFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         filterChain.doFilter(request, response);
-
-        CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser();
+        CloudbreakUser cloudbreakUser = authenticatedUserService.getCbUser(request);
         if (auditEnabled && includePathPattern(request.getRequestURI())) {
             Map<String, Object> requestParameters = new HashMap<>();
             requestParameters.put("uri", request.getRequestURI());
