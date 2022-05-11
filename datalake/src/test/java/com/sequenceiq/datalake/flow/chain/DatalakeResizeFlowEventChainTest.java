@@ -47,6 +47,16 @@ public class DatalakeResizeFlowEventChainTest {
         assertTriggerBackupEvent(flowTriggerEventQueue);
     }
 
+    @Test
+    public void chainCreationWithRazTest() {
+        SdxCluster clusterWithRaz = getValidSdxClusterwithRaz();
+        DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(clusterWithRaz.getId(), clusterWithRaz, USER_CRN, BACKUP_LOCATION,
+                true, true);
+        FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
+        assertEquals(7, flowTriggerEventQueue.getQueue().size());
+        assertTriggerBackupEvent(flowTriggerEventQueue);
+    }
+
     private void assertTriggerBackupEvent(FlowTriggerEventQueue flowChainQueue) {
         Selectable triggerBackupEvent = flowChainQueue.getQueue().remove();
         assertEquals(DATALAKE_TRIGGER_BACKUP_EVENT.selector(), triggerBackupEvent.selector());
@@ -65,6 +75,18 @@ public class DatalakeResizeFlowEventChainTest {
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");
         sdxCluster.setDatabaseCrn("crn:sdxcluster");
+        sdxCluster.setId(1L);
+        return sdxCluster;
+    }
+
+    private SdxCluster getValidSdxClusterwithRaz() {
+        sdxCluster = new SdxCluster();
+        sdxCluster.setClusterName("test-sdx-cluster");
+        sdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
+        sdxCluster.setEnvName("test-env");
+        sdxCluster.setCrn("crn:sdxcluster");
+        sdxCluster.setDatabaseCrn("crn:sdxcluster");
+        sdxCluster.setRangerRazEnabled(true);
         sdxCluster.setId(1L);
         return sdxCluster;
     }
