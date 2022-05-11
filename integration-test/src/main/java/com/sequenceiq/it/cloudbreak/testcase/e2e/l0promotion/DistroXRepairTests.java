@@ -70,17 +70,11 @@ public class DistroXRepairTests extends AbstractE2ETest {
     @Override
     protected void setupTest(TestContext testContext) {
         assertSupportedCloudPlatform(CloudPlatform.AZURE);
-        useRealUmsUser(testContext, L0UserKeys.USER_ACCOUNT_ADMIN);
+        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
+        createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
-        useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
         createDefaultCredential(testContext);
         createStorageOptimizedDatahub(testContext);
-    }
-
-    @Override
-    public void tearDownSpotValidateTags(Object[] data) {
-        useRealUmsUser((TestContext) data[0], L0UserKeys.ENV_CREATOR_A);
-        super.tearDownSpotValidateTags(data);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -89,24 +83,21 @@ public class DistroXRepairTests extends AbstractE2ETest {
             given = "there is a running environment with FreeIPA and SDX in available state",
             when = "a new DistroX should be created",
                 and = "MASTER host group should be recovered, where the instance had been terminated",
-            then = "DistroX recovery should be successful, the cluster should be up and running with same volumes"
-    )
+            then = "DistroX recovery should be successful, the cluster should be up and running with same volumes")
     public void testEphemeralDistroXMasterRepairWithTerminatedInstances(TestContext testContext) {
         String distrox = resourcePropertyProvider().getName();
         List<String> actualVolumeIds = new ArrayList<>();
         List<String> expectedVolumeIds = new ArrayList<>();
+        String userCrn = testContext.getActingUserCrn().toString();
+        String workloadUsername = testContext.given(UmsTestDto.class).assignTarget(EnvironmentTestDto.class.getSimpleName())
+                .when(umsTestClient.getUserDetails(userCrn, regionAwareInternalCrnGeneratorFactory)).getResponse().getWorkloadUsername();
 
         testContext
-                .given(UmsTestDto.class)
-                .assignTarget(EnvironmentTestDto.class.getSimpleName())
-                .withEnvironmentAdmin()
-                .when(umsTestClient.assignResourceRole(L0UserKeys.USER_ENV_CREATOR, regionAwareInternalCrnGeneratorFactory))
-                .validate();
-
-        String workloadUsername = testContext.getRealUmsUserByKey(L0UserKeys.USER_ENV_CREATOR).getWorkloadUserName();
-        useRealUmsUser(testContext, L0UserKeys.USER_ENV_CREATOR);
-
-        testContext
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .given(FreeIpaUserSyncTestDto.class)
+                .when(freeIpaTestClient.getLastSyncOperationStatus())
+                .await(OperationState.COMPLETED)
                 .given(UmsTestDto.class)
                     .assignTarget(EnvironmentTestDto.class.getSimpleName())
                 .when(umsTestClient.setWorkloadPassword(workloadPassword, regionAwareInternalCrnGeneratorFactory))

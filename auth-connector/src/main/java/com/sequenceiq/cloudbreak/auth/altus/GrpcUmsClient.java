@@ -319,6 +319,24 @@ public class GrpcUmsClient {
     }
 
     /**
+     * Set machine user Workload password.
+     *
+     * @param userCrn   the CRN of the machine user
+     * @param requestId an optional request Id
+     * @return the workload credentials associated with this machine user CRN
+     */
+    public UserManagementProto.SetActorWorkloadCredentialsResponse setMachineUserWorkloadPassword(String userCrn, String accountId, String password,
+            Optional<String> requestId, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        UmsClient client = makeClient(channelWrapper.getChannel(), regionAwareInternalCrnGeneratorFactory);
+        String workloadUserName = getMachineUserDetails(userCrn, accountId, requestId, regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
+        LOGGER.debug("Setting workload password for machine user {} with workload name {}", userCrn, workloadUserName);
+        UserManagementProto.SetActorWorkloadCredentialsResponse response = client.setActorWorkloadPassword(RequestIdUtil.getOrGenerate(requestId), userCrn,
+                password);
+        LOGGER.debug("Workload password has been set for machine user {} with workload name {}", userCrn, workloadUserName);
+        return response;
+    }
+
+    /**
      * Retrieves list of all machine users from UMS.
      *
      * @param accountId                   the account Id

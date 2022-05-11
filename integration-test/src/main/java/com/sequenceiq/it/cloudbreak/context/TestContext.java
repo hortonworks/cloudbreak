@@ -405,7 +405,8 @@ public abstract class TestContext implements ApplicationContextAware {
 
         CloudbreakUser who = setActingUser(runningParameter);
 
-        Log.then(LOGGER, assertion.getClass().getSimpleName() + " exception assertion on " + entity + " by " + who);
+        LOGGER.info("then exception {} action on {} by {}, name: {}", key, entity, who, entity.getName());
+        Log.thenException(LOGGER, assertion.getClass().getSimpleName() + " exception assertion on " + entity + " by " + who);
         try {
             String message = String.format("Expected exception with message (%s) has not been thrown!", runningParameter.getExpectedMessage());
             CloudbreakTestDto cloudbreakTestDto = resourceNames.get(key);
@@ -1102,6 +1103,8 @@ public abstract class TestContext implements ApplicationContextAware {
     private void htmlLoggerForExceptionValidation(String message, String stepKey) {
         if ("expect".equalsIgnoreCase(stepKey)) {
             Log.expect(LOGGER, message);
+        } else if ("thenException".equalsIgnoreCase(stepKey)) {
+            Log.thenException(LOGGER, message);
         } else {
             Log.whenException(LOGGER, message);
         }

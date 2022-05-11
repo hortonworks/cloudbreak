@@ -3,18 +3,25 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 
 import java.time.Duration;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
+import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.it.cloudbreak.actor.CloudbreakActor;
+import com.sequenceiq.it.cloudbreak.assertion.ums.VirtualGroupTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -26,9 +33,12 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshSudoCommandActions;
 
 public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentPrivilegedUserTest.class);
 
     private static final String LIST_RULES_FLAG = "-l";
 
@@ -53,22 +63,21 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
     @Inject
     private SshSudoCommandActions sshSudoCommandActions;
 
+    @Inject
+    private CloudbreakActor cloudbreakActor;
+
+    @Inject
+    private EnvironmentUtil environmentUtil;
+
     @Override
     protected void setupTest(TestContext testContext) {
         assertSupportedCloudPlatform(CloudPlatform.AWS);
         testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
         useRealUmsUser(testContext, L0UserKeys.USER_ACCOUNT_ADMIN);
         initializeDefaultBlueprints(testContext);
-
         useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
         createDefaultCredential(testContext);
         createDefaultDatalake(testContext);
-    }
-
-    @Override
-    public void tearDownSpotValidateTags(Object[] data) {
-        useRealUmsUser((TestContext) data[0], L0UserKeys.ENV_CREATOR_A);
-        super.tearDownSpotValidateTags(data);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -76,9 +85,10 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
             given = "there is an up and running SDX cluster ",
             when = "the current user tries to run sudo commands on any VM in the cluster ",
             then = "execution should fail in case of EnvironmentPrivilegedUser role is not assigned ",
-                and = "execution should pass in case of assigned EnvironmentPrivilegedUser role but changing the user to root should fail"
-    )
+                and = "execution should pass in case of assigned EnvironmentPrivilegedUser role but changing the user to root should fail")
     public void testSudoCommands(TestContext testContext) {
+        AtomicReference<Map<UmsVirtualGroupRight, String>> environmentVirtualGroups = new AtomicReference<>();
+
         testContext
                 .given(UmsTestDto.class)
                 .assignTarget(EnvironmentTestDto.class.getSimpleName())
@@ -104,6 +114,10 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                 .given(UmsTestDto.class)
                 .withEnvironmentPrivilegedUser()
                 .when(umsTestClient.assignResourceRole(L0UserKeys.USER_ENV_CREATOR, regionAwareInternalCrnGeneratorFactory))
+                .then((tc, dto, client) -> {
+                    environmentVirtualGroups.set(environmentUtil.getEnvironmentVirtualGroups(tc, client));
+                    return dto;
+                })
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
@@ -117,7 +131,17 @@ public class EnvironmentPrivilegedUserTest extends AbstractE2ETest {
                 .thenException((tc, testDto, client) -> {
                     sshSudoCommandActions.executeCommand(getIpAddresses(tc), workloadUsernameEnvCreator, workloadPassword, CHANGE_USER_TO_ROOT_COMMAND);
                     return testDto;
-                }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'."))
+                }, TestFailException.class, expectedMessage("sudo command failed on '.*' for user '" + workloadUsernameEnvCreator + "'.")
+                        .withWho(cloudbreakActor.useRealUmsUser(L0UserKeys.USER_ENV_CREATOR)))
+                .validate();
+
+        useRealUmsUser(testContext, L0UserKeys.ENV_CREATOR_A);
+
+        testContext
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.findUsers(Set.of(workloadUsernameEnvCreator), true))
+                .then(VirtualGroupTestAssertion.validateAdminVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
+                        Set.of(workloadUsernameEnvCreator), true))
                 .validate();
     }
 

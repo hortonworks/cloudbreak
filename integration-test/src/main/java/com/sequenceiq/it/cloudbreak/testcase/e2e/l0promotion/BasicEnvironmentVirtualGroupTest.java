@@ -1,32 +1,25 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion;
 
 import static com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto.getIamGroupAdminCrn;
-import static java.lang.String.format;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.util.StringUtils;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
-import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
+import com.sequenceiq.it.cloudbreak.assertion.ums.ResourceRoleTestAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.ums.UserGroupTestAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.ums.VirtualGroupTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
@@ -37,12 +30,8 @@ import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
-
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
+import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
 
 public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
 
@@ -71,6 +60,9 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private EnvironmentUtil environmentUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -107,7 +99,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .withEnvironmentUser()
                 .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_B, regionAwareInternalCrnGeneratorFactory))
                 .then((tc, dto, client) -> {
-                    environmentVirtualGroups.set(getEnvironmentVirtualGroups(tc, client));
+                    environmentVirtualGroups.set(environmentUtil.getEnvironmentVirtualGroups(tc, client));
                     return dto;
                 })
                 .given(FreeIpaUserSyncTestDto.class)
@@ -115,7 +107,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.findUsers(Set.of(workloadUsernameEnvAdminA, workloadUsernameEnvCreatorB), true))
-                .then((tc, dto, client) -> validateUserVirtualGroupMembership(tc, dto, environmentVirtualGroups.get(),
+                .then(VirtualGroupTestAssertion.validateUserVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
                         Set.of(workloadUsernameEnvCreatorB), true))
                 .validate();
 
@@ -128,7 +120,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
-                .then((tc, dto, client) -> validateAdminVirtualGroupMembership(tc, dto, environmentVirtualGroups.get(),
+                .then(VirtualGroupTestAssertion.validateAdminVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
                         Set.of(workloadUsernameEnvAdminA, workloadUsernameEnvCreatorB), true))
                 .validate();
 
@@ -144,7 +136,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.findUsers(Set.of(workloadUsernameEnvAdminA, workloadUsernameEnvCreatorB), false))
-                .then((tc, dto, client) -> validateAdminVirtualGroupMembership(tc, dto, environmentVirtualGroups.get(),
+                .then(VirtualGroupTestAssertion.validateAdminVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
                         Set.of(workloadUsernameEnvCreatorB), false))
                 .validate();
     }
@@ -177,16 +169,20 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .assignTargetByCrn(adminGroupCrn)
                 .withGroupAdmin()
                 .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
-                .then((tc, dto, client) -> validateAssignedResourceRole(tc, dto, client, userEnvCreatorA, getIamGroupAdminCrn(), true))
+                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, getIamGroupAdminCrn(), true,
+                        regionAwareInternalCrnGeneratorFactory))
                 .assignTargetByCrn(userGroupCrn)
                 .withGroupAdmin()
                 .when(umsTestClient.assignResourceRole(L0UserKeys.ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
-                .then((tc, dto, client) -> validateAssignedResourceRole(tc, dto, client, userEnvCreatorA, getIamGroupAdminCrn(), true))
+                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, getIamGroupAdminCrn(), true,
+                        regionAwareInternalCrnGeneratorFactory))
                 .given(UmsGroupTestDto.class)
                 .when(umsTestClient.addUserToGroup(adminGroupName, userEnvAdminA.getCrn(), regionAwareInternalCrnGeneratorFactory))
                 .when(umsTestClient.addUserToGroup(userGroupName, userEnvCreatorB.getCrn(), regionAwareInternalCrnGeneratorFactory))
-                .then((tc, dto, client) -> validateUserGroupMembership(tc, dto, client, userEnvAdminA, adminGroupName, true))
-                .then((tc, dto, client) -> validateUserGroupMembership(tc, dto, client, userEnvCreatorB, userGroupName, true))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvAdminA, adminGroupName, true,
+                        regionAwareInternalCrnGeneratorFactory))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvCreatorB, userGroupName, true,
+                        regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
         testContext
@@ -202,7 +198,7 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .withEnvironmentUser()
                 .when(umsTestClient.assignResourceRoleWithGroup(userGroupCrn, regionAwareInternalCrnGeneratorFactory))
                 .then((tc, dto, client) -> {
-                    environmentVirtualGroups.set(getEnvironmentVirtualGroups(tc, client));
+                    environmentVirtualGroups.set(environmentUtil.getEnvironmentVirtualGroups(tc, client));
                     return dto;
                 })
                 .given(FreeIpaUserSyncTestDto.class)
@@ -210,9 +206,9 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .await(OperationState.COMPLETED)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.findGroups(Set.of(adminGroupName, userGroupName)))
-                .then((tc, dto, client) -> validateAdminVirtualGroupMembership(tc, dto, environmentVirtualGroups.get(),
+                .then(VirtualGroupTestAssertion.validateAdminVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
                         Set.of(userEnvAdminA.getWorkloadUserName()), true))
-                .then((tc, dto, client) -> validateUserVirtualGroupMembership(tc, dto, environmentVirtualGroups.get(),
+                .then(VirtualGroupTestAssertion.validateUserVirtualGroupMembership(freeIpaTestClient, environmentVirtualGroups.get(),
                         Set.of(userEnvCreatorB.getWorkloadUserName()), true))
                 .validate();
 
@@ -220,8 +216,10 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .given(UmsGroupTestDto.class)
                 .when(umsTestClient.removeUserFromGroup(adminGroupName, userEnvAdminA.getCrn(), regionAwareInternalCrnGeneratorFactory))
                 .when(umsTestClient.removeUserFromGroup(userGroupName, userEnvCreatorB.getCrn(), regionAwareInternalCrnGeneratorFactory))
-                .then((tc, dto, client) -> validateUserGroupMembership(tc, dto, client, userEnvAdminA, adminGroupName, false))
-                .then((tc, dto, client) -> validateUserGroupMembership(tc, dto, client, userEnvCreatorB, userGroupName, false))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvAdminA, adminGroupName, false,
+                        regionAwareInternalCrnGeneratorFactory))
+                .then(UserGroupTestAssertion.validateUserGroupMembership(userEnvCreatorB, userGroupName, false,
+                        regionAwareInternalCrnGeneratorFactory))
                 .validate();
 
         testContext
@@ -229,128 +227,13 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
                 .assignTargetByCrn(adminGroupCrn)
                 .withGroupAdmin()
                 .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
-                .then((tc, dto, client) -> validateAssignedResourceRole(tc, dto, client, userEnvCreatorA, getIamGroupAdminCrn(), false))
+                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, getIamGroupAdminCrn(), false,
+                        regionAwareInternalCrnGeneratorFactory))
                 .assignTargetByCrn(userGroupCrn)
                 .withGroupAdmin()
                 .when(umsTestClient.unAssignResourceRole(L0UserKeys.ENV_CREATOR_A, regionAwareInternalCrnGeneratorFactory))
-                .then((tc, dto, client) -> validateAssignedResourceRole(tc, dto, client, userEnvCreatorA, getIamGroupAdminCrn(), false))
+                .then(ResourceRoleTestAssertion.validateAssignedResourceRole(userEnvCreatorA, getIamGroupAdminCrn(), false,
+                        regionAwareInternalCrnGeneratorFactory))
                 .validate();
-    }
-
-    private Map<UmsVirtualGroupRight, String> getEnvironmentVirtualGroups(TestContext testContext, UmsClient client) {
-        String accountId = testContext.getActingUserCrn().getAccountId();
-        String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
-        Map<UmsVirtualGroupRight, String> virtualGroups = new HashMap<>();
-        String virtualGroup = null;
-
-        for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
-            try {
-                virtualGroup = client.getDefaultClient().getWorkloadAdministrationGroupName(accountId, MDCUtils.getRequestId(),
-                        right, environmentCrn, regionAwareInternalCrnGeneratorFactory);
-            } catch (StatusRuntimeException ex) {
-                if (Status.Code.NOT_FOUND != ex.getStatus().getCode()) {
-                    LOGGER.info(String.format(" Virtual groups is missing for right: '%s' ", right.getRight()));
-                }
-            }
-            if (StringUtils.hasText(virtualGroup)) {
-                virtualGroups.put(right, virtualGroup);
-            }
-        }
-
-        if (MapUtils.isNotEmpty(virtualGroups)) {
-            Log.then(LOGGER, format(" Virtual groups are present [%s] for environment '%s' ", virtualGroups, environmentCrn));
-            LOGGER.info(String.format(" Virtual groups are present [%s] for environment '%s' ", virtualGroups, environmentCrn));
-        } else {
-            throw new TestFailException(String.format(" Cannot find virtual groups for environment '%s' ", environmentCrn));
-        }
-
-        return virtualGroups;
-    }
-
-    private FreeIpaTestDto validateAdminVirtualGroupMembership(TestContext testContext, FreeIpaTestDto testDto,
-            Map<UmsVirtualGroupRight, String> environmentVirtualGroups, Set<String> adminUsers, boolean expectedPresence) {
-
-        List<String> adminGroups = environmentVirtualGroups
-                .entrySet().stream()
-                .filter(group -> group.getKey().name().contains("ADMIN"))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
-        LOGGER.info(String.format(" Admin groups are present [%s] at environment '%s' ", adminGroups, testDto.getResponse().getEnvironmentCrn()));
-        adminGroups.forEach(adminGroup -> freeIpaTestClient.findUsersInGroup(adminUsers, adminGroup, expectedPresence));
-
-        return testDto;
-    }
-
-    private FreeIpaTestDto validateUserVirtualGroupMembership(TestContext testContext, FreeIpaTestDto testDto,
-            Map<UmsVirtualGroupRight, String> environmentVirtualGroups, Set<String> environmentUsers, boolean expectedPresence) {
-
-        List<String> userGroups = environmentVirtualGroups
-                .entrySet().stream()
-                .filter(group -> group.getKey().name().contains("ACCESS"))
-                .map(Map.Entry::getValue)
-                .collect(Collectors.toList());
-        LOGGER.info(String.format(" User groups are present [%s] at environment '%s' ", userGroups, testDto.getResponse().getEnvironmentCrn()));
-        userGroups.forEach(userGroup -> freeIpaTestClient.findUsersInGroup(environmentUsers, userGroup, expectedPresence));
-
-        return testDto;
-    }
-
-    private UmsGroupTestDto validateUserGroupMembership(TestContext testContext, UmsGroupTestDto umsGroupTestDto, UmsClient client, CloudbreakUser groupMember,
-            String groupName, boolean expectedPresence) {
-        String accountId = testContext.getActingUserCrn().getAccountId();
-
-        List<String> groupMembers = client.getDefaultClient().listMembersFromGroup(accountId, groupName,
-                Optional.of(""), regionAwareInternalCrnGeneratorFactory);
-        boolean memberPresent = groupMembers.stream().anyMatch(memberCrn -> groupMember.getCrn().equals(memberCrn));
-        LOGGER.info("Member is present '{}' at group '{}', group members: [{}]", memberPresent, groupName, groupMembers);
-        if (expectedPresence) {
-            if (memberPresent) {
-                LOGGER.info("User '{}' have been assigned successfully to group {}.", groupMember.getDisplayName(), groupName);
-                Log.then(LOGGER, format(" User '%s' have been assigned successfully to group '%s'. ", groupMember.getDisplayName(), groupName));
-            } else {
-                throw new TestFailException(String.format(" User '%s' is missing from group '%s' members! ", groupMember.getDisplayName(), groupName));
-            }
-        } else {
-            if (!memberPresent) {
-                LOGGER.info("User '{}' have been removed successfully from group {}.", groupMember.getDisplayName(), groupName);
-                Log.then(LOGGER, format(" User '%s' have been removed successfully from group '%s'. ", groupMember.getDisplayName(), groupName));
-            } else {
-                throw new TestFailException(String.format(" User '%s' is still member of group '%s'! ", groupMember.getDisplayName(), groupName));
-            }
-        }
-        return umsGroupTestDto;
-    }
-
-    private UmsTestDto validateAssignedResourceRole(TestContext testContext, UmsTestDto umsTestDto, UmsClient client, CloudbreakUser assignee,
-            String roleCrn, boolean expectedPresence) {
-        String resourceCrn = umsTestDto.getRequest().getResourceCrn();
-        String userCrn = assignee.getCrn();
-
-        LOGGER.info(format(" Validate resource role '%s' has been successfully assigned to user '%s' at resource '%s'... ", roleCrn, userCrn, resourceCrn));
-        Multimap<String, String> assignedResourceRoles = client.getDefaultClient()
-                .listAssignedResourceRoles(userCrn, Optional.of(""), regionAwareInternalCrnGeneratorFactory);
-        boolean resourceRoleAssigned = assignedResourceRoles.get(resourceCrn).contains(roleCrn);
-        if (expectedPresence) {
-            if (resourceRoleAssigned) {
-                LOGGER.info(format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", roleCrn, userCrn,
-                        resourceCrn));
-                Log.then(LOGGER, format(" Resource role '%s' has successfully been assigned to user '%s' at resource '%s' ", roleCrn, userCrn,
-                        resourceCrn));
-            } else {
-                throw new TestFailException(String.format(" Resource role '%s' has not been assigned to user '%s' at resource '%s'! ", roleCrn,
-                        userCrn, resourceCrn));
-            }
-        } else {
-            if (!resourceRoleAssigned) {
-                LOGGER.info(format(" Resource role '%s' has successfully been revoked from user '%s' at resource '%s' ", roleCrn, userCrn,
-                        resourceCrn));
-                Log.then(LOGGER, format(" Resource role '%s' has successfully been revoked from user '%s' at resource '%s' ", roleCrn,
-                        userCrn, resourceCrn));
-            } else {
-                throw new TestFailException(String.format(" Resource role '%s' has not been revoked from user '%s' at resource '%s'! ", roleCrn,
-                        userCrn, resourceCrn));
-            }
-        }
-        return umsTestDto;
     }
 }
