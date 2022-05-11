@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package authdistributor;
+
+option java_package = "com.cloudera.thunderhead.service.authdistributor";
+option java_outer_classname = "AuthDistributorProto";
+
+import "version.proto";
+
+// For future compatibility, all rpcs must take a request and return a response
+// even if there is initially no content for these messages.
+service AuthDistributor {
+  // Get the service version.
+  rpc GetVersion (version.VersionRequest)
+      returns (version.VersionResponse) {}
+
+  rpc FetchAuthViewForEnvironment(FetchAuthViewForEnvironmentRequest)
+      returns (FetchAuthViewForEnvironmentResponse) {}
+
+  rpc RemoveAuthViewForEnvironment(RemoveAuthViewForEnvironmentRequest)
+      returns (RemoveAuthViewForEnvironmentResponse) {}
+
+  rpc UpdateAuthViewForEnvironment(UpdateAuthViewForEnvironmentRequest)
+      returns (UpdateAuthViewForEnvironmentResponse) {}
+}
+
+message FetchAuthViewForEnvironmentRequest {
+  string environmentCrn = 1;
+}
+
+message FetchAuthViewForEnvironmentResponse {
+  UserState userState = 1;
+}
+
+message RemoveAuthViewForEnvironmentRequest {
+  string environmentCrn = 1;
+}
+
+message RemoveAuthViewForEnvironmentResponse {
+}
+
+message UpdateAuthViewForEnvironmentRequest {
+  string environmentCrn = 1;
+  UserState userState = 2;
+}
+
+message UpdateAuthViewForEnvironmentResponse {
+}
+
+message Group {
+  // The Group Name
+  string name = 1;
+}
+
+message User {
+  enum State {
+    ENABLED = 0;
+    DISABLED = 1;
+  }
+  // The username of the user.
+  string name = 1;
+  // The given name of the user.
+  string firstName = 2;
+  // The Surname of the user.
+  string lastName = 3;
+  // The state the user is in.
+  State state = 4;
+}
+
+message UserMetadata {
+  // The CRN for the user.
+  string crn = 1;
+  // The workload credentials version for the user.
+  int64 workloadCredentialsVersion = 2;
+}
+
+message UserState {
+  // The users assigned to the environment.
+  repeated User user = 1;
+  // The groups assigned to the environment.
+  repeated Group groups = 2;
+  // The mapping of group name to list of group members.
+  map<string, string> groupMembership = 3;
+  // The mapping of user to its metadata.
+  map<string, UserMetadata> userMetadataMap = 4;
+}

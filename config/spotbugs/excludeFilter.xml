@@ -86,4 +86,7 @@
     <Match>
         <Package name="~com\.cloudera\.thunderhead\.service\.datalakedr.*"/>
     </Match>
+    <Match>
+        <Package name="~com\.cloudera\.thunderhead\.service\.authdistributor.*"/>
+    </Match>
 </FindBugsFilter>

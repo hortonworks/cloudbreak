@@ -77,4 +77,5 @@ include 'custom-configurations'
 include 'custom-configurations-api'
 include 'cloud-consumption'
 include 'cloud-consumption-api'
+include 'auth-distributor-connector'
 
