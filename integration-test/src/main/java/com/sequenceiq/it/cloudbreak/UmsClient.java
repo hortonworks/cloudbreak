@@ -54,7 +54,7 @@ public class UmsClient<E extends Enum<E>, W extends WaitObject> extends Microser
         ReflectionUtils.setField(callingServiceName, clientConfig, "cloudbreak");
         Field grpcTimeoutSec = ReflectionUtils.findField(UmsClientConfig.class, "grpcTimeoutSec");
         ReflectionUtils.makeAccessible(grpcTimeoutSec);
-        ReflectionUtils.setField(grpcTimeoutSec, clientConfig, 5L);
+        ReflectionUtils.setField(grpcTimeoutSec, clientConfig, 60L);
         clientEntity.umsClient = GrpcUmsClient.createClient(
                 UmsChannelConfig.newManagedChannelWrapper(umsHost, 8982), clientConfig, tracer);
         return clientEntity;

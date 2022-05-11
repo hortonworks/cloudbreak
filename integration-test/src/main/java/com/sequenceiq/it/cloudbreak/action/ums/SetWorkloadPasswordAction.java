@@ -37,14 +37,22 @@ public class SetWorkloadPasswordAction implements Action<UmsTestDto, UmsClient> 
         if (resourceType.equals(Crn.ResourceType.MACHINE_USER)) {
             workloadUsername = client.getDefaultClient().getMachineUserDetails(userCrn, accountId, Optional.of(""),
                     regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
+            LOGGER.info("Setting new workload password '{}' for machine user '{}' with workload username '{}'...",
+                    newPassword, userCrn, workloadUsername);
+            Log.when(LOGGER, format(" Setting new workload password '%s' for machine user '%s' workload username '%s'... ",
+                    newPassword, userCrn, workloadUsername));
+            client.getDefaultClient().setMachineUserWorkloadPassword(userCrn, accountId, newPassword, Optional.of(""),
+                    regionAwareInternalCrnGeneratorFactory);
         } else {
             workloadUsername = client.getDefaultClient().getUserDetails(userCrn, Optional.of(""),
                     regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
+            LOGGER.info("Setting new workload password '{}' for user '{}' with workload username '{}'...",
+                    newPassword, userCrn, workloadUsername);
+            Log.when(LOGGER, format(" Setting new workload password '%s' for user '%s' workload username '%s'... ",
+                    newPassword, userCrn, workloadUsername));
+            client.getDefaultClient().setActorWorkloadPassword(userCrn, newPassword, Optional.of(""),
+                    regionAwareInternalCrnGeneratorFactory);
         }
-        LOGGER.info("Setting new workload password '{}' for user '{}' with workload username '{}'", newPassword, userCrn, workloadUsername);
-        Log.when(LOGGER, format(" Setting new workload password '%s' for user '%s' workload username '%s' ", newPassword, userCrn, workloadUsername));
-        client.getDefaultClient().setActorWorkloadPassword(userCrn, newPassword, Optional.of(""),
-                regionAwareInternalCrnGeneratorFactory);
         // wait for UmsRightsCache to expire
         Thread.sleep(7000);
         LOGGER.info("New workload password has been set for '{}' with workload username '{}'!", userCrn, workloadUsername);
