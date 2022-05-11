@@ -126,6 +126,8 @@ freeipa:
     connectionTimeoutMs: 5000
     readTimeoutMs: 5000
   nodestatus:
+    enabled: true
+    intervalsec: 1800
     connectionTimeoutMs: 5000
     readTimeoutMs: 5000
   batch:

@@ -15,6 +15,7 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.OperationAwareAction;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
+import com.sequenceiq.freeipa.nodestatus.NodeStatusJobService;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 public abstract class AbstractCommonChainAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload>
@@ -33,6 +34,9 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
 
     @Inject
     private FreeipaJobService jobService;
+
+    @Inject
+    private NodeStatusJobService nodeStatusJobService;
 
     protected AbstractCommonChainAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -81,6 +85,11 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
     protected void enableStatusChecker(Stack stack, String reason) {
         LOGGER.info("Enabling the status checker for stack ID {}. {}", stack.getId(), reason);
         jobService.schedule(stack.getId());
+    }
+
+    protected void enableNodeStatusChecker(Stack stack, String reason) {
+        LOGGER.info("Enabling the status checker for stack ID {}, {}", stack.getId(), reason);
+        nodeStatusJobService.schedule(stack.getId());
     }
 
     protected boolean shouldCompleteOperation(Map<Object, Object> variables) {
