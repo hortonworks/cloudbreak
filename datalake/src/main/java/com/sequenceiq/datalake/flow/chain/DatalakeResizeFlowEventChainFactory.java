@@ -59,7 +59,7 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
         // Create new
         chain.add(new SdxEvent(SDX_VALIDATION_EVENT.event(), event.getResourceId(), event.getSdxCluster().getClusterName(), event.getUserId()));
 
-        if (event.shouldTakeBackup() && !event.getSdxCluster().isRangerRazEnabled()) {
+        if (event.shouldPerformRestore()) {
             //restore the new cluster
             chain.add(new DatalakeTriggerRestoreEvent(DATALAKE_TRIGGER_RESTORE_EVENT.event(), event.getResourceId(), event.getSdxCluster().getClusterName(),
                     event.getUserId(), null, event.getBackupLocation(), null, DatalakeRestoreFailureReason.RESTORE_ON_RESIZE));
