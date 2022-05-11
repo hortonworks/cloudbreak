@@ -44,6 +44,10 @@
                 <name>CENTRAL_GROUP_CONFIG_PREFIX</name>
                 <value>gateway.group.config.</value>
             </param>
+            <param>
+                <name>group.mapping.{{ salt['pillar.get']('gateway:envAccessGroup') }}</name>
+                <value>(!= 0 (size groups))</value>
+            </param>
         </provider>
         <provider>
         {%- if salt['pillar.get']('gateway:enable_knox_ranger_authorizer') == True %}
