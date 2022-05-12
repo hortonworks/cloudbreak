@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.service.cloud;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -44,5 +46,11 @@ public class CloudResourceRetrieverService implements ResourceRetriever {
                 resourceType, stackId, optionalResource.isPresent());
         return optionalResource
                 .map(resource -> resourceToCloudResourceConverter.convert(resource));
+    }
+
+    @Override
+    public List<CloudResource> findAllByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
+        List<Resource> resources = resourceService.findAllByResourceStatusAndResourceTypeAndStackId(status, resourceType, stackId);
+        return resources.stream().map(resource -> resourceToCloudResourceConverter.convert(resource)).collect(Collectors.toList());
     }
 }
