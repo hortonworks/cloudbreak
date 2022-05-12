@@ -70,4 +70,7 @@ public class ResourceService {
         return repository.findByResourceReferenceAndStatusAndTypeAndStack(resourceReference, status, resourceType, stackId);
     }
 
+    public List<Resource> findAllByResourceStatusAndResourceTypeAndStackId(CommonStatus status, ResourceType resourceType, Long stackId) {
+        return repository.findAllByResourceStatusAndResourceTypeAndStackId(status, resourceType, stackId);
+    }
 }
