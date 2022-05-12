@@ -40,6 +40,8 @@ import com.sequenceiq.environment.environment.validation.ValidationType;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
@@ -366,6 +368,16 @@ public class EnvironmentModificationService {
                     AwsParameters awsOriginalParameters = (AwsParameters) originalParameters;
                     parametersDto.getAwsParametersDto().setFreeIpaSpotPercentage(awsOriginalParameters.getFreeIpaSpotPercentage());
                     validateAwsParameters(environment, parametersDto);
+                }
+            }
+            if (parametersDto.getGcpParametersDto() != null) {
+                String encryptionKey = Optional.of(parametersDto.getGcpParametersDto())
+                        .map(GcpParametersDto::getGcpResourceEncryptionParametersDto)
+                        .map(GcpResourceEncryptionParametersDto::getEncryptionKey)
+                        .orElse(null);
+                ValidationResult validationResult = environmentService.getValidatorService().validateEncryptionKey(encryptionKey, editDto.getAccountId());
+                if (validationResult.hasError()) {
+                    throw new BadRequestException(validationResult.getFormattedErrors());
                 }
             }
             BaseParameters parameters = parametersService.saveParameters(environment, parametersDto);
