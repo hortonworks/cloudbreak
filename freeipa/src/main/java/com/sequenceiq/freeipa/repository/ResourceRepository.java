@@ -40,4 +40,6 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
             @Param("status") CommonStatus status,
             @Param("type") ResourceType resourceType,
             @Param("stackId") Long stackId);
+
+    List<Resource> findAllByResourceStatusAndResourceTypeAndStackId(CommonStatus status, ResourceType resourceType, Long stackId);
 }
