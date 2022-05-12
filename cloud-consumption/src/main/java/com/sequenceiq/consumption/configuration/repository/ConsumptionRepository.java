@@ -45,4 +45,20 @@ public interface ConsumptionRepository extends AccountAwareResourceRepository<Co
             "AND e.accountId = :accountId")
     List<ResourceBasicView> findAllResourceBasicViewByNamesAndAccountId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
 
+    @Query("SELECT c " +
+            "FROM Consumption c " +
+            "WHERE c.monitoredResourceCrn = :monitoredResourceCrn " +
+            "AND c.consumptionType = 'STORAGE' " +
+            "AND c.storageLocation = :storageLocation")
+    Optional<Consumption> findStorageConsumptionByMonitoredResourceCrnAndLocation(@Param("monitoredResourceCrn") String monitoredResourceCrn,
+            @Param("storageLocation") String storageLocation);
+
+    @Query("SELECT COUNT(c)>0 " +
+            "FROM Consumption c " +
+            "WHERE c.monitoredResourceCrn = :monitoredResourceCrn " +
+            "AND c.consumptionType = 'STORAGE' " +
+            "AND c.storageLocation = :storageLocation")
+    boolean doesStorageConsumptionExistWithLocationForMonitoredCrn(@Param("monitoredResourceCrn") String monitoredResourceCrn,
+            @Param("storageLocation") String storageLocation);
+
 }
