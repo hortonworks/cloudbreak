@@ -1,10 +1,10 @@
 package com.sequenceiq.environment.environment.service;
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.ws.rs.BadRequestException;
@@ -180,28 +180,9 @@ public class EnvironmentCreationService {
         ValidationResultBuilder validationBuilder = validatorService.validateNetworkCreation(environment, creationDto.getNetwork());
         validationBuilder.merge(validatorService.validatePublicKey(creationDto.getAuthentication().getPublicKey()));
         validationBuilder.merge(validatorService.validateTags(creationDto));
-        if (AZURE.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
-            String encryptionKeyUrl = Optional.ofNullable(creationDto.getParameters())
-                    .map(paramsDto -> paramsDto.getAzureParametersDto())
-                    .map(azureParamsDto -> azureParamsDto.getAzureResourceEncryptionParametersDto())
-                    .map(azureREParamsDto -> azureREParamsDto.getEncryptionKeyUrl()).orElse(null);
-            if (encryptionKeyUrl != null) {
-                validationBuilder.merge(validatorService.validateEncryptionKeyUrl(encryptionKeyUrl, creationDto.getAccountId()));
-            }
+        if (creationDto.getCloudPlatform() != null) {
+            validationBuilder.merge(validateEncryptionKey(creationDto));
         }
-        if (GCP.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
-            validationBuilder.merge(validatorService.validateEncryptionKey(creationDto));
-        }
-        if (AWS.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
-            String encryptionKeyArn = Optional.ofNullable(creationDto.getParameters())
-                    .map(paramsDto -> paramsDto.getAwsParametersDto())
-                    .map(awsParamsDto -> awsParamsDto.getAwsDiskEncryptionParametersDto())
-                    .map(awsREparamsDto -> awsREparamsDto.getEncryptionKeyArn()).orElse(null);
-            if (encryptionKeyArn != null) {
-                validationBuilder.merge(validatorService.validateEncryptionKeyArn(encryptionKeyArn, creationDto.getAccountId()));
-            }
-        }
-
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
         EnvironmentTelemetry environmentTelemetry = creationDto.getTelemetry();
@@ -221,5 +202,42 @@ public class EnvironmentCreationService {
     private boolean isCloudPlatformInvalid(String userCrn, String cloudPlatform) {
         return (AZURE.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.azureEnabled(Crn.safeFromString(userCrn).getAccountId()))
                 || (GCP.name().equalsIgnoreCase(cloudPlatform) && !entitlementService.gcpEnabled(Crn.safeFromString(userCrn).getAccountId()));
+    }
+
+    private ValidationResult validateEncryptionKey(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder resultBuilder = ValidationResult.builder();
+        String cloudPlatform = creationDto.getCloudPlatform().toLowerCase(Locale.ROOT);
+        switch (cloudPlatform) {
+            case "azure":
+                String encryptionKeyUrl = Optional.ofNullable(creationDto.getParameters())
+                        .map(paramsDto -> paramsDto.getAzureParametersDto())
+                        .map(azureParamsDto -> azureParamsDto.getAzureResourceEncryptionParametersDto())
+                        .map(azureREParamsDto -> azureREParamsDto.getEncryptionKeyUrl()).orElse(null);
+                if (encryptionKeyUrl != null) {
+                    resultBuilder.merge(validatorService.validateEncryptionKeyUrl(encryptionKeyUrl, creationDto.getAccountId()));
+                }
+                break;
+            case "gcp":
+                String encryptionKey = Optional.ofNullable(creationDto.getParameters())
+                        .map(parametersDto -> parametersDto.getGcpParametersDto())
+                        .map(gcpParametersDto -> gcpParametersDto.getGcpResourceEncryptionParametersDto())
+                        .map(gcpREParamsDto -> gcpREParamsDto.getEncryptionKey()).orElse(null);
+                if (encryptionKey != null) {
+                    resultBuilder.merge(validatorService.validateEncryptionKey(encryptionKey, creationDto.getAccountId()));
+                }
+                break;
+            case "aws":
+                String encryptionKeyArn = Optional.ofNullable(creationDto.getParameters())
+                        .map(paramsDto -> paramsDto.getAwsParametersDto())
+                        .map(awsParamsDto -> awsParamsDto.getAwsDiskEncryptionParametersDto())
+                        .map(awsREparamsDto -> awsREparamsDto.getEncryptionKeyArn()).orElse(null);
+                if (encryptionKeyArn != null) {
+                    resultBuilder.merge(validatorService.validateEncryptionKeyArn(encryptionKeyArn, creationDto.getAccountId()));
+                }
+                break;
+            default:
+                break;
+        }
+        return resultBuilder.build();
     }
 }

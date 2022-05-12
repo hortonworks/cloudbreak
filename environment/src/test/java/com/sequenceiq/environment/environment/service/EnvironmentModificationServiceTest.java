@@ -55,10 +55,13 @@ import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
+import com.sequenceiq.environment.parameters.dao.domain.GcpParameters;
 import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
@@ -368,6 +371,69 @@ class EnvironmentModificationServiceTest {
         assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
 
         verify(parametersService, never()).saveParameters(environment, parameters);
+    }
+
+    @Test
+    void testEditByNameGcpEncryptionResourcesThrowsErrorWhenKeyValidationFails() {
+        ParametersDto parameters = ParametersDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withGcpParameters(GcpParametersDto.builder()
+                        .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
+                                .withEncryptionKey("dummyEncryptionKey")
+                                .build())
+                        .build())
+                .build();
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withParameters(parameters)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        BaseParameters baseParameters = new GcpParameters();
+        baseParameters.setId(123L);
+        ValidationResult validationResultError = ValidationResult.builder().error("Wrong key format").build();
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(validatorService.validateEncryptionKey("dummyEncryptionKey", ACCOUNT_ID)).thenReturn(validationResultError);
+        when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
+        when(environmentService
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
+        assertThrows(BadRequestException.class, () -> environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto));
+
+        verify(parametersService, never()).saveParameters(environment, parameters);
+    }
+
+    @Test
+    void testEditByNameGcpEncryptionResourcesWhenKeyValidationPass() {
+        ParametersDto parameters = ParametersDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withGcpParameters(GcpParametersDto.builder()
+                        .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
+                                .withEncryptionKey("dummyEncryptionKey")
+                                .build())
+                        .build())
+                .build();
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withParameters(parameters)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+        GcpParameters gcpParameters = new GcpParameters();
+        gcpParameters.setEncryptionKey("dummyEncryptionKey");
+        BaseParameters baseParameters = gcpParameters;
+        baseParameters.setId(123L);
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(validatorService.validateEncryptionKey("dummyEncryptionKey", ACCOUNT_ID)).thenReturn(ValidationResult.builder().build());
+        when(parametersService.findByEnvironment(any())).thenReturn(Optional.of(baseParameters));
+        when(environmentService
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(environment));
+        when(parametersService.saveParameters(environment, parameters)).thenReturn(baseParameters);
+
+        environmentModificationServiceUnderTest.editByName(ENVIRONMENT_NAME, environmentDto);
+
+        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(environmentArgumentCaptor.capture());
+        assertEquals("dummyEncryptionKey", ((GcpParameters) environmentArgumentCaptor.getValue().getParameters()).getEncryptionKey());
     }
 
     @Test
