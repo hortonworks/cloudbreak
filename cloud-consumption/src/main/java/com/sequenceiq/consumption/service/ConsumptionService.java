@@ -11,13 +11,14 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
-import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionScheduleRequest;
-import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionUnscheduleRequest;
+import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.configuration.repository.ConsumptionRepository;
-import com.sequenceiq.consumption.flow.ConsumptionReactorFlowManager;
+import com.sequenceiq.consumption.dto.ConsumptionCreationDto;
+import com.sequenceiq.consumption.dto.converter.ConsumptionDtoConverter;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
@@ -28,10 +29,10 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsumptionService.class);
 
     @Inject
-    private ConsumptionReactorFlowManager flowManager;
+    private ConsumptionRepository consumptionRepository;
 
     @Inject
-    private ConsumptionRepository consumptionRepository;
+    private ConsumptionDtoConverter consumptionDtoConverter;
 
     @Override
     public Long getResourceIdByResourceCrn(String resourceCrn) {
@@ -68,9 +69,24 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
                 .orElseThrow(() -> new NotFoundException(String.format("Consumption with ID [%s] not found", id)));
     }
 
-    public void scheduleStorageConsumptionCollection(StorageConsumptionScheduleRequest request) {
+    public Consumption findStorageConsumptionByMonitoredResourceCrnAndLocation(String monitoredResourceCrn, String storageLocation) {
+        return consumptionRepository.findStorageConsumptionByMonitoredResourceCrnAndLocation(monitoredResourceCrn, storageLocation)
+                .orElseThrow(() -> new NotFoundException(String.format("Storage consumption with location [%s] not found for resource with CRN [%s].",
+                        storageLocation, monitoredResourceCrn)));
     }
 
-    public void unscheduleStorageConsumptionCollection(StorageConsumptionUnscheduleRequest request) {
+    public Consumption create(ConsumptionCreationDto creationDto) {
+        if (ConsumptionType.STORAGE.equals(creationDto.getConsumptionType())) {
+            if (isStorageLocationOccupied(creationDto.getMonitoredResourceCrn(), creationDto.getStorageLocation())) {
+                throw new BadRequestException(String.format("Storage consumption with location [%s] already exists for resource with CRN [%s].",
+                        creationDto.getStorageLocation(), creationDto.getMonitoredResourceCrn()));
+            }
+        }
+        Consumption consumption = consumptionDtoConverter.creationDtoToConsumption(creationDto);
+        return create(consumption, consumption.getAccountId());
+    }
+
+    private boolean isStorageLocationOccupied(String monitoredResourceCrn, String storageLocation) {
+        return consumptionRepository.doesStorageConsumptionExistWithLocationForMonitoredCrn(monitoredResourceCrn, storageLocation);
     }
 }

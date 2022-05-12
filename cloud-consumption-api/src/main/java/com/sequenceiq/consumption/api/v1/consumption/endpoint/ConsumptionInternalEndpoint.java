@@ -12,9 +12,8 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
-import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionScheduleRequest;
+import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
 import com.sequenceiq.consumption.api.doc.ConsumptionOpDescription;
-import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionUnscheduleRequest;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,12 +29,12 @@ public interface ConsumptionInternalEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConsumptionOpDescription.SCHEDULE_STORAGE, produces = MediaType.APPLICATION_JSON, nickname = "scheduleStorageCollection")
     void scheduleStorageConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
-            @Valid @NotNull StorageConsumptionScheduleRequest request);
+            @Valid @NotNull StorageConsumptionRequest request);
 
     @DELETE
     @Path("unschedule/storage")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConsumptionOpDescription.UNSCHEDULE_STORAGE, produces = MediaType.APPLICATION_JSON, nickname = "unscheduleStorageCollection")
     void unscheduleStorageConsumptionCollection(@AccountId @QueryParam("accountId") String accountId,
-            @Valid @NotNull StorageConsumptionUnscheduleRequest request);
+            @NotNull @QueryParam("monitoredResourceCrn") String monitoredResourceCrn, @NotNull @QueryParam("storageLocation") String storageLocation);
 }
