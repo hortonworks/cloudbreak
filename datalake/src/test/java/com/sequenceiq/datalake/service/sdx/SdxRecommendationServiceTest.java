@@ -120,7 +120,7 @@ class SdxRecommendationServiceTest {
         stackRequest.getInstanceGroups().get(0).setName("unknown");
         SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.validateVmTypeOverride(createEnvironment(), sdxCluster));
+                () -> underTest.validateVmTypeOverride(createEnvironment("AWS"), sdxCluster));
 
         assertEquals("Instance group is missing from default template: unknown", badRequestException.getMessage());
     }
@@ -133,9 +133,17 @@ class SdxRecommendationServiceTest {
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
                 .thenReturn(createPlatformVmtypesResponse());
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.validateVmTypeOverride(createEnvironment(), createSdxCluster(createStackRequest(), LIGHT_DUTY)));
+                () -> underTest.validateVmTypeOverride(createEnvironment("AWS"), createSdxCluster(createStackRequest(), LIGHT_DUTY)));
 
         assertEquals("Missing vm type for default template instance group: master - unknown", badRequestException.getMessage());
+    }
+
+    @Test
+    public void validateVmTypeOverrideSkippedForYCoud() {
+        assertDoesNotThrow(() -> underTest.validateVmTypeOverride(createEnvironment("YARN"), createSdxCluster(createStackRequest(), LIGHT_DUTY)));
+
+        verify(cdpConfigService, never()).getConfigForKey(any());
+        verify(environmentClientService, never()).getVmTypesByCredential(anyString(), anyString(), anyString(), any(), any());
     }
 
     @Test
@@ -147,7 +155,7 @@ class SdxRecommendationServiceTest {
         stackRequest.getInstanceGroups().stream().forEach(ig -> ig.getTemplate().setInstanceType("small"));
         SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.validateVmTypeOverride(createEnvironment(), sdxCluster));
+                () -> underTest.validateVmTypeOverride(createEnvironment("AWS"), sdxCluster));
 
         assertEquals("Invalid custom instance type for instance group: master - small", badRequestException.getMessage());
     }
@@ -157,12 +165,12 @@ class SdxRecommendationServiceTest {
         when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
         when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any()))
                 .thenReturn(createPlatformVmtypesResponse());
-        assertDoesNotThrow(() -> underTest.validateVmTypeOverride(createEnvironment(), createSdxCluster(createStackRequest(), LIGHT_DUTY)));
+        assertDoesNotThrow(() -> underTest.validateVmTypeOverride(createEnvironment("AWS"), createSdxCluster(createStackRequest(), LIGHT_DUTY)));
     }
 
     @Test
     public void validateVmTypeOverrideWhenSdxClusterShapeIsCustom() {
-        assertDoesNotThrow(() -> underTest.validateVmTypeOverride(createEnvironment(), createSdxCluster(createStackRequest(), CUSTOM)));
+        assertDoesNotThrow(() -> underTest.validateVmTypeOverride(createEnvironment("AWS"), createSdxCluster(createStackRequest(), CUSTOM)));
         verify(cdpConfigService, never()).getConfigForKey(any());
         verify(environmentClientService, never()).getVmTypesByCredential(anyString(), anyString(), anyString(), any(), anyString());
     }
@@ -175,7 +183,7 @@ class SdxRecommendationServiceTest {
         return sdxCluster;
     }
 
-    private DetailedEnvironmentResponse createEnvironment() {
+    private DetailedEnvironmentResponse createEnvironment(String cloudPlatform) {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         CredentialResponse credential = new CredentialResponse();
         credential.setCrn("cred");
@@ -183,7 +191,7 @@ class SdxRecommendationServiceTest {
         CompactRegionResponse regions = new CompactRegionResponse();
         regions.setNames(List.of("eu-central-1"));
         environment.setRegions(regions);
-        environment.setCloudPlatform("AWS");
+        environment.setCloudPlatform(cloudPlatform);
         return environment;
     }
 

@@ -93,11 +93,12 @@ public class SdxRecommendationService {
     public void validateVmTypeOverride(DetailedEnvironmentResponse environment, SdxCluster sdxCluster) {
         try {
             LOGGER.debug("Validate vm type override for sdx cluster: {}", sdxCluster.getCrn());
-            if (!StringUtils.isBlank(sdxCluster.getStackRequest()) && !SdxClusterShape.CUSTOM.equals(sdxCluster.getClusterShape())) {
+            String cloudPlatform = environment.getCloudPlatform();
+            if (shouldValidateVmTypes(sdxCluster, cloudPlatform)) {
                 StackV4Request stackV4Request = JsonUtil.readValue(sdxCluster.getStackRequest(), StackV4Request.class);
-                StackV4Request defaultTemplate = getDefaultTemplate(sdxCluster.getClusterShape(), sdxCluster.getRuntime(), environment.getCloudPlatform());
+                StackV4Request defaultTemplate = getDefaultTemplate(sdxCluster.getClusterShape(), sdxCluster.getRuntime(), cloudPlatform);
                 String region = environment.getRegions().getNames().stream().findFirst().orElse(null);
-                List<VmTypeResponse> availableVmTypes = getAvailableVmTypes(environment.getCredential().getCrn(), environment.getCloudPlatform(), region, null);
+                List<VmTypeResponse> availableVmTypes = getAvailableVmTypes(environment.getCredential().getCrn(), cloudPlatform, region, null);
                 Map<String, VmTypeResponse> defaultVmTypesByInstanceGroup = getDefaultVmTypesByInstanceGroup(availableVmTypes, defaultTemplate);
                 Map<String, List<String>> availableVmTypeNamesByInstanceGroup = filterAvailableVmTypeNamesBasedOnDefault(availableVmTypes,
                         defaultVmTypesByInstanceGroup);
@@ -124,6 +125,12 @@ public class SdxRecommendationService {
             LOGGER.warn("Validate VM type override failed!", e);
             throw new RuntimeException("Validate VM type override failed: " + e.getMessage());
         }
+    }
+
+    private boolean shouldValidateVmTypes(SdxCluster sdxCluster, String cloudPlatform) {
+        return !StringUtils.isBlank(sdxCluster.getStackRequest())
+                && !SdxClusterShape.CUSTOM.equals(sdxCluster.getClusterShape())
+                && !CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform);
     }
 
     private boolean isProvidedInstanceTypeIsAvailable(Map<String, List<String>> availableVmTypesByInstanceGroup, InstanceGroupV4Request instanceGroup) {
