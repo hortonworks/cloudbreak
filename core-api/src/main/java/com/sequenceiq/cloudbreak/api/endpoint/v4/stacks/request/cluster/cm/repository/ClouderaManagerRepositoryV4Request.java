@@ -25,4 +25,9 @@ public class ClouderaManagerRepositoryV4Request extends RepositoryV4Request {
         setGpgKeyUrl(gpgKeyUrl);
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "ClouderaManagerRepositoryV4Request{} " + super.toString();
+    }
 }

@@ -68,4 +68,13 @@ public class ClouderaManagerV4Request implements JsonEntity {
         setEnableAutoTls(enableAutoTls);
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "ClouderaManagerV4Request{" +
+                "repository=" + repository +
+                ", products=" + products +
+                ", enableAutoTls=" + enableAutoTls +
+                '}';
+    }
 }

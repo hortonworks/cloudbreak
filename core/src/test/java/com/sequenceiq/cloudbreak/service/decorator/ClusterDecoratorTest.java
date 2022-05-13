@@ -9,21 +9,13 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.FileReaderUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -74,23 +66,12 @@ class ClusterDecoratorTest {
     private User user;
 
     @Mock
-    private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Mock
-    private CloudConnector<Object> connector;
-
-    @Mock
-    private PlatformParameters platformParameters;
-
-    @Mock
     private EmbeddedDatabaseService embeddedDatabaseService;
 
     @BeforeEach
     void setUp() {
         when(blueprintValidatorFactory.createBlueprintValidator(any())).thenReturn(cmTemplateValidator);
-        when(cloudPlatformConnectors.get(any(), any())).thenReturn(connector);
-        when(connector.parameters()).thenReturn(platformParameters);
-    }
+            }
 
     @Test
     void testDecorateIfMethodCalledThenSharedServiceConfigProviderShouldBeCalledOnceToConfigureTheCluster() {
@@ -99,42 +80,10 @@ class ClusterDecoratorTest {
         when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
                 .thenReturn(expectedClusterInstance);
         when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, expectedClusterInstance)).thenReturn(false);
-        Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack, null);
+        Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack);
 
         assertEquals(expectedClusterInstance, result);
         verify(sharedServiceConfigProvider, times(1)).configureCluster(any(Cluster.class), any(User.class), any(Workspace.class));
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"true", "false"})
-    void testAutoTlsSetting(String valueString) {
-        boolean useAutoTls = Boolean.parseBoolean(valueString);
-        Cluster expectedClusterInstance = new Cluster();
-        Blueprint blueprint = getBlueprint();
-        when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
-                .thenReturn(expectedClusterInstance);
-        when(platformParameters.isAutoTlsSupported()).thenReturn(useAutoTls);
-        when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, expectedClusterInstance)).thenReturn(false);
-
-        Cluster result = underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack, null);
-
-        assertEquals(useAutoTls, result.getAutoTlsEnabled());
-    }
-
-    @Test
-    void testAutoTlsSettingByParentEnvironmentCloudPlatform() {
-        Cluster expectedClusterInstance = new Cluster();
-        Blueprint blueprint = getBlueprint();
-        when(sharedServiceConfigProvider.configureCluster(any(Cluster.class), any(User.class), any(Workspace.class)))
-                .thenReturn(expectedClusterInstance);
-        ArgumentCaptor<Platform> platformArgumentCaptor = ArgumentCaptor.forClass(Platform.class);
-        when(cloudPlatformConnectors.get(platformArgumentCaptor.capture(), any())).thenReturn(connector);
-        when(embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, expectedClusterInstance)).thenReturn(false);
-
-        String platform = CloudPlatform.YARN.name();
-        underTest.decorate(expectedClusterInstance, createClusterV4Request(), blueprint, user, new Workspace(), stack, platform);
-
-        assertEquals(platform, platformArgumentCaptor.getValue().value());
     }
 
     private Blueprint getBlueprint() {

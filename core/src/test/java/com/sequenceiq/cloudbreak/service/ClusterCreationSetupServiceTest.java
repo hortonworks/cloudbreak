@@ -126,7 +126,7 @@ public class ClusterCreationSetupServiceTest {
 
         cluster = new Cluster();
         stack.setCluster(cluster);
-        when(clusterDecorator.decorate(any(), any(), any(), any(), any(), any(), any())).thenReturn(cluster);
+        when(clusterDecorator.decorate(any(), any(), any(), any(), any(), any())).thenReturn(cluster);
         when(componentConfigProviderService.getAllComponentsByStackIdAndType(any(), any())).thenReturn(Sets.newHashSet(imageComponent));
         when(blueprintUtils.getBlueprintStackVersion(any())).thenReturn(HDP_VERSION);
         when(blueprintUtils.getBlueprintStackName(any())).thenReturn("HDP");
@@ -146,7 +146,7 @@ public class ClusterCreationSetupServiceTest {
 
     @Test
     public void testMissingKerberosConfig() throws CloudbreakImageCatalogException, IOException, TransactionService.TransactionExecutionException {
-        underTest.prepare(clusterRequest, stack, blueprint, user, null);
+        underTest.prepare(clusterRequest, stack, blueprint, user);
         assertNull(stack.getCustomDomain());
     }
 
@@ -154,7 +154,7 @@ public class ClusterCreationSetupServiceTest {
     public void testMissingDomain() throws CloudbreakImageCatalogException, IOException, TransactionService.TransactionExecutionException {
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().build();
         when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.of(kerberosConfig));
-        underTest.prepare(clusterRequest, stack, blueprint, user, null);
+        underTest.prepare(clusterRequest, stack, blueprint, user);
         assertNull(stack.getCustomDomain());
     }
 }

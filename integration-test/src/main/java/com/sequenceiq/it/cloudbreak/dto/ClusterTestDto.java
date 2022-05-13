@@ -14,8 +14,6 @@ import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 @Prototype
 public class ClusterTestDto extends AbstractCloudbreakTestDto<ClusterV4Request, ClusterV4Response, ClusterTestDto> {
 
-    private static final String CLUSTER_REQUEST = "CLUSTER_REQUEST";
-
     public ClusterTestDto(ClusterV4Request request, TestContext testContex) {
         super(request, testContex);
     }

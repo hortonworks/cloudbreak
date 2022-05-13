@@ -184,6 +184,9 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     @Mock
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
+    @Mock
+    private AutoTlsFlagPreparatory autoTlsFlagPreparatory;
+
     private Credential credential;
 
     @BeforeEach
@@ -220,6 +223,8 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
         given(telemetryConverter.convert(null, StackType.WORKLOAD)).willReturn(new Telemetry());
+        given(autoTlsFlagPreparatory.provideAutoTlsFlag(any(ClusterV4Request.class), any(Stack.class), any(Optional.class))).willReturn(Boolean.TRUE);
+
         // WHEN
         Stack stack = underTest.convert(request);
         // THEN
@@ -237,6 +242,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         verify(environmentClientService, times(1)).getByCrn(anyString());
         verify(gatewaySecurityGroupDecorator, times(1))
                 .extendGatewaySecurityGroupWithDefaultGatewayCidrs(any(Stack.class), any(Tunnel.class));
+        assertTrue(stack.getCluster().getAutoTlsEnabled());
     }
 
     @Test
@@ -249,6 +255,8 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         given(credentialClientService.getByCrn(anyString())).willReturn(credential);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
+        given(autoTlsFlagPreparatory.provideAutoTlsFlag(any(ClusterV4Request.class), any(Stack.class), any(Optional.class))).willReturn(Boolean.TRUE);
+
         // WHEN
         Stack stack = underTest.convert(request);
         // THEN
@@ -262,6 +270,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
+        assertTrue(stack.getCluster().getAutoTlsEnabled());
     }
 
     private Mappable getMappable() {
@@ -327,10 +336,12 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         given(instanceGroupV4RequestToInstanceGroupConverter.convert(any(InstanceGroupV4Request.class), anyString())).willReturn(instanceGroup);
         given(providerParameterCalculator.get(request)).willReturn(getMappable());
         given(clusterV4RequestToClusterConverter.convert(any(ClusterV4Request.class))).willReturn(new Cluster());
+        given(autoTlsFlagPreparatory.provideAutoTlsFlag(any(ClusterV4Request.class), any(Stack.class), any(Optional.class))).willReturn(Boolean.TRUE);
 
         Stack result = underTest.convert(request);
 
         assertEquals(TEST_REGIONS.get(MOCK), result.getRegion());
+        assertTrue(result.getCluster().getAutoTlsEnabled());
     }
 
     @Test

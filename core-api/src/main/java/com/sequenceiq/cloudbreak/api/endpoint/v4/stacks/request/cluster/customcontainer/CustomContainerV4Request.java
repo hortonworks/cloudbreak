@@ -18,4 +18,11 @@ public class CustomContainerV4Request implements JsonEntity {
     public void setDefinitions(Map<String, String> definitions) {
         this.definitions = definitions;
     }
+
+    @Override
+    public String toString() {
+        return "CustomContainerV4Request{" +
+                "definitions=" + definitions +
+                '}';
+    }
 }
