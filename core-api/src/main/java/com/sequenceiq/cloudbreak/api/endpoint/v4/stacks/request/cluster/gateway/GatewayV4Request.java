@@ -93,4 +93,15 @@ public class GatewayV4Request implements JsonEntity {
     public void setSsoType(SSOType ssoType) {
         this.ssoType = ssoType;
     }
+
+    @Override
+    public String toString() {
+        return "GatewayV4Request{" +
+                "path='" + path + '\'' +
+                ", topologies=" + topologies +
+                ", ssoProvider='" + ssoProvider + '\'' +
+                ", gatewayType=" + gatewayType +
+                ", ssoType=" + ssoType +
+                '}';
+    }
 }

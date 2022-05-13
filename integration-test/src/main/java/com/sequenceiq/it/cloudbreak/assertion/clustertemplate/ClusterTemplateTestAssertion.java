@@ -201,4 +201,12 @@ public class ClusterTemplateTestAssertion {
                 .findFirst()
                 .orElseThrow(() -> new InvalidParameterException("Unable to find valid instancegroup by type"));
     }
+
+    public static com.sequenceiq.it.cloudbreak.assertion.Assertion<ClusterTemplateTestDto, CloudbreakClient> assertAutoTlsTrue() {
+        return (tc, testDto, client) -> {
+            SoftAssert softAssert = new SoftAssert();
+            softAssert.assertTrue(testDto.getResponse().getDistroXTemplate().getCluster().getCm().getEnableAutoTls(), "AutoTLS flag should be TRUE");
+            return testDto;
+        };
+    }
 }

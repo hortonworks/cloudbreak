@@ -12,13 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
-import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -50,20 +44,16 @@ public class ClusterDecorator {
     private SharedServiceConfigProvider sharedServiceConfigProvider;
 
     @Inject
-    private CloudPlatformConnectors cloudPlatformConnectors;
-
-    @Inject
     private EmbeddedDatabaseService embeddedDatabaseService;
 
     @Measure(ClusterDecorator.class)
     public Cluster decorate(@Nonnull Cluster cluster, @Nonnull ClusterV4Request request, Blueprint blueprint, User user, Workspace workspace,
-            @Nonnull Stack stack, String parentEnvironmentCloudPlatform) {
-        prepareBlueprint(cluster, request, workspace, stack, Optional.ofNullable(blueprint), user);
+            @Nonnull Stack stack) {
+        prepareBlueprint(cluster, request, workspace, Optional.ofNullable(blueprint));
         prepareClusterManagerVariant(cluster);
         validateBlueprintIfRequired(cluster, request, stack);
         prepareRds(cluster, request, stack);
         setupEmbeddedDatabase(cluster, stack);
-        prepareAutoTlsFlag(cluster, request, stack, parentEnvironmentCloudPlatform);
         cluster = sharedServiceConfigProvider.configureCluster(cluster, user, workspace);
         return cluster;
     }
@@ -74,8 +64,7 @@ public class ClusterDecorator {
                 request.getValidateBlueprint());
     }
 
-    private void prepareBlueprint(Cluster subject, ClusterV4Request request, Workspace workspace, Stack stack,
-            Optional<Blueprint> blueprint, User user) {
+    private void prepareBlueprint(Cluster subject, ClusterV4Request request, Workspace workspace, Optional<Blueprint> blueprint) {
         if (blueprint.isPresent()) {
             subject.setBlueprint(blueprint.get());
         } else if (!Strings.isNullOrEmpty(request.getBlueprintName())) {
@@ -95,18 +84,6 @@ public class ClusterDecorator {
         Optional.ofNullable(request.getDatabases())
                 .ifPresent(confs -> confs.forEach(confName -> subject.getRdsConfigs().add(
                         rdsConfigService.getByNameForWorkspace(confName, stack.getWorkspace()))));
-    }
-
-    private void prepareAutoTlsFlag(Cluster cluster, ClusterV4Request request, Stack stack, String parentEnvironmentCloudPlatform) {
-        String cloudPlatform = Optional.ofNullable(parentEnvironmentCloudPlatform).orElse(stack.getCloudPlatform());
-        cluster.setAutoTlsEnabled(Optional.ofNullable(request.getCm())
-                .map(ClouderaManagerV4Request::getEnableAutoTls)
-                .orElseGet(() -> {
-                    CloudConnector<Object> connector = cloudPlatformConnectors.get(
-                            Platform.platform(cloudPlatform), Variant.variant(stack.getPlatformVariant()));
-                    PlatformParameters platformParameters = connector.parameters();
-                    return platformParameters.isAutoTlsSupported();
-                }));
     }
 
     private void setupEmbeddedDatabase(Cluster cluster, Stack stack) {

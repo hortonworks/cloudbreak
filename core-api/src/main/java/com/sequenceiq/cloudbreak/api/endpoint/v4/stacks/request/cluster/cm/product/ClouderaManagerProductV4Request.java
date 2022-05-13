@@ -84,4 +84,14 @@ public class ClouderaManagerProductV4Request implements JsonEntity, ClouderaMana
         this.csd = csd;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return "ClouderaManagerProductV4Request{" +
+                "name='" + name + '\'' +
+                ", version='" + version + '\'' +
+                ", parcel='" + parcel + '\'' +
+                ", csd=" + csd +
+                '}';
+    }
 }

@@ -204,4 +204,24 @@ public class ClusterV4Request implements JsonEntity {
     public void setRangerRazEnabled(boolean rangerRazEnabled) {
         this.rangerRazEnabled = rangerRazEnabled;
     }
+
+    @Override
+    public String toString() {
+        return "ClusterV4Request{" +
+                "name='" + name + '\'' +
+                ", userName='" + userName + '\'' +
+                ", databases=" + databases +
+                ", databaseServerCrn='" + databaseServerCrn + '\'' +
+                ", proxyConfigCrn='" + proxyConfigCrn + '\'' +
+                ", cloudStorage=" + cloudStorage +
+                ", cm=" + cm +
+                ", gateway=" + gateway +
+                ", customContainer=" + customContainer +
+                ", customQueue='" + customQueue + '\'' +
+                ", blueprintName='" + blueprintName + '\'' +
+                ", validateBlueprint=" + validateBlueprint +
+                ", customConfigurationsName='" + customConfigurationsName + '\'' +
+                ", rangerRazEnabled=" + rangerRazEnabled +
+                '}';
+    }
 }

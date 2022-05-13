@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.aspect.Measure;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -72,14 +71,8 @@ public class ClusterCreationSetupService {
     @Inject
     private CloudStorageConverter cloudStorageConverter;
 
-    public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace,
-        DetailedEnvironmentResponse environment) {
-        validate(request, null, stack, user, workspace, environment);
-    }
-
     @Measure(ClusterCreationSetupService.class)
-    public void validate(ClusterV4Request request, CloudCredential cloudCredential, Stack stack, User user,
-            Workspace workspace, DetailedEnvironmentResponse environment) {
+    public void validate(ClusterV4Request request, Stack stack, User user, Workspace workspace, DetailedEnvironmentResponse environment) {
         MdcContext.builder().userCrn(user.getUserCrn()).tenant(user.getTenant().getName()).buildMdc();
         rdsConfigValidator.validateRdsConfigs(request, user, workspace);
         ValidationResult.ValidationResultBuilder resultBuilder = ValidationResult.builder();
@@ -94,13 +87,8 @@ public class ClusterCreationSetupService {
         }
     }
 
-    public Cluster prepare(
-            ClusterV4Request request,
-            Stack stack,
-            Blueprint blueprint,
-            User user,
-            String parentEnvironmentCloudPlatform) throws IOException,
-            CloudbreakImageCatalogException, TransactionExecutionException {
+    public Cluster prepare(ClusterV4Request request, Stack stack, Blueprint blueprint, User user)
+            throws IOException, CloudbreakImageCatalogException, TransactionExecutionException {
         String stackName = stack.getName();
         Cluster clusterStub = stack.getCluster();
         stack.setCluster(null);
@@ -115,9 +103,8 @@ public class ClusterCreationSetupService {
         clusterStub.setWorkspace(stack.getWorkspace());
 
         Cluster cluster =  measure(() ->
-                clusterDecorator.decorate(clusterStub, request, blueprint, user, stack.getWorkspace(), stack, parentEnvironmentCloudPlatform),
-                LOGGER,
-                "Cluster decorator {} ms for stack {}", stackName);
+                clusterDecorator.decorate(clusterStub, request, blueprint, user, stack.getWorkspace(), stack),
+                LOGGER, "Cluster decorator {} ms for stack {}", stackName);
 
         List<ClusterComponent> components = multiCheckedMeasure(
                 (MultiCheckedSupplier<List<ClusterComponent>, IOException, CloudbreakImageCatalogException>) () -> {

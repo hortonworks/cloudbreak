@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.In
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -57,7 +56,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackRuntimeVersionValidator;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -70,7 +68,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
@@ -78,7 +75,6 @@ import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -101,9 +97,6 @@ public class StackCreatorService {
 
     @Inject
     private StackDecorator stackDecorator;
-
-    @Inject
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Inject
     private ClusterCreationSetupService clusterCreationService;
@@ -147,9 +140,6 @@ public class StackCreatorService {
 
     @Inject
     private OwnerAssignmentService ownerAssignmentService;
-
-    @Inject
-    private CredentialConverter credentialConverter;
 
     @Inject
     private MultiAzCalculatorService multiAzCalculatorService;
@@ -224,8 +214,6 @@ public class StackCreatorService {
                                 environmentClientService.getByCrn(stack.getEnvironmentCrn())),
                         LOGGER,
                         "Get Environment from Environment service took {} ms");
-                Credential credential = credentialConverter.convert(environment.getCredential());
-                CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
 
                 if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
@@ -241,7 +229,7 @@ public class StackCreatorService {
                         "Set stacktype for stack object took {} ms");
 
                     measure(() -> clusterCreationService.validate(
-                            stackRequest.getCluster(), cloudCredential, stack, user, workspace, environment),
+                            stackRequest.getCluster(), stack, user, workspace, environment),
                             LOGGER,
                             "Validate cluster rds and autotls took {} ms");
                 }
@@ -264,7 +252,7 @@ public class StackCreatorService {
                 try {
                     LOGGER.info("Create cluster entity in the database with name {}.", stackName);
                     long clusterSaveStart = System.currentTimeMillis();
-                    createClusterIfNeeded(user, stackRequest, newStack, stackName, blueprint, environment.getParentEnvironmentCloudPlatform());
+                    createClusterIfNeeded(user, stackRequest, newStack, stackName, blueprint);
                     LOGGER.info("Cluster save took {} ms", System.currentTimeMillis() - clusterSaveStart);
                 } catch (CloudbreakImageCatalogException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
@@ -415,11 +403,11 @@ public class StackCreatorService {
                 .thenComparing(InstanceGroup::getGroupName);
     }
 
-    private void createClusterIfNeeded(User user, StackV4Request stackRequest, Stack stack, String stackName,
-            Blueprint blueprint, String parentEnvironmentCloudPlatform) throws CloudbreakImageCatalogException, IOException, TransactionExecutionException {
+    private void createClusterIfNeeded(User user, StackV4Request stackRequest, Stack stack, String stackName, Blueprint blueprint)
+            throws CloudbreakImageCatalogException, IOException, TransactionExecutionException {
         if (stackRequest.getCluster() != null) {
             long start = System.currentTimeMillis();
-            Cluster cluster = clusterCreationService.prepare(stackRequest.getCluster(), stack, blueprint, user, parentEnvironmentCloudPlatform);
+            Cluster cluster = clusterCreationService.prepare(stackRequest.getCluster(), stack, blueprint, user);
             LOGGER.debug("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             stack.setCluster(cluster);
         }
