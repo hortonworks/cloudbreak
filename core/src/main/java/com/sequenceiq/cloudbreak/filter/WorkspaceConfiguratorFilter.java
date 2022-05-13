@@ -1,7 +1,13 @@
 package com.sequenceiq.cloudbreak.filter;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -12,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
@@ -49,7 +56,8 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
             if (cloudbreakUser != null) {
                 if (ThreadBasedUserCrnProvider.getUserCrn() != null && !ThreadBasedUserCrnProvider.getUserCrn().equals(cloudbreakUser.getUserCrn())) {
                     LOGGER.debug("Before:There is a difference between:: Spring security context: {} and header-based-actor: '{}'",
-                            cloudbreakUser, ThreadBasedUserCrnProvider.getUserCrn());
+                            cloudbreakUser.getUserCrn(), ThreadBasedUserCrnProvider.getUserCrn());
+                    logHeadersSafely(request);
                 }
                 User user = userService.getOrCreate(cloudbreakUser);
                 String accountId = Crn.fromString(cloudbreakUser.getUserCrn()).getAccountId();
@@ -59,8 +67,8 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
                     throw new IllegalStateException("Tenant default workspace does not exist!");
                 }
                 if (ThreadBasedUserCrnProvider.getUserCrn() != null && !ThreadBasedUserCrnProvider.getUserCrn().equals(user.getUserCrn())) {
-                    LOGGER.debug("Before:There is a difference between:: CB user context: {} and and header-based-actor: '{}'",
-                            user, ThreadBasedUserCrnProvider.getUserCrn());
+                    LOGGER.debug("Before:There is a difference between:: CB user context: {} and header-based-actor: '{}'",
+                            user.getUserCrn(), ThreadBasedUserCrnProvider.getUserCrn());
                 }
                 Long workspaceId = tenantDefaultWorkspace.get().getId();
                 restRequestThreadLocalService.setRequestedWorkspaceId(workspaceId);
@@ -74,5 +82,23 @@ public class WorkspaceConfiguratorFilter extends OncePerRequestFilter {
         } finally {
             restRequestThreadLocalService.removeRequestedWorkspaceId();
         }
+    }
+
+    private void logHeadersSafely(HttpServletRequest request) {
+        try {
+            Map<String, String> headers = StreamSupport.stream(
+                            Spliterators.spliteratorUnknownSize(request.getHeaderNames().asIterator(), Spliterator.ORDERED), false)
+                    .collect(Collectors.toMap(headerName -> headerName, headerName -> getHeaderValues(request, headerName)));
+            LOGGER.debug("HTTP headers: \n{}", Joiner.on("\n").withKeyValueSeparator(" | ").join(headers));
+        } catch (Exception e) {
+            LOGGER.debug("Failed to log HTTP headers, because: {}", e.getMessage());
+        }
+    }
+
+    private String getHeaderValues(HttpServletRequest request, String headerName) {
+        Set<String> headerValues = StreamSupport.stream(Spliterators.spliteratorUnknownSize(
+                        request.getHeaders(headerName).asIterator(), Spliterator.ORDERED), false)
+                .collect(Collectors.toSet());
+        return Joiner.on(" , ").join(headerValues);
     }
 }
