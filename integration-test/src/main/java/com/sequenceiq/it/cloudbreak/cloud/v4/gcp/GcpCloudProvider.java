@@ -519,4 +519,9 @@ public class GcpCloudProvider extends AbstractCloudProvider {
             Log.then(LOGGER, format(" Volume has been encrypted with '%s' KMS key. ", kmsKey));
         }
     }
+
+    @Override
+    public boolean isMultiAZ() {
+        return gcpProperties.getMultiaz();
+    }
 }
