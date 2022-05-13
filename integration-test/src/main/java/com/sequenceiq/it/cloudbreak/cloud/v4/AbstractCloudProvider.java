@@ -315,4 +315,8 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     public void verifyVolumeEncryptionKey(List<String> volumeEncryptionKeyIds, String environmentName) {
         LOGGER.warn("Disk encryption feature is not available currently");
     }
+
+    public boolean isMultiAZ() {
+        return false;
+    }
 }

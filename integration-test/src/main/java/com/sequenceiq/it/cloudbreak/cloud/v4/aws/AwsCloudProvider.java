@@ -548,4 +548,9 @@ public class AwsCloudProvider extends AbstractCloudProvider {
             Log.then(LOGGER, format(" Volume has been encrypted with '%s' KMS key. ", kmsKeyArn));
         }
     }
+
+    @Override
+    public boolean isMultiAZ() {
+        return awsProperties.getMultiaz();
+    }
 }
