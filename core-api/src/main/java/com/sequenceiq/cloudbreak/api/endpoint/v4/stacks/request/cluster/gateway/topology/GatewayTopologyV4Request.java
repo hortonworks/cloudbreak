@@ -37,4 +37,12 @@ public class GatewayTopologyV4Request implements JsonEntity {
     public void setExposedServices(List<String> exposedServices) {
         this.exposedServices = exposedServices;
     }
+
+    @Override
+    public String toString() {
+        return "GatewayTopologyV4Request{" +
+                "topologyName='" + topologyName + '\'' +
+                ", exposedServices=" + exposedServices +
+                '}';
+    }
 }

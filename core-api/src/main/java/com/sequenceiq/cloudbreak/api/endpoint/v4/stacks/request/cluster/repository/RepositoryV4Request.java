@@ -49,4 +49,13 @@ public class RepositoryV4Request implements JsonEntity {
     public void setGpgKeyUrl(String gpgKeyUrl) {
         this.gpgKeyUrl = gpgKeyUrl;
     }
+
+    @Override
+    public String toString() {
+        return "RepositoryV4Request{" +
+                "version='" + version + '\'' +
+                ", baseUrl='" + baseUrl + '\'' +
+                ", gpgKeyUrl='" + gpgKeyUrl + '\'' +
+                '}';
+    }
 }

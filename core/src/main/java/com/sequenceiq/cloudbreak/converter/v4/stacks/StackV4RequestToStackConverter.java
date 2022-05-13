@@ -88,6 +88,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentBaseResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
 @Component
@@ -161,6 +162,9 @@ public class StackV4RequestToStackConverter {
     @Inject
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
+    @Inject
+    private AutoTlsFlagPreparatory autoTlsFlagPreparatory;
+
     public Stack convert(StackV4Request source) {
         Workspace workspace = workspaceService.getForCurrentUser();
 
@@ -198,7 +202,8 @@ public class StackV4RequestToStackConverter {
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setCreated(clock.getCurrentTimeMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
-        measure(() -> updateCluster(source, stack),
+        Optional<String> parentEnvCloudPlatform = Optional.ofNullable(environment).map(EnvironmentBaseResponse::getParentEnvironmentCloudPlatform);
+        measure(() -> updateCluster(source, stack, parentEnvCloudPlatform),
                 LOGGER, "Converted cluster and updated the stack in {} ms for stack {}", source.getName());
         stack.setGatewayPort(source.getGatewayPort());
         stack.setUuid(UUID.randomUUID().toString());
@@ -371,7 +376,7 @@ public class StackV4RequestToStackConverter {
         return convertedSet;
     }
 
-    private void updateCluster(StackV4Request source, Stack stack) {
+    private void updateCluster(StackV4Request source, Stack stack, Optional<String> parentEnvCloudPlatform) {
         if (source.getCluster() != null) {
             source.getCluster().setName(stack.getName());
             Cluster cluster = clusterV4RequestToClusterConverter.convert(source.getCluster());
@@ -384,6 +389,7 @@ public class StackV4RequestToStackConverter {
                     })
                     .collect(Collectors.toSet());
             cluster.setHostGroups(hostGroups);
+            cluster.setAutoTlsEnabled(autoTlsFlagPreparatory.provideAutoTlsFlag(source.getCluster(), stack, parentEnvCloudPlatform));
             stack.setCluster(cluster);
         }
     }

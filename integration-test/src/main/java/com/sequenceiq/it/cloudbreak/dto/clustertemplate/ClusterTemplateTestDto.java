@@ -82,6 +82,11 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
         return this;
     }
 
+    public ClusterTemplateTestDto withAutTls(Boolean autoTls) {
+        getRequest().getDistroXTemplate().getCluster().getCm().setEnableAutoTls(autoTls);
+        return this;
+    }
+
     @Override
     public Collection<ClusterTemplateV4Response> getAll(CloudbreakClient client) {
         return ClusterTemplateUtil.getResponseFromViews(client.getDefaultClient().clusterTemplateV4EndPoint().list(client.getWorkspaceId()).getResponses());
