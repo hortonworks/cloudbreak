@@ -79,9 +79,9 @@ public class RecipeEngine {
                     getRecipeNameMap(allHostGroups), stack.getWorkspace());
             if (targetHostGroups.stream().anyMatch(hostGroup -> hostGroup.getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY)) {
                 orchestratorRecipeExecutor.uploadRecipes(stack, recipeModels);
+                measure(() -> recipeTemplateService.updateAllGeneratedRecipes(allHostGroups, generatedRecipeTemplates), LOGGER,
+                        "Updating all the generated recipes took {} ms");
             }
-            measure(() -> recipeTemplateService.updateAllGeneratedRecipes(targetHostGroups, generatedRecipeTemplates), LOGGER,
-                    "Updating all the generated recipes took {} ms");
         } else {
             LOGGER.debug("Not found any recipes for host groups '{}'. No recipe uploaad will happen during upscale.", targetHostGroups);
         }
@@ -145,7 +145,7 @@ public class RecipeEngine {
         Map<HostGroup, List<RecipeModel>> recipeModels = recipeTemplateService.createRecipeModels(stack, hostGroups);
         boolean generatedRecipesMatch = recipeTemplateService.isGeneratedRecipesInDbStale(hostGroups, recipeModels);
         if (generatedRecipesMatch) {
-            LOGGER.debug("Generated recipes are matched for host group recipes, no need to upload them.");
+             LOGGER.debug("Generated recipes are matched for host group recipes, no need to upload them.");
         } else {
             uploadRecipesOnHostGroups(stack, hostGroups, recipeModels);
         }
