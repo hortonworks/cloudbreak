@@ -15,7 +15,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -53,7 +52,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -217,38 +215,6 @@ public class MetadataSetupServiceTest {
     }
 
     @Test
-    public void saveInstanceMetaDataTestExistingAvailableInstance() {
-        Stack stack = new Stack();
-        stack.setId(STACK_ID);
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setId(INSTANCE_GROUP_ID);
-        instanceGroup.setGroupName(GROUP_NAME);
-        Set<InstanceGroup> instanceGroupSet = new TreeSet<>();
-        instanceGroupSet.add(instanceGroup);
-        when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
-        when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME);
-        Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = getCloudVmMetaDataStatuses(InstanceStatus.CREATED);
-
-        Json image = new Json(getEmptyImage());
-        InstanceMetaData pgwInstanceMetadata = new InstanceMetaData();
-        pgwInstanceMetadata.setInstanceMetadataType(GATEWAY_PRIMARY);
-        pgwInstanceMetadata.setImage(image);
-        pgwInstanceMetadata.setPrivateId(PRIVATE_ID);
-        when(instanceMetaDataService.findNotTerminatedForStack(1L)).thenReturn(Set.of(pgwInstanceMetadata));
-
-        int newInstances = underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, CREATED);
-
-        assertEquals(1, newInstances);
-        verifyNoInteractions(imageService);
-        verify(instanceMetaDataService).save(instanceMetaDataCaptor.capture());
-        InstanceMetaData instanceMetaData = instanceMetaDataCaptor.getValue();
-        assertThat(instanceMetaData.getInstanceGroup()).isSameAs(instanceGroup);
-        assertEquals(CREATED, instanceMetaData.getInstanceStatus());
-        assertNotNull(instanceMetaData.getImage());
-        assertEquals(image, instanceMetaData.getImage());
-    }
-
-    @Test
     public void saveLoadBalancerMetadata() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
@@ -358,9 +324,12 @@ public class MetadataSetupServiceTest {
     }
 
     @Test
-    public void saveInstanceMetaDataTestOneTerminatedInstance() {
+    public void saveInstanceMetaDataTestOneTerminatedInstance()
+            throws CloudbreakImageNotFoundException {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
+        Image image = getEmptyImage();
+        when(imageService.getImage(STACK_ID)).thenReturn(image);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setId(INSTANCE_GROUP_ID);
         instanceGroup.setGroupName(GROUP_NAME);
@@ -377,7 +346,7 @@ public class MetadataSetupServiceTest {
         int newInstances = underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, SERVICES_RUNNING);
 
         assertEquals(0, newInstances);
-        verifyNoInteractions(imageService);
+        verify(imageService).getImage(STACK_ID);
         verify(instanceMetaDataService).save(instanceMetaDataCaptor.capture());
         InstanceMetaData instanceMetaData = instanceMetaDataCaptor.getValue();
         assertThat(instanceMetaData.getInstanceGroup()).isSameAs(instanceGroup);
@@ -388,9 +357,12 @@ public class MetadataSetupServiceTest {
     }
 
     @Test
-    public void saveInstanceMetaDataTestOneZombieInstance() {
+    public void saveInstanceMetaDataTestOneZombieInstance()
+            throws CloudbreakImageNotFoundException {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
+        Image image = getEmptyImage();
+        when(imageService.getImage(STACK_ID)).thenReturn(image);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setId(INSTANCE_GROUP_ID);
         instanceGroup.setGroupName(GROUP_NAME);
@@ -410,7 +382,7 @@ public class MetadataSetupServiceTest {
         int newInstances = underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, SERVICES_RUNNING);
 
         assertEquals(1, newInstances);
-        verifyNoInteractions(imageService);
+        verify(imageService).getImage(STACK_ID);
         verify(instanceMetaDataService).save(instanceMetaDataCaptor.capture());
         InstanceMetaData instanceMetaData = instanceMetaDataCaptor.getValue();
         assertThat(instanceMetaData.getInstanceGroup()).isSameAs(instanceGroup);
