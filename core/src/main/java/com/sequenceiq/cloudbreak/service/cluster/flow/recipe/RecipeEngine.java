@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @Component
 public class RecipeEngine {
@@ -69,22 +68,6 @@ public class RecipeEngine {
         Map<HostGroup, List<RecipeModel>> recipeModels = recipeTemplateService.createRecipeModels(stack, hostGroups);
         uploadRecipesOnHostGroups(stack, hostGroups, recipeModels);
         LOGGER.info("Upload recipes finished successfully for stack with name {}", stack.getName());
-    }
-
-    public void uploadUpscaleRecipes(Stack stack, Set<HostGroup> targetHostGroups, Set<HostGroup> allHostGroups)
-            throws CloudbreakException {
-        if (recipesFound(targetHostGroups)) {
-            Map<HostGroup, List<RecipeModel>> recipeModels = recipeTemplateService.createRecipeModels(stack, allHostGroups);
-            Map<HostGroup, Set<GeneratedRecipe>> generatedRecipeTemplates = recipeTemplateService.createGeneratedRecipes(recipeModels,
-                    getRecipeNameMap(allHostGroups), stack.getWorkspace());
-            if (targetHostGroups.stream().anyMatch(hostGroup -> hostGroup.getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY)) {
-                orchestratorRecipeExecutor.uploadRecipes(stack, recipeModels);
-            }
-            measure(() -> recipeTemplateService.updateAllGeneratedRecipes(targetHostGroups, generatedRecipeTemplates), LOGGER,
-                    "Updating all the generated recipes took {} ms");
-        } else {
-            LOGGER.debug("Not found any recipes for host groups '{}'. No recipe uploaad will happen during upscale.", targetHostGroups);
-        }
     }
 
     public void executePreClusterManagerRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
@@ -152,7 +135,7 @@ public class RecipeEngine {
     }
 
     private void uploadRecipesOnHostGroups(Stack stack, Set<HostGroup> hostGroups, Map<HostGroup, List<RecipeModel>> recipeModels) throws CloudbreakException {
-        boolean recipesFound = recipesFound(hostGroups);
+        boolean recipesFound = recipesOrGeneratedRecipesFound(hostGroups);
         if (recipesFound) {
             Map<HostGroup, Set<GeneratedRecipe>> generatedRecipeTemplates = recipeTemplateService.createGeneratedRecipes(recipeModels,
                     getRecipeNameMap(hostGroups), stack.getWorkspace());
@@ -168,9 +151,11 @@ public class RecipeEngine {
         return recipesFound(recipes, recipeType);
     }
 
-    private boolean recipesFound(Iterable<HostGroup> hostGroups) {
+    private boolean recipesOrGeneratedRecipesFound(Iterable<HostGroup> hostGroups) {
         for (HostGroup hostGroup : hostGroups) {
             if (!hostGroup.getRecipes().isEmpty()) {
+                return true;
+            } else if (!hostGroup.getGeneratedRecipes().isEmpty()) {
                 return true;
             }
         }
