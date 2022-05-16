@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DISK_ENCRYPTION_SET;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_KEY_VAULT_ROLE_ASSIGNMENT;
 
 import java.util.Map;
 import java.util.Optional;
@@ -126,11 +127,8 @@ public class AzureEncryptionResources implements EncryptionResources {
                     sourceVaultId,
                     diskEncryptionSetCreationRequest,
                     singleResourceGroup);
-            // The existence of the DES SP cannot be easily checked. That would need powerful special AD API permissions for the credential app itself that
-            // most customers would never grant. Though there is a system assigned managed identity as well sitting behind the SP, querying the properties of
-            // this identity (in order to check its existence) would also need an additional powerful Action for the role assigned to the credential app.
-            grantKeyVaultAccessPolicyToDiskEncryptionSetServicePrincipal(azureClient, vaultResourceGroupName, vaultName, desResourceGroupName,
-                    diskEncryptionSet.getDiskEncryptionSetName(), diskEncryptionSet.getDiskEncryptionSetPrincipalObjectId());
+            grantKeyVaultAccessToDiskEncryptionSet(azureClient, vaultResourceGroupName, vaultName, desResourceGroupName, diskEncryptionSet,
+                    diskEncryptionSetCreationRequest);
             return diskEncryptionSet;
         } catch (Exception e) {
             LOGGER.error("Disk Encryption Set creation failed, request=" + diskEncryptionSetCreationRequest, e);
@@ -145,6 +143,8 @@ public class AzureEncryptionResources implements EncryptionResources {
                     cloudResourceHelper.getResourceTypeFromList(AZURE_DISK_ENCRYPTION_SET, diskEncryptionSetDeletionRequest.getCloudResources());
             Optional<CloudResource> rgCloudResourceOptional =
                     cloudResourceHelper.getResourceTypeFromList(AZURE_RESOURCE_GROUP, diskEncryptionSetDeletionRequest.getCloudResources());
+            Optional<CloudResource> roleAssignmentCloudResourceOptional =
+                    cloudResourceHelper.getResourceTypeFromList(AZURE_KEY_VAULT_ROLE_ASSIGNMENT, diskEncryptionSetDeletionRequest.getCloudResources());
             if (desCloudResourceOptional.isPresent()) {
                 AzureClient azureClient = azureClientService.getClient(diskEncryptionSetDeletionRequest.getCloudCredential());
                 CloudResource desCloudResource = desCloudResourceOptional.get();
@@ -167,7 +167,8 @@ public class AzureEncryptionResources implements EncryptionResources {
                             diskEncryptionSetId));
                 }
                 LOGGER.info("Deleting Disk Encryption Set \"{}\"", diskEncryptionSetId);
-                deleteDiskEncryptionSetOnCloud(azureClient, desResourceGroupName, diskEncryptionSetName);
+                deleteDiskEncryptionSetOnCloud(azureClient, desResourceGroupName, diskEncryptionSetName, roleAssignmentCloudResourceOptional,
+                        diskEncryptionSetDeletionRequest.getCloudContext());
                 persistenceNotifier.notifyDeletion(desCloudResource, diskEncryptionSetDeletionRequest.getCloudContext());
             } else {
                 LOGGER.info("No Disk Encryption Set found to delete, request=" + diskEncryptionSetDeletionRequest);
@@ -217,7 +218,8 @@ public class AzureEncryptionResources implements EncryptionResources {
     }
 
     private CreatedDiskEncryptionSet getOrCreateDiskEncryptionSetOnCloud(AuthenticatedContext authenticatedContext, AzureClient azureClient,
-            String desResourceGroupName, String sourceVaultId, DiskEncryptionSetCreationRequest diskEncryptionSetCreationRequest, boolean singleResourceGroup) {
+            String desResourceGroupName, String sourceVaultId, DiskEncryptionSetCreationRequest diskEncryptionSetCreationRequest,
+            boolean singleResourceGroup) {
         CloudContext cloudContext = diskEncryptionSetCreationRequest.getCloudContext();
         String region = cloudContext.getLocation().getRegion().getRegionName();
         Map<String, String> tags = diskEncryptionSetCreationRequest.getTags();
@@ -264,11 +266,84 @@ public class AzureEncryptionResources implements EncryptionResources {
         return diskEncryptionSetCreationPoller.startPolling(authenticatedContext, checkerContext, desInitial);
     }
 
-    private void grantKeyVaultAccessPolicyToDiskEncryptionSetServicePrincipal(AzureClient azureClient, String vaultResourceGroupName, String vaultName,
-            String desResourceGroupName, String desName, String desPrincipalObjectId) {
+    private void grantKeyVaultRoleToDiskEncryptionSetServicePrincipal(AzureClient azureClient, String vaultResourceGroupName,
+            String vaultName, CreatedDiskEncryptionSet diskEncryptionSet, String desResourceGroupName, CloudContext cloudContext) {
         String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
-                        "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, vaultResourceGroupName, desPrincipalObjectId,
-                desName, desResourceGroupName);
+                        "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, vaultResourceGroupName,
+                diskEncryptionSet.getDiskEncryptionSetPrincipalObjectId(), diskEncryptionSet.getDiskEncryptionSetName(), desResourceGroupName);
+        try {
+            LOGGER.info("Granting {}.", description);
+            String roleId = azureClient.grantKeyVaultRoleToServicePrincipal(vaultResourceGroupName, vaultName,
+                    diskEncryptionSet.getDiskEncryptionSetPrincipalObjectId());
+            LOGGER.info("Granted {}.", description);
+            CloudResource roleAssignmentCloudResource = CloudResource.builder()
+                    .name("Key Vault Crypto Service Encryption User")
+                    .type(AZURE_KEY_VAULT_ROLE_ASSIGNMENT)
+                    .status(CommonStatus.CREATED)
+                    .reference(roleId)
+                    .build();
+            persistenceNotifier.notifyAllocation(roleAssignmentCloudResource, cloudContext);
+        } catch (Exception e) {
+            throw azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(e, "Granting " + description);
+        }
+    }
+
+    private void grantKeyVaultAccessToDiskEncryptionSet(AzureClient azureClient, String vaultResourceGroupName, String vaultName,
+            String desResourceGroupName, CreatedDiskEncryptionSet diskEncryptionSet, DiskEncryptionSetCreationRequest diskEncryptionSetCreationRequest) {
+        if (diskEncryptionSetCreationRequest.getRoleBasedAccessControlEnabled()) {
+            grantKeyVaultRoleToDiskEncryptionSetServicePrincipal(azureClient, vaultResourceGroupName, vaultName,
+                    diskEncryptionSet, desResourceGroupName, diskEncryptionSetCreationRequest.getCloudContext());
+        } else {
+            // The existence of the DES SP cannot be easily checked. That would need powerful special AD API permissions for the credential app itself that
+            // most customers would never grant. Though there is a system assigned managed identity as well sitting behind the SP, querying the properties of
+            // this identity (in order to check its existence) would also need an additional powerful Action for the role assigned to the credential app.
+            grantKeyVaultAccessPolicyToDiskEncryptionSetServicePrincipal(azureClient, vaultResourceGroupName, vaultName, desResourceGroupName,
+                    diskEncryptionSet);
+        }
+
+    }
+
+    private void removeKeyVaultAccessForDiskEncryptionSet(AzureClient azureClient, String desResourceGroupName, String desName,
+            DiskEncryptionSetInner existingDiskEncryptionSet, Optional<CloudResource> roleAssignmentCloudResourceOptional, CloudContext cloudContext) {
+        String vaultName;
+        String vaultResourceGroupName;
+        String encryptionKeyUrl = existingDiskEncryptionSet.activeKey().keyUrl();
+        String desPrincipalObjectId = existingDiskEncryptionSet.identity().principalId();
+        String sourceVaultId = existingDiskEncryptionSet.activeKey().sourceVault().id();
+        Matcher matcher = ENCRYPTION_KEY_URL_VAULT_NAME.matcher(encryptionKeyUrl);
+        if (matcher.matches()) {
+            vaultName = matcher.group(1);
+        } else {
+            throw new IllegalArgumentException(String.format("Failed to deduce vault name from given encryption key URL \"%s\"", encryptionKeyUrl));
+        }
+        matcher = RESOURCE_GROUP_NAME.matcher(sourceVaultId);
+        if (matcher.matches()) {
+            vaultResourceGroupName = matcher.group(1);
+        } else {
+            throw new IllegalArgumentException(String.format("Failed to deduce vault resource group name from source vault ID \"%s\"", sourceVaultId));
+        }
+        // Check for the existence of keyVault user has specified before removing disk encryption set's (DES) access permissions from this keyVault.
+        if (!azureClient.keyVaultExists(vaultResourceGroupName, vaultName)) {
+            LOGGER.warn(String.format("Vault with name \"%s\" either does not exist/have been deleted or user does not have permissions to access it.",
+                    vaultName));
+        } else {
+            if (roleAssignmentCloudResourceOptional.isPresent()) {
+                removeKeyVaultRoleForDiskEncryptionSetServicePrincipal(azureClient, desResourceGroupName, desName,
+                        vaultResourceGroupName, desPrincipalObjectId, vaultName, roleAssignmentCloudResourceOptional.get());
+                persistenceNotifier.notifyDeletion(roleAssignmentCloudResourceOptional.get(), cloudContext);
+            } else {
+                removeKeyVaultAccessPolicyFromDiskEncryptionSetServicePrincipal(azureClient, desResourceGroupName, desName,
+                        vaultResourceGroupName, desPrincipalObjectId, vaultName);
+            }
+        }
+    }
+
+    private void grantKeyVaultAccessPolicyToDiskEncryptionSetServicePrincipal(AzureClient azureClient, String vaultResourceGroupName, String vaultName,
+            String desResourceGroupName, CreatedDiskEncryptionSet diskEncryptionSet) {
+        String desPrincipalObjectId = diskEncryptionSet.getDiskEncryptionSetPrincipalObjectId();
+        String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
+                        "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, vaultResourceGroupName,
+                diskEncryptionSet.getDiskEncryptionSetPrincipalObjectId(), diskEncryptionSet.getDiskEncryptionSetName(), desResourceGroupName);
         retryService.testWith2SecDelayMax15Times(() -> {
             try {
                 LOGGER.info("Granting {}.", description);
@@ -284,7 +359,8 @@ public class AzureEncryptionResources implements EncryptionResources {
         });
     }
 
-    private void deleteDiskEncryptionSetOnCloud(AzureClient azureClient, String desResourceGroupName, String desName) {
+    private void deleteDiskEncryptionSetOnCloud(AzureClient azureClient, String desResourceGroupName, String desName,
+            Optional<CloudResource> roleAssignmentCloudResourceOptional, CloudContext cloudContext) {
         String description = String.format("Disk Encryption Set \"%s\" in Resource Group \"%s\"", desName, desResourceGroupName);
         retryService.testWith2SecDelayMax15Times(() -> {
             try {
@@ -294,9 +370,8 @@ public class AzureEncryptionResources implements EncryptionResources {
                     LOGGER.info("Deleting {}.", description);
                     azureClient.deleteDiskEncryptionSet(desResourceGroupName, desName);
                     LOGGER.info("Deleted {}.", description);
-                    removeKeyVaultAccessPolicyFromDiskEncryptionSetServicePrincipal(azureClient, desResourceGroupName, desName,
-                            existingDiskEncryptionSet.activeKey().keyUrl(), existingDiskEncryptionSet.identity().principalId(),
-                            existingDiskEncryptionSet.activeKey().sourceVault().id());
+                    removeKeyVaultAccessForDiskEncryptionSet(azureClient, desResourceGroupName, desName, existingDiskEncryptionSet,
+                            roleAssignmentCloudResourceOptional, cloudContext);
                 } else {
                     LOGGER.info("No {} found to delete.", description);
                 }
@@ -308,40 +383,36 @@ public class AzureEncryptionResources implements EncryptionResources {
     }
 
     private void removeKeyVaultAccessPolicyFromDiskEncryptionSetServicePrincipal(AzureClient azureClient, String desResourceGroupName, String desName,
-            String encryptionKeyUrl, String desPrincipalObjectId, String sourceVaultId) {
-        String vaultName;
-        String vaultResourceGroupName;
-        Matcher matcher = ENCRYPTION_KEY_URL_VAULT_NAME.matcher(encryptionKeyUrl);
-        if (matcher.matches()) {
-            vaultName = matcher.group(1);
-        } else {
-            throw new IllegalArgumentException(String.format("Failed to deduce vault name from given encryption key URL \"%s\"", encryptionKeyUrl));
-        }
-        matcher = RESOURCE_GROUP_NAME.matcher(sourceVaultId);
-        if (matcher.matches()) {
-            vaultResourceGroupName = matcher.group(1);
-        } else {
-            throw new IllegalArgumentException(String.format("Failed to deduce vault resource group name from source vault ID \"%s\"", sourceVaultId));
-        }
+            String vaultResourceGroupName, String desPrincipalObjectId, String vaultName) {
+        String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
+                        "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, vaultResourceGroupName, desPrincipalObjectId,
+                desName, desResourceGroupName);
+        retryService.testWith2SecDelayMax15Times(() -> {
+            try {
+                LOGGER.info("Removing {}.", description);
+                azureClient.removeKeyVaultAccessPolicyFromServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId);
+                LOGGER.info("Removed {}.", description);
+                return true;
+            } catch (Exception e) {
+                throw azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(e, "Removing " + description);
+            }
+        });
+    }
 
-        // Check for the existence of keyVault user has specified before removing disk encryption set's (DES) access permissions from this keyVault.
-        if (!azureClient.keyVaultExists(vaultResourceGroupName, vaultName)) {
-            LOGGER.warn(String.format("Vault with name \"%s\" either does not exist/have been deleted or user does not have permissions to access it.",
-                    vaultName));
-        } else {
-            String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
-                            "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, vaultResourceGroupName, desPrincipalObjectId,
-                    desName, desResourceGroupName);
-            retryService.testWith2SecDelayMax15Times(() -> {
-                try {
-                    LOGGER.info("Removing {}.", description);
-                    azureClient.removeKeyVaultAccessPolicyFromServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId);
-                    LOGGER.info("Removed {}.", description);
-                    return true;
-                } catch (Exception e) {
-                    throw azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(e, "Removing " + description);
-                }
-            });
-        }
+    private void removeKeyVaultRoleForDiskEncryptionSetServicePrincipal(AzureClient azureClient, String desResourceGroupName, String desName,
+        String vaultResourceGroupName, String desPrincipalObjectId, String vaultName, CloudResource roleAssignmentCloudResource) {
+        String description = String.format("Role based access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
+                        "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, vaultResourceGroupName, desPrincipalObjectId,
+                desName, desResourceGroupName);
+        retryService.testWith2SecDelayMax15Times(() -> {
+            try {
+                LOGGER.info("Removing {}.", description);
+                azureClient.removeKeyVaultRole(vaultResourceGroupName, vaultName, roleAssignmentCloudResource.getReference());
+                LOGGER.info("Removed {}.", description);
+                return true;
+            } catch (Exception e) {
+                throw azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(e, "Removing " + description);
+            }
+        });
     }
 }

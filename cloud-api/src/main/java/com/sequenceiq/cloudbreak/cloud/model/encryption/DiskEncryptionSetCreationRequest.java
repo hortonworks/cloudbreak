@@ -25,6 +25,8 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
 
     private final String encryptionKeyUrl;
 
+    private final Boolean roleBasedAccessControlEnabled;
+
     private DiskEncryptionSetCreationRequest(Builder builder) {
         this.id = builder.id;
         this.cloudCredential = builder.cloudCredential;
@@ -33,6 +35,7 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
         this.tags = builder.tags;
         this.encryptionKeyUrl = builder.encryptionKeyUrl;
         this.cloudContext = builder.cloudContext;
+        this.roleBasedAccessControlEnabled = builder.roleBasedAccessControlEnabled;
     }
 
     public String getId() {
@@ -63,6 +66,10 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
         return encryptionKeyUrl;
     }
 
+    public Boolean getRoleBasedAccessControlEnabled() {
+        return roleBasedAccessControlEnabled;
+    }
+
     @Override
     public Platform platform() {
         return cloudContext.getPlatform();
@@ -82,6 +89,7 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
         sb.append(", cloudCredential=").append(cloudCredential);
         sb.append(", diskEncryptionSetResourceGroupName='").append(diskEncryptionSetResourceGroupName).append('\'');
         sb.append(", encryptionKeyResourceGroupName='").append(encryptionKeyResourceGroupName).append('\'');
+        sb.append(", roleBasedAccessControlEnabled=").append(roleBasedAccessControlEnabled).append('\'');
         sb.append(", tags=").append(tags);
         sb.append('}');
         return sb.toString();
@@ -102,6 +110,8 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
         private Map<String, String> tags = new HashMap<>();
 
         private String encryptionKeyUrl;
+
+        private Boolean roleBasedAccessControlEnabled;
 
         public Builder() {
         }
@@ -138,6 +148,11 @@ public class DiskEncryptionSetCreationRequest implements CloudPlatformAware {
 
         public Builder withEncryptionKeyUrl(String encryptionKeyUrl) {
             this.encryptionKeyUrl = encryptionKeyUrl;
+            return this;
+        }
+
+        public Builder withRoleBasedAccessControlEnabled(Boolean roleBasedAccessControlEnabled) {
+            this.roleBasedAccessControlEnabled = roleBasedAccessControlEnabled;
             return this;
         }
 

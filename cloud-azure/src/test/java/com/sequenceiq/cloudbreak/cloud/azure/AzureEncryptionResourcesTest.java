@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DISK_ENCRYPTION_SET;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_KEY_VAULT_ROLE_ASSIGNMENT;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -274,6 +275,7 @@ public class AzureEncryptionResourcesTest {
                 .withEncryptionKeyResourceGroupName("dummyResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                .withRoleBasedAccessControlEnabled(Boolean.FALSE)
                 .build();
         EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
@@ -358,6 +360,7 @@ public class AzureEncryptionResourcesTest {
                 .withEncryptionKeyResourceGroupName("dummyResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                .withRoleBasedAccessControlEnabled(Boolean.FALSE)
                 .build();
         DiskEncryptionSetInner desInitial = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
                 .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
@@ -420,6 +423,7 @@ public class AzureEncryptionResourcesTest {
                 .withEncryptionKeyResourceGroupName("dummyResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                .withRoleBasedAccessControlEnabled(Boolean.FALSE)
                 .build();
         EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
@@ -471,6 +475,7 @@ public class AzureEncryptionResourcesTest {
                 .withEncryptionKeyResourceGroupName("dummyResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                .withRoleBasedAccessControlEnabled(Boolean.FALSE)
                 .build();
         EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
@@ -519,6 +524,7 @@ public class AzureEncryptionResourcesTest {
                 .withEncryptionKeyResourceGroupName("dummyResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                .withRoleBasedAccessControlEnabled(Boolean.FALSE)
                 .build();
         EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
@@ -568,6 +574,7 @@ public class AzureEncryptionResourcesTest {
                 .withEncryptionKeyResourceGroupName("dummyVaultResourceGroup")
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                .withRoleBasedAccessControlEnabled(Boolean.FALSE)
                 .build();
         EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
@@ -636,6 +643,7 @@ public class AzureEncryptionResourcesTest {
                 .withDiskEncryptionSetResourceGroupName(null)
                 .withTags(new HashMap<>())
                 .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                .withRoleBasedAccessControlEnabled(Boolean.FALSE)
                 .build();
         EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
         ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
@@ -975,6 +983,56 @@ public class AzureEncryptionResourcesTest {
         verify(azureClient, never()).deleteResourceGroup("dummyResourceGroup");
         verify(azureClient).removeKeyVaultAccessPolicyFromServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
         verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().get(0), deletionRequest.getCloudContext());
+    }
+
+    @Test
+    public void testDeleteDiskEncryptionSetShouldDeduceValidDiskEncryptionSetNameAndDeleteAssignedRoleIfRoleIsCreatedByCDP() {
+        CloudResource desCloudResource = new CloudResource.Builder()
+                .name("Des")
+                .type(AZURE_DISK_ENCRYPTION_SET)
+                .reference("/subscriptions/dummySubscriptionId/resourceGroups/dummy-CDP_DES-ResourceGroup/providers/" +
+                        "Microsoft.Compute/diskEncryptionSets/dummyDesId")
+                .status(CREATED)
+                .build();
+        CloudResource roleAssignedCloudResource = new CloudResource.Builder()
+                .name("dummyRoleId")
+                .type(AZURE_KEY_VAULT_ROLE_ASSIGNMENT)
+                .reference("dummyRoleId")
+                .status(CREATED)
+                .build();
+        List<CloudResource> resources = List.of(desCloudResource, roleAssignedCloudResource);
+        DiskEncryptionSetDeletionRequest deletionRequest = new DiskEncryptionSetDeletionRequest.Builder()
+                .withCloudCredential(cloudCredential)
+                .withCloudContext(cloudContext)
+                .withCloudResources(resources)
+                .build();
+        EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
+        ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
+        DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
+                .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
+                .withActiveKey(new KeyForDiskEncryptionSet()
+                        .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                        .withSourceVault(new SourceVault()
+                                .withId("/subscriptions/dummySubs/resourceGroups/dummyVaultResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
+                .withIdentity(identity)
+                .withLocation("dummyRegion");
+        when(cloudResourceHelper.getResourceTypeFromList(AZURE_DISK_ENCRYPTION_SET, resources))
+                .thenReturn(resources.isEmpty() ? Optional.empty() : Optional.of(resources.get(0)));
+        when(cloudResourceHelper.getResourceTypeFromList(AZURE_RESOURCE_GROUP, resources))
+                .thenReturn(Optional.empty());
+        when(cloudResourceHelper.getResourceTypeFromList(AZURE_KEY_VAULT_ROLE_ASSIGNMENT, resources))
+                .thenReturn(resources.isEmpty() ? Optional.empty() : Optional.of(resources.get(1)));
+        when(azureClient.getDiskEncryptionSetByName(any(), any())).thenReturn(des);
+        when(azureClientService.getClient(cloudCredential)).thenReturn(azureClient);
+        when(azureClient.keyVaultExists("dummyVaultResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        initRetry();
+
+        underTest.deleteDiskEncryptionSet(deletionRequest);
+
+        verify(azureClient).deleteDiskEncryptionSet("dummy-CDP_DES-ResourceGroup", "dummyDesId");
+        verify(azureClient).removeKeyVaultRole("dummyVaultResourceGroup", "dummyVaultName", "dummyRoleId");
+        verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().get(0), deletionRequest.getCloudContext());
+        verify(persistenceNotifier).notifyDeletion(deletionRequest.getCloudResources().get(1), deletionRequest.getCloudContext());
     }
 
     private List<CloudResource> getResources(String desId) {

@@ -54,4 +54,36 @@ class DiskEncryptionSetCreationRequestTest {
         assertThat(underTest.getEncryptionKeyResourceGroupName()).isEqualTo("dummyRg");
     }
 
+    @Test
+    void testShouldCreateRequestWithIsRoleBasedAccessControlEnabledWhenTrue() {
+        DiskEncryptionSetCreationRequest underTest = new DiskEncryptionSetCreationRequest.Builder()
+                .withEncryptionKeyUrl(ENCRYPTION_KEY_URL)
+                .withCloudContext(cloudContext)
+                .withTags(Map.of())
+                .withCloudCredential(cloudCredential)
+                .withId("foo")
+                .withDiskEncryptionSetResourceGroupName("myRg")
+                .withRoleBasedAccessControlEnabled(Boolean.TRUE)
+                .build();
+
+        assertThat(underTest.getDiskEncryptionSetResourceGroupName()).isEqualTo("myRg");
+        assertThat(underTest.getRoleBasedAccessControlEnabled()).isEqualTo(Boolean.TRUE);
+    }
+
+    @Test
+    void testShouldCreateRequestWithIsRoleBasedAccessControlEnabledSetAsFalse() {
+        DiskEncryptionSetCreationRequest underTest = new DiskEncryptionSetCreationRequest.Builder()
+                .withEncryptionKeyUrl(ENCRYPTION_KEY_URL)
+                .withCloudContext(cloudContext)
+                .withTags(Map.of())
+                .withCloudCredential(cloudCredential)
+                .withId("foo")
+                .withDiskEncryptionSetResourceGroupName("myRg")
+                .withRoleBasedAccessControlEnabled(Boolean.FALSE)
+                .build();
+
+        assertThat(underTest.getDiskEncryptionSetResourceGroupName()).isEqualTo("myRg");
+        assertThat(underTest.getRoleBasedAccessControlEnabled()).isEqualTo(Boolean.FALSE);
+    }
+
 }

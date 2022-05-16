@@ -73,10 +73,13 @@ public class EnvironmentEncryptionService {
 
     @VisibleForTesting
     DiskEncryptionSetCreationRequest createEncryptionResourcesCreationRequest(EnvironmentDto environment) {
-        String encryptionKeyResourceGroupName = Optional.ofNullable(environment.getParameters())
+        AzureResourceEncryptionParametersDto azureResourceEncryptionParametersDto = Optional.ofNullable(environment.getParameters())
                 .map(ParametersDto::getAzureParametersDto)
-                .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
-                .map(AzureResourceEncryptionParametersDto::getEncryptionKeyResourceGroupName).orElse(null);
+                .map(AzureParametersDto::getAzureResourceEncryptionParametersDto).orElse(null);
+        String encryptionKeyResourceGroupName = Optional.ofNullable(azureResourceEncryptionParametersDto.getEncryptionKeyResourceGroupName()).orElse(null);
+        String encryptionKeyUrl = Optional.ofNullable(azureResourceEncryptionParametersDto.getEncryptionKeyUrl()).orElse(null);
+        Boolean rolesBasedAccessControlEnabled = Optional.ofNullable(azureResourceEncryptionParametersDto.getRoleBasedAccessControlEnabled())
+                .orElse(Boolean.FALSE);
         String diskEncryptionSetResourceGroupName = Optional.ofNullable(environment.getParameters())
                 .map(ParametersDto::getAzureParametersDto)
                 .map(AzureParametersDto::getAzureResourceGroupDto)
@@ -86,8 +89,9 @@ public class EnvironmentEncryptionService {
                 .withCloudCredential(credentialToCloudCredentialConverter.convert(environment.getCredential()))
                 .withTags(environmentTagProvider.getTags(environment, environment.getResourceCrn()))
                 .withCloudContext(getCloudContext(environment))
-                .withEncryptionKeyUrl(environment.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl())
-                .withDiskEncryptionSetResourceGroupName(diskEncryptionSetResourceGroupName);
+                .withEncryptionKeyUrl(encryptionKeyUrl)
+                .withDiskEncryptionSetResourceGroupName(diskEncryptionSetResourceGroupName)
+                .withRoleBasedAccessControlEnabled(rolesBasedAccessControlEnabled);
         if (StringUtils.isNotEmpty(encryptionKeyResourceGroupName)) {
             builder.withEncryptionKeyResourceGroupName(encryptionKeyResourceGroupName);
         } else {
@@ -129,6 +133,12 @@ public class EnvironmentEncryptionService {
         Optional<CloudResource> rgCloudResourceOptional = resourceRetriever.findByEnvironmentIdAndType(environment.getId(),
                 ResourceType.AZURE_RESOURCE_GROUP);
         rgCloudResourceOptional.ifPresent(resources::add);
+
+        // Role ID is persisted in cloudResource only when it is created by CDP, as part of disk encryption set creation in case of
+        // roles based key vault access.
+        Optional<CloudResource> roleAssignmentCloudResourceOptional = resourceRetriever.findByEnvironmentIdAndType(environment.getId(),
+                ResourceType.AZURE_KEY_VAULT_ROLE_ASSIGNMENT);
+        roleAssignmentCloudResourceOptional.ifPresent(resources::add);
         return resources;
     }
 }

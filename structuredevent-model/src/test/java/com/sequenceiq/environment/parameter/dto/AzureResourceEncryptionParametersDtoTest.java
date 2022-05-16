@@ -27,6 +27,18 @@ public class AzureResourceEncryptionParametersDtoTest {
         assertEquals(dummyAzureResourceEncryptionParametersDto.getEncryptionKeyResourceGroupName(), "dummyResourceGroupName");
     }
 
+    @Test
+    void testAzureResourceEncryptionParametersDtowithIsRoleBasedAccessControlEnabled() {
+        AzureResourceEncryptionParametersDto dummyAzureResourceEncryptionParametersDto = AzureResourceEncryptionParametersDto.builder()
+                .withDiskEncryptionSetId("dummy-des-id")
+                .withEncryptionKeyUrl("dummy-key-url")
+                .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
+                .withRoleBasedAccessControlEnabled(Boolean.FALSE)
+                .build();
+        assertEquals(dummyAzureResourceEncryptionParametersDto.getEncryptionKeyResourceGroupName(), "dummyResourceGroupName");
+        assertEquals(dummyAzureResourceEncryptionParametersDto.getRoleBasedAccessControlEnabled(), Boolean.FALSE);
+    }
+
     private AzureResourceEncryptionParametersDto createAzureResourceEncryptionParametersDto() {
         return AzureResourceEncryptionParametersDto.builder()
                 .withDiskEncryptionSetId("dummy-des-id")

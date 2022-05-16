@@ -21,6 +21,8 @@ class AzureResourceEncryptionParametersTest {
 
     private static final String DISK_ENCRYPTION_SET_ID = "diskEncryptionSetId";
 
+    private static final Boolean ROLE_BASED_ACCESS_CONTROL_ENABLED = Boolean.TRUE;
+
     private LocalValidatorFactoryBean localValidatorFactory;
 
     @BeforeEach
@@ -36,6 +38,7 @@ class AzureResourceEncryptionParametersTest {
         underTest.setEncryptionKeyUrl(ENCRYPTION_KEY_URL);
         underTest.setEncryptionKeyResourceGroupName(ENCRYPTION_KEY_RESOURCE_GROUP_NAME);
         underTest.setDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID);
+        underTest.setRoleBasedAccessControlEnabled(ROLE_BASED_ACCESS_CONTROL_ENABLED);
 
         verifyFields(underTest);
     }
@@ -44,6 +47,7 @@ class AzureResourceEncryptionParametersTest {
         assertThat(underTest.getEncryptionKeyUrl()).isEqualTo(ENCRYPTION_KEY_URL);
         assertThat(underTest.getEncryptionKeyResourceGroupName()).isEqualTo(ENCRYPTION_KEY_RESOURCE_GROUP_NAME);
         assertThat(underTest.getDiskEncryptionSetId()).isEqualTo(DISK_ENCRYPTION_SET_ID);
+        assertThat(underTest.getRoleBasedAccessControlEnabled()).isEqualTo(ROLE_BASED_ACCESS_CONTROL_ENABLED);
     }
 
     @Test
@@ -52,6 +56,7 @@ class AzureResourceEncryptionParametersTest {
                 .withEncryptionKeyUrl(ENCRYPTION_KEY_URL)
                 .withEncryptionKeyResourceGroupName(ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
                 .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID)
+                .withRoleBasedAccessControlEnabled(ROLE_BASED_ACCESS_CONTROL_ENABLED)
                 .build();
 
         verifyFields(underTest);

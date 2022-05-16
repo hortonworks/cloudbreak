@@ -118,7 +118,9 @@ class EnvironmentEncryptionServiceTest {
                 .withParameters(ParametersDto.builder()
                         .withAzureParameters(AzureParametersDto.builder()
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                        .withEncryptionKeyUrl(KEY_URL).build())
+                                        .withEncryptionKeyUrl(KEY_URL)
+                                        .withRoleBasedAccessControlEnabled(Boolean.FALSE)
+                                        .build())
                                 .withResourceGroup(AzureResourceGroupDto.builder()
                                         .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                         .withName(RESOURCE_GROUP_NAME).build())
@@ -136,6 +138,7 @@ class EnvironmentEncryptionServiceTest {
         assertEquals(creationRequest.getEncryptionKeyUrl(), KEY_URL);
         assertEquals(creationRequest.getDiskEncryptionSetResourceGroupName(), RESOURCE_GROUP_NAME);
         assertEquals(creationRequest.getEncryptionKeyResourceGroupName(), RESOURCE_GROUP_NAME);
+        assertEquals(creationRequest.getRoleBasedAccessControlEnabled(), Boolean.FALSE);
         verifyCloudContext(creationRequest.getCloudContext());
         assertThat(creationRequest.getCloudCredential()).isSameAs(cloudCredential);
         assertThat(creationRequest.getId()).isEqualTo("randomGeneratedResource");
@@ -156,6 +159,7 @@ class EnvironmentEncryptionServiceTest {
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
                                         .withEncryptionKeyUrl(KEY_URL)
                                         .withEncryptionKeyResourceGroupName(KEY_URL_RESOURCE_GROUP_NAME)
+                                        .withRoleBasedAccessControlEnabled(Boolean.TRUE)
                                         .build())
                                 .withResourceGroup(AzureResourceGroupDto.builder()
                                         .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
@@ -174,6 +178,7 @@ class EnvironmentEncryptionServiceTest {
         assertEquals(creationRequest.getEncryptionKeyUrl(), KEY_URL);
         assertEquals(creationRequest.getDiskEncryptionSetResourceGroupName(), RESOURCE_GROUP_NAME);
         assertEquals(creationRequest.getEncryptionKeyResourceGroupName(), KEY_URL_RESOURCE_GROUP_NAME);
+        assertEquals(creationRequest.getRoleBasedAccessControlEnabled(), Boolean.TRUE);
         verifyCloudContext(creationRequest.getCloudContext());
         assertThat(creationRequest.getCloudCredential()).isSameAs(cloudCredential);
         assertThat(creationRequest.getId()).isEqualTo("randomGeneratedResource");
@@ -194,7 +199,9 @@ class EnvironmentEncryptionServiceTest {
                 .withParameters(ParametersDto.builder()
                         .withAzureParameters(AzureParametersDto.builder()
                                 .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                        .withEncryptionKeyUrl(KEY_URL).build())
+                                        .withEncryptionKeyUrl(KEY_URL)
+                                        .withRoleBasedAccessControlEnabled(Boolean.FALSE)
+                                        .build())
                                 .withResourceGroup(AzureResourceGroupDto.builder()
                                         .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_SINGLE)
                                         .withName(RESOURCE_GROUP_NAME).build())
@@ -297,7 +304,7 @@ class EnvironmentEncryptionServiceTest {
     }
 
     @Test
-    void testDeleteEncryptionResourcesShouldCallDeleteDiskEncryptionSetWhenCloudPlatformAzureAndNoResourceGroupPersistedAsCloudResource() {
+    void testDeleteEncryptionResourcesShouldCallDeleteDiskEncryptionSetWhenCloudPlatformAzureAndNoRGAndAssignedRolePersistedAsCloudResource() {
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
         when(cloudConnector.encryptionResources()).thenReturn(encryptionResources);
         EnvironmentDto environmentDto = EnvironmentDto.builder()
@@ -385,6 +392,63 @@ class EnvironmentEncryptionServiceTest {
         verifyDiskEncryptionSetDeletionRequestForResourceGroup();
     }
 
+    @Test
+    void testDeleteEncryptionResourcesShouldCallDeleteDiskEncryptionSetWhenCloudPlatformAzureAndAssignedRolePersistedAsCloudResource() {
+        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
+        when(cloudConnector.encryptionResources()).thenReturn(encryptionResources);
+        EnvironmentDto environmentDto = EnvironmentDto.builder()
+                .withResourceCrn(ENVIRONMENT_CRN)
+                .withId(ENVIRONMENT_ID)
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform(CLOUD_PLATFORM)
+                .withCredential(credential)
+                .withLocationDto(LocationDto.builder()
+                        .withName(REGION)
+                        .build())
+                .withParameters(ParametersDto.builder()
+                        .withAzureParameters(AzureParametersDto.builder()
+                                .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
+                                        .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID)
+                                        .withEncryptionKeyUrl(KEY_URL)
+                                        .build())
+                                .build())
+                        .build())
+                .withCreator(USER_NAME)
+                .withAccountId(ACCOUNT_ID)
+                .withCredential(credential)
+                .build();
+        CloudResource desCloudResource = CloudResource.builder()
+                .name(DISK_ENCRYPTION_SET_NAME)
+                .type(ResourceType.AZURE_DISK_ENCRYPTION_SET)
+                .reference(DISK_ENCRYPTION_SET_ID)
+                .status(CommonStatus.CREATED)
+                .build();
+        CloudResource rgCloudResource = CloudResource.builder()
+                .name("dummyenv-CDP_DES-ResourceGroup")
+                .type(ResourceType.AZURE_RESOURCE_GROUP)
+                .reference("uniqueDummyId")
+                .status(CommonStatus.CREATED)
+                .build();
+        CloudResource roleAssignmentCloudResource = CloudResource.builder()
+                .name("dummyRoleId")
+                .type(ResourceType.AZURE_KEY_VAULT_ROLE_ASSIGNMENT)
+                .reference("dummyRoleId")
+                .status(CommonStatus.CREATED)
+                .build();
+        when(resourceRetriever.findByEnvironmentIdAndType(ENVIRONMENT_ID, ResourceType.AZURE_DISK_ENCRYPTION_SET))
+                .thenReturn(Optional.of(desCloudResource));
+        when(resourceRetriever.findByEnvironmentIdAndType(ENVIRONMENT_ID, ResourceType.AZURE_RESOURCE_GROUP))
+                .thenReturn(Optional.of(rgCloudResource));
+        when(resourceRetriever.findByEnvironmentIdAndType(ENVIRONMENT_ID, ResourceType.AZURE_KEY_VAULT_ROLE_ASSIGNMENT))
+                .thenReturn(Optional.of(roleAssignmentCloudResource));
+
+        underTest.deleteEncryptionResources(environmentDto);
+
+        verify(encryptionResources).deleteDiskEncryptionSet(diskEncryptionSetDeletionRequestCaptor.capture());
+        verifyDiskEncryptionSetDeletionRequestForDes();
+        verifyDiskEncryptionSetDeletionRequestForAssignedRole();
+    }
+
     private void verifyDiskEncryptionSetDeletionRequestForDes() {
         DiskEncryptionSetDeletionRequest deletionRequest = diskEncryptionSetDeletionRequestCaptor.getValue();
         CloudContext cloudContext = deletionRequest.getCloudContext();
@@ -412,6 +476,19 @@ class EnvironmentEncryptionServiceTest {
         assertEquals(rgCloudResource.getReference(), "uniqueDummyId");
         assertEquals(rgCloudResource.getName(), "dummyenv-CDP_DES-ResourceGroup");
         assertEquals(rgCloudResource.getType(), ResourceType.AZURE_RESOURCE_GROUP);
+    }
+
+    private void verifyDiskEncryptionSetDeletionRequestForAssignedRole() {
+        DiskEncryptionSetDeletionRequest deletionRequest = diskEncryptionSetDeletionRequestCaptor.getValue();
+        List<CloudResource> cloudResources = deletionRequest.getCloudResources();
+        Optional<CloudResource> roleAssignmentCloudResourceOptional = cloudResources.stream()
+                .filter(r -> r.getType() == ResourceType.AZURE_KEY_VAULT_ROLE_ASSIGNMENT)
+                .findFirst();
+        assertThat(roleAssignmentCloudResourceOptional).isNotEmpty();
+        CloudResource roleAssignedCloudResource = roleAssignmentCloudResourceOptional.get();
+        assertEquals(roleAssignedCloudResource.getReference(), "dummyRoleId");
+        assertEquals(roleAssignedCloudResource.getName(), "dummyRoleId");
+        assertEquals(roleAssignedCloudResource.getType(), ResourceType.AZURE_KEY_VAULT_ROLE_ASSIGNMENT);
     }
 
 }

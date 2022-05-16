@@ -7,10 +7,13 @@ public class AzureResourceEncryptionParametersDto {
 
     private final String diskEncryptionSetId;
 
+    private final Boolean roleBasedAccessControlEnabled;
+
     private AzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.Builder builder) {
         encryptionKeyUrl = builder.encryptionKeyUrl;
         encryptionKeyResourceGroupName = builder.encryptionKeyResourceGroupName;
         diskEncryptionSetId = builder.diskEncryptionSetId;
+        roleBasedAccessControlEnabled = builder.roleBasedAccessControlEnabled;
     }
 
     public String getEncryptionKeyUrl() {
@@ -25,6 +28,10 @@ public class AzureResourceEncryptionParametersDto {
         return diskEncryptionSetId;
     }
 
+    public Boolean getRoleBasedAccessControlEnabled() {
+        return roleBasedAccessControlEnabled;
+    }
+
     public static AzureResourceEncryptionParametersDto.Builder builder() {
         return new AzureResourceEncryptionParametersDto.Builder();
     }
@@ -35,6 +42,7 @@ public class AzureResourceEncryptionParametersDto {
                 "encryptionKeyUrl=" + encryptionKeyUrl +
                 ", encryptionKeyResourceGroupName=" + encryptionKeyResourceGroupName +
                 ", diskEncryptionSetId=" + diskEncryptionSetId +
+                ", roleBasedAccessControlEnabled=" + roleBasedAccessControlEnabled +
                 '}';
     }
 
@@ -44,6 +52,8 @@ public class AzureResourceEncryptionParametersDto {
         private String diskEncryptionSetId;
 
         private String encryptionKeyResourceGroupName;
+
+        private Boolean roleBasedAccessControlEnabled;
 
         public AzureResourceEncryptionParametersDto.Builder withEncryptionKeyUrl(String encryptionKeyUrl) {
             this.encryptionKeyUrl = encryptionKeyUrl;
@@ -57,6 +67,11 @@ public class AzureResourceEncryptionParametersDto {
 
         public AzureResourceEncryptionParametersDto.Builder withDiskEncryptionSetId(String diskEncryptionSetId) {
             this.diskEncryptionSetId = diskEncryptionSetId;
+            return this;
+        }
+
+        public AzureResourceEncryptionParametersDto.Builder withRoleBasedAccessControlEnabled(Boolean roleBasedAccessControlEnabled) {
+            this.roleBasedAccessControlEnabled = roleBasedAccessControlEnabled;
             return this;
         }
 

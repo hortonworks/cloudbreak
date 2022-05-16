@@ -35,6 +35,9 @@ public class AzureResourceEncryptionParameters implements Serializable {
     @ApiModelProperty(EnvironmentModelDescription.DISK_ENCRYPTION_SET_ID)
     private String diskEncryptionSetId;
 
+    @ApiModelProperty(EnvironmentModelDescription.ROLE_BASED_ACCESS_CONTROL_ENABLED)
+    private Boolean roleBasedAccessControlEnabled;
+
     public String getEncryptionKeyUrl() {
         return encryptionKeyUrl;
     }
@@ -59,6 +62,14 @@ public class AzureResourceEncryptionParameters implements Serializable {
         this.diskEncryptionSetId = diskEncryptionSetId;
     }
 
+    public Boolean getRoleBasedAccessControlEnabled() {
+        return roleBasedAccessControlEnabled;
+    }
+
+    public void setRoleBasedAccessControlEnabled(Boolean roleBasedAccessControlEnabled) {
+        this.roleBasedAccessControlEnabled = roleBasedAccessControlEnabled;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -69,6 +80,7 @@ public class AzureResourceEncryptionParameters implements Serializable {
                 "encryptionKeyUrl='" + encryptionKeyUrl + '\'' +
                 ", encryptionKeyResourceGroupName='" + encryptionKeyResourceGroupName + '\'' +
                 ", diskEncryptionSetId='" + diskEncryptionSetId + '\'' +
+                ", roleBasedAccessControlEnabled='" + roleBasedAccessControlEnabled + '\'' +
                 '}';
     }
 
@@ -79,6 +91,8 @@ public class AzureResourceEncryptionParameters implements Serializable {
         private String encryptionKeyResourceGroupName;
 
         private String diskEncryptionSetId;
+
+        private Boolean roleBasedAccessControlEnabled;
 
         private Builder() {
         }
@@ -98,11 +112,17 @@ public class AzureResourceEncryptionParameters implements Serializable {
             return this;
         }
 
+        public Builder withRoleBasedAccessControlEnabled(Boolean roleBasedAccessControlEnabled) {
+            this.roleBasedAccessControlEnabled = roleBasedAccessControlEnabled;
+            return this;
+        }
+
         public AzureResourceEncryptionParameters build() {
             AzureResourceEncryptionParameters resourceEncryptionParameters = new AzureResourceEncryptionParameters();
             resourceEncryptionParameters.setEncryptionKeyUrl(encryptionKeyUrl);
             resourceEncryptionParameters.setEncryptionKeyResourceGroupName(encryptionKeyResourceGroupName);
             resourceEncryptionParameters.setDiskEncryptionSetId(diskEncryptionSetId);
+            resourceEncryptionParameters.setRoleBasedAccessControlEnabled(roleBasedAccessControlEnabled);
             return resourceEncryptionParameters;
         }
 
