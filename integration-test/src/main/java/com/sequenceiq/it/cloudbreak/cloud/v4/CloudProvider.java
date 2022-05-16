@@ -184,4 +184,6 @@ public interface CloudProvider {
     void verifyDiskEncryptionKey(DetailedEnvironmentResponse environment, String environmentName);
 
     void verifyVolumeEncryptionKey(List<String> volumeEncryptionKeyIds, String environmentName);
+
+    boolean isMultiAZ();
 }

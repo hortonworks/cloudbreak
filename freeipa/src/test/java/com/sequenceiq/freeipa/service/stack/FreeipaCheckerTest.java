@@ -17,7 +17,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
 import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -32,9 +31,6 @@ public class FreeipaCheckerTest {
 
     @InjectMocks
     private FreeipaChecker underTest;
-
-    @Mock
-    private FreeIpaNodeStatusService freeIpaNodeStatusService;
 
     @Mock
     private FreeIpaInstanceHealthDetailsService freeIpaInstanceHealthDetailsService;
@@ -52,24 +48,10 @@ public class FreeipaCheckerTest {
         Set<InstanceMetaData> instanceMetaDataSet = createInstanceMetaDataSet();
         given(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(any(), any()))
                 .willReturn(createHealthResponse());
-        given(freeIpaNodeStatusService.nodeNetworkReport(any(), any()))
-                .willReturn(createNodeStatusResponse());
-        given(freeIpaNodeStatusService.nodeServicesReport(any(), any()))
-                .willReturn(createNodeStatusResponse());
         // WHEN
         underTest.getStatus(stack, instanceMetaDataSet);
         // THEN
         verify(freeIpaInstanceHealthDetailsService, times(2)).checkFreeIpaHealth(any(), any());
-        verify(freeIpaNodeStatusService, times(2)).nodeNetworkReport(any(), any());
-        verify(freeIpaNodeStatusService, times(2)).nodeServicesReport(any(), any());
-    }
-
-    private RPCResponse<NodeStatusProto.NodeStatusReport> createNodeStatusResponse() {
-        RPCResponse<NodeStatusProto.NodeStatusReport> rpcResponse = new RPCResponse<>();
-        NodeStatusProto.NodeStatusReport report = NodeStatusProto.NodeStatusReport.newBuilder().build();
-        rpcResponse.setResult(report);
-        rpcResponse.setMessages(createRpcMessage());
-        return rpcResponse;
     }
 
     private RPCResponse<Boolean> createHealthResponse() {

@@ -63,72 +63,79 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
 
     public CdpNodeStatuses nodeStatusReport(CdpNodeStatusRequest request) throws CdpNodeStatusMonitorClientException {
         CdpNodeStatuses.Builder responseBuilder = CdpNodeStatuses.Builder.builder()
-                .withNetworkReport(nodeNetworkReport(true))
-                .withServicesReport(nodeServicesReport(true))
-                .withSystemMetricsReport(systemMetricsReport(true));
+                .withNetworkReport(nodeNetworkReport(true, request.isSkipObjectMapping()))
+                .withServicesReport(nodeServicesReport(true, request.isSkipObjectMapping()))
+                .withSystemMetricsReport(systemMetricsReport(true, request.isSkipObjectMapping()));
         if (request.isMetering()) {
-            responseBuilder.withMeteringReport(nodeMeteringReport(true));
+            responseBuilder.withMeteringReport(nodeMeteringReport(true, request.isSkipObjectMapping()));
         }
         if (request.isCmMonitoring()) {
-            responseBuilder.withCmMetricsReport(cmMetricsReport(true));
+            responseBuilder.withCmMetricsReport(cmMetricsReport(true, request.isSkipObjectMapping()));
         }
         return responseBuilder.build();
     }
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> nodeMeteringReport() throws CdpNodeStatusMonitorClientException {
-        return nodeMeteringReport(false);
+        return nodeMeteringReport(false, false);
     }
 
-    public RPCResponse<NodeStatusProto.NodeStatusReport> nodeMeteringReport(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
-        return invoke("node metering check", "/api/v1/metering", nodeStatusReportBuilderFunction(), acceptNotFound);
+    public RPCResponse<NodeStatusProto.NodeStatusReport> nodeMeteringReport(boolean acceptNotFound, boolean skipObjectMapping)
+            throws CdpNodeStatusMonitorClientException {
+        return invoke("node metering check", "/api/v1/metering", nodeStatusReportBuilderFunction(), acceptNotFound, skipObjectMapping);
     }
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> nodeNetworkReport() throws CdpNodeStatusMonitorClientException {
-        return nodeNetworkReport(false);
+        return nodeNetworkReport(false, false);
     }
 
-    public RPCResponse<NodeStatusProto.NodeStatusReport> nodeNetworkReport(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
-        return invoke("node network check", "/api/v1/network", nodeStatusReportBuilderFunction(), acceptNotFound);
+    public RPCResponse<NodeStatusProto.NodeStatusReport> nodeNetworkReport(boolean acceptNotFound, boolean skipObjectMapping)
+            throws CdpNodeStatusMonitorClientException {
+        return invoke("node network check", "/api/v1/network", nodeStatusReportBuilderFunction(), acceptNotFound, skipObjectMapping);
     }
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> nodeServicesReport() throws CdpNodeStatusMonitorClientException {
-        return nodeServicesReport(false);
+        return nodeServicesReport(false, false);
     }
 
-    public RPCResponse<NodeStatusProto.NodeStatusReport> nodeServicesReport(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
-        return invoke("node services check", "/api/v1/services", nodeStatusReportBuilderFunction(), acceptNotFound);
+    public RPCResponse<NodeStatusProto.NodeStatusReport> nodeServicesReport(boolean acceptNotFound, boolean skipObjectMapping)
+            throws CdpNodeStatusMonitorClientException {
+        return invoke("node services check", "/api/v1/services", nodeStatusReportBuilderFunction(), acceptNotFound, skipObjectMapping);
     }
 
     public RPCResponse<NodeStatusProto.NodeStatusReport> systemMetricsReport() throws CdpNodeStatusMonitorClientException {
-        return systemMetricsReport(false);
+        return systemMetricsReport(false, false);
     }
 
-    public RPCResponse<NodeStatusProto.NodeStatusReport> systemMetricsReport(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
-        return invoke("node system metrics check", "/api/v1/system/metrics", nodeStatusReportBuilderFunction(), acceptNotFound);
+    public RPCResponse<NodeStatusProto.NodeStatusReport> systemMetricsReport(boolean acceptNotFound, boolean skipObjectMapping)
+            throws CdpNodeStatusMonitorClientException {
+        return invoke("node system metrics check", "/api/v1/system/metrics", nodeStatusReportBuilderFunction(), acceptNotFound, skipObjectMapping);
     }
 
     public RPCResponse<NodeStatusProto.SaltHealthReport> saltReport() throws CdpNodeStatusMonitorClientException {
-        return saltReport(false);
+        return saltReport(false, false);
     }
 
-    public RPCResponse<NodeStatusProto.SaltHealthReport> saltReport(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
-        return invoke("node salt health check", "/api/v1/salt", saltHealthBuilderFunction(), acceptNotFound);
+    public RPCResponse<NodeStatusProto.SaltHealthReport> saltReport(boolean acceptNotFound, boolean skipObjectMapping)
+            throws CdpNodeStatusMonitorClientException {
+        return invoke("node salt health check", "/api/v1/salt", saltHealthBuilderFunction(), acceptNotFound, skipObjectMapping);
     }
 
-    public RPCResponse<NodeStatusProto.SaltHealthReport> saltPing(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
-        return invoke("node salt ping", "/api/v1/salt/ping", saltHealthBuilderFunction(), acceptNotFound);
+    public RPCResponse<NodeStatusProto.SaltHealthReport> saltPing(boolean acceptNotFound, boolean skipObjectMapping)
+            throws CdpNodeStatusMonitorClientException {
+        return invoke("node salt ping", "/api/v1/salt/ping", saltHealthBuilderFunction(), acceptNotFound, skipObjectMapping);
     }
 
     public RPCResponse<NodeStatusProto.CmMetricsReport> cmMetricsReport() throws CdpNodeStatusMonitorClientException {
-        return cmMetricsReport(false);
+        return cmMetricsReport(false, false);
     }
 
-    public RPCResponse<NodeStatusProto.CmMetricsReport> cmMetricsReport(boolean acceptNotFound) throws CdpNodeStatusMonitorClientException {
-        return invoke("node cm metrics check", "/api/v1/cm_services/metrics", cmMetricsReportBuilderFunction(), acceptNotFound);
-    }
-
-    private <T> RPCResponse<T> invoke(String name, String path, Function<String, T> buildProtoFunction, boolean acceptNotFound)
+    public RPCResponse<NodeStatusProto.CmMetricsReport> cmMetricsReport(boolean acceptNotFound, boolean skipObjectMapping)
             throws CdpNodeStatusMonitorClientException {
+        return invoke("node cm metrics check", "/api/v1/cm_services/metrics", cmMetricsReportBuilderFunction(), acceptNotFound, skipObjectMapping);
+    }
+
+    private <T> RPCResponse<T> invoke(String name, String path, Function<String, T> buildProtoFunction, boolean acceptNotFound,
+            boolean skipObjectMapping) throws CdpNodeStatusMonitorClientException {
         Builder builder = rpcTarget.path(path)
                 .request()
                 .headers(headers);
@@ -136,7 +143,7 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
             bufferResponseEntity(response);
             processRpcListener(response);
             checkResponseStatus(response);
-            return toRpcResponse(name, response, buildProtoFunction);
+            return toRpcResponse(name, response, buildProtoFunction, skipObjectMapping);
         } catch (CdpNodeStatusMonitorClientException e) {
             if (acceptNotFound) {
                 LOGGER.debug("Get 404 from node status response for {}, but it is accepted as an empty response.", path);
@@ -172,10 +179,12 @@ public class CdpNodeStatusMonitorClient implements AutoCloseable {
         }
     }
 
-    private <T> RPCResponse<T> toRpcResponse(String name, Response response, Function<String, T> builderFunc) {
+    private <T> RPCResponse<T> toRpcResponse(String name, Response response, Function<String, T> builderFunc, boolean skipObjectMapping) {
         RPCResponse<T> rpcResponse = new RPCResponse<>();
         String message = response.readEntity(String.class);
-        rpcResponse.setResult(builderFunc.apply(message));
+        if (!skipObjectMapping) {
+            rpcResponse.setResult(builderFunc.apply(message));
+        }
         RPCMessage rpcMessage = new RPCMessage();
         rpcMessage.setName(name);
         rpcMessage.setCode(response.getStatus());

@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrima
 import com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationFlowConfig;
@@ -67,6 +69,7 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
             ClusterSyncFlowConfig.class, ClusterTerminationFlowConfig.class, ClusterCredentialChangeFlowConfig.class,
             ClusterStartFlowConfig.class, ClusterStopFlowConfig.class,
             ClusterUpscaleFlowConfig.class, ClusterDownscaleFlowConfig.class,
+            StopStartUpscaleFlowConfig.class, StopStartDownscaleFlowConfig.class,
             ClusterUpgradeFlowConfig.class, ClusterResetFlowConfig.class, ChangePrimaryGatewayFlowConfig.class,
             ClusterCertificateRenewFlowConfig.class, DatabaseBackupFlowConfig.class, DatabaseRestoreFlowConfig.class, PillarConfigUpdateFlowConfig.class,
             AwsVariantMigrationFlowConfig.class

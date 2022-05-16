@@ -429,4 +429,9 @@ public class CloudProviderProxy implements CloudProvider {
     public void verifyVolumeEncryptionKey(List<String> volumeEncryptionKeyIds, String environmentName) {
         delegate.verifyVolumeEncryptionKey(volumeEncryptionKeyIds, environmentName);
     }
+
+    @Override
+    public boolean isMultiAZ() {
+        return delegate.isMultiAZ();
+    }
 }

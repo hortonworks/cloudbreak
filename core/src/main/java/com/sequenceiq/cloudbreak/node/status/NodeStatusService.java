@@ -113,7 +113,7 @@ public class NodeStatusService {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Retrieving salt ping report from the hosts of stack: {}", stack.getResourceCrn());
         try (CdpNodeStatusMonitorClient client = factory.getClient(stack, stack.getPrimaryGatewayInstance())) {
-            return client.saltPing(false);
+            return client.saltPing(false, false);
         } catch (CdpNodeStatusMonitorClientException e) {
             throw new CloudbreakServiceException("Could not get salt ping report from stack.");
         }

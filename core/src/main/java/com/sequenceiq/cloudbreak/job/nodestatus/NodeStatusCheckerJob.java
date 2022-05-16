@@ -96,7 +96,7 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
             if (StackType.WORKLOAD.equals(stack.getType())) {
                 requestBuilder.withMetering(true);
             }
-            CdpNodeStatusRequest request = requestBuilder.withCmMonitoring(true).build();
+            CdpNodeStatusRequest request = requestBuilder.withCmMonitoring(true).withSkipObjectMapping(true).build();
             CdpNodeStatuses statuses = nodeStatusService.getNodeStatuses(stack, request);
             processNodeStatusReport(statuses.getNetworkReport(), NodeStatusProto.NodeStatus::getNetworkDetails, stack, "Network");
             processNodeStatusReport(statuses.getServicesReport(), NodeStatusProto.NodeStatus::getServicesDetails, stack, "Services");
