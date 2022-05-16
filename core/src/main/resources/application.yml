@@ -321,6 +321,7 @@ cb:
         georedundantbackup: false
     distrox:
       enabled.instance.types: >
+        Standard_D5_v2,
         Standard_D8_v3,
         Standard_D8s_v3,
         Standard_D16_v3,
