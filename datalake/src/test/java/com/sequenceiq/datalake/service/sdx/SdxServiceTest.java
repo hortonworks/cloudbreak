@@ -1256,6 +1256,24 @@ class SdxServiceTest {
     }
 
     @Test
+    void testSdxResizeByAccountIdAndNameWhenSdxOnGcp() {
+        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
+        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
+        sdxClusterResizeRequest.setEnvironment("environment");
+
+        SdxCluster sdxCluster = getSdxCluster();
+        sdxCluster.setClusterShape(LIGHT_DUTY);
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.GCS);
+        sdxCluster.setDatabaseCrn(null);
+
+        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
+        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.resizeSdx(USER_CRN, "sdxcluster",
+                sdxClusterResizeRequest));
+        assertTrue(badRequestException.getMessage().startsWith("Unsupported cloud provider GCP"));
+    }
+
+    @Test
     void testSdxResizeByAccountIdAndNameWhenSdxWithExistingDetachedSdx() {
         SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
         sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
