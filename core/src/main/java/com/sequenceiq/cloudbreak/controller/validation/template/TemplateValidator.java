@@ -46,6 +46,8 @@ public class TemplateValidator {
 
     public static final String GROUP_NAME_ID_BROKER = "idbroker";
 
+    public static final String GROUP_NAME_COMPUTE = "compute";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TemplateValidator.class);
 
     @Inject
@@ -181,6 +183,10 @@ public class TemplateValidator {
         return GROUP_NAME_ID_BROKER.equalsIgnoreCase(instanceGroup.getGroupName());
     }
 
+    private boolean isComputeInstanceGroup(InstanceGroup instanceGroup) {
+        return GROUP_NAME_COMPUTE.equalsIgnoreCase(instanceGroup.getGroupName());
+    }
+
     private void validateVolumeCount(VolumeTemplate value, VmType vmType, VolumeParameterType volumeParameterType,
         ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup) {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
@@ -190,7 +196,8 @@ public class TemplateValidator {
                 // To be backward-compatible, we only check max limit and allow the min limit to be zero for IDBroker
                 if (value.getVolumeCount() > config.maximumNumber()) {
                     validationBuilder.error(String.format("Max allowed volume count for '%s': %s", vmType.value(), config.maximumNumber()));
-                } else if (!isIDBrokerInstanceGroup(instanceGroup) && value.getVolumeCount() < config.minimumNumber()) {
+                } else if (!(isIDBrokerInstanceGroup(instanceGroup) || isComputeInstanceGroup(instanceGroup)) &&
+                        value.getVolumeCount() < config.minimumNumber()) {
                     validationBuilder.error(String.format("Min allowed volume count for '%s': %s", vmType.value(), config.minimumNumber()));
                 }
             } else {
@@ -208,7 +215,8 @@ public class TemplateValidator {
                 // To be backward-compatible, we only check max limit and allow the min limit to be zero for IDBroker
                 if (value.getVolumeSize() > config.maximumSize()) {
                     validationBuilder.error(String.format("Max allowed volume size for '%s': %s", vmType.value(), config.maximumSize()));
-                } else if (!isIDBrokerInstanceGroup(instanceGroup) && value.getVolumeSize() < config.minimumSize()) {
+                } else if (!(isIDBrokerInstanceGroup(instanceGroup) || isComputeInstanceGroup(instanceGroup)) &&
+                        value.getVolumeSize() < config.minimumSize()) {
                     validationBuilder.error(String.format("Min allowed volume size for '%s': %s", vmType.value(), config.minimumSize()));
                 }
             } else {
