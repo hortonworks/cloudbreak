@@ -171,13 +171,13 @@ public class UpdateRecipeServiceTest {
         given(recipeService.getByNameForWorkspaceId(anyString(), anyLong()))
                 .willReturn(sampleRecipe);
         given(hostGroupService.save(any())).willReturn(sampleHostGroup);
-        doNothing().when(generatedRecipeService).deleteAll(anySet());
+        given(generatedRecipeService.save(any())).willReturn(new GeneratedRecipe());
         // WHEN
         underTest.detachRecipeFromCluster(DUMMY_ID, createStack(), POST_CLDR_START_RECIPE, MASTER_HOST_GROUP_NAME);
         // THEN
         verify(hostGroupService, times(1)).save(any());
         verify(hostGroupService, times(1)).getByClusterIdAndNameWithRecipes(anyLong(), anyString());
-        verify(generatedRecipeService, times(1)).deleteAll(anySet());
+        verify(generatedRecipeService, times(1)).save(any());
     }
 
     private List<UpdateHostGroupRecipes> createUpdateHostGroupRecipes(Map<String, Set<String>> hostGroupRecipesMap) {

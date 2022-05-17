@@ -56,14 +56,6 @@ public class ClusterUpscaleService {
     @Inject
     private ParcelService parcelService;
 
-    public void uploadRecipesOnNewHosts(Long stackId, Set<String> hostGroupNames) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        LOGGER.debug("Start executing pre recipes");
-        Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
-        Set<HostGroup> targetHostGroups = hostGroups.stream().filter(hostGroup -> hostGroupNames.contains(hostGroup.getName())).collect(Collectors.toSet());
-        recipeEngine.uploadUpscaleRecipes(stack, targetHostGroups, hostGroups);
-    }
-
     public void installServicesOnNewHosts(Long stackId, Set<String> hostGroupNames, Boolean repair, Boolean restartServices,
             Map<String, Set<String>> hostGroupsWithHostNames) throws CloudbreakException {
         Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
