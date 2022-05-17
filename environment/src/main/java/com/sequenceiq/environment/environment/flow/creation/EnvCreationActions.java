@@ -33,8 +33,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
+import com.sequenceiq.consumption.api.v1.consumption.model.common.ResourceType;
+import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -42,6 +45,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors;
+import com.sequenceiq.environment.environment.service.ConsumptionCommunicator;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
 import com.sequenceiq.environment.environment.validation.ValidationType;
@@ -65,14 +69,18 @@ public class EnvCreationActions {
 
     private final EnvironmentJobService environmentJobService;
 
+    private final ConsumptionCommunicator consumptionCommunicator;
+
     public EnvCreationActions(EnvironmentService environmentService,
             EventSenderService eventService,
             EnvironmentMetricService metricService,
-            EnvironmentJobService environmentJobService) {
+            EnvironmentJobService environmentJobService,
+            ConsumptionCommunicator consumptionCommunicator) {
         this.environmentService = environmentService;
         this.eventService = eventService;
         this.metricService = metricService;
         this.environmentJobService = environmentJobService;
+        this.consumptionCommunicator = consumptionCommunicator;
     }
 
     @Bean(name = "ENVIRONMENT_INITIALIZATION_STATE")
@@ -268,6 +276,15 @@ public class EnvCreationActions {
                             eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_CREATION_FINISHED);
                         }, () -> LOGGER.error("Cannot finish the creation of env, because the environment does not exist: {}. "
                                 + "But the flow will continue, how can this happen?", payload.getResourceId()));
+                environmentService.findEnvironmentById(payload.getResourceId()).ifPresent(environment -> {
+                    StorageConsumptionRequest request = new StorageConsumptionRequest();
+                    request.setEnvironmentCrn(environment.getResourceCrn());
+                    request.setMonitoredResourceCrn(environment.getResourceCrn());
+                    request.setMonitoredResourceName(environment.getResourceName());
+                    request.setMonitoredResourceType(ResourceType.ENVIRONMENT);
+                    request.setStorageLocation(environment.getTelemetry().getLogging().getStorageLocation());
+                    consumptionCommunicator.asdasd(environment.getAccountId(), request);
+                });
                 LOGGER.info("Flow entered into ENV_CREATION_FINISHED_STATE");
                 sendEvent(context, FINALIZE_ENV_CREATION_EVENT.event(), payload);
             }
