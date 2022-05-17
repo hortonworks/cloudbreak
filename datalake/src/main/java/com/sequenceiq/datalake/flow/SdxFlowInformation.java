@@ -2,7 +2,6 @@ package com.sequenceiq.datalake.flow;
 
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,16 +15,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
-import com.sequenceiq.datalake.flow.create.SdxCreateFlowConfig;
-import com.sequenceiq.datalake.flow.datalake.recovery.DatalakeUpgradeRecoveryFlowConfig;
-import com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeFlowConfig;
 import com.sequenceiq.datalake.flow.delete.SdxDeleteFlowConfig;
-import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFlowConfig;
-import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFlowConfig;
-import com.sequenceiq.datalake.flow.repair.SdxRepairFlowConfig;
-import com.sequenceiq.datalake.flow.start.SdxStartFlowConfig;
-import com.sequenceiq.datalake.flow.stop.SdxStopFlowConfig;
-import com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmFlowConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
@@ -37,18 +27,6 @@ public class SdxFlowInformation implements ApplicationFlowInformation {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxFlowInformation.class);
 
-    private static final List<Class<? extends FlowConfiguration<?>>> RESTARTABLE_FLOWS = Arrays.asList(
-            SdxCreateFlowConfig.class,
-            SdxDeleteFlowConfig.class,
-            SdxStartFlowConfig.class,
-            SdxStopFlowConfig.class,
-            SdxRepairFlowConfig.class,
-            DatalakeUpgradeFlowConfig.class,
-            DatalakeBackupFlowConfig.class,
-            DatalakeRestoreFlowConfig.class,
-            DatalakeUpgradeRecoveryFlowConfig.class,
-            UpgradeCcmFlowConfig.class);
-
     private static final List<String> ALLOWED_PARALLEL_FLOWS = Collections.singletonList(SDX_DELETE_EVENT.event());
 
     @Inject
@@ -56,11 +34,6 @@ public class SdxFlowInformation implements ApplicationFlowInformation {
 
     @Inject
     private SdxStatusService sdxStatusService;
-
-    @Override
-    public List<Class<? extends FlowConfiguration<?>>> getRestartableFlows() {
-        return RESTARTABLE_FLOWS;
-    }
 
     @Override
     public List<String> getAllowedParallelFlows() {

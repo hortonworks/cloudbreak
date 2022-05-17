@@ -486,37 +486,35 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
 
         if (flowLog.getFlowType() != null) {
-            if (applicationFlowInformation.getRestartableFlows().contains(flowLog.getFlowType().getClassValue())) {
-                Optional<FlowConfiguration<?>> flowConfig = flowConfigs
-                        .stream()
-                        .filter(fc -> flowLog.isFlowType(fc.getClass()))
-                        .findFirst();
-                try {
-                    String flowChainType = flowChainLogService.getFlowChainType(flowLog.getFlowChainId());
-                    Payload payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
-                    Flow flow = flowConfig.get().createFlow(flowLog.getFlowId(), flowLog.getFlowChainId(), payload.getResourceId(), flowChainType);
-                    runningFlows.put(flow, flowLog.getFlowChainId());
-                    flowStatCache.put(flow.getFlowId(), flowLog.getFlowChainId(), payload.getResourceId(),
-                            flowConfig.get().getFlowOperationType().name(), flow.getFlowConfigClass(), true);
-                    if (flowLog.getFlowChainId() != null) {
-                        flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
-                    }
-                    Map<Object, Object> variables = (Map<Object, Object>) JsonReader.jsonToJava(flowLog.getVariables());
-                    flow.initialize(flowLog.getCurrentState(), variables);
-                    RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
-                    if (restartAction != null) {
-                        LOGGER.debug("Restarting flow with id: '{}', flow chain id: '{}', flow type: '{}', restart action: '{}'", flow.getFlowId(),
-                                flowLog.getFlowChainId(), flowLog.getFlowType().getClassValue().getSimpleName(), restartAction.getClass().getSimpleName());
-                        Span span = tracer.buildSpan(flowLog.getCurrentState()).ignoreActiveSpan().start();
-                        restartAction.restart(new FlowParameters(flowLog.getFlowId(), flowLog.getFlowTriggerUserCrn(),
-                                flowLog.getOperationType().name(), span.context()), flowLog.getFlowChainId(), flowLog.getNextEvent(), payload);
-                        return;
-                    }
-                } catch (RuntimeException e) {
-                    String message = String.format("Flow could not be restarted with id: '%s', flow chain id: '%s' and flow type: '%s'", flowLog.getFlowId(),
-                            flowLog.getFlowChainId(), flowLog.getFlowType().getClassValue().getSimpleName());
-                    LOGGER.error(message, e);
+            Optional<FlowConfiguration<?>> flowConfig = flowConfigs
+                    .stream()
+                    .filter(fc -> flowLog.isFlowType(fc.getClass()))
+                    .findFirst();
+            try {
+                String flowChainType = flowChainLogService.getFlowChainType(flowLog.getFlowChainId());
+                Payload payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
+                Flow flow = flowConfig.get().createFlow(flowLog.getFlowId(), flowLog.getFlowChainId(), payload.getResourceId(), flowChainType);
+                runningFlows.put(flow, flowLog.getFlowChainId());
+                flowStatCache.put(flow.getFlowId(), flowLog.getFlowChainId(), payload.getResourceId(),
+                        flowConfig.get().getFlowOperationType().name(), flow.getFlowConfigClass(), true);
+                if (flowLog.getFlowChainId() != null) {
+                    flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
                 }
+                Map<Object, Object> variables = (Map<Object, Object>) JsonReader.jsonToJava(flowLog.getVariables());
+                flow.initialize(flowLog.getCurrentState(), variables);
+                RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
+                if (restartAction != null) {
+                    LOGGER.debug("Restarting flow with id: '{}', flow chain id: '{}', flow type: '{}', restart action: '{}'", flow.getFlowId(),
+                            flowLog.getFlowChainId(), flowLog.getFlowType().getClassValue().getSimpleName(), restartAction.getClass().getSimpleName());
+                    Span span = tracer.buildSpan(flowLog.getCurrentState()).ignoreActiveSpan().start();
+                    restartAction.restart(new FlowParameters(flowLog.getFlowId(), flowLog.getFlowTriggerUserCrn(),
+                            flowLog.getOperationType().name(), span.context()), flowLog.getFlowChainId(), flowLog.getNextEvent(), payload);
+                    return;
+                }
+            } catch (RuntimeException e) {
+                String message = String.format("Flow could not be restarted with id: '%s', flow chain id: '%s' and flow type: '%s'", flowLog.getFlowId(),
+                        flowLog.getFlowChainId(), flowLog.getFlowType().getClassValue().getSimpleName());
+                LOGGER.error(message, e);
             }
             try {
                 flowLogService.terminate(flowLog.getResourceId(), flowLog.getFlowId());
