@@ -20,6 +20,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceLifeCycle;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -186,7 +188,6 @@ public class MetadataSetupService {
             int newInstances = 0;
             Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
             boolean primaryIgSelected = allInstanceMetadata.stream().anyMatch(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
-            Json imageJson = new Json(imageService.getImage(stack.getId()));
 
             Map<String, InstanceGroup> instanceGroups = instanceGroupService.findByStackId(stack.getId())
                     .stream()
@@ -229,7 +230,11 @@ public class MetadataSetupService {
                         instanceMetaDataEntry.setInstanceStatus(InstanceStatus.TERMINATED);
                     } else {
                         instanceMetaDataEntry.setInstanceStatus(status);
-                        instanceMetaDataEntry.setImage(imageJson);
+                        if (instanceMetaDataEntry.getImage() == null || !StringUtils.hasText(instanceMetaDataEntry.getImage().getValue())) {
+                            Image image = imageService.getImage(stack.getId());
+                            LOGGER.debug("Add image {} for instance metadata: {}", image.getImageId(), instanceMetaDataEntry);
+                            instanceMetaDataEntry.setImage(new Json(image));
+                        }
                     }
                 }
                 instanceMetaDataService.save(instanceMetaDataEntry);
