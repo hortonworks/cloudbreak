@@ -3,3 +3,6 @@ tests:
   - name: "aws_longrunning_e2e_native_tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXUpgradeTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests
+        includedMethods:
+          - testHAFreeIpaInstanceUpgrade

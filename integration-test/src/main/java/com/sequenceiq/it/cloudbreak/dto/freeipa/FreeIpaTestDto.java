@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.testng.util.Strings;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
@@ -25,11 +26,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupNetworkRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
@@ -37,6 +40,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.InstanceGroupAwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AzureNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.GcpNetworkParameters;
@@ -63,6 +67,7 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.NetworkV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
+import com.sequenceiq.it.cloudbreak.dto.SubnetId;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
@@ -95,7 +100,15 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                 .withAuthentication(getCloudProvider().stackAuthentication(given(StackAuthenticationTestDto.class)))
                 .withFreeIpa("ipatest.local", "ipaserver", "admin1234", "admins")
                 .withCatalog(getCloudProvider().getFreeIpaImageCatalogUrl())
-                .withTunnel(Tunnel.CLUSTER_PROXY);
+                .withTunnel(Tunnel.CLUSTER_PROXY)
+                .withVariant();
+    }
+
+    private FreeIpaTestDto withVariant() {
+        if (StringUtils.isNotBlank(getCloudProvider().getVariant())) {
+            getRequest().setVariant(getCloudProvider().getVariant());
+        }
+        return this;
     }
 
     public FreeIpaTestDto withFreeIpaHa(int instanceGroupCount, int instanceCountByGroup) {
@@ -164,6 +177,13 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         List<InstanceGroupRequest> instanceGroupRequests = instanceGroups.stream()
                 .filter(instanceGroupTestDto -> "master".equals(instanceGroupTestDto.getRequest().getName()))
                 .limit(1)
+                .map(ig -> {
+                    if (getCloudProvider().isMultiAZ()) {
+                        return ig.withNetwork(SubnetId.all());
+                    } else {
+                        return ig;
+                    }
+                })
                 .map(InstanceGroupTestDto::getRequest)
                 .map(mapInstanceGroupRequest(instanceCountByGroup))
                 .collect(Collectors.toList());
@@ -177,6 +197,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                 req.setType(reqToCopyDataFrom.getType());
                 req.setInstanceTemplateRequest(reqToCopyDataFrom.getInstanceTemplate());
                 req.setSecurityGroup(reqToCopyDataFrom.getSecurityGroup());
+                req.setNetwork(reqToCopyDataFrom.getNetwork());
                 instanceGroupRequests.add(req);
             }
         }
@@ -192,8 +213,23 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
             instanceGroupRequest.setType(InstanceGroupType.MASTER);
             instanceGroupRequest.setInstanceTemplateRequest(mapInstanceTemplateRequest(request));
             instanceGroupRequest.setSecurityGroup(mapSecurityGroupRequest(request));
+            instanceGroupRequest.setNetwork(mapInstanceGroupNetwork(request.getNetwork()));
             return instanceGroupRequest;
         };
+    }
+
+    private InstanceGroupNetworkRequest mapInstanceGroupNetwork(InstanceGroupNetworkV4Request source) {
+        if (source != null) {
+            InstanceGroupNetworkRequest result = new InstanceGroupNetworkRequest();
+            if (source.getAws() != null) {
+                InstanceGroupAwsNetworkParameters aws = new InstanceGroupAwsNetworkParameters();
+                aws.setSubnetIds(source.getAws().getSubnetIds());
+                result.setAws(aws);
+            }
+            return result;
+        } else {
+            return null;
+        }
     }
 
     private SecurityGroupRequest mapSecurityGroupRequest(InstanceGroupV4Request request) {
@@ -244,7 +280,9 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         NetworkRequest networkRequest = new NetworkRequest();
         if (request.getAws() != null) {
             AwsNetworkParameters params = new AwsNetworkParameters();
-            params.setSubnetId(request.getAws().getSubnetId());
+            if (!getCloudProvider().isMultiAZ()) {
+                params.setSubnetId(request.getAws().getSubnetId());
+            }
             params.setVpcId(request.getAws().getVpcId());
             networkRequest.setAws(params);
         } else if (request.getMock() != null) {
@@ -256,7 +294,9 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         } else if (request.getGcp() != null) {
             GcpNetworkParameters gcp = new GcpNetworkParameters();
             gcp.setNetworkId(request.getGcp().getNetworkId());
-            gcp.setSubnetId(request.getGcp().getSubnetId());
+            if (!getCloudProvider().isMultiAZ()) {
+                gcp.setSubnetId(request.getGcp().getSubnetId());
+            }
             gcp.setNoFirewallRules(request.getGcp().getNoFirewallRules());
             gcp.setNoPublicIp(request.getGcp().getNoPublicIp());
             gcp.setSharedProjectId(request.getGcp().getSharedProjectId());
