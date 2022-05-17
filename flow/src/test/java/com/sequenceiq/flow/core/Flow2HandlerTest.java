@@ -507,7 +507,6 @@ public class Flow2HandlerTest {
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         flowLog.setPayload(JsonWriter.objectToJson(payload));
-        when(applicationFlowInformation.getRestartableFlows()).thenReturn(List.of(HelloWorldFlowConfig.class));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
 
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
@@ -541,7 +540,6 @@ public class Flow2HandlerTest {
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         flowLog.setPayload(JsonWriter.objectToJson(payload));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
-        when(applicationFlowInformation.getRestartableFlows()).thenReturn(List.of(HelloWorldFlowConfig.class));
 
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
 
@@ -564,7 +562,6 @@ public class Flow2HandlerTest {
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         flowLog.setPayload(JsonWriter.objectToJson(payload));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
-        when(applicationFlowInformation.getRestartableFlows()).thenReturn(List.of(HelloWorldFlowConfig.class));
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
 
         setUpFlowConfigCreateFlow(helloWorldFlowConfig);

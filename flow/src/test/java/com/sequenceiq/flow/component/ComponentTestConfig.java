@@ -40,7 +40,6 @@ import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
-import com.sequenceiq.flow.component.sleep.SleepFlowConfig;
 
 @EnableAutoConfiguration
 @EnableJpaRepositories(basePackages = "com.sequenceiq")
@@ -59,11 +58,6 @@ public class ComponentTestConfig {
     @Bean
     public ApplicationFlowInformation applicationFlowInformation() {
         return new ApplicationFlowInformation() {
-            @Override
-            public List<Class<? extends FlowConfiguration<?>>> getRestartableFlows() {
-                return List.of(SleepFlowConfig.class);
-            }
-
             @Override
             public List<String> getAllowedParallelFlows() {
                 return List.of();
