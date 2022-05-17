@@ -83,4 +83,5 @@ dependencies {
   implementation project (':cloud-api')
   implementation project(':cluster-dns-connector')
   implementation project(':sdx-connector')
+  implementation project(':auth-distributor-connector')
 }

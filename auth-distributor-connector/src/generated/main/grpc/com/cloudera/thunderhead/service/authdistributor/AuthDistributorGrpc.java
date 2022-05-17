@@ -3,10 +3,6 @@ package com.cloudera.thunderhead.service.authdistributor;
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /**
- * <pre>
- * For future compatibility, all rpcs must take a request and return a response
- * even if there is initially no content for these messages.
- * </pre>
  */
 @javax.annotation.Generated(
     value = "by gRPC proto compiler (version 1.42.1)",
@@ -188,10 +184,6 @@ public final class AuthDistributorGrpc {
   }
 
   /**
-   * <pre>
-   * For future compatibility, all rpcs must take a request and return a response
-   * even if there is initially no content for these messages.
-   * </pre>
    */
   public static abstract class AuthDistributorImplBase implements io.grpc.BindableService {
 
@@ -261,10 +253,6 @@ public final class AuthDistributorGrpc {
   }
 
   /**
-   * <pre>
-   * For future compatibility, all rpcs must take a request and return a response
-   * even if there is initially no content for these messages.
-   * </pre>
    */
   public static final class AuthDistributorStub extends io.grpc.stub.AbstractAsyncStub<AuthDistributorStub> {
     private AuthDistributorStub(
@@ -315,10 +303,6 @@ public final class AuthDistributorGrpc {
   }
 
   /**
-   * <pre>
-   * For future compatibility, all rpcs must take a request and return a response
-   * even if there is initially no content for these messages.
-   * </pre>
    */
   public static final class AuthDistributorBlockingStub extends io.grpc.stub.AbstractBlockingStub<AuthDistributorBlockingStub> {
     private AuthDistributorBlockingStub(
@@ -365,10 +349,6 @@ public final class AuthDistributorGrpc {
   }
 
   /**
-   * <pre>
-   * For future compatibility, all rpcs must take a request and return a response
-   * even if there is initially no content for these messages.
-   * </pre>
    */
   public static final class AuthDistributorFutureStub extends io.grpc.stub.AbstractFutureStub<AuthDistributorFutureStub> {
     private AuthDistributorFutureStub(

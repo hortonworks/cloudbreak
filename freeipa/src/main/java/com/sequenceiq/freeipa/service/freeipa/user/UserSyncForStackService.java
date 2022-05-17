@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -64,7 +65,10 @@ public class UserSyncForStackService {
     @Inject
     private UserStateDifferenceCalculator userStateDifferenceCalculator;
 
-    public SyncStatusDetail synchronizeStack(Stack stack, UmsUsersState umsUsersState, UserSyncOptions options) {
+    @Inject
+    private AuthDistributorService authDistributorService;
+
+    public SyncStatusDetail synchronizeStack(Stack stack, UmsUsersState umsUsersState, UserSyncOptions options, String operationId) {
         MDCBuilder.buildMdcContext(stack);
         String environmentCrn = stack.getEnvironmentCrn();
         Multimap<String, String> warnings = ArrayListMultimap.create();
@@ -96,7 +100,12 @@ public class UserSyncForStackService {
                 }
             }
 
-            return toSyncStatusDetail(environmentCrn, warnings);
+            SyncStatusDetail syncStatusDetail = toSyncStatusDetail(environmentCrn, warnings);
+            LOGGER.debug("Stack sync status: {}, environmentCrn: {}, fullSync: {}", syncStatusDetail.getStatus(), environmentCrn, options.isFullSync());
+            if (options.isFullSync() && SynchronizationStatus.COMPLETED.equals(syncStatusDetail.getStatus())) {
+                authDistributorService.updateAuthViewForEnvironment(environmentCrn, umsUsersState, stack.getAccountId(), operationId);
+            }
+            return syncStatusDetail;
         } catch (TimeoutException e) {
             LOGGER.warn("Timed out while synchronizing environment {}", environmentCrn, e);
             return SyncStatusDetail.fail(environmentCrn, "Timed out", warnings);

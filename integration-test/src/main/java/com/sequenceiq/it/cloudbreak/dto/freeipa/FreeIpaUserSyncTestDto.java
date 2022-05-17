@@ -20,6 +20,8 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 @Prototype
 public class FreeIpaUserSyncTestDto extends AbstractFreeIpaTestDto<SynchronizeAllUsersRequest, SyncOperationStatus, FreeIpaUserSyncTestDto> {
 
+    private String errorMessage;
+
     public FreeIpaUserSyncTestDto(TestContext testContext) {
         super(new SynchronizeAllUsersRequest(), testContext);
     }
@@ -33,6 +35,11 @@ public class FreeIpaUserSyncTestDto extends AbstractFreeIpaTestDto<SynchronizeAl
 
     public FreeIpaUserSyncTestDto forAllEnvironments() {
         getRequest().setEnvironments(Set.of());
+        return this;
+    }
+
+    public FreeIpaUserSyncTestDto withUsers(Set<String> users) {
+        getRequest().setUsers(users);
         return this;
     }
 
@@ -62,4 +69,11 @@ public class FreeIpaUserSyncTestDto extends AbstractFreeIpaTestDto<SynchronizeAl
         return getEnvironmentCrn();
     }
 
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
 }

@@ -121,9 +121,9 @@ class UserSyncForEnvServiceTest {
             return future;
         });
         when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID), any(Optional.class))).thenReturn(new UmsEventGenerationIds());
-        when(userSyncForStackService.synchronizeStack(stack1, umsUsersState1, options))
+        when(userSyncForStackService.synchronizeStack(stack1, umsUsersState1, options, OPERATION_ID))
                 .thenReturn(new SyncStatusDetail(ENV_CRN, SynchronizationStatus.COMPLETED, "", ImmutableMultimap.of()));
-        when(userSyncForStackService.synchronizeStack(stack2, umsUsersState2, options))
+        when(userSyncForStackService.synchronizeStack(stack2, umsUsersState2, options, OPERATION_ID))
                 .thenReturn(new SyncStatusDetail(ENV_CRN_2, SynchronizationStatus.COMPLETED, "", ImmutableMultimap.of()));
         when(userSyncStatusService.getOrCreateForStack(stack1)).thenReturn(new UserSyncStatus());
         when(userSyncStatusService.getOrCreateForStack(stack2)).thenReturn(new UserSyncStatus());
@@ -163,9 +163,9 @@ class UserSyncForEnvServiceTest {
             return future;
         });
         when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID), any(Optional.class))).thenReturn(new UmsEventGenerationIds());
-        when(userSyncForStackService.synchronizeStack(stack1, umsUsersState1, options))
+        when(userSyncForStackService.synchronizeStack(stack1, umsUsersState1, options, OPERATION_ID))
                 .thenReturn(new SyncStatusDetail(ENV_CRN, SynchronizationStatus.FAILED, "fial1", ImmutableMultimap.of(ENV_CRN, "failed1")));
-        when(userSyncForStackService.synchronizeStack(stack2, umsUsersState2, options))
+        when(userSyncForStackService.synchronizeStack(stack2, umsUsersState2, options, OPERATION_ID))
                 .thenReturn(new SyncStatusDetail(ENV_CRN_2, SynchronizationStatus.REJECTED, "fial2", ImmutableMultimap.of(ENV_CRN_2, "failed2")));
 
         underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1, stack2), userSyncFilter, options, System.currentTimeMillis());
@@ -281,7 +281,7 @@ class UserSyncForEnvServiceTest {
         UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
         when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), any()))
                 .thenReturn(Map.of(ENV_CRN, umsUsersState1));
-        when(userSyncForStackService.synchronizeStack(stack1, umsUsersState1, options))
+        when(userSyncForStackService.synchronizeStack(stack1, umsUsersState1, options, OPERATION_ID))
                 .thenReturn(new SyncStatusDetail(ENV_CRN, SynchronizationStatus.COMPLETED, "", ImmutableMultimap.of()));
         Future<SyncStatusDetail> future = mock(Future.class);
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {

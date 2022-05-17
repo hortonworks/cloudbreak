@@ -26,6 +26,7 @@ import com.sequenceiq.authorization.service.CustomCheckUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
@@ -85,6 +86,7 @@ public class UserSyncService {
     public Operation synchronizeUsers(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             Set<String> userCrnFilter, Set<String> machineUserCrnFilter, WorkloadCredentialsUpdateType workloadCredentialsUpdateType) {
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(userCrnFilter, machineUserCrnFilter, Optional.empty());
+        checkPartialUserSync(accountId, userSyncFilter);
         List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userSyncFilter);
         UserSyncOptions options = getUserSyncOptions(accountId, userSyncFilter.isFullSync(), workloadCredentialsUpdateType);
         return performSyncForStacks(accountId, userSyncFilter, options, stacks);
@@ -92,11 +94,20 @@ public class UserSyncService {
 
     public Operation synchronizeUsersWithCustomPermissionCheck(String accountId, String actorCrn, Set<String> environmentCrnFilter,
             UserSyncRequestFilter userSyncFilter, WorkloadCredentialsUpdateType workloadCredentialsUpdateType, AuthorizationResourceAction action) {
+        checkPartialUserSync(accountId, userSyncFilter);
         List<Stack> stacks = getStacksForSync(accountId, actorCrn, environmentCrnFilter, userSyncFilter);
         List<String> relatedEnvironmentCrns = stacks.stream().map(Stack::getEnvironmentCrn).collect(Collectors.toList());
         customCheckUtil.run(actorCrn, () -> commonPermissionCheckingUtils.checkPermissionForUserOnResources(action, actorCrn, relatedEnvironmentCrns));
         UserSyncOptions options = getUserSyncOptions(accountId, userSyncFilter.isFullSync(), workloadCredentialsUpdateType);
         return performSyncForStacks(accountId, userSyncFilter, options, stacks);
+    }
+
+    private void checkPartialUserSync(String accountId, UserSyncRequestFilter userSyncFilter) {
+        if (entitlementService.isCdpSaasEnabled(accountId) && !userSyncFilter.isFullSync()) {
+            String message = "Partial sync is not available for CDP SAAS.";
+            LOGGER.warn(message);
+            throw new BadRequestException(message);
+        }
     }
 
     private UserSyncOptions getUserSyncOptions(String accountId, boolean fullSync, WorkloadCredentialsUpdateType requestedCredentialsUpdateType) {

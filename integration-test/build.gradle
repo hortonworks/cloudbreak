@@ -110,6 +110,9 @@ dependencies {
   implementation (project(':sdx-connector')) {
     transitive = false;
   }
+  implementation (project(':auth-distributor-connector')) {
+    transitive = false;
+  }
 
   implementation project(':common')
   implementation project(':cloud-gcp')

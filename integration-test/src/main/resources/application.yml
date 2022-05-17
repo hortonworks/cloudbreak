@@ -319,6 +319,9 @@ integrationtest:
     cluster:
     app:
 
+  authdistributor:
+    host: thunderhead-mock
+
 altus:
   audit:
     endpoint: localhost:8982

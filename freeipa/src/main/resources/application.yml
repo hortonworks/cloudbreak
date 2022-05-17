@@ -332,3 +332,7 @@ clusterProxy:
 crn:
   partition: cdp
   region: us-west-1
+
+authdistributor:
+  host: localhost
+  port: 8982

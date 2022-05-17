@@ -5904,6 +5904,644 @@ public final class AuthDistributorProto {
 
   }
 
+  public interface GroupMembershipOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:authdistributor.GroupMembership)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>repeated string user = 1;</code>
+     * @return A list containing the user.
+     */
+    java.util.List<java.lang.String>
+        getUserList();
+    /**
+     * <code>repeated string user = 1;</code>
+     * @return The count of user.
+     */
+    int getUserCount();
+    /**
+     * <code>repeated string user = 1;</code>
+     * @param index The index of the element to return.
+     * @return The user at the given index.
+     */
+    java.lang.String getUser(int index);
+    /**
+     * <code>repeated string user = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the user at the given index.
+     */
+    com.google.protobuf.ByteString
+        getUserBytes(int index);
+  }
+  /**
+   * Protobuf type {@code authdistributor.GroupMembership}
+   */
+  public static final class GroupMembership extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:authdistributor.GroupMembership)
+      GroupMembershipOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use GroupMembership.newBuilder() to construct.
+    private GroupMembership(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private GroupMembership() {
+      user_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GroupMembership();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private GroupMembership(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                user_ = new com.google.protobuf.LazyStringArrayList();
+                mutable_bitField0_ |= 0x00000001;
+              }
+              user_.add(s);
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          user_ = user_.getUnmodifiableView();
+        }
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.internal_static_authdistributor_GroupMembership_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.internal_static_authdistributor_GroupMembership_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership.class, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership.Builder.class);
+    }
+
+    public static final int USER_FIELD_NUMBER = 1;
+    private com.google.protobuf.LazyStringList user_;
+    /**
+     * <code>repeated string user = 1;</code>
+     * @return A list containing the user.
+     */
+    public com.google.protobuf.ProtocolStringList
+        getUserList() {
+      return user_;
+    }
+    /**
+     * <code>repeated string user = 1;</code>
+     * @return The count of user.
+     */
+    public int getUserCount() {
+      return user_.size();
+    }
+    /**
+     * <code>repeated string user = 1;</code>
+     * @param index The index of the element to return.
+     * @return The user at the given index.
+     */
+    public java.lang.String getUser(int index) {
+      return user_.get(index);
+    }
+    /**
+     * <code>repeated string user = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the user at the given index.
+     */
+    public com.google.protobuf.ByteString
+        getUserBytes(int index) {
+      return user_.getByteString(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      for (int i = 0; i < user_.size(); i++) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, user_.getRaw(i));
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      {
+        int dataSize = 0;
+        for (int i = 0; i < user_.size(); i++) {
+          dataSize += computeStringSizeNoTag(user_.getRaw(i));
+        }
+        size += dataSize;
+        size += 1 * getUserList().size();
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership other = (com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership) obj;
+
+      if (!getUserList()
+          .equals(other.getUserList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      if (getUserCount() > 0) {
+        hash = (37 * hash) + USER_FIELD_NUMBER;
+        hash = (53 * hash) + getUserList().hashCode();
+      }
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code authdistributor.GroupMembership}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:authdistributor.GroupMembership)
+        com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembershipOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.internal_static_authdistributor_GroupMembership_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.internal_static_authdistributor_GroupMembership_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership.class, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        user_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.internal_static_authdistributor_GroupMembership_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership build() {
+        com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership buildPartial() {
+        com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership result = new com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership(this);
+        int from_bitField0_ = bitField0_;
+        if (((bitField0_ & 0x00000001) != 0)) {
+          user_ = user_.getUnmodifiableView();
+          bitField0_ = (bitField0_ & ~0x00000001);
+        }
+        result.user_ = user_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership) {
+          return mergeFrom((com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership other) {
+        if (other == com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership.getDefaultInstance()) return this;
+        if (!other.user_.isEmpty()) {
+          if (user_.isEmpty()) {
+            user_ = other.user_;
+            bitField0_ = (bitField0_ & ~0x00000001);
+          } else {
+            ensureUserIsMutable();
+            user_.addAll(other.user_);
+          }
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.LazyStringList user_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      private void ensureUserIsMutable() {
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          user_ = new com.google.protobuf.LazyStringArrayList(user_);
+          bitField0_ |= 0x00000001;
+         }
+      }
+      /**
+       * <code>repeated string user = 1;</code>
+       * @return A list containing the user.
+       */
+      public com.google.protobuf.ProtocolStringList
+          getUserList() {
+        return user_.getUnmodifiableView();
+      }
+      /**
+       * <code>repeated string user = 1;</code>
+       * @return The count of user.
+       */
+      public int getUserCount() {
+        return user_.size();
+      }
+      /**
+       * <code>repeated string user = 1;</code>
+       * @param index The index of the element to return.
+       * @return The user at the given index.
+       */
+      public java.lang.String getUser(int index) {
+        return user_.get(index);
+      }
+      /**
+       * <code>repeated string user = 1;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the user at the given index.
+       */
+      public com.google.protobuf.ByteString
+          getUserBytes(int index) {
+        return user_.getByteString(index);
+      }
+      /**
+       * <code>repeated string user = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The user to set.
+       * @return This builder for chaining.
+       */
+      public Builder setUser(
+          int index, java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureUserIsMutable();
+        user_.set(index, value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string user = 1;</code>
+       * @param value The user to add.
+       * @return This builder for chaining.
+       */
+      public Builder addUser(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  ensureUserIsMutable();
+        user_.add(value);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string user = 1;</code>
+       * @param values The user to add.
+       * @return This builder for chaining.
+       */
+      public Builder addAllUser(
+          java.lang.Iterable<java.lang.String> values) {
+        ensureUserIsMutable();
+        com.google.protobuf.AbstractMessageLite.Builder.addAll(
+            values, user_);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string user = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearUser() {
+        user_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>repeated string user = 1;</code>
+       * @param value The bytes of the user to add.
+       * @return This builder for chaining.
+       */
+      public Builder addUserBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        ensureUserIsMutable();
+        user_.add(value);
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:authdistributor.GroupMembership)
+    }
+
+    // @@protoc_insertion_point(class_scope:authdistributor.GroupMembership)
+    private static final com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership();
+    }
+
+    public static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<GroupMembership>
+        PARSER = new com.google.protobuf.AbstractParser<GroupMembership>() {
+      @java.lang.Override
+      public GroupMembership parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new GroupMembership(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<GroupMembership> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GroupMembership> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface UserStateOrBuilder extends
       // @@protoc_insertion_point(interface_extends:authdistributor.UserState)
       com.google.protobuf.MessageOrBuilder {
@@ -5913,43 +6551,43 @@ public final class AuthDistributorProto {
      * The users assigned to the environment.
      * </pre>
      *
-     * <code>repeated .authdistributor.User user = 1;</code>
+     * <code>repeated .authdistributor.User users = 1;</code>
      */
     java.util.List<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User> 
-        getUserList();
+        getUsersList();
     /**
      * <pre>
      * The users assigned to the environment.
      * </pre>
      *
-     * <code>repeated .authdistributor.User user = 1;</code>
+     * <code>repeated .authdistributor.User users = 1;</code>
      */
-    com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User getUser(int index);
+    com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User getUsers(int index);
     /**
      * <pre>
      * The users assigned to the environment.
      * </pre>
      *
-     * <code>repeated .authdistributor.User user = 1;</code>
+     * <code>repeated .authdistributor.User users = 1;</code>
      */
-    int getUserCount();
+    int getUsersCount();
     /**
      * <pre>
      * The users assigned to the environment.
      * </pre>
      *
-     * <code>repeated .authdistributor.User user = 1;</code>
+     * <code>repeated .authdistributor.User users = 1;</code>
      */
     java.util.List<? extends com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder> 
-        getUserOrBuilderList();
+        getUsersOrBuilderList();
     /**
      * <pre>
      * The users assigned to the environment.
      * </pre>
      *
-     * <code>repeated .authdistributor.User user = 1;</code>
+     * <code>repeated .authdistributor.User users = 1;</code>
      */
-    com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder getUserOrBuilder(
+    com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder getUsersOrBuilder(
         int index);
 
     /**
@@ -6001,53 +6639,53 @@ public final class AuthDistributorProto {
      * The mapping of group name to list of group members.
      * </pre>
      *
-     * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+     * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
      */
-    int getGroupMembershipCount();
+    int getGroupMembershipsCount();
     /**
      * <pre>
      * The mapping of group name to list of group members.
      * </pre>
      *
-     * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+     * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
      */
-    boolean containsGroupMembership(
+    boolean containsGroupMemberships(
         java.lang.String key);
     /**
-     * Use {@link #getGroupMembershipMap()} instead.
+     * Use {@link #getGroupMembershipsMap()} instead.
      */
     @java.lang.Deprecated
-    java.util.Map<java.lang.String, java.lang.String>
-    getGroupMembership();
+    java.util.Map<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership>
+    getGroupMemberships();
     /**
      * <pre>
      * The mapping of group name to list of group members.
      * </pre>
      *
-     * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+     * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
      */
-    java.util.Map<java.lang.String, java.lang.String>
-    getGroupMembershipMap();
+    java.util.Map<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership>
+    getGroupMembershipsMap();
     /**
      * <pre>
      * The mapping of group name to list of group members.
      * </pre>
      *
-     * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+     * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
      */
 
-    java.lang.String getGroupMembershipOrDefault(
+    com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership getGroupMembershipsOrDefault(
         java.lang.String key,
-        java.lang.String defaultValue);
+        com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership defaultValue);
     /**
      * <pre>
      * The mapping of group name to list of group members.
      * </pre>
      *
-     * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+     * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
      */
 
-    java.lang.String getGroupMembershipOrThrow(
+    com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership getGroupMembershipsOrThrow(
         java.lang.String key);
 
     /**
@@ -6117,7 +6755,7 @@ public final class AuthDistributorProto {
       super(builder);
     }
     private UserState() {
-      user_ = java.util.Collections.emptyList();
+      users_ = java.util.Collections.emptyList();
       groups_ = java.util.Collections.emptyList();
     }
 
@@ -6154,10 +6792,10 @@ public final class AuthDistributorProto {
               break;
             case 10: {
               if (!((mutable_bitField0_ & 0x00000001) != 0)) {
-                user_ = new java.util.ArrayList<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User>();
+                users_ = new java.util.ArrayList<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User>();
                 mutable_bitField0_ |= 0x00000001;
               }
-              user_.add(
+              users_.add(
                   input.readMessage(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.parser(), extensionRegistry));
               break;
             }
@@ -6172,15 +6810,15 @@ public final class AuthDistributorProto {
             }
             case 26: {
               if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-                groupMembership_ = com.google.protobuf.MapField.newMapField(
-                    GroupMembershipDefaultEntryHolder.defaultEntry);
+                groupMemberships_ = com.google.protobuf.MapField.newMapField(
+                    GroupMembershipsDefaultEntryHolder.defaultEntry);
                 mutable_bitField0_ |= 0x00000004;
               }
-              com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
-              groupMembership__ = input.readMessage(
-                  GroupMembershipDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
-              groupMembership_.getMutableMap().put(
-                  groupMembership__.getKey(), groupMembership__.getValue());
+              com.google.protobuf.MapEntry<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership>
+              groupMemberships__ = input.readMessage(
+                  GroupMembershipsDefaultEntryHolder.defaultEntry.getParserForType(), extensionRegistry);
+              groupMemberships_.getMutableMap().put(
+                  groupMemberships__.getKey(), groupMemberships__.getValue());
               break;
             }
             case 34: {
@@ -6212,7 +6850,7 @@ public final class AuthDistributorProto {
             e).setUnfinishedMessage(this);
       } finally {
         if (((mutable_bitField0_ & 0x00000001) != 0)) {
-          user_ = java.util.Collections.unmodifiableList(user_);
+          users_ = java.util.Collections.unmodifiableList(users_);
         }
         if (((mutable_bitField0_ & 0x00000002) != 0)) {
           groups_ = java.util.Collections.unmodifiableList(groups_);
@@ -6232,7 +6870,7 @@ public final class AuthDistributorProto {
         int number) {
       switch (number) {
         case 3:
-          return internalGetGroupMembership();
+          return internalGetGroupMemberships();
         case 4:
           return internalGetUserMetadataMap();
         default:
@@ -6248,64 +6886,64 @@ public final class AuthDistributorProto {
               com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState.class, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState.Builder.class);
     }
 
-    public static final int USER_FIELD_NUMBER = 1;
-    private java.util.List<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User> user_;
+    public static final int USERS_FIELD_NUMBER = 1;
+    private java.util.List<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User> users_;
     /**
      * <pre>
      * The users assigned to the environment.
      * </pre>
      *
-     * <code>repeated .authdistributor.User user = 1;</code>
+     * <code>repeated .authdistributor.User users = 1;</code>
      */
     @java.lang.Override
-    public java.util.List<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User> getUserList() {
-      return user_;
+    public java.util.List<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User> getUsersList() {
+      return users_;
     }
     /**
      * <pre>
      * The users assigned to the environment.
      * </pre>
      *
-     * <code>repeated .authdistributor.User user = 1;</code>
+     * <code>repeated .authdistributor.User users = 1;</code>
      */
     @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder> 
-        getUserOrBuilderList() {
-      return user_;
+        getUsersOrBuilderList() {
+      return users_;
     }
     /**
      * <pre>
      * The users assigned to the environment.
      * </pre>
      *
-     * <code>repeated .authdistributor.User user = 1;</code>
+     * <code>repeated .authdistributor.User users = 1;</code>
      */
     @java.lang.Override
-    public int getUserCount() {
-      return user_.size();
+    public int getUsersCount() {
+      return users_.size();
     }
     /**
      * <pre>
      * The users assigned to the environment.
      * </pre>
      *
-     * <code>repeated .authdistributor.User user = 1;</code>
+     * <code>repeated .authdistributor.User users = 1;</code>
      */
     @java.lang.Override
-    public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User getUser(int index) {
-      return user_.get(index);
+    public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User getUsers(int index) {
+      return users_.get(index);
     }
     /**
      * <pre>
      * The users assigned to the environment.
      * </pre>
      *
-     * <code>repeated .authdistributor.User user = 1;</code>
+     * <code>repeated .authdistributor.User users = 1;</code>
      */
     @java.lang.Override
-    public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder getUserOrBuilder(
+    public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder getUsersOrBuilder(
         int index) {
-      return user_.get(index);
+      return users_.get(index);
     }
 
     public static final int GROUPS_FIELD_NUMBER = 2;
@@ -6368,81 +7006,81 @@ public final class AuthDistributorProto {
       return groups_.get(index);
     }
 
-    public static final int GROUPMEMBERSHIP_FIELD_NUMBER = 3;
-    private static final class GroupMembershipDefaultEntryHolder {
+    public static final int GROUPMEMBERSHIPS_FIELD_NUMBER = 3;
+    private static final class GroupMembershipsDefaultEntryHolder {
       static final com.google.protobuf.MapEntry<
-          java.lang.String, java.lang.String> defaultEntry =
+          java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> defaultEntry =
               com.google.protobuf.MapEntry
-              .<java.lang.String, java.lang.String>newDefaultInstance(
-                  com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.internal_static_authdistributor_UserState_GroupMembershipEntry_descriptor, 
+              .<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership>newDefaultInstance(
+                  com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.internal_static_authdistributor_UserState_GroupMembershipsEntry_descriptor, 
                   com.google.protobuf.WireFormat.FieldType.STRING,
                   "",
-                  com.google.protobuf.WireFormat.FieldType.STRING,
-                  "");
+                  com.google.protobuf.WireFormat.FieldType.MESSAGE,
+                  com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership.getDefaultInstance());
     }
     private com.google.protobuf.MapField<
-        java.lang.String, java.lang.String> groupMembership_;
-    private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-    internalGetGroupMembership() {
-      if (groupMembership_ == null) {
+        java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> groupMemberships_;
+    private com.google.protobuf.MapField<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership>
+    internalGetGroupMemberships() {
+      if (groupMemberships_ == null) {
         return com.google.protobuf.MapField.emptyMapField(
-            GroupMembershipDefaultEntryHolder.defaultEntry);
+            GroupMembershipsDefaultEntryHolder.defaultEntry);
       }
-      return groupMembership_;
+      return groupMemberships_;
     }
 
-    public int getGroupMembershipCount() {
-      return internalGetGroupMembership().getMap().size();
+    public int getGroupMembershipsCount() {
+      return internalGetGroupMemberships().getMap().size();
     }
     /**
      * <pre>
      * The mapping of group name to list of group members.
      * </pre>
      *
-     * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+     * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
      */
 
     @java.lang.Override
-    public boolean containsGroupMembership(
+    public boolean containsGroupMemberships(
         java.lang.String key) {
       if (key == null) { throw new NullPointerException("map key"); }
-      return internalGetGroupMembership().getMap().containsKey(key);
+      return internalGetGroupMemberships().getMap().containsKey(key);
     }
     /**
-     * Use {@link #getGroupMembershipMap()} instead.
+     * Use {@link #getGroupMembershipsMap()} instead.
      */
     @java.lang.Override
     @java.lang.Deprecated
-    public java.util.Map<java.lang.String, java.lang.String> getGroupMembership() {
-      return getGroupMembershipMap();
+    public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> getGroupMemberships() {
+      return getGroupMembershipsMap();
     }
     /**
      * <pre>
      * The mapping of group name to list of group members.
      * </pre>
      *
-     * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+     * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
      */
     @java.lang.Override
 
-    public java.util.Map<java.lang.String, java.lang.String> getGroupMembershipMap() {
-      return internalGetGroupMembership().getMap();
+    public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> getGroupMembershipsMap() {
+      return internalGetGroupMemberships().getMap();
     }
     /**
      * <pre>
      * The mapping of group name to list of group members.
      * </pre>
      *
-     * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+     * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
      */
     @java.lang.Override
 
-    public java.lang.String getGroupMembershipOrDefault(
+    public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership getGroupMembershipsOrDefault(
         java.lang.String key,
-        java.lang.String defaultValue) {
+        com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership defaultValue) {
       if (key == null) { throw new NullPointerException("map key"); }
-      java.util.Map<java.lang.String, java.lang.String> map =
-          internalGetGroupMembership().getMap();
+      java.util.Map<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> map =
+          internalGetGroupMemberships().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
     }
     /**
@@ -6450,15 +7088,15 @@ public final class AuthDistributorProto {
      * The mapping of group name to list of group members.
      * </pre>
      *
-     * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+     * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
      */
     @java.lang.Override
 
-    public java.lang.String getGroupMembershipOrThrow(
+    public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership getGroupMembershipsOrThrow(
         java.lang.String key) {
       if (key == null) { throw new NullPointerException("map key"); }
-      java.util.Map<java.lang.String, java.lang.String> map =
-          internalGetGroupMembership().getMap();
+      java.util.Map<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> map =
+          internalGetGroupMemberships().getMap();
       if (!map.containsKey(key)) {
         throw new java.lang.IllegalArgumentException();
       }
@@ -6576,8 +7214,8 @@ public final class AuthDistributorProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      for (int i = 0; i < user_.size(); i++) {
-        output.writeMessage(1, user_.get(i));
+      for (int i = 0; i < users_.size(); i++) {
+        output.writeMessage(1, users_.get(i));
       }
       for (int i = 0; i < groups_.size(); i++) {
         output.writeMessage(2, groups_.get(i));
@@ -6585,8 +7223,8 @@ public final class AuthDistributorProto {
       com.google.protobuf.GeneratedMessageV3
         .serializeStringMapTo(
           output,
-          internalGetGroupMembership(),
-          GroupMembershipDefaultEntryHolder.defaultEntry,
+          internalGetGroupMemberships(),
+          GroupMembershipsDefaultEntryHolder.defaultEntry,
           3);
       com.google.protobuf.GeneratedMessageV3
         .serializeStringMapTo(
@@ -6603,23 +7241,23 @@ public final class AuthDistributorProto {
       if (size != -1) return size;
 
       size = 0;
-      for (int i = 0; i < user_.size(); i++) {
+      for (int i = 0; i < users_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(1, user_.get(i));
+          .computeMessageSize(1, users_.get(i));
       }
       for (int i = 0; i < groups_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, groups_.get(i));
       }
-      for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
-           : internalGetGroupMembership().getMap().entrySet()) {
-        com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
-        groupMembership__ = GroupMembershipDefaultEntryHolder.defaultEntry.newBuilderForType()
+      for (java.util.Map.Entry<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> entry
+           : internalGetGroupMemberships().getMap().entrySet()) {
+        com.google.protobuf.MapEntry<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership>
+        groupMemberships__ = GroupMembershipsDefaultEntryHolder.defaultEntry.newBuilderForType()
             .setKey(entry.getKey())
             .setValue(entry.getValue())
             .build();
         size += com.google.protobuf.CodedOutputStream
-            .computeMessageSize(3, groupMembership__);
+            .computeMessageSize(3, groupMemberships__);
       }
       for (java.util.Map.Entry<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserMetadata> entry
            : internalGetUserMetadataMap().getMap().entrySet()) {
@@ -6646,12 +7284,12 @@ public final class AuthDistributorProto {
       }
       com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState other = (com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState) obj;
 
-      if (!getUserList()
-          .equals(other.getUserList())) return false;
+      if (!getUsersList()
+          .equals(other.getUsersList())) return false;
       if (!getGroupsList()
           .equals(other.getGroupsList())) return false;
-      if (!internalGetGroupMembership().equals(
-          other.internalGetGroupMembership())) return false;
+      if (!internalGetGroupMemberships().equals(
+          other.internalGetGroupMemberships())) return false;
       if (!internalGetUserMetadataMap().equals(
           other.internalGetUserMetadataMap())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
@@ -6665,17 +7303,17 @@ public final class AuthDistributorProto {
       }
       int hash = 41;
       hash = (19 * hash) + getDescriptor().hashCode();
-      if (getUserCount() > 0) {
-        hash = (37 * hash) + USER_FIELD_NUMBER;
-        hash = (53 * hash) + getUserList().hashCode();
+      if (getUsersCount() > 0) {
+        hash = (37 * hash) + USERS_FIELD_NUMBER;
+        hash = (53 * hash) + getUsersList().hashCode();
       }
       if (getGroupsCount() > 0) {
         hash = (37 * hash) + GROUPS_FIELD_NUMBER;
         hash = (53 * hash) + getGroupsList().hashCode();
       }
-      if (!internalGetGroupMembership().getMap().isEmpty()) {
-        hash = (37 * hash) + GROUPMEMBERSHIP_FIELD_NUMBER;
-        hash = (53 * hash) + internalGetGroupMembership().hashCode();
+      if (!internalGetGroupMemberships().getMap().isEmpty()) {
+        hash = (37 * hash) + GROUPMEMBERSHIPS_FIELD_NUMBER;
+        hash = (53 * hash) + internalGetGroupMemberships().hashCode();
       }
       if (!internalGetUserMetadataMap().getMap().isEmpty()) {
         hash = (37 * hash) + USERMETADATAMAP_FIELD_NUMBER;
@@ -6793,7 +7431,7 @@ public final class AuthDistributorProto {
           int number) {
         switch (number) {
           case 3:
-            return internalGetGroupMembership();
+            return internalGetGroupMemberships();
           case 4:
             return internalGetUserMetadataMap();
           default:
@@ -6806,7 +7444,7 @@ public final class AuthDistributorProto {
           int number) {
         switch (number) {
           case 3:
-            return internalGetMutableGroupMembership();
+            return internalGetMutableGroupMemberships();
           case 4:
             return internalGetMutableUserMetadataMap();
           default:
@@ -6835,18 +7473,18 @@ public final class AuthDistributorProto {
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessageV3
                 .alwaysUseFieldBuilders) {
-          getUserFieldBuilder();
+          getUsersFieldBuilder();
           getGroupsFieldBuilder();
         }
       }
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        if (userBuilder_ == null) {
-          user_ = java.util.Collections.emptyList();
+        if (usersBuilder_ == null) {
+          users_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000001);
         } else {
-          userBuilder_.clear();
+          usersBuilder_.clear();
         }
         if (groupsBuilder_ == null) {
           groups_ = java.util.Collections.emptyList();
@@ -6854,7 +7492,7 @@ public final class AuthDistributorProto {
         } else {
           groupsBuilder_.clear();
         }
-        internalGetMutableGroupMembership().clear();
+        internalGetMutableGroupMemberships().clear();
         internalGetMutableUserMetadataMap().clear();
         return this;
       }
@@ -6883,14 +7521,14 @@ public final class AuthDistributorProto {
       public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState buildPartial() {
         com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState result = new com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState(this);
         int from_bitField0_ = bitField0_;
-        if (userBuilder_ == null) {
+        if (usersBuilder_ == null) {
           if (((bitField0_ & 0x00000001) != 0)) {
-            user_ = java.util.Collections.unmodifiableList(user_);
+            users_ = java.util.Collections.unmodifiableList(users_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
-          result.user_ = user_;
+          result.users_ = users_;
         } else {
-          result.user_ = userBuilder_.build();
+          result.users_ = usersBuilder_.build();
         }
         if (groupsBuilder_ == null) {
           if (((bitField0_ & 0x00000002) != 0)) {
@@ -6901,8 +7539,8 @@ public final class AuthDistributorProto {
         } else {
           result.groups_ = groupsBuilder_.build();
         }
-        result.groupMembership_ = internalGetGroupMembership();
-        result.groupMembership_.makeImmutable();
+        result.groupMemberships_ = internalGetGroupMemberships();
+        result.groupMemberships_.makeImmutable();
         result.userMetadataMap_ = internalGetUserMetadataMap();
         result.userMetadataMap_.makeImmutable();
         onBuilt();
@@ -6953,29 +7591,29 @@ public final class AuthDistributorProto {
 
       public Builder mergeFrom(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState other) {
         if (other == com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState.getDefaultInstance()) return this;
-        if (userBuilder_ == null) {
-          if (!other.user_.isEmpty()) {
-            if (user_.isEmpty()) {
-              user_ = other.user_;
+        if (usersBuilder_ == null) {
+          if (!other.users_.isEmpty()) {
+            if (users_.isEmpty()) {
+              users_ = other.users_;
               bitField0_ = (bitField0_ & ~0x00000001);
             } else {
-              ensureUserIsMutable();
-              user_.addAll(other.user_);
+              ensureUsersIsMutable();
+              users_.addAll(other.users_);
             }
             onChanged();
           }
         } else {
-          if (!other.user_.isEmpty()) {
-            if (userBuilder_.isEmpty()) {
-              userBuilder_.dispose();
-              userBuilder_ = null;
-              user_ = other.user_;
+          if (!other.users_.isEmpty()) {
+            if (usersBuilder_.isEmpty()) {
+              usersBuilder_.dispose();
+              usersBuilder_ = null;
+              users_ = other.users_;
               bitField0_ = (bitField0_ & ~0x00000001);
-              userBuilder_ = 
+              usersBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
-                   getUserFieldBuilder() : null;
+                   getUsersFieldBuilder() : null;
             } else {
-              userBuilder_.addAllMessages(other.user_);
+              usersBuilder_.addAllMessages(other.users_);
             }
           }
         }
@@ -7005,8 +7643,8 @@ public final class AuthDistributorProto {
             }
           }
         }
-        internalGetMutableGroupMembership().mergeFrom(
-            other.internalGetGroupMembership());
+        internalGetMutableGroupMemberships().mergeFrom(
+            other.internalGetGroupMemberships());
         internalGetMutableUserMetadataMap().mergeFrom(
             other.internalGetUserMetadataMap());
         this.mergeUnknownFields(other.unknownFields);
@@ -7039,30 +7677,30 @@ public final class AuthDistributorProto {
       }
       private int bitField0_;
 
-      private java.util.List<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User> user_ =
+      private java.util.List<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User> users_ =
         java.util.Collections.emptyList();
-      private void ensureUserIsMutable() {
+      private void ensureUsersIsMutable() {
         if (!((bitField0_ & 0x00000001) != 0)) {
-          user_ = new java.util.ArrayList<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User>(user_);
+          users_ = new java.util.ArrayList<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User>(users_);
           bitField0_ |= 0x00000001;
          }
       }
 
       private com.google.protobuf.RepeatedFieldBuilderV3<
-          com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder> userBuilder_;
+          com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder> usersBuilder_;
 
       /**
        * <pre>
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public java.util.List<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User> getUserList() {
-        if (userBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(user_);
+      public java.util.List<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User> getUsersList() {
+        if (usersBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(users_);
         } else {
-          return userBuilder_.getMessageList();
+          return usersBuilder_.getMessageList();
         }
       }
       /**
@@ -7070,13 +7708,13 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public int getUserCount() {
-        if (userBuilder_ == null) {
-          return user_.size();
+      public int getUsersCount() {
+        if (usersBuilder_ == null) {
+          return users_.size();
         } else {
-          return userBuilder_.getCount();
+          return usersBuilder_.getCount();
         }
       }
       /**
@@ -7084,13 +7722,13 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User getUser(int index) {
-        if (userBuilder_ == null) {
-          return user_.get(index);
+      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User getUsers(int index) {
+        if (usersBuilder_ == null) {
+          return users_.get(index);
         } else {
-          return userBuilder_.getMessage(index);
+          return usersBuilder_.getMessage(index);
         }
       }
       /**
@@ -7098,19 +7736,19 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public Builder setUser(
+      public Builder setUsers(
           int index, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User value) {
-        if (userBuilder_ == null) {
+        if (usersBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureUserIsMutable();
-          user_.set(index, value);
+          ensureUsersIsMutable();
+          users_.set(index, value);
           onChanged();
         } else {
-          userBuilder_.setMessage(index, value);
+          usersBuilder_.setMessage(index, value);
         }
         return this;
       }
@@ -7119,16 +7757,16 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public Builder setUser(
+      public Builder setUsers(
           int index, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder builderForValue) {
-        if (userBuilder_ == null) {
-          ensureUserIsMutable();
-          user_.set(index, builderForValue.build());
+        if (usersBuilder_ == null) {
+          ensureUsersIsMutable();
+          users_.set(index, builderForValue.build());
           onChanged();
         } else {
-          userBuilder_.setMessage(index, builderForValue.build());
+          usersBuilder_.setMessage(index, builderForValue.build());
         }
         return this;
       }
@@ -7137,18 +7775,18 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public Builder addUser(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User value) {
-        if (userBuilder_ == null) {
+      public Builder addUsers(com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User value) {
+        if (usersBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureUserIsMutable();
-          user_.add(value);
+          ensureUsersIsMutable();
+          users_.add(value);
           onChanged();
         } else {
-          userBuilder_.addMessage(value);
+          usersBuilder_.addMessage(value);
         }
         return this;
       }
@@ -7157,19 +7795,19 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public Builder addUser(
+      public Builder addUsers(
           int index, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User value) {
-        if (userBuilder_ == null) {
+        if (usersBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensureUserIsMutable();
-          user_.add(index, value);
+          ensureUsersIsMutable();
+          users_.add(index, value);
           onChanged();
         } else {
-          userBuilder_.addMessage(index, value);
+          usersBuilder_.addMessage(index, value);
         }
         return this;
       }
@@ -7178,16 +7816,16 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public Builder addUser(
+      public Builder addUsers(
           com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder builderForValue) {
-        if (userBuilder_ == null) {
-          ensureUserIsMutable();
-          user_.add(builderForValue.build());
+        if (usersBuilder_ == null) {
+          ensureUsersIsMutable();
+          users_.add(builderForValue.build());
           onChanged();
         } else {
-          userBuilder_.addMessage(builderForValue.build());
+          usersBuilder_.addMessage(builderForValue.build());
         }
         return this;
       }
@@ -7196,16 +7834,16 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public Builder addUser(
+      public Builder addUsers(
           int index, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder builderForValue) {
-        if (userBuilder_ == null) {
-          ensureUserIsMutable();
-          user_.add(index, builderForValue.build());
+        if (usersBuilder_ == null) {
+          ensureUsersIsMutable();
+          users_.add(index, builderForValue.build());
           onChanged();
         } else {
-          userBuilder_.addMessage(index, builderForValue.build());
+          usersBuilder_.addMessage(index, builderForValue.build());
         }
         return this;
       }
@@ -7214,17 +7852,17 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public Builder addAllUser(
+      public Builder addAllUsers(
           java.lang.Iterable<? extends com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User> values) {
-        if (userBuilder_ == null) {
-          ensureUserIsMutable();
+        if (usersBuilder_ == null) {
+          ensureUsersIsMutable();
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, user_);
+              values, users_);
           onChanged();
         } else {
-          userBuilder_.addAllMessages(values);
+          usersBuilder_.addAllMessages(values);
         }
         return this;
       }
@@ -7233,15 +7871,15 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public Builder clearUser() {
-        if (userBuilder_ == null) {
-          user_ = java.util.Collections.emptyList();
+      public Builder clearUsers() {
+        if (usersBuilder_ == null) {
+          users_ = java.util.Collections.emptyList();
           bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
         } else {
-          userBuilder_.clear();
+          usersBuilder_.clear();
         }
         return this;
       }
@@ -7250,15 +7888,15 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public Builder removeUser(int index) {
-        if (userBuilder_ == null) {
-          ensureUserIsMutable();
-          user_.remove(index);
+      public Builder removeUsers(int index) {
+        if (usersBuilder_ == null) {
+          ensureUsersIsMutable();
+          users_.remove(index);
           onChanged();
         } else {
-          userBuilder_.remove(index);
+          usersBuilder_.remove(index);
         }
         return this;
       }
@@ -7267,24 +7905,24 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder getUserBuilder(
+      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder getUsersBuilder(
           int index) {
-        return getUserFieldBuilder().getBuilder(index);
+        return getUsersFieldBuilder().getBuilder(index);
       }
       /**
        * <pre>
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder getUserOrBuilder(
+      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder getUsersOrBuilder(
           int index) {
-        if (userBuilder_ == null) {
-          return user_.get(index);  } else {
-          return userBuilder_.getMessageOrBuilder(index);
+        if (usersBuilder_ == null) {
+          return users_.get(index);  } else {
+          return usersBuilder_.getMessageOrBuilder(index);
         }
       }
       /**
@@ -7292,14 +7930,14 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
       public java.util.List<? extends com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder> 
-           getUserOrBuilderList() {
-        if (userBuilder_ != null) {
-          return userBuilder_.getMessageOrBuilderList();
+           getUsersOrBuilderList() {
+        if (usersBuilder_ != null) {
+          return usersBuilder_.getMessageOrBuilderList();
         } else {
-          return java.util.Collections.unmodifiableList(user_);
+          return java.util.Collections.unmodifiableList(users_);
         }
       }
       /**
@@ -7307,10 +7945,10 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder addUserBuilder() {
-        return getUserFieldBuilder().addBuilder(
+      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder addUsersBuilder() {
+        return getUsersFieldBuilder().addBuilder(
             com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.getDefaultInstance());
       }
       /**
@@ -7318,11 +7956,11 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
-      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder addUserBuilder(
+      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder addUsersBuilder(
           int index) {
-        return getUserFieldBuilder().addBuilder(
+        return getUsersFieldBuilder().addBuilder(
             index, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.getDefaultInstance());
       }
       /**
@@ -7330,25 +7968,25 @@ public final class AuthDistributorProto {
        * The users assigned to the environment.
        * </pre>
        *
-       * <code>repeated .authdistributor.User user = 1;</code>
+       * <code>repeated .authdistributor.User users = 1;</code>
        */
       public java.util.List<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder> 
-           getUserBuilderList() {
-        return getUserFieldBuilder().getBuilderList();
+           getUsersBuilderList() {
+        return getUsersFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilderV3<
           com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder> 
-          getUserFieldBuilder() {
-        if (userBuilder_ == null) {
-          userBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+          getUsersFieldBuilder() {
+        if (usersBuilder_ == null) {
+          usersBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.User.Builder, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserOrBuilder>(
-                  user_,
+                  users_,
                   ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
-          user_ = null;
+          users_ = null;
         }
-        return userBuilder_;
+        return usersBuilder_;
       }
 
       private java.util.List<com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.Group> groups_ =
@@ -7664,80 +8302,80 @@ public final class AuthDistributorProto {
       }
 
       private com.google.protobuf.MapField<
-          java.lang.String, java.lang.String> groupMembership_;
-      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-      internalGetGroupMembership() {
-        if (groupMembership_ == null) {
+          java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> groupMemberships_;
+      private com.google.protobuf.MapField<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership>
+      internalGetGroupMemberships() {
+        if (groupMemberships_ == null) {
           return com.google.protobuf.MapField.emptyMapField(
-              GroupMembershipDefaultEntryHolder.defaultEntry);
+              GroupMembershipsDefaultEntryHolder.defaultEntry);
         }
-        return groupMembership_;
+        return groupMemberships_;
       }
-      private com.google.protobuf.MapField<java.lang.String, java.lang.String>
-      internalGetMutableGroupMembership() {
+      private com.google.protobuf.MapField<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership>
+      internalGetMutableGroupMemberships() {
         onChanged();;
-        if (groupMembership_ == null) {
-          groupMembership_ = com.google.protobuf.MapField.newMapField(
-              GroupMembershipDefaultEntryHolder.defaultEntry);
+        if (groupMemberships_ == null) {
+          groupMemberships_ = com.google.protobuf.MapField.newMapField(
+              GroupMembershipsDefaultEntryHolder.defaultEntry);
         }
-        if (!groupMembership_.isMutable()) {
-          groupMembership_ = groupMembership_.copy();
+        if (!groupMemberships_.isMutable()) {
+          groupMemberships_ = groupMemberships_.copy();
         }
-        return groupMembership_;
+        return groupMemberships_;
       }
 
-      public int getGroupMembershipCount() {
-        return internalGetGroupMembership().getMap().size();
+      public int getGroupMembershipsCount() {
+        return internalGetGroupMemberships().getMap().size();
       }
       /**
        * <pre>
        * The mapping of group name to list of group members.
        * </pre>
        *
-       * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+       * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
        */
 
       @java.lang.Override
-      public boolean containsGroupMembership(
+      public boolean containsGroupMemberships(
           java.lang.String key) {
         if (key == null) { throw new NullPointerException("map key"); }
-        return internalGetGroupMembership().getMap().containsKey(key);
+        return internalGetGroupMemberships().getMap().containsKey(key);
       }
       /**
-       * Use {@link #getGroupMembershipMap()} instead.
+       * Use {@link #getGroupMembershipsMap()} instead.
        */
       @java.lang.Override
       @java.lang.Deprecated
-      public java.util.Map<java.lang.String, java.lang.String> getGroupMembership() {
-        return getGroupMembershipMap();
+      public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> getGroupMemberships() {
+        return getGroupMembershipsMap();
       }
       /**
        * <pre>
        * The mapping of group name to list of group members.
        * </pre>
        *
-       * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+       * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
        */
       @java.lang.Override
 
-      public java.util.Map<java.lang.String, java.lang.String> getGroupMembershipMap() {
-        return internalGetGroupMembership().getMap();
+      public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> getGroupMembershipsMap() {
+        return internalGetGroupMemberships().getMap();
       }
       /**
        * <pre>
        * The mapping of group name to list of group members.
        * </pre>
        *
-       * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+       * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
        */
       @java.lang.Override
 
-      public java.lang.String getGroupMembershipOrDefault(
+      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership getGroupMembershipsOrDefault(
           java.lang.String key,
-          java.lang.String defaultValue) {
+          com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership defaultValue) {
         if (key == null) { throw new NullPointerException("map key"); }
-        java.util.Map<java.lang.String, java.lang.String> map =
-            internalGetGroupMembership().getMap();
+        java.util.Map<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> map =
+            internalGetGroupMemberships().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
       }
       /**
@@ -7745,23 +8383,23 @@ public final class AuthDistributorProto {
        * The mapping of group name to list of group members.
        * </pre>
        *
-       * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+       * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
        */
       @java.lang.Override
 
-      public java.lang.String getGroupMembershipOrThrow(
+      public com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership getGroupMembershipsOrThrow(
           java.lang.String key) {
         if (key == null) { throw new NullPointerException("map key"); }
-        java.util.Map<java.lang.String, java.lang.String> map =
-            internalGetGroupMembership().getMap();
+        java.util.Map<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> map =
+            internalGetGroupMemberships().getMap();
         if (!map.containsKey(key)) {
           throw new java.lang.IllegalArgumentException();
         }
         return map.get(key);
       }
 
-      public Builder clearGroupMembership() {
-        internalGetMutableGroupMembership().getMutableMap()
+      public Builder clearGroupMemberships() {
+        internalGetMutableGroupMemberships().getMutableMap()
             .clear();
         return this;
       }
@@ -7770,13 +8408,13 @@ public final class AuthDistributorProto {
        * The mapping of group name to list of group members.
        * </pre>
        *
-       * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+       * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
        */
 
-      public Builder removeGroupMembership(
+      public Builder removeGroupMemberships(
           java.lang.String key) {
         if (key == null) { throw new NullPointerException("map key"); }
-        internalGetMutableGroupMembership().getMutableMap()
+        internalGetMutableGroupMemberships().getMutableMap()
             .remove(key);
         return this;
       }
@@ -7784,26 +8422,26 @@ public final class AuthDistributorProto {
        * Use alternate mutation accessors instead.
        */
       @java.lang.Deprecated
-      public java.util.Map<java.lang.String, java.lang.String>
-      getMutableGroupMembership() {
-        return internalGetMutableGroupMembership().getMutableMap();
+      public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership>
+      getMutableGroupMemberships() {
+        return internalGetMutableGroupMemberships().getMutableMap();
       }
       /**
        * <pre>
        * The mapping of group name to list of group members.
        * </pre>
        *
-       * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+       * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
        */
-      public Builder putGroupMembership(
+      public Builder putGroupMemberships(
           java.lang.String key,
-          java.lang.String value) {
+          com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership value) {
         if (key == null) { throw new NullPointerException("map key"); }
         if (value == null) {
   throw new NullPointerException("map value");
 }
 
-        internalGetMutableGroupMembership().getMutableMap()
+        internalGetMutableGroupMemberships().getMutableMap()
             .put(key, value);
         return this;
       }
@@ -7812,12 +8450,12 @@ public final class AuthDistributorProto {
        * The mapping of group name to list of group members.
        * </pre>
        *
-       * <code>map&lt;string, string&gt; groupMembership = 3;</code>
+       * <code>map&lt;string, .authdistributor.GroupMembership&gt; groupMemberships = 3;</code>
        */
 
-      public Builder putAllGroupMembership(
-          java.util.Map<java.lang.String, java.lang.String> values) {
-        internalGetMutableGroupMembership().getMutableMap()
+      public Builder putAllGroupMemberships(
+          java.util.Map<java.lang.String, com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.GroupMembership> values) {
+        internalGetMutableGroupMemberships().getMutableMap()
             .putAll(values);
         return this;
       }
@@ -8079,15 +8717,20 @@ public final class AuthDistributorProto {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_authdistributor_UserMetadata_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_authdistributor_GroupMembership_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_authdistributor_GroupMembership_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_authdistributor_UserState_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_authdistributor_UserState_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_authdistributor_UserState_GroupMembershipEntry_descriptor;
+    internal_static_authdistributor_UserState_GroupMembershipsEntry_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
-      internal_static_authdistributor_UserState_GroupMembershipEntry_fieldAccessorTable;
+      internal_static_authdistributor_UserState_GroupMembershipsEntry_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_authdistributor_UserState_UserMetadataMapEntry_descriptor;
   private static final 
@@ -8119,31 +8762,33 @@ public final class AuthDistributorProto {
       "hdistributor.User.State\"\"\n\005State\022\013\n\007ENAB" +
       "LED\020\000\022\014\n\010DISABLED\020\001\"?\n\014UserMetadata\022\013\n\003c" +
       "rn\030\001 \001(\t\022\"\n\032workloadCredentialsVersion\030\002" +
-      " \001(\003\"\373\002\n\tUserState\022#\n\004user\030\001 \003(\0132\025.authd" +
-      "istributor.User\022&\n\006groups\030\002 \003(\0132\026.authdi" +
-      "stributor.Group\022H\n\017groupMembership\030\003 \003(\013" +
-      "2/.authdistributor.UserState.GroupMember" +
-      "shipEntry\022H\n\017userMetadataMap\030\004 \003(\0132/.aut" +
-      "hdistributor.UserState.UserMetadataMapEn" +
-      "try\0326\n\024GroupMembershipEntry\022\013\n\003key\030\001 \001(\t" +
-      "\022\r\n\005value\030\002 \001(\t:\0028\001\032U\n\024UserMetadataMapEn" +
-      "try\022\013\n\003key\030\001 \001(\t\022,\n\005value\030\002 \001(\0132\035.authdi" +
-      "stributor.UserMetadata:\0028\0012\201\004\n\017AuthDistr" +
-      "ibutor\022A\n\nGetVersion\022\027.version.VersionRe" +
-      "quest\032\030.version.VersionResponse\"\000\022\212\001\n\033Fe" +
-      "tchAuthViewForEnvironment\0223.authdistribu" +
-      "tor.FetchAuthViewForEnvironmentRequest\0324" +
-      ".authdistributor.FetchAuthViewForEnviron" +
-      "mentResponse\"\000\022\215\001\n\034RemoveAuthViewForEnvi" +
-      "ronment\0224.authdistributor.RemoveAuthView" +
-      "ForEnvironmentRequest\0325.authdistributor." +
-      "RemoveAuthViewForEnvironmentResponse\"\000\022\215" +
-      "\001\n\034UpdateAuthViewForEnvironment\0224.authdi" +
-      "stributor.UpdateAuthViewForEnvironmentRe" +
-      "quest\0325.authdistributor.UpdateAuthViewFo" +
-      "rEnvironmentResponse\"\000BH\n0com.cloudera.t" +
-      "hunderhead.service.authdistributorB\024Auth" +
-      "DistributorProtob\006proto3"
+      " \001(\003\"\037\n\017GroupMembership\022\014\n\004user\030\001 \003(\t\"\241\003" +
+      "\n\tUserState\022$\n\005users\030\001 \003(\0132\025.authdistrib" +
+      "utor.User\022&\n\006groups\030\002 \003(\0132\026.authdistribu" +
+      "tor.Group\022J\n\020groupMemberships\030\003 \003(\01320.au" +
+      "thdistributor.UserState.GroupMemberships" +
+      "Entry\022H\n\017userMetadataMap\030\004 \003(\0132/.authdis" +
+      "tributor.UserState.UserMetadataMapEntry\032" +
+      "Y\n\025GroupMembershipsEntry\022\013\n\003key\030\001 \001(\t\022/\n" +
+      "\005value\030\002 \001(\0132 .authdistributor.GroupMemb" +
+      "ership:\0028\001\032U\n\024UserMetadataMapEntry\022\013\n\003ke" +
+      "y\030\001 \001(\t\022,\n\005value\030\002 \001(\0132\035.authdistributor" +
+      ".UserMetadata:\0028\0012\201\004\n\017AuthDistributor\022A\n" +
+      "\nGetVersion\022\027.version.VersionRequest\032\030.v" +
+      "ersion.VersionResponse\"\000\022\212\001\n\033FetchAuthVi" +
+      "ewForEnvironment\0223.authdistributor.Fetch" +
+      "AuthViewForEnvironmentRequest\0324.authdist" +
+      "ributor.FetchAuthViewForEnvironmentRespo" +
+      "nse\"\000\022\215\001\n\034RemoveAuthViewForEnvironment\0224" +
+      ".authdistributor.RemoveAuthViewForEnviro" +
+      "nmentRequest\0325.authdistributor.RemoveAut" +
+      "hViewForEnvironmentResponse\"\000\022\215\001\n\034Update" +
+      "AuthViewForEnvironment\0224.authdistributor" +
+      ".UpdateAuthViewForEnvironmentRequest\0325.a" +
+      "uthdistributor.UpdateAuthViewForEnvironm" +
+      "entResponse\"\000BH\n0com.cloudera.thunderhea" +
+      "d.service.authdistributorB\024AuthDistribut" +
+      "orProtob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -8204,17 +8849,23 @@ public final class AuthDistributorProto {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_authdistributor_UserMetadata_descriptor,
         new java.lang.String[] { "Crn", "WorkloadCredentialsVersion", });
-    internal_static_authdistributor_UserState_descriptor =
+    internal_static_authdistributor_GroupMembership_descriptor =
       getDescriptor().getMessageTypes().get(9);
+    internal_static_authdistributor_GroupMembership_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_authdistributor_GroupMembership_descriptor,
+        new java.lang.String[] { "User", });
+    internal_static_authdistributor_UserState_descriptor =
+      getDescriptor().getMessageTypes().get(10);
     internal_static_authdistributor_UserState_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_authdistributor_UserState_descriptor,
-        new java.lang.String[] { "User", "Groups", "GroupMembership", "UserMetadataMap", });
-    internal_static_authdistributor_UserState_GroupMembershipEntry_descriptor =
+        new java.lang.String[] { "Users", "Groups", "GroupMemberships", "UserMetadataMap", });
+    internal_static_authdistributor_UserState_GroupMembershipsEntry_descriptor =
       internal_static_authdistributor_UserState_descriptor.getNestedTypes().get(0);
-    internal_static_authdistributor_UserState_GroupMembershipEntry_fieldAccessorTable = new
+    internal_static_authdistributor_UserState_GroupMembershipsEntry_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
-        internal_static_authdistributor_UserState_GroupMembershipEntry_descriptor,
+        internal_static_authdistributor_UserState_GroupMembershipsEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_authdistributor_UserState_UserMetadataMapEntry_descriptor =
       internal_static_authdistributor_UserState_descriptor.getNestedTypes().get(1);
