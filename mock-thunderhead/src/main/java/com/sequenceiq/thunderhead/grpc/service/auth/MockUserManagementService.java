@@ -753,8 +753,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Override
     public void getAccount(GetAccountRequest request, StreamObserver<GetAccountResponse> responseObserver) {
-        mockCrnService.ensureProperAccountIdUsage(request.getAccountId());
-        LOGGER.info("Get account: {}", request.getAccountId());
+        String accountId = request.getAccountId();
+        mockCrnService.ensureProperAccountIdUsage(accountId);
+        LOGGER.info("Get account: {}", accountId);
         Account.Builder builder = Account.newBuilder();
         if (enableBaseImages) {
             builder.addEntitlements(createEntitlement(CDP_BASE_IMAGE));
@@ -906,7 +907,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (diagnosticsEnabled) {
             builder.addEntitlements(createEntitlement(CDP_VM_DIAGNOSTICS));
         }
-        if (enableSaas) {
+        if (enableSaas || accountId.contains("CDP_SAAS")) {
             builder.addEntitlements(createEntitlement(CDP_SAAS));
         }
         if (enableFmsFreeipaBatchCall) {
@@ -989,8 +990,8 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_RAW_S3))
                                 .addEntitlements(createEntitlement(CDP_CM_BULK_HOSTS_REMOVAL))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
-                                .setAccountId(request.getAccountId())
-                                .setExternalAccountId("external-" + request.getAccountId())
+                                .setAccountId(accountId)
+                                .setExternalAccountId("external-" + accountId)
                                 .build())
                         .build());
         responseObserver.onCompleted();

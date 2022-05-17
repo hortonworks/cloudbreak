@@ -7,8 +7,6 @@ option java_outer_classname = "AuthDistributorProto";
 
 import "version.proto";
 
-// For future compatibility, all rpcs must take a request and return a response
-// even if there is initially no content for these messages.
 service AuthDistributor {
   // Get the service version.
   rpc GetVersion (version.VersionRequest)
@@ -74,13 +72,17 @@ message UserMetadata {
   int64 workloadCredentialsVersion = 2;
 }
 
+message GroupMembership {
+  repeated string user = 1;
+}
+
 message UserState {
   // The users assigned to the environment.
-  repeated User user = 1;
+  repeated User users = 1;
   // The groups assigned to the environment.
   repeated Group groups = 2;
   // The mapping of group name to list of group members.
-  map<string, string> groupMembership = 3;
+  map<string, GroupMembership> groupMemberships = 3;
   // The mapping of user to its metadata.
   map<string, UserMetadata> userMetadataMap = 4;
 }

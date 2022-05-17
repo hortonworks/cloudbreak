@@ -21,7 +21,7 @@ public class UmsChannelConfig {
     private int port;
 
     @Bean
-    public ManagedChannelWrapper managedChannelWrapper() {
+    public ManagedChannelWrapper umsManagedChannelWrapper() {
         return newManagedChannelWrapper(endpoint, port);
     }
 

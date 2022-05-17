@@ -1,34 +1,40 @@
 package com.sequenceiq.cloudbreak.authdistributor;
 
+import static com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.FetchAuthViewForEnvironmentRequest;
 import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.cloudera.thunderhead.service.authdistributor.AuthDistributorGrpc;
 import com.cloudera.thunderhead.service.authdistributor.AuthDistributorGrpc.AuthDistributorBlockingStub;
+import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.FetchAuthViewForEnvironmentResponse;
 import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.RemoveAuthViewForEnvironmentRequest;
 import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UpdateAuthViewForEnvironmentRequest;
 import com.cloudera.thunderhead.service.authdistributor.AuthDistributorProto.UserState;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.authdistributor.config.AuthDistributorConfig;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.opentracing.Tracer;
 
 public class AuthDistributorClient {
 
-    private final ManagedChannel channel;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthDistributorClient.class);
 
-    private final AuthDistributorConfig authDistributorConfig;
+    private final ManagedChannel channel;
 
     private final Tracer tracer;
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public AuthDistributorClient(ManagedChannel channel, AuthDistributorConfig authDistributorConfig, Tracer tracer,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+    public AuthDistributorClient(ManagedChannel channel, Tracer tracer, RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.channel = channel;
-        this.authDistributorConfig = authDistributorConfig;
         this.tracer = tracer;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
@@ -53,6 +59,26 @@ public class AuthDistributorClient {
                 .setEnvironmentCrn(environmentCrn);
 
         newStub(requestId).removeAuthViewForEnvironment(requestBuilder.build());
+    }
+
+    public Optional<UserState> fetchAuthViewForEnvironment(String requestId, String environmentCrn) {
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(environmentCrn, "environmentCrn should not be null.");
+
+        FetchAuthViewForEnvironmentRequest.Builder requestBuilder = FetchAuthViewForEnvironmentRequest.newBuilder()
+                .setEnvironmentCrn(environmentCrn);
+
+        try {
+            FetchAuthViewForEnvironmentResponse response = newStub(requestId).fetchAuthViewForEnvironment(requestBuilder.build());
+            return Optional.ofNullable(response.getUserState());
+        } catch (StatusRuntimeException e) {
+            if (e.getStatus().getCode().equals(Status.NOT_FOUND.getCode())) {
+                LOGGER.debug("Auth view for environment not found: {}", environmentCrn);
+                return Optional.empty();
+            } else {
+                throw e;
+            }
+        }
     }
 
     private AuthDistributorBlockingStub newStub(String requestId) {

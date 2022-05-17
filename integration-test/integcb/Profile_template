@@ -22,6 +22,8 @@ export ENVIRONMENT_EXPERIENCE_SCAN_ENABLED=true
 export CB_LOCAL_DEV_LIST=jaeger,environments2-api,audit-api,distrox-api,thunderhead-api,datalake-api
 
 export ALTUS_AUDIT_ENDPOINT=thunderhead-mock
+export INTEGRATIONTEST_AUTHDISTRIBUTOR_HOST=thunderhead-mock
+export AUTHDISTRIBUTOR_HOST=thunderhead-mock
 export CLUSTERDNS_HOST=thunderhead-mock
 export MOCK_INFRASTRUCTURE_HOST=mock-infrastructure
 

@@ -165,7 +165,7 @@ public class UserSyncForEnvService {
     private Future<SyncStatusDetail> asyncSynchronizeStack(Stack stack, UmsUsersState umsUsersState, UmsEventGenerationIds umsEventGenerationIds,
             UserSyncOptions options, String operationId, String accountId) {
         return asyncTaskExecutor.submit(() -> {
-            SyncStatusDetail statusDetail = userSyncForStackService.synchronizeStack(stack, umsUsersState, options);
+            SyncStatusDetail statusDetail = userSyncForStackService.synchronizeStack(stack, umsUsersState, options, operationId);
             if (options.isFullSync() && statusDetail.getStatus() == SynchronizationStatus.COMPLETED) {
                 UserSyncStatus userSyncStatus = userSyncStatusService.getOrCreateForStack(stack);
                 userSyncStatus.setUmsEventGenerationIds(new Json(umsEventGenerationIds));

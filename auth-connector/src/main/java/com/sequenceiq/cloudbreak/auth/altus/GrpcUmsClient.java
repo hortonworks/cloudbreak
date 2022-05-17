@@ -18,6 +18,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -74,6 +75,7 @@ public class GrpcUmsClient {
 
     private static final int CHECK_RIGHT_HAS_RIGHTS_TRESHOLD = 3;
 
+    @Qualifier("umsManagedChannelWrapper")
     @Inject
     private ManagedChannelWrapper channelWrapper;
 
