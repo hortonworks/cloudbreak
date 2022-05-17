@@ -18,7 +18,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_ENCRYPTION_AT_HOST;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
@@ -468,9 +467,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private Optional<SshPublicKey> sshPublicKey;
 
-    @Value("${auth.mock.azure.disk.SSEWithCMK.enable}")
-    private boolean enableAzureDiskSSEWithCMK;
-
     @Value("${auth.mock.azure.encryptionAtHost.enable}")
     private boolean enableAzureEncryptionAtHost;
 
@@ -863,9 +859,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (ephemeralDisksForTempDataEnabled) {
             builder.addEntitlements(createEntitlement(EPHEMERAL_DISKS_FOR_TEMP_DATA));
-        }
-        if (enableAzureDiskSSEWithCMK) {
-            builder.addEntitlements(createEntitlement(CDP_CB_AZURE_DISK_SSE_WITH_CMK));
         }
         if (enableAzureEncryptionAtHost) {
             builder.addEntitlements(createEntitlement(CDP_CB_AZURE_ENCRYPTION_AT_HOST));

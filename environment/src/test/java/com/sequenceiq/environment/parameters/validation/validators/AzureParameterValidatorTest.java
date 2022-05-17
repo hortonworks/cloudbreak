@@ -63,7 +63,6 @@ public class AzureParameterValidatorTest {
     public void setup() {
         MockitoAnnotations.initMocks(this);
         when(entitlementService.azureSingleResourceGroupDeploymentEnabled(anyString())).thenReturn(true);
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(true);
     }
 
     @Test
@@ -354,66 +353,12 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEntitlementDisabledThenError() {
-        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
-                .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
-                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                .withEncryptionKeyUrl(KEY_URL).build())
-                        .build())
-                .build();
-        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
-
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(false);
-        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
-
-        assertTrue(validationResult.hasError());
-        assertEquals(validationResult.getFormattedErrors(), "You specified encryptionKeyUrl to use Server Side Encryption for Azure Managed disks with CMK, " +
-                "but that feature is currently disabled. Get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for your account to use SSE with CMK.");
-    }
-
-    @Test
-    public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEncryptionKeyResourceGroupAndEntitlementEnabledThenNoError() {
-        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
-                .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
-                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                .withEncryptionKeyUrl(KEY_URL)
-                                .withEncryptionKeyResourceGroupName(RESOURCE_GROUP_NAME)
-                                .build())
-                        .build())
-                .build();
-        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
-
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(true);
-        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
-
-        assertFalse(validationResult.hasError());
-    }
-
-    @Test
-    public void testWhenNoResourceGroupAndNoResourceEncryptionParameterAndEntitlementDisabledThenNoError() {
+    public void testNoResourceGroupAndNoResourceEncryptionParameterThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder().build())
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(false);
-        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
-
-        assertFalse(validationResult.hasError());
-    }
-
-    @Test
-    public void testNoResourceGroupAndNoResourceEncryptionParameterAndEntitlementEnabledThenNoError() {
-        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
-                .withAzureParameters(AzureParametersDto.builder().build())
-                .build();
-        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
-
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(true);
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
@@ -443,7 +388,7 @@ public class AzureParameterValidatorTest {
     }
 
     @Test
-    public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEncryptionKeyResourceGroupNameAndEntitlementEnabledThenNoError() {
+    public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEncryptionKeyResourceGroupNameThenNoError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
@@ -456,36 +401,13 @@ public class AzureParameterValidatorTest {
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(true);
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertFalse(validationResult.hasError());
     }
 
     @Test
-    public void testWhenUseMultipleResourceGroupsAndResourceEncryptionParameterKeyUrlAndEncryptionKeyResourceGroupNameAndNoEntitlementThenError() {
-        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
-                .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
-                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                .withEncryptionKeyUrl(KEY_URL)
-                                .withEncryptionKeyResourceGroupName(ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
-                                .build())
-                        .build())
-                .build();
-        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
-
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(false);
-        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
-
-        assertTrue(validationResult.hasError());
-        assertEquals(validationResult.getFormattedErrors(), "You specified encryptionKeyUrl to use Server Side Encryption for Azure Managed disks " +
-                "with CMK, but that feature is currently disabled. Get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for your account to use SSE with CMK.");
-    }
-
-    @Test
-    public void testWhenUseMultipleResourceGroupsAndEncryptionKeyResourceGroupNameAndNoEntitlementThenError() {
+    public void testWhenUseMultipleResourceGroupsAndEncryptionKeyResourceGroupNameAndNoResourceEncryptionParameterKeyUrlThenError() {
         EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
@@ -497,29 +419,6 @@ public class AzureParameterValidatorTest {
                 .build();
         EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
 
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(false);
-        ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
-
-        assertTrue(validationResult.hasError());
-        assertEquals(validationResult.getFormattedErrors(), "You specified encryptionKeyResourceGroupName to provide the resource group name which contains " +
-                "the encryption keyfor Server Side Encryption of Azure Managed disks, but that feature is currently disabled. " +
-                "Get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for your account to use SSE with CMK.");
-    }
-
-    @Test
-    public void testWhenUseMultipleResourceGroupsAndEncryptionKeyResourceGroupNameAndNoResourceEncryptionParameterKeyUrlAndEntitlementThenError() {
-        EnvironmentDto environmentDto = new EnvironmentDtoBuilder()
-                .withAzureParameters(AzureParametersDto.builder()
-                        .withResourceGroup(AzureResourceGroupDto.builder()
-                                .withResourceGroupUsagePattern(ResourceGroupUsagePattern.USE_MULTIPLE).build())
-                        .withEncryptionParameters(AzureResourceEncryptionParametersDto.builder()
-                                .withEncryptionKeyResourceGroupName(ENCRYPTION_KEY_RESOURCE_GROUP_NAME)
-                                .build())
-                        .build())
-                .build();
-        EnvironmentValidationDto environmentValidationDto = EnvironmentValidationDto.builder().withEnvironmentDto(environmentDto).build();
-
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(anyString())).thenReturn(true);
         ValidationResult validationResult = underTest.validate(environmentValidationDto, environmentDto.getParameters(), ValidationResult.builder());
 
         assertTrue(validationResult.hasError());

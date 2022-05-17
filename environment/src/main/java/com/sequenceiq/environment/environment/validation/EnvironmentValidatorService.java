@@ -278,14 +278,8 @@ public class EnvironmentValidatorService {
 
     public ValidationResult validateEncryptionKeyUrl(String encryptionKeyUrl, String accountId) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if (!entitlementService.isAzureDiskSSEWithCMKEnabled(accountId)) {
-            resultBuilder.error(String.format("You have specified encryption-key-url to enable Server Side Encryption for Azure Managed disks with CMK"
-                    + " but that feature is currently not enabled for this account."
-                    + " Please get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for this account to use SSE with CMK."));
-        } else {
-            ValidationResult validationResult = encryptionKeyUrlValidator.validateEncryptionKeyUrl(encryptionKeyUrl);
-            resultBuilder.merge(validationResult);
-        }
+        ValidationResult validationResult = encryptionKeyUrlValidator.validateEncryptionKeyUrl(encryptionKeyUrl);
+        resultBuilder.merge(validationResult);
         return resultBuilder.build();
     }
 

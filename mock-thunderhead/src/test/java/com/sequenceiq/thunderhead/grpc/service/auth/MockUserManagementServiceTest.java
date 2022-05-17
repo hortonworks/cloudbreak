@@ -247,9 +247,6 @@ public class MockUserManagementServiceTest {
                 {"gcpEndpointGatewayEnabled false", "gcpEndpointGatewayEnabled", false, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", false},
                 {"gcpEndpointGatewayEnabled true", "gcpEndpointGatewayEnabled", true, "CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", true},
 
-                {"enableAzureDiskSSEWithCMK false", "enableAzureDiskSSEWithCMK", false, "CDP_CB_AZURE_DISK_SSE_WITH_CMK", false},
-                {"enableAzureDiskSSEWithCMK true", "enableAzureDiskSSEWithCMK", true, "CDP_CB_AZURE_DISK_SSE_WITH_CMK", true},
-
                 {"enableAzureEncryptionAtHost false", "enableAzureEncryptionAtHost", false, "CDP_CB_AZURE_ENCRYPTION_AT_HOST", false},
                 {"enableAzureEncryptionAtHost true", "enableAzureEncryptionAtHost", true, "CDP_CB_AZURE_ENCRYPTION_AT_HOST", true},
 

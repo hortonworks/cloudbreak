@@ -366,12 +366,11 @@ class EnvironmentValidatorServiceTest {
     }
 
     @Test
-    void shouldFailIfEncryptionKeyUrlSpecifiedAndEntitlementAndWrongFormat() {
+    void shouldFailIfEncryptionKeyUrlSpecifiedAndWrongFormat() {
         String encryptionKeyUrl = "Dummy-key-url";
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         validationResultBuilder.error("error");
         when(encryptionKeyUrlValidator.validateEncryptionKeyUrl(any())).thenReturn(validationResultBuilder.build());
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(any())).thenReturn(true);
         ValidationResult validationResult = underTest.validateEncryptionKeyUrl(encryptionKeyUrl, ACCOUNT_ID);
         assertTrue(validationResult.hasError());
     }
@@ -391,24 +390,6 @@ class EnvironmentValidatorServiceTest {
         when(encryptionKeyArnValidator.validateEncryptionKeyArn(any())).thenReturn(validationResultBuilder.build());
         when(entitlementService.isAWSDiskEncryptionWithCMKEnabled(any())).thenReturn(true);
         ValidationResult validationResult = underTest.validateEncryptionKeyArn(encryptionKeyArn, ACCOUNT_ID);
-        assertFalse(validationResult.hasError());
-    }
-
-    @Test
-    void shouldFailIfEncryptionKeyUrlSpecifiedAndNotEntitlement() {
-        String encryptionKeyUrl = "Dummy-key-url";
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(any())).thenReturn(false);
-        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(encryptionKeyUrl, ACCOUNT_ID);
-        assertTrue(validationResult.hasError());
-    }
-
-    @Test
-    void testValidateEncryptionKeyUrlSpecifiedAndEntitlement() {
-        String encryptionKeyUrl = "https://someVault.vault.azure.net/keys/someKey/someKeyVersion";
-        ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        when(encryptionKeyUrlValidator.validateEncryptionKeyUrl(any())).thenReturn(validationResultBuilder.build());
-        when(entitlementService.isAzureDiskSSEWithCMKEnabled(any())).thenReturn(true);
-        ValidationResult validationResult = underTest.validateEncryptionKeyUrl(encryptionKeyUrl, ACCOUNT_ID);
         assertFalse(validationResult.hasError());
     }
 

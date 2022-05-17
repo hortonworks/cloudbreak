@@ -151,13 +151,6 @@ public class AzureParameterValidator implements ParameterValidator {
         String encryptionKeyUrl = azureResourceEncryptionParametersDto.getEncryptionKeyUrl();
         String encryptionKeyResourceGroupName = azureResourceEncryptionParametersDto.getEncryptionKeyResourceGroupName();
         if (encryptionKeyUrl != null) {
-            if (!entitlementService.isAzureDiskSSEWithCMKEnabled(accountId)) {
-                LOGGER.info("Invalid request, CDP_CB_AZURE_DISK_SSE_WITH_CMK entitlement turned off for account {}", accountId);
-                return validationResultBuilder.error(
-                        "You specified encryptionKeyUrl to use Server Side Encryption for Azure Managed disks with CMK, "
-                                + "but that feature is currently disabled. Get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for your account to use SSE with CMK.").
-                        build();
-            }
             if (encryptionKeyResourceGroupName == null && USE_MULTIPLE.equals(azureParametersDto.getAzureResourceGroupDto().getResourceGroupUsagePattern())) {
                 LOGGER.info("Invalid request, neither --encryption-key-resource-group-name nor --resource-group-name is present.");
                 return validationResultBuilder.error(
@@ -169,14 +162,6 @@ public class AzureParameterValidator implements ParameterValidator {
         }
 
         if (encryptionKeyResourceGroupName != null) {
-            if (!entitlementService.isAzureDiskSSEWithCMKEnabled(accountId)) {
-                LOGGER.info("Invalid request, CDP_CB_AZURE_DISK_SSE_WITH_CMK entitlement turned off for account {}", accountId);
-                return validationResultBuilder.error(
-                        "You specified encryptionKeyResourceGroupName to provide the resource group name which contains the encryption key" +
-                                "for Server Side Encryption of Azure Managed disks, but that feature is currently disabled. " +
-                                "Get 'CDP_CB_AZURE_DISK_SSE_WITH_CMK' enabled for your account to use SSE with CMK.").
-                        build();
-            }
             if (encryptionKeyUrl == null) {
                 LOGGER.info("Invalid request, encryptionKeyResourceGroupName cannot be specified without encryptionKeyUrl");
                 return validationResultBuilder.error(

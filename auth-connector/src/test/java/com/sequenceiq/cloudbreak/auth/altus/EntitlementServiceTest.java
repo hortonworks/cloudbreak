@@ -164,9 +164,6 @@ class EntitlementServiceTest {
                 {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", (EntitlementCheckFunction) EntitlementService::gcpEndpointGatewayEnabled, false},
                 {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP", (EntitlementCheckFunction) EntitlementService::gcpEndpointGatewayEnabled, true},
 
-                {"CDP_CB_AZURE_DISK_SSE_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAzureDiskSSEWithCMKEnabled, false},
-                {"CDP_CB_AZURE_DISK_SSE_WITH_CMK", (EntitlementCheckFunction) EntitlementService::isAzureDiskSSEWithCMKEnabled, true},
-
                 {"CDP_CB_AZURE_ENCRYPTION_AT_HOST", (EntitlementCheckFunction) EntitlementService::isAzureEncryptionAtHostEnabled, false},
                 {"CDP_CB_AZURE_ENCRYPTION_AT_HOST", (EntitlementCheckFunction) EntitlementService::isAzureEncryptionAtHostEnabled, true},
 

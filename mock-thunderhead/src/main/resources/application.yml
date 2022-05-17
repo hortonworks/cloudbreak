@@ -70,8 +70,6 @@ auth:
     diagnostics.vm.enable: true
     user.sync.credentials.update.optimization.enable: true
     azure:
-      disk:
-        SSEWithCMK.enable: true
       encryptionAtHost.enable: false
     aws:
       native.variant.migration.enable: true
