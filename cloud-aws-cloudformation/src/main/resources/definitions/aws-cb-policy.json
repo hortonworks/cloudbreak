@@ -271,6 +271,20 @@
       "Resource": [
         "*"
       ]
+    },
+    {
+      "Sid": "AllowSsmParams",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:DescribeParameters",
+        "ssm:GetParameter",
+        "ssm:GetParameters",
+        "ssm:GetParameterHistory",
+        "ssm:GetParametersByPath"
+      ],
+      "Resource": [
+        "arn:aws:ssm:*:*:parameter/aws/service/eks/optimized-ami/*"
+      ]
     }
   ],
   "Version": "2012-10-17"
