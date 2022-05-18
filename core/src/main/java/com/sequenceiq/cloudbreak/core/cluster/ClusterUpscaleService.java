@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -54,10 +55,13 @@ public class ClusterUpscaleService {
     private KerberosConfigService kerberosConfigService;
 
     @Inject
+    private ClusterHostServiceRunner clusterHostServiceRunner;
+
+    @Inject
     private ParcelService parcelService;
 
     public void installServicesOnNewHosts(Long stackId, Set<String> hostGroupNames, Boolean repair, Boolean restartServices,
-            Map<String, Set<String>> hostGroupsWithHostNames) throws CloudbreakException {
+            Map<String, Set<String>> hostGroupsWithHostNames, Map<String, Integer> hostGroupWithAdjustment) throws CloudbreakException {
         Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
         LOGGER.debug("Start installing CM services");
         removeUnusedParcelComponents(stack);
@@ -66,7 +70,8 @@ public class ClusterUpscaleService {
         Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup = hostGroupSetWithInstanceMetadas.stream()
                 .filter(hostGroup -> hostGroupNames.contains(hostGroup.getName()))
                 .collect(Collectors.toMap(Function.identity(), hostGroup -> hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet()));
-        recipeEngine.executePostAmbariStartRecipes(stack, hostGroupSetWithRecipes);
+        recipeEngine.executePostClouderaManagerStartRecipesOnTargets(stack, hostGroupSetWithRecipes,
+                clusterHostServiceRunner.collectUpscaleCandidates(stack.getCluster().getId(), hostGroupWithAdjustment, false));
         Set<InstanceMetaData> runningInstanceMetaDataSet =
                 hostGroupSetWithInstanceMetadas.stream()
                         .flatMap(hostGroup -> hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet().stream())
@@ -112,10 +117,11 @@ public class ClusterUpscaleService {
         return restartServices && stack.getNotTerminatedAndNotZombieInstanceMetaDataList().size() == stack.getRunningInstanceMetaDataSet().size();
     }
 
-    public void executePostRecipesOnNewHosts(Long stackId) throws CloudbreakException {
+    public void executePostRecipesOnNewHosts(Long stackId, Map<String, Integer> hostGroupWithAdjustment) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Start executing post recipes");
-        recipeEngine.executePostInstallRecipes(stack, hostGroupService.getByClusterWithRecipes(stack.getCluster().getId()));
+        recipeEngine.executePostInstallRecipesOnTargets(stack, hostGroupService.getByClusterWithRecipes(stack.getCluster().getId()),
+                clusterHostServiceRunner.collectUpscaleCandidates(stack.getCluster().getId(), hostGroupWithAdjustment, false));
     }
 
     public Map<String, String> gatherInstalledComponents(Long stackId, String hostname) {

@@ -14,18 +14,22 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
 
     private Map<String, Set<String>> hostGroupsWithHostNames;
 
-    public UpscaleClusterRequest(Long stackId, Set<String> hostGroups, boolean repair, boolean restartServices) {
+    private Map<String, Integer> hostGroupWithAdjustment;
+
+    public UpscaleClusterRequest(Long stackId, Set<String> hostGroups, boolean repair, boolean restartServices, Map<String, Integer> hostGroupWithAdjustment) {
         super(stackId, hostGroups);
         this.repair = repair;
         this.restartServices = restartServices;
+        this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.hostGroupsWithHostNames = new HashMap<>();
     }
 
     public UpscaleClusterRequest(Long stackId, Set<String> hostGroups, boolean repair, boolean restartServices,
-            Map<String, Set<String>> hostGroupsWithHostNames) {
+            Map<String, Set<String>> hostGroupsWithHostNames, Map<String, Integer> hostGroupWithAdjustment) {
         super(stackId, hostGroups);
         this.repair = repair;
         this.restartServices = restartServices;
+        this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.hostGroupsWithHostNames = hostGroupsWithHostNames;
     }
 
@@ -39,5 +43,9 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
 
     public Map<String, Set<String>> getHostGroupsWithHostNames() {
         return hostGroupsWithHostNames;
+    }
+
+    public Map<String, Integer> getHostGroupWithAdjustment() {
+        return hostGroupWithAdjustment;
     }
 }

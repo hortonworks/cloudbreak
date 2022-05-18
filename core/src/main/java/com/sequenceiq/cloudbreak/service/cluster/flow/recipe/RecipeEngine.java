@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -70,21 +71,32 @@ public class RecipeEngine {
         LOGGER.info("Upload recipes finished successfully for stack with name {}", stack.getName());
     }
 
-    public void executePreClusterManagerRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePreClusterManagerRecipes(Stack stack, Map<String, String> candidateAddresses, Set<HostGroup> hostGroups) throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
         if (shouldExecuteRecipeOnStack(recipes, PRE_CLOUDERA_MANAGER_START)) {
             uploadRecipesIfNeeded(stack, hostGroups);
-            orchestratorRecipeExecutor.preClusterManagerStartRecipes(stack);
+            if (MapUtils.isEmpty(candidateAddresses)) {
+                orchestratorRecipeExecutor.preClusterManagerStartRecipes(stack);
+            } else {
+                orchestratorRecipeExecutor.preClusterManagerStartRecipesOnTargets(stack, candidateAddresses);
+            }
         }
     }
 
-    // note: executed when LDAP config is present, because later the LDAP sync is hooked for this salt state in the top.sls.
-    public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePostClouderaManagerStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
-        if ((stack.getCluster() != null && ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName()))
-                || recipesFound(recipes, POST_CLOUDERA_MANAGER_START)) {
+        if (shouldExecutePostClouderaManagerStartRecipeOnStack(stack, recipes)) {
             uploadRecipesIfNeeded(stack, hostGroups);
             orchestratorRecipeExecutor.postClusterManagerStartRecipes(stack);
+        }
+    }
+
+    public void executePostClouderaManagerStartRecipesOnTargets(Stack stack, Set<HostGroup> hostGroups, Map<String, String> candidateAddresses)
+            throws CloudbreakException {
+        Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
+        if (shouldExecutePostClouderaManagerStartRecipeOnStack(stack, recipes)) {
+            uploadRecipesIfNeeded(stack, hostGroups);
+            orchestratorRecipeExecutor.postClusterManagerStartRecipesOnTargets(stack, candidateAddresses);
         }
     }
 
@@ -92,8 +104,16 @@ public class RecipeEngine {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
         if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL)) {
             uploadRecipesIfNeeded(stack, hostGroups);
+            orchestratorRecipeExecutor.postClusterInstall(stack);
         }
-        orchestratorRecipeExecutor.postClusterInstall(stack);
+    }
+
+    public void executePostInstallRecipesOnTargets(Stack stack, Set<HostGroup> hostGroups, Map<String, String> candidateAddresses) throws CloudbreakException {
+        Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
+        if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL)) {
+            uploadRecipesIfNeeded(stack, hostGroups);
+            orchestratorRecipeExecutor.postClusterInstallOnTargets(stack, candidateAddresses);
+        }
     }
 
     public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups, boolean forced) throws CloudbreakException {
@@ -106,6 +126,12 @@ public class RecipeEngine {
         if (shouldExecutePreTerminationWithUploadRecipes(stack, hostGroups)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack, hostNames);
         }
+    }
+
+    // note: executed when LDAP config is present, because later the LDAP sync is hooked for this salt state in the top.sls.
+    private boolean shouldExecutePostClouderaManagerStartRecipeOnStack(Stack stack, Collection<Recipe> recipes) {
+        return (stack.getCluster() != null && ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName()))
+                || recipesFound(recipes, POST_CLOUDERA_MANAGER_START);
     }
 
     private boolean shouldExecutePreTerminationWithUploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {

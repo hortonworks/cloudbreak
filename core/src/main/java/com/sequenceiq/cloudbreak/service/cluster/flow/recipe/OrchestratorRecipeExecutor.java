@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -77,51 +78,29 @@ class OrchestratorRecipeExecutor {
     }
 
     public void preClusterManagerStartRecipes(Stack stack) throws CloudbreakException {
-        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        try {
-            hostOrchestrator.preClusterManagerStartRecipes(gatewayConfig, stackUtil.collectReachableNodes(stack),
-                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
-        } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
-            String preClusterManagerStartException = "Pre cluster manager start" + getRecipeTimeoutErrorMessage(timeoutException);
-            LOGGER.info("{} {}", preClusterManagerStartException, timeoutException);
-            throw new CloudbreakException(preClusterManagerStartException, timeoutException);
-        } catch (CloudbreakOrchestratorFailedException e) {
-            String message = getRecipeExecutionFailureMessage(stack, e);
-            LOGGER.info(message);
-            throw new CloudbreakException(message);
-        }
+        executePreClusterManagerStartRecipes(stack, () -> stackUtil.collectReachableNodes(stack));
+    }
+
+    public void preClusterManagerStartRecipesOnTargets(Stack stack, Map<String, String> candidateAddresses) throws CloudbreakException {
+        executePreClusterManagerStartRecipes(stack,
+                () -> stackUtil.collectReachableAndUnreachableCandidateNodes(stack, candidateAddresses.keySet()).getReachableNodes());
     }
 
     public void postClusterManagerStartRecipes(Stack stack) throws CloudbreakException {
-        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        try {
-            hostOrchestrator.postClusterManagerStartRecipes(gatewayConfig, stackUtil.collectReachableNodes(stack),
-                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
-        } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
-            String postClusterManagerStartException = "Post cluster manager start" + getRecipeTimeoutErrorMessage(timeoutException);
-            LOGGER.info("{} {}", postClusterManagerStartException, timeoutException);
-            throw new CloudbreakException(postClusterManagerStartException, timeoutException);
-        } catch (CloudbreakOrchestratorFailedException e) {
-            String message = getRecipeExecutionFailureMessage(stack, e);
-            LOGGER.info(message);
-            throw new CloudbreakException(message, e);
-        }
+        executePostClusterManagerStartRecipes(stack, () -> stackUtil.collectReachableNodes(stack));
+    }
+
+    public void postClusterManagerStartRecipesOnTargets(Stack stack, Map<String, String> candidateAddresses) throws CloudbreakException {
+        executePostClusterManagerStartRecipes(stack,
+                () -> stackUtil.collectReachableAndUnreachableCandidateNodes(stack, candidateAddresses.keySet()).getReachableNodes());
     }
 
     public void postClusterInstall(Stack stack) throws CloudbreakException {
-        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        try {
-            hostOrchestrator.postInstallRecipes(gatewayConfig, stackUtil.collectReachableNodes(stack),
-                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
-        } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
-            String postInstallException = getRecipeTimeoutErrorMessage(timeoutException);
-            LOGGER.info("{} {}", postInstallException, timeoutException);
-            throw new CloudbreakException(postInstallException, timeoutException);
-        } catch (CloudbreakOrchestratorFailedException e) {
-            String message = getRecipeExecutionFailureMessage(stack, e);
-            LOGGER.info(message);
-            throw new CloudbreakException(message, e);
-        }
+        executePostClusterInstall(stack, () -> stackUtil.collectReachableNodes(stack));
+    }
+
+    public void postClusterInstallOnTargets(Stack stack, Map<String, String> candidateAddresses) throws CloudbreakException {
+        executePostClusterInstall(stack, () -> stackUtil.collectReachableAndUnreachableCandidateNodes(stack, candidateAddresses.keySet()).getReachableNodes());
     }
 
     public void preTerminationRecipes(Stack stack, boolean forced) throws CloudbreakException {
@@ -130,21 +109,6 @@ class OrchestratorRecipeExecutor {
 
     public void preTerminationRecipes(Stack stack, Set<String> hostNames) throws CloudbreakException {
         preTerminationRecipesOnNodes(stack, collectNodes(stack, hostNames), false);
-    }
-
-    public void preTerminationRecipesOnNodes(Stack stack, Set<Node> nodes, boolean forced) throws CloudbreakException {
-        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        try {
-            hostOrchestrator.preTerminationRecipes(gatewayConfig, nodes, ClusterDeletionBasedExitCriteriaModel.nonCancellableModel(), forced);
-        } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
-            String preTerminationException = "Pre-termination" + getRecipeTimeoutErrorMessage(timeoutException);
-            LOGGER.info("{} {}", preTerminationException, timeoutException);
-            throw new CloudbreakException(preTerminationException, timeoutException);
-        } catch (CloudbreakOrchestratorFailedException e) {
-            String message = getRecipeExecutionFailureMessage(stack, e);
-            LOGGER.info(message);
-            throw new CloudbreakException(message, e);
-        }
     }
 
     private String getRecipeTimeoutErrorMessage(CloudbreakOrchestratorTimeoutException timeoutException) {
@@ -164,6 +128,72 @@ class OrchestratorRecipeExecutor {
                 .map(failure -> getSingleRecipeExecutionFailureMessage(instanceMetaData, failure))
                 .collect(Collectors.joining("\n ---------------------------------------------- \n"));
         return new StringBuilder("Failed to execute recipe(s): \n").append(message).toString();
+    }
+
+    private void executePostClusterManagerStartRecipes(Stack stack, Supplier<Set<Node>> targetNodeFn) throws CloudbreakException {
+        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        try {
+            Set<Node> targetNodes = targetNodeFn.get();
+            hostOrchestrator.postClusterManagerStartRecipes(gatewayConfig, targetNodes,
+                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
+            String postClusterManagerStartException = "Post cluster manager start" + getRecipeTimeoutErrorMessage(timeoutException);
+            LOGGER.info("{} {}", postClusterManagerStartException, timeoutException);
+            throw new CloudbreakException(postClusterManagerStartException, timeoutException);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            String message = getRecipeExecutionFailureMessage(stack, e);
+            LOGGER.info(message);
+            throw new CloudbreakException(message, e);
+        }
+    }
+
+    public void executePostClusterInstall(Stack stack, Supplier<Set<Node>> targetNodeFn) throws CloudbreakException {
+        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        try {
+            Set<Node> targetNodes = targetNodeFn.get();
+            hostOrchestrator.postInstallRecipes(gatewayConfig, targetNodes,
+                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
+            String postInstallException = getRecipeTimeoutErrorMessage(timeoutException);
+            LOGGER.info("{} {}", postInstallException, timeoutException);
+            throw new CloudbreakException(postInstallException, timeoutException);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            String message = getRecipeExecutionFailureMessage(stack, e);
+            LOGGER.info(message);
+            throw new CloudbreakException(message, e);
+        }
+    }
+
+    private void executePreClusterManagerStartRecipes(Stack stack, Supplier<Set<Node>> targetNodeFn) throws CloudbreakException {
+        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        try {
+            Set<Node> targetNodes = targetNodeFn.get();
+            hostOrchestrator.preClusterManagerStartRecipes(gatewayConfig, targetNodes,
+                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+        } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
+            String preClusterManagerStartException = "Pre cluster manager start" + getRecipeTimeoutErrorMessage(timeoutException);
+            LOGGER.info("{} {}", preClusterManagerStartException, timeoutException);
+            throw new CloudbreakException(preClusterManagerStartException, timeoutException);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            String message = getRecipeExecutionFailureMessage(stack, e);
+            LOGGER.info(message);
+            throw new CloudbreakException(message);
+        }
+    }
+
+    private void preTerminationRecipesOnNodes(Stack stack, Set<Node> nodes, boolean forced) throws CloudbreakException {
+        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        try {
+            hostOrchestrator.preTerminationRecipes(gatewayConfig, nodes, ClusterDeletionBasedExitCriteriaModel.nonCancellableModel(), forced);
+        } catch (CloudbreakOrchestratorTimeoutException timeoutException) {
+            String preTerminationException = "Pre-termination" + getRecipeTimeoutErrorMessage(timeoutException);
+            LOGGER.info("{} {}", preTerminationException, timeoutException);
+            throw new CloudbreakException(preTerminationException, timeoutException);
+        } catch (CloudbreakOrchestratorFailedException e) {
+            String message = getRecipeExecutionFailureMessage(stack, e);
+            LOGGER.info(message);
+            throw new CloudbreakException(message, e);
+        }
     }
 
     @VisibleForTesting
