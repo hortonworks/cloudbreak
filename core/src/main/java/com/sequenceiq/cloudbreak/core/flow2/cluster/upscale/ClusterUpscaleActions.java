@@ -171,7 +171,7 @@ public class ClusterUpscaleActions {
                     Map<String, Set<String>> hostGroupsWithHostNames =
                             (Map<String, Set<String>>) variables.getOrDefault(HOST_NAMES_BY_HOST_GROUP, new HashMap<>());
                     UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroups(),
-                            context.isRepair(), context.isRestartServices(), hostGroupsWithHostNames);
+                            context.isRepair(), context.isRestartServices(), hostGroupsWithHostNames, context.getHostGroupWithAdjustment());
                     sendEvent(context, request.selector(), request);
                 }
             }
@@ -361,7 +361,7 @@ public class ClusterUpscaleActions {
             @Override
             protected Selectable createRequest(ClusterUpscaleContext context) {
                 UpscaleClusterRequest request = new UpscaleClusterRequest(context.getStackId(), context.getHostGroups(),
-                        context.isRepair(), context.isRestartServices());
+                        context.isRepair(), context.isRestartServices(), context.getHostGroupWithAdjustment());
                 return new UpscaleClusterResult(request);
             }
         };
@@ -378,7 +378,7 @@ public class ClusterUpscaleActions {
 
             @Override
             protected Selectable createRequest(ClusterUpscaleContext context) {
-                return new UpscalePostRecipesRequest(context.getStackId(), context.getHostGroups());
+                return new UpscalePostRecipesRequest(context.getStackId(), context.getHostGroups(), context.getHostGroupWithAdjustment());
             }
         };
     }

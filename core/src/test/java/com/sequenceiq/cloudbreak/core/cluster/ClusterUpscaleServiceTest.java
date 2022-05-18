@@ -3,7 +3,10 @@ package com.sequenceiq.cloudbreak.core.cluster;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,6 +30,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -69,6 +73,9 @@ class ClusterUpscaleServiceTest {
     @Mock
     private ClusterCommissionService clusterCommissionService;
 
+    @Mock
+    private ClusterHostServiceRunner clusterHostServiceRunner;
+
     private InOrder inOrder;
 
     private Stack stack;
@@ -98,11 +105,12 @@ class ClusterUpscaleServiceTest {
         when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(List.of());
+        when(clusterHostServiceRunner.collectUpscaleCandidates(anyLong(), isNull(), anyBoolean())).thenReturn(Map.of());
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")));
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null);
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stack);
-        inOrder.verify(recipeEngine, times(1)).executePostAmbariStartRecipes(stack, Set.of(hostGroup));
+        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stack, Set.of(hostGroup), Map.of());
         inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
         inOrder.verify(clusterStatusService, times(1)).getDecommissionedHostsFromCM();
         inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
@@ -124,11 +132,12 @@ class ClusterUpscaleServiceTest {
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(clusterApi.clusterCommissionService()).thenReturn(clusterCommissionService);
         when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(List.of("master-2"));
+        when(clusterHostServiceRunner.collectUpscaleCandidates(anyLong(), isNull(), anyBoolean())).thenReturn(Map.of());
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")));
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null);
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stack);
-        inOrder.verify(recipeEngine, times(1)).executePostAmbariStartRecipes(stack, Set.of(hostGroup));
+        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stack, Set.of(hostGroup), Map.of());
         inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
         inOrder.verify(clusterStatusService, times(1)).getDecommissionedHostsFromCM();
         inOrder.verify(clusterCommissionService, times(1)).recommissionHosts(List.of("master-2"));
@@ -150,11 +159,12 @@ class ClusterUpscaleServiceTest {
         when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(clusterStatusService.getDecommissionedHostsFromCM()).thenReturn(List.of());
+        when(clusterHostServiceRunner.collectUpscaleCandidates(anyLong(), isNull(), anyBoolean())).thenReturn(Map.of());
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")));
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, Map.of("master", Set.of("master-1", "master-2", "master-3")), null);
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stack);
-        inOrder.verify(recipeEngine, times(1)).executePostAmbariStartRecipes(stack, Set.of(hostGroup));
+        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stack, Set.of(hostGroup), Map.of());
         inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
         inOrder.verify(clusterApi, times(0)).restartAll(false);
         inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
@@ -171,13 +181,14 @@ class ClusterUpscaleServiceTest {
         when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
         when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
         when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
+        when(clusterHostServiceRunner.collectUpscaleCandidates(anyLong(), isNull(), anyBoolean())).thenReturn(Map.of());
 
         when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
 
-        underTest.installServicesOnNewHosts(1L, Set.of("master"), false, false, Map.of("master", Set.of("master-1", "master-2", "master-3")));
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), false, false, Map.of("master", Set.of("master-1", "master-2", "master-3")), null);
 
         inOrder.verify(parcelService).removeUnusedParcelComponents(stack);
-        inOrder.verify(recipeEngine, times(1)).executePostAmbariStartRecipes(stack, Set.of(hostGroup));
+        inOrder.verify(recipeEngine, times(1)).executePostClouderaManagerStartRecipesOnTargets(stack, Set.of(hostGroup), Map.of());
         inOrder.verify(clusterApi, times(1)).upscaleCluster(any());
         inOrder.verify(clusterApi, times(0)).restartAll(false);
         inOrder.verify(clusterStatusService, times(0)).getDecommissionedHostsFromCM();
@@ -189,7 +200,7 @@ class ClusterUpscaleServiceTest {
         when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of("parcel", "parcel")));
 
         CloudbreakException exception = assertThrows(CloudbreakException.class,
-                () -> underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, new HashMap<>()));
+                () -> underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true, new HashMap<>(), null));
 
         assertEquals("Failed to remove the following parcels: {parcel=[parcel]}", exception.getMessage());
         verify(parcelService).removeUnusedParcelComponents(stack);
