@@ -24,6 +24,8 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.TopologySegment;
 import com.sequenceiq.freeipa.client.model.TopologySuffix;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +41,9 @@ class FreeIpaTopologyServiceTest {
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Mock
+    private FreeIpaClientFactory freeIpaClientFactory;
 
     @Test
     void testGenerateTopology() {
@@ -162,6 +167,51 @@ class FreeIpaTopologyServiceTest {
             when(freeIpaClient.deleteTopologySegment(Mockito.anyString(), Mockito.any())).thenReturn(new TopologySegment());
         }
         underTest.updateReplicationTopology(1L, Set.of(), freeIpaClient);
+        Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToAdd)).addTopologySegment(Mockito.eq("ca"), Mockito.any());
+        Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToAdd)).addTopologySegment(Mockito.eq("domain"), Mockito.any());
+        Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToRemove)).deleteTopologySegment(Mockito.eq("ca"), Mockito.any());
+        Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToRemove)).deleteTopologySegment(Mockito.eq("domain"), Mockito.any());
+    }
+
+    @MethodSource("testUpdateReplicationTopologyParameters")
+    @ParameterizedTest(name = "Run {index}: numNodes={0}, expectedSegmentsToAdd={1}, expectedSegmentsToRemove={2}")
+    void testUpdateReplicationTopologyWithRetry(int numNodes, int expectedSegmentsToAdd, int expectedSegmentsToRemove) throws FreeIpaClientException {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
+        Set<InstanceMetaData> imSet = new HashSet<>();
+        for (int i = 0; i < numNodes; i++) {
+            InstanceMetaData im = new InstanceMetaData();
+            im.setDiscoveryFQDN(String.format("ipaserver%d.example.com", i));
+            imSet.add(im);
+        }
+        when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(imSet);
+        TopologySuffix caSuffix = new TopologySuffix();
+        caSuffix.setCn("ca");
+        TopologySuffix domainSuffix = new TopologySuffix();
+        domainSuffix.setCn("domain");
+        when(freeIpaClient.findAllTopologySuffixes()).thenReturn(List.of(caSuffix, domainSuffix));
+        List<TopologySegment> topologySegments1 = new LinkedList<>();
+        for (int i = 1; i < numNodes; i++) {
+            TopologySegment segment = new TopologySegment();
+            segment.setLeftNode("ipaserver0.example.com");
+            segment.setRightNode(String.format("ipaserver%d.example.com", i));
+            topologySegments1.add(segment);
+        }
+        List<TopologySegment> topologySegments2 = new LinkedList<>();
+        topologySegments2.addAll(topologySegments1);
+        when(freeIpaClient.findTopologySegments(Mockito.anyString()))
+                .thenReturn(topologySegments1)
+                .thenReturn(topologySegments1)
+                .thenReturn(topologySegments2)
+                .thenReturn(topologySegments2);
+        if (expectedSegmentsToAdd > 0) {
+            when(freeIpaClient.addTopologySegment(Mockito.anyString(), Mockito.any())).thenReturn(new TopologySegment());
+        }
+        if (expectedSegmentsToRemove > 0) {
+            when(freeIpaClient.deleteTopologySegment(Mockito.anyString(), Mockito.any())).thenReturn(new TopologySegment());
+        }
+        underTest.updateReplicationTopologyWithRetry(stack, Set.of());
         Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToAdd)).addTopologySegment(Mockito.eq("ca"), Mockito.any());
         Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToAdd)).addTopologySegment(Mockito.eq("domain"), Mockito.any());
         Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToRemove)).deleteTopologySegment(Mockito.eq("ca"), Mockito.any());

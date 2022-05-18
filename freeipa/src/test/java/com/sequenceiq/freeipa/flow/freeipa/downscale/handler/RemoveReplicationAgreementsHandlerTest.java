@@ -15,12 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removereplication.RemoveReplicationAgreementsRequest;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaTopologyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -57,9 +55,6 @@ class RemoveReplicationAgreementsHandlerTest {
     private StackService stackService;
 
     @Mock
-    private FreeIpaClientFactory freeIpaClientFactory;
-
-    @Mock
     private FreeIpaTopologyService freeIpaTopologyService;
 
     @InjectMocks
@@ -71,22 +66,18 @@ class RemoveReplicationAgreementsHandlerTest {
                 new CleanupEvent(STACK_ID, USERS, HOSTS, ROLES, IPS, STATES_TO_SKIP, ACCOUNT_ID, OPERATION_ID, CLUSTER_NAME, ENVIRONMENT_CRN);
         RemoveReplicationAgreementsRequest request = new RemoveReplicationAgreementsRequest(cleanupEvent);
         Stack stack = mock(Stack.class);
-        FreeIpaClient freeIpaClient = mock(FreeIpaClient.class);
         when(stackService.getStackById(any())).thenReturn(stack);
-        when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenReturn(freeIpaClient);
         underTest.accept(new Event<>(request));
-        verify(freeIpaTopologyService).updateReplicationTopology(any(), any(), any());
+        verify(freeIpaTopologyService).updateReplicationTopologyWithRetry(any(), any());
         verify(eventBus).notify(eq("REMOVEREPLICATIONAGREEMENTSRESPONSE"), ArgumentMatchers.<Event>any());
     }
 
     @Test
-    void testRemoveReplicationAgreementsFailure() throws FreeIpaClientException {
+    void testRemoveReplicationAgreementsFailure() {
         CleanupEvent cleanupEvent =
                 new CleanupEvent(STACK_ID, USERS, HOSTS, ROLES, IPS, STATES_TO_SKIP, ACCOUNT_ID, OPERATION_ID, CLUSTER_NAME, ENVIRONMENT_CRN);
         RemoveReplicationAgreementsRequest request = new RemoveReplicationAgreementsRequest(cleanupEvent);
-        Stack stack = mock(Stack.class);
-        when(stackService.getStackById(any())).thenReturn(stack);
-        when(freeIpaClientFactory.getFreeIpaClientForStack(any())).thenThrow(new RuntimeException("expected exception"));
+        when(stackService.getStackById(any())).thenThrow(new RuntimeException("expected exception"));
         underTest.accept(new Event<>(request));
         verify(eventBus).notify(eq("REMOVE_REPLICATION_AGREEMENTS_FAILED_EVENT"), ArgumentMatchers.<Event>any());
     }
