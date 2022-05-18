@@ -15,12 +15,10 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removereplication.RemoveReplicationAgreementsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.removereplication.RemoveReplicationAgreementsResponse;
-import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaTopologyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -32,9 +30,6 @@ public class RemoveReplicationAgreementsHandler extends ExceptionCatcherEventHan
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private FreeIpaClientFactory freeIpaClientFactory;
 
     @Inject
     private FreeIpaTopologyService freeIpaTopologyService;
@@ -56,8 +51,7 @@ public class RemoveReplicationAgreementsHandler extends ExceptionCatcherEventHan
         try {
             Long stackId = request.getResourceId();
             Stack stack = stackService.getStackById(stackId);
-            FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-            freeIpaTopologyService.updateReplicationTopology(stackId, request.getHosts(), freeIpaClient);
+            freeIpaTopologyService.updateReplicationTopologyWithRetry(stack, request.getHosts());
             return new RemoveReplicationAgreementsResponse(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Downscale removing replication agreements failed", e);
