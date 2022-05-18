@@ -41,6 +41,23 @@ public class CloudContext {
      */
     private String originalName;
 
+    /*
+     * We need this constructor because flow request objects use this class and it can not be serialized back to object
+     */
+    private CloudContext(Long id, String name, Platform platform, boolean govCloud, Variant variant, Location location, String userName, String accountId,
+            Long tenantId, String crn) {
+        this.id = id;
+        this.name = name;
+        this.platform = platform;
+        this.govCloud = govCloud;
+        this.variant = variant;
+        this.location = location;
+        this.userName = userName;
+        this.accountId = accountId;
+        this.tenantId = tenantId;
+        this.crn = crn;
+    }
+
     private CloudContext(Builder builder) {
         this.id = builder.id;
         this.name = builder.name;
