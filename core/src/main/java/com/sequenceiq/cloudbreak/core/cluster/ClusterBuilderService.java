@@ -178,7 +178,7 @@ public class ClusterBuilderService {
     }
 
     public void executePostClusterManagerStartRecipes(Long stackId) throws CloudbreakException {
-        recipeEngine.executePostAmbariStartRecipes(
+        recipeEngine.executePostClouderaManagerStartRecipes(
                 stackService.getByIdWithListsInTransaction(stackId),
                 hostGroupService.getByClusterWithRecipes(
                         stackService.getByIdWithListsInTransaction(stackId).getCluster().getId()));

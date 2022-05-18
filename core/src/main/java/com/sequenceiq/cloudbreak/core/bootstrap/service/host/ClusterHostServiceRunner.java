@@ -13,6 +13,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -299,7 +300,7 @@ public class ClusterHostServiceRunner {
         hostOrchestrator.initServiceRun(stack, gatewayConfigs, allNodes, reachableNodes, saltConfig,
                 exitCriteriaModel, stack.getCloudPlatform());
         mountDisks(stack, candidateAddresses, allNodes, reachableNodes);
-        recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getByClusterWithRecipes(cluster.getId()));
+        recipeEngine.executePreClusterManagerRecipes(stack, candidateAddresses, hostGroupService.getByClusterWithRecipes(cluster.getId()));
         hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
         modifyStartupMountRole(stack, reachableNodes, GrainOperation.REMOVE);
     }
@@ -859,7 +860,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private Map<String, String> collectUpscaleCandidates(Long clusterId, Map<String, Integer> hostGroupWithAdjustment) {
+    public Map<String, String> collectUpscaleCandidates(Long clusterId, Map<String, Integer> hostGroupWithAdjustment, boolean includeCreatedOnly) {
         Map<String, String> hostNames = new HashMap<>();
         for (Map.Entry<String, Integer> entry : hostGroupWithAdjustment.entrySet()) {
             String hostGroupName = entry.getKey();
@@ -868,7 +869,10 @@ public class ClusterHostServiceRunner {
                     .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
             if (hostGroup.getInstanceGroup() != null) {
                 Long instanceGroupId = hostGroup.getInstanceGroup().getId();
-                instanceMetaDataService.findUnusedHostsInInstanceGroup(instanceGroupId).stream()
+                Collection<InstanceMetaData> instanceMetaDataSet = includeCreatedOnly
+                        ? instanceMetaDataService.findUnusedHostsInInstanceGroup(instanceGroupId)
+                        : instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroupId);
+                instanceMetaDataSet.stream()
                         .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                         .sorted(Comparator.comparing(InstanceMetaData::getStartDate))
                         .limit(adjustment.longValue())
@@ -876,6 +880,10 @@ public class ClusterHostServiceRunner {
             }
         }
         return hostNames;
+    }
+
+    public Map<String, String> collectUpscaleCandidates(Long clusterId, Map<String, Integer> hostGroupWithAdjustment) {
+        return collectUpscaleCandidates(clusterId, hostGroupWithAdjustment, true);
     }
 
     private void putIfNotNull(Map<String, String> context, Object variable, String key) {
