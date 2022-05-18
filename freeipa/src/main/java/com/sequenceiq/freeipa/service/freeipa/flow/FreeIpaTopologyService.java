@@ -18,14 +18,19 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.TopologySegment;
 import com.sequenceiq.freeipa.client.model.TopologySuffix;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Service
@@ -37,6 +42,9 @@ public class FreeIpaTopologyService {
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private FreeIpaClientFactory freeIpaClientFactory;
 
     public void updateReplicationTopology(Long stackId, Set<String> fqdnsToExclude, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
         Set<String> allNodesFqdn = instanceMetaDataService.findNotTerminatedForStack(stackId).stream()
@@ -52,6 +60,15 @@ public class FreeIpaTopologyService {
             createMissingSegments(freeIpaClient, topologySuffix.getCn(), topology);
             removeExtraSegments(freeIpaClient, topologySuffix.getCn(), topology);
         }
+    }
+
+    @Retryable(value = FreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+    public void updateReplicationTopologyWithRetry(Stack stack, Set<String> fqdnsToExclude) throws FreeIpaClientException {
+        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
+        updateReplicationTopology(stack.getId(), fqdnsToExclude, freeIpaClient);
     }
 
     private TopologySegment convertUnorderedPairToTopologySegment(UnorderedPair pair) {
