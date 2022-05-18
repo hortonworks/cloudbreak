@@ -163,7 +163,7 @@
               },
               {
                 "name": "java.arg.7",
-                "value": "-Djava.io.tmpdir=${nifi.working.directory}/tmp"
+                "value": "${nifi.working.directory}/tmp"
               },
               {
                 "name": "nifi.registry.client.name",
