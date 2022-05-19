@@ -169,8 +169,8 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
             } else {
                 sendScaleUpEvent(stackV4Response.getNodeCount(), existingHostGroupSize, yarnRecommendedScaleUpCount);
             }
-        } else if (!yarnRecommendedDecommissionHosts.isEmpty() && isCoolDownTimeElapsed(cluster.getStackCrn(), "scaled-down",
-                loadAlertConfiguration.getScaleDownCoolDownMillis(), cluster.getLastScalingActivity()))  {
+        } else if (!yarnRecommendedDecommissionHosts.isEmpty() && isCoolDownTimeElapsedAfterScalingActivityCompletion(cluster.getStackCrn(), "scaled-down",
+                loadAlertConfiguration.getScaleDownCoolDownMillis(), cluster.getScalingActivityDetails()))  {
             sendScaleDownEvent(serviceHealthyHostGroupSize, yarnRecommendedDecommissionHosts);
         }
     }

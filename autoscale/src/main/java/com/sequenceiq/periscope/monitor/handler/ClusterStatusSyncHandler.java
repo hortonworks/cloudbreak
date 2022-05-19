@@ -3,6 +3,7 @@ package com.sequenceiq.periscope.monitor.handler;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ScalingActivityDetails;
 import com.sequenceiq.periscope.monitor.event.ClusterStatusSyncEvent;
 import com.sequenceiq.periscope.service.AltusMachineUserService;
 import com.sequenceiq.periscope.service.ClusterService;
@@ -31,6 +33,9 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
 
     @Inject
     private CloudbreakCommunicator cloudbreakCommunicator;
+
+    @Inject
+    private FlowCommunicator flowCommunicator;
 
     @Inject
     private AltusMachineUserService altusMachineUserService;
@@ -60,6 +65,7 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         LOGGER.info("Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ", statusResponse, cluster.getStackCrn(), clusterAvailable);
 
         updateClusterState(cluster, statusResponse, clusterAvailable);
+        updateClusterScalingCompleted(cluster);
     }
 
     private void updateClusterState(Cluster cluster, StackStatusV4Response statusResponse, boolean clusterAvailable) {
@@ -77,6 +83,17 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
                     cluster.getStackCrn(), statusResponse.getStatus(), statusResponse.getClusterStatus());
         } else if (RUNNING.equals(cluster.getState()) && (cluster.getMachineUserCrn() == null || cluster.getEnvironmentCrn() == null)) {
             populateEnvironmentAndMachineUserIfNotPresent(cluster);
+        }
+    }
+
+    private void updateClusterScalingCompleted(Cluster cluster) {
+        boolean hasActiveFlow = cluster.getScalingActivityDetails() != null
+                && flowCommunicator.hasActiveFlow(cluster.getScalingActivityDetails().getLastScalingFlowId());
+        if (!hasActiveFlow) {
+            ScalingActivityDetails scalingActivityDetails = cluster.getScalingActivityDetails() == null
+                    ? new ScalingActivityDetails() : cluster.getScalingActivityDetails();
+            scalingActivityDetails.setLastScalingActivityCompleted(Instant.now().toEpochMilli());
+            clusterService.setScalingActivityDetails(cluster.getId(), scalingActivityDetails);
         }
     }
 

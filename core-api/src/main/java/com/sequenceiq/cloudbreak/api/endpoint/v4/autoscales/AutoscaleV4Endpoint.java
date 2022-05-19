@@ -52,7 +52,7 @@ public interface AutoscaleV4Endpoint {
     @Path("/stack/crn/{crn}/{userId}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putStackForAutoscale")
-    void putStack(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateStackV4Request updateRequest);
+    FlowIdentifier putStack(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateStackV4Request updateRequest);
 
     // Not overloading the regular scaling API since 1) that is public, and 2) stopstart may move into a separate InstancePoolManagementController at some point
     @PUT
@@ -142,7 +142,7 @@ public interface AutoscaleV4Endpoint {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
             notes = Notes.STACK_NOTES, nickname = "decommissionInternalInstancesForClusterCrn")
-    void decommissionInternalInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
+    FlowIdentifier decommissionInternalInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
             @RequestBody @NotEmpty List<String> instanceIds,
             @QueryParam("forced") @DefaultValue("false") Boolean forced);
 

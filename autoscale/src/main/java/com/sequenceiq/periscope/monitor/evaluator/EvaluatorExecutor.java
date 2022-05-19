@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.periscope.domain.ScalingActivityDetails;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
 import com.sequenceiq.periscope.utils.ClusterUtils;
@@ -49,6 +50,19 @@ public abstract class EvaluatorExecutor implements Runnable {
     protected boolean isCoolDownTimeElapsed(String clusterCrn, String coolDownAction, long expectedCoolDownMillis, long lastClusterScalingActivity) {
         long remainingTime = ClusterUtils.getRemainingCooldownTime(
                 expectedCoolDownMillis, lastClusterScalingActivity);
+
+        if (remainingTime <= 0) {
+            return true;
+        } else {
+            LOGGER.debug("Cluster {} cannot be {} for {} min(s)", clusterCrn, coolDownAction,
+                    ClusterUtils.TIME_FORMAT.format((double) remainingTime / TimeUtil.MIN_IN_MS));
+        }
+        return false;
+    }
+
+    protected boolean isCoolDownTimeElapsedAfterScalingActivityCompletion(String clusterCrn, String coolDownAction,
+            long expectedCoolDownMillis, ScalingActivityDetails scalingActivityDetails) {
+        long remainingTime = ClusterUtils.getRemainingCooldownTimePostScalingActivity(expectedCoolDownMillis, scalingActivityDetails);
 
         if (remainingTime <= 0) {
             return true;

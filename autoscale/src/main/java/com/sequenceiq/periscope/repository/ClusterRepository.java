@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.ScalingActivityDetails;
 import com.sequenceiq.periscope.domain.UpdateFailedDetails;
 
 @EntityType(entityClass = Cluster.class)
@@ -106,4 +107,8 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     @Modifying
     @Query("UPDATE Cluster c SET c.updateFailedDetails = :updateFailedDetails WHERE c.id = :clusterId")
     void setClusterUpdateFailedDetails(@Param("clusterId") Long clusterId, @Param("updateFailedDetails") UpdateFailedDetails updateFailedDetails);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.scalingActivityDetails = :scalingActivityDetails WHERE c.id = :clusterId")
+    void setClusterScalingActivityDetails(@Param("clusterId") Long clusterId, @Param("scalingActivityDetails") ScalingActivityDetails scalingActivityDetails);
 }

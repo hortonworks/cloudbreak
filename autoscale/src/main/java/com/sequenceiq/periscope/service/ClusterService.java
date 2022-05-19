@@ -30,6 +30,7 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterManager;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.domain.MetricType;
+import com.sequenceiq.periscope.domain.ScalingActivityDetails;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.domain.UpdateFailedDetails;
 import com.sequenceiq.periscope.model.MonitoredStack;
@@ -228,6 +229,10 @@ public class ClusterService {
 
     public void setLastScalingActivity(Long clusterId, Long lastScalingActivity) {
         clusterRepository.setClusterLastScalingActivity(clusterId, lastScalingActivity);
+    }
+
+    public void setScalingActivityDetails(Long clusterId, ScalingActivityDetails scalingActivityDetails) {
+        clusterRepository.setClusterScalingActivityDetails(clusterId, scalingActivityDetails);
     }
 
     public void setUpdateFailedDetails(Long clusterId, UpdateFailedDetails updateFailedDetails) {

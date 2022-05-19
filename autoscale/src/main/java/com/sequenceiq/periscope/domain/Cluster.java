@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.converter.db.ScalingActivityDetailsConverter;
 import com.sequenceiq.periscope.converter.db.StackTypeAttributeConverter;
 import com.sequenceiq.periscope.converter.db.UpdateFailedDetailsConverter;
 import com.sequenceiq.periscope.model.MonitoredStack;
@@ -107,6 +108,10 @@ public class Cluster implements Monitored, Clustered {
     @Column(name = "update_failed_details")
     @Convert(converter = UpdateFailedDetailsConverter.class)
     private UpdateFailedDetails updateFailedDetails;
+
+    @Column(name = "scaling_activity_details")
+    @Convert(converter = ScalingActivityDetailsConverter.class)
+    private ScalingActivityDetails scalingActivityDetails;
 
     public Cluster() {
     }
@@ -360,6 +365,14 @@ public class Cluster implements Monitored, Clustered {
 
     public void setUpdateFailedDetails(UpdateFailedDetails updateFailedDetails) {
         this.updateFailedDetails = updateFailedDetails;
+    }
+
+    public ScalingActivityDetails getScalingActivityDetails() {
+        return scalingActivityDetails;
+    }
+
+    public void setScalingActivityDetails(ScalingActivityDetails scalingActivityDetails) {
+        this.scalingActivityDetails = scalingActivityDetails;
     }
 }
 

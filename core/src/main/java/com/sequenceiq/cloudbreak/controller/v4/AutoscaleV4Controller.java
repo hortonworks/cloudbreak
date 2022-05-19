@@ -93,8 +93,8 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void putStack(@TenantAwareParam @ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
-        stackCommonService.putInDefaultWorkspace(crn, updateRequest);
+    public FlowIdentifier putStack(@TenantAwareParam @ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
+        return stackCommonService.putInDefaultWorkspace(crn, updateRequest);
     }
 
     @Override
@@ -147,11 +147,11 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @InternalOnly
-    public void decommissionInternalInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn,
+    public FlowIdentifier decommissionInternalInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn,
             List<String> instanceIds, Boolean forced) {
         LOGGER.info("decommissionInternalInstancesForClusterCrn. forced={}, clusterCrn={}, instanceIds=[{}]",
                 forced, clusterCrn, instanceIds);
-        stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getRequestedWorkspaceId(),
+        return stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getRequestedWorkspaceId(),
                 new HashSet(instanceIds), forced);
     }
 

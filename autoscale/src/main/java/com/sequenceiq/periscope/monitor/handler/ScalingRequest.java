@@ -25,14 +25,17 @@ import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.MetricType;
+import com.sequenceiq.periscope.domain.ScalingActivityDetails;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AuditService;
+import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.PeriscopeMetricService;
 import com.sequenceiq.periscope.service.UsageReportingService;
@@ -89,6 +92,9 @@ public class ScalingRequest implements Runnable {
     @Inject
     private LimitsConfigurationService limitsConfigurationService;
 
+    @Inject
+    private ClusterService clusterService;
+
     public ScalingRequest(Cluster cluster, ScalingPolicy policy, int existingClusterNodeCount, int existingHostGroupNodeCount,
             int desiredHostGroupNodeCount, List<String> decommissionNodeIds) {
         this.cluster = cluster;
@@ -142,11 +148,19 @@ public class ScalingRequest implements Runnable {
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
 
+            FlowIdentifier flowIdentifier;
+
             if (Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
-                cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStackStartInstancesByCrn(stackCrn, updateStackJson);
+                flowIdentifier = cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStackStartInstancesByCrn(stackCrn, updateStackJson);
             } else {
-                cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStack(stackCrn, cluster.getClusterPertain().getUserId(), updateStackJson);
+                flowIdentifier = cloudbreakCrnClient.withInternalCrn()
+                        .autoscaleEndpoint().putStack(stackCrn, cluster.getClusterPertain().getUserId(), updateStackJson);
             }
+
+            ScalingActivityDetails scalingActivityDetails = cluster.getScalingActivityDetails() == null
+                    ? new ScalingActivityDetails() : cluster.getScalingActivityDetails();
+            scalingActivityDetails.setLastScalingFlowId(flowIdentifier.getPollableId());
+            clusterService.setScalingActivityDetails(cluster.getId(), scalingActivityDetails);
 
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = getMessageForCBSuccess();
@@ -205,7 +219,13 @@ public class ScalingRequest implements Runnable {
             LOGGER.info("Sending request to remove  nodeIdCount '{}', nodeId(s) '{}' from host group '{}', cluster '{}', user '{}'",
                     decommissionNodeIds.size(), decommissionNodeIds, hostGroup, cluster.getStackCrn(),
                     cluster.getClusterPertain().getUserCrn());
-            cloudbreakCommunicator.decommissionInstancesForCluster(cluster, decommissionNodeIds);
+            FlowIdentifier flowIdentifier = cloudbreakCommunicator.decommissionInstancesForCluster(cluster, decommissionNodeIds);
+
+            ScalingActivityDetails scalingActivityDetails = cluster.getScalingActivityDetails() == null ?
+                    new ScalingActivityDetails() : cluster.getScalingActivityDetails();
+            scalingActivityDetails.setLastScalingFlowId(flowIdentifier.getPollableId());
+            clusterService.setScalingActivityDetails(cluster.getId(), scalingActivityDetails);
+
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_DOWNSCALE_SUCCESSFUL);

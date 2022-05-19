@@ -3,6 +3,7 @@ package com.sequenceiq.periscope.monitor.handler;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.inject.Inject;
 
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
@@ -65,19 +67,21 @@ public class CloudbreakCommunicator {
         return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(stackCrn);
     }
 
-    public void decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
+    public FlowIdentifier decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
         ScalingStrategy scalingStrategy = ScalingStrategy.STOPSTART;
+        AtomicReference<FlowIdentifier> flowIdentiferAtomicReference = new AtomicReference<>();
         requestLogging.logResponseTime(() -> {
             if (Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
-                cloudbreakInternalCrnClient.withInternalCrn()
-                        .autoscaleEndpoint().stopInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false, scalingStrategy);
+                flowIdentiferAtomicReference.set(cloudbreakInternalCrnClient.withInternalCrn()
+                        .autoscaleEndpoint().stopInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false, scalingStrategy));
             } else {
-                cloudbreakInternalCrnClient.withInternalCrn()
-                        .autoscaleEndpoint().decommissionInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false);
+                flowIdentiferAtomicReference.set(cloudbreakInternalCrnClient.withInternalCrn()
+                        .autoscaleEndpoint().decommissionInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false));
             }
             return Optional.empty();
         }, String.format("DecommissionInstancesForCluster query for cluster crn %s, Scaling strategy %s, NodeIds %s, Scaling Strategy %s",
                 scalingStrategy, cluster.getStackCrn(), scalingStrategy, decommissionNodeIds));
+        return flowIdentiferAtomicReference.get();
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 10000))
