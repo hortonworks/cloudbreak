@@ -49,6 +49,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_DELAYED_STOP_START;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_RECIPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_USERSYNC_THREAD_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
@@ -521,6 +522,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.saas.sdx.integration.enable}")
     private boolean enableSdxSaasIntegration;
 
+    @Value("${auth.mock.freeipa.recipes.enable}")
+    private boolean enableFreeIpaRecipes;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -931,6 +935,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableFreeipaDelayedStopStart) {
             builder.addEntitlements(createEntitlement(CDP_FMS_DELAYED_STOP_START));
+        }
+        if (enableFreeIpaRecipes) {
+            builder.addEntitlements(createEntitlement(CDP_FMS_RECIPE));
         }
         if (enableUnboundElimination) {
             builder.addEntitlements(createEntitlement(CDP_UNBOUND_ELIMINATION));

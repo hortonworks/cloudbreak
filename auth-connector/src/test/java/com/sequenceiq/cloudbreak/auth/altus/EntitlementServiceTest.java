@@ -227,7 +227,10 @@ class EntitlementServiceTest {
                 {"CDP_FMS_USERSYNC_THREAD_TIMEOUT", (EntitlementCheckFunction) EntitlementService::isUserSyncThreadTimeoutEnabled, true},
 
                 {"CDP_FMS_DELAYED_STOP_START", (EntitlementCheckFunction) EntitlementService::isFmsDelayedStopStartEnabled, false},
-                {"CDP_FMS_DELAYED_STOP_START", (EntitlementCheckFunction) EntitlementService::isFmsDelayedStopStartEnabled, true}
+                {"CDP_FMS_DELAYED_STOP_START", (EntitlementCheckFunction) EntitlementService::isFmsDelayedStopStartEnabled, true},
+
+                {"CDP_FMS_RECIPE", (EntitlementCheckFunction) EntitlementService::isFmsRecipesEnabled, false},
+                {"CDP_FMS_RECIPE", (EntitlementCheckFunction) EntitlementService::isFmsRecipesEnabled, true}
         };
     }
 

@@ -23,6 +23,7 @@ auth:
       batch.call.enable: true
       usersync.thread.timeout.enable: true
       delayedstopstart.enable: true
+      recipes.enable: true
     cloudstoragevalidation.enable:
       global: true
       aws: true
