@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.impala;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildEphemeralVolumePathString;
 import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildVolumePathStringZeroVolumeHandled;
 
 import java.util.ArrayList;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -38,10 +40,24 @@ public class ImpalaVolumeConfigProvider implements CmHostGroupRoleConfigProvider
                         .mapToInt(volume -> volume.getVolumeSize())
                         .min()
                         .orElse(0);
+                Integer volumeCount = 0;
+                Integer temporaryStorageVolumeCount = 0;
+                if (hostGroupView != null) {
+                    volumeCount = hostGroupView.getVolumeCount();
+                    if (hostGroupView.getTemporaryStorageVolumeCount() != null) {
+                        temporaryStorageVolumeCount = hostGroupView.getTemporaryStorageVolumeCount();
+                    }
+                }
 
                 List<ApiClusterTemplateConfig> configs = new ArrayList<>();
+
+                if (checkTemporaryStorage(hostGroupView, temporaryStorageVolumeCount)) {
+                    configs.add(config(IMPALA_SCRATCH_DIRS_PARAM,
+                        buildEphemeralVolumePathString(temporaryStorageVolumeCount, "impala/scratch")));
+                } else {
                 configs.add(config(IMPALA_SCRATCH_DIRS_PARAM,
-                        buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "impala/scratch")));
+                        buildVolumePathStringZeroVolumeHandled(volumeCount, "impala/scratch")));
+                }
 
                 if (minAttachedVolumeSize > MIN_ATTACHED_VOLUME_SIZE_TO_ENABLE_CACHE_IN_GB
                         && hostGroupView.getVolumeCount() > 0) {
@@ -50,8 +66,13 @@ public class ImpalaVolumeConfigProvider implements CmHostGroupRoleConfigProvider
 
                     configs.add(config(IMPALA_DATACACHE_ENABLED_PARAM, "true"));
                     configs.add(config(IMPALA_DATACACHE_CAPACITY_PARAM, Long.toString(dataCacheCapacityInBytes)));
+                    if (checkTemporaryStorage(hostGroupView, temporaryStorageVolumeCount)) {
+                        configs.add(config(IMPALA_DATACACHE_DIRS_PARAM,
+                            buildEphemeralVolumePathString(temporaryStorageVolumeCount, "impala/datacache")));
+                    } else {
                     configs.add(config(IMPALA_DATACACHE_DIRS_PARAM,
-                            buildVolumePathStringZeroVolumeHandled(hostGroupView.getVolumeCount(), "impala/datacache")));
+                            buildVolumePathStringZeroVolumeHandled(volumeCount, "impala/datacache")));
+                    }
                 }
                 return configs;
 
@@ -73,5 +94,9 @@ public class ImpalaVolumeConfigProvider implements CmHostGroupRoleConfigProvider
     @Override
     public boolean sharedRoleType(String roleType) {
         return false;
+    }
+
+    private boolean checkTemporaryStorage(HostgroupView hostGroupView, Integer temporaryStorageVolumeCount) {
+        return hostGroupView != null && hostGroupView.getTemporaryStorage() == TemporaryStorage.EPHEMERAL_VOLUMES && temporaryStorageVolumeCount != 0;
     }
 }
