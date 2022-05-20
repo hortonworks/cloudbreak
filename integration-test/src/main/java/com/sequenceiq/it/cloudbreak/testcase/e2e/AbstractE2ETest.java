@@ -7,6 +7,9 @@ import static org.hamcrest.Matchers.not;
 import javax.annotation.Nonnull;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.ITestResult;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Listeners;
@@ -21,6 +24,8 @@ import com.sequenceiq.it.util.TagsUtil;
 
 @Listeners(SpotRetryOnceTestListener.class)
 public abstract class AbstractE2ETest extends AbstractIntegrationTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractE2ETest.class);
 
     @Inject
     private SpotUtil spotUtil;
@@ -48,7 +53,10 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
     @AfterMethod
     public void tearDownSpotValidateTags(Object[] data) {
-        ((TestContext) data[0]).getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, (TestContext) data[0]));
+        if (MapUtils.isEmpty(((TestContext) data[0]).getExceptionMap())) {
+            LOGGER.info("Validating default tags on the created and tagged test resources...");
+            ((TestContext) data[0]).getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, (TestContext) data[0]));
+        }
         spotUtil.setUseSpotInstances(Boolean.FALSE);
     }
 
