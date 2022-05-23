@@ -89,7 +89,7 @@ public class AuthorizationClient {
                 throw new CloudbreakServiceException("Authorization failed due to user management service call failed.");
             }
         } catch (Exception e) {
-            LOGGER.error("Unkown error while checking hasRights {} for actor {} and rights {}", actorCrn, rightChecks, e);
+            LOGGER.error("Unknown error while checking hasRights {} for actor {} and rights {}", actorCrn, rightChecks, e);
             throw new CloudbreakServiceException("Authorization failed due to user management service call failed with error.");
         }
     }

@@ -140,11 +140,17 @@ public class RecipeClusterTest extends AbstractMockTest {
             then = "the pretermination highstate has to called on pretermination recipes")
     public void testRecipePreTerminationRecipeHasGotHighStateOnCluster(MockedTestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
+        String preCldrManagerStartRecipe = "pre-cldr-start-manager";
         testContext
                 .given(RecipeTestDto.class)
                 .withName(recipeName)
                 .withContent(RECIPE_CONTENT)
                 .withRecipeType(PRE_TERMINATION)
+                .when(recipeTestClient.createV4())
+                .given(RecipeTestDto.class)
+                .withName(preCldrManagerStartRecipe)
+                .withContent(RECIPE_CONTENT)
+                .withRecipeType(PRE_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
                 .withHostGroup(HostGroupType.WORKER)
@@ -158,7 +164,12 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .given(StackTestDto.class)
                 .withAttachedRecipe(HostGroupType.WORKER.getName(), recipeName)
                 .when(stackTestClient.attachRecipeV4())
+                .withAttachedRecipe(HostGroupType.WORKER.getName(), preCldrManagerStartRecipe)
+                .when(stackTestClient.attachRecipeV4())
                 .await(STACK_AVAILABLE)
+                .when(StackScalePostAction.valid().withDesiredCount(4))
+                .await(STACK_AVAILABLE, pollingInterval(POLLING_INTERVAL))
+                .mockSalt().run().post().bodyContains(HIGHSTATE, 1).atLeast(2).verify()
                 .when(stackTestClient.deleteV4())
                 .await(STACK_DELETED)
                 .mockSalt().run().post().bodyContains(HIGHSTATE, 1).atLeast(2).verify()

@@ -4,14 +4,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewGrpc;
 import com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.opentracing.Tracer;
 
 /**
@@ -19,6 +25,8 @@ import io.opentracing.Tracer;
  * the appropriate context-propogatinng interceptors and hides some boilerplate.
  */
 public class PersonalResourceViewClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PersonalResourceViewClient.class);
 
     private final ManagedChannel channel;
 
@@ -46,15 +54,30 @@ public class PersonalResourceViewClient {
         checkNotNull(requestId, "requestId should not be null.");
         checkNotNull(actorCrn, "actorCrn should not be null.");
         checkNotNull(resources, "resources should not be null.");
-        return newStub(requestId)
-                .hasResourcesByRight(
-                        PersonalResourceViewProto.HasResourcesByRightRequest
-                                .newBuilder()
-                                .setUserCrn(actorCrn)
-                                .setRight(right)
-                                .addAllResource(resources)
-                                .build())
-                .getResultList();
+        try {
+            return newStub(requestId)
+                    .hasResourcesByRight(
+                            PersonalResourceViewProto.HasResourcesByRightRequest
+                                    .newBuilder()
+                                    .setUserCrn(actorCrn)
+                                    .setRight(right)
+                                    .addAllResource(resources)
+                                    .build())
+                    .getResultList();
+        } catch (StatusRuntimeException statusRuntimeException) {
+            if (Status.Code.DEADLINE_EXCEEDED.equals(statusRuntimeException.getStatus().getCode())) {
+                LOGGER.error("Deadline exceeded for hasRightOnResources {} for actor {} and right {} and resources {}", actorCrn, right, resources,
+                        statusRuntimeException);
+                throw new CloudbreakServiceException("Authorization failed due to user management service call timed out.");
+            } else {
+                LOGGER.error("Status runtime exception while checking hasRightOnResources {} for actor {} and right {} and resources {}", actorCrn, right,
+                        resources, statusRuntimeException);
+                throw new CloudbreakServiceException("Authorization failed due to user management service call failed.");
+            }
+        } catch (Exception e) {
+            LOGGER.error("Unknown error while checking hasRightOnResources {} for actor {} and right {} and resources", actorCrn, right, resources, e);
+            throw new CloudbreakServiceException("Authorization failed due to user management service call failed with error.");
+        }
     }
 
     /**

@@ -192,13 +192,15 @@ public class UpdateRecipeService {
                             .filter(r -> !r.getName().equals(recipeName))
                             .collect(Collectors.toSet())
             );
-            Optional<GeneratedRecipe> generatedRecipeToDelete =
+            Optional<GeneratedRecipe> generatedRecipeToDetach =
                     hostGroup.getGeneratedRecipes().stream()
                             .filter(gr -> recipeNamesMatchForGeneratedRecipe(gr, Set.of(recipeName)))
                             .findFirst();
-            generatedRecipeToDelete.ifPresent(generatedRecipe -> hostGroup.getGeneratedRecipes().remove(generatedRecipe));
             hostGroupService.save(hostGroup);
-            generatedRecipeToDelete.ifPresent(generatedRecipe -> generatedRecipeService.deleteAll(Set.of(generatedRecipe)));
+            generatedRecipeToDetach.ifPresent(generatedRecipe -> {
+                generatedRecipe.setRecipe(null);
+                generatedRecipeService.save(generatedRecipe);
+            });
         } else {
             LOGGER.debug("Recipe {} already detached from host group {}. ", recipeName, hostGroupName);
         }

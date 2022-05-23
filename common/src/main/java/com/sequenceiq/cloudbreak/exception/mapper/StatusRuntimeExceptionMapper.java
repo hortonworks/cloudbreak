@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.exception.mapper;
 
+import static io.grpc.Status.Code.DEADLINE_EXCEEDED;
+
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -28,6 +30,7 @@ public class StatusRuntimeExceptionMapper extends BaseExceptionMapper<StatusRunt
             case UNIMPLEMENTED:
                 return Response.Status.NOT_IMPLEMENTED;
             case UNAVAILABLE:
+            case DEADLINE_EXCEEDED:
                 return Response.Status.SERVICE_UNAVAILABLE;
             case UNAUTHENTICATED:
                 return Response.Status.UNAUTHORIZED;
@@ -39,7 +42,11 @@ public class StatusRuntimeExceptionMapper extends BaseExceptionMapper<StatusRunt
     @Override
     protected String getErrorMessage(StatusRuntimeException exception) {
         LOGGER.info("Error occurred in gRPC call: {}, original message: {}", exception.getStatus(), exception.getMessage());
-        return super.getErrorMessage(exception);
+        if (DEADLINE_EXCEEDED.equals(exception.getStatus().getCode())) {
+            return "Service Unavailable";
+        } else {
+            return super.getErrorMessage(exception);
+        }
     }
 
     @Override
