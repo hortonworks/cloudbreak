@@ -8,7 +8,9 @@ base:
 {%- if salt['file.file_exists']('/srv/pillar/recipes/init.sls') %}
     - recipes.init
 {%- endif %}
+{%- if salt['file.file_exists']('/srv/pillar/unbound/forwarders.sls') %}
     - unbound.forwarders
+{%- endif %}
     - unbound.elimination
     - docker
     - metadata.init
@@ -46,7 +48,9 @@ base:
   'G@roles:gateway or G@roles:knox':
     - match: compound
     - gateway.init
+{%- if salt['file.file_exists']('/srv/pillar/gateway/ldap.sls') %}
     - gateway.ldap
+{%- endif %}
     - gateway.settings
 
   'roles:kerberized':
@@ -81,7 +85,9 @@ base:
     - cloudera-manager.autotls
 {%- endif %}
     - gateway.init
+{%- if salt['file.file_exists']('/srv/pillar/gateway/ldap.sls') %}
     - gateway.ldap
+{%- endif %}
     - gateway.settings
     - postgresql.disaster_recovery
 
