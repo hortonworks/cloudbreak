@@ -25,4 +25,11 @@ public class TerminationEvent extends StackEvent {
                 event -> Objects.equals(forced, event.forced));
     }
 
+    @Override
+    public String toString() {
+        return "TerminationEvent{" +
+                "forced=" + forced +
+                "} " + super.toString();
+    }
+
 }

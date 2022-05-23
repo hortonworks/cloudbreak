@@ -2,8 +2,10 @@ package com.sequenceiq.environment.environment.v1;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_RECIPE;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME_LIST;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.util.List;
@@ -165,6 +167,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "credentialName", type = NAME, action = DESCRIBE_CREDENTIAL)
+    @CheckPermissionByRequestProperty(path = "freeIpa.recipes", type = NAME_LIST, action = DESCRIBE_RECIPE, skipOnNull = true)
     public DetailedEnvironmentResponse post(@RequestObject @Valid EnvironmentRequest request) {
         EnvironmentCreationDto environmentCreationDto = environmentApiConverter.initCreationDto(request);
         EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto);

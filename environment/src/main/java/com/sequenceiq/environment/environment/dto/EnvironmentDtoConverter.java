@@ -29,6 +29,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.domain.Region;
+import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
@@ -61,6 +62,8 @@ public class EnvironmentDtoConverter {
 
     private final CrnUserDetailsService crnUserDetailsService;
 
+    private final EnvironmentRecipeService environmentRecipeService;
+
     public EnvironmentDtoConverter(Map<CloudPlatform,
             EnvironmentNetworkConverter> environmentNetworkConverterMap,
             Map<CloudPlatform, EnvironmentParametersConverter> environmentParamsConverterMap,
@@ -70,7 +73,8 @@ public class EnvironmentDtoConverter {
             DefaultInternalAccountTagService defaultInternalAccountTagService,
             AccountTagToAccountTagResponsesConverter accountTagToAccountTagResponsesConverter,
             AccountTagService accountTagService,
-            CrnUserDetailsService crnUserDetailsService) {
+            CrnUserDetailsService crnUserDetailsService,
+            EnvironmentRecipeService environmentRecipeService) {
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
         this.environmentParamsConverterMap = environmentParamsConverterMap;
         this.authenticationDtoConverter = authenticationDtoConverter;
@@ -80,6 +84,7 @@ public class EnvironmentDtoConverter {
         this.defaultInternalAccountTagService = defaultInternalAccountTagService;
         this.accountTagToAccountTagResponsesConverter = accountTagToAccountTagResponsesConverter;
         this.crnUserDetailsService = crnUserDetailsService;
+        this.environmentRecipeService = environmentRecipeService;
     }
 
     public EnvironmentViewDto environmentViewToViewDto(EnvironmentView environmentView) {
@@ -280,9 +285,10 @@ public class EnvironmentDtoConverter {
     }
 
     private FreeIpaCreationDto environmentToFreeIpaCreationDto(Environment environment) {
+        Set<String> recipesForEnvironment = environmentRecipeService.getRecipes(environment.getId());
         FreeIpaCreationDto freeIpaCreationDto = getFreeIpaCreationDto(environment.isCreateFreeIpa(), environment.getFreeIpaInstanceCountByGroup(),
                 environment.getFreeIpaInstanceType(), environment.getFreeIpaImageCatalog(), environment.getFreeIpaImageId(),
-                environment.isFreeIpaEnableMultiAz());
+                environment.isFreeIpaEnableMultiAz(), recipesForEnvironment);
         freeIpaCreationDto.setAws(getFreeIpaAwsParameters(environment.getCloudPlatform(), environment.getParameters()));
         return freeIpaCreationDto;
     }
@@ -290,7 +296,7 @@ public class EnvironmentDtoConverter {
     private FreeIpaCreationDto environmentToFreeIpaCreationDto(EnvironmentView environment) {
         FreeIpaCreationDto freeIpaCreationDto = getFreeIpaCreationDto(environment.isCreateFreeIpa(), environment.getFreeIpaInstanceCountByGroup(),
                 environment.getFreeIpaInstanceType(), environment.getFreeIpaImageCatalog(), environment.getFreeIpaImageId(),
-                environment.isFreeIpaEnableMultiAz());
+                environment.isFreeIpaEnableMultiAz(), environment.getFreeipaRecipes());
         freeIpaCreationDto.setAws(getFreeIpaAwsParameters(environment.getCloudPlatform(), environment.getParameters()));
         return freeIpaCreationDto;
     }
@@ -310,7 +316,7 @@ public class EnvironmentDtoConverter {
     }
 
     private FreeIpaCreationDto getFreeIpaCreationDto(boolean createFreeIpa, Integer freeIpaInstanceCountByGroup, String freeIpaInstanceType,
-            String freeIpaImageCatalog, String freeIpaImageId, boolean freeIpaEnableMultiAz) {
+            String freeIpaImageCatalog, String freeIpaImageId, boolean freeIpaEnableMultiAz, Set<String> freeipaRecipes) {
         FreeIpaCreationDto.Builder builder = FreeIpaCreationDto.builder()
                 .withCreate(createFreeIpa);
         Optional.ofNullable(freeIpaInstanceCountByGroup).ifPresent(builder::withInstanceCountByGroup);
@@ -318,6 +324,7 @@ public class EnvironmentDtoConverter {
         builder.withImageCatalog(freeIpaImageCatalog);
         builder.withImageId(freeIpaImageId);
         builder.withEnableMultiAz(freeIpaEnableMultiAz);
+        builder.withRecipes(freeipaRecipes);
         return builder.build();
     }
 }

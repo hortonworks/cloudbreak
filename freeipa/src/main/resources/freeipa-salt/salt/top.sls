@@ -3,6 +3,7 @@ base:
              - freeipa.grow-disk
              - nginx
              - tags
+             - recipes.runner
              - telemetry
              - fluent
              - ntp
@@ -12,6 +13,10 @@ base:
              - logrotate
              - ccm
              - monitoring
+
+           'recipes:pre-cloudera-manager-start':
+             - match: grain
+             - recipes.pre-cloudera-manager-start
 
            'roles:freeipa_primary':
              - match: grain
@@ -40,3 +45,15 @@ base:
              - freeipa.healthagent
              - nodestatus
              - freeipa.patch-pki-tomcat
+
+           'recipes:post-cloudera-manager-start':
+             - match: grain
+             - recipes.post-cloudera-manager-start
+
+           'recipes:post-cluster-install':
+             - match: grain
+             - recipes.post-cluster-install
+
+           'recipes:pre-termination':
+             - match: grain
+             - recipes.pre-termination

@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -30,6 +31,9 @@ public class AttachedFreeIpaRequest implements Serializable {
 
     @ApiModelProperty(value = EnvironmentModelDescription.MULTIAZ_FREEIPA)
     private boolean enableMultiAz;
+
+    @ApiModelProperty(EnvironmentModelDescription.FREEIPA_RECIPE_LIST)
+    private Set<String> recipes;
 
     @Valid
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_AWS_PARAMETERS)
@@ -124,4 +128,13 @@ public class AttachedFreeIpaRequest implements Serializable {
     public void setEnableMultiAz(boolean enableMultiAz) {
         this.enableMultiAz = enableMultiAz;
     }
+
+    public Set<String> getRecipes() {
+        return recipes;
+    }
+
+    public void setRecipes(Set<String> recipes) {
+        this.recipes = recipes;
+    }
+
 }

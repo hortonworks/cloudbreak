@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.stack.termination;
 
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.CCM_KEY_DEREGISTRATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.CLUSTER_PROXY_DEREGISTRATION_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.EXECUTE_PRE_TERMINATION_RECIPES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.REMOVE_MACHINE_USER_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.STOP_TELEMETRY_AGENT_FINISHED_EVENT;
@@ -11,6 +12,7 @@ import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEven
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationEvent.TERMINATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.DEREGISTER_CCMKEY_STATE;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.DEREGISTER_CLUSTERPROXY_STATE;
+import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.EXECUTE_PRE_TERMINATION_RECIPES;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.stack.termination.StackTerminationState.REMOVE_MACHINE_USER_STATE;
@@ -32,7 +34,9 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     private static final List<Transition<StackTerminationState, StackTerminationEvent>> TRANSITIONS =
             new Builder<StackTerminationState, StackTerminationEvent>()
                     .defaultFailureEvent(TERMINATION_FAILED_EVENT)
-                    .from(INIT_STATE).to(STOP_TELEMETRY_AGENT_STATE).event(TERMINATION_EVENT).defaultFailureEvent()
+                    .from(INIT_STATE).to(EXECUTE_PRE_TERMINATION_RECIPES).event(TERMINATION_EVENT).defaultFailureEvent()
+                    .from(EXECUTE_PRE_TERMINATION_RECIPES).to(STOP_TELEMETRY_AGENT_STATE).event(EXECUTE_PRE_TERMINATION_RECIPES_FINISHED_EVENT)
+                    .defaultFailureEvent()
                     .from(STOP_TELEMETRY_AGENT_STATE).to(DEREGISTER_CLUSTERPROXY_STATE).event(STOP_TELEMETRY_AGENT_FINISHED_EVENT).defaultFailureEvent()
                     .from(DEREGISTER_CLUSTERPROXY_STATE).to(DEREGISTER_CCMKEY_STATE).event(CLUSTER_PROXY_DEREGISTRATION_FINISHED_EVENT).defaultFailureEvent()
                     .from(DEREGISTER_CCMKEY_STATE).to(REMOVE_MACHINE_USER_STATE).event(CCM_KEY_DEREGISTRATION_FINISHED_EVENT).defaultFailureEvent()

@@ -264,6 +264,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             securityGroupRequest = createSecurityGroupRequest(environment.getSecurityAccess());
         }
         createFreeIpaRequest.setInstanceGroups(createInstanceGroupRequests(createFreeIpaRequest, securityGroupRequest, environment, multiAzRequired));
+        createFreeIpaRequest.setRecipes(environment.getFreeIpaCreation().getRecipes());
         setVariant(environment, createFreeIpaRequest, multiAzRequired);
         setUseCcm(environment.getExperimentalFeatures().getTunnel(), createFreeIpaRequest);
         return createFreeIpaRequest;

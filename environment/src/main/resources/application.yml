@@ -89,7 +89,7 @@ environment:
     url: http://localhost:8090
     contextPath: /freeipa
     synchronizeOnStart: true
-    supportedPlatforms: AWS,AZURE,GCP
+    supportedPlatforms: AWS,AZURE,GCP,MOCK
   sdx:
     url: http://localhost:8086
     contextPath: /dl

@@ -5,9 +5,12 @@ import java.util.Objects;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
+import javax.persistence.CollectionTable;
 import javax.persistence.Column;
 import javax.persistence.Convert;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
@@ -123,6 +126,11 @@ public class EnvironmentView extends CompactView implements AuthResource {
     private String freeIpaImageCatalog;
 
     private String freeIpaImageId;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "environment_freeiparecipes", joinColumns = @JoinColumn(name = "environment_id", referencedColumnName = "id"))
+    @Column(name = "recipe")
+    private Set<String> freeipaRecipes;
 
     @Column(nullable = false)
     private boolean freeIpaEnableMultiAz;
@@ -481,6 +489,14 @@ public class EnvironmentView extends CompactView implements AuthResource {
         this.freeIpaEnableMultiAz = freeIpaEnableMultiAz;
     }
 
+    public Set<String> getFreeipaRecipes() {
+        return freeipaRecipes;
+    }
+
+    public void setFreeipaRecipes(Set<String> freeipaRecipes) {
+        this.freeipaRecipes = freeipaRecipes;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -514,6 +530,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
                 ", accountId='" + accountId + '\'' +
                 ", resourceCrn='" + resourceCrn + '\'' +
                 ", status=" + status +
+                ", freeipaRecipes='" + freeipaRecipes + '\'' +
                 ", deletionType=" + deletionType +
                 '}';
     }

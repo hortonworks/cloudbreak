@@ -51,6 +51,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.NetworkService;
@@ -105,6 +106,9 @@ class EnvironmentCreationServiceTest {
     @MockBean
     private LoadBalancerEntitlementService loadBalancerEntitlementService;
 
+    @MockBean
+    private EnvironmentRecipeService recipeService;
+
     @Inject
     private EnvironmentCreationService environmentCreationServiceUnderTest;
 
@@ -124,6 +128,7 @@ class EnvironmentCreationServiceTest {
 
         assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
 
+        verify(validatorService, Mockito.times(1)).validateFMSRecipesEntitlement(environmentCreationDto);
         verify(validatorService, Mockito.times(0)).validatePublicKey(any());
         verify(environmentService, never()).save(any());
         verify(environmentResourceService, never()).createAndSetNetwork(any(), any(), any(), any(), any());

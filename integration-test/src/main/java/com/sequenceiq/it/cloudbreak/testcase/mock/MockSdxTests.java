@@ -204,7 +204,7 @@ public class MockSdxTests extends AbstractMockTest {
                 .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
                 .withNetwork(networkKey)
-                .withCreateFreeIpa(Boolean.TRUE)
+                .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)

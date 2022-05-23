@@ -24,6 +24,7 @@ import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -46,17 +47,21 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final DnsV1Endpoint dnsV1Endpoint;
 
+    private final EnvironmentRecipeService environmentRecipeService;
+
     protected FreeIpaDeletionHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
             FreeIpaService freeIpaService,
             PollingService<FreeIpaPollerObject> freeIpaPollingService,
-            DnsV1Endpoint dnsV1Endpoint) {
+            DnsV1Endpoint dnsV1Endpoint,
+            EnvironmentRecipeService environmentRecipeService) {
         super(eventSender);
         this.environmentService = environmentService;
         this.freeIpaService = freeIpaService;
         this.freeIpaPollingService = freeIpaPollingService;
         this.dnsV1Endpoint = dnsV1Endpoint;
+        this.environmentRecipeService = environmentRecipeService;
     }
 
     @Override
@@ -66,6 +71,7 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
         Environment environment = environmentService.findEnvironmentById(environmentDto.getId()).orElse(null);
         try {
             if (shouldRemoveFreeIpa(environment)) {
+                environmentRecipeService.deleteRecipes(environmentDto.getId());
                 if (Objects.nonNull(environment.getParentEnvironment())) {
                     detachChildEnvironmentFromFreeIpa(environment);
                 } else {

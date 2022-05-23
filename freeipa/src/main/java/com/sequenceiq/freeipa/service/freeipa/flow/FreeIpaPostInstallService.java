@@ -3,10 +3,10 @@ package com.sequenceiq.freeipa.service.freeipa.flow;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -14,13 +14,22 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.User;
+import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
+import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -57,22 +66,41 @@ public class FreeIpaPostInstallService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private HostOrchestrator hostOrchestrator;
+
+    @Inject
+    private GatewayConfigService gatewayConfigService;
+
+    @Inject
+    private FreeIpaNodeUtilService freeIpaNodeUtilService;
+
     @Retryable(value = FreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public void postInstallFreeIpa(Long stackId, boolean fullPostInstall) throws Exception {
         LOGGER.debug("Performing post-install configuration for stack {}. {}.", stackId, fullPostInstall ? "Full post install" : "Partial post install");
-        Stack stack = stackService.getStackById(stackId);
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         freeIpaTopologyService.updateReplicationTopology(stackId, Set.of(), freeIpaClient);
         if (fullPostInstall) {
-            setInitialFreeIpaPolicies(stack, freeIpaClient);
+            setInitialFreeIpaPolicies(freeIpaClient);
             synchronizeUsers(stack);
         }
+        executePostInstallRecipes(stack);
     }
 
-    private void setInitialFreeIpaPolicies(Stack stack, FreeIpaClient freeIpaClient) throws Exception {
+    private void executePostInstallRecipes(Stack stack) throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
+        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        Set<InstanceMetaData> instanceMetaDatas = stack.getNotDeletedInstanceMetaDataSet();
+        Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDatas);
+        LOGGER.info("Execute post install recipes for freeipa: {}. Instances: {}", stack.getName(),
+                instanceMetaDatas.stream().map(InstanceMetaData::getInstanceId).collect(Collectors.joining()));
+        hostOrchestrator.postInstallRecipes(primaryGatewayConfig, allNodes, new StackBasedExitCriteriaModel(stack.getId()));
+    }
+
+    private void setInitialFreeIpaPolicies(FreeIpaClient freeIpaClient) throws Exception {
         Set<Permission> permission = freeIpaClient.findPermission(SET_PASSWORD_EXPIRATION_PERMISSION);
         if (permission.isEmpty()) {
             freeIpaClient.addPasswordExpirationPermission(SET_PASSWORD_EXPIRATION_PERMISSION);

@@ -128,6 +128,7 @@ public class EnvironmentModelDescription {
     public static final String ENCRYPTION_KEY = "Key Resource of the Customer Managed Encryption Key to encrypt GCP resources";
 
     public static final String FREEIPA_AWS_PARAMETERS = "Aws specific FreeIpa parameters";
+    public static final String FREEIPA_RECIPE_LIST = "FreeIpa recipe list";
     public static final String FREEIPA_AZURE_PARAMETERS = "Azure specific FreeIpa parameters";
     public static final String FREEIPA_GCP_PARAMETERS = "Gcp specific FreeIpa parameters";
     public static final String FREEIPA_AWS_SPOT_PARAMETERS = "Aws spot instance related parameters.";

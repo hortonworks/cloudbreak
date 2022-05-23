@@ -361,6 +361,37 @@ public class FreeIpaCreationHandlerTest {
     }
 
     @Test
+    public void testFreeIpaRecipesPopulatedIfProvided() {
+        EnvironmentDto environmentDto = someEnvironmentWithFreeIpaCreation();
+        environmentDto.getFreeIpaCreation().setRecipes(Set.of("recipe1", "recipe2"));
+        environmentDto.setCredential(new Credential());
+        Environment environment = new Environment();
+        environment.setCreateFreeIpa(true);
+
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        when(supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())).thenReturn(true);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
+        when(connectors.getDefault(any())).thenReturn(mock(CloudConnector.class));
+        when(freeIpaPollingService.pollWithTimeout(
+                any(FreeIpaCreationRetrievalTask.class),
+                any(FreeIpaPollerObject.class),
+                anyLong(),
+                anyInt(),
+                anyInt()))
+                .thenReturn(extendedPollingResult);
+
+        victim.accept(new Event<>(environmentDto));
+
+        ArgumentCaptor<CreateFreeIpaRequest> freeIpaRequestCaptor = ArgumentCaptor.forClass(CreateFreeIpaRequest.class);
+        verify(freeIpaService).create(freeIpaRequestCaptor.capture());
+        CreateFreeIpaRequest freeIpaRequest = freeIpaRequestCaptor.getValue();
+        assertThat(freeIpaRequest.getRecipes()).containsExactlyInAnyOrder("recipe1", "recipe2");
+    }
+
+    @Test
     public void testFreeIpaImageIdIsPopulatedInCaseOfMissingImageCatalog() {
         EnvironmentDto environmentDto = someEnvironmentWithFreeIpaCreation();
         environmentDto.getFreeIpaCreation().setImageId(IMAGE_ID);

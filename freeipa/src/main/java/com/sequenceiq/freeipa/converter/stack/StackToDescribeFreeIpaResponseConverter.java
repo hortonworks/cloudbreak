@@ -32,6 +32,7 @@ import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
+import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
 @Component
@@ -64,6 +65,9 @@ public class StackToDescribeFreeIpaResponseConverter {
     @Inject
     private StackToAvailabilityStatusConverter stackToAvailabilityStatusConverter;
 
+    @Inject
+    private FreeIpaRecipeService freeIpaRecipeService;
+
     public DescribeFreeIpaResponse convert(Stack stack, ImageEntity image, FreeIpa freeIpa, Optional<UserSyncStatus> userSyncStatus,
             Boolean includeAllInstances) {
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
@@ -86,6 +90,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         decorateFreeIpaServerResponseWithIps(describeFreeIpaResponse.getFreeIpa(), describeFreeIpaResponse.getInstanceGroups());
         decorateFreeIpaServerResponseWithLoadBalancedHost(stack, describeFreeIpaResponse.getFreeIpa(), freeIpa);
         describeFreeIpaResponse.setAppVersion(stack.getAppVersion());
+        describeFreeIpaResponse.setRecipes(freeIpaRecipeService.getRecipeNamesForStack(stack.getId()));
         decorateWithCloudStorageAndTelemetry(stack, describeFreeIpaResponse);
         userSyncStatus.ifPresent(u -> describeFreeIpaResponse.setUserSyncStatus(userSyncStatusConverter.convert(u)));
         return describeFreeIpaResponse;

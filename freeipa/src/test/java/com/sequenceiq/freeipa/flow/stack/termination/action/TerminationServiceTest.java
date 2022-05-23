@@ -23,6 +23,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCleanupService;
+import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -49,6 +50,9 @@ class TerminationServiceTest {
 
     @Mock
     private StackUpdater stackUpdater;
+
+    @Mock
+    private FreeIpaRecipeService freeIpaRecipeService;
 
     @InjectMocks
     private TerminationService underTest;
@@ -113,6 +117,7 @@ class TerminationServiceTest {
 
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getName()).thenReturn(STACK_NAME);
+        when(stack.getId()).thenReturn(1L);
 
         underTest.finalizeTerminationTransaction(1L);
 
@@ -124,5 +129,6 @@ class TerminationServiceTest {
                 eq("Stack was terminated successfully."));
         verify(stackService).save(eq(stack));
         verify(instanceMetaDataService, never()).save(any());
+        verify(freeIpaRecipeService).deleteRecipes(1L);
     }
 }

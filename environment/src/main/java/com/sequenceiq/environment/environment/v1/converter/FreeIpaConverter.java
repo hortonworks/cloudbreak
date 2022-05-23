@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -93,6 +94,10 @@ public class FreeIpaConverter {
             if (image != null) {
                 builder.withImageCatalog(image.getCatalog());
                 builder.withImageId(image.getId());
+            }
+            Set<String> recipes = request.getRecipes();
+            if (recipes != null) {
+                builder.withRecipes(recipes);
             }
         }
         return builder.build();

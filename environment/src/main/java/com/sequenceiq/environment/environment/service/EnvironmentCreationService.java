@@ -31,6 +31,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
@@ -61,6 +62,8 @@ public class EnvironmentCreationService {
 
     private final LoadBalancerEntitlementService loadBalancerEntitlementService;
 
+    private final EnvironmentRecipeService recipeService;
+
     @Value("${info.app.version}")
     private String environmentServiceVersion;
 
@@ -73,7 +76,8 @@ public class EnvironmentCreationService {
             AuthenticationDtoConverter authenticationDtoConverter,
             ParametersService parametersService,
             EntitlementService entitlementService,
-            LoadBalancerEntitlementService loadBalancerEntitlementService) {
+            LoadBalancerEntitlementService loadBalancerEntitlementService,
+            EnvironmentRecipeService recipeService) {
         this.environmentService = environmentService;
         validatorService = environmentValidatorService;
         this.environmentResourceService = environmentResourceService;
@@ -83,6 +87,7 @@ public class EnvironmentCreationService {
         this.parametersService = parametersService;
         this.entitlementService = entitlementService;
         this.loadBalancerEntitlementService = loadBalancerEntitlementService;
+        this.recipeService = recipeService;
     }
 
     public EnvironmentDto create(EnvironmentCreationDto creationDto) {
@@ -92,6 +97,8 @@ public class EnvironmentCreationService {
             null : creationDto.getNetwork().getPublicEndpointAccessGateway();
         loadBalancerEntitlementService.validateNetworkForEndpointGateway(creationDto.getCloudPlatform(), creationDto.getName(),
             endpointAccessGateway);
+
+        validatorService.validateFMSRecipesEntitlement(creationDto);
 
         if (environmentService.isNameOccupied(creationDto.getName(), creationDto.getAccountId())) {
             throw new BadRequestException(String.format("Environment with name '%s' already exists in account '%s'.",
@@ -111,6 +118,7 @@ public class EnvironmentCreationService {
         validateCreation(creationDto, environment);
         try {
             environment = environmentService.save(environment);
+            saveFreeIpaRecipes(creationDto, environment);
             environmentResourceService.createAndSetNetwork(environment, creationDto.getNetwork(), creationDto.getAccountId(),
                     getIfNotNull(creationDto.getNetwork(), NetworkDto::getSubnetMetas),
                     getIfNotNull(creationDto.getNetwork(), NetworkDto::getEndpointGatewaySubnetMetas));
@@ -124,6 +132,12 @@ public class EnvironmentCreationService {
             throw e;
         }
         return environmentDtoConverter.environmentToDto(environment);
+    }
+
+    private void saveFreeIpaRecipes(EnvironmentCreationDto creationDto, Environment environment) {
+        if (creationDto.getFreeIpaCreation() != null && creationDto.getFreeIpaCreation().getRecipes() != null) {
+            recipeService.saveRecipes(creationDto.getFreeIpaCreation().getRecipes(), environment.getId());
+        }
     }
 
     private Environment initializeEnvironment(EnvironmentCreationDto creationDto) {

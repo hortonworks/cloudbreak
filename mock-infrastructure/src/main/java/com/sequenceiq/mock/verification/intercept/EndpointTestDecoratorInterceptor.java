@@ -1,11 +1,11 @@
 package com.sequenceiq.mock.verification.intercept;
 
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 
@@ -73,10 +75,20 @@ public class EndpointTestDecoratorInterceptor implements HandlerInterceptor {
             });
             return params;
         }
+        if (request instanceof StandardMultipartHttpServletRequest) {
+            StandardMultipartHttpServletRequest multipartHttpServletRequest = (StandardMultipartHttpServletRequest) request;
+            Map<String, String> parameters = multipartHttpServletRequest.getParameterMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+                    entry -> entry.getValue()[0]));
+            MultipartFile multipartFile = multipartHttpServletRequest.getMultiFileMap().getFirst("file");
+            if (multipartFile != null) {
+                parameters.put("file", multipartFile.getOriginalFilename());
+            }
+            return parameters;
+        }
         return null;
     }
 
-    private String getRequestBody(HttpServletRequest request) throws IOException {
+    private String getRequestBody(HttpServletRequest request) {
         if (request instanceof ContentCachingRequestWrapper) {
             return new String(((ContentCachingRequestWrapper) request).getContentAsByteArray());
         } else {

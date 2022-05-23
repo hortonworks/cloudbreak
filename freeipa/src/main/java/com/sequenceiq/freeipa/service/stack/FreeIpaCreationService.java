@@ -55,6 +55,7 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.freeipa.service.multiaz.MultiAzValidator;
+import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.telemetry.AccountTelemetryService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -129,6 +130,9 @@ public class FreeIpaCreationService {
     @Inject
     private FreeIpaRecommendationService freeIpaRecommendationService;
 
+    @Inject
+    private FreeIpaRecipeService freeIpaRecipeService;
+
     @Value("${info.app.version:}")
     private String appVersion;
 
@@ -140,6 +144,7 @@ public class FreeIpaCreationService {
                 LOGGER, "Environment properties were queried under {} ms for environment {}", request.getEnvironmentCrn());
 
         Stack stack = stackConverter.convert(request, environment, accountId, ownerFuture, userCrn, credential.getCloudPlatform());
+
         stack.setAppVersion(appVersion);
         GetPlatformTemplateRequest getPlatformTemplateRequest = templateService.triggerGetTemplate(stack, credential);
         Telemetry telemetry = stack.getTelemetry();
@@ -168,6 +173,7 @@ public class FreeIpaCreationService {
                 SecurityConfig savedSecurityConfig = securityConfigService.save(securityConfig);
                 stack.setSecurityConfig(savedSecurityConfig);
                 Stack savedStack = stackService.save(stack);
+                freeIpaRecipeService.saveRecipes(request.getRecipes(), savedStack.getId());
                 ImageSettingsRequest imageSettingsRequest = request.getImage();
                 ImageEntity image = imageService.create(savedStack, Objects.nonNull(imageSettingsRequest) ? imageSettingsRequest : new ImageSettingsRequest());
                 FreeIpa freeIpa = freeIpaService.create(savedStack, request.getFreeIpa());

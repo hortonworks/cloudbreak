@@ -1,11 +1,13 @@
 package com.sequenceiq.freeipa.controller;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_RECIPE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ENVIRONMENT_CHANGE_FREEIPA_IMAGE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.REPAIR_FREEIPA;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.SCALE_FREEIPA;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME_LIST;
 
 import java.util.List;
 import java.util.Optional;
@@ -176,6 +178,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    @CheckPermissionByRequestProperty(path = "recipes", type = NAME_LIST, action = DESCRIBE_RECIPE, skipOnNull = true)
     public DescribeFreeIpaResponse create(@RequestObject @Valid CreateFreeIpaRequest request) {
         ValidationResult validationResult = createFreeIpaRequestValidator.validate(request);
         if (validationResult.getState() == State.ERROR) {
