@@ -139,6 +139,7 @@ dependencies {
   implementation project(':notification-sender')
   implementation project(':environment-api')
   implementation project(':environment-common')
+  implementation project(':core-common')
   implementation project(':datalake-api')
   implementation project(':cluster-proxy')
   implementation project(':status-checker')

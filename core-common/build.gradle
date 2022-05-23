@@ -1,0 +1,16 @@
+plugins {
+  id "java"
+}
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+
+  implementation project(":core-api")
+  implementation project(":common")
+
+  testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion
+
+}

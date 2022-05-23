@@ -1,8 +1,10 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -23,12 +25,18 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
+import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 
 public class EnvironmentTest extends AbstractMockTest {
 
@@ -39,6 +47,18 @@ public class EnvironmentTest extends AbstractMockTest {
 
     @Inject
     private CredentialTestClient credentialTestClient;
+
+    @Inject
+    private RecipeTestClient recipeTestClient;
+
+    @Inject
+    private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
+    private RecipeUtil recipeUtil;
+
+    @Inject
+    private ImageCatalogMockServerSetup imageCatalogMockServerSetup;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -169,6 +189,44 @@ public class EnvironmentTest extends AbstractMockTest {
                 }, key("wrongCrn"))
                 .expect(BadRequestException.class, expectedMessage("Invalid Crn was provided. 'someName' does not match the Crn pattern")
                         .withKey("wrongCrn"))
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "valid create environment request is sent with freeipa recipe",
+            then = "environment should be created with freeipa and recipes was passed")
+    public void testCreateEnvironmentAndFreeIpaRecipesPassed(MockedTestContext testContext) throws IOException {
+        String preCMRecipeName = resourcePropertyProvider().getName();
+        String preTerminationRecipeName = resourcePropertyProvider().getName();
+        testContext
+                .given(RecipeTestDto.class)
+                    .withName(preCMRecipeName)
+                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
+                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                .when(recipeTestClient.createV4())
+                .given(RecipeTestDto.class)
+                    .withName(preTerminationRecipeName)
+                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
+                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                .when(recipeTestClient.createV4())
+                .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
+                .given(EnvironmentTestDto.class)
+                .withCreateFreeIpa(true)
+                .withFreeIpaRecipe(Set.of(preCMRecipeName, preTerminationRecipeName))
+                .withFreeIpaImage(imageCatalogMockServerSetup.getFreeIpaImageCatalogUrl(), "f6e778fc-7f17-4535-9021-515351df3691")
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.describe())
+                .then((testContext1, testDto, client) -> {
+                    if (!testDto.getResponse().getRecipes().containsAll(Set.of(preCMRecipeName, preTerminationRecipeName))) {
+                        throw new TestFailException("Necessary recipes are not present on FreeIpa stack!");
+                    }
+                    return testDto;
+                })
                 .validate();
     }
 

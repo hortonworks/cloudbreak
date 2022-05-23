@@ -15,7 +15,7 @@ public class RecipeToRecipeV4RequestConverter {
 
     public RecipeV4Request convert(Recipe source) {
         RecipeV4Request recipeRequest = new RecipeV4Request();
-        recipeRequest.setName("");
+        recipeRequest.setName(source.getName());
         recipeRequest.setDescription(source.getDescription());
         recipeRequest.setType(RecipeV4Type.valueOf(source.getRecipeType().name()));
         recipeRequest.setContent(source.getContent());

@@ -111,6 +111,14 @@ public class EnvironmentValidatorService {
         this.encryptionKeyValidator = encryptionKeyValidator;
     }
 
+    public void validateFMSRecipesEntitlement(EnvironmentCreationDto creationDto) {
+        if (!entitlementService.isFmsRecipesEnabled(creationDto.getAccountId())
+                && creationDto.getFreeIpaCreation().getRecipes() != null
+                && creationDto.getFreeIpaCreation().getRecipes().size() > 0) {
+            throw new BadRequestException("FreeIpa recipe support is not enabled for this account");
+        }
+    }
+
     public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network) {
         return networkCreationValidator.validateNetworkCreation(environment, network);
     }

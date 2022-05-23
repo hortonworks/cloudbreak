@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -408,6 +409,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     public FreeIpaTestDto withTunnel(Tunnel tunnel) {
         getRequest().setTunnel(tunnel);
+        return this;
+    }
+
+    public FreeIpaTestDto withRecipe(Set<String> recipes) {
+        getRequest().setRecipes(recipes);
         return this;
     }
 

@@ -29,6 +29,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaPollerObject;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.network.dao.domain.YarnNetwork;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -67,6 +68,9 @@ class FreeIpaDeletionHandlerTest {
 
     @Mock
     private DnsV1Endpoint dnsV1Endpoint;
+
+    @Mock
+    private EnvironmentRecipeService environmentRecipeService;
 
     @InjectMocks
     private FreeIpaDeletionHandler victim;
@@ -144,6 +148,7 @@ class FreeIpaDeletionHandlerTest {
 
         victim.accept(new Event<>(environmentDeletionDto));
 
+        verify(environmentRecipeService).deleteRecipes(1L);
         verify(freeIpaService).delete(ENVIRONMENT_CRN, true);
         verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
         verifyNoMoreInteractions(freeIpaService);

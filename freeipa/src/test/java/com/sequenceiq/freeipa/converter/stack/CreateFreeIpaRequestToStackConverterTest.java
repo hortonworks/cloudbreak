@@ -55,8 +55,8 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.tag.AccountTagService;
-import com.sequenceiq.freeipa.util.CrnService;
 import com.sequenceiq.freeipa.util.CloudArgsForIgConverter;
+import com.sequenceiq.freeipa.util.CrnService;
 
 @ExtendWith(MockitoExtension.class)
 public class CreateFreeIpaRequestToStackConverterTest {

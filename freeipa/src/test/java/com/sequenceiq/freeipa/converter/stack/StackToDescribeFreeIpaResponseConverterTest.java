@@ -40,6 +40,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.util.BalancedDnsAvailabilityChecker;
 
 @ExtendWith(MockitoExtension.class)
@@ -113,6 +114,9 @@ class StackToDescribeFreeIpaResponseConverterTest {
     @Mock
     private StackToAvailabilityStatusConverter stackToAvailabilityStatusConverter;
 
+    @Mock
+    private FreeIpaRecipeService freeIpaRecipeService;
+
     @BeforeEach
     void initInstanceGroupResponse() {
         InstanceMetaDataResponse instanceMetaDataResponse = new InstanceMetaDataResponse();
@@ -137,6 +141,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         when(userSyncStatusConverter.convert(userSyncStatus)).thenReturn(USERSYNC_STATUS_RESPONSE);
         when(balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)).thenReturn(true);
         when(stackToAvailabilityStatusConverter.convert(stack)).thenReturn(AvailabilityStatus.AVAILABLE);
+        when(freeIpaRecipeService.getRecipeNamesForStack(1L)).thenReturn(Set.of("recipe1", "recipe2"));
 
         DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, Optional.of(userSyncStatus), true);
 
@@ -160,6 +165,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .returns(USERSYNC_STATUS_RESPONSE, DescribeFreeIpaResponse::getUserSyncStatus)
                 .returns(tunnel, DescribeFreeIpaResponse::getTunnel);
 
+        assertThat(result.getRecipes()).containsExactlyInAnyOrder("recipe1", "recipe2");
         assertThat(freeIpaServerResponse)
                 .returns(Set.of(SERVER_IP), FreeIpaServerResponse::getServerIp)
                 .returns(FREEIPA_HOST, FreeIpaServerResponse::getFreeIpaHost)
@@ -168,6 +174,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
 
     private Stack createStack(Tunnel tunnel) {
         Stack stack = new Stack();
+        stack.setId(1L);
         stack.setEnvironmentCrn(ENV_CRN);
         stack.setName(NAME);
         stack.setResourceCrn(RESOURCE_CRN);

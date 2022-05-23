@@ -11,8 +11,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import javax.ws.rs.BadRequestException;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +38,7 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
@@ -104,6 +109,38 @@ class EnvironmentValidatorServiceTest {
                 encryptionKeyUrlValidator,
                 entitlementService,
                 encryptionKeyValidator);
+    }
+
+    @Test
+    public void testValidateFMSRecipesEntitlementIfEntitlementNotEnabledAndHasRecipes() {
+        when(entitlementService.isFmsRecipesEnabled("accountId")).thenReturn(false);
+        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withAccountId("accountId")
+                .withFreeIpaCreation(FreeIpaCreationDto.builder().withRecipes(Set.of("recipe1", "recipe2")).build())
+                .build();
+        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.validateFMSRecipesEntitlement(environmentCreationDto));
+        Assertions.assertEquals("FreeIpa recipe support is not enabled for this account", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testValidateFMSRecipesEntitlementIfEntitlementNotEnabledAndDontHaveRecipes() {
+        when(entitlementService.isFmsRecipesEnabled("accountId")).thenReturn(false);
+        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withAccountId("accountId")
+                .withFreeIpaCreation(FreeIpaCreationDto.builder().withRecipes(Set.of()).build())
+                .build();
+        underTest.validateFMSRecipesEntitlement(environmentCreationDto);
+    }
+
+    @Test
+    public void testValidateFMSRecipesEntitlementIfEntitlementEnabledAndHasRecipes() {
+        when(entitlementService.isFmsRecipesEnabled("accountId")).thenReturn(true);
+        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withAccountId("accountId")
+                .withFreeIpaCreation(FreeIpaCreationDto.builder().withRecipes(Set.of("recipe1", "recipe2")).build())
+                .build();
+        underTest.validateFMSRecipesEntitlement(environmentCreationDto);
     }
 
     @Test

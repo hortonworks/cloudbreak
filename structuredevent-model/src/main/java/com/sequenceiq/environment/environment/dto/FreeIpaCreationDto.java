@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.dto;
 
+import java.util.Set;
+
 public class FreeIpaCreationDto {
 
     private boolean create = true;
@@ -7,6 +9,8 @@ public class FreeIpaCreationDto {
     private int instanceCountByGroup = 1;
 
     private FreeIpaCreationAwsParametersDto aws;
+
+    private Set<String> recipes;
 
     private boolean enableMultiAz;
 
@@ -24,6 +28,7 @@ public class FreeIpaCreationDto {
         enableMultiAz = builder.enableMultiAz;
         imageId = builder.imageId;
         instanceType = builder.instanceType;
+        recipes = builder.recipes;
     }
 
     public void setCreate(boolean create) {
@@ -82,17 +87,26 @@ public class FreeIpaCreationDto {
         this.instanceType = instanceType;
     }
 
+    public Set<String> getRecipes() {
+        return recipes;
+    }
+
+    public void setRecipes(Set<String> recipes) {
+        this.recipes = recipes;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaCreationDto{" +
-            "create='" + create + '\'' +
-            "instanceCountByGroup='" + instanceCountByGroup + '\'' +
-            "aws='" + aws + '\'' +
-            "imageCatalog='" + imageCatalog + '\'' +
-            "imageId='" + imageId + '\'' +
-            "enableMultiAz='" + enableMultiAz + '\'' +
-            "instanceType='" + instanceType + '\'' +
-            '}';
+                "create=" + create +
+                ", instanceCountByGroup=" + instanceCountByGroup +
+                ", aws=" + aws +
+                ", recipes=" + recipes +
+                ", enableMultiAz=" + enableMultiAz +
+                ", imageCatalog='" + imageCatalog + '\'' +
+                ", imageId='" + imageId + '\'' +
+                ", instanceType='" + instanceType + '\'' +
+                '}';
     }
 
     public static Builder builder() {
@@ -114,6 +128,8 @@ public class FreeIpaCreationDto {
         private boolean enableMultiAz;
 
         private String instanceType;
+
+        private Set<String> recipes;
 
         private Builder() {
         }
@@ -150,6 +166,11 @@ public class FreeIpaCreationDto {
 
         public Builder withInstanceType(String instanceType) {
             this.instanceType = instanceType;
+            return this;
+        }
+
+        public Builder withRecipes(Set<String> recipes) {
+            this.recipes = recipes;
             return this;
         }
 

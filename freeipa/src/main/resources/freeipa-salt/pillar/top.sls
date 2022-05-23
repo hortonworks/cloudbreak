@@ -11,3 +11,4 @@ base:
     - freeipa
     - freeipa.services
     - upgradeccm
+    - recipes

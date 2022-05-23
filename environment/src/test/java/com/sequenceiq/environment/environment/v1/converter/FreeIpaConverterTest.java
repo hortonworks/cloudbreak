@@ -1,10 +1,13 @@
 package com.sequenceiq.environment.environment.v1.converter;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -172,6 +175,20 @@ public class FreeIpaConverterTest {
         // THEN
         assertNotNull(result.getInstanceType());
         assertEquals(INSTANCE_TYPE, result.getInstanceType());
+    }
+
+    @Test
+    public void testConvertWithRecipes() {
+        // GIVEN
+        AttachedFreeIpaRequest request = new AttachedFreeIpaRequest();
+        request.setCreate(true);
+        request.setInstanceType(INSTANCE_TYPE);
+        request.setRecipes(Set.of("recipe1", "recipe2"));
+        // WHEN
+        FreeIpaCreationDto result = underTest.convert(request, "id", CloudConstants.AWS);
+        // THEN
+        assertNotNull(result.getRecipes());
+        assertThat(result.getRecipes()).containsExactlyInAnyOrder("recipe1", "recipe2");
     }
 
     private FreeIpaImageRequest aFreeIpaImage(String catalog, String id) {
