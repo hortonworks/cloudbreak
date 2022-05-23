@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowState;
@@ -253,6 +254,23 @@ public class FlowLogDBServiceTest {
     public void testHasPendingFlowEvent() {
         Boolean actual = underTest.hasPendingFlowEvent(Lists.newArrayList(createFlowLog(true, "1"), createFlowLog(false, "2")));
         assertEquals(Boolean.TRUE, actual);
+    }
+
+    @Test
+    public void testTerminate() throws TransactionService.TransactionExecutionException {
+        Long resourceId = 1L;
+        Long flowDatabaseId = 2L;
+        when(transactionService.required(any(Supplier.class))).thenAnswer(invocation -> ((Supplier) invocation.getArguments()[0]).get());
+        FlowLog lastFlowLog = new FlowLog(resourceId, FLOW_ID, "currentState", false, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
+        lastFlowLog.setId(flowDatabaseId);
+        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(lastFlowLog));
+
+        FlowLog flowLog = underTest.terminate(resourceId, FLOW_ID);
+
+        verify(flowLogRepository).finalizeByFlowId(FLOW_ID);
+        verify(flowLogRepository).updateLastLogStatusInFlow(flowDatabaseId, StateStatus.SUCCESSFUL);
+        verify(flowLogRepository).save(any());
+        verify(applicationFlowInformation).handleFlowFail(flowLog);
     }
 
     private FlowLog createFlowLog(boolean pending, String flowId) {

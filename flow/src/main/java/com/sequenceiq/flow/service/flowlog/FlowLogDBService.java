@@ -115,7 +115,9 @@ public class FlowLogDBService implements FlowLogService {
 
     @Override
     public FlowLog terminate(Long resourceId, String flowId) throws TransactionExecutionException {
-        return finalize(resourceId, flowId, FlowConstants.TERMINATED_STATE, false);
+        FlowLog flowLog = finalize(resourceId, flowId, FlowConstants.TERMINATED_STATE, false);
+        applicationFlowInformation.handleFlowFail(flowLog);
+        return flowLog;
     }
 
     public void finalize(String flowId) {
