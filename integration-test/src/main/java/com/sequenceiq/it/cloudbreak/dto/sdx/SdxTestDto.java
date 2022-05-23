@@ -40,6 +40,7 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
@@ -175,7 +176,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto awaitForDeletedInstancesOnProvider() {
         Map<List<String>, InstanceStatus> instanceStatusMap = getInstanceStatusMapIfAvailableInResponse(() ->
-                        getResponse().getStackV4Response().getInstanceGroups().stream().collect(Collectors.toMap(
+                getResponse().getStackV4Response().getInstanceGroups().stream().collect(Collectors.toMap(
                         instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
                                 .map(InstanceMetaDataV4Response::getInstanceId).collect(Collectors.toList()),
                         instanceMetaDataV4Response -> InstanceStatus.DELETED_ON_PROVIDER_SIDE)));
@@ -183,6 +184,11 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     public SdxTestDto awaitForHostGroups(List<String> hostGroups, InstanceStatus instanceStatus) {
+        if (!getTestContext().getExceptionMap().isEmpty()) {
+            Log.await(LOGGER, String.format("Await for instances is skipped because of previous error. Required status %s, host group(s) %s.",
+                    instanceStatus, hostGroups));
+            return this;
+        }
         List<InstanceGroupV4Response> instanceGroups = getResponse().getStackV4Response().getInstanceGroups().stream()
                 .filter(instanceGroupV4Response -> hostGroups.contains(instanceGroupV4Response.getName()))
                 .collect(Collectors.toList());
