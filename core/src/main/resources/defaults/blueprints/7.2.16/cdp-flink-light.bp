@@ -15,7 +15,6 @@
           "hdfs-JOURNALNODE-BASE",
           "kafka-GATEWAY-BASE",
           "sql_stream_builder-MATERIALIZED_VIEW_ENGINE-BASE",
-          "sql_stream_builder-STREAMING_SQL_CONSOLE-BASE",
           "sql_stream_builder-STREAMING_SQL_ENGINE-BASE",
           "yarn-GATEWAY-BASE",
           "yarn-JOBHISTORY-BASE",
@@ -247,11 +246,6 @@
           {
             "refName": "sql_stream_builder-STREAMING_SQL_ENGINE-BASE",
             "roleType": "STREAMING_SQL_ENGINE",
-            "base": true
-          },
-          {
-            "refName": "sql_stream_builder-STREAMING_SQL_CONSOLE-BASE",
-            "roleType": "STREAMING_SQL_CONSOLE",
             "base": true
           },
           {
