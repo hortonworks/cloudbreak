@@ -7,6 +7,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NA
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,10 +36,13 @@ import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.saas.client.sdx.GrpcSdxSaasClient;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
@@ -125,6 +129,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentUpgradeCcmService upgradeCcmService;
 
+    private final GrpcSdxSaasClient grpcSdxSaasClient;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
@@ -142,7 +148,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentLoadBalancerService environmentLoadBalancerService,
             EnvironmentFiltering environmentFiltering,
             CloudStorageValidator cloudStorageValidator,
-            EnvironmentUpgradeCcmService upgradeCcmService) {
+            EnvironmentUpgradeCcmService upgradeCcmService,
+            GrpcSdxSaasClient grpcSdxSaasClient) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -160,6 +167,21 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentFiltering = environmentFiltering;
         this.cloudStorageValidator = cloudStorageValidator;
         this.upgradeCcmService = upgradeCcmService;
+        this.grpcSdxSaasClient = grpcSdxSaasClient;
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public String createSdxSaas(@ResourceCrn String envCrn) {
+        Crn pureEnvCrn = Crn.safeFromString(envCrn);
+        return grpcSdxSaasClient.createInstance(MDCUtils.getRequestId(), pureEnvCrn.getResource(), envCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
+    public Map<String, String> listSdxSaas(@ResourceCrn String envCrn) {
+        return grpcSdxSaasClient.listInstances(MDCUtils.getRequestId(), envCrn).stream()
+                .collect(Collectors.toMap(i -> i.getCrn(), i -> i.getStatus().name()));
     }
 
     @Override

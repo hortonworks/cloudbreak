@@ -3,6 +3,7 @@ package com.sequenceiq.environment.api.v1.environment.endpoint;
 import static com.sequenceiq.environment.api.doc.environment.EnvironmentDescription.ENVIRONMENT_NOTES;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -49,6 +50,18 @@ import io.swagger.annotations.ApiOperation;
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/v1/env", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface EnvironmentEndpoint {
+
+    @GET
+    @Path("/sdxsaas/{envCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "sdxsaas", produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "sdxsaas")
+    String createSdxSaas(@PathParam("envCrn") String envCrn);
+
+    @GET
+    @Path("/sdxsaas/list/{envCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "listsdxsaas", produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES, nickname = "listsdxsaas")
+    Map<String, String> listSdxSaas(@PathParam("envCrn") String envCrn);
 
     @POST
     @Path("")
