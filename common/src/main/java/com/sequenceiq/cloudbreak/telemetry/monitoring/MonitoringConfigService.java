@@ -22,9 +22,9 @@ public class MonitoringConfigService {
     }
 
     public MonitoringConfigView createMonitoringConfig(Monitoring monitoring, MonitoringClusterType clusterType,
-            MonitoringAuthConfig cmAuthConfig, char[] exporterPassword, boolean cdpSaasEnabled) {
+            MonitoringAuthConfig cmAuthConfig, char[] exporterPassword, boolean cdpSaasEnabled, boolean computeMonitoringEnabled) {
         final MonitoringConfigView.Builder builder = new MonitoringConfigView.Builder();
-        boolean enabled = isMonitoringEnabled(cdpSaasEnabled);
+        boolean enabled = isMonitoringEnabled(cdpSaasEnabled, computeMonitoringEnabled);
         LOGGER.debug("Tyring to set monitoring configurations.");
         if (clusterType != null) {
             builder.withType(clusterType.value());
@@ -83,8 +83,8 @@ public class MonitoringConfigService {
         }
     }
 
-    private boolean isMonitoringEnabled(boolean cdpSaasEnabled) {
-        return monitoringConfiguration.isEnabled() && (cdpSaasEnabled || monitoringConfiguration.isPaasSupport());
+    private boolean isMonitoringEnabled(boolean cdpSaasEnabled, boolean computeMonitoringEnabled) {
+        return computeMonitoringEnabled || (monitoringConfiguration.isEnabled() && (cdpSaasEnabled || monitoringConfiguration.isPaasSupport()));
     }
 
     private boolean areAuthConfigsValid(MonitoringAuthConfig authConfig) {

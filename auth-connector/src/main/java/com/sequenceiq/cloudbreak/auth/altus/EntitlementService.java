@@ -26,6 +26,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_JUMPGATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_TO_V2_JUMPGATE_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_USE_ONE_WAY_TLS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
@@ -481,6 +482,10 @@ public class EntitlementService {
 
     public boolean isEnvironmentPrivilegedUserEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_ENVIRONMENT_PRIVILEGED_USER);
+    }
+
+    public boolean isComputeMonitoringEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CENTRAL_COMPUTE_MONITORING);
     }
 
     public boolean isWorkloadIamSyncEnabled(String accountId) {

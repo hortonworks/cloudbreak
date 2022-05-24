@@ -112,6 +112,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider {
             boolean databusEnabled = telemetry.isClusterLogsCollectionEnabled();
             boolean databusEndpointValidation = entitlementService.isFreeIpaDatabusEndpointValidationEnabled(stack.getAccountId());
             boolean cdpSaasEnabled = entitlementService.isCdpSaasEnabled(stack.getAccountId());
+            boolean computeMonitoring = entitlementService.isComputeMonitoringEnabled(stack.getAccountId());
             Map<String, SaltPillarProperties> servicePillarConfig = new HashMap<>();
             servicePillarConfig.putAll(getTelemetryCommonPillarConfig(stack, telemetry, databusEndpoint, databusEndpointValidation));
             servicePillarConfig.putAll(getFluentPillarConfig(stack, telemetry, databusEnabled));
@@ -120,7 +121,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider {
             if (StringUtils.isNotBlank(stack.getCdpNodeStatusMonitorPassword())) {
                 passwordInput = stack.getCdpNodeStatusMonitorPassword().toCharArray();
             }
-            servicePillarConfig.putAll(getMonitoringPillarConfig(stack, telemetry, passwordInput, cdpSaasEnabled));
+            servicePillarConfig.putAll(getMonitoringPillarConfig(stack, telemetry, passwordInput, cdpSaasEnabled, computeMonitoring));
             servicePillarConfig.putAll(getCdpNodeStatusPillarConfig(stack, passwordInput));
             return servicePillarConfig;
         } else {
@@ -128,13 +129,14 @@ public class TelemetryConfigService implements TelemetryConfigProvider {
         }
     }
 
-    private Map<String, SaltPillarProperties> getMonitoringPillarConfig(Stack stack, Telemetry telemetry, char[] passwordInput, boolean cdpSaasEnabled) {
+    private Map<String, SaltPillarProperties> getMonitoringPillarConfig(Stack stack, Telemetry telemetry, char[] passwordInput, boolean cdpSaasEnabled,
+            boolean computeMonitoring) {
         Map<String, Object> config = new HashMap<>();
         if (telemetry.isMonitoringFeatureEnabled()) {
             Monitoring monitoring = telemetry.getMonitoring();
             LOGGER.debug("Monitoring is enabled, filling configs ...");
             MonitoringConfigView configView = monitoringConfigService.createMonitoringConfig(monitoring,
-                    MonitoringClusterType.FREEIPA, null, passwordInput, cdpSaasEnabled);
+                    MonitoringClusterType.FREEIPA, null, passwordInput, cdpSaasEnabled, computeMonitoring);
             config = configView.toMap();
         }
         return Map.of("monitoring",

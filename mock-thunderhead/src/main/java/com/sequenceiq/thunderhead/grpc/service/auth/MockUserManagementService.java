@@ -27,6 +27,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_JUMPGATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_TO_V2_JUMPGATE_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_USE_ONE_WAY_TLS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
@@ -521,6 +522,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.freeipa.recipes.enable}")
     private boolean enableFreeIpaRecipes;
 
+    @Value("${auth.mock.compute.monitoring.enable}")
+    private boolean enableComputeMonitoring;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -955,6 +959,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableSdxSaasIntegration) {
             builder.addEntitlements(createEntitlement(CDP_SAAS_SDX_INTEGRATION));
+        }
+        if (enableComputeMonitoring) {
+            builder.addEntitlements(createEntitlement(CDP_CENTRAL_COMPUTE_MONITORING));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
