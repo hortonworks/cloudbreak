@@ -11,6 +11,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
+import com.sequenceiq.it.cloudbreak.assertion.datalake.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -81,8 +82,8 @@ public class InternalSdxSshAndCmAccessTest extends PreconditionSdxE2ETest {
                 .when(freeIpaTestClient.syncAll())
                 .await(OperationState.COMPLETED)
                 .given(SdxInternalTestDto.class)
-                .then((tc, testDto, client) -> sshJUtil.checkFilesOnHostByNameAndPath(testDto, getInstanceGroups(testDto, client), List.of(MASTER.getName()),
-                            filePath, fileName, 1, workloadUsername, workloadPassword))
+                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName()), filePath, fileName, 1, workloadUsername, workloadPassword,
+                        sshJUtil))
                 .then((tc, testDto, client) -> clouderaManagerUtil.checkClouderaManagerKnoxIDBrokerRoleConfigGroups(testDto, workloadUsername,
                         workloadPassword))
                 .validate();

@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,7 +49,7 @@ public class FreeIpaCreationTest extends AbstractMockTest {
             given = "environment is present",
             when = "calling a freeipa creation",
             then = "freeipa should be available with kerberos and ldap config")
-    public void testCreateFreeIpa(MockedTestContext testContext) throws IOException {
+    public void testCreateFreeIpa(MockedTestContext testContext) {
         String preRecipeName = resourcePropertyProvider().getName();
         String postInstallRecipeName = resourcePropertyProvider().getName();
         String preTerminationRecipeName = resourcePropertyProvider().getName();
