@@ -189,7 +189,8 @@ public class TelemetryDecorator {
         if (StringUtils.isNotBlank(stack.getCluster().getCdpNodeStatusMonitorPassword())) {
             nodePasswordInput = stack.getCluster().getCdpNodeStatusMonitorPassword().toCharArray();
         }
-        setupMonitoring(servicePillar, cdpSaasEnabled, stack, telemetry, nodePasswordInput);
+        boolean computeMonitoringEnabled = entitlementService.isComputeMonitoringEnabled(accountId);
+        setupMonitoring(servicePillar, cdpSaasEnabled, computeMonitoringEnabled, stack, telemetry, nodePasswordInput);
         setupNodeStatusMonitor(servicePillar, stack, nodePasswordInput);
         return servicePillar;
     }
@@ -227,7 +228,7 @@ public class TelemetryDecorator {
         return new AltusCredential(null, null);
     }
 
-    private void setupMonitoring(Map<String, SaltPillarProperties> servicePillar, boolean cdpSaasEnabled, Stack stack,
+    private void setupMonitoring(Map<String, SaltPillarProperties> servicePillar, boolean cdpSaasEnabled, boolean computeMonitoringEnabled, Stack stack,
             Telemetry telemetry, char[] passwordInput) {
         if (telemetry.isMonitoringFeatureEnabled()) {
             LOGGER.debug("Filling monitoring configs.");
@@ -239,7 +240,7 @@ public class TelemetryDecorator {
                 cmAuthConfig = new MonitoringAuthConfig(cmMonitoringUser, cmMonitoringPassword);
             }
             MonitoringConfigView monitoringConfigView = monitoringConfigService.createMonitoringConfig(telemetry.getMonitoring(),
-                    MonitoringClusterType.CLOUDERA_MANAGER, cmAuthConfig, passwordInput, cdpSaasEnabled);
+                    MonitoringClusterType.CLOUDERA_MANAGER, cmAuthConfig, passwordInput, cdpSaasEnabled, computeMonitoringEnabled);
             if (monitoringConfigView.isEnabled()) {
                 Map<String, Object> monitoringConfig = monitoringConfigView.toMap();
                 servicePillar.put("monitoring",
