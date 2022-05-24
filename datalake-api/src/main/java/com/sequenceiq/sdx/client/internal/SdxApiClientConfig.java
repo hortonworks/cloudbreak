@@ -16,6 +16,7 @@ import com.sequenceiq.sdx.api.endpoint.ProgressEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxBackupEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 
@@ -45,6 +46,12 @@ public class SdxApiClientConfig {
     @ConditionalOnBean(name = "sdxApiClientWebTarget")
     SdxEndpoint createSdxV1Endpoint(WebTarget sdxApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(sdxApiClientWebTarget, SdxEndpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "sdxApiClientWebTarget")
+    SdxUpgradeEndpoint createSdxUpgradeV1Endpoint(WebTarget sdxApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(sdxApiClientWebTarget, SdxUpgradeEndpoint.class);
     }
 
     @Bean

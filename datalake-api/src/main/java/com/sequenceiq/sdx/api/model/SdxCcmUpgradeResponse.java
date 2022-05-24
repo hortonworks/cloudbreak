@@ -23,13 +23,17 @@ public class SdxCcmUpgradeResponse {
     @ApiModelProperty(ModelDescriptions.CCM_UPGRADE_ERROR_REASON)
     private String reason;
 
+    @ApiModelProperty(ModelDescriptions.DATA_LAKE_CRN)
+    private String resourceCrn;
+
     public SdxCcmUpgradeResponse() {
     }
 
-    public SdxCcmUpgradeResponse(CcmUpgradeResponseType responseType, FlowIdentifier flowIdentifier, String reason) {
+    public SdxCcmUpgradeResponse(CcmUpgradeResponseType responseType, FlowIdentifier flowIdentifier, String reason, String resourceCrn) {
         this.responseType = responseType;
         this.flowIdentifier = flowIdentifier;
         this.reason = reason;
+        this.resourceCrn = resourceCrn;
     }
 
     public String getReason() {
@@ -56,6 +60,14 @@ public class SdxCcmUpgradeResponse {
         this.responseType = responseType;
     }
 
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -65,12 +77,13 @@ public class SdxCcmUpgradeResponse {
             return false;
         }
         SdxCcmUpgradeResponse that = (SdxCcmUpgradeResponse) o;
-        return Objects.equals(flowIdentifier, that.flowIdentifier) && responseType == that.responseType && Objects.equals(reason, that.reason);
+        return Objects.equals(flowIdentifier, that.flowIdentifier) && responseType == that.responseType && Objects.equals(reason, that.reason)
+                && Objects.equals(resourceCrn, that.resourceCrn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(flowIdentifier, responseType, reason);
+        return Objects.hash(flowIdentifier, responseType, reason, resourceCrn);
     }
 
     @Override
@@ -78,7 +91,8 @@ public class SdxCcmUpgradeResponse {
         return "SdxCcmUpgradeResponse{" +
                 "flowIdentifier=" + flowIdentifier +
                 ", responseType=" + responseType +
-                ", reason='" + reason + '\'' +
+                ", reason='" + reason +
+                ", resourceCrn='" + resourceCrn + '\'' +
                 '}';
     }
 }

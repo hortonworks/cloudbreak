@@ -256,7 +256,8 @@ class SdxUpgradeControllerTest {
 
     @Test
     void testUpgradeCcm() {
-        SdxCcmUpgradeResponse response = new SdxCcmUpgradeResponse(CcmUpgradeResponseType.TRIGGERED, new FlowIdentifier(FlowType.FLOW, "FlowId"), "OK");
+        SdxCcmUpgradeResponse response = new SdxCcmUpgradeResponse(CcmUpgradeResponseType.TRIGGERED, new FlowIdentifier(FlowType.FLOW, "FlowId"),
+                "OK", "crn");
         when(sdxCcmUpgradeService.upgradeCcm(ENV_CRN)).thenReturn(response);
         SdxCcmUpgradeResponse sdxCcmUpgradeResponse = underTest.upgradeCcm(ENV_CRN, USER_CRN);
         assertThat(sdxCcmUpgradeResponse).isEqualTo(response);

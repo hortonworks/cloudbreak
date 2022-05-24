@@ -15,6 +15,8 @@ import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.environment.environment.service.sdx.SdxService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
+import com.sequenceiq.flow.api.model.operation.OperationProgressStatus;
+import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -71,6 +73,28 @@ public class SdxPollerProvider {
             mutableCrnList.retainAll(remaining);
             return clusterPollerResultEvaluator.evaluateResult(results);
         };
+    }
+
+    public AttemptResult<Void> upgradeCcmPoller(Long envId, String datalakeCrn) {
+        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+            String message = "SDX polling cancelled in inmemory store, environment id: " + envId;
+            LOGGER.info(message);
+            throw new PollerStoppedException(message);
+        }
+        OperationView operation = sdxService.getOperation(datalakeCrn, false);
+        OperationProgressStatus progressStatus = operation.getProgressStatus();
+        switch (progressStatus) {
+            case CANCELLED:
+                return AttemptResults.breakFor("SDX Upgrade CCM cancelled for datalake CRN " + datalakeCrn);
+            case FAILED:
+                return AttemptResults.breakFor("SDX Upgrade CCM failed for environment CRN " + datalakeCrn);
+            case FINISHED:
+                return AttemptResults.justFinish();
+            case RUNNING:
+                return AttemptResults.justContinue();
+            default:
+                return AttemptResults.breakFor("SDX Upgrade CCM is in ambiguous state " + progressStatus + " for environment CRN " + datalakeCrn);
+        }
     }
 
     private List<AttemptResult<Void>> collectSdxStopResults(List<String> pollingCrns, List<String> remainingCrns, Long envId) {
