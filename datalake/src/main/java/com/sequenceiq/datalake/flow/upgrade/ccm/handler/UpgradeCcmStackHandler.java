@@ -33,7 +33,7 @@ public class UpgradeCcmStackHandler extends ExceptionCatcherEventHandler<Upgrade
     @Value("${sdx.upgrade.ccm.sleeptime_sec:20}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.upgrade.ccm.duration_min:120}")
+    @Value("${sdx.upgrade.ccm.duration_min:20}")
     private int durationInMinutes;
 
     @Inject

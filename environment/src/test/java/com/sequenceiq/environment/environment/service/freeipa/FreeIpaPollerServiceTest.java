@@ -150,6 +150,17 @@ public class FreeIpaPollerServiceTest {
     }
 
     @Test
+    void testWaitForCcmUpgradeAlreadyCompleted() {
+        OperationStatus status = new OperationStatus("123", OperationType.UPGRADE_CCM, OperationState.COMPLETED, null, null, null, 0, null);
+        when(freeIpaService.upgradeCcm(any())).thenReturn(status);
+
+        underTest.waitForCcmUpgrade(ENV_ID, ENV_CRN);
+
+        verify(freeIpaService).upgradeCcm(ENV_CRN);
+        verify(freeipaPollerProvider, never()).upgradeCcmPoller(any(), any(), any());
+    }
+
+    @Test
     void testWaitForCcmUpgradeFailed() {
         OperationStatus status = new OperationStatus("123", OperationType.UPGRADE_CCM, OperationState.REQUESTED, null, null, null, 0, null);
         when(freeIpaService.upgradeCcm(any())).thenReturn(status);

@@ -19,6 +19,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStat
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
 @Service
@@ -29,13 +30,13 @@ public class FreeIpaPollerService {
     @Value("${env.stop.polling.attempt:90}")
     private Integer startStopAttempt;
 
-    @Value("${env.upgradeccm.freeipa.polling.attempt:360}")
+    @Value("${env.upgradeccm.freeipa.polling.attempt:60}")
     private Integer upgradeccmAttempt;
 
     @Value("${env.stop.polling.sleep.time:10}")
     private Integer startStopSleeptime;
 
-    @Value("${env.upgradeccm.freeipa.polling.sleeptime:5}")
+    @Value("${env.upgradeccm.freeipa.polling.sleeptime:20}")
     private Integer upgradeccmSleeptime;
 
     private final FreeIpaService freeIpaService;
@@ -62,14 +63,16 @@ public class FreeIpaPollerService {
 
     public void waitForCcmUpgrade(Long envId, String envCrn) {
         OperationStatus status = freeIpaService.upgradeCcm(envCrn);
-        try {
-            Polling.stopAfterAttempt(upgradeccmAttempt)
-                    .stopIfException(true)
-                    .waitPeriodly(upgradeccmSleeptime, TimeUnit.SECONDS)
-                    .run(() -> freeipaPollerProvider.upgradeCcmPoller(envId, envCrn, status.getOperationId()));
-        } catch (PollerStoppedException e) {
-            LOGGER.info("FreeIPA Upgrade CCM timed out or error happened.", e);
-            throw new FreeIpaOperationFailedException("FreeIPA upgrade of Cluster Connectivity Manager timed out or error happened: " + e.getMessage());
+        if (status.getStatus() != OperationState.COMPLETED) {
+            try {
+                Polling.stopAfterAttempt(upgradeccmAttempt)
+                        .stopIfException(true)
+                        .waitPeriodly(upgradeccmSleeptime, TimeUnit.SECONDS)
+                        .run(() -> freeipaPollerProvider.upgradeCcmPoller(envId, envCrn, status.getOperationId()));
+            } catch (PollerStoppedException e) {
+                LOGGER.info("FreeIPA Upgrade CCM timed out or error happened.", e);
+                throw new FreeIpaOperationFailedException("FreeIPA upgrade of Cluster Connectivity Manager timed out or error happened: " + e.getMessage());
+            }
         }
     }
 

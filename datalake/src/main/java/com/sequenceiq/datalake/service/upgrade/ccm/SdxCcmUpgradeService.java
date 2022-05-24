@@ -2,7 +2,6 @@ package com.sequenceiq.datalake.service.upgrade.ccm;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE_CCM;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE_CCM_ALREADY_UPGRADED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE_CCM_ERROR_ENVIRONMENT_IS_NOT_AVAILABLE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE_CCM_ERROR_ENVIRONMENT_IS_NOT_LATEST;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE_CCM_ERROR_INVALID_COUNT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_UPGRADE_CCM_NOT_AVAILABLE;
@@ -20,6 +19,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -28,11 +30,11 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
@@ -60,6 +62,12 @@ public class SdxCcmUpgradeService {
     @Inject
     private CloudbreakPoller cloudbreakPoller;
 
+    @Inject
+    private CloudbreakFlowService cloudbreakFlowService;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public SdxCcmUpgradeResponse upgradeCcm(String environmentCrn) {
         checkEnvironment(environmentCrn);
         Optional<SdxCluster> sdxClusterOpt = getSdxCluster(environmentCrn);
@@ -81,9 +89,11 @@ public class SdxCcmUpgradeService {
     public void initAndWaitForStackUpgrade(SdxCluster sdxCluster, PollingConfig pollingConfig) {
         String stackCrn = sdxCluster.getStackCrn();
         LOGGER.debug("Initiating CCM upgrade on stack CRN {} for datalake {}", stackCrn, sdxCluster.getName());
-        // String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        // ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.upgradeCcm(stackCrn, initiatorUserCrn));
-
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        StackCcmUpgradeV4Response upgradeResponse =
+                ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                        () -> stackV4Endpoint.upgradeCcmByCrnInternal(0L, stackCrn, initiatorUserCrn));
+        cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, upgradeResponse.getFlowIdentifier());
         LOGGER.debug("Waiting for CCM upgrade on stack CRN {} for datalake {}", stackCrn, sdxCluster.getName());
         cloudbreakPoller.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig);
     }
@@ -93,11 +103,6 @@ public class SdxCcmUpgradeService {
         if (environment.getTunnel() != Tunnel.latestUpgradeTarget()) {
             LOGGER.debug("Environment {} is not on the latest CCM", environmentCrn);
             throw new BadRequestException(getMessage(DATALAKE_UPGRADE_CCM_ERROR_ENVIRONMENT_IS_NOT_LATEST, List.of(environmentCrn)));
-        }
-
-        if (environment.getEnvironmentStatus() != EnvironmentStatus.AVAILABLE) {
-            LOGGER.debug("Environment {} is no Available", environmentCrn);
-            throw new BadRequestException(getMessage(DATALAKE_UPGRADE_CCM_ERROR_ENVIRONMENT_IS_NOT_AVAILABLE, List.of(environmentCrn)));
         }
     }
 
@@ -116,7 +121,8 @@ public class SdxCcmUpgradeService {
     private SdxCcmUpgradeResponse checkPrerequisitesAndTrigger(SdxCluster sdxCluster, StackV4Response stack) {
         if (!stack.getStatus().isAvailable()) {
             LOGGER.debug("Datalake stack {} is not available for CCM upgrade", stack.getName());
-            return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.ERROR, FlowIdentifier.notTriggered(), getMessage(DATALAKE_UPGRADE_CCM_NOT_AVAILABLE));
+            return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.ERROR, FlowIdentifier.notTriggered(),
+                    getMessage(DATALAKE_UPGRADE_CCM_NOT_AVAILABLE), stack.getCrn());
         }
 
         LOGGER.debug("Datalake stack {} has to be upgraded from TunnelType {} to {}", stack.getName(), stack.getTunnel().name(), Tunnel.latestUpgradeTarget());
@@ -126,23 +132,26 @@ public class SdxCcmUpgradeService {
     private SdxCcmUpgradeResponse noDatalakeAnswer(String environmentCrn) {
         LOGGER.debug("Environment {} has no datalake", environmentCrn);
         return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.SKIP, FlowIdentifier.notTriggered(),
-                getMessage(DATALAKE_UPGRADE_CCM_NO_DATALAKE, List.of(environmentCrn)));
+                getMessage(DATALAKE_UPGRADE_CCM_NO_DATALAKE, List.of(environmentCrn)), null);
     }
 
     private SdxCcmUpgradeResponse alreadyOnLatestAnswer(StackV4Response stack) {
         LOGGER.debug("Datalake stack {} already has TunnelType {}", stack.getName(), stack.getTunnel().name());
-        return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.SKIP, FlowIdentifier.notTriggered(), getMessage(DATALAKE_UPGRADE_CCM_ALREADY_UPGRADED));
+        return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.SKIP, FlowIdentifier.notTriggered(),
+                getMessage(DATALAKE_UPGRADE_CCM_ALREADY_UPGRADED), stack.getCrn());
     }
 
     private SdxCcmUpgradeResponse cannotUpgradeAnswer(StackV4Response stack) {
         LOGGER.debug("Datalake stack {} has TunnelType {}. No CCM upgrade is possible.", stack.getName(), stack.getTunnel().name());
-        return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.ERROR, FlowIdentifier.notTriggered(), getMessage(DATALAKE_UPGRADE_CCM_NOT_UPGRADEABLE));
+        return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.ERROR, FlowIdentifier.notTriggered(),
+                getMessage(DATALAKE_UPGRADE_CCM_NOT_UPGRADEABLE), stack.getCrn());
     }
 
     private SdxCcmUpgradeResponse triggerCcmUpgradeFlow(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerCcmUpgradeFlow(cluster);
-        return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.TRIGGERED, flowIdentifier, getMessage(DATALAKE_UPGRADE_CCM, null));
+        return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.TRIGGERED, flowIdentifier,
+                getMessage(DATALAKE_UPGRADE_CCM, null), cluster.getResourceCrn());
     }
 
     private String getMessage(ResourceEvent resourceEvent) {

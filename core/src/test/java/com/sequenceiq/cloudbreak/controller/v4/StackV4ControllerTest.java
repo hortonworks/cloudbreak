@@ -25,6 +25,8 @@ class StackV4ControllerTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:test@test.com";
 
+    private static final String STACK_CRN = "crn:cdp:datalake:us-west-1:hortonworks:datalake:guid";
+
     private static final long WORKSPACE_ID = 1236L;
 
     private static final String STACK_NAME = "stack name";
@@ -79,8 +81,8 @@ class StackV4ControllerTest {
     @Test
     public void testCcmUpgrade() {
         FlowIdentifier actual = new FlowIdentifier(FlowType.FLOW, "1");
-        when(stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofName(STACK_NAME))).thenReturn(actual);
-        StackCcmUpgradeV4Response result = underTest.upgradeCcmByNameInternal(WORKSPACE_ID, STACK_NAME, USER_CRN);
+        when(stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(STACK_CRN))).thenReturn(actual);
+        StackCcmUpgradeV4Response result = underTest.upgradeCcmByCrnInternal(WORKSPACE_ID, STACK_CRN, USER_CRN);
         Assertions.assertSame(actual, result.getFlowIdentifier());
     }
 }

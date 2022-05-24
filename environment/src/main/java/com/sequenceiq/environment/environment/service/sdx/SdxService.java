@@ -9,10 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.saas.sdx.PaasRemoteDataContextSupplier;
 import com.sequenceiq.environment.exception.SdxOperationFailedException;
+import com.sequenceiq.flow.api.model.operation.OperationView;
+import com.sequenceiq.sdx.api.endpoint.OperationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
+import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Service
@@ -22,11 +28,23 @@ public class SdxService implements PaasRemoteDataContextSupplier {
 
     private final SdxEndpoint sdxEndpoint;
 
+    private final SdxUpgradeEndpoint sdxUpgradeEndpoint;
+
+    private final OperationEndpoint sdxOperationEndpoint;
+
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    public SdxService(SdxEndpoint sdxEndpoint, WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    public SdxService(SdxEndpoint sdxEndpoint, SdxUpgradeEndpoint sdxUpgradeEndpoint,
+            OperationEndpoint sdxOperationEndpoint, WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+
         this.sdxEndpoint = sdxEndpoint;
+        this.sdxUpgradeEndpoint = sdxUpgradeEndpoint;
+        this.sdxOperationEndpoint = sdxOperationEndpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public SdxClusterResponse getByCrn(String clusterCrn) {
@@ -67,6 +85,31 @@ public class SdxService implements PaasRemoteDataContextSupplier {
             LOGGER.error(String.format("Failed to stop SDX cluster by crn '%s' due to '%s'.", crn, errorMessage), e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
+    }
+
+    public SdxCcmUpgradeResponse upgradeCcm(String environmentCrn) {
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        try {
+            LOGGER.debug("Calling SDX Upgrade CCM by environment CRN {}", environmentCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> sdxUpgradeEndpoint.upgradeCcm(environmentCrn, initiatorUserCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to Upgrade Cluster Connectivity Manager by environment CRN '%s' due to '%s'.", environmentCrn, errorMessage), e);
+            throw new SdxOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public OperationView getOperation(String datalakeCrn, boolean detailed) {
+        try {
+            LOGGER.debug("Calling SDX Operation result for datalake CRN {}", datalakeCrn);
+            return sdxOperationEndpoint.getOperationProgressByResourceCrn(datalakeCrn, detailed);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to get Operation for datalake CRN '%s' due to '%s'.", datalakeCrn, errorMessage), e);
+            throw new SdxOperationFailedException(errorMessage, e);
+        }
+
     }
 
     @Override
