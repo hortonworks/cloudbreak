@@ -5,14 +5,13 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.inject.Inject;
 
-import org.apache.commons.codec.binary.Base64;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.it.cloudbreak.assertion.datalake.RecipeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
@@ -24,9 +23,9 @@ import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
-import com.sequenceiq.it.util.ResourceUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
@@ -48,13 +47,16 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
     @Inject
     private SdxUtil sdxUtil;
 
+    @Inject
+    private RecipeUtil recipeUtil;
+
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
             when = "recovery called on the IDBROKER and MASTER host group, where the EC2 instance had been stopped",
             then = "SDX recovery should be successful, the cluster should be up and running"
     )
-    public void testSDXMultiRepairIDBRokerAndMasterWithRecipeFile(TestContext testContext) throws IOException {
+    public void testSDXMultiRepairIDBRokerAndMasterWithRecipeFile(TestContext testContext) {
         String sdxInternal = resourcePropertyProvider().getName();
         String cluster = resourcePropertyProvider().getName();
         String clouderaManager = resourcePropertyProvider().getName();
@@ -70,25 +72,34 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
         testContext
                 .given(clouderaManager, ClouderaManagerTestDto.class)
-                .given(cluster, ClusterTestDto.class).withBlueprintName(getDefaultSDXBlueprintName()).withValidateBlueprint(Boolean.FALSE)
-                .withClouderaManager(clouderaManager)
-                .given(RecipeTestDto.class).withName(recipeName).withContent(generateRecipeContent())
-                .withRecipeType(POST_CLOUDERA_MANAGER_START)
+                .given(cluster, ClusterTestDto.class)
+                    .withBlueprintName(getDefaultSDXBlueprintName())
+                    .withValidateBlueprint(Boolean.FALSE)
+                    .withClouderaManager(clouderaManager)
+                .given(RecipeTestDto.class)
+                    .withName(recipeName)
+                    .withContent(recipeUtil.generatePostCmStartRecipeContent(applicationContext))
+                    .withRecipeType(POST_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
-                .given(masterInstanceGroup, InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1).withRecipes(recipeName)
-                .given(idbrokerInstanceGroup, InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1).withRecipes(recipeName)
-                .given(stack, StackTestDto.class).withCluster(cluster).withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
+                .given(masterInstanceGroup, InstanceGroupTestDto.class)
+                    .withHostGroup(MASTER)
+                    .withNodeCount(1)
+                    .withRecipes(recipeName)
+                .given(idbrokerInstanceGroup, InstanceGroupTestDto.class)
+                    .withHostGroup(IDBROKER)
+                    .withNodeCount(1)
+                    .withRecipes(recipeName)
+                .given(stack, StackTestDto.class)
+                    .withCluster(cluster)
+                    .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .withCloudStorage(getCloudStorageRequest(testContext))
-                .withDatabase(sdxDatabaseRequest)
-                .withStackRequest(key(cluster), key(stack))
+                    .withCloudStorage(getCloudStorageRequest(testContext))
+                    .withDatabase(sdxDatabaseRequest)
+                    .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    return sshJUtil.checkFilesOnHostByNameAndPath(testDto, getInstanceGroups(testDto, client), List.of(MASTER.getName(), IDBROKER.getName()),
-                            filePath, fileName, 1, null, null);
-                })
+                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), filePath, fileName, 1, null, null, sshJUtil))
                 .then((tc, testDto, client) -> {
                     List<String> instanceIdsToStop = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instanceIdsToStop.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));
@@ -100,15 +111,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdxInternal).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()
-                .then((tc, testDto, client) -> {
-                    return sshJUtil.checkFilesOnHostByNameAndPath(testDto, getInstanceGroups(testDto, client), List.of(MASTER.getName(), IDBROKER.getName()),
-                            filePath, fileName, 1, null, null);
-                })
+                .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), filePath, fileName, 1, null, null, sshJUtil))
                 .validate();
-    }
-
-    private String generateRecipeContent() throws IOException {
-        String recipeContentFromFile = ResourceUtil.readResourceAsString(applicationContext, getRecipePath());
-        return Base64.encodeBase64String(recipeContentFromFile.getBytes());
     }
 }

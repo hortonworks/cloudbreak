@@ -38,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.util.cleanup.ParcelGeneratorUtil;
 import com.sequenceiq.it.util.cleanup.ParcelMockActivatorUtil;
 
@@ -73,6 +74,9 @@ public class RecipeClusterTest extends AbstractMockTest {
     @Inject
     private ParcelGeneratorUtil parcelGeneratorUtil;
 
+    @Inject
+    private RecipeUtil recipeUtil;
+
     @Test(dataProvider = "dataProviderForNonPreTerminationRecipeTypes")
     public void testRecipeNotPreTerminationHasGotHighStateOnCluster(
             TestContext testContext,
@@ -86,14 +90,14 @@ public class RecipeClusterTest extends AbstractMockTest {
 
         testContext
                 .given(recipeName, RecipeTestDto.class)
-                .withName(recipeName)
-                .withContent(RECIPE_CONTENT)
-                .withRecipeType(type)
+                    .withName(recipeName)
+                    .withContent(recipeUtil.generateRecipeContent(RECIPE_CONTENT))
+                    .withRecipeType(type)
                 .when(recipeTestClient.createV4(), RunningParameter.key(recipeName))
                 .given(instanceGroupName, InstanceGroupTestDto.class)
-                .withHostGroup(HostGroupType.WORKER)
-                .withNodeCount(NODE_COUNT)
-                .withRecipes(recipeName)
+                    .withHostGroup(HostGroupType.WORKER)
+                    .withNodeCount(NODE_COUNT)
+                    .withRecipes(recipeName)
                 .given(stackName, StackTestDto.class)
                 .replaceInstanceGroups(instanceGroupName)
                 .when(stackTestClient.createV4(), RunningParameter.key(stackName))
@@ -117,15 +121,15 @@ public class RecipeClusterTest extends AbstractMockTest {
 
         testContext
                 .given(recipeName, RecipeTestDto.class)
-                .withName(recipeName)
-                .withContent(RECIPE_CONTENT)
-                .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                    .withName(recipeName)
+                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
+                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4(), RunningParameter.key(recipeName))
                 .when(recipeTestClient.deleteV4(), RunningParameter.key(recipeName))
                 .given(instanceGroupName, InstanceGroupTestDto.class)
-                .withHostGroup(hostGroupTypeForRecipe)
-                .withNodeCount(NODE_COUNT)
-                .withRecipes(recipeName)
+                    .withHostGroup(hostGroupTypeForRecipe)
+                    .withNodeCount(NODE_COUNT)
+                    .withRecipes(recipeName)
                 .given(stackName, StackTestDto.class)
                 .replaceInstanceGroups(instanceGroupName)
                 .whenException(stackTestClient.createV4(), BadRequestException.class, expectedMessage(String.format("The given recipe does not exist" +
@@ -143,18 +147,18 @@ public class RecipeClusterTest extends AbstractMockTest {
         String preCldrManagerStartRecipe = "pre-cldr-start-manager";
         testContext
                 .given(RecipeTestDto.class)
-                .withName(recipeName)
-                .withContent(RECIPE_CONTENT)
-                .withRecipeType(PRE_TERMINATION)
+                    .withName(recipeName)
+                    .withContent(recipeUtil.generatePreTerminationRecipeContent(applicationContext))
+                    .withRecipeType(PRE_TERMINATION)
                 .when(recipeTestClient.createV4())
                 .given(RecipeTestDto.class)
-                .withName(preCldrManagerStartRecipe)
-                .withContent(RECIPE_CONTENT)
-                .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                    .withName(preCldrManagerStartRecipe)
+                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
+                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
-                .withHostGroup(HostGroupType.WORKER)
-                .withNodeCount(NODE_COUNT)
+                    .withHostGroup(HostGroupType.WORKER)
+                    .withNodeCount(NODE_COUNT)
                 .given(StackTestDto.class)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
                 .when(stackTestClient.createV4())
@@ -162,9 +166,9 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .await(STACK_AVAILABLE)
                 .mockSalt().run().post().bodyContains(HIGHSTATE, 1).atLeast(1).verify()
                 .given(StackTestDto.class)
-                .withAttachedRecipe(HostGroupType.WORKER.getName(), recipeName)
+                    .withAttachedRecipe(HostGroupType.WORKER.getName(), recipeName)
                 .when(stackTestClient.attachRecipeV4())
-                .withAttachedRecipe(HostGroupType.WORKER.getName(), preCldrManagerStartRecipe)
+                    .withAttachedRecipe(HostGroupType.WORKER.getName(), preCldrManagerStartRecipe)
                 .when(stackTestClient.attachRecipeV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(4))
@@ -181,37 +185,37 @@ public class RecipeClusterTest extends AbstractMockTest {
             given = "a created cluster with post ambari install recipe",
             when = "upscaling cluster",
             then = "the post recipe should run on the new nodes as well")
-    public void testWhenClusterGetUpScaledThenPostClusterInstallRecipeShouldBeExecuted(MockedTestContext testContext) {
+    public void testPostClusterInstallRecipeWhenClusterGetUpScaled(MockedTestContext testContext) {
         ApiParcel parcel = parcelGeneratorUtil.getActivatedCDHParcel();
         String clusterName = resourcePropertyProvider.getName();
         parcelMockActivatorUtil.mockActivateWithDefaultParcels(testContext, clusterName, parcel);
         String recipeName = resourcePropertyProvider().getName();
         testContext
                 .given(RecipeTestDto.class)
-                .withName(recipeName)
-                .withContent(RECIPE_CONTENT)
-                .withRecipeType(POST_CLUSTER_INSTALL)
+                    .withName(recipeName)
+                    .withContent(recipeUtil.generatePostInstallRecipeContent(applicationContext))
+                    .withRecipeType(POST_CLUSTER_INSTALL)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
-                .withHostGroup(HostGroupType.WORKER)
-                .withNodeCount(NODE_COUNT)
-                .withRecipes(recipeName)
+                    .withHostGroup(HostGroupType.WORKER)
+                    .withNodeCount(NODE_COUNT)
+                    .withRecipes(recipeName)
                 .given("computeIg", InstanceGroupTestDto.class)
-                .withHostGroup(HostGroupType.COMPUTE)
-                .withNodeCount(NODE_COUNT)
-                .withRecipes(recipeName)
+                    .withHostGroup(HostGroupType.COMPUTE)
+                    .withNodeCount(NODE_COUNT)
+                    .withRecipes(recipeName)
                 .given("cmpkey", ClouderaManagerProductTestDto.class)
-                .withParcel("someParcel")
-                .withName(parcel.getProduct())
-                .withVersion(parcel.getVersion())
+                    .withParcel("someParcel")
+                    .withName(parcel.getProduct())
+                    .withVersion(parcel.getVersion())
                 .given("cmanager", ClouderaManagerTestDto.class)
-                .withClouderaManagerProduct("cmpkey")
+                    .withClouderaManagerProduct("cmpkey")
                 .given("cmpclusterkey", ClusterTestDto.class)
-                .withClouderaManager("cmanager")
+                    .withClouderaManager("cmanager")
                 .given(StackTestDto.class)
-                .withName(clusterName)
+                    .withName(clusterName)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
-                .withCluster("cmpclusterkey")
+                    .withCluster("cmpclusterkey")
                 .when(stackTestClient.createV4())
                 .enableVerification()
                 .await(STACK_AVAILABLE)
@@ -226,7 +230,7 @@ public class RecipeClusterTest extends AbstractMockTest {
             given = "a created cluster with post ambari recipe",
             when = "upscaling cluster on hostgroup which has no post install recipe",
             then = "the post recipe should not run on the new nodes because those recipe not configured on the upscaled hostgroup")
-    public void testWhenRecipeProvidedToHostGroupAndAnotherHostGroupGetUpScaledThenThereIsNoFurtherRecipeExecutionOnTheNewNodeBesideTheDefaultOnes(
+    public void testPostCmStartRecipeNotExecutedWhenAnotherHostGroupGetUpScaled(
             MockedTestContext testContext) {
         ApiParcel parcel = parcelGeneratorUtil.getActivatedCDHParcel();
         String recipeName = resourcePropertyProvider().getName();
@@ -234,26 +238,26 @@ public class RecipeClusterTest extends AbstractMockTest {
         parcelMockActivatorUtil.mockActivateWithDefaultParcels(testContext, clusterName, parcel);
         testContext
                 .given(RecipeTestDto.class)
-                .withName(recipeName)
-                .withContent(RECIPE_CONTENT)
-                .withRecipeType(POST_CLOUDERA_MANAGER_START)
+                    .withName(recipeName)
+                    .withContent(recipeUtil.generatePostCmStartRecipeContent(applicationContext))
+                    .withRecipeType(POST_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class)
-                .withHostGroup(HostGroupType.COMPUTE)
-                .withNodeCount(NODE_COUNT)
-                .withRecipes(recipeName)
+                    .withHostGroup(HostGroupType.COMPUTE)
+                    .withNodeCount(NODE_COUNT)
+                    .withRecipes(recipeName)
                 .given("cmpkey", ClouderaManagerProductTestDto.class)
-                .withParcel("someParcel")
-                .withName(parcel.getProduct())
-                .withVersion(parcel.getVersion())
+                    .withParcel("someParcel")
+                    .withName(parcel.getProduct())
+                    .withVersion(parcel.getVersion())
                 .given("cmanager", ClouderaManagerTestDto.class)
-                .withClouderaManagerProduct("cmpkey")
+                    .withClouderaManagerProduct("cmpkey")
                 .given("cmpclusterkey", ClusterTestDto.class)
-                .withClouderaManager("cmanager")
+                    .withClouderaManager("cmanager")
                 .given(StackTestDto.class)
-                .withName(clusterName)
+                    .withName(clusterName)
                 .replaceInstanceGroups(INSTANCE_GROUP_ID)
-                .withCluster("cmpclusterkey")
+                    .withCluster("cmpclusterkey")
                 .when(stackTestClient.createV4())
                 .enableVerification()
                 .await(STACK_AVAILABLE)
@@ -272,7 +276,10 @@ public class RecipeClusterTest extends AbstractMockTest {
         String recipeName = resourcePropertyProvider().getName();
 
         testContext
-                .given(RecipeTestDto.class).withName(recipeName).withContent(RECIPE_CONTENT).withRecipeType(POST_CLOUDERA_MANAGER_START)
+                .given(RecipeTestDto.class)
+                    .withName(recipeName)
+                    .withContent(recipeUtil.generatePostCmStartRecipeContent(applicationContext))
+                    .withRecipeType(POST_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
                 .given(INSTANCE_GROUP_ID, InstanceGroupTestDto.class).withRecipes(recipeName)
                 .given(StackTestDto.class).replaceInstanceGroups(INSTANCE_GROUP_ID)
