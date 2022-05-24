@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.flow.deletion.handler.freeipa;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_RDBMS_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_EVENT;
 
 import java.util.List;
 import java.util.Objects;
@@ -66,6 +66,7 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
 
     @Override
     public void accept(Event<EnvironmentDeletionDto> environmentDtoEvent) {
+        LOGGER.debug("FreeIPA deletion flow step started.");
         EnvironmentDeletionDto environmentDeletionDto = environmentDtoEvent.getData();
         EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
         Environment environment = environmentService.findEnvironmentById(environmentDto.getId()).orElse(null);
@@ -78,8 +79,9 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
                     deleteFreeIpa(environment, environmentDeletionDto.isForceDelete());
                 }
             }
-            eventSender().sendEvent(getNextStepObject(environmentDeletionDto), environmentDtoEvent.getHeaders());
+            eventSender().sendEvent(getNextStepEvent(environmentDeletionDto), environmentDtoEvent.getHeaders());
         } catch (Exception e) {
+            LOGGER.error("FreeIPA deletion failed", e);
             EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
                     .withEnvironmentID(environmentDto.getId())
                     .withException(e)
@@ -88,6 +90,7 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
                     .build();
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         }
+        LOGGER.debug("FreeIPA deletion flow step completed.");
     }
 
     private boolean shouldRemoveFreeIpa(Environment environment) {
@@ -166,14 +169,15 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
         return DELETE_FREEIPA_EVENT.selector();
     }
 
-    private EnvDeleteEvent getNextStepObject(EnvironmentDeletionDto environmentDeletionDto) {
+    private EnvDeleteEvent getNextStepEvent(EnvironmentDeletionDto environmentDeletionDto) {
         EnvironmentDto environmentDto = environmentDeletionDto.getEnvironmentDto();
         return EnvDeleteEvent.builder()
                 .withForceDelete(environmentDeletionDto.isForceDelete())
                 .withResourceId(environmentDto.getResourceId())
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())
-                .withSelector(START_RDBMS_DELETE_EVENT.selector())
+                .withSelector(START_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_EVENT.selector())
                 .build();
     }
+
 }

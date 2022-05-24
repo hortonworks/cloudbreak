@@ -1,19 +1,22 @@
 package com.sequenceiq.environment.environment.flow.creation.handler;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
@@ -42,29 +45,52 @@ import reactor.bus.EventBus;
 @ExtendWith(MockitoExtension.class)
 class EnvironmentValidationHandlerTest {
 
-    private final EventSender eventSender = mock(EventSender.class);
+    private static final long ENVIRONMENT_ID = 1L;
 
-    private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor = mock(WebApplicationExceptionMessageExtractor.class);
+    private static final String ENVIRONMENT_CRN = "environmentCrn";
 
-    private final EnvironmentFlowValidatorService validatorService = mock(EnvironmentFlowValidatorService.class);
+    private static final String ENVIRONMENT_NAME = "environmentName";
 
-    private final EnvironmentService environmentService = mock(EnvironmentService.class);
+    @Mock
+    private EventSender eventSender;
 
-    private final EventBus eventBus = mock(EventBus.class);
+    @Mock
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    private final EventSenderService eventSenderService = mock(EventSenderService.class);
+    @Mock
+    private EnvironmentFlowValidatorService validatorService;
 
-    private final CloudStorageValidator cloudStorageValidator = mock(CloudStorageValidator.class);
+    @Mock
+    private EnvironmentService environmentService;
 
-    private final TelemetryApiConverter telemetryApiConverter = mock(TelemetryApiConverter.class);
+    @Mock
+    private EventBus eventBus;
 
-    private final BackupConverter backupConverter = mock(BackupConverter.class);
+    @Mock
+    private EventSenderService eventSenderService;
 
-    private final EnvironmentValidationHandler underTest = new EnvironmentValidationHandler(eventSender, environmentService, validatorService,
-            webApplicationExceptionMessageExtractor, eventBus, eventSenderService, cloudStorageValidator, telemetryApiConverter, backupConverter);
+    @Mock
+    private CloudStorageValidator cloudStorageValidator;
+
+    @Mock
+    private TelemetryApiConverter telemetryApiConverter;
+
+    @Mock
+    private BackupConverter backupConverter;
+
+    @InjectMocks
+    private EnvironmentValidationHandler underTest;
+
+    @Captor
+    private ArgumentCaptor<Event<EnvCreationFailureEvent>> failureEventCaptor;
 
     @Test
-    void acceptAndSendStartNetworkCreationEventWhenNoValidationErrorFound() {
+    void selectorTest() {
+        assertThat(underTest.selector()).isEqualTo("VALIDATE_ENVIRONMENT_EVENT");
+    }
+
+    @Test
+    void acceptAndSendNextStateEventWhenNoValidationErrorFound() {
         EnvironmentValidationDto environmentValidationDto = createEnvironmentValidationDto();
         Environment environment = new Environment();
         when(environmentService.findEnvironmentById(anyLong())).thenReturn(Optional.of(environment));
@@ -74,7 +100,14 @@ class EnvironmentValidationHandlerTest {
 
         underTest.accept(Event.wrap(environmentValidationDto));
 
-        verify(eventSender, times(1)).sendEvent(any(EnvCreationEvent.class), any());
+        ArgumentCaptor<EnvCreationEvent> envCreationEventCaptor = ArgumentCaptor.forClass(EnvCreationEvent.class);
+        verify(eventSender, times(1)).sendEvent(envCreationEventCaptor.capture(), any());
+
+        EnvCreationEvent envCreationEvent = envCreationEventCaptor.getValue();
+        assertThat(envCreationEvent).isNotNull();
+        assertThat(envCreationEvent.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
+        assertThat(envCreationEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
+        assertThat(envCreationEvent.selector()).isEqualTo("START_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_EVENT");
     }
 
     @Test
@@ -84,10 +117,9 @@ class EnvironmentValidationHandlerTest {
 
         underTest.accept(Event.wrap(environmentValidationDto));
 
-        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus, times(1)).notify(eq(EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT.name()), eventCaptor.capture());
-        EnvCreationFailureEvent envCreationFailureEvent = (EnvCreationFailureEvent) eventCaptor.getValue().getData();
-        Assertions.assertEquals("Environment was not found with id '1'.", envCreationFailureEvent.getException().getMessage());
+        verify(eventBus, times(1)).notify(eq(EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT.name()), failureEventCaptor.capture());
+        EnvCreationFailureEvent envCreationFailureEvent = failureEventCaptor.getValue().getData();
+        assertEquals("Environment was not found with id '1'.", envCreationFailureEvent.getException().getMessage());
     }
 
     @Test
@@ -101,21 +133,23 @@ class EnvironmentValidationHandlerTest {
 
         underTest.accept(Event.wrap(environmentValidationDto));
 
-        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus, times(1)).notify(eq(EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT.name()), eventCaptor.capture());
-        EnvCreationFailureEvent envCreationFailureEvent = (EnvCreationFailureEvent) eventCaptor.getValue().getData();
-        Assertions.assertEquals("Validation failed.", envCreationFailureEvent.getException().getMessage());
+        verify(eventBus, times(1)).notify(eq(EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT.name()), failureEventCaptor.capture());
+        EnvCreationFailureEvent envCreationFailureEvent = failureEventCaptor.getValue().getData();
+        assertEquals("Validation failed.", envCreationFailureEvent.getException().getMessage());
     }
 
     private EnvironmentValidationDto createEnvironmentValidationDto() {
         EnvironmentValidationDto environmentValidationDto = new EnvironmentValidationDto();
         environmentValidationDto.setValidationType(ValidationType.ENVIRONMENT_CREATION);
         EnvironmentDto environmentDto = new EnvironmentDto();
-        environmentDto.setId(1L);
+        environmentDto.setId(ENVIRONMENT_ID);
+        environmentDto.setResourceCrn(ENVIRONMENT_CRN);
+        environmentDto.setName(ENVIRONMENT_NAME);
         Credential credential = new Credential();
         credential.setResourceCrn("credential");
         environmentDto.setCredential(credential);
         environmentValidationDto.setEnvironmentDto(environmentDto);
         return environmentValidationDto;
     }
+
 }

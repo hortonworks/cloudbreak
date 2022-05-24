@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.creation.handler;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.VALIDATE_ENVIRONMENT_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_EVENT;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Set;
@@ -57,11 +57,11 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
 
     private final EventSenderService eventSenderService;
 
-    private CloudStorageValidator cloudStorageValidator;
+    private final CloudStorageValidator cloudStorageValidator;
 
-    private TelemetryApiConverter telemetryApiConverter;
+    private final TelemetryApiConverter telemetryApiConverter;
 
-    private BackupConverter backupConverter;
+    private final BackupConverter backupConverter;
 
     protected EnvironmentValidationHandler(
             EventSender eventSender,
@@ -92,9 +92,9 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                 .ifPresentOrElse(environment -> {
                             LOGGER.debug("Environment validation flow step started.");
                             try {
-                                validateEnvironment(environmentDtoEvent, environmentValidationDto, environment);
-                                validateCloudStorage(environmentDtoEvent, environmentDto);
-                                goToNetworkCreationState(environmentDtoEvent, environmentDto);
+                                validateEnvironment(environmentValidationDto, environment);
+                                validateCloudStorage(environmentDto);
+                                goToNextState(environmentDtoEvent, environmentDto);
                             } catch (WebApplicationException e) {
                                 String responseMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
                                 goToFailedState(environmentDtoEvent, e.getMessage() + ". " + responseMessage);
@@ -105,7 +105,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
                 );
     }
 
-    private void validateCloudStorage(Event<EnvironmentValidationDto> environmentDtoEvent, EnvironmentDto environmentDto) {
+    private void validateCloudStorage(EnvironmentDto environmentDto) {
         EnvironmentCloudStorageValidationRequest cloudStorageValidationRequest = new EnvironmentCloudStorageValidationRequest();
         cloudStorageValidationRequest.setCredentialCrn(environmentDto.getCredential().getResourceCrn());
         TelemetryRequest telemetryRequest = telemetryApiConverter.convertToRequest(environmentDto.getTelemetry());
@@ -117,7 +117,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         try {
             response = cloudStorageValidator.validateCloudStorage(environmentDto.getAccountId(), cloudStorageValidationRequest);
         } catch (Exception e) {
-            String message = String.format("Error occured during object storage validation, validation skipped. Error: %s", e.getMessage());
+            String message = String.format("Error occurred during object storage validation, validation skipped. Error: %s", e.getMessage());
             LOGGER.warn(message);
             eventSenderService.sendEventAndNotification(environmentDto, ThreadBasedUserCrnProvider.getUserCrn(),
                     ResourceEvent.ENVIRONMENT_VALIDATION_FAILED_AND_SKIPPED, Set.of(e.getMessage()));
@@ -131,8 +131,7 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         }
     }
 
-    private void validateEnvironment(Event<EnvironmentValidationDto> environmentDtoEvent, EnvironmentValidationDto environmentValidationDto,
-            Environment environment) {
+    private void validateEnvironment(EnvironmentValidationDto environmentValidationDto, Environment environment) {
         EnvironmentDto environmentDto = environmentValidationDto.getEnvironmentDto();
         RegionWrapper regionWrapper = environment.getRegionWrapper();
         CloudRegions cloudRegions = environmentService.getRegionsByEnvironment(environment);
@@ -164,10 +163,10 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         eventBus.notify(failureEvent.selector(), new Event<>(environmentDtoEvent.getHeaders(), failureEvent));
     }
 
-    private void goToNetworkCreationState(Event<EnvironmentValidationDto> environmentDtoEvent, EnvironmentDto environmentDto) {
+    private void goToNextState(Event<EnvironmentValidationDto> environmentDtoEvent, EnvironmentDto environmentDto) {
         EnvCreationEvent envCreationEvent = EnvCreationEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
-                .withSelector(START_NETWORK_CREATION_EVENT.selector())
+                .withSelector(START_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_EVENT.selector())
                 .withResourceCrn(environmentDto.getResourceCrn())
                 .withResourceName(environmentDto.getName())
                 .build();

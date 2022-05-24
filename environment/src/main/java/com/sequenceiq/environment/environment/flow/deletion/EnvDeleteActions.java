@@ -10,6 +10,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_RDBMS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_S3GUARD_TABLE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_UMS_RESOURCE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINALIZE_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.HANDLED_FAILED_ENV_DELETE_EVENT;
 
@@ -85,6 +86,25 @@ public class EnvDeleteActions {
                         .withId(payload.getResourceId())
                         .build();
                 sendEvent(context, DELETE_FREEIPA_EVENT.selector(), environmentDeletionDto);
+            }
+        };
+    }
+
+    @Bean(name = "STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE")
+    public Action<?, ?> storageConsumptionCollectionUnschedulingAction() {
+        return new AbstractEnvDeleteAction<>(EnvDeleteEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvDeleteEvent payload, Map<Object, Object> variables) {
+                EnvironmentDto envDto = environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(context, payload, EnvironmentStatus.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_IN_PROGRESS,
+                                ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED,
+                                EnvDeleteState.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE);
+                EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto.builder()
+                        .withEnvironmentDto(envDto)
+                        .withForceDelete(payload.isForceDelete())
+                        .withId(payload.getResourceId())
+                        .build();
+                sendEvent(context, UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT.selector(), environmentDeletionDto);
             }
         };
     }
@@ -302,12 +322,11 @@ public class EnvDeleteActions {
 
         @Override
         protected Object getFailurePayload(P payload, Optional<CommonContext> flowContext, Exception ex) {
-            EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
+            return EnvDeleteFailedEvent.builder()
                     .withException(ex)
                     .withEnvironmentID(NullUtil.getIfNotNullOtherwise(payload, ResourceCrnPayload::getResourceId, -1L))
                     .withResourceCrn(NullUtil.getIfNotNullOtherwise(payload, ResourceCrnPayload::getResourceCrn, "null CRN"))
                     .build();
-            return failedEvent;
         }
 
         @Override

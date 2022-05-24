@@ -12,6 +12,8 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_PUBLICKE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_VALIDATION_STARTED;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
@@ -19,6 +21,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PUBLICKEY_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.INITIALIZE_ENVIRONMENT_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.SCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.VALIDATE_ENVIRONMENT_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINALIZE_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
@@ -129,6 +132,38 @@ public class EnvCreationActions {
                     LOGGER.debug("Environment validation action went failed with EnvCreationFailureEvent was: {}", failureEvent);
                     eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_VALIDATION_FAILED, context.getFlowTriggerUserCrn());
                     LOGGER.warn("Failed to validate environment creation request! No environment found with id '{}'.", payload.getResourceId());
+                    sendEvent(context, failureEvent);
+                });
+            }
+        };
+    }
+
+    @Bean(name = "STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED_STATE")
+    public Action<?, ?> storageConsumptionCollectionSchedulingAction() {
+        return new AbstractEnvironmentCreationAction<>(EnvCreationEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, EnvCreationEvent payload, Map<Object, Object> variables) {
+                environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
+                    LOGGER.info("Scheduling of storage consumption collection has started. " +
+                            "Current state is - STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED_STATE");
+                    environment.setStatus(EnvironmentStatus.STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_IN_PROGRESS);
+                    environment.setStatusReason(null);
+                    environment = environmentService.save(environment);
+                    EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(),
+                            ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED);
+                    sendEvent(context, SCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT.selector(), environmentDto);
+                }, () -> {
+                    EnvCreationFailureEvent failureEvent = new EnvCreationFailureEvent(
+                            payload.getResourceId(),
+                            payload.getResourceName(),
+                            null,
+                            payload.getResourceCrn());
+                    LOGGER.debug("Environment storage consumption collection scheduling action went failed with EnvCreationFailureEvent was: {}", failureEvent);
+                    eventService.sendEventAndNotificationForMissingEnv(payload, ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_FAILED,
+                            context.getFlowTriggerUserCrn());
+                    LOGGER.warn("Failed to schedule storage consumption collection for environment! No environment found with id '{}'.",
+                            payload.getResourceId());
                     sendEvent(context, failureEvent);
                 });
             }
@@ -298,7 +333,7 @@ public class EnvCreationActions {
         };
     }
 
-    private abstract class AbstractEnvironmentCreationAction<P extends ResourceCrnPayload>
+    private abstract static class AbstractEnvironmentCreationAction<P extends ResourceCrnPayload>
             extends AbstractAction<EnvCreationState, EnvCreationStateSelectors, CommonContext, P> {
 
         protected AbstractEnvironmentCreationAction(Class<P> payloadClass) {

@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.creation;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_PUBLICKEY_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.SCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FAILED_ENV_CREATION_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,7 +41,9 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
 import com.sequenceiq.environment.events.EventSenderService;
+import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -80,6 +83,12 @@ class EnvCreationActionsTest {
 
     @Mock
     private EventSenderService eventSenderService;
+
+    @Mock
+    private EnvironmentMetricService metricService;
+
+    @Mock
+    private EnvironmentJobService environmentJobService;
 
     @Mock
     private StateContext stateContext;
@@ -172,7 +181,7 @@ class EnvCreationActionsTest {
 
     @Test
     void publicKeyCreationActionTestNoEnvironment() {
-        testNoEnvironment(underTest::publickeyCreationAction, FAILED_ENV_CREATION_EVENT.selector());
+        testNoEnvironment(underTest::publickeyCreationAction, FAILED_ENV_CREATION_EVENT.selector(), ResourceEvent.ENVIRONMENT_PUBLICKEY_CREATION_FAILED);
     }
 
     @Test
@@ -188,7 +197,8 @@ class EnvCreationActionsTest {
 
     @Test
     void resourceEncryptionInitializationActionTestNoEnvironment() {
-        testNoEnvironment(underTest::resourceEncryptionInitializationAction, FAILED_ENV_CREATION_EVENT.selector());
+        testNoEnvironment(underTest::resourceEncryptionInitializationAction, FAILED_ENV_CREATION_EVENT.selector(),
+                ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_FAILED);
     }
 
     @Test
@@ -196,6 +206,24 @@ class EnvCreationActionsTest {
         testCreationActionHappyPath(underTest::resourceEncryptionInitializationAction, INITIALIZE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector(),
                 EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS,
                 ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED);
+    }
+
+    @Test
+    void storageConsumptionCollectionSchedulingActionTestFailure() {
+        testFailure(underTest::storageConsumptionCollectionSchedulingAction);
+    }
+
+    @Test
+    void storageConsumptionCollectionSchedulingActionTestNoEnvironment() {
+        testNoEnvironment(underTest::storageConsumptionCollectionSchedulingAction, FAILED_ENV_CREATION_EVENT.selector(),
+                ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_FAILED);
+    }
+
+    @Test
+    void storageConsumptionCollectionSchedulingActionHappyPath() {
+        testCreationActionHappyPath(underTest::storageConsumptionCollectionSchedulingAction, SCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT.selector(),
+                EnvironmentStatus.STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_IN_PROGRESS,
+                ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_STARTED);
     }
 
     private void testFailure(Supplier<Action<?, ?>> creationAction) {
@@ -215,7 +243,7 @@ class EnvCreationActionsTest {
         verifyFailureEvent();
     }
 
-    private void testNoEnvironment(Supplier<Action<?, ?>> creationAction, String selector) {
+    private void testNoEnvironment(Supplier<Action<?, ?>> creationAction, String selector, ResourceEvent eventFailed) {
         Action<?, ?> action = configureAction(creationAction);
 
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.empty());
@@ -225,6 +253,7 @@ class EnvCreationActionsTest {
         verify(environmentService, never()).save(any(Environment.class));
         verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
         verify(eventSenderService, never()).sendEventAndNotification(any(EnvironmentDto.class), anyString(), any(ResourceEvent.class));
+        verify(eventSenderService).sendEventAndNotificationForMissingEnv(actionPayload, eventFailed, FLOW_TRIGGER_USER_CRN);
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
 

@@ -70,11 +70,12 @@ public abstract class ConsumptionBaseRequest implements Serializable {
 
     @Override
     public String toString() {
-        return "StorageConsumptionBaseRequest{" +
+        return "ConsumptionBaseRequest{" +
                 "environmentCrn='" + environmentCrn + '\'' +
                 ", monitoredResourceType='" + monitoredResourceType + '\'' +
                 ", monitoredResourceCrn='" + monitoredResourceCrn + '\'' +
                 ", monitoredResourceName='" + monitoredResourceName + '\'' +
                 '}';
     }
+
 }

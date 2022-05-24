@@ -16,7 +16,12 @@ public enum EnvironmentStatus {
 
     ENVIRONMENT_INITIALIZATION_IN_PROGRESS("Initialization in progress"),
     ENVIRONMENT_VALIDATION_IN_PROGRESS("Validation in progress"),
+
+    STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_IN_PROGRESS("Storage consumption collection scheduling in progress"),
+    STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_IN_PROGRESS("Storage consumption collection unscheduling in progress"),
+
     PREREQUISITES_CREATE_IN_PROGRESS("Prerequisites creation in progress"),
+
     NETWORK_CREATION_IN_PROGRESS("Network creation in progress"),
     NETWORK_DELETE_IN_PROGRESS("Network deletion initiated"),
 
@@ -169,7 +174,7 @@ public enum EnvironmentStatus {
             EXPERIENCE_DELETE_IN_PROGRESS
     );
 
-    private String description;
+    private final String description;
 
     EnvironmentStatus(String description) {
         this.description = description;

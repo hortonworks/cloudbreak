@@ -17,6 +17,11 @@ public enum EnvironmentStatus {
     // Setting up the regions and network metadata (public/private and cidr)
     ENVIRONMENT_VALIDATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENVIRONMENT_VALIDATION_IN_PROGRESS),
 
+    STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.STORAGE_CONSUMPTION_COLLECTION_SCHEDULING_IN_PROGRESS),
+    STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_IN_PROGRESS),
+
     // If the user choosing create new option for the network then we create the network on provider side
     NETWORK_CREATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS),
     // If the user choosing create new option for the network then we delete on provider side
