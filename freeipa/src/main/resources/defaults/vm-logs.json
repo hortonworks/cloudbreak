@@ -98,5 +98,9 @@
   {
     "path": "/var/log/upgrade-ccm.log",
     "label": "upgrade_ccm"
+  },
+  {
+    "path": "/cdp/ipahealthagent/ipahealthagent.log",
+    "label": "ipahealthagent"
   }
 ]
