@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
@@ -112,10 +111,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .given(DistroXTestDto.class)
                 .when(distroXTestClient.get())
                 .then(this::verifyMountedDisks)
-                .then((tc, testDto, client) -> {
-                    List<InstanceGroupV4Response> instanceGroups = testDto.getResponse().getInstanceGroups();
-                    return sshJUtil.checkMeteringStatus(testDto, instanceGroups, List.of(MASTER.getName()));
-                })
+                .then((tc, testDto, client) -> sshJUtil.checkMeteringStatus(testDto, testDto.getResponse().getInstanceGroups(), List.of(MASTER.getName())))
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
                     List<String> instancesToDelete = distroxUtil.getInstanceIds(testDto, client, MASTER.getName());
@@ -142,8 +138,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
 
     private DistroXTestDto verifyMountedDisks(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
         CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
-        List<InstanceGroupV4Response> instanceGroups = testDto.getResponse().getInstanceGroups();
-        cloudFunctionality.checkMountedDisks(instanceGroups, List.of(HostGroupType.WORKER.getName()));
+        cloudFunctionality.checkMountedDisks(testDto.getResponse().getInstanceGroups(), List.of(HostGroupType.WORKER.getName()));
         return testDto;
     }
 }

@@ -1,15 +1,12 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.environment;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.assertion.environment.EnvironmentNetworkTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -97,15 +94,8 @@ public class NewNetworkWithNoInternetEnvironmentTests extends AbstractE2ETest {
                 .withCloudStorage()
                 .when(sdxTestClient.create(), RunningParameter.key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .then((tc, testDto, client) -> sshJClientActions.checkNoOutboundInternetTraffic(testDto, getInstanceGroups(testDto, client),
-                        List.of(HostGroupType.MASTER.getName())))
+                .then((tc, testDto, client) -> sshJClientActions.checkNoOutboundInternetTraffic(testDto,
+                        testDto.getResponse().getStackV4Response().getInstanceGroups(), List.of(HostGroupType.MASTER.getName())))
                 .validate();
-    }
-
-    private List<InstanceGroupV4Response> getInstanceGroups(SdxTestDto testDto, SdxClient client) {
-        return client.getDefaultClient()
-                .sdxEndpoint()
-                .getDetailByCrn(testDto.getCrn(), Collections.emptySet())
-                .getStackV4Response().getInstanceGroups();
     }
 }

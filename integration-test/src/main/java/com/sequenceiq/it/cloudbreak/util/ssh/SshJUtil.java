@@ -8,6 +8,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
@@ -23,6 +25,12 @@ public class SshJUtil {
     public <T extends AbstractSdxTestDto> T checkFilesOnHostByNameAndPath(T testDto, List<InstanceGroupV4Response> instanceGroups,
             List<String> hostGroupNames, String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
         return sshJClientActions.checkFilesByNameAndPath(testDto, instanceGroups, hostGroupNames, filePath, fileName, requiredNumberOfFiles, user,
+                password);
+    }
+
+    public <T extends AbstractFreeIpaTestDto> T checkFilesOnFreeIpaByNameAndPath(T testDto, String environmentCrn, FreeIpaClient freeipaClient,
+            String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
+        return sshJClientActions.checkFilesByNameAndPath(testDto, environmentCrn, freeipaClient, filePath, fileName, requiredNumberOfFiles, user,
                 password);
     }
 

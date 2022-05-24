@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -75,12 +76,7 @@ public class SshJClientActions extends SshJClient {
         return instanceIPs;
     }
 
-    public <T extends AbstractSdxTestDto> T checkFilesByNameAndPath(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
-            String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
-        String fileListCommand = format("find %s -type f -name %s", filePath, fileName);
-        Map<String, Long> filesByIp = getInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
-                .collect(Collectors.toMap(ip -> ip, ip -> executefileListCommand(ip, user, password, fileListCommand)));
-
+    private void validateRequiredNumberOfFiles(Map<String, Long> filesByIp, String filePath, long requiredNumberOfFiles) {
         filesByIp.forEach((ip, fileCount) -> {
             if (requiredNumberOfFiles == fileCount) {
                 Log.log(LOGGER, " Required number (%d) of files are available at '%s' on %s instance. ", fileCount, filePath, ip);
@@ -90,6 +86,25 @@ public class SshJClientActions extends SshJClient {
                         filePath, ip));
             }
         });
+    }
+
+    public <T extends AbstractSdxTestDto> T checkFilesByNameAndPath(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
+            String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
+        String fileListCommand = format("find %s -type f -name %s", filePath, fileName);
+        Map<String, Long> filesByIp = getInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executefileListCommand(ip, user, password, fileListCommand)));
+
+        validateRequiredNumberOfFiles(filesByIp, filePath, requiredNumberOfFiles);
+        return testDto;
+    }
+
+    public <T extends AbstractFreeIpaTestDto> T checkFilesByNameAndPath(T testDto, String environmentCrn, FreeIpaClient freeipaClient,
+            String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
+        String fileListCommand = format("find %s -type f -name %s", filePath, fileName);
+        Map<String, Long> filesByIp = getFreeIpaInstanceGroupIps(environmentCrn, freeipaClient, false).stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executefileListCommand(ip, user, password, fileListCommand)));
+
+        validateRequiredNumberOfFiles(filesByIp, filePath, requiredNumberOfFiles);
         return testDto;
     }
 
