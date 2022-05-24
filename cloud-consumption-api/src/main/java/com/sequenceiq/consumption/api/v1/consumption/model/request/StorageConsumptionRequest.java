@@ -27,8 +27,9 @@ public class StorageConsumptionRequest extends ConsumptionBaseRequest {
     @Override
     public String toString() {
         return super.toString() +
-                ", StorageConsumptionScheduleRequest{" +
+                ", StorageConsumptionRequest{" +
                 "storageLocation='" + storageLocation + '\'' +
                 '}';
     }
+
 }

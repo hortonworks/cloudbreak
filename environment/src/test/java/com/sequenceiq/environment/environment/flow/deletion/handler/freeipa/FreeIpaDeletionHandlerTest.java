@@ -2,7 +2,8 @@ package com.sequenceiq.environment.environment.flow.deletion.handler.freeipa;
 
 
 import static java.util.Optional.of;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -16,9 +17,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
@@ -27,6 +28,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.FreeIpaPollerObject;
+import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
@@ -54,6 +56,8 @@ class FreeIpaDeletionHandlerTest {
 
     private static final String YARN_NETWORK_CIDR = "172.27.0.0/16";
 
+    private static final String CHILD_ACCOUNT_ID = "childAccountId";
+
     @Mock
     private EventSender eventSender;
 
@@ -75,8 +79,16 @@ class FreeIpaDeletionHandlerTest {
     @InjectMocks
     private FreeIpaDeletionHandler victim;
 
+    @Captor
+    private ArgumentCaptor<BaseNamedFlowEvent> baseNamedFlowEventCaptor;
+
     @Test
-    public void shouldDetachChildEnvironmentIfParentExists() throws Exception {
+    void selectorTest() {
+        assertThat(victim.selector()).isEqualTo("DELETE_FREEIPA_EVENT");
+    }
+
+    @Test
+    public void shouldDetachChildEnvironmentIfParentExists() {
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setId(CHILD_ENVIRONMENT_ID);
         EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto
@@ -95,15 +107,24 @@ class FreeIpaDeletionHandlerTest {
                 = ArgumentCaptor.forClass(DetachChildEnvironmentRequest.class);
         verify(freeIpaService).detachChildEnvironment(detachChildEnvironmentRequestArgumentCaptor.capture());
         verifyNoMoreInteractions(freeIpaService);
-        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
+        verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Event.Headers.class));
+        verifySuccessEvent();
         verify(dnsV1Endpoint).deleteDnsZoneBySubnet(eq(PARENT_ENVIRONMENT_CRN), any());
 
         assertEquals(PARENT_ENVIRONMENT_CRN, detachChildEnvironmentRequestArgumentCaptor.getValue().getParentEnvironmentCrn());
         assertEquals(ENVIRONMENT_CRN, detachChildEnvironmentRequestArgumentCaptor.getValue().getChildEnvironmentCrn());
     }
 
+    private void verifySuccessEvent() {
+        BaseNamedFlowEvent baseNamedFlowEvent = baseNamedFlowEventCaptor.getValue();
+        assertThat(baseNamedFlowEvent).isInstanceOf(EnvDeleteEvent.class);
+
+        EnvDeleteEvent envDeleteEvent = (EnvDeleteEvent) baseNamedFlowEvent;
+        assertThat(envDeleteEvent.selector()).isEqualTo("START_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_EVENT");
+    }
+
     @Test
-    public void shouldNotDeleteDnsZoneWhenSiblingsExist() throws Exception {
+    public void shouldNotDeleteDnsZoneWhenSiblingsExist() {
         EnvironmentDto environmentDto = new EnvironmentDto();
         environmentDto.setId(CHILD_ENVIRONMENT_ID);
         EnvironmentDeletionDto environmentDeletionDto = EnvironmentDeletionDto
@@ -121,6 +142,8 @@ class FreeIpaDeletionHandlerTest {
 
         victim.accept(new Event<>(environmentDeletionDto));
 
+        verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Event.Headers.class));
+        verifySuccessEvent();
         verify(dnsV1Endpoint, never()).deleteDnsZoneBySubnet(eq(PARENT_ENVIRONMENT_CRN), any());
     }
 
@@ -142,15 +165,16 @@ class FreeIpaDeletionHandlerTest {
         when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(of(new DescribeFreeIpaResponse()));
         when(freeIpaPollingService.pollWithTimeout(any(),
                 any(),
-                Mockito.eq(FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL),
-                Mockito.eq(FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT),
-                Mockito.eq(1))).thenReturn(extendedPollingResult);
+                eq((long) FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL),
+                eq(FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT),
+                eq(FreeIpaDeletionRetrievalTask.FREEIPA_FAILURE_COUNT))).thenReturn(extendedPollingResult);
 
         victim.accept(new Event<>(environmentDeletionDto));
 
         verify(environmentRecipeService).deleteRecipes(1L);
         verify(freeIpaService).delete(ENVIRONMENT_CRN, true);
-        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
+        verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Event.Headers.class));
+        verifySuccessEvent();
         verifyNoMoreInteractions(freeIpaService);
     }
 
@@ -169,12 +193,14 @@ class FreeIpaDeletionHandlerTest {
         victim.accept(new Event<>(environmentDeletionDto));
 
         verify(freeIpaService, never()).delete(ENVIRONMENT_CRN, true);
-        verify(eventSender).sendEvent(any(BaseNamedFlowEvent.class), any(Event.Headers.class));
+        verify(eventSender).sendEvent(baseNamedFlowEventCaptor.capture(), any(Event.Headers.class));
+        verifySuccessEvent();
     }
 
     private Environment anEnvironmentWithParent(Long id) {
         Environment environment = new Environment();
         environment.setId(id);
+        environment.setAccountId(CHILD_ACCOUNT_ID);
         environment.setParentEnvironment(getParentEnvironment());
         environment.setResourceCrn(ENVIRONMENT_CRN);
         environment.setCreateFreeIpa(Boolean.TRUE);

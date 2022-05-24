@@ -26,7 +26,7 @@ public class ConsumptionApiClientConfig {
 
     @Bean
     @ConditionalOnBean(ConsumptionApiClientParams.class)
-    public WebTarget billingApiClientWebTarget(ConsumptionApiClientParams consumptionApiClientParams) {
+    public WebTarget consumptionApiClientWebTarget(ConsumptionApiClientParams consumptionApiClientParams) {
         return new ThreadLocalUserCrnWebTargetBuilder(consumptionApiClientParams.getServiceUrl())
                 .withCertificateValidation(consumptionApiClientParams.isCertificateValidation())
                 .withIgnorePreValidation(consumptionApiClientParams.isIgnorePreValidation())
@@ -36,4 +36,5 @@ public class ConsumptionApiClientConfig {
                 .withTracer(clientTracingFeature)
                 .build();
     }
+
 }

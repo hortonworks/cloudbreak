@@ -1,20 +1,21 @@
 package com.sequenceiq.consumption.client;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 
 public class ConsumptionInternalCrnClient {
 
-    private ConsumptionServiceUserCrnClient client;
+    private final ConsumptionServiceUserCrnClient client;
 
-    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+    private final RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     public ConsumptionInternalCrnClient(ConsumptionServiceUserCrnClient crnClient,
-        RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         this.client = crnClient;
-        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
+        this.regionAwareInternalCrnGenerator = regionAwareInternalCrnGenerator;
     }
 
     public ConsumptionServiceCrnEndpoints withInternalCrn() {
-        return client.withCrn(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString());
+        return client.withCrn(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString());
     }
+
 }

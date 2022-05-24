@@ -8,6 +8,7 @@ public enum EnvDeleteState implements FlowState {
 
     INIT_STATE,
     FREEIPA_DELETE_STARTED_STATE,
+    STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE,
     RDBMS_DELETE_STARTED_STATE,
     ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE,
     PUBLICKEY_DELETE_STARTED_STATE,
@@ -24,4 +25,5 @@ public enum EnvDeleteState implements FlowState {
     public Class<? extends RestartAction> restartAction() {
         return EnvironmentFillInMemoryStateStoreRestartAction.class;
     }
+
 }

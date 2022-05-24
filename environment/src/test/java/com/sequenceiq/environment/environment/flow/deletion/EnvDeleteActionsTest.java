@@ -3,15 +3,14 @@ package com.sequenceiq.environment.environment.flow.deletion;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_IDBROKER_MAPPINGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_PUBLICKEY_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,14 +34,15 @@ import org.springframework.statemachine.state.State;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
-import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
+import com.sequenceiq.environment.events.EventSenderService;
+import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -50,7 +50,6 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.MessageFactory;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.notification.NotificationService;
 
 import io.opentracing.Scope;
 import io.opentracing.Span;
@@ -75,15 +74,13 @@ class EnvDeleteActionsTest {
 
     private static final String ENVIRONMENT_CRN = "environmentCrn";
 
-    private static final String MESSAGE = "Houston, we have a problem.";
-
-    private static final String FAILURE_EVENT = "failureEvent";
+    private static final boolean FORCE_DELETE_ENABLED = true;
 
     @Mock
     private EnvironmentService environmentService;
 
     @Mock
-    private NotificationService notificationService;
+    private EventSenderService eventService;
 
     @Mock
     private EnvironmentResponseConverter environmentResponseConverter;
@@ -117,6 +114,9 @@ class EnvDeleteActionsTest {
 
     @Mock
     private EnvironmentStatusUpdateService environmentStatusUpdateService;
+
+    @Mock
+    private EnvironmentMetricService metricService;
 
     @InjectMocks
     private EnvDeleteActions underTest;
@@ -157,7 +157,7 @@ class EnvDeleteActionsTest {
     void setUp() {
         FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
-        actionPayload = new EnvDeleteEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN, true);
+        actionPayload = new EnvDeleteEvent(ACTION_PAYLOAD_SELECTOR, ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN, FORCE_DELETE_ENABLED);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actionPayload);
         when(stateContext.getExtendedState()).thenReturn(extendedState);
         when(extendedState.getVariables()).thenReturn(new HashMap<>());
@@ -178,52 +178,36 @@ class EnvDeleteActionsTest {
     @Test
     void idbmmsDeleteActionTestHappyPath() {
         testDeleteActionHappyPath(underTest::idbmmsDeleteAction, DELETE_IDBROKER_MAPPINGS_EVENT.selector(),
-                EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED);
-    }
-
-    @Test
-    void idbmmsDeleteActionTestNoEnvironment() {
-        testNoEnvironment(underTest::idbmmsDeleteAction, DELETE_IDBROKER_MAPPINGS_EVENT.selector());
+                EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_IDBROKER_MAPPINGS_DELETION_STARTED,
+                EnvDeleteState.IDBROKER_MAPPINGS_DELETE_STARTED_STATE);
     }
 
     @Test
     void publicKeyDeleteActionTestHappyPath() {
         testDeleteActionHappyPath(underTest::publickeyDeleteAction, DELETE_PUBLICKEY_EVENT.selector(),
-                EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PUBLICKEY_DELETION_STARTED);
-    }
-
-    @Test
-    void publicKeyDeleteActionTestNoEnvironment() {
-        testNoEnvironment(underTest::publickeyDeleteAction, DELETE_PUBLICKEY_EVENT.selector());
-    }
-
-    @Test
-    void resourceEncryptionDeleteActionTestNoEnvironment() {
-        testNoEnvironment(underTest::resourceEncryptionDeleteAction, DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector());
+                EnvironmentStatus.PUBLICKEY_DELETE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_PUBLICKEY_DELETION_STARTED,
+                EnvDeleteState.PUBLICKEY_DELETE_STARTED_STATE);
     }
 
     @Test
     void resourceEncryptionDeleteActionTestHappyPath() {
         testDeleteActionHappyPath(underTest::resourceEncryptionDeleteAction, DELETE_ENVIRONMENT_RESOURCE_ENCRYPTION_EVENT.selector(),
-                EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETION_STARTED);
+                EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS, ResourceEvent.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETION_STARTED,
+                EnvDeleteState.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE);
     }
 
-    private void testNoEnvironment(Supplier<Action<?, ?>> deleteAction, String selector) {
-        Action<?, ?> action = configureAction(deleteAction);
-
-        action.execute(stateContext);
-
-        verify(environmentService, never()).save(any(Environment.class));
-        verify(environmentService, never()).getEnvironmentDto(any(Environment.class));
-        verify(environmentResponseConverter, never()).dtoToSimpleResponse(any(EnvironmentDto.class), anyBoolean(), anyBoolean());
-        verify(notificationService, never()).send(any(ResourceEvent.class), any(SimpleEnvironmentResponse.class), anyString());
-        verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
+    @Test
+    void storageConsumptionCollectionUnschedulingActionTestHappyPath() {
+        testDeleteActionHappyPath(underTest::storageConsumptionCollectionUnschedulingAction, UNSCHEDULE_STORAGE_CONSUMPTION_COLLECTION_EVENT.selector(),
+                EnvironmentStatus.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_IN_PROGRESS,
+                ResourceEvent.ENVIRONMENT_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED,
+                EnvDeleteState.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE);
     }
 
     private void testDeleteActionHappyPath(Supplier<Action<?, ?>> deleteAction,
             String selector,
             EnvironmentStatus environmentStatus,
-            ResourceEvent eventStarted) {
+            ResourceEvent eventStarted, EnvDeleteState envDeleteState) {
 
         Action<?, ?> action = configureAction(deleteAction);
 
@@ -234,7 +218,23 @@ class EnvDeleteActionsTest {
 
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
-        verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(any(), any(), eq(environmentStatus), eq(eventStarted), any());
+        verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(any(), any(), eq(environmentStatus), eq(eventStarted), eq(envDeleteState));
+
+        verifyDeleteActionSuccessEvent(selector, environmentDto);
+    }
+
+    private void verifyDeleteActionSuccessEvent(String selector, EnvironmentDto environmentDto) {
+        assertThat(selectorArgumentCaptor.getValue()).isEqualTo(selector);
+
+        verifyEventFactoryAndHeaders();
+
+        Object payload = payloadArgumentCaptor.getValue();
+        assertThat(payload).isInstanceOf(EnvironmentDeletionDto.class);
+
+        EnvironmentDeletionDto environmentDeletionDto = (EnvironmentDeletionDto) payload;
+        assertThat(environmentDeletionDto.getEnvironmentDto()).isSameAs(environmentDto);
+        assertThat(environmentDeletionDto.isForceDelete()).isEqualTo(FORCE_DELETE_ENABLED);
+        assertThat(environmentDeletionDto.getResourceId()).isEqualTo(ENVIRONMENT_ID);
     }
 
     private Action<?, ?> configureAction(Supplier<Action<?, ?>> actionSupplier) {
@@ -251,14 +251,6 @@ class EnvDeleteActionsTest {
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
         ReflectionTestUtils.setField(action, null, tracer, Tracer.class);
-    }
-
-    private void verifyFailureEvent() {
-        assertThat(selectorArgumentCaptor.getValue()).isEqualTo(FAILURE_EVENT);
-
-        verifyEventFactoryAndHeaders();
-
-        assertThat(payloadArgumentCaptor.getValue()).isSameAs(actionPayload);
     }
 
     private void verifyEventFactoryAndHeaders() {

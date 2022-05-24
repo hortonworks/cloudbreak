@@ -8,17 +8,17 @@ public class ConsumptionApiClientParams {
 
     private final boolean ignorePreValidation;
 
-    private final String billingServerUrl;
+    private final String consumptionServerUrl;
 
-    public ConsumptionApiClientParams(boolean restDebug, boolean certificateValidation, boolean ignorePreValidation, String billingServerUrl) {
+    public ConsumptionApiClientParams(boolean restDebug, boolean certificateValidation, boolean ignorePreValidation, String consumptionServerUrl) {
         this.restDebug = restDebug;
         this.certificateValidation = certificateValidation;
         this.ignorePreValidation = ignorePreValidation;
-        this.billingServerUrl = billingServerUrl;
+        this.consumptionServerUrl = consumptionServerUrl;
     }
 
     public String getServiceUrl() {
-        return billingServerUrl;
+        return consumptionServerUrl;
     }
 
     public boolean isCertificateValidation() {
@@ -32,4 +32,5 @@ public class ConsumptionApiClientParams {
     public boolean isRestDebug() {
         return restDebug;
     }
+
 }

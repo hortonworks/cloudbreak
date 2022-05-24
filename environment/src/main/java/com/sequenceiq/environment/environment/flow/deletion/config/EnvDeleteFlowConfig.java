@@ -12,6 +12,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteStat
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.PUBLICKEY_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.RDBMS_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.S3GUARD_TABLE_DELETE_STARTED_STATE;
+import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.UMS_RESOURCE_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINALIZE_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
@@ -24,6 +25,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_PUBLICKEY_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_RDBMS_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_S3GUARD_TABLE_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_UMS_RESOURCE_DELETE_EVENT;
 
 import java.util.List;
@@ -45,7 +47,10 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
             .from(INIT_STATE).to(FREEIPA_DELETE_STARTED_STATE)
             .event(START_FREEIPA_DELETE_EVENT).defaultFailureEvent()
 
-            .from(FREEIPA_DELETE_STARTED_STATE).to(RDBMS_DELETE_STARTED_STATE)
+            .from(FREEIPA_DELETE_STARTED_STATE).to(STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE)
+            .event(START_STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_EVENT).defaultFailureEvent()
+
+            .from(STORAGE_CONSUMPTION_COLLECTION_UNSCHEDULING_STARTED_STATE).to(RDBMS_DELETE_STARTED_STATE)
             .event(START_RDBMS_DELETE_EVENT).defaultFailureEvent()
 
             .from(RDBMS_DELETE_STARTED_STATE).to(ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE)
