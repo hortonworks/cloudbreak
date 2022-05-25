@@ -4,7 +4,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.cluster.ClusterUpscaleService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesResult;
@@ -19,9 +18,6 @@ public class UploadUpscaleRecipesHandler implements EventHandler<UploadUpscaleRe
     @Inject
     private EventBus eventBus;
 
-    @Inject
-    private ClusterUpscaleService clusterUpscaleService;
-
     @Override
     public String selector() {
         return EventSelectorUtil.selector(UploadUpscaleRecipesRequest.class);
@@ -32,7 +28,7 @@ public class UploadUpscaleRecipesHandler implements EventHandler<UploadUpscaleRe
         UploadUpscaleRecipesRequest request = event.getData();
         UploadUpscaleRecipesResult result;
         try {
-            clusterUpscaleService.uploadRecipesOnNewHosts(request.getResourceId(), request.getHostGroupNames());
+            // TODO: because of CB-17116 - step removed - cleanup the code
             result = new UploadUpscaleRecipesResult(request);
         } catch (Exception e) {
             result = new UploadUpscaleRecipesResult(e.getMessage(), e, request);

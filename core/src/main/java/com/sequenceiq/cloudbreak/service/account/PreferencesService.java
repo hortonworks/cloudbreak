@@ -71,7 +71,7 @@ public class PreferencesService {
         Map<String, Boolean> result = new HashMap<>();
         if (StringUtils.isEmpty(enabledPlatforms)) {
             for (CloudConstant cloudConstant : cloudConstants) {
-                result.put(cloudConstant.platform().value(), true);
+                result.put(cloudConstant.platform().value(), false);
             }
         } else {
             for (String platform : enabledPlatforms()) {
@@ -90,7 +90,7 @@ public class PreferencesService {
         Map<String, Boolean> result = new HashMap<>();
         if (StringUtils.isEmpty(enabledGovPlatforms)) {
             for (CloudConstant cloudConstant : cloudConstants) {
-                result.put(cloudConstant.platform().value(), true);
+                result.put(cloudConstant.platform().value(), false);
             }
         } else {
             for (String platform : enabledGovPlatforms()) {
