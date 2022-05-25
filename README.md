@@ -235,7 +235,6 @@ To launch the Cloudbreak application execute the `com.sequenceiq.cloudbreak.Clou
 -Daltus.ums.host=localhost
 -Dvault.addr=localhost
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
--Dcb.enabledplatforms=""
 -Dinstance.node.id=<NODE_ID>
 ```
 

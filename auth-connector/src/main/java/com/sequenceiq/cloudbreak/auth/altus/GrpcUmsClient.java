@@ -576,7 +576,7 @@ public class GrpcUmsClient {
                 throw new CloudbreakServiceException("Authorization failed due to user management service call failed.");
             }
         } catch (Exception e) {
-            LOGGER.error("Unkown error while checking right {} for user {} on resource {}", right, userCrn, resource != null ? resource :
+            LOGGER.error("Unknown error while checking right {} for user {} on resource {}", right, userCrn, resource != null ? resource :
                     "account", e);
             throw new CloudbreakServiceException("Authorization failed due to user management service call failed with error.");
         }

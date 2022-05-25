@@ -108,7 +108,7 @@ altus:
     caller: cloudbreak
 
 cb:
-  enabledplatforms: AZURE,AWS,GCP
+  enabledplatforms: AWS,AZURE,YARN,GCP,MOCK
   enabledgovplatforms: AWS
   platform.default.rootVolumeSize:
     AWS: 100
