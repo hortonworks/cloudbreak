@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -52,5 +54,13 @@ public class SecurityConfigService {
             }
         }
         return securityConfig;
+    }
+
+    public void changeSaltPassword(Stack stack, String password) {
+        SaltSecurityConfig saltSecurityConfig = Optional.ofNullable(stack.getSecurityConfig())
+                .map(SecurityConfig::getSaltSecurityConfig)
+                .orElseThrow(() -> new IllegalStateException("Stack " + stack.getResourceCrn() + " does not yet have a salt security config"));
+        saltSecurityConfig.setSaltPassword(password);
+        disabledSaltSecurityConfigRepository.save(saltSecurityConfig);
     }
 }

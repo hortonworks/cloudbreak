@@ -1,5 +1,9 @@
 package com.sequenceiq.environment.environment.service.freeipa;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SALT_PASSWORD_ROTATE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SALT_PASSWORD_ROTATE_FINISHED;
+
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -15,8 +19,10 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.flow.api.model.operation.OperationView;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
@@ -45,16 +51,20 @@ public class FreeIpaService {
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    private final EventSenderService eventService;
+
     public FreeIpaService(FreeIpaV1Endpoint freeIpaV1Endpoint,
             OperationV1Endpoint operationV1Endpoint,
             UserV1Endpoint userV1Endpoint,
             WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
+            EventSenderService eventService) {
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
         this.operationV1Endpoint = operationV1Endpoint;
         this.userV1Endpoint = userV1Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
+        this.eventService = eventService;
     }
 
     public DescribeFreeIpaResponse create(CreateFreeIpaRequest createFreeIpaRequest) {
@@ -226,6 +236,23 @@ public class FreeIpaService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to stop FreeIpa cluster for environment '%s' due to: '%s'", environmentCrn, errorMessage), e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public void rotateSaltPassword(EnvironmentDto environmentDto) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        try {
+            LOGGER.info("Rotating salt password of FreeIpa cluster");
+            ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    initiatorUserCrn -> freeIpaV1Endpoint.rotateSaltPasswordInternal(environmentDto.getResourceCrn(), initiatorUserCrn));
+            eventService.sendEventAndNotification(environmentDto, userCrn, ENVIRONMENT_SALT_PASSWORD_ROTATE_FINISHED);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to rotate salt password of FreeIpa cluster for environment '{}' due to: '{}'",
+                    environmentDto.getResourceCrn(), errorMessage, e);
+            eventService.sendEventAndNotification(environmentDto, userCrn, ENVIRONMENT_SALT_PASSWORD_ROTATE_FAILED, List.of(errorMessage));
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

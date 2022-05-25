@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +40,8 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.Assert;
 import org.junit.Before;
@@ -68,6 +71,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.CmAgentStopFlags;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
+import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
@@ -100,6 +104,10 @@ import com.sequenceiq.cloudbreak.util.CompressUtil;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({SaltOrchestrator.class, SaltStates.class})
 public class SaltOrchestratorTest {
+
+    private static final String OLD_PASSWORD = "old-password";
+
+    private static final String NEW_PASSWORD = "new-password";
 
     private GatewayConfig gatewayConfig;
 
@@ -162,6 +170,8 @@ public class SaltOrchestratorTest {
         saltConnectors = List.of(saltConnector);
         when(saltService.createSaltConnector(anyCollection())).thenReturn(saltConnectors);
         when(saltService.getPrimaryGatewayConfig(anyList())).thenReturn(gatewayConfig);
+
+        PowerMockito.mockStatic(SaltStates.class);
     }
 
     @Test
@@ -181,6 +191,68 @@ public class SaltOrchestratorTest {
         // salt.zip, master_sign.pem, master_sign.pub
         verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(saltConnectors), eq(allGatewayConfigs), eq(targets),
                 eq(bootstrapParams));
+    }
+
+    @Test
+    public void changePasswordTest() throws Exception {
+        List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
+
+        setupChangePasswordResponsesWithOneSuccessAndOneWithStatusCode(200, NEW_PASSWORD);
+
+        saltOrchestrator.changePassword(allGatewayConfigs, NEW_PASSWORD, OLD_PASSWORD);
+
+        verifyStatic(SaltStates.class);
+        SaltStates.changePassword(eq(saltConnector), eq(Set.of(gatewayConfig.getPrivateAddress())), eq(NEW_PASSWORD));
+    }
+
+    @Test
+    public void changePasswordWebApplicationExceptionTest() throws Exception {
+        PowerMockito.when(SaltStates.changePassword(any(), any(), any())).thenThrow(new WebApplicationException("500 Internal Server Error"));
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class,
+                () -> saltOrchestrator.changePassword(Collections.singletonList(gatewayConfig), NEW_PASSWORD, OLD_PASSWORD));
+        assertEquals("Salt-bootstrap responded with error, please check the service status on node 10.0.0.1 and retry the operation. " +
+                        "Details: 500 Internal Server Error",
+                exception.getMessage());
+    }
+
+    @Test
+    public void changePasswordErrorResponsesTest() throws Exception {
+        setupChangePasswordResponsesWithOneSuccessAndOneWithStatusCode(500, NEW_PASSWORD);
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class,
+                () -> saltOrchestrator.changePassword(Collections.singletonList(gatewayConfig), NEW_PASSWORD, OLD_PASSWORD));
+        assertEquals("Failed to change password on some of the nodes, so you may experience issues with the cluster until the password is fixed. " +
+                        "Please check the salt-bootstrap service status on nodes and retry the operation. Details from nodes: 10.0.0.1: HTTP 500 error-text",
+                exception.getMessage());
+    }
+
+    @Test
+    public void changePasswordRevertPassword() throws Exception {
+        setupChangePasswordResponsesWithOneSuccessAndOneWithStatusCode(500, NEW_PASSWORD);
+        setupChangePasswordResponsesWithOneSuccessAndOneWithStatusCode(200, OLD_PASSWORD);
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class,
+                () -> saltOrchestrator.changePassword(Collections.singletonList(gatewayConfig), NEW_PASSWORD, OLD_PASSWORD));
+        assertEquals("Failed to change password on some of the nodes, but successfully reverted back to old password so cluster health is not affected. " +
+                        "Please check the salt-bootstrap service status on nodes and retry the operation. Details from nodes: 10.0.0.1: HTTP 500 error-text",
+                exception.getMessage());
+    }
+
+    private void setupChangePasswordResponsesWithOneSuccessAndOneWithStatusCode(int statusCode, String password) throws Exception {
+        GenericResponses genericResponses = new GenericResponses();
+        GenericResponse response = new GenericResponse();
+        response.setAddress(gatewayConfig.getPrivateAddress());
+        response.setStatusCode(statusCode);
+        response.setErrorText("error-text");
+        // add a success response to emulate partial success
+        GenericResponse successResponse = new GenericResponse();
+        successResponse.setAddress("10.0.0.2");
+        successResponse.setStatusCode(200);
+
+        genericResponses.setResponses(List.of(response, successResponse));
+
+        PowerMockito.when(SaltStates.changePassword(any(), any(), eq(password))).thenReturn(genericResponses);
     }
 
     @Test
@@ -232,7 +304,6 @@ public class SaltOrchestratorTest {
         SaltCommandTracker mineUpdateRunnerSaltCommandTracker = mock(SaltCommandTracker.class);
         whenNew(SaltCommandTracker.class).withArguments(eq(saltConnector), eq(mineUpdateRunner)).thenReturn(mineUpdateRunnerSaltCommandTracker);
 
-        PowerMockito.mockStatic(SaltStates.class);
         PowerMockito.when(SaltStates.getGrains(any(), any(), any())).thenReturn(new HashMap<>());
 
         SaltConfig saltConfig = new SaltConfig();
@@ -413,7 +484,6 @@ public class SaltOrchestratorTest {
         downscaleTargets.add(new Node("10.0.0.2", "1.1.1.2", "10-0-0-2.example.com", "hg", "fqdn2", null));
         downscaleTargets.add(new Node("10.0.0.3", "1.1.1.3", "10-0-0-3.example.com", "hg", "fqdn3", null));
 
-        PowerMockito.mockStatic(SaltStates.class);
         Set<String> responsiveAddresses = new HashSet<>();
         responsiveAddresses.add("10.0.0.1");
         responsiveAddresses.add("10.0.0.2");
@@ -474,7 +544,6 @@ public class SaltOrchestratorTest {
 
         when(primaryNode.getHostname()).thenReturn("primary.example.com");
         when(primaryGateway.getHostname()).thenReturn("primary.example.com");
-        PowerMockito.mockStatic(SaltStates.class);
         PowerMockito.when(SaltStates.getGrains(any(), any(), any()))
                 .thenReturn(Map.of())
                 .thenReturn(Map.of())
@@ -507,7 +576,6 @@ public class SaltOrchestratorTest {
         when(primaryGateway.getHostname()).thenReturn("primary.example.com");
         when(replica1Config.getHostname()).thenReturn("replica1.example.com");
         when(replica2Config.getHostname()).thenReturn("replica2.example.com");
-        PowerMockito.mockStatic(SaltStates.class);
         PowerMockito.when(SaltStates.getGrains(any(), any(), any()))
                 .thenReturn(Map.of())
                 .thenReturn(Map.of())
@@ -541,7 +609,6 @@ public class SaltOrchestratorTest {
         when(primaryGateway.getHostname()).thenReturn("primary.example.com");
         when(replicaConfig.getHostname()).thenReturn("replica.example.com");
         when(newReplicaConfig.getHostname()).thenReturn("new_replica.example.com");
-        PowerMockito.mockStatic(SaltStates.class);
         PowerMockito.when(SaltStates.getGrains(any(), any(), any()))
                 .thenReturn(Map.of("primary.example.com", mock(JsonNode.class)))
                 .thenReturn(Map.of())
@@ -576,7 +643,6 @@ public class SaltOrchestratorTest {
         when(primaryGateway.getHostname()).thenReturn("primary.example.com");
         when(newReplica1Config.getHostname()).thenReturn("new_replica1.example.com");
         when(newReplica2Config.getHostname()).thenReturn("new_replica2.example.com");
-        PowerMockito.mockStatic(SaltStates.class);
         PowerMockito.when(SaltStates.getGrains(any(), any(), any()))
                 .thenReturn(Map.of("primary.example.com", mock(JsonNode.class)))
                 .thenReturn(Map.of())
@@ -625,7 +691,6 @@ public class SaltOrchestratorTest {
         when(replicaNode1.getHostname()).thenReturn("replica1.domain");
         when(replicaNode2.getHostname()).thenReturn("replica2.domain");
 
-        PowerMockito.mockStatic(SaltStates.class);
         HostAndRoleTarget replicaTarget = new HostAndRoleTarget("freeipa_replica", Set.of("replica1.domain", "replica2.domain"));
         ArrayNode replicaRole = mapper.createArrayNode();
         replicaRole.add("freeipa_replica");
@@ -676,7 +741,6 @@ public class SaltOrchestratorTest {
         when(newInstanceNode.getHostname()).thenReturn("newInstance.domain");
         when(replicaNode2.getHostname()).thenReturn("replica2.domain");
 
-        PowerMockito.mockStatic(SaltStates.class);
         HostAndRoleTarget replicaTarget = new HostAndRoleTarget("freeipa_replica", Set.of("newInstance.domain", "replica2.domain"));
         ArrayNode replicaRole = mapper.createArrayNode();
         replicaRole.add("freeipa_replica");
@@ -708,7 +772,6 @@ public class SaltOrchestratorTest {
 
     @Test
     public void testRemoveDeadSaltMinions() throws Exception {
-        PowerMockito.mockStatic(SaltStates.class);
         MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
         List<MinionStatus> minionStatusList = new ArrayList<>();
         MinionStatus minionStatus = new MinionStatus();
@@ -726,7 +789,6 @@ public class SaltOrchestratorTest {
 
     @Test
     public void testDontRemoveDeadSaltMinions() throws Exception {
-        PowerMockito.mockStatic(SaltStates.class);
         MinionStatusSaltResponse minionStatusSaltResponse = new MinionStatusSaltResponse();
         List<MinionStatus> minionStatusList = new ArrayList<>();
         MinionStatus minionStatus = new MinionStatus();
@@ -744,8 +806,6 @@ public class SaltOrchestratorTest {
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
     public void testCannotRemoveDeadMinions() throws Exception {
-        PowerMockito.mockStatic(SaltStates.class);
-
         when(SaltStates.collectNodeStatus(eq(saltConnector))).thenThrow(new RuntimeException("connection failed"));
         saltOrchestrator.removeDeadSaltMinions(gatewayConfig);
     }
