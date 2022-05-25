@@ -1,11 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.cmsync.CmSyncEvent.CM_SYNC_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_UPSCALE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_EVENT;
 
-import java.util.Collections;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -21,7 +19,6 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -42,7 +39,6 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
         ClusterView clusterView = stackView.getClusterView();
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         addStackSyncTriggerEvent(event, flowEventChain);
-        addCmSyncTriggerEvent(event, flowEventChain);
         addStackScaleTriggerEvent(event, flowEventChain);
         addClusterScaleTriggerEventIfNeeded(event, stackView, clusterView, flowEventChain);
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
@@ -54,14 +50,6 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
                 event.getResourceId(),
                 false,
                 event.accepted())
-        );
-    }
-
-    private void addCmSyncTriggerEvent(StackAndClusterUpscaleTriggerEvent event, Queue<Selectable> flowEventChain) {
-        flowEventChain.add(new CmSyncTriggerEvent(
-                CM_SYNC_TRIGGER_EVENT.event(),
-                event.getResourceId(),
-                Collections.emptySet())
         );
     }
 
