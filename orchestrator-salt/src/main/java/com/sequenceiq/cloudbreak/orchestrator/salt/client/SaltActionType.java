@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum SaltActionType {
 
     RUN("run"),
-    STOP("stop");
+    STOP("stop"),
+    CHANGE_PASSWORD("change-password");
 
     private final String action;
 

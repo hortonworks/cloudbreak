@@ -32,6 +32,8 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig);
 
+    void changePassword(List<GatewayConfig> allGatewayConfigs, String newPassword, String oldPassword) throws CloudbreakOrchestratorException;
+
     void initServiceRun(OrchestratorAware stack, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, Set<Node> reachableNodes,
             SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel, String cloudPlatform) throws CloudbreakOrchestratorException;
 

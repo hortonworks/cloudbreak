@@ -30,6 +30,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.common.model.PackageInfo;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Glob;
@@ -47,6 +48,8 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo.DurationComparator;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAuth;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.service.Retry;
 
@@ -278,6 +281,18 @@ public class SaltStates {
             saltAction.addMinion(minion);
         }
         sc.action(saltAction);
+    }
+
+    public static GenericResponses changePassword(SaltConnector sc, Set<String> privateIPs, String password) throws CloudbreakOrchestratorFailedException {
+        SaltAuth auth = new SaltAuth(password);
+        SaltAction saltAction = new SaltAction(SaltActionType.CHANGE_PASSWORD);
+        for (String privateIp : privateIPs) {
+            SaltMaster master = new SaltMaster();
+            master.setAddress(privateIp);
+            master.setAuth(auth);
+            saltAction.addMaster(master);
+        }
+        return sc.action(saltAction);
     }
 
     public static Map<String, List<PackageInfo>> getPackageVersions(SaltConnector sc, Map<String, Optional<String>> packages) {

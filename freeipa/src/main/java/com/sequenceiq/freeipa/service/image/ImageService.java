@@ -199,7 +199,7 @@ public class ImageService {
         return new ImageCatalog(images, null);
     }
 
-    private Image getImageForStack(Stack stack) {
+    public Image getImageForStack(Stack stack) {
         final ImageEntity imageEntity = getByStack(stack);
         final ImageSettingsRequest imageSettings = imageEntityToImageSettingsRequest(imageEntity);
         final ImageWrapper imageWrapper = getImage(imageSettings, stack.getRegion(), getPlatformString(stack));

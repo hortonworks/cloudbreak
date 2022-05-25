@@ -2,6 +2,8 @@ package com.sequenceiq.environment.environment.v1;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +24,9 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentCreationService;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentUpgradeCcmService;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 
@@ -44,6 +48,12 @@ class EnvironmentControllerTest {
 
     @Mock
     private EnvironmentUpgradeCcmService upgradeCcmService;
+
+    @Mock
+    private EnvironmentService environmentService;
+
+    @Mock
+    private FreeIpaService freeIpaService;
 
     @InjectMocks
     private EnvironmentController underTest;
@@ -72,6 +82,16 @@ class EnvironmentControllerTest {
     void testUpgradeCcmByCrnCallsService() {
         underTest.upgradeCcmByCrn("crn123");
         verify(upgradeCcmService).upgradeCcmByCrn("crn123");
+    }
+
+    @Test
+    void testRotateSaltPasswordByName() {
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        when(environmentService.getByCrnAndAccountId(eq("crn"), anyString())).thenReturn(environmentDto);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPasswordByCrn("crn"));
+
+        verify(freeIpaService).rotateSaltPassword(environmentDto);
     }
 
     private EnvironmentNetworkRequest setupNetworkRequestWithEndpointGatway() {

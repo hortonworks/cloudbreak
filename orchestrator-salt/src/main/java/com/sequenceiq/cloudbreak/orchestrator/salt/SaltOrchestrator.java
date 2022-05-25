@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -58,6 +59,8 @@ import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.CmAgentStopFlags;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
+import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
@@ -198,6 +201,68 @@ public class SaltOrchestrator implements HostOrchestrator {
             saltConnectors.forEach(SaltConnector::close);
         }
         LOGGER.debug("SaltBootstrap finished");
+    }
+
+    @Override
+    public void changePassword(List<GatewayConfig> allGatewayConfigs, String newPassword, String oldPassword) throws CloudbreakOrchestratorException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
+        LOGGER.info("Changing salt password using primary gateway {} on all gateways: {} ", primaryGateway.getPrivateAddress(), gatewayTargets);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            GenericResponses responses = SaltStates.changePassword(sc, gatewayTargets, newPassword);
+            List<GenericResponse> errorResponses = responses.getResponses().stream()
+                    .filter(response -> response.getStatusCode() != HttpStatus.OK.value())
+                    .collect(Collectors.toList());
+            if (!errorResponses.isEmpty()) {
+                LOGGER.warn("Change password responses contain error(s): {}", errorResponses);
+                boolean partialSuccess = errorResponses.size() != responses.getResponses().size();
+                if (partialSuccess) {
+                    boolean changeBackSuccess = tryToChangeBackPasswordOnSuccessNodes(sc, responses, oldPassword);
+                    if (changeBackSuccess) {
+                        partialSuccess = false;
+                    }
+                }
+                String message = partialSuccess
+                        ? "Failed to change password on some of the nodes, so you may experience issues with the cluster until the password is fixed."
+                        : "Failed to change password on some of the nodes, but successfully reverted back to old password so cluster health is not affected.";
+                message += " Please check the salt-bootstrap service status on nodes and retry the operation. Details from nodes: " +
+                        errorResponses.stream()
+                                .map(response -> String.format("%s: HTTP %s %s", response.getAddress(), response.getStatusCode(), response.getErrorText()))
+                                .collect(Collectors.joining(", "));
+                throw new CloudbreakOrchestratorFailedException(message);
+            }
+        } catch (CloudbreakOrchestratorException e) {
+            throw e;
+        } catch (WebApplicationException e) {
+            LOGGER.warn("Error occurred during salt password change", e);
+            throw new CloudbreakOrchestratorFailedException("Salt-bootstrap responded with error, please check the service status on node " +
+                    primaryGateway.getPrivateAddress() + " and retry the operation. Details: " + e.getMessage());
+        } catch (Exception e) {
+            LOGGER.warn("Error occurred during salt password change", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    private static boolean tryToChangeBackPasswordOnSuccessNodes(SaltConnector sc, GenericResponses responses, String oldPassword) {
+        LOGGER.info("Trying to change back the password to old value after partial password change success");
+        try {
+            Set<String> gatewaysWithSuccessfulPasswordChange = responses.getResponses().stream()
+                    .filter(response -> response.getStatusCode() == HttpStatus.OK.value())
+                    .map(GenericResponse::getAddress)
+                    .collect(Collectors.toSet());
+            GenericResponses changeBackResponses = SaltStates.changePassword(sc, gatewaysWithSuccessfulPasswordChange, oldPassword);
+            boolean changedBackOnAllSuccessNodes = changeBackResponses.getResponses().stream()
+                    .allMatch(response -> response.getStatusCode() == HttpStatus.OK.value());
+            if (changedBackOnAllSuccessNodes) {
+                LOGGER.info("Changed back old password on all success nodes");
+                return true;
+            } else {
+                LOGGER.warn("Failed to change back password on some nodes. Responses: {}", changeBackResponses.getResponses());
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to change back old password", e);
+        }
+        return false;
     }
 
     @Override

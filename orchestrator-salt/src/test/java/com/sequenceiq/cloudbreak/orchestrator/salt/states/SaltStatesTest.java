@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionResponse
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.RetryService;
@@ -313,6 +314,28 @@ public class SaltStatesTest {
 
         Set<String> minionAddresses = saltAction.getMinions().stream().map(Minion::getAddress).collect(Collectors.toSet());
         assertThat(minionAddresses, containsInAnyOrder("10.0.0.1", "10.0.0.2", "10.0.0.3"));
+    }
+
+    @Test
+    public void changePasswordTest() throws CloudbreakOrchestratorFailedException {
+        String password = "password";
+        Set<String> privateIps = new HashSet<>();
+        privateIps.add("10.0.0.1");
+        privateIps.add("10.0.0.2");
+        privateIps.add("10.0.0.3");
+        SaltStates.changePassword(saltConnector, privateIps, password);
+
+        ArgumentCaptor<SaltAction> saltActionArgumentCaptor = ArgumentCaptor.forClass(SaltAction.class);
+        verify(saltConnector, times(1)).action(saltActionArgumentCaptor.capture());
+
+        SaltAction saltAction = saltActionArgumentCaptor.getValue();
+        assertEquals(SaltActionType.CHANGE_PASSWORD, saltAction.getAction());
+
+        assertThat(saltAction.getMasters(), hasSize(3));
+
+        Set<String> minionAddresses = saltAction.getMasters().stream().map(SaltMaster::getAddress).collect(Collectors.toSet());
+        assertThat(minionAddresses, containsInAnyOrder("10.0.0.1", "10.0.0.2", "10.0.0.3"));
+        assertTrue(saltAction.getMasters().stream().allMatch(master -> master.getAuth().getPassword().equals(password)));
     }
 
     @Test

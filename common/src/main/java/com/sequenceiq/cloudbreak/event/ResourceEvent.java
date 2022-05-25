@@ -92,6 +92,8 @@ public enum ResourceEvent {
     ENVIRONMENT_CREATION_FINISHED("environment.creation.finished"),
     ENVIRONMENT_CREATION_FAILED("environment.creation.failed"),
     ENVIRONMENT_SYNC_FINISHED("environment.sync.finished"),
+    ENVIRONMENT_SALT_PASSWORD_ROTATE_FINISHED("environment.salt.passwordrotate.finished"),
+    ENVIRONMENT_SALT_PASSWORD_ROTATE_FAILED("environment.salt.passwordrotate.failed"),
 
     ENVIRONMENT_NETWORK_DELETION_STARTED("environment.network.deletion.started"),
     ENVIRONMENT_PUBLICKEY_DELETION_STARTED("environment.publickey.deletion.started"),
@@ -367,6 +369,8 @@ public enum ResourceEvent {
     CLUSTER_PILLAR_CONFIG_UPDATE_FAILED("cluster.pillar.config.update.failed"),
     CLUSTER_PILLAR_CONFIG_UPDATE_FINISHED("cluster.pillar.config.update.finished"),
     CLUSTER_PILLAR_CONFIG_UPDATE_STARTED("cluster.pillar.config.update.started"),
+    CLUSTER_SALT_PASSWORD_ROTATE_FINISHED("cluster.salt.passwordrotate.finished"),
+    CLUSTER_SALT_PASSWORD_ROTATE_FAILED("cluster.salt.passwordrotate.failed"),
     CLUSTER_STOPPING("cluster.stopping"),
     CLUSTER_STOPPED("cluster.stopped"),
     CLUSTER_STOP_FAILED("cluster.stop.failed"),
@@ -484,7 +488,6 @@ public enum ResourceEvent {
 
     DATAHUB_REFRESH_IN_PROGRESS("datalake.datahub.refresh.in.progress"),
     DATAHUB_REFRESH_FAILED("datalake.datahub.refresh.failed"),
-
 
     // deprecated
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped");

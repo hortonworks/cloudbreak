@@ -92,6 +92,7 @@ public enum AuthorizationResourceAction {
     DELETE_CUSTOM_CONFIGS("datahub/deleteCustomConfigs", AuthorizationResourceType.CUSTOM_CONFIGURATIONS),
     CREATE_AUDIT_CREDENTIAL("environments/createAuditCredential", AuthorizationResourceType.AUDIT_CREDENTIAL),
     DESCRIBE_AUDIT_CREDENTIAL("environments/describeAuditCredential", AuthorizationResourceType.AUDIT_CREDENTIAL),
+    ROTATE_SALTUSER_PASSWORD_ENVIRONMENT("environments/rotateSaltuserPassword", AuthorizationResourceType.ENVIRONMENT),
     MODIFY_AUDIT_CREDENTIAL("environments/modifyAuditCredential", AuthorizationResourceType.AUDIT_CREDENTIAL),
     POWERUSER_ONLY("cloudbreak/allowPowerUserOnly", null),
     LIST_ASSIGNED_ROLES("iam/listAssignedResourceRoles", null),
