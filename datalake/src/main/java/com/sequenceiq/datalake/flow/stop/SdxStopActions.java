@@ -24,6 +24,7 @@ import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.SdxFailedEvent;
+import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
 import com.sequenceiq.datalake.flow.stop.event.RdsStopSuccessEvent;
 import com.sequenceiq.datalake.flow.stop.event.RdsWaitingToStopRequest;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
@@ -36,8 +37,12 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.domain.FlowChainLog;
+import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 @Configuration
 public class SdxStopActions {
@@ -52,6 +57,12 @@ public class SdxStopActions {
 
     @Inject
     private EventSenderService eventSenderService;
+
+    @Inject
+    private FlowLogService flowLogService;
+
+    @Inject
+    private FlowChainLogService flowChainLogService;
 
     @Bean(name = "SDX_STOP_START_STATE")
     public Action<?, ?> sdxStop() {
@@ -204,6 +215,16 @@ public class SdxStopActions {
                 }
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
+
+                // If this is part of DL resize, mark failure as such in order to enable proper recovery.
+                Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
+                if (lastFlowLog.isPresent()) {
+                    Optional<FlowChainLog> flowChainLog = flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.get().getFlowChainId());
+                    if (flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(DatalakeResizeFlowEventChainFactory.class.getSimpleName())) {
+                        statusReason = "Datalake resize failure: " + statusReason;
+                    }
+                }
+
                 eventSenderService.notifyEvent(context, ResourceEvent.SDX_STOP_FAILED);
                 sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, statusReason, payload.getResourceId());
                 sendEvent(context, SDX_STOP_FAILED_HANDLED_EVENT.event(), payload);

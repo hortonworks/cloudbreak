@@ -301,8 +301,11 @@ public class SdxDetachActions {
                 Exception exception = payload.getException();
                 LOGGER.error("Detaching SDX cluster with ID {} and name {} failed with error {}.",
                         payload.getResourceId(), payload.getSdxName(), exception.getMessage(), exception);
-                String statusReason = Optional.ofNullable(exception.getMessage()).orElse("SDX detach failed");
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, statusReason, payload.getResourceId());
+                String statusReason = Optional.ofNullable(exception.getMessage()).orElse("unknown error");
+                sdxStatusService.setStatusForDatalakeAndNotify(
+                        DatalakeStatusEnum.STOPPED,
+                        "SDX detach failed due to: " + statusReason, payload.getResourceId()
+                );
                 getFlow(context.getFlowParameters().getFlowId()).setFlowFailed(payload.getException());
                 sendEvent(context, SDX_DETACH_FAILED_HANDLED_EVENT.event(), payload);
             }
