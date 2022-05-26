@@ -82,7 +82,8 @@ public class CmTemplateValidator implements BlueprintValidator {
                 && isVersionNewerOrEqualThanLimited(blueprintVersion, role.getBlockedUntilCDPVersionAsVersion());
     }
 
-    private void validateBlackListedScalingRoles(String accountId, CmTemplateProcessor templateProcessor, String hostGroupName,
+
+    protected void validateBlackListedScalingRoles(String accountId, CmTemplateProcessor templateProcessor, String hostGroupName,
             Integer adjustment, Optional<ClouderaManagerProduct> cdhProduct) {
         Set<String> services = templateProcessor.getComponentsByHostGroup().get(hostGroupName);
         if (adjustment < 0) {

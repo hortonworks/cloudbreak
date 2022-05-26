@@ -144,7 +144,7 @@ public class UpdateNodeCountValidator {
                 accountId,
                 stack.getCluster().getBlueprint(),
                 instanceGroupAdjustments,
-                clusterComponentConfigProvider.getCdhProduct(stack.getCluster().getId()),
+                clusterComponentConfigProvider.getNormalizedCdhProductWithNormalizedVersion(stack.getCluster().getId()),
                 instanceGroupService.findNotTerminatedByStackId(stack.getId()));
     }
 
@@ -154,7 +154,7 @@ public class UpdateNodeCountValidator {
             cmTemplateValidator.validateHostGroupScalingRequest(
                     accountId,
                     stack.getCluster().getBlueprint(),
-                    clusterComponentConfigProvider.getCdhProduct(stack.getCluster().getId()),
+                    clusterComponentConfigProvider.getNormalizedCdhProductWithNormalizedVersion(stack.getCluster().getId()),
                     instanceGroup,
                     scalingAdjustment,
                     instanceGroupService.findNotTerminatedByStackId(stack.getId()));

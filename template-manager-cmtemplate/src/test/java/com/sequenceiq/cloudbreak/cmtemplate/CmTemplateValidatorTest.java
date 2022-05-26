@@ -2,18 +2,24 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 
 import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static java.util.stream.Collectors.toSet;
+import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -24,6 +30,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -270,7 +277,7 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
         assertThrows(BadRequestException.class, () -> subject
-            .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of()));
     }
 
     @Test
@@ -284,7 +291,7 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
         assertDoesNotThrow(() -> subject
-            .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of()));
     }
 
     @Test
@@ -298,7 +305,7 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
         assertDoesNotThrow(() -> subject
-            .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of()));
     }
 
     @Test
@@ -351,6 +358,43 @@ public class CmTemplateValidatorTest {
 
         subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint,
                 Optional.of(clouderaManagerRepo), hostGroup, -2, Set.of(compute, worker));
+    }
+
+    @Test
+    public void checkKafkaBrokerBlackListedUpscaleShouldBeAllowed() {
+        String hostGroup = "compute";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.2.12");
+        CmTemplateProcessor processor = mock(CmTemplateProcessor.class);
+        Map<String, Set<String>> componentsByHostGroup = new HashMap<>();
+        Set<String> components = new HashSet<>();
+        components.add("KAFKA_BROKER");
+        componentsByHostGroup.put("compute", components);
+        when(processor.getComponentsByHostGroup()).thenReturn(componentsByHostGroup);
+        Optional<ClouderaManagerProduct> product = Optional.of(clouderaManagerRepo);
+        subject.validateBlackListedScalingRoles(ACCOUNT_ID, processor, hostGroup, 1, product);
+    }
+
+    @Test
+    public void checkKafkaBrokerBlackListedUpscaleShouldBeDenied() {
+        String hostGroup = "compute";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion("7.2.6");
+        CmTemplateProcessor processor = mock(CmTemplateProcessor.class);
+        Map<String, Set<String>> componentsByHostGroup = new HashMap<>();
+        Set<String> components = new HashSet<>();
+        components.add("KAFKA_BROKER");
+        componentsByHostGroup.put("compute", components);
+        when(processor.getComponentsByHostGroup()).thenReturn(componentsByHostGroup);
+        Optional<ClouderaManagerProduct> product = Optional.of(clouderaManagerRepo);
+        Throwable exception = Assert.assertThrows(BadRequestException.class, () -> subject.validateBlackListedScalingRoles(ACCOUNT_ID, processor, hostGroup, 1, product));
+        assertEquals("'KAFKA_BROKER' service is not enabled to scale until CDP 7.2.12", exception.getMessage());
+    }
+
+    @Test
+    public void isVersionEnablesScaling() {
+        Versioned version = () -> "7.2.12";
+        assertTrue(subject.isVersionEnablesScaling(version, BlackListedUpScaleRole.KAFKA_BROKER));
     }
 
     @Test

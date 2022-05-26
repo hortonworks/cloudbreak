@@ -154,7 +154,7 @@ public class ClusterCommonService {
             cmTemplateValidator.validateHostGroupScalingRequest(
                     accountId,
                     blueprint,
-                    clusterComponentConfigProvider.getCdhProduct(stack.getCluster().getId()),
+                    clusterComponentConfigProvider.getNormalizedCdhProductWithNormalizedVersion(stack.getCluster().getId()),
                     hostGroupName,
                     updateJson.getHostGroupAdjustment().getScalingAdjustment(),
                     instanceGroupService.findNotTerminatedByStackId(stack.getId()));
