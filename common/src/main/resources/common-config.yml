@@ -21,8 +21,8 @@ altus:
 telemetry:
   repo:
     name: cdp-infra-tools
-    base-url: https://archive.cloudera.com/p/cdp-infra-tools/latest/redhat7/yum
-    gpg-key: https://archive.cloudera.com/p/cdp-infra-tools/latest/redhat7/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+    base-url: https://archive.cloudera.com/cdp-infra-tools/latest/redhat7/yum
+    gpg-key: https://archive.cloudera.com/cdp-infra-tools/latest/redhat7/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     gpg-check: 1
   monitoring:
     enabled: false
