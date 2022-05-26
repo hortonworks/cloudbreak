@@ -62,16 +62,16 @@ public class AzureImageFormatValidator implements Validator {
                 throw new CloudConnectorException(errorMessage);
             }
             LOGGER.debug("Checking if Terms and Conditions for your Azure Marketplace image {} are accepted", imageUri);
-            AzureClient azureClient = ac.getParameter(AzureClient.class);
             AzureMarketplaceImage azureMarketplaceImage = azureMarketplaceImageProviderService.get(image);
-            if (!enableAzureImageTermsAutomaticSigner
-                    && !azureImageTermsSignerService.isSigned(azureClient.getCurrentSubscription().subscriptionId(), azureMarketplaceImage, azureClient)) {
+            if (isAutomaticTermsSignerDisabled() && areTermsNotSigned(ac, azureMarketplaceImage)) {
                 String errorMessage = String.format("Your image %s seems to be an Azure Marketplace image, "
                         + "however its Terms and Conditions are not accepted! Please accept them and retry upgrade. " +
                         "On how to accept the Terms and Conditions of the image please refer to azure documentation " +
                         "at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.", imageUri);
                 LOGGER.warn(errorMessage);
                 throw new CloudConnectorException(errorMessage);
+            } else {
+                LOGGER.debug("The Terms and Conditions are accepted for Azure Marketplace image {} or the automatic signer is enabled.", imageUri);
             }
 
         } else {
@@ -79,6 +79,15 @@ public class AzureImageFormatValidator implements Validator {
             LOGGER.warn(errorMessage);
             throw new CloudConnectorException(errorMessage);
         }
+    }
+
+    private boolean isAutomaticTermsSignerDisabled() {
+        return !enableAzureImageTermsAutomaticSigner;
+    }
+
+    private boolean areTermsNotSigned(AuthenticatedContext ac, AzureMarketplaceImage azureMarketplaceImage) {
+        AzureClient azureClient = ac.getParameter(AzureClient.class);
+        return !azureImageTermsSignerService.isSigned(azureClient.getCurrentSubscription().subscriptionId(), azureMarketplaceImage, azureClient);
     }
 
     public boolean isMarketplaceImageFormat(Image image) {
