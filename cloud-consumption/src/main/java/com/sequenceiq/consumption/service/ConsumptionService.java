@@ -2,6 +2,8 @@ package com.sequenceiq.consumption.service;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -14,6 +16,7 @@ import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.configuration.repository.ConsumptionRepository;
@@ -92,5 +95,9 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
 
     private boolean isStorageLocationOccupied(String monitoredResourceCrn, String storageLocation) {
         return consumptionRepository.doesStorageConsumptionExistWithLocationForMonitoredCrn(monitoredResourceCrn, storageLocation);
+    }
+
+    public List<JobResource> findAllStorageConsumptionJobResource() {
+        return consumptionRepository.findAllStorageConsumptionJobResource();
     }
 }
