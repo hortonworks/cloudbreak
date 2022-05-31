@@ -31,7 +31,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Respo
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeAvailabilityService;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
-import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
 public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
@@ -93,8 +92,7 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     @InternalOnly
     public DistroXCcmUpgradeV1Response upgradeCcmByCrnInternal(@NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) String crn,
             @InitiatorUserCrn @ValidCrn(resource = CrnResourceDescriptor.USER) @NotEmpty String initiatorUserCrn) {
-        FlowIdentifier flowIdentifier = stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(crn));
-        return new DistroXCcmUpgradeV1Response(flowIdentifier);
+        return upgradeConverter.convert(stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(crn)));
     }
 
     private DistroXUpgradeV1Response upgradeCluster(String clusterNameOrCrn, DistroXUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn) {

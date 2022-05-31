@@ -1,11 +1,11 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -140,10 +142,16 @@ class DistroXUpgradeV1ControllerTest {
 
     @Test
     public void testCcmUpgrade() {
-        FlowIdentifier expected = new FlowIdentifier(FlowType.FLOW, "1");
-        when(stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(DATAHUB_CRN))).thenReturn(expected);
+        FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "1");
+        StackCcmUpgradeV4Response stackCcmUpgradeV4Response = new StackCcmUpgradeV4Response(CcmUpgradeResponseType.TRIGGERED, flowId, null, "resourceCrn");
+        DistroXCcmUpgradeV1Response expected = new DistroXCcmUpgradeV1Response(CcmUpgradeResponseType.TRIGGERED, flowId, null, "resourceCrn");
+        when(upgradeConverter.convert(stackCcmUpgradeV4Response)).thenReturn(expected);
+        when(stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(DATAHUB_CRN))).thenReturn(stackCcmUpgradeV4Response);
         DistroXCcmUpgradeV1Response result = underTest.upgradeCcmByCrnInternal(DATAHUB_CRN, USER_CRN);
-        Assertions.assertSame(expected, result.getFlowIdentifier());
+        assertThat(result.getFlowIdentifier()).isEqualTo(expected.getFlowIdentifier());
+        assertThat(result.getReason()).isEqualTo(expected.getReason());
+        assertThat(result.getResourceCrn()).isEqualTo(expected.getResourceCrn());
+        assertThat(result.getResponseType()).isEqualTo(expected.getResponseType());
     }
 
 }

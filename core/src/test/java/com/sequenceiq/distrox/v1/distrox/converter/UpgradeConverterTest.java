@@ -14,8 +14,11 @@ import org.junit.jupiter.params.provider.EnumSource;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeShowAvailableImages;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
@@ -94,5 +97,21 @@ class UpgradeConverterTest {
         assertEquals(source.getFlowIdentifier(), result.getFlowIdentifier());
         assertEquals(source.getReason(), result.getReason());
         assertEquals(source.getUpgradeCandidates(), result.getUpgradeCandidates());
+    }
+
+    @Test
+    public void testConvertUpgradeCcmResult() {
+        StackCcmUpgradeV4Response source = new StackCcmUpgradeV4Response();
+        source.setResponseType(CcmUpgradeResponseType.TRIGGERED);
+        source.setResourceCrn("crn");
+        source.setFlowIdentifier(new FlowIdentifier(FlowType.FLOW, "asdg"));
+        source.setReason("fdas");
+
+        DistroXCcmUpgradeV1Response result = underTest.convert(source);
+
+        assertEquals(source.getFlowIdentifier(), result.getFlowIdentifier());
+        assertEquals(source.getReason(), result.getReason());
+        assertEquals(source.getResourceCrn(), result.getResourceCrn());
+        assertEquals(source.getResponseType(), result.getResponseType());
     }
 }
