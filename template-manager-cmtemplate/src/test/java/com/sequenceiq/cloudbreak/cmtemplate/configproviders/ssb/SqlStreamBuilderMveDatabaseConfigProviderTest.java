@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SqlStreamBuilderSnapperDatabaseConfigProviderTest {
+public class SqlStreamBuilderMveDatabaseConfigProviderTest {
 
-    private final SqlStreamBuilderSnapperDatabaseConfigProvider underTest = new SqlStreamBuilderSnapperDatabaseConfigProvider();
+    private final SqlStreamBuilderMveDatabaseConfigProvider underTest = new SqlStreamBuilderMveDatabaseConfigProvider();
 
     @Test
     public void testNoConfigNeeded() {
@@ -55,9 +55,9 @@ public class SqlStreamBuilderSnapperDatabaseConfigProviderTest {
 
         assertThat(roleConfigs).hasSameElementsAs(
                 List.of(
-                        config("ssb.mve.datasource.url", "jdbc:postgresql://testhost:5432/eventador_snapper"),
-                        config("ssb.mve.datasource.username", "ssb_test_user"),
-                        config("ssb.mve.datasource.password", "ssb_test_pw")
+                        config(SqlStreamBuilderMveDatabaseConfigProvider.DATABASE_URL, "jdbc:postgresql://testhost:5432/ssb_mve"),
+                        config(SqlStreamBuilderMveDatabaseConfigProvider.DATABASE_USER, "ssb_test_user"),
+                        config(SqlStreamBuilderMveDatabaseConfigProvider.DATABASE_PASSWORD, "ssb_test_pw")
                 ));
     }
 
@@ -78,7 +78,7 @@ public class SqlStreamBuilderSnapperDatabaseConfigProviderTest {
         when(rdsConfig.getType()).thenReturn(DatabaseType.SQL_STREAM_BUILDER_SNAPPER.toString());
         when(rdsConfig.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
         when(rdsConfig.getConnectionDriver()).thenReturn(DatabaseVendor.POSTGRES.connectionDriver());
-        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/eventador_snapper");
+        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/ssb_mve");
         when(rdsConfig.getConnectionUserName()).thenReturn("ssb_test_user");
         when(rdsConfig.getConnectionPassword()).thenReturn("ssb_test_pw");
 

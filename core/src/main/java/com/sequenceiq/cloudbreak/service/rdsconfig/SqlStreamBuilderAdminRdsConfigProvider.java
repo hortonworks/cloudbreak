@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ssb.SqlStreamBuilderRoles;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
@@ -18,10 +19,10 @@ public class SqlStreamBuilderAdminRdsConfigProvider extends AbstractRdsConfigPro
     @Value("${cb.ssb.database.admin.port:5432}")
     private String port;
 
-    @Value("${cb.ssb.database.admin.user:eventador_admin}")
+    @Value("${cb.ssb.database.admin.user:" + PILLAR_KEY + "}")
     private String userName;
 
-    @Value("${cb.ssb.database.admin.db:eventador_admin}")
+    @Value("${cb.ssb.database.admin.db:" + PILLAR_KEY + "}")
     private String db;
 
     @Inject
@@ -55,6 +56,6 @@ public class SqlStreamBuilderAdminRdsConfigProvider extends AbstractRdsConfigPro
     @Override
     protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprint.getBlueprintText());
-        return blueprintProcessor.isCMComponentExistsInBlueprint("STREAMING_SQL_CONSOLE");
+        return blueprintProcessor.isCMComponentExistsInBlueprint(SqlStreamBuilderRoles.STREAMING_SQL_ENGINE);
     }
 }

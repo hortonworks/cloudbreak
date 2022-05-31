@@ -36,7 +36,7 @@ public class SqlStreamBuilderAdminDatabaseConfigProvider extends SqlStreamBuilde
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of(SqlStreamBuilderRoles.STREAMING_SQL_ENGINE, SqlStreamBuilderRoles.STREAMING_SQL_CONSOLE, SqlStreamBuilderRoles.MATERIALIZED_VIEW_ENGINE);
+        return List.of(SqlStreamBuilderRoles.STREAMING_SQL_ENGINE, SqlStreamBuilderRoles.MATERIALIZED_VIEW_ENGINE);
     }
 
     @Override
