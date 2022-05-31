@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.HierarchyAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
@@ -81,7 +82,6 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
-import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -94,6 +94,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
@@ -109,6 +110,7 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.PayloadContextProvider;
@@ -198,6 +200,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private DistroXV1Endpoint distroXV1Endpoint;
 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
@@ -348,21 +353,21 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.refreshRecipesInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
-                sdxCluster.getInitiatorUserCrn()));
+                        sdxCluster.getInitiatorUserCrn()));
     }
 
     public AttachRecipeV4Response attachRecipe(SdxCluster sdxCluster, AttachRecipeV4Request request) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.attachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
-                sdxCluster.getInitiatorUserCrn()));
+                        sdxCluster.getInitiatorUserCrn()));
     }
 
     public DetachRecipeV4Response detachRecipe(SdxCluster sdxCluster, DetachRecipeV4Request request) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> stackV4Endpoint.detachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
-                sdxCluster.getInitiatorUserCrn()));
+                        sdxCluster.getInitiatorUserCrn()));
     }
 
     public Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxCustomClusterRequest sdxCustomClusterRequest) {
@@ -381,17 +386,18 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> {
-            RangerRazEnabledV4Response response = stackV4Endpoint.rangerRazEnabledInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), initiatorUserCrn);
-            if (response.isRangerRazEnabled()) {
-                if (!sdxCluster.isRangerRazEnabled()) {
-                    validateRazEnablement(sdxCluster.getRuntime(), response.isRangerRazEnabled(), environmentClientService.getByCrn(sdxCluster.getEnvCrn()));
-                    sdxCluster.setRangerRazEnabled(true);
-                    save(sdxCluster);
-                }
-            } else {
-                throw new BadRequestException(String.format("Ranger raz is not installed on the datalake: %s!", sdxCluster.getClusterName()));
-            }
-        });
+                    RangerRazEnabledV4Response response = stackV4Endpoint.rangerRazEnabledInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), initiatorUserCrn);
+                    if (response.isRangerRazEnabled()) {
+                        if (!sdxCluster.isRangerRazEnabled()) {
+                            validateRazEnablement(sdxCluster.getRuntime(), response.isRangerRazEnabled(),
+                                    environmentClientService.getByCrn(sdxCluster.getEnvCrn()));
+                            sdxCluster.setRangerRazEnabled(true);
+                            save(sdxCluster);
+                        }
+                    } else {
+                        throw new BadRequestException(String.format("Ranger raz is not installed on the datalake: %s!", sdxCluster.getClusterName()));
+                    }
+                });
     }
 
     private Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
@@ -485,7 +491,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         InstanceTemplateV4Request instanceTemplate = templateGroup.getTemplate();
         if (instanceTemplate != null && StringUtils.isNoneBlank(newInstanceType)) {
             LOGGER.debug("Override instance group {} instance type from {} to {}",
-                    templateGroup.getName(),  instanceTemplate.getInstanceType(), newInstanceType);
+                    templateGroup.getName(), instanceTemplate.getInstanceType(), newInstanceType);
             instanceTemplate.setInstanceType(newInstanceType);
         }
     }
@@ -507,7 +513,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         RecipeViewV4Responses recipeResponses = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> recipeV4Endpoint.listInternal(
-                WORKSPACE_ID_DEFAULT, initiatorUserCrn));
+                        WORKSPACE_ID_DEFAULT, initiatorUserCrn));
         Set<String> recipeNames = recipeResponses.getResponses()
                 .stream()
                 .map(CompactViewV4Response::getName).collect(Collectors.toSet());
@@ -589,6 +595,22 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         newSdxCluster.setStackRequest(stackRequest);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster);
         return Pair.of(sdxCluster, flowIdentifier);
+    }
+
+    public SdxCluster refreshDataHub(String clusterName, String datahubName) {
+        if (!entitlementService.isDatalakeLightToMediumMigrationEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            throw new BadRequestException("Refresh of the data hub is not supported");
+        }
+        String accountIdFromCrn = getAccountIdFromCrn(ThreadBasedUserCrnProvider.getUserCrn());
+        SdxCluster sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, clusterName)
+                .orElseThrow(() -> notFound("SDX cluster", clusterName).get());
+        if (Strings.isNullOrEmpty(datahubName)) {
+            distroxService.restartAttachedDistroxClusters(sdxCluster.getEnvCrn());
+        } else {
+            StackV4Response stackV4Response = distroXV1Endpoint.getByName(datahubName, null);
+            distroxService.restartDistroxByCrns(List.of(stackV4Response.getCrn()));
+        }
+        return sdxCluster;
     }
 
     private SdxCluster validateAndCreateNewSdxCluster(String userCrn,

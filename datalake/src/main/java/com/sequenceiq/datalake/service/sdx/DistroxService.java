@@ -34,11 +34,6 @@ public class DistroxService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroxService.class);
 
-    private enum Type {
-        STOP,
-        START
-    }
-
     @Value("${dl.dh.polling.attempt:360}")
     private Integer attempt;
 
@@ -82,6 +77,10 @@ public class DistroxService {
                     .waitPeriodly(sleeptime, TimeUnit.SECONDS)
                     .run(checkDistroxStatus(pollingCrnList, Type.START, this::stackAndClusterStarted));
         }
+    }
+
+    public void restartDistroxByCrns(List<String> crns) {
+        distroXV1Endpoint.restartClusterServicesByCrns(crns);
     }
 
     public void stopAttachedDistrox(String envCrn) {
@@ -170,5 +169,10 @@ public class DistroxService {
                 && cluster != null
                 && cluster.getStatus() != null
                 && cluster.getStatus().isAvailable();
+    }
+
+    private enum Type {
+        STOP,
+        START
     }
 }
