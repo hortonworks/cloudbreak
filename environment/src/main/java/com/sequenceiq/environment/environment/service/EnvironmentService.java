@@ -372,7 +372,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         try {
             grpcUmsClient.assignResourceRole(userCrn,
                     environmentCrn,
-                    roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(),
+                    roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(Crn.safeFromString(environmentCrn).getAccountId()),
                     MDCUtils.getRequestId(),
                     regionAwareInternalCrnGeneratorFactory);
             LOGGER.debug("EnvironmentAdmin role of {} environemnt is successfully assigned to the {} user", environmentCrn, userCrn);

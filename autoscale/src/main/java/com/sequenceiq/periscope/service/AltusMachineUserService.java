@@ -50,14 +50,16 @@ public class AltusMachineUserService {
         try {
             String environmentCrn = cluster.getEnvironmentCrn();
             if (environmentCrn != null) {
+                String accountId = Crn.safeFromString(environmentCrn).getAccountId();
                 String machineUserCrn = getOrCreateAutoscaleMachineUser(environmentCrn, cluster.getClusterPertain().getTenant()).getCrn();
                 Multimap<String, String> assignedResourceRoles =
                         grpcUmsClient.listAssignedResourceRoles(machineUserCrn, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
-                if (!assignedResourceRoles.get(environmentCrn).contains(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn())) {
-                    grpcUmsClient.assignResourceRole(machineUserCrn, environmentCrn,
-                            roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(), MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
+                String envUserResourceRoleCrn = roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(accountId);
+                if (!assignedResourceRoles.get(environmentCrn).contains(envUserResourceRoleCrn)) {
+                    grpcUmsClient.assignResourceRole(machineUserCrn, environmentCrn, envUserResourceRoleCrn, MDCUtils.getRequestId(),
+                            regionAwareInternalCrnGeneratorFactory);
                     LOGGER.info("Assigned resourcerole '{}' for  machineUserCrn '{}' for environment '{}'",
-                            roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(), machineUserCrn, environmentCrn);
+                            envUserResourceRoleCrn, machineUserCrn, environmentCrn);
                 }
                 syncEnvironment(cluster.getClusterPertain().getTenant(), machineUserCrn, environmentCrn, Optional.empty());
                 clusterService.setMachineUserCrn(cluster.getId(), machineUserCrn);

@@ -49,20 +49,21 @@ public class RoleCrnGeneratorTest {
 
     @Test
     public void testGetExistingRoles() {
-        Crn testRole1 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getRoleCrn(TEST_ROLE_1));
-        Crn testRole2 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getRoleCrn(TEST_ROLE_2));
+        Crn testRole1 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getRoleCrn(TEST_ROLE_1, "altus"));
+        Crn testRole2 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getRoleCrn(TEST_ROLE_2, "altus"));
         existingRoleAssertions(testRole1, testRole2, Crn.ResourceType.ROLE);
 
-        testRole1 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getResourceRoleCrn(TEST_ROLE_1));
-        testRole2 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getResourceRoleCrn(TEST_ROLE_2));
+        testRole1 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getResourceRoleCrn(TEST_ROLE_1, "altus"));
+        testRole2 = ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getResourceRoleCrn(TEST_ROLE_2, "altus"));
         existingRoleAssertions(testRole1, testRole2, Crn.ResourceType.RESOURCE_ROLE);
     }
 
     @Test
     public void testGetNonExistingRoles() {
-        assertThrows(InternalServerErrorException.class, () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getRoleCrn("whatever")));
-        assertThrows(InternalServerErrorException.class, () ->
-                ThreadBasedUserCrnProvider.doAs(ACTOR, () -> underTest.getResourceRoleCrn("whatever")));
+        assertThrows(InternalServerErrorException.class, () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () ->
+                underTest.getRoleCrn("whatever", "altus")));
+        assertThrows(InternalServerErrorException.class, () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () ->
+                underTest.getResourceRoleCrn("whatever", "altus")));
     }
 
     private void existingRoleAssertions(Crn testRole1, Crn testRole2, Crn.ResourceType roleType) {
