@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.ClusterOpDescr
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ATTACH_RECIPE_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ATTACH_RECIPE_IN_WORKSPACE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHANGE_IMAGE_CATALOG;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ROTATE_SALT_PASSWORD_BY_CRN_IN_WORKSPACE_INTERNAL;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_FOR_UPGRADE_CLUSTER_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_IMAGE_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHECK_IMAGE_IN_WORKSPACE_INTERNAL;
@@ -250,6 +251,14 @@ public interface StackV4Endpoint {
     @ApiOperation(value = START_BY_NAME_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "startStackInWorkspaceV4Internal")
     FlowIdentifier putStartInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
+    @Path("internal/{crn}/rotate_salt_password")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ROTATE_SALT_PASSWORD_BY_CRN_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "rotateSaltPasswordForStackInWorkspaceV4Internal")
+    FlowIdentifier rotateSaltPasswordInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT

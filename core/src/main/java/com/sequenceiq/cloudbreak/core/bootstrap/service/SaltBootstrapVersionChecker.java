@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.PackageVersionChe
 @Component
 public class SaltBootstrapVersionChecker {
 
+    public static final String CHANGE_SALTUSER_PASSWORD_SUPPORT_MIN_VERSION = "0.13.6";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltBootstrapVersionChecker.class);
 
     private static final Versioned FINGERPRINT_SUPPORT_MIN_VERSION = () -> "0.13.2";
@@ -29,6 +31,10 @@ public class SaltBootstrapVersionChecker {
 
     public boolean isRestartNeededFlagSupported(Json image) {
         return isSupported(RESTART_NEEDED_FLAG_SUPPORT_MIN_VERSION, image);
+    }
+
+    public boolean isChangeSaltuserPasswordSupported(Json image) {
+        return isSupported(() -> CHANGE_SALTUSER_PASSWORD_SUPPORT_MIN_VERSION, image);
     }
 
     private boolean isSupported(Versioned version, Json image) {

@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.auth;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -127,12 +127,12 @@ public class ThreadBasedUserCrnProvider {
         }
     }
 
-    public static void doAsInternalActor(String internalCrn, Consumer<String> originalUserCrnConsumer) {
+    public static <T> T doAsInternalActor(String internalCrn, Function<String, T> originalUserCrnConsumer) {
         String originalUserCrn = getUserCrn();
         if (originalUserCrn != null && RegionAwareInternalCrnGeneratorUtil.isInternalCrn(originalUserCrn)) {
-            doAs(originalUserCrn, () -> originalUserCrnConsumer.accept(originalUserCrn));
+            return doAs(originalUserCrn, () -> originalUserCrnConsumer.apply(originalUserCrn));
         } else {
-            doAs(internalCrn, () -> originalUserCrnConsumer.accept(originalUserCrn));
+            return doAs(internalCrn, () -> originalUserCrnConsumer.apply(originalUserCrn));
         }
     }
 }

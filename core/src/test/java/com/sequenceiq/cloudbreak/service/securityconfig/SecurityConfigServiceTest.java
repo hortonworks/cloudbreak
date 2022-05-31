@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.securityconfig;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -17,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
@@ -50,6 +52,7 @@ public class SecurityConfigServiceTest {
         stack = new Stack();
         stack.setId(123L);
         stack.setWorkspace(new Workspace());
+        stack.setName("stack-name");
     }
 
     @Test
@@ -72,6 +75,20 @@ public class SecurityConfigServiceTest {
         SecurityConfig securityConfig = underTest.generateAndSaveSecurityConfig(stack);
 
         Assert.assertEquals("It should create a new SecurityConfig", createdSecurityConfig, securityConfig);
+    }
+
+    @Test
+    public void testChangeSaltPassword() {
+        SecurityConfig securityConfig = new SecurityConfig();
+        SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
+        saltSecurityConfig.setSaltPassword("old-pw");
+        securityConfig.setSaltSecurityConfig(saltSecurityConfig);
+        String newPassword = "new-pw";
+
+        underTest.changeSaltPassword(securityConfig, newPassword);
+
+        verify(saltSecurityConfigService).save(saltSecurityConfig);
+        Assert.assertEquals(newPassword, saltSecurityConfig.getSaltPassword());
     }
 
 }

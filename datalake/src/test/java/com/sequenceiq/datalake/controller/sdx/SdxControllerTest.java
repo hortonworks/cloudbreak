@@ -158,6 +158,16 @@ class SdxControllerTest {
         verify(sdxService).updateRangerRazEnabled(sdxCluster);
     }
 
+    @Test
+    void rotateSaltPasswordByName() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByCrn(USER_CRN, sdxCluster.getCrn())).thenReturn(sdxCluster);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.rotateSaltPasswordByCrn(sdxCluster.getCrn()));
+
+        verify(sdxService).rotateSaltPassword(sdxCluster);
+    }
+
     private SdxCluster getValidSdxCluster() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName(SDX_CLUSTER_NAME);

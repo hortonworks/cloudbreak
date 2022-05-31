@@ -204,6 +204,12 @@ public interface SdxEndpoint {
     @ApiOperation(value = "stop sdx by crn", produces = MediaType.APPLICATION_JSON, nickname = "stopSdxByCrn")
     FlowIdentifier stopByCrn(@PathParam("crn") String crn);
 
+    @POST
+    @Path("{crn}/rotate_salt_password")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "rotate salt password", produces = MediaType.APPLICATION_JSON, nickname = "rotateSaltPasswordSdxByCrn")
+    FlowIdentifier rotateSaltPasswordByCrn(@PathParam("crn") String crn);
+
     @GET
     @Path("/versions")
     @Produces(MediaType.APPLICATION_JSON)

@@ -43,6 +43,7 @@ public class OperationDescriptions {
         public static final String RESTART_SERVICES_BY_NAME_IN_WORKSPACE_INTERNAL = "restarts services in the cluster, internal only";
         public static final String START_BY_NAME_IN_WORKSPACE = "starts the stack by name in workspace";
         public static final String START_BY_NAME_IN_WORKSPACE_INTERNAL = "starts the stack by name in workspace, internal only";
+        public static final String ROTATE_SALT_PASSWORD_BY_CRN_IN_WORKSPACE_INTERNAL = "rotates the salt password of stack by crn in workspace, internal only";
         public static final String SCALE_BY_NAME_IN_WORKSPACE = "scales the stack by name in workspace";
         public static final String REPAIR_CLUSTER_IN_WORKSPACE = "repairs the stack by name in workspace";
         public static final String REPAIR_CLUSTER_IN_WORKSPACE_INTERNAL = "repairs the stack by name in workspace, internal only";

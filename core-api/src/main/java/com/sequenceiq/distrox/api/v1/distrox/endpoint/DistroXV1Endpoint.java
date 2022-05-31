@@ -35,12 +35,13 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.POS
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RENEW_CERTIFICATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.REPAIR_CLUSTER_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RESTART_CLUSTER_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RETRY_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RETRY_BY_NAME;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROTATE_SALT_PASSWORD_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SCALE_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SCALE_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.START_BY_CRN;
-import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RESTART_CLUSTER_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.START_BY_NAME;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.STOP_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.STOP_BY_NAME;
@@ -251,6 +252,12 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = RESTART_CLUSTER_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "restartDistroXClusterByCrns")
     void restartClusterServicesByCrns(@QueryParam("crns") List<String> crns);
+
+    @POST
+    @Path("crn/{crn}/rotate_salt_password")
+    @ApiOperation(value = ROTATE_SALT_PASSWORD_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
+            nickname = "rotateSaltPasswordDistroXV1ByCrn")
+    FlowIdentifier rotateSaltPasswordByCrn(@PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/scaling")

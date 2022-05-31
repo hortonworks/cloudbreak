@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.rotatepassword.RotateSaltPasswordEvent;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTriggerEvent;
@@ -208,6 +209,11 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerClusterInstall(Long stackId) {
         String selector = CLUSTER_CREATION_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
+    }
+
+    public FlowIdentifier triggerRotateSaltPassword(Long stackId) {
+        String selector = RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 

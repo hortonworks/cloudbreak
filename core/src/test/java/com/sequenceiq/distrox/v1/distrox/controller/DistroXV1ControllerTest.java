@@ -112,4 +112,14 @@ class DistroXV1ControllerTest {
 
         assertEquals(actual, flowIdentifier);
     }
+
+    @Test
+    void testRotateSaltPasswordByCrn() {
+        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+
+        distroXV1Controller.rotateSaltPasswordByCrn(CRN);
+
+        verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(CRN), WORKSPACE_ID);
+    }
 }
