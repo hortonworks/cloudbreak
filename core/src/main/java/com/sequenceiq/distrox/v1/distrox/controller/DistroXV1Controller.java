@@ -328,6 +328,12 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ROTATE_SALTUSER_PASSWORD_DATAHUB)
+    public FlowIdentifier rotateSaltPasswordByCrn(@ResourceCrn String crn) {
+        return stackOperations.rotateSaltPassword(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser());
+    }
+
+    @Override
     @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.START_DATAHUB)
     public void putStartByNames(@ResourceNameList List<String> names) {
         names.forEach(this::putStartByName);

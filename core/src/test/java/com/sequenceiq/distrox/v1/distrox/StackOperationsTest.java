@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -113,6 +114,9 @@ public class StackOperationsTest {
 
     @Mock
     private GenerateImageCatalogService generateImageCatalogService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     private Stack stack;
 
@@ -238,6 +242,16 @@ public class StackOperationsTest {
         CloudbreakImageCatalogV3 actual = underTest.generateImageCatalog(nameOrCrn, stack.getWorkspace().getId());
 
         assertEquals(imageCatalog, actual);
+    }
+
+    @Test
+    public void rotateSaltPassword() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
+        long workspaceId = 0L;
+
+        underTest.rotateSaltPassword(nameOrCrn, workspaceId);
+
+        verify(stackCommonService).rotateSaltPassword(nameOrCrn, workspaceId);
     }
 
     private StackV4Response stackResponse() {

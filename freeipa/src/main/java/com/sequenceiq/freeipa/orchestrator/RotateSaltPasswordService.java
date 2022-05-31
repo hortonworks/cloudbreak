@@ -54,7 +54,8 @@ public class RotateSaltPasswordService {
         MDCBuilder.buildMdcContext(stack);
 
         if (!saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)) {
-            throw new BadRequestException("Rotating salt password is not supported in image with salt-bootstrap version < 0.13.6");
+            throw new BadRequestException("Rotating salt password is not supported with your image version, " +
+                    "please upgrade to an image with salt-bootstrap version >= 0.13.6 (you can find this information in the image catalog)");
         }
 
         try {

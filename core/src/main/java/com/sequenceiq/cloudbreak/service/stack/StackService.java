@@ -810,6 +810,11 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                 : stackRepository.findByCrnAndWorkspaceIdWithLists(crn, stackType, workspaceId, config.isActive(), config.showAfterMillisecs());
     }
 
+    public Stack getByNameOrCrnAndWorkspaceIdWithLists(NameOrCrn nameOrCrn, Long workspaceId) {
+        return findByNameOrCrnAndWorkspaceIdWithLists(nameOrCrn, workspaceId)
+                .orElseThrow(() -> new NotFoundException(String.format(STACK_NOT_FOUND_BY_NAME_OR_CRN_EXCEPTION_MESSAGE, nameOrCrn)));
+    }
+
     private Optional<Stack> findByNameOrCrnAndWorkspaceIdWithLists(NameOrCrn nameOrCrn, Long workspaceId) {
         return nameOrCrn.hasName()
                 ? stackRepository.findByNameAndWorkspaceIdWithLists(nameOrCrn.getName(), workspaceId, false, 0L)

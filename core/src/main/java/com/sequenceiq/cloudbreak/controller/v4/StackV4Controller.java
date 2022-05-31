@@ -206,6 +206,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    @InternalOnly
+    public FlowIdentifier rotateSaltPasswordInternal(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperations.rotateSaltPassword(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId());
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier putScaling(Long workspaceId, String name, @Valid StackScaleV4Request updateRequest, @AccountId String accountId) {
         return stackOperations.putScaling(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), updateRequest);
