@@ -63,6 +63,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ROTATE_SALTUSER_PASSWORD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
@@ -529,6 +530,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.compute.monitoring.enable}")
     private boolean enableComputeMonitoring;
 
+    @Value("${auth.mock.salt.rotatepassword.enable}")
+    private boolean enableSalRotatePassword;
+
     @PostConstruct
     public void init() {
         cbLicense = getLicense();
@@ -970,6 +974,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableComputeMonitoring) {
             builder.addEntitlements(createEntitlement(CDP_CENTRAL_COMPUTE_MONITORING));
+        }
+        if (enableSalRotatePassword) {
+            builder.addEntitlements(createEntitlement(CDP_ROTATE_SALTUSER_PASSWORD));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()

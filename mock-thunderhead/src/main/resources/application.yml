@@ -96,6 +96,7 @@ auth:
     saas.enable: false
     workloadiam.sync.enable: false
     saas.sdx.integration.enable: true
+    salt.rotatepassword.enable: true
 
 crn:
   partition: cdp

@@ -246,7 +246,10 @@ public class FreeIpaService {
             LOGGER.info("Rotating salt password of FreeIpa cluster");
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    initiatorUserCrn -> freeIpaV1Endpoint.rotateSaltPasswordInternal(environmentDto.getResourceCrn(), initiatorUserCrn));
+                    initiatorUserCrn -> {
+                        freeIpaV1Endpoint.rotateSaltPasswordInternal(environmentDto.getResourceCrn(), initiatorUserCrn);
+                        return null;
+                    });
             eventService.sendEventAndNotification(environmentDto, userCrn, ENVIRONMENT_SALT_PASSWORD_ROTATE_FINISHED);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);

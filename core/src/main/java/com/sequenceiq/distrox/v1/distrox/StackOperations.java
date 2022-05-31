@@ -258,6 +258,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackCommonService.putStartInWorkspace(nameOrCrn, workspaceId);
     }
 
+    public FlowIdentifier rotateSaltPassword(NameOrCrn nameOrCrn, Long workspaceId) {
+        return stackCommonService.rotateSaltPassword(nameOrCrn, workspaceId);
+    }
+
     public FlowIdentifier putScaling(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid StackScaleV4Request updateRequest) {
         return stackCommonService.putScalingInWorkspace(nameOrCrn, workspaceId, updateRequest);
     }

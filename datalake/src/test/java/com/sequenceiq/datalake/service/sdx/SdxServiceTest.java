@@ -5,6 +5,7 @@ import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_JUMPGATE_REQUIRED_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_REQUIRED_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxService.MEDIUM_DUTY_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxService.WORKSPACE_ID_DEFAULT;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
 import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
@@ -26,6 +27,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -113,6 +115,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.sdx.api.model.SdxAwsRequest;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
@@ -139,6 +142,8 @@ class SdxServiceTest {
     private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:default:datalake:e438a2db-d650-4132-ae62-242c5ba2f784";
 
     private static final Long SDX_ID = 2L;
+
+    private static final String SDX_CRN = "crn";
 
     private static final String CLUSTER_NAME = "test-sdx-cluster";
 
@@ -222,6 +227,9 @@ class SdxServiceTest {
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    @Mock
+    private FlowLogService flowLogService;
 
     @InjectMocks
     private SdxService underTest;
@@ -1161,6 +1169,7 @@ class SdxServiceTest {
     private SdxCluster getSdxCluster() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(SDX_ID);
+        sdxCluster.setCrn(SDX_CRN);
         sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setEnvCrn(ENVIRONMENT_CRN);
         sdxCluster.setEnvName("envir");
@@ -1638,6 +1647,33 @@ class SdxServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:iam:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         return sdxCluster;
+    }
+
+    @Test
+    void rotateSaltPassword() {
+        SdxCluster sdxCluster = getSdxCluster();
+        when(flowLogService.isOtherFlowRunning(sdxCluster.getId())).thenReturn(false);
+        when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPassword(sdxCluster));
+
+        verify(stackV4Endpoint).rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, USER_CRN);
+        verify(regionAwareInternalCrnGenerator).getInternalCrnForServiceAsString();
+    }
+
+    @Test
+    void rotateSaltPasswordWithRunningFlow() {
+        SdxCluster sdxCluster = getSdxCluster();
+        when(flowLogService.isOtherFlowRunning(sdxCluster.getId())).thenReturn(true);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPassword(sdxCluster)));
+
+        assertEquals(String.format("Operation is running for cluster '%s'. Please try again later.", sdxCluster.getName()), exception.getMessage());
+
+        verify(stackV4Endpoint, never()).rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getName(), USER_CRN);
+        verify(regionAwareInternalCrnGenerator, never()).getInternalCrnForServiceAsString();
     }
 
 }

@@ -99,7 +99,8 @@ class RotateSaltPasswordServiceTest {
 
         Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(ENVIRONMENT_CRN, ACCOUNT_ID))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Rotating salt password is not supported in image with salt-bootstrap version < 0.13.6");
+                .hasMessage("Rotating salt password is not supported with your image version, " +
+                        "please upgrade to an image with salt-bootstrap version >= 0.13.6 (you can find this information in the image catalog)");
     }
 
     @Test

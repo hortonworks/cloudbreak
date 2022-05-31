@@ -113,6 +113,7 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -200,6 +201,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Inject
+    private FlowLogService flowLogService;
 
     @Inject
     private DistroXV1Endpoint distroXV1Endpoint;
@@ -1346,5 +1350,15 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             result = stackV4Request.getInstanceGroups().stream().map(InstanceGroupV4Base::getName).collect(Collectors.toSet());
         }
         return result;
+    }
+
+    public FlowIdentifier rotateSaltPassword(SdxCluster sdxCluster) {
+        if (flowLogService.isOtherFlowRunning(sdxCluster.getId())) {
+            throw new BadRequestException(String.format("Operation is running for cluster '%s'. Please try again later.", sdxCluster.getName()));
+        }
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                initiatorUserCrn -> stackV4Endpoint.rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), initiatorUserCrn)
+        );
     }
 }
