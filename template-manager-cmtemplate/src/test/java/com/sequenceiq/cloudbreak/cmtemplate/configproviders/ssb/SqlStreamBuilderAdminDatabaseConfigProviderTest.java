@@ -55,12 +55,12 @@ public class SqlStreamBuilderAdminDatabaseConfigProviderTest {
 
         assertThat(roleConfigs).hasSameElementsAs(
                 List.of(
-                        config("database_type", "postgresql"),
-                        config("database_host", "testhost"),
-                        config("database_port", "5432"),
-                        config("database_schema", "eventador_admin"),
-                        config("database_user", "ssb_test_user"),
-                        config("database_password", "ssb_test_pw")
+                        config(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_TYPE, "postgresql"),
+                        config(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_HOST, "testhost"),
+                        config(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_PORT, "5432"),
+                        config(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_SCHEMA, "ssb_admin"),
+                        config(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_USER, "ssb_test_user"),
+                        config(SqlStreamBuilderAdminDatabaseConfigProvider.DATABASE_PASSWORD, "ssb_test_pw")
                 ));
     }
 
@@ -81,7 +81,7 @@ public class SqlStreamBuilderAdminDatabaseConfigProviderTest {
         when(rdsConfig.getType()).thenReturn(DatabaseType.SQL_STREAM_BUILDER_ADMIN.toString());
         when(rdsConfig.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
         when(rdsConfig.getConnectionDriver()).thenReturn(DatabaseVendor.POSTGRES.connectionDriver());
-        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/eventador_admin");
+        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/ssb_admin");
         when(rdsConfig.getConnectionUserName()).thenReturn("ssb_test_user");
         when(rdsConfig.getConnectionPassword()).thenReturn("ssb_test_pw");
 
