@@ -165,6 +165,13 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESIZE_DATALAKE)
+    public SdxClusterResponse refreshDataHubs(@ResourceName String name, String datahubName) {
+        SdxCluster sdxCluster = sdxService.refreshDataHub(name, datahubName);
+        return sdxClusterConverter.sdxClusterToResponse(sdxCluster);
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "credentialCrn", type = CRN, action = DESCRIBE_CREDENTIAL)
     public ObjectStorageValidateResponse validateCloudStorage(@ValidStackNameFormat @ValidStackNameLength String clusterName,
