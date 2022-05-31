@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmEvent;
@@ -14,6 +13,7 @@ import com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmF
 import com.sequenceiq.environment.environment.flow.upgrade.ccm.event.UpgradeCcmStateSelectors;
 import com.sequenceiq.environment.environment.service.sdx.SdxService;
 import com.sequenceiq.environment.environment.service.sdx.SdxUpgradeCcmPollerService;
+import com.sequenceiq.environment.exception.SdxOperationFailedException;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
@@ -51,7 +51,7 @@ public class UpgradeCcmOnDatalakeHandler extends EventSenderAwareHandler<Environ
                 case ERROR:
                     String message = String.format("Upgrade CCM returned with reason: %s", ccmUpgradeResponse.getReason());
                     LOGGER.warn(message);
-                    sendFailedEvent(environmentDtoEvent, environmentDto, new OperationException(message));
+                    sendFailedEvent(environmentDtoEvent, environmentDto, new SdxOperationFailedException(message));
                     return;
                 case TRIGGERED:
                     LOGGER.debug("Waiting for data lake Upgrade CCM flow to finish.");
@@ -63,7 +63,7 @@ public class UpgradeCcmOnDatalakeHandler extends EventSenderAwareHandler<Environ
                 default:
                     message = String.format("Unknown response type: %s", ccmUpgradeResponse.getResponseType());
                     LOGGER.warn(message);
-                    sendFailedEvent(environmentDtoEvent, environmentDto, new OperationException(message));
+                    sendFailedEvent(environmentDtoEvent, environmentDto, new SdxOperationFailedException(message));
                     return;
             }
 

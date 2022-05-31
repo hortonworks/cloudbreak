@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
+import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -157,8 +158,9 @@ class SdxCcmUpgradeServiceTest {
         assertThat(response.getFlowIdentifier()).isEqualTo(FlowIdentifier.notTriggered());
     }
 
-    @Test
-    void testTriggerUpgrade() {
+    @ParameterizedTest
+    @EnumSource(value = Status.class, names = { "AVAILABLE", "UPGRADE_CCM_FAILED" }, mode = Mode.INCLUDE)
+    void testTriggerUpgrade(Status status) {
         SdxCluster sdxCluster = getSdxCluster();
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(sdxCluster));
         when(sdxService.getAccountIdFromCrn(any())).thenReturn(ACCOUNT_ID);
@@ -177,7 +179,7 @@ class SdxCcmUpgradeServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString())
                 .thenReturn("crn:altus:iam:us-west-1:altus:user:__internal__actor__");
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "pollableId");
-        StackCcmUpgradeV4Response upgradeResponse = new StackCcmUpgradeV4Response(flowId);
+        StackCcmUpgradeV4Response upgradeResponse = new StackCcmUpgradeV4Response(CcmUpgradeResponseType.TRIGGERED, flowId, null, "resourceCrn");
         when(stackV4Endpoint.upgradeCcmByCrnInternal(eq(0L), eq(STACK_CRN), any())).thenReturn(upgradeResponse);
         PollingConfig pc = new PollingConfig(1L, TimeUnit.HOURS, 1L, TimeUnit.HOURS);
         SdxCluster sdx = getSdxCluster();
