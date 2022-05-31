@@ -185,6 +185,18 @@ public class VolumeSetAttributes {
         public void setCloudVolumeUsageType(CloudVolumeUsageType cloudVolumeUsageType) {
             this.cloudVolumeUsageType = cloudVolumeUsageType;
         }
+
+        @Override
+        public String toString() {
+            return "Volume{" +
+                    "id='" + id + '\'' +
+                    ", device='" + device + '\'' +
+                    ", size=" + size +
+                    ", type='" + type + '\'' +
+                    ", cloudVolumeUsageType=" + cloudVolumeUsageType +
+                    '}';
+        }
+
     }
 
     public static class Builder {
