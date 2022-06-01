@@ -426,13 +426,7 @@
           {
             "base": true,
             "refName": "hive-HIVEMETASTORE-BASE",
-            "roleType": "HIVEMETASTORE",
-            "configs": [
-              { 
-                "name": "hive_compactor_initiator_on",
-                "value": "false"
-              }
-            ]
+            "roleType": "HIVEMETASTORE"
           }
         ],
         "serviceType": "HIVE"
