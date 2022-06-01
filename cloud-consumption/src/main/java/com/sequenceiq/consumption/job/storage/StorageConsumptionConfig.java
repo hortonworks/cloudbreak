@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class StorageConsumptionConfig {
 
-    @Value("${storageconsumption.intervalminutes:30}")
+    @Value("${storageconsumption.intervalminutes:1}")
     private int intervalInMinutes;
 
     @Value("${storageconsumption.enabled:true}")
