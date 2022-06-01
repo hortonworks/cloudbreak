@@ -1061,7 +1061,7 @@ public class AzureClient {
     }
 
     public Optional<String> getAccessToken() {
-        return azureClientCredentials.getAccesToken();
+        return azureClientCredentials.getAccessToken();
     }
 
 }

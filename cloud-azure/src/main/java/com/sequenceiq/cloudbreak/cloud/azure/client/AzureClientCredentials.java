@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure.client;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,13 +22,18 @@ import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.priv
 import com.microsoft.rest.LogLevel;
 import com.sequenceiq.cloudbreak.cloud.azure.tracing.AzureOkHttp3TracingInterceptor;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 import okhttp3.JavaNetAuthenticator;
 
 public class AzureClientCredentials {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureClientCredentials.class);
+
+    private static final String RESOURCE_MANAGER_ENDPOINT_URL = "resourceManagerEndpointUrl";
 
     private final AzureCredentialView credentialView;
 
@@ -41,12 +49,20 @@ public class AzureClientCredentials {
 
     public AzureClientCredentials(AzureCredentialView credentialView, LogLevel logLevel, CBRefreshTokenClientProvider cbRefreshTokenClientProvider,
             AuthenticationContextProvider authenticationContextProvider, AzureOkHttp3TracingInterceptor tracingInterceptor) {
+        this(null, credentialView, logLevel, cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor);
+    }
+
+    public AzureClientCredentials(CloudContext cloudContext, AzureCredentialView credentialView, LogLevel logLevel,
+            CBRefreshTokenClientProvider cbRefreshTokenClientProvider, AuthenticationContextProvider authenticationContextProvider,
+            AzureOkHttp3TracingInterceptor tracingInterceptor) {
         this.authenticationContextProvider = authenticationContextProvider;
         this.cbRefreshTokenClientProvider = cbRefreshTokenClientProvider;
         this.credentialView = credentialView;
         this.logLevel = logLevel;
         this.tracingInterceptor = tracingInterceptor;
-        azureClientCredentials = getAzureCredentials();
+        azureClientCredentials = getAzureCredentials(Optional.ofNullable(cloudContext)
+                .map(CloudContext::getLocation)
+                .map(Location::getRegion));
     }
 
     public Azure getAzure() {
@@ -75,12 +91,12 @@ public class AzureClientCredentials {
         return MarketplaceOrderingManager.authenticate(azureClientCredentials, credentialView.getSubscriptionId());
     }
 
-    private AzureTokenCredentials getAzureCredentials() {
+    AzureTokenCredentials getAzureCredentials(Optional<Region> region) {
         String tenantId = credentialView.getTenantId();
         String clientId = credentialView.getAccessKey();
         String secretKey = credentialView.getSecretKey();
         String subscriptionId = credentialView.getSubscriptionId();
-        AzureEnvironment azureEnvironment = AzureEnvironment.AZURE;
+        AzureEnvironment azureEnvironment = getAzureEnvironment(region);
         ApplicationTokenCredentials applicationTokenCredentials = new ApplicationTokenCredentials(clientId, tenantId, secretKey, azureEnvironment);
         Optional<Boolean> codeGrantFlow = Optional.ofNullable(credentialView.codeGrantFlow());
 
@@ -115,6 +131,35 @@ public class AzureClientCredentials {
         return result.withDefaultSubscriptionId(subscriptionId);
     }
 
+    private AzureEnvironment getAzureEnvironment(Optional<Region> region) {
+        AzureEnvironment azureEnvironment = new AzureEnvironment(new HashMap<>());
+        azureEnvironment.endpoints().putAll(AzureEnvironment.AZURE.endpoints());
+        if (region.isPresent()) {
+            Map<String, String> endpoints = azureEnvironment.endpoints();
+            String resourceManagerEndpoint = endpoints.get(RESOURCE_MANAGER_ENDPOINT_URL);
+            String compressedRegion = compressRegion(region.get().getRegionName());
+            if (!resourceManagerEndpoint.contains(compressedRegion + ".")) {
+                try {
+                    URL resourceManagerEndpointUrl = new URL(resourceManagerEndpoint);
+
+                    String regionAwareUrl = String.format("%s://%s.%s",
+                            resourceManagerEndpointUrl.getProtocol(),
+                            compressedRegion,
+                            resourceManagerEndpointUrl.getHost());
+                    endpoints.put(RESOURCE_MANAGER_ENDPOINT_URL, regionAwareUrl);
+                    azureEnvironment = new AzureEnvironment(endpoints);
+                } catch (MalformedURLException e) {
+                    LOGGER.info("Invalid URL format {}, this should not happen, we fallback to global endpoint.", resourceManagerEndpoint);
+                }
+            }
+        }
+        return azureEnvironment;
+    }
+
+    private String compressRegion(String regionName) {
+        return regionName.toLowerCase().replaceAll("\\s", "");
+    }
+
     public Optional<String> getRefreshToken() {
         String refreshToken = null;
         Optional<Boolean> codeGrantFlow = Optional.ofNullable(credentialView.codeGrantFlow());
@@ -132,7 +177,7 @@ public class AzureClientCredentials {
         return Optional.ofNullable(refreshToken);
     }
 
-    public Optional<String> getAccesToken() {
+    public Optional<String> getAccessToken() {
         try {
             return Optional.of(azureClientCredentials.getToken("https://management.core.windows.net/"));
         } catch (IOException e) {
