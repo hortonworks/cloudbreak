@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.consumption.flow.consumption.ConsumptionContext;
+import com.sequenceiq.consumption.flow.consumption.storage.event.SendStorageConsumptionEvent;
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionEvent;
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionHandlerEvent;
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionHandlerSelectors;
@@ -28,7 +29,7 @@ public class StorageConsumptionCollectionActions {
                 LOGGER.debug("Flow entered into STORAGE_CONSUMPTION_COLLECTION_STATE. resourceCrn: '{}'", resourceCrn);
                 StorageConsumptionCollectionHandlerEvent event = new StorageConsumptionCollectionHandlerEvent(
                         StorageConsumptionCollectionHandlerSelectors.STORAGE_CONSUMPTION_COLLECTION_HANDLER.selector(),
-                        payload.getResourceId(), resourceCrn, context);
+                        payload.getResourceId(), resourceCrn, context, null);
                 sendEvent(context, event);
             }
         };
@@ -36,14 +37,14 @@ public class StorageConsumptionCollectionActions {
 
     @Bean(name = "SEND_CONSUMPTION_EVENT_STATE")
     public Action<?, ?> sendConsumptionEventAction() {
-        return new AbstractStorageConsumptionCollectionAction<>(StorageConsumptionCollectionEvent.class) {
+        return new AbstractStorageConsumptionCollectionAction<>(SendStorageConsumptionEvent.class) {
             @Override
-            protected void doExecute(ConsumptionContext context, StorageConsumptionCollectionEvent payload, Map<Object, Object> variables) {
+            protected void doExecute(ConsumptionContext context, SendStorageConsumptionEvent payload, Map<Object, Object> variables) {
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into SEND_CONSUMPTION_EVENT_STATE. resourceCrn: '{}'", resourceCrn);
                 StorageConsumptionCollectionHandlerEvent event = new StorageConsumptionCollectionHandlerEvent(
                         StorageConsumptionCollectionHandlerSelectors.SEND_CONSUMPTION_EVENT_HANDLER.selector(),
-                        payload.getResourceId(), resourceCrn, context);
+                        payload.getResourceId(), resourceCrn, context, payload.getStorageConsumptionResult());
                 sendEvent(context, event);
             }
         };

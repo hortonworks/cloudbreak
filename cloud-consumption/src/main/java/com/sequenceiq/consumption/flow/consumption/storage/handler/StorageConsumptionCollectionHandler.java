@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.consumption.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.dto.Credential;
-import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionEvent;
+import com.sequenceiq.consumption.flow.consumption.storage.event.SendStorageConsumptionEvent;
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionHandlerEvent;
 import com.sequenceiq.consumption.service.CredentialService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -42,11 +42,7 @@ public class StorageConsumptionCollectionHandler  extends AbstractStorageOperati
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
         LOGGER.debug("Storage consumption collection started. resourceCrn: '{}'", resourceCrn);
-        return StorageConsumptionCollectionEvent.builder()
-                .withResourceCrn(resourceCrn)
-                .withResourceId(resourceId)
-                .withSelector(SEND_CONSUMPTION_EVENT_EVENT.selector())
-                .build();
+        return new SendStorageConsumptionEvent(SEND_CONSUMPTION_EVENT_EVENT.selector(), resourceId, resourceCrn, null);
     }
 
     @Override

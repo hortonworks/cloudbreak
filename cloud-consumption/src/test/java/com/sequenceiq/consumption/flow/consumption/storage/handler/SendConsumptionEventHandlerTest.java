@@ -39,7 +39,7 @@ public class SendConsumptionEventHandlerTest {
 
         StorageConsumptionCollectionHandlerEvent event = new StorageConsumptionCollectionHandlerEvent(
                 SEND_CONSUMPTION_EVENT_HANDLER.selector(),
-                resourceId, resourceCrn, null);
+                resourceId, resourceCrn, null, null);
 
         StorageConsumptionCollectionEvent result = (StorageConsumptionCollectionEvent) underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
