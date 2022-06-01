@@ -33,14 +33,18 @@ public class AzureClientService {
 
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
-        AzureClient azureClient = getClient(cloudCredential);
+        AzureClient azureClient = getClient(cloudContext, cloudCredential);
         authenticatedContext.putParameter(AzureClient.class, azureClient);
         return authenticatedContext;
     }
 
     public AzureClient getClient(CloudCredential cloudCredential) {
+        return getClient(null, cloudCredential);
+    }
+
+    public AzureClient getClient(CloudContext cloudContext, CloudCredential cloudCredential) {
         AzureCredentialView azureCredentialView = new AzureCredentialView(cloudCredential);
-        AzureClientCredentials azureClientCredentials = new AzureClientCredentials(azureCredentialView, logLevel, cbRefreshTokenClientProvider,
+        AzureClientCredentials azureClientCredentials = new AzureClientCredentials(cloudContext, azureCredentialView, logLevel, cbRefreshTokenClientProvider,
                 authenticationContextProvider, tracingInterceptor);
         return new AzureClient(azureClientCredentials, azureAuthExceptionHandler);
     }

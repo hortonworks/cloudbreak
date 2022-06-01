@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.client;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -12,6 +13,8 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -24,13 +27,16 @@ import org.mockito.MockitoAnnotations;
 import com.microsoft.aad.adal4j.AuthenticationResult;
 import com.microsoft.aad.adal4j.UserInfo;
 import com.microsoft.azure.AzureEnvironment;
+import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.implementation.ComputeManager;
 import com.microsoft.azure.management.privatedns.v2018_09_01.implementation.privatednsManager;
 import com.microsoft.rest.LogLevel;
 import com.sequenceiq.cloudbreak.cloud.azure.tracing.AzureOkHttp3TracingInterceptor;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 
 public class AzureClientCredentialsTest {
 
@@ -41,6 +47,8 @@ public class AzureClientCredentialsTest {
     private static final String SECRET_KEY = "someSecretKey";
 
     private static final String SUBSCRIPTION_ID = "4321";
+
+    private static final Region REGION = Region.region("westus2");
 
     private static final String CREDENTIAL_NAME = "someCredName";
 
@@ -55,6 +63,9 @@ public class AzureClientCredentialsTest {
 
     @Mock
     private AzureCredentialView credentialView;
+
+    @Mock
+    private CloudContext cloudContext;
 
     @Mock
     private CBRefreshTokenClient cbRefreshTokenClient;
@@ -209,6 +220,30 @@ public class AzureClientCredentialsTest {
                 cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor).getComputeManager();
         assertNotNull(result);
         assertEquals(SUBSCRIPTION_ID, result.subscriptionId());
+    }
+
+    @Test
+    public void testRegionAwareEndpointIsNotSet() {
+        AzureTokenCredentials azureTokenCredentials = new AzureClientCredentials(cloudContext, credentialView, LOG_LEVEL,
+                cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor).getAzureCredentials(Optional.empty());
+        assertNotNull(azureTokenCredentials);
+        assertEquals(AzureEnvironment.AZURE.resourceManagerEndpoint(), azureTokenCredentials.environment().resourceManagerEndpoint());
+    }
+
+    @Test
+    public void testRegionAwareEndpointIsSet() throws MalformedURLException {
+        String originalResourceManagerEndpoint = AzureEnvironment.AZURE.resourceManagerEndpoint();
+        AzureTokenCredentials azureTokenCredentials = new AzureClientCredentials(cloudContext, credentialView, LOG_LEVEL,
+                cbRefreshTokenClientProvider, authenticationContextProvider, tracingInterceptor).getAzureCredentials(Optional.of(REGION));
+
+        URL resourceManagerEndpointUrl = new URL(originalResourceManagerEndpoint);
+        String regionAwareUrl = String.format("%s://%s.%s",
+                resourceManagerEndpointUrl.getProtocol(),
+                REGION.getRegionName(),
+                resourceManagerEndpointUrl.getHost());
+        assertNotNull(azureTokenCredentials);
+        assertNotEquals(originalResourceManagerEndpoint, azureTokenCredentials.environment().resourceManagerEndpoint());
+        assertEquals(regionAwareUrl, azureTokenCredentials.environment().resourceManagerEndpoint());
     }
 
 }

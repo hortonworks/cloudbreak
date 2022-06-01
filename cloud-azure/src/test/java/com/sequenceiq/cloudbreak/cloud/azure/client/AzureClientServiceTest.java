@@ -60,7 +60,12 @@ class AzureClientServiceTest {
     @Test
     void getClientTest() {
         AzureClient azureClient = underTest.getClient(cloudCredential);
+        verifyAzureClient(azureClient);
+    }
 
+    @Test
+    void getClientWithContextTest() {
+        AzureClient azureClient = underTest.getClient(cloudContext, cloudCredential);
         verifyAzureClient(azureClient);
     }
 
