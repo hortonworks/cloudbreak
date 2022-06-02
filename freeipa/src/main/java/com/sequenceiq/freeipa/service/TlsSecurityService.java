@@ -4,7 +4,6 @@ import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -22,15 +21,11 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.repository.InstanceMetaDataRepository;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
 public class TlsSecurityService {
-
-    @Inject
-    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Inject
     private SecurityConfigService securityConfigService;
@@ -122,7 +117,7 @@ public class TlsSecurityService {
                         null, null);
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             gatewayConfig
-                    .withPath(clusterProxyService.getProxyPathPgwAsFallBack(stack, Optional.ofNullable(gatewayInstance.getDiscoveryFQDN())))
+                    .withPath(clusterProxyService.getProxyPathPgwAsFallBack(stack, gatewayInstance.getDiscoveryFQDN()))
                     .withProtocol(clusterProxyConfiguration.getClusterProxyProtocol());
         }
         return gatewayConfig;

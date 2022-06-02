@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -323,7 +322,7 @@ public class ClusterProxyServiceTest {
         freeIpa.setDomain("ipadom");
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
 
-        String result = underTest.getProxyPath(stack, Optional.empty());
+        String result = underTest.getProxyPath(stack, null);
 
         assertEquals("basePath/proxy/resourceCrn/freeipa.ipadom", result);
     }
@@ -339,7 +338,7 @@ public class ClusterProxyServiceTest {
         readConfigResponse.setServices(List.of());
         when(clusterProxyRegistrationClient.readConfig(STACK_RESOURCE_CRN)).thenReturn(readConfigResponse);
 
-        String result = underTest.getProxyPath(stack, Optional.of("unregistered"));
+        String result = underTest.getProxyPath(stack, "unregistered");
 
         assertEquals("basePath/proxy/resourceCrn/freeipa.ipadom", result);
     }
@@ -354,7 +353,7 @@ public class ClusterProxyServiceTest {
         ReadConfigResponse readConfigResponse = new ReadConfigResponse();
         when(clusterProxyRegistrationClient.readConfig(STACK_RESOURCE_CRN)).thenReturn(readConfigResponse);
 
-        String result = underTest.getProxyPath(stack, Optional.of("unregistered"));
+        String result = underTest.getProxyPath(stack, "unregistered");
 
         assertEquals("basePath/proxy/resourceCrn/freeipa.ipadom", result);
     }
@@ -372,7 +371,7 @@ public class ClusterProxyServiceTest {
         readConfigResponse.setServices(List.of(service));
         when(clusterProxyRegistrationClient.readConfig(STACK_RESOURCE_CRN)).thenReturn(readConfigResponse);
 
-        String result = underTest.getProxyPath(stack, Optional.of("registered"));
+        String result = underTest.getProxyPath(stack, "registered");
 
         assertEquals("basePath/proxy/resourceCrn/registered", result);
     }
