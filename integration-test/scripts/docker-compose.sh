@@ -40,18 +40,34 @@ cd $INTEGCB_LOCATION
 unset HTTPS_PROXY
 env
 
+cbd_teardown_and_exit() {
+  date
+  echo -e "\n\033[1;96m--- ERROR: Failed to bring up all the necessary CBD services! Process is about to terminate!\033[0m\n"
+  ./cbd kill
+  .deps/bin/docker-compose --compatibility down --remove-orphans
+  exit 1
+}
+
+cbd_services_sanity_check() {
+  if [[ $RESULT -ne 0 ]]; then
+    cbd_teardown_and_exit
+  else
+    local exited_containers=$(docker ps -f "name=cbreak" -f status=exited -f status=dead -q)
+    docker ps -f "name=cbreak" --format "table {{.ID}}\t{{.State}}\t{{.Names}}\t{{.Image}}"
+
+    if [[ -n "$exited_containers" ]]; then
+      cbd_teardown_and_exit
+    else
+      date
+      echo -e "\n\033[1;96m--- INFO: All the necessary CBD services have been started successfully!\033[0m\n"
+    fi
+  fi
+}
+
 TRACE=1 ./cbd regenerate
 ./cbd start-wait traefik dev-gateway core-gateway commondb vault cloudbreak environment periscope freeipa redbeams datalake haveged mock-infrastructure idbmms cluster-proxy cadence cluster-proxy-health-check-worker
-
-docker ps --format ‘{{.Image}}’
-
-date
-if [ $? -ne 0 ]; then
-    echo -e "\n\033[1;96m--- ERROR: Failed to bring up all the necessary services! Process is about to terminate!\033[0m\n"
-    ./cbd kill
-    .deps/bin/docker-compose --compatibility down --remove-orphans
-    exit 1
-fi
+RESULT=$?
+cbd_services_sanity_check
 
 check_primary_key () {
     set +e
@@ -107,7 +123,7 @@ curl -k http://${PUBLIC_IP}:8085/as/api/swagger.json -o ./apidefinitions/autosca
 
 docker rm -f cbreak_periscope_1
 
-if [[ "$CIRCLECI" ]]; then
+if [[ "$CIRCLECI" && "$CIRCLECI" == "true" ]]; then
     date
     echo -e "\n\033[1;96m--- Setting ACCESSKEY/SECRETKEY for test variables:\033[0m\n"
     export INTEGRATIONTEST_USER_ACCESSKEY=$INTEGRATIONTEST_USER_ACCESSKEY
@@ -183,4 +199,3 @@ if [[ "$CIRCLECI" ]]; then
         mv ./test-output/docker_stats/pg_query_stat_template.html ./test-output/docker_stats/query_stat.html
     fi
 fi
-
