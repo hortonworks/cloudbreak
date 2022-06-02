@@ -68,6 +68,8 @@ public class ModelDescriptions {
 
     public static final String NODE_IDS = "Node ids.";
 
+    public static final String DELETE_VOLUMES = "If true, delete volumes, otherwise reattaches them to a newly created node instance.";
+
     public static final String DATA_LAKE_CRN = "Data Lake crn.";
 
     public static final String DATA_LAKE_NAME = "Data Lake name.";

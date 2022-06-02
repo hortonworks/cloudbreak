@@ -18,6 +18,8 @@ public class SdxRepairSettings {
 
     private List<String> nodeIds = new ArrayList<>();
 
+    private boolean deleteVolumes;
+
     private SdxRepairSettings() {
     }
 
@@ -41,6 +43,7 @@ public class SdxRepairSettings {
             settings.hostGroupNames.addAll(request.getHostGroupNames());
         } else {
             settings.nodeIds.addAll(request.getNodesIds());
+            settings.deleteVolumes = request.isDeleteVolumes();
         }
         return settings;
     }
@@ -51,6 +54,10 @@ public class SdxRepairSettings {
 
     public List<String> getNodeIds() {
         return nodeIds;
+    }
+
+    public boolean isDeleteVolumes() {
+        return deleteVolumes;
     }
 
     @Override

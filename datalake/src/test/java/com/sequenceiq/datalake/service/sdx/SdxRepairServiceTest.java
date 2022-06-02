@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.junit.jupiter.api.Test;
@@ -96,6 +97,7 @@ public class SdxRepairServiceTest {
 
     @Test
     public void triggerNodeIdBasedCloudbreakRepair() {
+        Boolean deleteVolumes = new Random().nextBoolean();
         SdxCluster cluster = new SdxCluster();
         cluster.setId(CLUSTER_ID.incrementAndGet());
         cluster.setInitiatorUserCrn(USER_CRN);
@@ -103,6 +105,7 @@ public class SdxRepairServiceTest {
         cluster.setAccountId("accountid");
         SdxRepairRequest sdxRepairRequest = new SdxRepairRequest();
         sdxRepairRequest.setNodesIds(List.of("node1"));
+        sdxRepairRequest.setDeleteVolumes(deleteVolumes);
         SdxRepairSettings sdxRepairSettings = SdxRepairSettings.from(sdxRepairRequest);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
@@ -111,6 +114,7 @@ public class SdxRepairServiceTest {
         verify(stackV4Endpoint).repairClusterInternal(eq(0L), eq(CLUSTER_NAME), captor.capture(), nullable(String.class));
         assertEquals(List.of("node1"), captor.getValue().getNodes().getIds());
         assertNull(captor.getValue().getHostGroups());
+        assertEquals(deleteVolumes, captor.getValue().getNodes().isDeleteVolumes());
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_IN_PROGRESS, "Datalake repair in progress", cluster);
     }
