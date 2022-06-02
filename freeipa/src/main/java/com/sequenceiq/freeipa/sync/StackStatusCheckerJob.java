@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.metrics.MetricsClient;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -65,6 +66,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private MetricsClient metricsClient;
+
     @Value("${freeipa.autosync.update.status:true}")
     private boolean updateStatus;
 
@@ -87,6 +91,10 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             } else {
                 LOGGER.debug("No flows running, trying to sync freeipa");
                 syncAStack(stack, false);
+            }
+            if (stack.getStackStatus() != null && stack.getStackStatus().getStatus() != null) {
+                metricsClient.processStackStatus(stack.getResourceCrn(), stack.getCloudPlatform(), stack.getStackStatus().getStatus().name(),
+                        stack.getStackStatus().getStatus().ordinal());
             }
         } catch (InterruptSyncingException e) {
             LOGGER.info("Syncing was interrupted", e);

@@ -131,6 +131,7 @@ dependencies {
   implementation project(':node-status-monitor-client')
   implementation project(':telemetry-common')
   implementation project(':usage-collection')
+  implementation project(':metrics-client')
   implementation project(':common')
   implementation project(':core-api')
   implementation project(':databus-connector')

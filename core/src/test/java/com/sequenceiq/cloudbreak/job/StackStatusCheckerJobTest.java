@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.job;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.metrics.MetricsClient;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -157,6 +159,9 @@ public class StackStatusCheckerJobTest {
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
+    @Mock
+    private MetricsClient metricsClient;
+
     @Before
     public void init() {
         Tracer tracer = Mockito.mock(Tracer.class);
@@ -203,6 +208,7 @@ public class StackStatusCheckerJobTest {
         setStackStatus(DetailedStackStatus.DELETE_COMPLETED);
         underTest.executeTracedJob(jobExecutionContext);
 
+        verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt());
         verify(clusterApiConnectors, times(0)).getConnector(stack);
     }
 
@@ -213,6 +219,7 @@ public class StackStatusCheckerJobTest {
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
+        verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
     }
 
@@ -223,6 +230,7 @@ public class StackStatusCheckerJobTest {
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
+        verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt());
         verify(clusterOperationService, times(0)).reportHealthChange(anyString(), any(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
     }
@@ -236,6 +244,7 @@ public class StackStatusCheckerJobTest {
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
+        verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt());
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
         verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true);

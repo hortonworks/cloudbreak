@@ -30,6 +30,11 @@ telemetry:
     remote-write-url: ""
     scrape-interval-seconds: 300
     dev-stack: false
+    status-processor:
+      enabled: true
+      workers: 1
+      queue-size-limit: 1000
+      http-timeout-seconds: 30
     global-auth:
       enabled: false
       username: ""

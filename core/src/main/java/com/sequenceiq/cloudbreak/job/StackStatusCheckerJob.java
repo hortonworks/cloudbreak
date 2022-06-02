@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.metrics.MetricsClient;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -116,6 +117,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
+    private MetricsClient metricsClient;
+
+    @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     public StackStatusCheckerJob(Tracer tracer) {
@@ -152,6 +156,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                     switchToShortSyncIfNecessary(context);
                 } else {
                     LOGGER.warn("Unhandled stack status, {}", stackStatus);
+                }
+                if (stackStatus != null) {
+                    metricsClient.processStackStatus(stack.getResourceCrn(), stack.cloudPlatform(), stackStatus.name(), stackStatus.ordinal());
                 }
             }, LOGGER, "Check status took {} ms for stack {}.", getStackId());
         } catch (Exception e) {
