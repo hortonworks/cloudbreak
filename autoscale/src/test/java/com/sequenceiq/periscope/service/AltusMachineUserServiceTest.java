@@ -91,7 +91,7 @@ class AltusMachineUserServiceTest {
                 .thenReturn(machineUser);
         when(grpcUmsClient.listAssignedResourceRoles(anyString(), any(Optional.class), any(RegionAwareInternalCrnGeneratorFactory.class)))
                 .thenReturn(LinkedHashMultimap.create());
-        when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn()).thenReturn(environmentRoleCrn);
+        when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(anyString())).thenReturn(environmentRoleCrn);
         when(freeIpaCommunicator.synchronizeAllUsers(any(SynchronizeAllUsersRequest.class))).thenReturn(getSyncOpStatus(SynchronizationStatus.COMPLETED));
 
         underTest.initializeMachineUserForEnvironment(cluster);
@@ -122,7 +122,7 @@ class AltusMachineUserServiceTest {
                 .thenReturn(machineUser);
         when(machineUser.getCrn()).thenReturn(autoscaleMachineUserCrn);
         when(grpcUmsClient.listAssignedResourceRoles(anyString(), any(Optional.class), any(RegionAwareInternalCrnGeneratorFactory.class))).thenReturn(rolesMap);
-        when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn()).thenReturn(environmentRoleCrn);
+        when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(anyString())).thenReturn(environmentRoleCrn);
         when(freeIpaCommunicator.synchronizeAllUsers(any(SynchronizeAllUsersRequest.class))).thenReturn(getSyncOpStatus(SynchronizationStatus.COMPLETED));
 
         underTest.initializeMachineUserForEnvironment(cluster);
@@ -147,7 +147,7 @@ class AltusMachineUserServiceTest {
         RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator = mock(RegionAwareInternalCrnGenerator.class);
         when(machineUserMock.getCrn()).thenReturn(autoscaleMachineUserCrn);
         when(machineUserMock.getWorkloadUsername()).thenReturn("workloadUserName");
-        when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn()).thenReturn(environmentRoleCrn);
+        when(roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(anyString())).thenReturn(environmentRoleCrn);
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(internalActorCrn);
         when(grpcUmsClient.getOrCreateMachineUserWithoutAccessKey(eq(autoscaleMachineUserName),

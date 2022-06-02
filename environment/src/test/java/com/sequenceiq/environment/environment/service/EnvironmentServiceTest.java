@@ -53,6 +53,8 @@ import com.sequenceiq.environment.environment.validation.EnvironmentValidatorSer
 @ExtendWith(MockitoExtension.class)
 class EnvironmentServiceTest {
 
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:accountId:environment:4c5ba74b-c35e-45e9-9f47-123456789876";
+
     @InjectMocks
     private EnvironmentService environmentServiceUnderTest;
 
@@ -80,7 +82,7 @@ class EnvironmentServiceTest {
 
     @BeforeEach
     void setup() {
-        lenient().when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn())
+        lenient().when(roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(anyString()))
                 .thenReturn("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin");
         environment = new Environment();
         environmentDto = new EnvironmentDto();
@@ -235,11 +237,11 @@ class EnvironmentServiceTest {
     @Test
     void testRoleAssignment() {
         ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
-            environmentServiceUnderTest.assignEnvironmentAdminRole(TestConstants.CRN, "envCrn");
+            environmentServiceUnderTest.assignEnvironmentAdminRole(TestConstants.CRN, ENV_CRN);
         });
 
         verify(grpcUmsClient)
-                .assignResourceRole(eq(TestConstants.CRN), eq("envCrn"), eq("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"), any(), any());
+                .assignResourceRole(eq(TestConstants.CRN), eq(ENV_CRN), eq("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"), any(), any());
     }
 
     @Test
@@ -248,11 +250,11 @@ class EnvironmentServiceTest {
                 .when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any(), any());
 
         ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
-            environmentServiceUnderTest.assignEnvironmentAdminRole(TestConstants.CRN, "envCrn");
+            environmentServiceUnderTest.assignEnvironmentAdminRole(TestConstants.CRN, ENV_CRN);
         });
 
         verify(grpcUmsClient)
-                .assignResourceRole(eq(TestConstants.CRN), eq("envCrn"), eq("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"), any(), any());
+                .assignResourceRole(eq(TestConstants.CRN), eq(ENV_CRN), eq("crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"), any(), any());
         verifyNoMoreInteractions(grpcUmsClient);
     }
 

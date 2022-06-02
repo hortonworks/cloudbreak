@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Joiner;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
@@ -28,28 +27,20 @@ public class RoleCrnGenerator {
         return getRoleCrn("DbusUploader", accountId).toString();
     }
 
-    public String getBuiltInOwnerResourceRoleCrn() {
-        return getResourceRoleCrn("Owner").toString();
+    public String getBuiltInOwnerResourceRoleCrn(String accountId) {
+        return getResourceRoleCrn("Owner", accountId).toString();
     }
 
-    public String getBuiltInEnvironmentAdminResourceRoleCrn() {
-        return getResourceRoleCrn("EnvironmentAdmin").toString();
+    public String getBuiltInEnvironmentAdminResourceRoleCrn(String accountId) {
+        return getResourceRoleCrn("EnvironmentAdmin", accountId).toString();
     }
 
-    public String getBuiltInEnvironmentUserResourceRoleCrn() {
-        return getResourceRoleCrn("EnvironmentUser").toString();
+    public String getBuiltInEnvironmentUserResourceRoleCrn(String accountId) {
+        return getResourceRoleCrn("EnvironmentUser", accountId).toString();
     }
 
     public String getBuiltInWXMClusterAdminResourceRoleCrn(String accountId) {
         return getResourceRoleCrn("WXMClusterAdmin", accountId).toString();
-    }
-
-    public Crn getResourceRoleCrn(String resourceRoleName) {
-        return getResourceRoleCrn(resourceRoleName, ThreadBasedUserCrnProvider.getAccountId());
-    }
-
-    public Crn getRoleCrn(String roleName) {
-        return getRoleCrn(roleName, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     public Crn getResourceRoleCrn(String resourceRoleName, String accountId) {
