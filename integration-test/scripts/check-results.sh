@@ -6,7 +6,7 @@ status_code=0
 
 set -ex
 
-if [[ "$CIRCLECI" ]]; then
+if [[ "$CIRCLECI" && "$CIRCLECI" == "true" ]]; then
 
     # Check integration test results
     date

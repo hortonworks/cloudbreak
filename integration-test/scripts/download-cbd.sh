@@ -9,7 +9,7 @@ cd $INTEGCB_LOCATION
 os=$(uname)
 echo -e "\n\033[1;96m--- build latest cbd: $CB_TARGET_BRANCH for $os\033[0m\n"
 rm_flag=""
-if ! [[ "$CIRCLECI" ]]; then
+if ! [[ "$CIRCLECI" && "$CIRCLECI" == "true" ]]; then
     rm_flag="--rm"
 fi
 
