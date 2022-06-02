@@ -22,6 +22,9 @@ public class SdxRepairRequest {
     @ApiModelProperty(ModelDescriptions.NODE_IDS)
     private List<String> nodesIds;
 
+    @ApiModelProperty(ModelDescriptions.DELETE_VOLUMES)
+    private boolean deleteVolumes;
+
     public String getHostGroupName() {
         return hostGroupName;
     }
@@ -46,12 +49,21 @@ public class SdxRepairRequest {
         this.nodesIds = nodesIds;
     }
 
+    public boolean isDeleteVolumes() {
+        return deleteVolumes;
+    }
+
+    public void setDeleteVolumes(boolean deleteVolumes) {
+        this.deleteVolumes = deleteVolumes;
+    }
+
     @Override
     public String toString() {
         return "SdxRepairRequest{" +
                 "hostGroupName='" + hostGroupName + '\'' +
                 ", hostGroupNames=" + hostGroupNames +
                 ", nodesIds=" + nodesIds +
+                ", deleteVolumes=" + deleteVolumes +
                 '}';
     }
 }

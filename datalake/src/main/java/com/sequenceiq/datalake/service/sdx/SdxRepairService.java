@@ -124,7 +124,7 @@ public class SdxRepairService {
             repairRequest.setHostGroups(sdxRepairSettings.getHostGroupNames());
         } else {
             ClusterRepairNodesV4Request nodes = new ClusterRepairNodesV4Request();
-            nodes.setDeleteVolumes(false);
+            nodes.setDeleteVolumes(sdxRepairSettings.isDeleteVolumes());
             nodes.setIds(sdxRepairSettings.getNodeIds());
             repairRequest.setNodes(nodes);
         }
