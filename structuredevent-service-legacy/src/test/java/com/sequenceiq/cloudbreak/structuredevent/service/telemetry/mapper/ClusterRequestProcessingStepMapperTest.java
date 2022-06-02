@@ -26,6 +26,7 @@ public class ClusterRequestProcessingStepMapperTest {
     @Test
     public void testOtherNextFlowStateMappedCorrectlyToUnset() {
         Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, mapNextFlowStateToProcessingStep("OTHER_STATE"));
+        Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, mapNextFlowStateToProcessingStep("DECOMISSION_FAILED_STATE"));
     }
 
     private UsageProto.CDPRequestProcessingStep.Value mapNextFlowStateToProcessingStep(String nextFlowState) {
