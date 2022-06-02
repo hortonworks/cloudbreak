@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.polling;
 
 import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
 
 public interface StatusCheckerTask<T> {
@@ -29,5 +30,9 @@ public interface StatusCheckerTask<T> {
 
     default void sendTimeoutEvent(T t) {
 
+    }
+
+    default Optional<String> additionalTimeoutErrorMessage() {
+        return Optional.empty();
     }
 }

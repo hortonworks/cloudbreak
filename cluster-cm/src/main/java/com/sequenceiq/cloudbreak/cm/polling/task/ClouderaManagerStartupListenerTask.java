@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 import static org.apache.commons.lang3.StringUtils.containsIgnoreCase;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
@@ -54,5 +55,10 @@ public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerA
     @Override
     protected String getPollingName() {
         return "API Echo";
+    }
+
+    @Override
+    public Optional<String> additionalTimeoutErrorMessage() {
+        return Optional.of(" Please check Cloudera Manager logs and service status, possibly Cloudera Manager hasn't been started properly.");
     }
 }

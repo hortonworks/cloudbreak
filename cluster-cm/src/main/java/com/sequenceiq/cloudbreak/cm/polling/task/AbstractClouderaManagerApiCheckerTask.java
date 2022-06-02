@@ -6,6 +6,7 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -113,8 +114,11 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
 
     @Override
     public void handleTimeout(T t) {
-        throw new ClouderaManagerOperationFailedException(String.format("Polling of [%s] timed out.",
-                getPollingName()));
+        String timeoutErrorMessage = String.format("Polling of [%s] timed out.", getPollingName());
+        if (additionalTimeoutErrorMessage().isPresent()) {
+            timeoutErrorMessage = StringUtils.appendIfMissing(timeoutErrorMessage, additionalTimeoutErrorMessage().get());
+        }
+        throw new ClouderaManagerOperationFailedException(timeoutErrorMessage);
     }
 
     @Override
