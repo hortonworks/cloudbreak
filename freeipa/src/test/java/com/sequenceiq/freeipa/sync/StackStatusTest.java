@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.metrics.MetricsClient;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
@@ -94,6 +95,9 @@ class StackStatusTest {
 
     @MockBean
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @MockBean
+    private MetricsClient metricsClient;
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;

@@ -45,6 +45,9 @@
         <Package name="~org\.apache\.cb\.yarn.*"/>
     </Match>
     <Match>
+        <Package name="~prometheus.*"/>
+    </Match>
+    <Match>
         <Package name="~com\.cloudera\.thunderhead\.service\.audit.*"/>
     </Match>
     <Match>
