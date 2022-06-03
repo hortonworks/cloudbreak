@@ -32,7 +32,7 @@ public class OwnerAssignmentService {
 
     public void assignResourceOwnerRoleIfEntitled(String userCrn, String resourceCrn, String accountId) {
         try {
-            umsClient.assignResourceRole(userCrn, resourceCrn, roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(),
+            umsClient.assignResourceRole(userCrn, resourceCrn, roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(accountId),
                     MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
             LOGGER.debug("Owner role of {} is successfully assigned to the {} user", resourceCrn, userCrn);
         } catch (StatusRuntimeException ex) {
