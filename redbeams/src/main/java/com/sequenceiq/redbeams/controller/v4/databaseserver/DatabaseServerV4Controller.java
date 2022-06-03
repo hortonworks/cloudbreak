@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
+import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
@@ -38,6 +40,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4En
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -54,6 +57,7 @@ import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStopService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
+import com.sequenceiq.redbeams.service.stack.RedbeamsUpgradeService;
 
 @Controller
 @Transactional(TxType.NEVER)
@@ -72,6 +76,9 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Inject
     private RedbeamsStopService redbeamsStopService;
+
+    @Inject
+    private RedbeamsUpgradeService redbeamsUpgradeService;
 
     @Inject
     private DatabaseServerConfigService databaseServerConfigService;
@@ -216,5 +223,12 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_DATABASE_SERVER)
     public void stop(@TenantAwareParam @ResourceCrn @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull String crn) {
         redbeamsStopService.stopDatabaseServer(crn);
+    }
+
+    @Override
+    @InternalOnly
+    public void upgrade(@TenantAwareParam @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) String databaseServerCrn,
+            @Valid @NotNull UpgradeDatabaseServerV4Request request) {
+        redbeamsUpgradeService.upgradeDatabaseServer(databaseServerCrn, request.getMajorVersion());
     }
 }

@@ -24,6 +24,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.request.CreateDatabaseV4
 import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabaseV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
@@ -39,6 +40,7 @@ import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStopService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsTerminationService;
+import com.sequenceiq.redbeams.service.stack.RedbeamsUpgradeService;
 
 public class DatabaseServerV4ControllerTest {
 
@@ -91,6 +93,9 @@ public class DatabaseServerV4ControllerTest {
 
     @Mock
     private RedbeamsStopService redbeamsStopService;
+
+    @Mock
+    private RedbeamsUpgradeService redbeamsUpgradeService;
 
     @Mock
     private DatabaseServerConfigToDatabaseServerV4ResponseConverter databaseServerConfigToDatabaseServerV4ResponseConverter;
@@ -317,5 +322,15 @@ public class DatabaseServerV4ControllerTest {
         underTest.stop(SERVER_CRN);
 
         verify(redbeamsStopService).stopDatabaseServer(SERVER_CRN);
+    }
+
+    @Test
+    public void testUpgrade() {
+        UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
+        request.setMajorVersion("MajorVersion");
+
+        underTest.upgrade(SERVER_CRN, request);
+
+        verify(redbeamsUpgradeService).upgradeDatabaseServer(SERVER_CRN, "MajorVersion");
     }
 }
