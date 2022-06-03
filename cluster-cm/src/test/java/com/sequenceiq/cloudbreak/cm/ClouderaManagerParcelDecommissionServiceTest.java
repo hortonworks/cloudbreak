@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -247,6 +250,18 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         assertTrue(parcelVersionsCaptorForDelete.getValue().containsEntry("CDH", "old"));
         assertTrue(parcelVersionsCaptorForDelete.getValue().containsEntry("CDH", "old2"));
         verifyNoMoreInteractions(parcelResourceApi);
+    }
+
+    @Test
+    public void testGetParcelsInStatusThrowsException() throws ApiException {
+
+        doThrow(new ApiException("Operation failed")).
+                when(parcelManagementService).getClouderaManagerParcelsByStatus(parcelsResourceApi, STACK_NAME, ParcelStatus.ACTIVATED);
+
+        ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class, () ->
+        underTest.getParcelsInStatus(parcelsResourceApi, STACK_NAME, ParcelStatus.ACTIVATED));
+
+        Assertions.assertEquals(actual.getMessage(), "Unable to fetch the list of activated parcels due to: Operation failed");
     }
 
     private ApiParcelList createApiParcelList(Map<String, String> products, ParcelStatus parcelStatus) {

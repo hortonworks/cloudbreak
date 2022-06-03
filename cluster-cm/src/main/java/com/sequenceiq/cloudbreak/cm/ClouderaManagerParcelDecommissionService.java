@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.Map;
@@ -40,14 +41,16 @@ class ClouderaManagerParcelDecommissionService {
     private ClouderaManagerParcelManagementService parcelManagementService;
 
     public Map<String, String> getParcelsInStatus(ParcelsResourceApi parcelsResourceApi, String stackName, ParcelStatus parcelStatus) {
+        requireNonNull(parcelStatus, "Parcel status cannot be null");
         try {
             Map<String, String> parcelResponse = parcelManagementService.getClouderaManagerParcelsByStatus(parcelsResourceApi, stackName, parcelStatus).stream()
                     .collect(toMap(ApiParcel::getProduct, ApiParcel::getVersion));
             LOGGER.debug("The following parcels are found in {} status: {}", parcelStatus, parcelResponse);
             return parcelResponse;
         } catch (ApiException e) {
-            LOGGER.info("Unable to fetch the list of activated parcels", e);
-            throw new ClouderaManagerOperationFailedException("Unable to fetch the list of activated parcels", e);
+            String errorMessage = String.format("Unable to fetch the list of %s parcels due to: %s", parcelStatus.name().toLowerCase(), e.getMessage());
+            LOGGER.info(errorMessage, e);
+            throw new ClouderaManagerOperationFailedException(errorMessage, e);
         }
     }
 
