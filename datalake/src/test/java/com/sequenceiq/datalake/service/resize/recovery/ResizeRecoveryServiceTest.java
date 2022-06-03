@@ -1,8 +1,8 @@
 package com.sequenceiq.datalake.service.resize.recovery;
 
-import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.PROVISIONING_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STOPPED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STOP_FAILED;
+import static com.sequenceiq.datalake.service.resize.recovery.ResizeRecoveryService.FAILURE_STATES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -107,16 +107,35 @@ public class ResizeRecoveryServiceTest {
 
     @Test
     public void testRestoreNotFailedAndRunningNotRecoverable() {
+        SdxCluster old = new SdxCluster();
+        old.setClusterName("old");
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
+                .thenReturn(Optional.of(old));
         sdxStatusEntity.setStatusReason("Datalake is running");
         testGetClusterRecoverableForStatusNotRecoverable(DatalakeStatusEnum.RUNNING);
     }
 
     @Test
     public void testKnownNonRecoverableStates() {
+        SdxCluster old = new SdxCluster();
+        old.setClusterName("old");
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
+                .thenReturn(Optional.of(old));
         for (DatalakeStatusEnum datalakeStatusEnum : DatalakeStatusEnum.values()) {
-            if (!datalakeStatusEnum.equals(PROVISIONING_FAILED)) {
+            if (!FAILURE_STATES.contains(datalakeStatusEnum)) {
                 testGetClusterRecoverableForStatusNotRecoverable(datalakeStatusEnum);
             }
+        }
+    }
+
+    @Test
+    public void testKnownRecoverableStates() {
+        SdxCluster old = new SdxCluster();
+        old.setClusterName("old");
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
+                .thenReturn(Optional.of(old));
+        for (DatalakeStatusEnum datalakeStatusEnum : FAILURE_STATES) {
+            testGetClusterRecoverableForStatusRecoverable(datalakeStatusEnum);
         }
     }
 
@@ -152,15 +171,6 @@ public class ResizeRecoveryServiceTest {
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(cluster, request)));
         assertEquals("Entitlement for resize recovery is missing", result.getMessage());
 
-    }
-
-    @Test
-    public void testProvisioningFailedRecoverable() {
-        SdxCluster old = new SdxCluster();
-        old.setClusterName("old");
-        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
-                .thenReturn(Optional.of(old));
-        testGetClusterRecoverableForStatusRecoverable(PROVISIONING_FAILED);
     }
 
     @Test
