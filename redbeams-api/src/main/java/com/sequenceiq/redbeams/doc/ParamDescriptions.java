@@ -31,6 +31,7 @@ public final class ParamDescriptions {
         public static final String CREATE_DATABASE_REQUEST = ModelDescriptions.CREATE_DATABASE_REQUEST;
         public static final String DATABASE_SERVER_REQUEST = ModelDescriptions.DATABASE_SERVER_REQUEST;
         public static final String DATABASE_SERVER_TEST_REQUEST = ModelDescriptions.DATABASE_SERVER_TEST_REQUEST;
+        public static final String UPGRADE_DATABASE_SERVER_REQUEST = ModelDescriptions.UPGRADE_DATABASE_SERVER_REQUEST;
 
         private DatabaseServerParamDescriptions() {
         }

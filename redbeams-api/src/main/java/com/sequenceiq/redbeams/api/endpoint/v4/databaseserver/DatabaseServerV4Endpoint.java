@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.validation.ValidCrn.Effect.DENY;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -29,6 +30,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabase
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerTestV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -198,4 +200,14 @@ public interface DatabaseServerV4Endpoint {
     void stop(
             @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotNull @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn
     );
+
+    @PUT
+    @Path("{crn}/upgrade")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseServerOpDescription.UPGRADE, notes = DatabaseServerNotes.UPGRADE,
+            consumes = MediaType.APPLICATION_JSON, nickname = "upgradeDatabaseServer")
+    void upgrade(
+            @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) @NotEmpty @ApiParam(DatabaseServerParamDescriptions.CRN) @PathParam("crn") String crn,
+            @Valid @NotNull @ApiParam(DatabaseServerParamDescriptions.UPGRADE_DATABASE_SERVER_REQUEST) UpgradeDatabaseServerV4Request request);
+
 }

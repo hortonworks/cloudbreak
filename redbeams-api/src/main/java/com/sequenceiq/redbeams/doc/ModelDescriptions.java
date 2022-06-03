@@ -3,6 +3,8 @@ package com.sequenceiq.redbeams.doc;
 public final class ModelDescriptions {
 
     public static final String ALLOCATE_DATABASE_SERVER_REQUEST = "Request for allocating a new database server in a provider";
+
+    public static final String UPGRADE_DATABASE_SERVER_REQUEST = "Request for upgrading a database server in a provider to a higher major version";
     public static final String SSL_CONFIG_REQUEST = "Request for the SSL config of a database server";
     public static final String CREATE_DATABASE_REQUEST = "Request for creating a new database on a registered database server";
     public static final String CREATE_DATABASE_RESPONSE = "Response for creating a new database on a registered database server";
@@ -153,6 +155,10 @@ public final class ModelDescriptions {
 
     public static class SecurityGroupModelDescriptions {
         public static final String SECURITY_GROUP_IDS = "Exisiting security group ID(s) for the database server";
+    }
+
+    public static class UpgradeModelDescriptions {
+        public static final String MAJOR_VERSION = "The major version to which the database server should be upgraded";
     }
 
 }

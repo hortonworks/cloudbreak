@@ -53,6 +53,9 @@ public final class Notes {
                 "Gets information on a database server by cluster CRN";
         public static final String CREATE =
             "Creates a new database server. The database server starts out with only default databases.";
+        public static final String UPGRADE =
+                "Upgrades a database server to a higher major version.";
+
         public static final String UPDATE_CLUSTER_CRN =
                 "Updates the cluster crn associated with the database";
         public static final String RELEASE =
