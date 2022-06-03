@@ -187,7 +187,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("blackboxExporterPort", this.blackboxExporterPort);
         map.put("agentUser", ObjectUtils.defaultIfNull(this.agentUser, EMPTY_CONFIG_DEFAULT));
         map.put("agentPort", this.agentPort);
-        map.put("agentMaxDiskUsage", ObjectUtils.defaultIfNull(this.agentUser, AGENT_MAX_DISK_USAGE_DEFAULT));
+        map.put("agentMaxDiskUsage", ObjectUtils.defaultIfNull(this.agentMaxDiskUsage, AGENT_MAX_DISK_USAGE_DEFAULT));
         map.put("username", ObjectUtils.defaultIfNull(this.username, EMPTY_CONFIG_DEFAULT));
         map.put("password", this.password != null ? new String(this.password) : EMPTY_CONFIG_DEFAULT);
         map.put("token", this.token != null ? new String(this.token) : EMPTY_CONFIG_DEFAULT);
