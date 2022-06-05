@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.consumption.api.v1.consumption.endpoint.ConsumptionInternalEndpoint;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
+import com.sequenceiq.consumption.api.v1.consumption.model.response.ConsumptionExistenceResponse;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.dto.ConsumptionCreationDto;
 import com.sequenceiq.consumption.endpoint.converter.ConsumptionApiConverter;
@@ -70,5 +71,15 @@ public class ConsumptionInternalV1Controller implements ConsumptionInternalEndpo
         Consumption consumption = consumptionService.findStorageConsumptionByMonitoredResourceCrnAndLocation(monitoredResourceCrn, storageLocation);
         jobService.unschedule(consumption.getId().toString());
         consumptionService.delete(consumption);
+    }
+
+    @Override
+    @InternalOnly
+    public ConsumptionExistenceResponse doesStorageConsumptionCollectionExist(@AccountId String accountId,
+            @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE}) String monitoredResourceCrn,
+            @NotEmpty String storageLocation) {
+        ConsumptionExistenceResponse response = new ConsumptionExistenceResponse();
+        response.setExists(consumptionService.isConsumptionPresentForLocationAndMonitoredCrn(monitoredResourceCrn, storageLocation));
+        return response;
     }
 }
