@@ -86,14 +86,14 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
 
     private void validateStorageLocationCollision(ConsumptionCreationDto creationDto) {
         if (ConsumptionType.STORAGE.equals(creationDto.getConsumptionType())) {
-            if (isStorageLocationOccupied(creationDto.getMonitoredResourceCrn(), creationDto.getStorageLocation())) {
+            if (isConsumptionPresentForLocationAndMonitoredCrn(creationDto.getMonitoredResourceCrn(), creationDto.getStorageLocation())) {
                 throw new BadRequestException(String.format("Storage consumption with location [%s] already exists for resource with CRN [%s].",
                         creationDto.getStorageLocation(), creationDto.getMonitoredResourceCrn()));
             }
         }
     }
 
-    private boolean isStorageLocationOccupied(String monitoredResourceCrn, String storageLocation) {
+    public boolean isConsumptionPresentForLocationAndMonitoredCrn(String monitoredResourceCrn, String storageLocation) {
         return consumptionRepository.doesStorageConsumptionExistWithLocationForMonitoredCrn(monitoredResourceCrn, storageLocation);
     }
 
