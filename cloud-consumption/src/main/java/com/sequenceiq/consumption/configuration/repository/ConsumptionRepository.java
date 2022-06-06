@@ -61,4 +61,8 @@ public interface ConsumptionRepository extends AccountAwareResourceRepository<Co
     boolean doesStorageConsumptionExistWithLocationForMonitoredCrn(@Param("monitoredResourceCrn") String monitoredResourceCrn,
             @Param("storageLocation") String storageLocation);
 
+    @Query("SELECT c.resourceCrn as remoteResourceId, c.id as localId, c.name as name " +
+            "FROM Consumption c " +
+            "WHERE c.consumptionType = 'STORAGE' ")
+    List<JobResource> findAllStorageConsumptionJobResource();
 }
