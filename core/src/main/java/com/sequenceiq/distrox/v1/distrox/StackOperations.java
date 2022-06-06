@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
+import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -140,6 +141,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private ClusterOperationService clusterOperationService;
+
+    @Inject
+    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -449,5 +453,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         }
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         return clusterOperationService.restartClusterServices(stack);
+    }
+
+    public void updateLoadBalancerDNS(Long workspaceId, NameOrCrn nameOrCrn) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        gatewayPublicEndpointManagementService.updateDnsEntryForLoadBalancers(stack);
     }
 }

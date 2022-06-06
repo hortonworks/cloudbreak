@@ -83,11 +83,7 @@ public class ResizeRecoveryService implements RecoveryService {
                 case STOP_FAILED:
                     return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxStartFlow(sdxCluster));
                 case STOPPED:
-                    if (sdxCluster.isDetached()) {
-                        return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, null));
-                    } else {
-                        return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxStartFlow(sdxCluster));
-                    }
+                    return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, null));
                 case PROVISIONING_FAILED:
                     return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(getOldClusterErrorIfNotFound(sdxCluster), sdxCluster));
                 case RUNNING:
