@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -13,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudPlatformValidationWarningException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
@@ -45,14 +49,24 @@ public class ProvisionValidationHandler implements CloudPlatformEventHandler<Val
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             CloudStack cloudStack = request.getCloudStack();
-            for (Validator v : connector.validators(ValidatorType.ALL)) {
-                v.validate(ac, cloudStack);
+            Set<String> warningMessages = new HashSet<>();
+            for (Validator validator : connector.validators(ValidatorType.ALL)) {
+                executeValidation(ac, cloudStack, warningMessages, validator);
             }
-            result = new ValidationResult(request.getResourceId());
+            result = new ValidationResult(request.getResourceId(), warningMessages);
         } catch (RuntimeException e) {
             result = new ValidationResult(e, request.getResourceId());
         }
         request.getResult().onNext(result);
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
+    }
+
+    private void executeValidation(AuthenticatedContext ac, CloudStack cloudStack, Set<String> warningMessages, Validator v) {
+        try {
+            v.validate(ac, cloudStack);
+        } catch (CloudPlatformValidationWarningException e) {
+            LOGGER.warn("{} sent the following warning: {}", v.getClass().getSimpleName(), e.getMessage());
+            warningMessages.add(e.getMessage());
+        }
     }
 }

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestOperationsService;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestResponseException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudPlatformValidationWarningException;
 
 @ExtendWith(MockitoExtension.class)
 public class AzureImageTermsSignerServiceTest {
@@ -49,14 +50,14 @@ public class AzureImageTermsSignerServiceTest {
     private AzureMarketplaceImage azureMarketplaceImage = new AzureMarketplaceImage("cloudera", "my-offer", "my-plan", "my-version");
 
     static Object[][] exceptionsFromHttpMethod() {
-        return new Object[][]{
-                {new AzureRestResponseException("myMessage"), "myMessage"},
-                {new RestClientException("myMessage"), "myMessage"}
+        return new Object[][] {
+                { new AzureRestResponseException("myMessage"), "myMessage" },
+                { new RestClientException("myMessage"), "myMessage" }
         };
     }
 
     @ParameterizedTest
-    @ValueSource(booleans = {true, false})
+    @ValueSource(booleans = { true, false })
     void testIsSignedReturnsSignedFromRestResponseBody(boolean signedFromRestResponse) {
         when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
         when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenReturn(setupAzureImageTerms(signedFromRestResponse));
@@ -82,11 +83,10 @@ public class AzureImageTermsSignerServiceTest {
         verify(azureClient).getAccessToken();
     }
 
-    @ParameterizedTest
-    @MethodSource("exceptionsFromHttpMethod")
-    void testIsSignedWhenGetTermsThrowsError(Exception restException, String customErrorMessage) {
+    @Test
+    void testIsSignedWhenGetTermsThrowsError() {
         when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
-        when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(restException);
+        when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(new RestClientException("myMessage"));
 
         Exception exception = Assertions.assertThrows(CloudConnectorException.class,
                 () -> underTest.isSigned(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
@@ -94,6 +94,23 @@ public class AzureImageTermsSignerServiceTest {
         assertEquals("Error when retrieving if marketplace image terms and conditions are signed for " +
                         "AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', planId='my-plan', version='my-version'}. " +
                         "Reason: myMessage. Please try again.",
+                exception.getMessage());
+        verify(azureClient).getAccessToken();
+        verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
+    }
+
+    @Test
+    void testIsSignedWhenGetTermsThrowsPermissionError() {
+        when(azureClient.getAccessToken()).thenReturn(Optional.of(ACCESS_TOKEN));
+        when(azureRestOperationsService.httpGet(any(), any(), anyString())).thenThrow(new AzureRestResponseException("Missing permission"));
+
+        Exception exception = Assertions.assertThrows(CloudPlatformValidationWarningException.class,
+                () -> underTest.isSigned(AZURE_SUBSCRIPTION_ID, azureMarketplaceImage, azureClient));
+
+        assertEquals("Failed to get the status of the Terms and Conditions for image AzureMarketplaceImage{publisherId='cloudera', offerId='my-offer', "
+                        + "planId='my-plan', version='my-version'}. "
+                        + "Please make sure that Azure Marketplace Terms and Conditions "
+                        + "have been accepted for your subscription before proceeding with CDP deployment.",
                 exception.getMessage());
         verify(azureClient).getAccessToken();
         verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));

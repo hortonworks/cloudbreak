@@ -440,6 +440,7 @@ public enum ResourceEvent {
     KERBEROS_CONFIG_VALIDATION_FAILED("cluster.kerberosconfig.validation.failed"),
 
     CLOUD_CONFIG_VALIDATION_FAILED("cluster.cloudconfig.validation.failed"),
+    CLOUD_PROVIDER_VALIDATION_WARNING("cluster.provider.validation.warning"),
 
     STACK_RETRY_FLOW_START("retry.flow.start"),
 
