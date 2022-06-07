@@ -6,7 +6,9 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPNetwor
 
 import java.lang.module.ModuleDescriptor;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -37,6 +39,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataProvider;
+import com.sequenceiq.cloudbreak.telemetry.metering.MeteringConfiguration;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 
 @Service
@@ -70,6 +73,9 @@ public class DiagnosticsFlowService {
 
     @Inject
     private DataBusEndpointProvider dataBusEndpointProvider;
+
+    @Inject
+    private MeteringConfiguration meteringConfiguration;
 
     @Inject
     private UsageReporter usageReporter;
@@ -164,6 +170,82 @@ public class DiagnosticsFlowService {
                     NodeStatusProto.NetworkDetails::getServiceDeliveryCacheS3Accessible);
         } catch (Exception e) {
             LOGGER.error("Unexpected error happened during preflight check reporting.", e);
+        }
+    }
+
+    public void nodeStatusMeteringReport(Long stackId) {
+        try {
+            Stack stack = stackService.getById(stackId);
+            if (stack.isDatalake()) {
+                LOGGER.debug("Skip metering check as billing is not used for datalake");
+                return;
+            }
+            if (!meteringConfiguration.isEnabled()) {
+                LOGGER.debug("Metering feature is not enabled (or telemetry is empty). Skip metering check.");
+                return;
+            }
+            RPCResponse<NodeStatusProto.NodeStatusReport> rpcResponse = nodeStatusService.getMeteringReport(stackId);
+            if (rpcResponse != null) {
+                LOGGER.debug("Diagnostics metering report response: {}", rpcResponse.getFirstTextMessage());
+                NodeStatusProto.NodeStatusReport nodeStatusReport = rpcResponse.getResult();
+                if (nodeStatusReport != null && CollectionUtils.isNotEmpty(nodeStatusReport.getNodesList())) {
+                    List<NodeStatusProto.NodeStatus> nodeStatuses = nodeStatusReport.getNodesList();
+                    Set<String> errorSet = new HashSet<>();
+                    reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getHeartbeatAgentRunning,
+                            "Heartbeat agents running", errorSet);
+                    reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getHeartbeatConfig,
+                            "Heartbeat agents configured", errorSet);
+                    reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getLoggingServiceRunning,
+                            "Logging agents running", errorSet);
+                    reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getLoggingAgentConfig,
+                            "Logging agents configured", errorSet);
+                    reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getDatabusReachable,
+                            "DataBus reachable", errorSet);
+                    reportMeteringUsage(nodeStatuses, NodeStatusProto.MeteringDetails::getDatabusTestResponse,
+                            "DataBus test response", errorSet);
+                    Map<String, Integer> countPerHost = nodeStatuses.stream()
+                            .filter(m -> StringUtils.isNotBlank(m.getStatusDetails().getHost()))
+                            .collect(Collectors.toMap(m -> m.getStatusDetails().getHost(), m -> m.getMeteringDetails().getEventDetailsCount()));
+                    LOGGER.debug("[Metering] event count per host: {}", countPerHost);
+                    String resourceCrn = stack.getResourceCrn();
+                    String accountId = Crn.safeFromString(resourceCrn).getAccountId();
+                    UsageProto.CDPDiagnosticEvent.Builder diagnosticsEventBuilder = UsageProto.CDPDiagnosticEvent.newBuilder();
+                    diagnosticsEventBuilder
+                            .setAccountId(accountId)
+                            .setResourceCrn(resourceCrn)
+                            .setEnvironmentCrn(stack.getEnvironmentCrn())
+                            .setServiceType(UsageProto.ServiceType.Value.DATAHUB);
+                    if (errorSet.isEmpty()) {
+                        LOGGER.info("No metering issue detected, skip sending metering diagnostic event.");
+                    } else {
+                        diagnosticsEventBuilder.setResult(calculateDiagnosticFailureResult(nodeStatuses));
+                        diagnosticsEventBuilder.setFailureMessage(String.format("Failure result:%n%s", StringUtils.join(errorSet, "\\n")));
+                        usageReporter.cdpDiagnosticsEvent(diagnosticsEventBuilder.build());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.debug("Diagnostics metering node status check failed (skipping): {}", e.getMessage());
+        }
+    }
+
+    private UsageProto.CDPDiagnosticResult.Value calculateDiagnosticFailureResult(List<NodeStatusProto.NodeStatus> nodeStatuses) {
+        return nodeStatuses.stream().anyMatch(ns -> NodeStatusProto.HealthStatus.NOK.equals(ns.getMeteringDetails().getDatabusReachable()))
+                ? UsageProto.CDPDiagnosticResult.Value.DBUS_UNAVAILABLE
+                : UsageProto.CDPDiagnosticResult.Value.METERING_HB_FAILURE;
+    }
+
+    private void reportMeteringUsage(List<NodeStatusProto.NodeStatus> nodeStatuses,
+            Function<NodeStatusProto.MeteringDetails, NodeStatusProto.HealthStatus> healthEvaluator, String checkMessage, Set<String> errorSet) {
+        List<String> notOkHosts = nodeStatuses.stream()
+                .filter(m -> NodeStatusProto.HealthStatus.NOK.equals(healthEvaluator.apply(m.getMeteringDetails())))
+                .filter(m -> StringUtils.isNotBlank(m.getStatusDetails().getHost()))
+                .map(m -> m.getStatusDetails().getHost()).collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(notOkHosts)) {
+            String hostsStr = StringUtils.join(notOkHosts, ",");
+            String errorMsg = String.format("%s  check result - FAILED for hosts: %s", checkMessage, hostsStr);
+            errorSet.add(errorMsg);
+            LOGGER.warn("[Metering] {}", errorMsg);
         }
     }
 

@@ -53,6 +53,7 @@ public class DiagnosticsPreFlightCheckHandlerTest {
     public void testDoAccept() {
         // GIVEN
         doNothing().when(diagnosticsFlowService).nodeStatusNetworkReport(anyLong());
+        doNothing().when(diagnosticsFlowService).nodeStatusMeteringReport(anyLong());
         // WHEN
         DiagnosticsCollectionEvent event = new DiagnosticsCollectionEvent(SALT_PILLAR_UPDATE_DIAGNOSTICS_EVENT.selector(), STACK_ID, "crn",
                 new DiagnosticParameters(), Set.of(), Set.of(), Set.of());

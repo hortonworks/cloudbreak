@@ -256,6 +256,16 @@ public class UsageReportProcessor implements UsageReporter {
     }
 
     @Override
+    public void cdpDiagnosticsEvent(UsageProto.CDPDiagnosticEvent details) {
+        checkNotNull(details);
+        usageProcessingStrategy.processUsage(eventBuilder()
+                .setCdpDiagnosticEvent(details)
+                .build(), UsageContext.Builder.newBuilder()
+                .accountId(details.getAccountId())
+                .build());
+    }
+
+    @Override
     public void cdpStackPatcherEvent(UsageProto.CDPStackPatchEvent details) {
         checkNotNull(details);
         usageProcessingStrategy.processUsage(eventBuilder()

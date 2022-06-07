@@ -27,6 +27,7 @@ public class DiagnosticsPreFlightCheckHandler extends AbstractDiagnosticsOperati
         String resourceCrn = data.getResourceCrn();
         DiagnosticParameters parameters = data.getParameters();
         diagnosticsFlowService.nodeStatusNetworkReport(resourceId);
+        diagnosticsFlowService.nodeStatusMeteringReport(resourceId);
         return DiagnosticsCollectionEvent.builder()
                 .withResourceCrn(resourceCrn)
                 .withResourceId(resourceId)
