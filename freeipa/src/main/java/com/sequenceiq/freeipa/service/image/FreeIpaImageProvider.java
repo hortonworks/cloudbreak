@@ -22,10 +22,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.FreeIpaVersions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
 
 @Service
@@ -97,7 +97,7 @@ public class FreeIpaImageProvider implements ImageProvider {
                     .filter(img -> img.getImageSetsByProvider().containsKey(platform) && filterRegion(region, platform, img))
                     //It's not clear why we check the provider image reference (eg. the AMI in case of AWS) as imageId here.
                     //For safety and backward compatibility reasons the check remains here but should be checked if it really needed.
-                    .filter(img -> img.getUuid().equalsIgnoreCase(imageId) || img.getImageSetsByProvider().get(platform).get(region).equalsIgnoreCase(imageId))
+                    .filter(img -> hasSameUuid(imageId, img) || isMatchingImageIdInRegion(imageId, region, platform, img))
                     .collect(Collectors.toList());
         } else {
             if (StringUtils.isNotBlank(imageOs)) {
@@ -107,6 +107,16 @@ public class FreeIpaImageProvider implements ImageProvider {
             return images.stream().filter(image -> image.getImageSetsByProvider().containsKey(platform))
                     .collect(Collectors.toList());
         }
+    }
+
+    private Boolean isMatchingImageIdInRegion(String imageId, String region, String platform, Image img) {
+        return Optional.ofNullable(img.getImageSetsByProvider().get(platform).get(region))
+                .map(reg -> reg.equalsIgnoreCase(imageId))
+                .orElse(false);
+    }
+
+    private boolean hasSameUuid(String imageId, Image img) {
+        return img.getUuid().equalsIgnoreCase(imageId);
     }
 
     private boolean filterRegion(String region, String platform, Image img) {
