@@ -16,10 +16,11 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
-import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.ec2.model.AttachVolumeRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
+import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
@@ -64,8 +66,6 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
     @Override
     public List<CloudResource> build(AwsContext context, CloudInstance cloudInstance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
-        LOGGER.debug("Attach volumes to instance");
-
         CloudResource instance = buildableResource.stream()
                 .filter(cloudResource -> cloudResource.getType().equals(ResourceType.AWS_INSTANCE))
                 .findFirst()
@@ -84,7 +84,8 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
         AmazonEc2Client client = getAmazonEc2Client(auth);
 
         VolumeSetAttributes volumeSetAttributes = volumeSet.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
-        LOGGER.debug("Creating attach volume requests and submitting to executor for stack '{}',   group '{}'",
+        LOGGER.debug("Attach volume set {} to instance {}", volumeSetAttributes, instance.getInstanceId());
+        LOGGER.debug("Creating attach volume requests and submitting to executor for stack '{}', group '{}'",
                 auth.getCloudContext().getName(), group.getName());
         List<Future<?>> futures = volumeSetAttributes.getVolumes().stream()
                 .filter(volume -> !StringUtils.equals(AwsDiskType.Ephemeral.value(), volume.getType()))
@@ -99,10 +100,9 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
         for (Future<?> future : futures) {
             try {
                 future.get();
-            } catch (AmazonClientException e) {
-                LOGGER.error("Attach was unsuccesful. Group: {}, Volume: {} Instance: {}, AWS error: {}", group.getName(), instance.getName(),
-                        volumeSet.getName(), e.getMessage());
-                throw e;
+            } catch (Throwable throwable) {
+                LOGGER.info("Attachment failed with error.", throwable);
+                checkIfEveryVolumesAttachedSuccessfullyEvenIfSomethingFailed(instance, client, volumeSetAttributes, throwable);
             }
         }
         LOGGER.debug("Attach volume requests sent");
@@ -110,6 +110,22 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
         volumeSet.setInstanceId(instance.getInstanceId());
         volumeSet.setStatus(CommonStatus.CREATED);
         return List.of(volumeSet);
+    }
+
+    private void checkIfEveryVolumesAttachedSuccessfullyEvenIfSomethingFailed(CloudResource instance, AmazonEc2Client client,
+            VolumeSetAttributes volumeSetAttributes, Throwable throwable) {
+        List<String> volumeIdsToAttach =
+                volumeSetAttributes.getVolumes().stream().map(VolumeSetAttributes.Volume::getId).collect(Collectors.toList());
+        DescribeVolumesResult describeVolumesResult = client.describeVolumes(new DescribeVolumesRequest().withFilters(new Filter(
+                "attachment.instance-id", List.of(instance.getInstanceId()))));
+        LOGGER.info("Describe volume result for instanceid: {}, {}", instance.getInstanceId(), describeVolumesResult);
+        List<Volume> volumes = describeVolumesResult.getVolumes();
+        List<String> volumeIdsForInstance = volumes.stream().map(Volume::getVolumeId).collect(Collectors.toList());
+        LOGGER.info("Volume IDs to attach {}", volumeIdsToAttach);
+        if (!volumeIdsForInstance.containsAll(volumeIdsToAttach)) {
+            LOGGER.error("Volume attachment were unsuccessful.");
+            throw new CloudbreakServiceException("Volume attachment were unsuccessful. " + throwable.getMessage(), throwable);
+        }
     }
 
     @Override
