@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision.action;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackProvisionConstants.START_DATE;
 
 import java.util.Date;
@@ -13,6 +14,7 @@ import javax.inject.Inject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
@@ -54,6 +56,7 @@ import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionEvent;
@@ -64,6 +67,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -90,6 +94,9 @@ public class StackCreationActions {
 
     @Inject
     private EnvironmentClientService environmentClientService;
+
+    @Inject
+    private CloudbreakEventService eventService;
 
     @Bean(name = "VALIDATION_STATE")
     public Action<?, ?> provisioningValidationAction() {
@@ -118,6 +125,7 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(ValidationResult.class) {
             @Override
             protected void doExecute(StackCreationContext context, ValidationResult payload, Map<Object, Object> variables) {
+                handleValidationWarnings(context, payload);
                 sendEvent(context);
             }
 
@@ -245,7 +253,7 @@ public class StackCreationActions {
             protected void doExecute(StackCreationContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
                 Stack stack = stackCreationService.setupMetadata(context, payload);
                 StackCreationContext newContext = new StackCreationContext(context.getFlowParameters(), stack, context.getCloudContext(),
-                        context.getCloudCredential(),  context.getCloudStack());
+                        context.getCloudCredential(), context.getCloudStack());
                 sendEvent(newContext);
             }
 
@@ -365,5 +373,12 @@ public class StackCreationActions {
                 return new StackEvent(StackCreationEvent.STACKCREATION_FAILURE_HANDLED_EVENT.event(), context.getStackView().getId());
             }
         };
+    }
+
+    private void handleValidationWarnings(StackCreationContext context, ValidationResult payload) {
+        if (!CollectionUtils.isEmpty(payload.getWarningMessages())) {
+            eventService.fireCloudbreakEvent(context.getStack().getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLOUD_PROVIDER_VALIDATION_WARNING,
+                    payload.getWarningMessages());
+        }
     }
 }

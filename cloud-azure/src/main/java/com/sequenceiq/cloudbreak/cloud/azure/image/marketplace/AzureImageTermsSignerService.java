@@ -13,7 +13,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestOperationsService;
+import com.sequenceiq.cloudbreak.cloud.azure.rest.AzureRestResponseException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudPlatformValidationWarningException;
 
 @Service
 public class AzureImageTermsSignerService {
@@ -30,6 +32,9 @@ public class AzureImageTermsSignerService {
     private static final String SIGN_URL_AZ_TEMPLATE = "https://management.azure.com/subscriptions/%s/providers/Microsoft.MarketplaceOrdering/offerTypes/" +
             "virtualmachine/publishers/%s/offers/%s/plans/%s/agreements/current?api-version=2015-06-01";
 
+    private static final String READ_PROBLEM_MESSAGE_TEMPLATE = "Failed to get the status of the Terms and Conditions for image %s. " +
+            "Please make sure that Azure Marketplace Terms and Conditions have been accepted for your subscription before proceeding with CDP deployment.";
+
     @Inject
     private AzureRestOperationsService azureRestOperationsService;
 
@@ -43,6 +48,10 @@ public class AzureImageTermsSignerService {
             AzureImageTerms azureImageTerms = azureRestOperationsService.httpGet(signUri, AzureImageTerms.class, token);
             LOGGER.debug("Image terms and conditions received for image {} is : {}", azureMarketplaceImage, azureImageTerms);
             return azureImageTerms.getProperties().isAccepted();
+        } catch (AzureRestResponseException e) {
+            String message = String.format(READ_PROBLEM_MESSAGE_TEMPLATE, azureMarketplaceImage);
+            LOGGER.warn(message, e);
+            throw new CloudPlatformValidationWarningException(message, e);
         } catch (Exception e) {
             String message = errorMessageBuilder.buildWithReason(e.getMessage());
             LOGGER.warn(message, e);
