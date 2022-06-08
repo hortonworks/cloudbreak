@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
-import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
-import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -36,16 +33,6 @@ public class ParcelUrlProvider {
         LOGGER.debug("Retrieving parcel URLs from image {}", image.getUuid());
         String cdhParcelUrl = getCdhParcelUrl(image);
         return StackType.DATALAKE.equals(stack.getType()) ? Collections.singleton(cdhParcelUrl) : getAllParcel(cdhParcelUrl, image, stack);
-    }
-
-    public String getCmRpmUrl(Image image) {
-        LOGGER.debug("Retrieving CM RPM package URL from image {}", image.getUuid());
-        return image.getRepo().get(image.getOsType())
-                .concat("RPMS/x86_64/cloudera-manager-server-")
-                .concat(image.getPackageVersions().get(CM.getKey()))
-                .concat("-")
-                .concat(image.getPackageVersions().get(CM_BUILD_NUMBER.getKey()))
-                .concat(".el7.x86_64.rpm");
     }
 
     private String getCdhParcelUrl(Image image) {
