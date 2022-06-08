@@ -121,7 +121,7 @@ environment:
   admin.group.default.prefix: cdp_
   telemetry:
     rules:
-      - value: \b([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-\._]*[A-Za-z0-9])@(([A-Za-z0-9]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])\.)+([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])\b
+      - value: \b([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-\._]*[A-Za-z0-9])@(?!.*(CLOUDERA|cloudera)\b)(([A-Za-z0-9]|[A-Za-z][A-Za-z0-9\-]*[A-Za-z0-9])\.)+([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])\b
         replacement: "email@redacted.host"
       - value: \d{4}[^\w]\d{4}[^\w]\d{4}[^\w]\d{4}
         replacement: "XXXX-XXXX-XXXX-XXXX"
