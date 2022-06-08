@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service;
 
+import java.util.Collection;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -32,6 +33,12 @@ public class EnvironmentStatusUpdateService {
 
     public EnvironmentDto updateEnvironmentStatusAndNotify(CommonContext context, Payload payload, EnvironmentStatus environmentStatus,
             ResourceEvent resourceEvent, Enum<?> envState) {
+
+        return updateEnvironmentStatusAndNotify(context, payload, environmentStatus, resourceEvent, Set.of(), envState);
+    }
+
+    public EnvironmentDto updateEnvironmentStatusAndNotify(CommonContext context, Payload payload, EnvironmentStatus environmentStatus,
+            ResourceEvent resourceEvent, Collection<?> messageArgs, Enum<?> envState) {
         LOGGER.info("Flow entered into {}", envState.name());
         return environmentService
                 .findEnvironmentById(payload.getResourceId())
@@ -40,7 +47,7 @@ public class EnvironmentStatusUpdateService {
                     environment.setStatusReason(null);
                     Environment env = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent);
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent, messageArgs);
                     return environmentDto;
                 }).orElseThrow(() -> new IllegalStateException(
                         String.format("Cannot update status of environment, because it does not exist: %s. ", payload.getResourceId())
@@ -49,6 +56,13 @@ public class EnvironmentStatusUpdateService {
 
     public EnvironmentDto updateFailedEnvironmentStatusAndNotify(CommonContext context, BaseFailedFlowEvent failedFlowEvent,
             EnvironmentStatus environmentStatus, ResourceEvent resourceEvent, Enum<?> envState) {
+
+        return updateFailedEnvironmentStatusAndNotify(context, failedFlowEvent, environmentStatus, resourceEvent, Set.of(), envState);
+    }
+
+    public EnvironmentDto updateFailedEnvironmentStatusAndNotify(CommonContext context, BaseFailedFlowEvent failedFlowEvent,
+            EnvironmentStatus environmentStatus, ResourceEvent resourceEvent, Collection<?> messageArgs, Enum<?> envState) {
+
         LOGGER.info("Flow entered into {}", envState.name());
         return environmentService
                 .findEnvironmentById(failedFlowEvent.getResourceId())
@@ -57,7 +71,7 @@ public class EnvironmentStatusUpdateService {
                     environment.setStatusReason(failedFlowEvent.getException().getMessage());
                     Environment env = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
-                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent);
+                    eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent, messageArgs);
                     return environmentDto;
                 }).orElseThrow(() -> new IllegalStateException(
                         String.format("Cannot update status of environment, because it does not exist: %s. ", failedFlowEvent.getResourceId())
