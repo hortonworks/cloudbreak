@@ -3,6 +3,15 @@ package com.sequenceiq.environment.environment.flow.config.update;
 import static com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors.FINALIZE_ENV_STACK_CONIFG_UPDATES_EVENT;
 import static com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors.HANDLE_FAILED_ENV_STACK_CONIFG_UPDATES_EVENT;
 
+import java.util.Map;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.action.Action;
+
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -16,12 +25,6 @@ import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateSer
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.CommonContext;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.action.Action;
 
 @Configuration
 public class EnvStackConfigUpdatesActions {
@@ -90,6 +93,7 @@ public class EnvStackConfigUpdatesActions {
                     .updateFailedEnvironmentStatusAndNotify(context, payload,
                         getCurrentStatus(payload.getResourceId()),
                         ResourceEvent.ENVIRONMENT_STACK_CONFIGS_UPDATE_FAILED,
+                        Set.of(payload.getException().getMessage()),
                         EnvStackConfigUpdatesState.STACK_CONFIG_UPDATES_FAILED_STATE);
                 metricService.incrementMetricCounter(MetricType.ENV_STACK_CONFIG_UPDATE_FAILED,
                     environmentDto,

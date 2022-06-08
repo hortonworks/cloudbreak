@@ -4,8 +4,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,20 +35,36 @@ public class EnvironmentStatusUpdateServiceTest {
     @InjectMocks
     private EnvironmentStatusUpdateService underTest;
 
-    @Test
-    public void testUpdateEnvironmentStatusAndNotify() {
-        CommonContext commonContext = new CommonContext(new FlowParameters("flowId", "userCrn", null));
-        EnvironmentDto environmentDto = EnvironmentDto.builder().withId(1L).withEnvironmentStatus(EnvironmentStatus.STOP_DATAHUB_FAILED).build();
+    private CommonContext commonContext;
+
+    private EnvironmentDto environmentDto;
+
+    @BeforeEach
+    void setUp() {
+        commonContext = new CommonContext(new FlowParameters("flowId", "userCrn", null));
+        environmentDto = EnvironmentDto.builder().withId(1L).withEnvironmentStatus(EnvironmentStatus.STOP_DATAHUB_FAILED).build();
         Environment environment = new Environment();
 
         when(environmentService.findEnvironmentById(environmentDto.getResourceId())).thenReturn(Optional.of(environment));
         when(environmentService.save(environment)).thenReturn(environment);
         when(environmentService.getEnvironmentDto(environment)).thenReturn(environmentDto);
+    }
 
+    @Test
+    public void testUpdateEnvironmentStatusAndNotify() {
         EnvironmentDto actual = underTest.updateEnvironmentStatusAndNotify(commonContext, environmentDto, EnvironmentStatus.STOP_DATAHUB_FAILED,
                 ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, EnvStartState.ENV_START_FINISHED_STATE);
 
         Assertions.assertEquals(EnvironmentStatus.STOP_DATAHUB_FAILED, actual.getStatus());
-        verify(eventSenderService).sendEventAndNotification(environmentDto, "userCrn", ResourceEvent.ENVIRONMENT_VALIDATION_FAILED);
+        verify(eventSenderService).sendEventAndNotification(environmentDto, "userCrn", ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, Set.of());
+    }
+
+    @Test
+    public void testUpdateEnvironmentStatusAndNotifyWithMessageArgs() {
+        EnvironmentDto actual = underTest.updateEnvironmentStatusAndNotify(commonContext, environmentDto, EnvironmentStatus.STOP_DATAHUB_FAILED,
+                ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, Set.of("message"), EnvStartState.ENV_START_FINISHED_STATE);
+
+        Assertions.assertEquals(EnvironmentStatus.STOP_DATAHUB_FAILED, actual.getStatus());
+        verify(eventSenderService).sendEventAndNotification(environmentDto, "userCrn", ResourceEvent.ENVIRONMENT_VALIDATION_FAILED, Set.of("message"));
     }
 }
