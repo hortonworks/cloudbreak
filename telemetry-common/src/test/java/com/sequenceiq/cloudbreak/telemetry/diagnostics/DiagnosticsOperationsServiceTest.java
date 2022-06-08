@@ -28,6 +28,8 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataProvider;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentUpgradeConfiguration;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryUpgradeConfiguration;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
@@ -52,6 +54,12 @@ public class DiagnosticsOperationsServiceTest {
     @Mock
     private OrchestratorMetadata metadata;
 
+    @Mock
+    private TelemetryUpgradeConfiguration telemetryUpgradeConfiguration;
+
+    @Mock
+    private TelemetryComponentUpgradeConfiguration cdpTelemetry;
+
     @BeforeEach
     public void setUp() {
         underTest = new DiagnosticsOperationsService();
@@ -63,6 +71,8 @@ public class DiagnosticsOperationsServiceTest {
         // GIVEN
         given(orchestratorMetadataProvider.getOrchestratorMetadata(STACK_ID)).willReturn(metadata);
         given(metadata.getNodes()).willReturn(nodes());
+        given(telemetryUpgradeConfiguration.getCdpTelemetry()).willReturn(cdpTelemetry);
+        given(cdpTelemetry.getDesiredVersion()).willReturn("0.4.24");
         doNothing().when(telemetryOrchestrator).initDiagnosticCollection(anyList(), anySet(), anyMap(), any());
         // WHEN
         underTest.init(STACK_ID, diagnosticParameters(DiagnosticsDestination.SUPPORT));
@@ -232,6 +242,7 @@ public class DiagnosticsOperationsServiceTest {
     private DiagnosticParameters diagnosticParameters(DiagnosticsDestination destination) {
         DiagnosticParameters result = new DiagnosticParameters();
         result.setStatusReason("status");
+        result.setUpdatePackage(true);
         if (destination != null) {
             result.setDestination(DiagnosticsDestination.SUPPORT);
         }

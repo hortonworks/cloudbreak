@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.telemetry.diagnostics;
 
+import static com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigView.DESIRED_CDP_TELEMETRY_VERSION;
+
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -19,6 +22,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadata;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataFilter;
 import com.sequenceiq.cloudbreak.orchestrator.metadata.OrchestratorMetadataProvider;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryUpgradeConfiguration;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
@@ -30,6 +34,8 @@ public class DiagnosticsOperationsService {
 
     private static final Integer ERROR_MESSAGE_MAX_LENGTH = 1000;
 
+    private static final String TELEMETRY_SALT_COMPONENT = "telemetry";
+
     @Inject
     private TelemetryOrchestrator telemetryOrchestrator;
 
@@ -39,9 +45,12 @@ public class DiagnosticsOperationsService {
     @Inject
     private OrchestratorMetadataProvider orchestratorMetadataProvider;
 
+    @Inject
+    private TelemetryUpgradeConfiguration telemetryUpgradeConfiguration;
+
     public void init(Long stackId, DiagnosticParameters parameters) throws CloudbreakOrchestratorFailedException {
         executeDiagnosticsOperation(stackId, parameters, "init", (m, p) -> telemetryOrchestrator.initDiagnosticCollection(
-                m.getGatewayConfigs(), m.getNodes(), p.toMap(), m.getExitCriteriaModel()));
+                m.getGatewayConfigs(), m.getNodes(), getPropertiesForUpgrade(p), m.getExitCriteriaModel()));
     }
 
     public void collect(Long stackId, DiagnosticParameters parameters) throws CloudbreakOrchestratorFailedException {
@@ -172,6 +181,15 @@ public class DiagnosticsOperationsService {
                 .includeHostGroups(parameters.getHostGroups())
                 .exlcudeHosts(parameters.getExcludeHosts())
                 .build();
+    }
+
+    private Map<String, Object> getPropertiesForUpgrade(DiagnosticParameters parameters) {
+        Map<String, Object> result = parameters.toMap();
+        if (parameters.getUpdatePackage() && telemetryUpgradeConfiguration.getCdpTelemetry() != null
+                && StringUtils.isNotBlank(telemetryUpgradeConfiguration.getCdpTelemetry().getDesiredVersion())) {
+            result.put(TELEMETRY_SALT_COMPONENT, Map.of(DESIRED_CDP_TELEMETRY_VERSION, telemetryUpgradeConfiguration.getCdpTelemetry().getDesiredVersion()));
+        }
+        return result;
     }
 
 }
