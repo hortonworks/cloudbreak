@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.UserSyncState;
 import com.sequenceiq.freeipa.entity.Operation;
@@ -87,7 +86,7 @@ public class EnvironmentUserSyncStateCalculator {
     private UserSyncState calculateStateForCompletedOperation(String accountId, String envCrnString, UserSyncStatus userSyncStatus) {
         Operation lastSync = userSyncStatus.getLastStartedFullSync();
         if (environmentUserSyncSucceeded(lastSync, envCrnString)) {
-            UmsEventGenerationIds currentEventGenerationIds = umsEventGenerationIdsProvider.getEventGenerationIds(accountId, MDCUtils.getRequestId());
+            UmsEventGenerationIds currentEventGenerationIds = umsEventGenerationIdsProvider.getEventGenerationIds(accountId);
             if (eventGenerationIdsChecker.isInSync(userSyncStatus, currentEventGenerationIds)) {
                 return UserSyncState.UP_TO_DATE;
             } else {

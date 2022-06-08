@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
@@ -160,7 +159,7 @@ public class PasswordService {
     @VisibleForTesting
     Optional<Instant> calculateExpirationTime(String userCrn, String accountId) {
         LOGGER.debug("calculating expiration time for password in account {}", accountId);
-        UserManagementProto.Account account = umsClient.getAccountDetails(accountId, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
+        UserManagementProto.Account account = umsClient.getAccountDetails(accountId, regionAwareInternalCrnGeneratorFactory);
         Optional<UserManagementProto.WorkloadPasswordPolicy> passwordPolicy = getPasswordPolicyForUser(account, userCrn);
         if (passwordPolicy.isPresent()) {
             long maxLifetime = passwordPolicy.get().getWorkloadPasswordMaxLifetime();
@@ -196,11 +195,10 @@ public class PasswordService {
         Crn crn = Crn.safeFromString(userCrn);
         switch (crn.getResourceType()) {
             case USER:
-                return umsClient.getUserDetails(userCrn, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
+                return umsClient.getUserDetails(userCrn, regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
             case MACHINE_USER:
                 return umsClient.getMachineUserDetails(userCrn,
                         Crn.fromString(userCrn).getAccountId(),
-                        MDCUtils.getRequestId(),
                         regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
             default:
                 throw new IllegalArgumentException(String.format("UserCrn %s is not of resource type USER or MACHINE_USER", userCrn));

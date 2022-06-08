@@ -103,7 +103,7 @@ public class TelemetryConfigServiceTest {
         given(vmLogsService.getVmLogs()).willReturn(List.of(new VmLog()));
         given(telemetryCommonConfigService.createTelemetryCommonConfigs(any(), any(), any())).willReturn(new TelemetryCommonConfigView.Builder().build());
         given(cmLicenseParser.parseLicense(anyString())).willReturn(Optional.of(license));
-        given(umsClient.getAccountDetails(anyString(), any(), any())).willReturn(account);
+        given(umsClient.getAccountDetails(anyString(), any())).willReturn(account);
         given(fluentConfigService.createFluentConfigs(any(), anyBoolean(), anyBoolean(), isNull(), any()))
                 .willReturn(new FluentConfigView.Builder().build());
         given(nodeStatusConfigService.createNodeStatusConfig(isNull(), isNull(), anyBoolean())).willReturn(new NodeStatusConfigView.Builder().build());

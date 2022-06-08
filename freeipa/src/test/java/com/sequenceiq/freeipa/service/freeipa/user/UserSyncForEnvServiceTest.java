@@ -113,7 +113,7 @@ class UserSyncForEnvServiceTest {
         UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
         UmsUsersState umsUsersState2 = mock(UmsUsersState.class);
         when(umsUsersStateProviderDispatcher
-                .getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN, ENV_CRN_2)), eq(Set.of()), eq(Set.of()), any(), eq(options)))
+                .getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN, ENV_CRN_2)), eq(Set.of()), eq(Set.of()), eq(options)))
                 .thenReturn(Map.of(ENV_CRN, umsUsersState1, ENV_CRN_2, umsUsersState2));
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
             SyncStatusDetail result = (SyncStatusDetail) inv.getArgument(0, Callable.class).call();
@@ -121,7 +121,7 @@ class UserSyncForEnvServiceTest {
             when(future.get()).thenReturn(result);
             return future;
         });
-        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID), any(Optional.class))).thenReturn(new UmsEventGenerationIds());
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(new UmsEventGenerationIds());
         when(userSyncForStackService.synchronizeStack(stack1, umsUsersState1, options, OPERATION_ID))
                 .thenReturn(new SyncStatusDetail(ENV_CRN, SynchronizationStatus.COMPLETED, "", ImmutableMultimap.of()));
         when(userSyncForStackService.synchronizeStack(stack2, umsUsersState2, options, OPERATION_ID))
@@ -156,7 +156,7 @@ class UserSyncForEnvServiceTest {
         UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
         UmsUsersState umsUsersState2 = mock(UmsUsersState.class);
         when(umsUsersStateProviderDispatcher
-                .getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN, ENV_CRN_2)), eq(Set.of()), eq(Set.of()), any(), eq(options)))
+                .getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN, ENV_CRN_2)), eq(Set.of()), eq(Set.of()), eq(options)))
                 .thenReturn(Map.of(ENV_CRN, umsUsersState1, ENV_CRN_2, umsUsersState2));
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
             SyncStatusDetail result = (SyncStatusDetail) inv.getArgument(0, Callable.class).call();
@@ -164,7 +164,7 @@ class UserSyncForEnvServiceTest {
             when(future.get()).thenReturn(result);
             return future;
         });
-        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID), any(Optional.class))).thenReturn(new UmsEventGenerationIds());
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(new UmsEventGenerationIds());
         when(userSyncForStackService.synchronizeStack(stack1, umsUsersState1, options, OPERATION_ID))
                 .thenReturn(new SyncStatusDetail(ENV_CRN, SynchronizationStatus.FAILED, "fial1", ImmutableMultimap.of(ENV_CRN, "failed1")));
         when(userSyncForStackService.synchronizeStack(stack2, umsUsersState2, options, OPERATION_ID))
@@ -203,14 +203,14 @@ class UserSyncForEnvServiceTest {
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(OPERATION_ID), eq(ACCOUNT_ID), any(Runnable.class));
         UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
-        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), any(), eq(options)))
+        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), eq(options)))
                 .thenReturn(Map.of(ENV_CRN, umsUsersState1));
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
             Future future = mock(Future.class);
             when(future.get()).thenThrow(new InterruptedException("interrupt"));
             return future;
         });
-        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID), any(Optional.class))).thenReturn(new UmsEventGenerationIds());
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(new UmsEventGenerationIds());
 
         underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1), userSyncFilter, options, System.currentTimeMillis());
 
@@ -241,14 +241,14 @@ class UserSyncForEnvServiceTest {
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(OPERATION_ID), eq(ACCOUNT_ID), any(Runnable.class));
         UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
-        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), any(), eq(options)))
+        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), eq(options)))
                 .thenReturn(Map.of(ENV_CRN, umsUsersState1));
         Future<?> future = mock(Future.class);
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
             when(future.get(0L, TimeUnit.MILLISECONDS)).thenThrow(new TimeoutException("timeout"));
             return future;
         });
-        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID), any(Optional.class))).thenReturn(new UmsEventGenerationIds());
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(new UmsEventGenerationIds());
         when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
 
         underTest.synchronizeUsers(OPERATION_ID, ACCOUNT_ID, List.of(stack1), userSyncFilter, options, System.currentTimeMillis());
@@ -281,7 +281,7 @@ class UserSyncForEnvServiceTest {
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(OPERATION_ID), eq(ACCOUNT_ID), any(Runnable.class));
         UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
-        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), any(), eq(options)))
+        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), eq(options)))
                 .thenReturn(Map.of(ENV_CRN, umsUsersState1));
         when(userSyncForStackService.synchronizeStack(stack1, umsUsersState1, options, OPERATION_ID))
                 .thenReturn(new SyncStatusDetail(ENV_CRN, SynchronizationStatus.COMPLETED, "", ImmutableMultimap.of()));
@@ -291,7 +291,7 @@ class UserSyncForEnvServiceTest {
             when(future.get(anyLong(), eq(TimeUnit.MILLISECONDS))).thenReturn(result);
             return future;
         });
-        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID), any(Optional.class))).thenReturn(new UmsEventGenerationIds());
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(new UmsEventGenerationIds());
         when(userSyncStatusService.getOrCreateForStack(stack1)).thenReturn(new UserSyncStatus());
         when(entitlementService.isUserSyncThreadTimeoutEnabled(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
 

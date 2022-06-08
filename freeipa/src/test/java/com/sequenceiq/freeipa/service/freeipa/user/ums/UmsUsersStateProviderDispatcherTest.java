@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
@@ -59,18 +58,17 @@ class UmsUsersStateProviderDispatcherTest {
         UserSyncOptions userSyncOptions = createUserSyncOptions(true);
 
         Map<String, UmsUsersState> expected = createExpectedResponse();
-        when(bulkUmsUsersStateProvider.get(anyString(), any(Set.class), any(Optional.class), any(UserSyncOptions.class)))
+        when(bulkUmsUsersStateProvider.get(anyString(), any(Set.class), any(UserSyncOptions.class)))
                 .thenReturn(expected);
 
-        Optional<String> requestIdOptional = Optional.of(UUID.randomUUID().toString());
         Map<String, UmsUsersState> response = underTest.getEnvToUmsUsersStateMap(
                 ACCOUNT_ID, ENVIRONMENT_CRNS,
-                userCrns, machineUserCrns, requestIdOptional, userSyncOptions);
+                userCrns, machineUserCrns, userSyncOptions);
 
         assertEquals(expected, response);
-        verify(bulkUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS, requestIdOptional, userSyncOptions);
+        verify(bulkUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS, userSyncOptions);
         verify(defaultUmsUsersStateProvider, never()).get(anyString(), any(Set.class),
-                any(Set.class), any(Set.class), any(Optional.class), any(UserSyncOptions.class));
+                any(Set.class), any(Set.class), any(UserSyncOptions.class));
     }
 
     @Test
@@ -79,22 +77,21 @@ class UmsUsersStateProviderDispatcherTest {
         Set<String> machineUserCrns = Set.of();
         UserSyncOptions userSyncOptions = createUserSyncOptions(true);
 
-        when(bulkUmsUsersStateProvider.get(anyString(), any(Set.class), any(Optional.class), any(UserSyncOptions.class)))
+        when(bulkUmsUsersStateProvider.get(anyString(), any(Set.class), any(UserSyncOptions.class)))
                 .thenThrow(StatusRuntimeException.class);
         Map<String, UmsUsersState> expected = createExpectedResponse();
         when(defaultUmsUsersStateProvider.get(anyString(), any(Set.class),
-                any(Set.class), any(Set.class), any(Optional.class), any(UserSyncOptions.class)))
+                any(Set.class), any(Set.class), any(UserSyncOptions.class)))
                 .thenReturn(expected);
 
-        Optional<String> requestIdOptional = Optional.of(UUID.randomUUID().toString());
         Map<String, UmsUsersState> response = underTest.getEnvToUmsUsersStateMap(
                 ACCOUNT_ID, ENVIRONMENT_CRNS,
-                userCrns, machineUserCrns, requestIdOptional, userSyncOptions);
+                userCrns, machineUserCrns, userSyncOptions);
 
         assertEquals(expected, response);
-        verify(bulkUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS, requestIdOptional, userSyncOptions);
+        verify(bulkUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS, userSyncOptions);
         verify(defaultUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS,
-                userCrns, machineUserCrns, requestIdOptional, userSyncOptions);
+                userCrns, machineUserCrns, userSyncOptions);
     }
 
     @Test
@@ -105,19 +102,18 @@ class UmsUsersStateProviderDispatcherTest {
 
         Map<String, UmsUsersState> expected = createExpectedResponse();
         when(defaultUmsUsersStateProvider.get(anyString(), any(Set.class),
-                any(Set.class), any(Set.class), any(Optional.class), any(UserSyncOptions.class)))
+                any(Set.class), any(Set.class), any(UserSyncOptions.class)))
                 .thenReturn(expected);
 
-        Optional<String> requestIdOptional = Optional.of(UUID.randomUUID().toString());
         Map<String, UmsUsersState> response = underTest.getEnvToUmsUsersStateMap(
                 ACCOUNT_ID, ENVIRONMENT_CRNS,
-                userCrns, machineUserCrns, requestIdOptional, userSyncOptions);
+                userCrns, machineUserCrns, userSyncOptions);
 
         assertEquals(expected, response);
         verify(bulkUmsUsersStateProvider, never())
-                .get(anyString(), anyCollection(), any(Optional.class), any(UserSyncOptions.class));
+                .get(anyString(), anyCollection(), any(UserSyncOptions.class));
         verify(defaultUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS,
-                userCrns, machineUserCrns, requestIdOptional, userSyncOptions);
+                userCrns, machineUserCrns, userSyncOptions);
     }
 
     private Map<String, UmsUsersState> createExpectedResponse() {

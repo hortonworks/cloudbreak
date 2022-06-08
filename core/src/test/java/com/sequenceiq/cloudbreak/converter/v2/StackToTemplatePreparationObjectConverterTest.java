@@ -342,7 +342,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         IdBroker idbroker = idBrokerConverterUtil.generateIdBrokerSignKeys(cluster);
         when(idBrokerService.getByCluster(any(Cluster.class))).thenReturn(idbroker);
         when(idBrokerService.save(any(IdBroker.class))).thenReturn(idbroker);
-        when(grpcUmsClient.listServicePrincipalCloudIdentities(anyString(), anyString(), any(Optional.class))).thenReturn(Collections.EMPTY_LIST);
+        when(grpcUmsClient.listServicePrincipalCloudIdentities(anyString(), anyString())).thenReturn(Collections.EMPTY_LIST);
         when(dbCertificateProvider.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(stackMock.getId()).thenReturn(1L);
         when(generalClusterConfigsProvider.generalClusterConfigs(any(Stack.class), any(Cluster.class))).thenReturn(new GeneralClusterConfigs());

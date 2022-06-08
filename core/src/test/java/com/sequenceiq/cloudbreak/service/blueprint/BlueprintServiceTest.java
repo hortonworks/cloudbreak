@@ -143,7 +143,7 @@ public class BlueprintServiceTest {
         lenient().when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         lenient().when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
         lenient().when(workspaceService.get(1L, user)).thenReturn(getWorkspace());
-        lenient().doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString(), any());
+        lenient().doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString());
     }
 
     @Test

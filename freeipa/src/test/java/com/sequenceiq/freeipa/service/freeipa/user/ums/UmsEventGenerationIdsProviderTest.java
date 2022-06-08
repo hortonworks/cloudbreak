@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -69,10 +68,9 @@ class UmsEventGenerationIdsProviderTest {
     @Test
     void testGetEventGenerationIds() {
         GetEventGenerationIdsResponse response = createGetEventGenerationIdsResponse();
-        when(grpcUmsClient.getEventGenerationIds(any(), any(), any())).thenReturn(response);
+        when(grpcUmsClient.getEventGenerationIds(any(), any())).thenReturn(response);
 
-        UmsEventGenerationIds umsEventGenerationIds =
-                underTest.getEventGenerationIds(ACCOUNT_ID, Optional.of(UUID.randomUUID().toString()));
+        UmsEventGenerationIds umsEventGenerationIds = underTest.getEventGenerationIds(ACCOUNT_ID);
 
         for (EventMapping eventMapping : EventMapping.values()) {
             assertEquals(eventMapping.getConverter().apply(response.getEventGenerationIds()),

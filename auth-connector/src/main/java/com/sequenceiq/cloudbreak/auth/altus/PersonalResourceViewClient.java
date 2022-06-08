@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
@@ -50,12 +51,11 @@ public class PersonalResourceViewClient {
         this.tracer = tracer;
     }
 
-    public List<Boolean> hasRightOnResources(String requestId, String actorCrn, String right, Iterable<String> resources) {
-        checkNotNull(requestId, "requestId should not be null.");
+    public List<Boolean> hasRightOnResources(String actorCrn, String right, Iterable<String> resources) {
         checkNotNull(actorCrn, "actorCrn should not be null.");
         checkNotNull(resources, "resources should not be null.");
         try {
-            return newStub(requestId)
+            return newStub()
                     .hasResourcesByRight(
                             PersonalResourceViewProto.HasResourcesByRightRequest
                                     .newBuilder()
@@ -86,8 +86,8 @@ public class PersonalResourceViewClient {
      * @param requestId the request ID
      * @return the stub
      */
-    private PersonalResourceViewGrpc.PersonalResourceViewBlockingStub newStub(String requestId) {
-        checkNotNull(requestId, "requestId should not be null.");
+    private PersonalResourceViewGrpc.PersonalResourceViewBlockingStub newStub() {
+        String requestId = RequestIdUtil.getOrGenerate(MDCUtils.getRequestId());
         return PersonalResourceViewGrpc.newBlockingStub(channel).withInterceptors(
                 GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcShortTimeoutSec()),
                 GrpcUtil.getTracingInterceptor(tracer),

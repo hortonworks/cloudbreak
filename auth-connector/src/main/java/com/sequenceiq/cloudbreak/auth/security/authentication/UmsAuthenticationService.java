@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.auth.security.authentication;
 
-import java.util.Optional;
-
 import org.springframework.security.core.Authentication;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.MachineUser;
@@ -14,7 +12,6 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 public class UmsAuthenticationService implements AuthenticationService {
 
@@ -39,7 +36,6 @@ public class UmsAuthenticationService implements AuthenticationService {
 
     @Override
     public CloudbreakUser getCloudbreakUser(String userCrn, String principal) {
-        String requestId = MDCBuilder.getOrGenerateRequestId();
         Crn crn;
         try {
             crn = Crn.safeFromString(userCrn);
@@ -52,8 +48,7 @@ public class UmsAuthenticationService implements AuthenticationService {
                 if (RegionAwareInternalCrnGeneratorUtil.isInternalCrn(userCrn)) {
                     return RegionAwareInternalCrnGeneratorUtil.createInternalCrnUser(Crn.fromString(userCrn));
                 } else {
-                    User userInfo = umsClient.getUserDetails(userCrn,
-                            Optional.ofNullable(requestId), regionAwareInternalCrnGeneratorFactory);
+                    User userInfo = umsClient.getUserDetails(userCrn, regionAwareInternalCrnGeneratorFactory);
                     String userName = principal != null ? principal : userInfo.getEmail();
                     cloudbreakUser = new CloudbreakUser(userInfo.getUserId(), userCrn,
                             userName, userInfo.getEmail(), crn.getAccountId());
@@ -61,8 +56,7 @@ public class UmsAuthenticationService implements AuthenticationService {
                 break;
             case MACHINE_USER:
                 MachineUser machineUserInfo =
-                        umsClient.getMachineUserDetails(userCrn, Crn.fromString(userCrn).getAccountId(),
-                                Optional.ofNullable(requestId), regionAwareInternalCrnGeneratorFactory);
+                        umsClient.getMachineUserDetails(userCrn, Crn.fromString(userCrn).getAccountId(), regionAwareInternalCrnGeneratorFactory);
                 String machineUserName = principal != null ? principal : machineUserInfo.getMachineUserName();
                 cloudbreakUser = new CloudbreakUser(machineUserInfo.getMachineUserId(), userCrn,
                         machineUserName, machineUserInfo.getMachineUserName(), crn.getAccountId());

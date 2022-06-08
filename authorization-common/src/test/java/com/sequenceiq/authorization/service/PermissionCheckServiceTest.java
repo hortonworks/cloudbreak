@@ -138,7 +138,7 @@ public class PermissionCheckServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(accountAuthorizationService).authorize(any(CheckPermissionByAccount.class), eq(USER_CRN));
-        verify(resourceAuthorizationService).authorize(eq(USER_CRN), eq(proceedingJoinPoint), eq(methodSignature), any());
+        verify(resourceAuthorizationService).authorize(eq(USER_CRN), eq(proceedingJoinPoint), eq(methodSignature));
         verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
         verifyNoInteractions(
                 internalUserModifier);
@@ -154,7 +154,7 @@ public class PermissionCheckServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
         verify(accountAuthorizationService).authorize(any(CheckPermissionByAccount.class), eq(USER_CRN));
-        verify(resourceAuthorizationService).authorize(eq(USER_CRN), eq(proceedingJoinPoint), eq(methodSignature), any());
+        verify(resourceAuthorizationService).authorize(eq(USER_CRN), eq(proceedingJoinPoint), eq(methodSignature));
         verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
         verifyNoInteractions(
                 internalUserModifier);
@@ -169,7 +169,7 @@ public class PermissionCheckServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.hasPermission(proceedingJoinPoint));
 
-        verify(resourceAuthorizationService).authorize(eq(USER_CRN), eq(proceedingJoinPoint), eq(methodSignature), any());
+        verify(resourceAuthorizationService).authorize(eq(USER_CRN), eq(proceedingJoinPoint), eq(methodSignature));
         verify(commonPermissionCheckingUtils).proceed(eq(proceedingJoinPoint), eq(methodSignature), anyLong());
         verifyNoInteractions(
                 internalUserModifier,

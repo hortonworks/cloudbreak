@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -65,7 +64,7 @@ public class CredentialDeleteService extends AbstractCredentialService {
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", name);
         Credential archived = archiveCredential(credential);
-        ownerAssignmentService.notifyResourceDeleted(archived.getResourceCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(archived.getResourceCrn());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
         return archived;
     }
@@ -76,7 +75,7 @@ public class CredentialDeleteService extends AbstractCredentialService {
         checkEnvironmentsForDeletion(credential);
         LOGGER.debug("About to archive credential: {}", crn);
         Credential archived = archiveCredential(credential);
-        ownerAssignmentService.notifyResourceDeleted(archived.getResourceCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(archived.getResourceCrn());
         sendCredentialNotification(credential, ResourceEvent.CREDENTIAL_DELETED);
         return archived;
     }

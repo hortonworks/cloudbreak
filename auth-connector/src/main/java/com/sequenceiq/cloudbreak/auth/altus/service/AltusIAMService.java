@@ -78,7 +78,7 @@ public class AltusIAMService {
             result = true;
         } else {
             LOGGER.debug("Query (or create if needed) machine user with name {}", machineUserName);
-            Optional<String> machineUserCrn = umsClient.createMachineUser(machineUserName, actorCrn, accountId, Optional.empty(),
+            Optional<String> machineUserCrn = umsClient.createMachineUser(machineUserName, actorCrn, accountId,
                     regionAwareInternalCrnGeneratorFactory);
             if (machineUserCrn.isPresent()) {
                 return umsClient.doesMachineUserHasAccessKey(actorCrn, accountId, machineUserCrn.get(), accessKey,
@@ -123,7 +123,6 @@ public class AltusIAMService {
     }
 
     public List<UserManagementProto.MachineUser> getAllMachineUsersForAccount(String accountId) {
-        return umsClient.listAllMachineUsers(accountId, true, true,
-                Optional.empty(), regionAwareInternalCrnGeneratorFactory);
+        return umsClient.listAllMachineUsers(accountId, true, true, regionAwareInternalCrnGeneratorFactory);
     }
 }

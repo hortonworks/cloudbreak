@@ -96,7 +96,7 @@ public class FreeIPAEndpointManagementServiceTest {
         UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
             .setWorkloadSubdomain(accountWorkloadSubdomain)
             .build();
-        when(grpcUmsClient.getAccountDetails(any(), any(), any())).thenReturn(umsAccount);
+        when(grpcUmsClient.getAccountDetails(any(), any())).thenReturn(umsAccount);
 
         underTest.setCertGenerationEnabled(true);
     }

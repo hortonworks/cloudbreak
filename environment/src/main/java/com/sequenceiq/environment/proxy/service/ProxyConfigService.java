@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
 
@@ -61,7 +60,7 @@ public class ProxyConfigService implements CompositeAuthResourcePropertyProvider
                 .orElseThrow(notFound("Proxy config with name:", name));
         MDCBuilder.buildMdcContext(proxyConfig);
         proxyConfigRepository.delete(proxyConfig);
-        ownerAssignmentService.notifyResourceDeleted(proxyConfig.getResourceCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(proxyConfig.getResourceCrn());
         return proxyConfig;
     }
 
@@ -70,7 +69,7 @@ public class ProxyConfigService implements CompositeAuthResourcePropertyProvider
                 .orElseThrow(notFound("Proxy config with crn:", crn));
         MDCBuilder.buildMdcContext(proxyConfig);
         proxyConfigRepository.delete(proxyConfig);
-        ownerAssignmentService.notifyResourceDeleted(proxyConfig.getResourceCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(proxyConfig.getResourceCrn());
         return proxyConfig;
     }
 
@@ -78,7 +77,7 @@ public class ProxyConfigService implements CompositeAuthResourcePropertyProvider
         Set<ProxyConfig> toBeDeleted = getByNamesForAccountId(names, accountId);
         proxyConfigRepository.deleteAll(toBeDeleted);
         toBeDeleted.stream().forEach(proxy ->
-                ownerAssignmentService.notifyResourceDeleted(proxy.getResourceCrn(), MDCUtils.getRequestId()));
+                ownerAssignmentService.notifyResourceDeleted(proxy.getResourceCrn()));
         return toBeDeleted;
     }
 

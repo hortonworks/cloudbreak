@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.action.ums;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +36,10 @@ public class UnassignResourceRoleAction extends AbstractUmsAction<UmsTestDto> {
         Log.when(LOGGER, format(" Revoke resource role '%s' from user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
         Log.whenJson(LOGGER, format(" Revoke resource role request:%n "), testDto.getRequest());
         LOGGER.info(format(" Revoking resource role '%s' from user '%s' at resource '%s'... ", resourceRole, userCrn, resourceCrn));
-        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(userCrn, Optional.of(""),
+        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(userCrn,
                 regionAwareInternalCrnGeneratorFactory);
         if (assignedResourceRoles.get(resourceCrn).contains(resourceRole)) {
-            client.getDefaultClient().unassignResourceRole(userCrn, resourceCrn, resourceRole, Optional.of(""),
+            client.getDefaultClient().unassignResourceRole(userCrn, resourceCrn, resourceRole,
                     regionAwareInternalCrnGeneratorFactory);
             // wait for UmsRightsCache to expire
             Thread.sleep(7000);

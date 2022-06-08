@@ -31,17 +31,16 @@ import com.sequenceiq.authorization.info.model.CheckRightV4Request;
 import com.sequenceiq.authorization.info.model.CheckRightV4Response;
 import com.sequenceiq.authorization.info.model.CheckRightV4SingleResponse;
 import com.sequenceiq.authorization.info.model.RightV4;
-import com.sequenceiq.authorization.service.list.ResourceListProvider;
 import com.sequenceiq.authorization.service.list.Resource;
 import com.sequenceiq.authorization.service.list.ResourceFilteringService;
+import com.sequenceiq.authorization.service.list.ResourceListProvider;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 @Service
 public class UtilAuthorizationService {
@@ -74,7 +73,7 @@ public class UtilAuthorizationService {
         List<AuthorizationProto.RightCheck> rightChecks = rightReq.getRights().stream()
                 .map(rightV4 -> createRightCheckObject(umsRightProvider.getRight(rightV4.getAction()), null))
                 .collect(Collectors.toList());
-        List<Boolean> results = grpcUmsClient.hasRights(userCrn, rightChecks, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
+        List<Boolean> results = grpcUmsClient.hasRights(userCrn, rightChecks, regionAwareInternalCrnGeneratorFactory);
         return new CheckRightV4Response(rightReq.getRights().stream()
                 .map(rightV4 -> new CheckRightV4SingleResponse(rightV4, results.get(rightReq.getRights().indexOf(rightV4))))
                 .collect(Collectors.toList()));
@@ -89,7 +88,7 @@ public class UtilAuthorizationService {
         List<AuthorizationProto.RightCheck> rightChecks = Lists.newLinkedList(resourceRightsChecks.values());
 
         LOGGER.info("Check rights: {}", rightChecks);
-        List<Boolean> results = grpcUmsClient.hasRights(userCrn, rightChecks, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
+        List<Boolean> results = grpcUmsClient.hasRights(userCrn, rightChecks, regionAwareInternalCrnGeneratorFactory);
 
         Map<AuthorizationProto.RightCheck, Boolean> rightCheckResultMap = new HashMap<>();
         for (AuthorizationProto.RightCheck rightCheck : rightChecks) {

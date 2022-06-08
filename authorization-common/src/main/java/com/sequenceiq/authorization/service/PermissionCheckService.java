@@ -71,7 +71,7 @@ public class PermissionCheckService {
             if (hasAnnotationOnMethod(methodSignature, CheckPermissionByAccount.class)) {
                 accountAuthorizationService.authorize(methodSignature.getMethod().getAnnotation(CheckPermissionByAccount.class), userCrn);
             }
-            resourceAuthorizationService.authorize(userCrn, proceedingJoinPoint, methodSignature, getRequestId());
+            resourceAuthorizationService.authorize(userCrn, proceedingJoinPoint, methodSignature);
         }
 
         if (internalUser && initiatorUserCrnParameter.isPresent()) {
@@ -132,9 +132,5 @@ public class PermissionCheckService {
 
     private boolean hasAnnotationOnClass(ProceedingJoinPoint proceedingJoinPoint, Class<? extends Annotation> annotation) {
         return proceedingJoinPoint.getTarget().getClass().isAnnotationPresent(annotation);
-    }
-
-    protected Optional<String> getRequestId() {
-        return Optional.of(MDCBuilder.getOrGenerateRequestId());
     }
 }

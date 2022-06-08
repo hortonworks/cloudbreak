@@ -128,6 +128,6 @@ class PasswordServiceTest {
                         .setWorkloadPasswordMaxLifetime(lifetime)
                         .build()));
 
-        when(grpcUmsClient.getAccountDetails(eq(ACCOUNT_ID), any(), any())).thenReturn(builder.build());
+        when(grpcUmsClient.getAccountDetails(eq(ACCOUNT_ID), any())).thenReturn(builder.build());
     }
 }

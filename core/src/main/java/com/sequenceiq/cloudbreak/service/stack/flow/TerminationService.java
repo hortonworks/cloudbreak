@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
@@ -127,7 +126,7 @@ public class TerminationService {
                 return updatedStack;
             });
             if (stack.getType().equals(StackType.WORKLOAD)) {
-                ownerAssignmentService.notifyResourceDeleted(stack.getResourceCrn(), MDCUtils.getRequestId());
+                ownerAssignmentService.notifyResourceDeleted(stack.getResourceCrn());
             }
         } catch (TransactionService.TransactionExecutionException e) {
             throw e.getCause();

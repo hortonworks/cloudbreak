@@ -98,7 +98,7 @@ public class UmsAuthenticationServiceTest {
                 .setCrn(crn)
                 .build();
 
-        when(grpcUmsClient.getUserDetails(anyString(), any(), any())).thenReturn(user);
+        when(grpcUmsClient.getUserDetails(anyString(), any())).thenReturn(user);
         CloudbreakUser cloudbreakUser = underTest.getCloudbreakUser(crn, null);
 
         assertEquals("userId", cloudbreakUser.getUserId());
@@ -114,7 +114,7 @@ public class UmsAuthenticationServiceTest {
                 .setCrn(crn)
                 .build();
 
-        when(grpcUmsClient.getMachineUserDetails(anyString(), anyString(), any(), any())).thenReturn(machineUser);
+        when(grpcUmsClient.getMachineUserDetails(anyString(), anyString(), any())).thenReturn(machineUser);
         CloudbreakUser cloudbreakUser = underTest.getCloudbreakUser(crn, "principal");
 
         assertEquals("machineUserId", cloudbreakUser.getUserId());

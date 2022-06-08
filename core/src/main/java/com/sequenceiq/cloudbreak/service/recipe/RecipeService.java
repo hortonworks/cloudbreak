@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.domain.CreationType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.view.RecipeView;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
@@ -72,14 +71,14 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
     public Recipe delete(NameOrCrn recipeNameOrCrn, Long workspaceId) {
         Recipe toDelete = get(recipeNameOrCrn, workspaceId);
         Recipe deleted = super.delete(toDelete);
-        ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn());
         return deleted;
     }
 
     @Override
     public Set<Recipe> deleteMultipleByNameFromWorkspace(Set<String> names, Long workspaceId) {
         Set<Recipe> deletedRecipes = super.deleteMultipleByNameFromWorkspace(names, workspaceId);
-        deletedRecipes.stream().forEach(deleted -> ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn(), MDCUtils.getRequestId()));
+        deletedRecipes.stream().forEach(deleted -> ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn()));
         return deletedRecipes;
     }
 

@@ -67,14 +67,14 @@ class EnvironmentBasedDomainNameProviderTest {
         UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
                 .setWorkloadSubdomain(accountWorkloadSubdomain)
                 .build();
-        when(grpcUmsClient.getAccountDetails(anyString(), any(), any())).thenReturn(umsAccount);
+        when(grpcUmsClient.getAccountDetails(anyString(), any())).thenReturn(umsAccount);
         when(legacyEnvironmentNameBasedDomainNameProvider.getDomainName(anyString(), anyString())).thenReturn(environmentDomain);
 
         String commonName = underTest.getCommonName(endpointName, environment);
 
         String expected = String.format("5e8a4beefa5d7f90.%s", environmentDomain);
         assertEquals(expected, commonName);
-        verify(grpcUmsClient, times(1)).getAccountDetails(anyString(), any(), any());
+        verify(grpcUmsClient, times(1)).getAccountDetails(anyString(), any());
         verify(legacyEnvironmentNameBasedDomainNameProvider, times(1)).getDomainName(anyString(), anyString());
     }
 }

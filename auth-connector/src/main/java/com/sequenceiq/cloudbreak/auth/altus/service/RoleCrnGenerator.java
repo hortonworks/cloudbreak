@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 @Service
 public class RoleCrnGenerator {
@@ -44,7 +43,7 @@ public class RoleCrnGenerator {
     }
 
     public Crn getResourceRoleCrn(String resourceRoleName, String accountId) {
-        Set<String> resourceRoles = grpcUmsClient.getResourceRoles(accountId, MDCUtils.getRequestId());
+        Set<String> resourceRoles = grpcUmsClient.getResourceRoles(accountId);
         LOGGER.info("Resource roles in account {} are {}", accountId, Joiner.on(",").join(resourceRoles));
         return resourceRoles.stream()
                 .map(Crn::safeFromString)
@@ -54,7 +53,7 @@ public class RoleCrnGenerator {
     }
 
     public Crn getRoleCrn(String roleName, String accountId) {
-        Set<String> roles = grpcUmsClient.getRoles(accountId, MDCUtils.getRequestId());
+        Set<String> roles = grpcUmsClient.getRoles(accountId);
         LOGGER.info("Roles in account {} are {}", accountId, Joiner.on(",").join(roles));
         return roles.stream()
                 .map(Crn::safeFromString)

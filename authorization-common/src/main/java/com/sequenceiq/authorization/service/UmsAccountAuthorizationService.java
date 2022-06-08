@@ -1,7 +1,5 @@
 package com.sequenceiq.authorization.service;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -13,7 +11,6 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Service
 public class UmsAccountAuthorizationService {
@@ -37,7 +34,7 @@ public class UmsAccountAuthorizationService {
     }
 
     private void checkRightOfUser(String userCrn, String right, String unauthorizedMessage) {
-        if (!umsClient.checkAccountRight(userCrn, right, getRequestId(), regionAwareInternalCrnGeneratorFactory)) {
+        if (!umsClient.checkAccountRight(userCrn, right, regionAwareInternalCrnGeneratorFactory)) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
@@ -56,9 +53,5 @@ public class UmsAccountAuthorizationService {
             throw new AccessDeniedException(unauthorizedMessage);
         }
         checkRightOfUser(actorCrnStr, action);
-    }
-
-    protected Optional<String> getRequestId() {
-        return Optional.of(MDCBuilder.getOrGenerateRequestId());
     }
 }

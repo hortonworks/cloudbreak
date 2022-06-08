@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.publicendpoint;
 
 import static com.google.common.hash.Hashing.sipHash24;
 
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -17,7 +16,6 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.dns.LegacyEnvironmentNameBasedDomainNameProvider;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -79,8 +77,7 @@ public class EnvironmentBasedDomainNameProvider {
     private String getAccountWorkloadSubdomain(String environmentCrn) {
         //starting to use the CRN of the environment as the certificate renewal will be automatic and be triggered by PEM with internal user
         String accountId = Crn.safeFromString(environmentCrn).getAccountId();
-        Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
-        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(accountId, requestIdOptional, regionAwareInternalCrnGeneratorFactory);
+        UserManagementProto.Account account = grpcUmsClient.getAccountDetails(accountId, regionAwareInternalCrnGeneratorFactory);
         String accountSubdomain = account.getWorkloadSubdomain();
         if (accountSubdomain == null || accountSubdomain.isEmpty()) {
             accountSubdomain = FREEIPA_DEFAULT_ACCOUNT_DOMAIN;

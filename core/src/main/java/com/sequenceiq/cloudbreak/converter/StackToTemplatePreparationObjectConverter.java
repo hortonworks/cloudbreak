@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.google.common.base.Strings;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.CustomConfigurationsRuntimeVersionException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
@@ -232,8 +231,7 @@ public class StackToTemplatePreparationObjectConverter {
             String accountId = Crn.safeFromString(source.getResourceCrn()).getAccountId();
             List<UserManagementProto.ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities =
                     grpcUmsClient.listServicePrincipalCloudIdentities(accountId,
-                            source.getEnvironmentCrn(),
-                            MDCUtils.getRequestId());
+                            source.getEnvironmentCrn());
 
             BlueprintView blueprintView = blueprintViewProvider.getBlueprintView(cluster.getBlueprint());
             Optional<String> version = Optional.ofNullable(blueprintView.getVersion());

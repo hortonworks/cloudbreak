@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -373,7 +372,6 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             grpcUmsClient.assignResourceRole(userCrn,
                     environmentCrn,
                     roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(Crn.safeFromString(environmentCrn).getAccountId()),
-                    MDCUtils.getRequestId(),
                     regionAwareInternalCrnGeneratorFactory);
             LOGGER.debug("EnvironmentAdmin role of {} environemnt is successfully assigned to the {} user", environmentCrn, userCrn);
         } catch (StatusRuntimeException ex) {

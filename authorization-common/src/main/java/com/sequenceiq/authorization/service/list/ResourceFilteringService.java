@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Service
 public class ResourceFilteringService {
@@ -37,7 +36,7 @@ public class ResourceFilteringService {
         }
         Map<Optional<String>, List<R>> resourcesByParents = sortByParentResources(resources);
         List<String> resourceCrns = flattenByParentResources(resourcesByParents);
-        List<Boolean> result = umsClient.hasRightsOnResources(userCrn.toString(), resourceCrns, action.getRight(), getRequestId());
+        List<Boolean> result = umsClient.hasRightsOnResources(userCrn.toString(), resourceCrns, action.getRight());
         Map<String, Boolean> resultMap = calculateResultMap(resourcesByParents, result);
         return resultMapper.apply(resourceCrn -> resultMap.getOrDefault(resourceCrn, Boolean.FALSE));
     }
@@ -82,9 +81,5 @@ public class ResourceFilteringService {
             }
         });
         return resultMap;
-    }
-
-    private Optional<String> getRequestId() {
-        return Optional.of(MDCBuilder.getOrGenerateRequestId());
     }
 }

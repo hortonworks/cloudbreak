@@ -73,12 +73,12 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
         given(environmentDeletionDto.getEnvironmentDto()).willReturn(environmentDto);
         given(environmentDto.getResourceCrn()).willReturn(TEST_CRN);
         given(environmentService.findEnvironmentById(any())).willReturn(Optional.of(new Environment()));
-        doNothing().when(ownerAssignmentService).notifyResourceDeleted(eq(TEST_CRN), any());
+        doNothing().when(ownerAssignmentService).notifyResourceDeleted(eq(TEST_CRN));
         // WHEN
         underTest.accept(environmentDtoEvent);
         // THEN
         verify(environmentService, times(1)).findEnvironmentById(any());
-        verify(ownerAssignmentService, times(1)).notifyResourceDeleted(eq(TEST_CRN), any());
+        verify(ownerAssignmentService, times(1)).notifyResourceDeleted(eq(TEST_CRN));
         verify(eventSender, times(1)).sendEvent(any(EnvDeleteEvent.class), any());
     }
 
@@ -92,12 +92,12 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
         given(environmentDeletionDto.getEnvironmentDto()).willReturn(environmentDto);
         given(environmentDto.getResourceCrn()).willReturn(null);
         given(environmentService.findEnvironmentById(any())).willReturn(Optional.of(env));
-        doNothing().when(ownerAssignmentService).notifyResourceDeleted(eq(crnFromQuery), any());
+        doNothing().when(ownerAssignmentService).notifyResourceDeleted(eq(crnFromQuery));
         // WHEN
         underTest.accept(environmentDtoEvent);
         // THEN
         verify(environmentService, times(1)).findEnvironmentById(any());
-        verify(ownerAssignmentService, times(1)).notifyResourceDeleted(eq(crnFromQuery), any());
+        verify(ownerAssignmentService, times(1)).notifyResourceDeleted(eq(crnFromQuery));
         verify(eventSender, times(1)).sendEvent(any(EnvDeleteEvent.class), any());
     }
 
@@ -109,12 +109,12 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
         given(environmentDeletionDto.getEnvironmentDto()).willReturn(environmentDto);
         given(environmentDto.getResourceCrn()).willReturn(TEST_CRN);
         given(environmentService.findEnvironmentById(any())).willReturn(Optional.of(new Environment()));
-        doThrow(new UmsOperationException("ums exception")).when(ownerAssignmentService).notifyResourceDeleted(eq(TEST_CRN), any());
+        doThrow(new UmsOperationException("ums exception")).when(ownerAssignmentService).notifyResourceDeleted(eq(TEST_CRN));
         // WHEN
         underTest.accept(environmentDtoEvent);
         // THEN
         verify(environmentService, times(1)).findEnvironmentById(any());
-        verify(ownerAssignmentService, times(1)).notifyResourceDeleted(eq(TEST_CRN), any());
+        verify(ownerAssignmentService, times(1)).notifyResourceDeleted(eq(TEST_CRN));
         verify(eventSender, times(1)).sendEvent(any(EnvDeleteEvent.class), any());
     }
 }

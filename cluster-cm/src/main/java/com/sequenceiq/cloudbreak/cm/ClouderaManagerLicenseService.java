@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 @Service
 class ClouderaManagerLicenseService {
@@ -30,7 +29,7 @@ class ClouderaManagerLicenseService {
     }
 
     private boolean hasNoLicense(String accountId) {
-        return StringUtils.isEmpty(umsClient.getAccountDetails(accountId, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory)
+        return StringUtils.isEmpty(umsClient.getAccountDetails(accountId, regionAwareInternalCrnGeneratorFactory)
                 .getClouderaManagerLicenseKey());
     }
 

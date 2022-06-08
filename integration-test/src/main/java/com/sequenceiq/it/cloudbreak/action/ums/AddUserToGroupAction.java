@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.action.ums;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +35,7 @@ public class AddUserToGroupAction implements Action<UmsGroupTestDto, UmsClient> 
         testDto.withMember(memberCrn);
         Log.when(LOGGER, format(" Assigning user '%s' to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.whenJson(LOGGER, format(" Assign user to group request:%n "), testDto.getRequest());
-        client.getDefaultClient().addMemberToGroup(accountId, groupName, memberCrn, Optional.of(""), regionAwareInternalCrnGeneratorFactory);
+        client.getDefaultClient().addMemberToGroup(accountId, groupName, memberCrn, regionAwareInternalCrnGeneratorFactory);
         LOGGER.info(format(" User '%s' has been assigned to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.when(LOGGER, format(" User '%s' has been assigned to group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         return testDto;

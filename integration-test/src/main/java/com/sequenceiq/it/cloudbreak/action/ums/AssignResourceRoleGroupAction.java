@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.action.ums;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +30,7 @@ public class AssignResourceRoleGroupAction extends AbstractUmsAction<UmsTestDto>
         String resourceCrn = testDto.getRequest().getResourceCrn();
         Log.when(LOGGER, format(" Assigning resource role '%s' at resource '%s' for group '%s' ", resourceRole, resourceCrn, groupCrn));
         Log.whenJson(LOGGER, format(" Assign resource role request:%n "), testDto.getRequest());
-        client.getDefaultClient().assignResourceRole(groupCrn, resourceCrn, resourceRole, Optional.of(""), regionAwareInternalCrnGeneratorFactory);
+        client.getDefaultClient().assignResourceRole(groupCrn, resourceCrn, resourceRole, regionAwareInternalCrnGeneratorFactory);
         // wait for UmsRightsCache to expire
         Thread.sleep(7000);
         LOGGER.info(format(" Resource role '%s' has been assigned at resource '%s' for group '%s' ", resourceRole, resourceCrn, groupCrn));

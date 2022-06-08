@@ -15,7 +15,6 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.it.cloudbreak.UmsClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -41,7 +40,7 @@ public class EnvironmentUtil {
 
         for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
             try {
-                virtualGroup = client.getDefaultClient().getWorkloadAdministrationGroupName(accountId, MDCUtils.getRequestId(),
+                virtualGroup = client.getDefaultClient().getWorkloadAdministrationGroupName(accountId,
                         right, environmentCrn, regionAwareInternalCrnGeneratorFactory);
             } catch (StatusRuntimeException ex) {
                 if (Status.Code.NOT_FOUND != ex.getStatus().getCode()) {

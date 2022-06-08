@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
 import java.util.Map;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -22,9 +21,9 @@ public class UmsEventGenerationIdsProvider {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public UmsEventGenerationIds getEventGenerationIds(String accountId, Optional<String> requestId) {
+    public UmsEventGenerationIds getEventGenerationIds(String accountId) {
         EventGenerationIds eventGenerationIds =
-                grpcUmsClient.getEventGenerationIds(accountId, requestId, regionAwareInternalCrnGeneratorFactory)
+                grpcUmsClient.getEventGenerationIds(accountId, regionAwareInternalCrnGeneratorFactory)
                 .getEventGenerationIds();
 
         UmsEventGenerationIds umsEventGenerationIds = new UmsEventGenerationIds();

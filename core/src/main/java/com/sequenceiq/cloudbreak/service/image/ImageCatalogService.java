@@ -62,7 +62,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
@@ -474,7 +473,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         setImageCatalogAsDefault(null, user);
         imageCatalog.setName(generateArchiveName(name));
         imageCatalogRepository.save(imageCatalog);
-        ownerAssignmentService.notifyResourceDeleted(imageCatalog.getResourceCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(imageCatalog.getResourceCrn());
         userProfileHandler.destroyProfileImageCatalogPreparation(imageCatalog);
         LOGGER.debug("Image catalog has been archived: {}", imageCatalog);
         return imageCatalog;

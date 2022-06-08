@@ -59,7 +59,6 @@ import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
@@ -180,7 +179,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                 ? super.deleteByNameFromWorkspace(nameOrCrn.getName(), workspaceId)
                 : delete(blueprintRepository.findByResourceCrnAndWorkspaceId(nameOrCrn.getCrn(), workspaceId)
                 .orElseThrow(() -> notFound("blueprint", nameOrCrn.getCrn()).get()));
-        ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn());
         return deleted;
     }
 

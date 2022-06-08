@@ -145,7 +145,7 @@ class RdsDeletionHandlerTest {
         verify(consumptionService, never()).unscheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
         verify(databaseService, never()).terminate(any(SdxCluster.class), anyBoolean());
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(DatalakeStatusEnum.class), anyString(), any(SdxCluster.class));
-        verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString(), any(Optional.class));
+        verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString());
     }
 
     private void initHandlerEvent(boolean forceDelete) {
@@ -165,7 +165,7 @@ class RdsDeletionHandlerTest {
         verify(consumptionService, never()).unscheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
         verify(databaseService, never()).terminate(any(SdxCluster.class), anyBoolean());
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(DatalakeStatusEnum.class), anyString(), any(SdxCluster.class));
-        verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString(), any(Optional.class));
+        verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString());
     }
 
     @ParameterizedTest(name = "forceDelete={0}")
@@ -181,7 +181,7 @@ class RdsDeletionHandlerTest {
         verify(consumptionService, never()).unscheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
         verify(databaseService, never()).terminate(any(SdxCluster.class), anyBoolean());
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(DatalakeStatusEnum.class), anyString(), any(SdxCluster.class));
-        verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString(), any(Optional.class));
+        verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString());
     }
 
     @ParameterizedTest(name = "forceDelete={0}")
@@ -197,7 +197,7 @@ class RdsDeletionHandlerTest {
         verify(consumptionService, never()).unscheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
         verify(databaseService, never()).terminate(any(SdxCluster.class), anyBoolean());
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(DatalakeStatusEnum.class), anyString(), any(SdxCluster.class));
-        verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString(), any(Optional.class));
+        verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString());
     }
 
     @ParameterizedTest(name = "forceDelete={0}")
@@ -212,7 +212,7 @@ class RdsDeletionHandlerTest {
         verify(consumptionService, never()).unscheduleStorageConsumptionCollectionIfNeeded(any(SdxCluster.class));
         verify(databaseService, never()).terminate(any(SdxCluster.class), anyBoolean());
         verify(sdxStatusService, never()).setStatusForDatalakeAndNotify(any(DatalakeStatusEnum.class), anyString(), any(SdxCluster.class));
-        verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString(), any(Optional.class));
+        verify(ownerAssignmentService, never()).notifyResourceDeleted(anyString());
     }
 
     private void verifySuccessEvent(Selectable result) {
@@ -294,7 +294,7 @@ class RdsDeletionHandlerTest {
 
     private void verifyDeletedStatus(SdxCluster sdxCluster) {
         verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETED, "Datalake External RDS deleted", sdxCluster);
-        verify(ownerAssignmentService).notifyResourceDeleted(DATALAKE_CRN, Optional.of(REQUEST_ID));
+        verify(ownerAssignmentService).notifyResourceDeleted(DATALAKE_CRN);
     }
 
     static Object[][] executeTerminateDataProvider() {

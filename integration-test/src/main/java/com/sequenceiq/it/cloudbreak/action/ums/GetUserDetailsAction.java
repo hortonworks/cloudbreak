@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.action.ums;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +31,7 @@ public class GetUserDetailsAction implements Action<UmsTestDto, UmsClient> {
         Log.when(LOGGER, format(" Getting UMS user '%s' details. ", userCrn));
         Log.whenJson(LOGGER, " Get UMS user details request: ", testDto.getRequest());
         testDto.setResponse(client.getDefaultClient()
-                .getUserDetails(userCrn, Optional.of(""), regionAwareInternalCrnGeneratorFactory));
+                .getUserDetails(userCrn, regionAwareInternalCrnGeneratorFactory));
         UserManagementProto.User user = testDto.getResponse();
         LOGGER.info(format(" User details %ncrn: %s %nworkload username: %s %nfirst name: %s %nlast name: %s %nstate: %s %ncreation date: %s " +
                         "%nemail: %s %nexternal user id: %s %nSFDC contact id: %s ", user.getCrn(), user.getWorkloadUsername(), user.getFirstName(),

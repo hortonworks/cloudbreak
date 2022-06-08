@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.service.freeipa.user.ums;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -11,9 +10,6 @@ import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
-import io.grpc.Status;
-import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -26,8 +22,12 @@ import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsUserConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
+
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 
 @Component
 public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
@@ -50,14 +50,12 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
 
     public Map<String, UmsUsersState> get(
             String accountId, Collection<String> environmentCrns,
-            Optional<String> requestIdOptional,
             UserSyncOptions options) {
         List<String> environmentCrnList = List.copyOf(environmentCrns);
         UserManagementProto.GetUserSyncStateModelResponse userSyncStateModel = grpcUmsClient.getUserSyncStateModel(
                 accountId,
                 umsRightsChecksFactory.get(environmentCrnList),
                 true,
-                requestIdOptional,
                 regionAwareInternalCrnGeneratorFactory);
 
         Map<String, FmsGroup> groups = convertGroupsToFmsGroups(userSyncStateModel.getGroupList());
@@ -91,13 +89,12 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                     addActorsToUmsUsersStateBuilder(
                             environmentIndex,
                             userSyncStateModel,
-                            actorHandler,
-                            requestIdOptional);
+                            actorHandler);
 
                     addServicePrincipalsCloudIdentities(
                             umsUsersStateBuilder,
                             grpcUmsClient.listServicePrincipalCloudIdentities(
-                                    accountId, environmentCrn, requestIdOptional));
+                                    accountId, environmentCrn));
 
                     UsersState usersState = usersStateBuilder.build();
                     umsUsersStateBuilder.setUsersState(usersState);
@@ -112,8 +109,7 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     private void addActorsToUmsUsersStateBuilder(
             int environmentIndex,
             UserManagementProto.GetUserSyncStateModelResponse userSyncStateModel,
-            ActorHandler actorHandler,
-            Optional<String> requestIdOptional) {
+            ActorHandler actorHandler) {
 
 
         // process actors - users and machine users are combined in the actor list
@@ -134,7 +130,7 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                                             .get(wagIndex).getWorkloadAdministrationGroupName())
                             .collect(Collectors.toList());
             Supplier<WorkloadCredential> workloadCredentialSupplier = () ->
-                    umsCredentialProvider.getCredentials(actor.getActorDetails().getCrn(), requestIdOptional);
+                    umsCredentialProvider.getCredentials(actor.getActorDetails().getCrn());
 
             try {
                 actorHandler.handleActor(

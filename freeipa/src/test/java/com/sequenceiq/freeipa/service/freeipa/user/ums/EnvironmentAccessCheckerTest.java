@@ -10,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
@@ -23,8 +22,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
-import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.model.EnvironmentAccessRights;
 
@@ -72,11 +71,11 @@ class EnvironmentAccessCheckerTest {
         EnvironmentAccessChecker underTest = environmentAccessCheckerFactory.create(ENV_CRN);
         ArgumentCaptor<List<AuthorizationProto.RightCheck>> argumentCaptor = ArgumentCaptor.forClass((Class) List.class);
         when(grpcUmsClient.hasRightsNoCache(
-                eq(MEMBER_CRN), anyList(), any(Optional.class), any())).thenReturn(List.of(true, true));
+                eq(MEMBER_CRN), anyList(), any())).thenReturn(List.of(true, true));
 
-        underTest.hasAccess(MEMBER_CRN, Optional.empty());
+        underTest.hasAccess(MEMBER_CRN);
 
-        verify(grpcUmsClient).hasRightsNoCache(eq(MEMBER_CRN), argumentCaptor.capture(), any(), any());
+        verify(grpcUmsClient).hasRightsNoCache(eq(MEMBER_CRN), argumentCaptor.capture(), any());
         List<AuthorizationProto.RightCheck> capturedRightChecks = argumentCaptor.getValue();
         assertEquals(2, capturedRightChecks.size());
         AuthorizationProto.RightCheck hasAccess = capturedRightChecks.get(0);
@@ -92,10 +91,10 @@ class EnvironmentAccessCheckerTest {
 
         for (boolean hasAccess : new boolean[] { false, true}) {
             for (boolean ipaAdmin : new boolean[] { false, true}) {
-                when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList(), any(Optional.class), any()))
+                when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList(), any()))
                         .thenReturn(List.of(hasAccess, ipaAdmin));
 
-                EnvironmentAccessRights environmentAccessRights = underTest.hasAccess(MEMBER_CRN, Optional.empty());
+                EnvironmentAccessRights environmentAccessRights = underTest.hasAccess(MEMBER_CRN);
 
                 assertEquals(hasAccess, environmentAccessRights.hasEnvironmentAccessRight());
                 assertEquals(ipaAdmin, environmentAccessRights.hasAdminFreeIpaRight());
@@ -108,10 +107,10 @@ class EnvironmentAccessCheckerTest {
         EnvironmentAccessChecker underTest = environmentAccessCheckerFactory.create(ENV_CRN);
 
         Throwable ex = new StatusRuntimeException(Status.Code.NOT_FOUND.toStatus());
-        when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList(), any(Optional.class), any()))
+        when(grpcUmsClient.hasRightsNoCache(eq(MEMBER_CRN), anyList(), any()))
                 .thenThrow(ex);
 
-        EnvironmentAccessRights environmentAccessRights = underTest.hasAccess(MEMBER_CRN, Optional.empty());
+        EnvironmentAccessRights environmentAccessRights = underTest.hasAccess(MEMBER_CRN);
 
         assertFalse(environmentAccessRights.hasEnvironmentAccessRight());
         assertFalse(environmentAccessRights.hasAdminFreeIpaRight());
