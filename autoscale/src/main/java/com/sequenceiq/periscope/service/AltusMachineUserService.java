@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -53,10 +52,10 @@ public class AltusMachineUserService {
                 String accountId = Crn.safeFromString(environmentCrn).getAccountId();
                 String machineUserCrn = getOrCreateAutoscaleMachineUser(environmentCrn, cluster.getClusterPertain().getTenant()).getCrn();
                 Multimap<String, String> assignedResourceRoles =
-                        grpcUmsClient.listAssignedResourceRoles(machineUserCrn, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
+                        grpcUmsClient.listAssignedResourceRoles(machineUserCrn, regionAwareInternalCrnGeneratorFactory);
                 String envUserResourceRoleCrn = roleCrnGenerator.getBuiltInEnvironmentUserResourceRoleCrn(accountId);
                 if (!assignedResourceRoles.get(environmentCrn).contains(envUserResourceRoleCrn)) {
-                    grpcUmsClient.assignResourceRole(machineUserCrn, environmentCrn, envUserResourceRoleCrn, MDCUtils.getRequestId(),
+                    grpcUmsClient.assignResourceRole(machineUserCrn, environmentCrn, envUserResourceRoleCrn,
                             regionAwareInternalCrnGeneratorFactory);
                     LOGGER.info("Assigned resourcerole '{}' for  machineUserCrn '{}' for environment '{}'",
                             envUserResourceRoleCrn, machineUserCrn, environmentCrn);
@@ -74,7 +73,7 @@ public class AltusMachineUserService {
         if (environmentCrn != null && machineUserCrn != null) {
             MachineUser machineUser = getOrCreateAutoscaleMachineUser(environmentCrn, accountId);
             grpcUmsClient.deleteMachineUser(machineUser.getCrn(), regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                    accountId, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
+                    accountId, regionAwareInternalCrnGeneratorFactory);
             syncEnvironment(accountId, machineUserCrn, environmentCrn, Optional.of(machineUser.getWorkloadUsername()));
             LOGGER.info("Deleted MachineUser for machineUserCrn '{}', environment '{}'", machineUserCrn, environmentCrn);
         }
@@ -83,7 +82,7 @@ public class AltusMachineUserService {
     private MachineUser getOrCreateAutoscaleMachineUser(String environmentCrn, String accountId) {
         //Idempotent api retrieves machine user or creates if missing.
         String autoscaleMachineUserName = String.format(AUTOSCALE_MACHINE_USER_NAME_PATTERN, Crn.fromString(environmentCrn).getResource());
-        MachineUser machineUser = grpcUmsClient.getOrCreateMachineUserWithoutAccessKey(autoscaleMachineUserName, accountId, MDCUtils.getRequestId());
+        MachineUser machineUser = grpcUmsClient.getOrCreateMachineUserWithoutAccessKey(autoscaleMachineUserName, accountId);
         LOGGER.info("Retrieved machineUser '{}' for machineUserName '{}' ", machineUser, autoscaleMachineUserName);
         return machineUser;
     }

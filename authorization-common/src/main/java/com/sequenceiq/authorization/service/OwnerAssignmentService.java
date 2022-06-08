@@ -1,7 +1,5 @@
 package com.sequenceiq.authorization.service;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -33,7 +30,7 @@ public class OwnerAssignmentService {
     public void assignResourceOwnerRoleIfEntitled(String userCrn, String resourceCrn, String accountId) {
         try {
             umsClient.assignResourceRole(userCrn, resourceCrn, roleCrnGenerator.getBuiltInOwnerResourceRoleCrn(accountId),
-                    MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
+                    regionAwareInternalCrnGeneratorFactory);
             LOGGER.debug("Owner role of {} is successfully assigned to the {} user", resourceCrn, userCrn);
         } catch (StatusRuntimeException ex) {
             if (Status.Code.ALREADY_EXISTS.equals(ex.getStatus().getCode())) {
@@ -44,7 +41,7 @@ public class OwnerAssignmentService {
         }
     }
 
-    public void notifyResourceDeleted(String resourceCrn, Optional<String> requestId) {
-        umsClient.notifyResourceDeleted(resourceCrn, requestId, regionAwareInternalCrnGeneratorFactory);
+    public void notifyResourceDeleted(String resourceCrn) {
+        umsClient.notifyResourceDeleted(resourceCrn, regionAwareInternalCrnGeneratorFactory);
     }
 }

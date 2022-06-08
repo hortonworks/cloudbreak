@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.assertion.ums;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +29,7 @@ public class ResourceRoleTestAssertion {
 
             LOGGER.info(format(" Validate resource role '%s' has been successfully assigned to user '%s' at resource '%s'... ", roleCrn, userCrn, resourceCrn));
             Multimap<String, String> assignedResourceRoles = umsClient.getDefaultClient()
-                    .listAssignedResourceRoles(userCrn, Optional.of(""), crnGeneratorFactory);
+                    .listAssignedResourceRoles(userCrn, crnGeneratorFactory);
             boolean resourceRoleAssigned = assignedResourceRoles.get(resourceCrn).contains(roleCrn);
             if (expectedPresence) {
                 if (resourceRoleAssigned) {

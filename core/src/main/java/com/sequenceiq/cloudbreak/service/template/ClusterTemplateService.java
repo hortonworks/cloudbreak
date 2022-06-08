@@ -57,7 +57,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.init.clustertemplate.ClusterTemplateLoaderService;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -404,7 +403,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     public ClusterTemplate deleteByName(String name, Long workspaceId) {
         ClusterTemplate clusterTemplate = getByNameForWorkspaceId(name, workspaceId);
         clusterTemplate = delete(clusterTemplate);
-        ownerAssignmentService.notifyResourceDeleted(clusterTemplate.getResourceCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(clusterTemplate.getResourceCrn());
         stackTemplateService.delete(clusterTemplate.getStackTemplate());
         return clusterTemplate;
     }

@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.domain.CustomConfigurationProperty;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.CustomConfigurationsCreationException;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.CustomConfigurationPropertyRepository;
 import com.sequenceiq.cloudbreak.repository.CustomConfigurationsRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -189,7 +188,7 @@ public class CustomConfigurationsService implements CompositeAuthResourcePropert
         CustomConfigurations customConfigurationsByCrn = getByCrn(crn);
         prepareDeletion(customConfigurationsByCrn);
         customConfigurationPropertyRepository.deleteAll(customConfigurationsByCrn.getConfigurations());
-        ownerAssignmentService.notifyResourceDeleted(crn, MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(crn);
         return customConfigurationsByCrn;
     }
 
@@ -197,7 +196,7 @@ public class CustomConfigurationsService implements CompositeAuthResourcePropert
         CustomConfigurations customConfigurationsByName = getByName(name, accountId);
         prepareDeletion(customConfigurationsByName);
         customConfigurationPropertyRepository.deleteAll(customConfigurationsByName.getConfigurations());
-        ownerAssignmentService.notifyResourceDeleted(customConfigurationsByName.getCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(customConfigurationsByName.getCrn());
         return customConfigurationsByName;
     }
 

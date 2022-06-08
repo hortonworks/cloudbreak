@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.service.customconfigs;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -24,9 +23,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -150,7 +149,7 @@ class CustomConfigurationsServiceTest {
     @Test
     void testCustomConfigurationsAreDeletedByName() {
         when(customConfigurationsRepository.findByNameAndAccountId(TEST_NAME, TEST_ACCOUNT_ID_1)).thenReturn(Optional.of(customConfigurations));
-        doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString(), any());
+        doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString());
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN_1, () -> {
             CustomConfigurations result = underTest.deleteByName(TEST_NAME, TEST_ACCOUNT_ID_1);
@@ -161,7 +160,7 @@ class CustomConfigurationsServiceTest {
     @Test
     void testCustomConfigurationsAreDeletedByCrn() {
         when(customConfigurationsRepository.findByCrn(TEST_CRN_1)).thenReturn(Optional.of(customConfigurations));
-        doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString(), any());
+        doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString());
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN_1, () -> {
             CustomConfigurations result = underTest.deleteByCrn(TEST_CRN_1);

@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
@@ -140,10 +139,10 @@ public class UserSyncForEnvService {
             LOGGER.debug("Starting {} for environments {} ...", logRetrieveUmsEvent, environmentCrns);
             Map<String, UmsUsersState> envToUmsStateMap = umsUsersStateProviderDispatcher
                     .getEnvToUmsUsersStateMap(accountId, environmentCrns, userSyncFilter.getUserCrnFilter(),
-                            userSyncFilter.getMachineUserCrnFilter(), MDCUtils.getRequestId(), options);
+                            userSyncFilter.getMachineUserCrnFilter(), options);
             LOGGER.debug("Finished {}.", logRetrieveUmsEvent);
             UmsEventGenerationIds umsEventGenerationIds = options.isFullSync() ?
-                    umsEventGenerationIdsProvider.getEventGenerationIds(accountId, MDCUtils.getRequestId()) : null;
+                    umsEventGenerationIdsProvider.getEventGenerationIds(accountId) : null;
             return stacks.stream()
                     .collect(Collectors.toMap(Stack::getEnvironmentCrn,
                             stack -> asyncSynchronizeStack(stack, envToUmsStateMap.get(stack.getEnvironmentCrn()), umsEventGenerationIds, options,

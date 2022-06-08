@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -28,17 +27,14 @@ public class UmsUsersStateProviderDispatcher {
 
     public Map<String, UmsUsersState> getEnvToUmsUsersStateMap(
             String accountId, Collection<String> environmentCrns,
-            Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional,
-            UserSyncOptions userSyncOptions) {
+            Set<String> userCrns, Set<String> machineUserCrns, UserSyncOptions userSyncOptions) {
         try {
-            LOGGER.debug("Getting UMS state for environments {} with requestId {}", environmentCrns, requestIdOptional);
+            LOGGER.debug("Getting UMS state for environments {}", environmentCrns);
 
             if (userSyncOptions.isFullSync()) {
-                return dispatchBulk(accountId, environmentCrns, userCrns, machineUserCrns,
-                        requestIdOptional, userSyncOptions);
+                return dispatchBulk(accountId, environmentCrns, userCrns, machineUserCrns, userSyncOptions);
             } else {
-                return dispatchDefault(accountId, environmentCrns, userCrns, machineUserCrns,
-                        requestIdOptional, userSyncOptions);
+                return dispatchDefault(accountId, environmentCrns, userCrns, machineUserCrns, userSyncOptions);
             }
         } catch (RuntimeException e) {
             throw new UmsOperationException(String.format("Error during UMS operation: '%s'", e.getLocalizedMessage()), e);
@@ -47,24 +43,18 @@ public class UmsUsersStateProviderDispatcher {
 
     private Map<String, UmsUsersState> dispatchBulk(
             String accountId, Collection<String> environmentCrns,
-            Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional,
-            UserSyncOptions userSyncOptions) {
+            Set<String> userCrns, Set<String> machineUserCrns, UserSyncOptions userSyncOptions) {
         try {
-            return bulkUmsUsersStateProvider.get(accountId, environmentCrns, requestIdOptional, userSyncOptions);
+            return bulkUmsUsersStateProvider.get(accountId, environmentCrns, userSyncOptions);
         } catch (RuntimeException e) {
             LOGGER.debug("Failed to retrieve UMS user sync state through bulk request. Falling back on default approach.", e);
-            return dispatchDefault(accountId, environmentCrns, userCrns, machineUserCrns,
-                    requestIdOptional, userSyncOptions);
+            return dispatchDefault(accountId, environmentCrns, userCrns, machineUserCrns, userSyncOptions);
         }
     }
 
     private Map<String, UmsUsersState> dispatchDefault(
             String accountId, Collection<String> environmentCrns,
-            Set<String> userCrns, Set<String> machineUserCrns, Optional<String> requestIdOptional,
-            UserSyncOptions userSyncOptions) {
-        return defaultUmsUsersStateProvider.get(
-                accountId,
-                environmentCrns, userCrns, machineUserCrns,
-                requestIdOptional, userSyncOptions);
+            Set<String> userCrns, Set<String> machineUserCrns, UserSyncOptions userSyncOptions) {
+        return defaultUmsUsersStateProvider.get(accountId, environmentCrns, userCrns, machineUserCrns, userSyncOptions);
     }
 }

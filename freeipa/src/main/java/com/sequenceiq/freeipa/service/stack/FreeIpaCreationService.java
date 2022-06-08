@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.CloudStorageFolderResolverService;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -195,10 +194,10 @@ public class FreeIpaCreationService {
         if (Crn.safeFromString(userCrn).getResourceType().equals(Crn.ResourceType.MACHINE_USER)) {
             ownerFuture = intermediateBuilderExecutor.submit(() ->
                     umsClient.getMachineUserDetails(userCrn, Crn.fromString(userCrn).getAccountId(),
-                            MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory).getMachineUserName());
+                            regionAwareInternalCrnGeneratorFactory).getMachineUserName());
         } else {
             ownerFuture = intermediateBuilderExecutor.submit(() -> umsClient.getUserDetails(userCrn,
-                    MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory).getEmail());
+                    regionAwareInternalCrnGeneratorFactory).getEmail());
         }
         return ownerFuture;
     }

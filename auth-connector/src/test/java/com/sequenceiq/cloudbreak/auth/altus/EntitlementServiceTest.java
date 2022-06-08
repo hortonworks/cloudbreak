@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -243,7 +242,7 @@ class EntitlementServiceTest {
 
     @Test
     void getEntitlementsTest() {
-        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any(Optional.class), any()))
+        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any()))
                 .thenReturn(ACCOUNT_ENTITLEMENTS_FOO_BAR);
         assertThat(underTest.getEntitlements(ACCOUNT_ID)).containsExactly(ENTITLEMENT_FOO, ENTITLEMENT_BAR);
     }
@@ -257,7 +256,7 @@ class EntitlementServiceTest {
                                 .setEntitlementName(entitlement)
                                 .build());
         }
-        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any(), any()))
+        when(umsClient.getAccountDetails(eq(ACCOUNT_ID), any()))
                 .thenReturn(builder.build());
     }
 

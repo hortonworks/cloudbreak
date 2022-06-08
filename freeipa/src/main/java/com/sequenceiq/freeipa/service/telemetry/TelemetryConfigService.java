@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
@@ -214,8 +213,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider {
 
     private Map<String, Object> getPaywallConfigs(Stack stack) {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-        UserManagementProto.Account account = umsClient.getAccountDetails(accountId, MDCUtils.getRequestId(),
-                regionAwareInternalCrnGeneratorFactory);
+        UserManagementProto.Account account = umsClient.getAccountDetails(accountId, regionAwareInternalCrnGeneratorFactory);
         Optional<JsonCMLicense> license = Optional.of(account.getClouderaManagerLicenseKey())
                 .flatMap(cmLicenseParser::parseLicense);
         if (license.isPresent()) {

@@ -49,11 +49,11 @@ public class ResourceAuthorizationService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public void authorize(String userCrn, ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature, Optional<String> requestId) {
+    public void authorize(String userCrn, ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {
         Function<AuthorizationResourceAction, String> rightMapper = umsRightProvider.getRightMapper();
         getAuthorization(userCrn, proceedingJoinPoint, methodSignature).ifPresent(authorization -> {
             LOGGER.debug("Resource authorization rule: {}", authorization.toString(rightMapper));
-            List<Boolean> rightCheckResults = checkWithUms(userCrn, requestId, rightMapper, authorization);
+            List<Boolean> rightCheckResults = checkWithUms(userCrn, rightMapper, authorization);
             LOGGER.debug("Ums resource right check result: {}", rightCheckResults);
             Iterator<Boolean> iterator = rightCheckResults.iterator();
             authorization.evaluateAndGetFailed(iterator).ifPresentOrElse(failedAuthorization -> {
@@ -74,11 +74,10 @@ public class ResourceAuthorizationService {
         return crns;
     }
 
-    private List<Boolean> checkWithUms(String userCrn, Optional<String> requestId,
-            Function<AuthorizationResourceAction, String> rightMapper, AuthorizationRule authorization) {
+    private List<Boolean> checkWithUms(String userCrn, Function<AuthorizationResourceAction, String> rightMapper, AuthorizationRule authorization) {
         List<RightCheck> rightChecks = convertToRightChecks(authorization, rightMapper);
         LOGGER.debug("Ums resource right check request: {}", rightChecks);
-        return grpcUmsClient.hasRights(userCrn, rightChecks, requestId, regionAwareInternalCrnGeneratorFactory);
+        return grpcUmsClient.hasRights(userCrn, rightChecks, regionAwareInternalCrnGeneratorFactory);
     }
 
     private Optional<AuthorizationRule> getAuthorization(String userCrn, ProceedingJoinPoint proceedingJoinPoint, MethodSignature methodSignature) {

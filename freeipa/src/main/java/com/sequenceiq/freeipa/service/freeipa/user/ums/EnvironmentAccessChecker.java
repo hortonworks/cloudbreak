@@ -4,7 +4,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,12 +49,11 @@ public class EnvironmentAccessChecker {
         checkArgument(rightChecks.size() == UserSyncConstants.RIGHTS.size());
     }
 
-    public EnvironmentAccessRights hasAccess(String memberCrn, Optional<String> requestId) {
+    public EnvironmentAccessRights hasAccess(String memberCrn) {
         requireNonNull(memberCrn, "memberCrn is null");
-        requireNonNull(requestId, "requestId is null");
 
         try {
-            List<Boolean> hasRights = grpcUmsClient.hasRightsNoCache(memberCrn, rightChecks, requestId,
+            List<Boolean> hasRights = grpcUmsClient.hasRightsNoCache(memberCrn, rightChecks,
                     regionAwareInternalCrnGeneratorFactory);
             return new EnvironmentAccessRights(hasRights.get(0), hasRights.get(1));
         } catch (StatusRuntimeException e) {

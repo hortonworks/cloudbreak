@@ -12,7 +12,6 @@ import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
@@ -107,6 +106,6 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
         } catch (NotFoundException notFoundException) {
             LOGGER.info("Can not set status to DELETED because data lake was not found");
         }
-        ownerAssignmentService.notifyResourceDeleted(cluster.getCrn(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(cluster.getCrn());
     }
 }

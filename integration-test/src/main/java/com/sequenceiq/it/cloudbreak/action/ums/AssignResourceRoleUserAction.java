@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.action.ums;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,13 +36,13 @@ public class AssignResourceRoleUserAction extends AbstractUmsAction<UmsTestDto> 
         Log.when(LOGGER, format(" Assigning resource role '%s' to user '%s' at resource '%s'... ", resourceRole, userCrn, resourceCrn));
         Log.whenJson(LOGGER, format(" Assign resource role request:%n "), testDto.getRequest());
         LOGGER.info(format(" Assigning resource role '%s' to user '%s' at resource '%s'... ", resourceRole, userCrn, resourceCrn));
-        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(userCrn, Optional.of(""),
+        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(userCrn,
                 regionAwareInternalCrnGeneratorFactory);
         if (assignedResourceRoles.get(resourceCrn).contains(resourceRole)) {
             LOGGER.info(format(" Resource role '%s' has already been assigned to user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
             Log.when(LOGGER, format(" Resource role '%s' has already been assigned to user '%s' at resource '%s' ", resourceRole, userCrn, resourceCrn));
         } else {
-            client.getDefaultClient().assignResourceRole(userCrn, resourceCrn, resourceRole, Optional.of(""),
+            client.getDefaultClient().assignResourceRole(userCrn, resourceCrn, resourceRole,
                     regionAwareInternalCrnGeneratorFactory);
             // wait for UmsRightsCache to expire
             Thread.sleep(7000);

@@ -3,7 +3,6 @@ package com.sequenceiq.authorization.service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -17,7 +16,6 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.utils.AuthorizationMessageUtilsService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Service
 public class UmsResourceAuthorizationService {
@@ -42,7 +40,7 @@ public class UmsResourceAuthorizationService {
     }
 
     public Map<String, Boolean> getRightOfUserOnResources(String userCrn, AuthorizationResourceAction action, List<String> resourceCrns) {
-        return umsClient.hasRights(userCrn, resourceCrns, umsRightProvider.getRight(action), getRequestId(), regionAwareInternalCrnGeneratorFactory);
+        return umsClient.hasRights(userCrn, resourceCrns, umsRightProvider.getRight(action), regionAwareInternalCrnGeneratorFactory);
     }
 
     public void checkRightOfUserOnResources(String userCrn, AuthorizationResourceAction action, Collection<String> resourceCrns) {
@@ -51,21 +49,17 @@ public class UmsResourceAuthorizationService {
     }
 
     private void checkRightOfUserOnResource(String userCrn, String right, String resourceCrn, String unauthorizedMessage) {
-        if (!umsClient.checkResourceRight(userCrn, right, resourceCrn, getRequestId(), regionAwareInternalCrnGeneratorFactory)) {
+        if (!umsClient.checkResourceRight(userCrn, right, resourceCrn, regionAwareInternalCrnGeneratorFactory)) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
     }
 
     private void checkRightOfUserOnResources(String userCrn, String right, Collection<String> resourceCrns, String unauthorizedMessage) {
-        if (!umsClient.hasRights(userCrn, Lists.newArrayList(resourceCrns), right, getRequestId(), regionAwareInternalCrnGeneratorFactory)
+        if (!umsClient.hasRights(userCrn, Lists.newArrayList(resourceCrns), right, regionAwareInternalCrnGeneratorFactory)
                 .values().stream().allMatch(Boolean::booleanValue)) {
             LOGGER.error(unauthorizedMessage);
             throw new AccessDeniedException(unauthorizedMessage);
         }
-    }
-
-    protected Optional<String> getRequestId() {
-        return Optional.of(MDCBuilder.getOrGenerateRequestId());
     }
 }

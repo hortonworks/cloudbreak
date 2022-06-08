@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.assertion.ums;
 import static java.lang.String.format;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +27,7 @@ public class UserGroupTestAssertion {
         return (testContext, umsGroupTestDto, umsClient) -> {
             String accountId = testContext.getActingUserCrn().getAccountId();
 
-            List<String> groupMembers = umsClient.getDefaultClient().listMembersFromGroup(accountId, groupName,
-                    Optional.of(""), crnGeneratorFactory);
+            List<String> groupMembers = umsClient.getDefaultClient().listMembersFromGroup(accountId, groupName, crnGeneratorFactory);
             boolean memberPresent = groupMembers.stream().anyMatch(memberCrn -> groupMember.getCrn().equals(memberCrn));
             LOGGER.info("Member is present '{}' at group '{}', group members: [{}]", memberPresent, groupName, groupMembers);
             if (expectedPresence) {

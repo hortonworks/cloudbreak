@@ -5,7 +5,6 @@ import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncTestUtils.ENVI
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -150,7 +149,7 @@ class EnvironmentUserSyncStateCalculatorTest {
         userSyncStatus.setLastStartedFullSync(lastSync);
 
         UmsEventGenerationIds current = new UmsEventGenerationIds();
-        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID), any())).thenReturn(current);
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(current);
 
         when(eventGenerationIdsChecker.isInSync(userSyncStatus, current)).thenReturn(false);
 
@@ -170,7 +169,7 @@ class EnvironmentUserSyncStateCalculatorTest {
         userSyncStatus.setLastStartedFullSync(lastSync);
 
         UmsEventGenerationIds current = new UmsEventGenerationIds();
-        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID), any())).thenReturn(current);
+        when(umsEventGenerationIdsProvider.getEventGenerationIds(eq(ACCOUNT_ID))).thenReturn(current);
 
         when(eventGenerationIdsChecker.isInSync(userSyncStatus, current)).thenReturn(true);
 

@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.user.handler;
 
+import java.io.IOException;
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -7,10 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.freeipa.client.FreeIpaCapabilities;
@@ -22,15 +24,12 @@ import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.user.event.SetPasswordResult;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.WorkloadCredentialService;
-import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredentialUpdate;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
-import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsCredentialProvider;
 import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredential;
+import com.sequenceiq.freeipa.service.freeipa.user.model.WorkloadCredentialUpdate;
+import com.sequenceiq.freeipa.service.freeipa.user.ums.UmsCredentialProvider;
 import com.sequenceiq.freeipa.service.stack.StackService;
-
-import java.io.IOException;
-import java.util.Optional;
 
 import reactor.bus.Event;
 
@@ -73,7 +72,7 @@ public class SetPasswordHandler implements EventHandler<SetPasswordRequest> {
             FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
             if (FreeIpaCapabilities.hasSetPasswordHashSupport(freeIpaClient.getConfig())) {
                 LOGGER.info("IPA has password hash support. Credentials information from UMS will be used.");
-                WorkloadCredential workloadCredential = umsCredentialProvider.getCredentials(request.getUserCrn(), MDCUtils.getRequestId());
+                WorkloadCredential workloadCredential = umsCredentialProvider.getCredentials(request.getUserCrn());
                 setPasswordHash(stack, request, freeIpaClient, workloadCredential);
 
                 if (StringUtils.isBlank(workloadCredential.getHashedPassword())) {

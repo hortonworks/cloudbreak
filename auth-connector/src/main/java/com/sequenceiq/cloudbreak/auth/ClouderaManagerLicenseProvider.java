@@ -5,12 +5,11 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
-import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 @Component
 public class ClouderaManagerLicenseProvider {
@@ -26,8 +25,7 @@ public class ClouderaManagerLicenseProvider {
 
     public JsonCMLicense getLicense(String userCrn) {
         String accountId = getAccountIdFromCrn(userCrn);
-        UserManagementProto.Account account = umsClient.getAccountDetails(accountId, MDCUtils.getRequestId(),
-                regionAwareInternalCrnGeneratorFactory);
+        UserManagementProto.Account account = umsClient.getAccountDetails(accountId, regionAwareInternalCrnGeneratorFactory);
         return cmLicenseParser.parseLicense(account.getClouderaManagerLicenseKey())
                 .orElseThrow(() -> new BadRequestException("No valid CM license is present"));
     }

@@ -49,7 +49,7 @@ public class UmsAccountAuthorizationServiceTest {
 
     @Test
     public void testHasRightOfUserWithValidResourceTypeAndAction() {
-        when(umsClient.checkAccountRight(anyString(), any(), any(), any())).thenReturn(false);
+        when(umsClient.checkAccountRight(anyString(), any(), any())).thenReturn(false);
 
         assertThrows(AccessDeniedException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkRightOfUser(USER_CRN, AuthorizationResourceAction.DESCRIBE_DATALAKE)));
@@ -82,7 +82,7 @@ public class UmsAccountAuthorizationServiceTest {
     public void testActorAndTargetDifferentHasRequiredRight() {
         String user2 = "crn:cdp:iam:us-west-1:1234:user:someOtherUserId";
 
-        when(umsClient.checkAccountRight(any(), any(), any(), any())).thenReturn(true);
+        when(umsClient.checkAccountRight(any(), any(), any())).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.
                 checkCallerIsSelfOrHasRight(USER_CRN, user2, AuthorizationResourceAction.DATALAKE_READ));

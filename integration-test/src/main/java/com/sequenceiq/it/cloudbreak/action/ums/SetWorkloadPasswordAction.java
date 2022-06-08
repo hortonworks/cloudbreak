@@ -2,8 +2,6 @@ package com.sequenceiq.it.cloudbreak.action.ums;
 
 import static java.lang.String.format;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,22 +33,22 @@ public class SetWorkloadPasswordAction implements Action<UmsTestDto, UmsClient> 
         Crn.ResourceType resourceType = testContext.getActingUserCrn().getResourceType();
         String workloadUsername;
         if (resourceType.equals(Crn.ResourceType.MACHINE_USER)) {
-            workloadUsername = client.getDefaultClient().getMachineUserDetails(userCrn, accountId, Optional.of(""),
+            workloadUsername = client.getDefaultClient().getMachineUserDetails(userCrn, accountId,
                     regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
             LOGGER.info("Setting new workload password '{}' for machine user '{}' with workload username '{}'...",
                     newPassword, userCrn, workloadUsername);
             Log.when(LOGGER, format(" Setting new workload password '%s' for machine user '%s' workload username '%s'... ",
                     newPassword, userCrn, workloadUsername));
-            client.getDefaultClient().setMachineUserWorkloadPassword(userCrn, accountId, newPassword, Optional.of(""),
+            client.getDefaultClient().setMachineUserWorkloadPassword(userCrn, accountId, newPassword,
                     regionAwareInternalCrnGeneratorFactory);
         } else {
-            workloadUsername = client.getDefaultClient().getUserDetails(userCrn, Optional.of(""),
+            workloadUsername = client.getDefaultClient().getUserDetails(userCrn,
                     regionAwareInternalCrnGeneratorFactory).getWorkloadUsername();
             LOGGER.info("Setting new workload password '{}' for user '{}' with workload username '{}'...",
                     newPassword, userCrn, workloadUsername);
             Log.when(LOGGER, format(" Setting new workload password '%s' for user '%s' workload username '%s'... ",
                     newPassword, userCrn, workloadUsername));
-            client.getDefaultClient().setActorWorkloadPassword(userCrn, newPassword, Optional.of(""),
+            client.getDefaultClient().setActorWorkloadPassword(userCrn, newPassword,
                     regionAwareInternalCrnGeneratorFactory);
         }
         // wait for UmsRightsCache to expire

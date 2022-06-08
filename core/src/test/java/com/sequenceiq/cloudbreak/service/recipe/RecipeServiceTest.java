@@ -87,7 +87,7 @@ public class RecipeServiceTest {
         lenient().when(clock.getCurrentTimeMillis()).thenReturn(659602800L);
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
         lenient().doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
-        lenient().doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString(), any());
+        lenient().doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString());
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
     }
 

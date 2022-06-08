@@ -19,7 +19,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.saas.client.sdx.GrpcSdxSaasClient;
 import com.sequenceiq.cloudbreak.saas.client.sdx.GrpcServiceDiscoveryClient;
 import com.sequenceiq.cloudbreak.saas.sdx.polling.PollingResult;
@@ -40,7 +39,7 @@ public class SaasSdxService extends AbstractSdxService<SDXSvcCommonProto.Instanc
     public Optional<String> getRemoteDataContext(String crn) {
         if (isPlatformEntitled(Crn.safeFromString(crn).getAccountId())) {
             try {
-                return Optional.of(grpcServiceDiscoveryClient.getRemoteDataContext(MDCUtils.getRequestId(), crn));
+                return Optional.of(grpcServiceDiscoveryClient.getRemoteDataContext(crn));
             } catch (JsonProcessingException e) {
                 LOGGER.error("Json processing failed, thus we cannot query remote data context.");
             }
@@ -57,14 +56,14 @@ public class SaasSdxService extends AbstractSdxService<SDXSvcCommonProto.Instanc
     public void deleteSdx(String sdxCrn, Boolean force) {
         if (isPlatformEntitled(Crn.safeFromString(sdxCrn).getAccountId())) {
             LOGGER.info("Calling deleteInstance for SDX SaaS instance {}", sdxCrn);
-            grpcSdxSaasClient.deleteInstance(MDCUtils.getRequestId(), sdxCrn);
+            grpcSdxSaasClient.deleteInstance(sdxCrn);
         }
     }
 
     @Override
     public Set<String> listSdxCrns(String environmentName, String environmentCrn) {
         if (isPlatformEntitled(Crn.safeFromString(environmentCrn).getAccountId())) {
-            return grpcSdxSaasClient.listInstances(MDCUtils.getRequestId(), environmentCrn).stream()
+            return grpcSdxSaasClient.listInstances(environmentCrn).stream()
                     .map(SDXSvcCommonProto.Instance::getCrn)
                     .collect(Collectors.toSet());
         }
@@ -75,7 +74,7 @@ public class SaasSdxService extends AbstractSdxService<SDXSvcCommonProto.Instanc
     public Set<Pair<String, SDXSvcCommonProto.InstanceHighLevelStatus.Value>> listSdxCrnStatusPair(String environmentCrn,
             String environmentName, Set<String> sdxCrns) {
         if (isPlatformEntitled(ThreadBasedUserCrnProvider.getAccountId())) {
-            return grpcSdxSaasClient.listInstances(MDCUtils.getRequestId(), environmentCrn).stream()
+            return grpcSdxSaasClient.listInstances(environmentCrn).stream()
                     .filter(instance -> sdxCrns.contains(instance.getCrn()))
                     .map(instance -> Pair.of(instance.getCrn(), instance.getStatus()))
                     .collect(Collectors.toSet());

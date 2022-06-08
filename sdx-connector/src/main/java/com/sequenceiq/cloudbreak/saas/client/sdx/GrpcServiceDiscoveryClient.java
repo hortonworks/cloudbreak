@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.saas.client.sdx;
 
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -13,7 +11,6 @@ import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.saas.client.sdx.config.ServiceDiscoveryChannelConfig;
 
 import io.grpc.ManagedChannelBuilder;
@@ -39,10 +36,9 @@ public class GrpcServiceDiscoveryClient {
         return client;
     }
 
-    public String getRemoteDataContext(Optional<String> requestId, String sdxCrn) throws JsonProcessingException {
+    public String getRemoteDataContext(String sdxCrn) throws JsonProcessingException {
         ServiceDiscoveryClient serviceDiscoveryClient = makeClient();
-        String generatedRequestId = requestId.orElse(MDCBuilder.getOrGenerateRequestId());
-        return JsonUtil.writeValueAsString(serviceDiscoveryClient.getRemoteDataContext(generatedRequestId, sdxCrn));
+        return JsonUtil.writeValueAsString(serviceDiscoveryClient.getRemoteDataContext(sdxCrn));
     }
 
     ServiceDiscoveryClient makeClient() {

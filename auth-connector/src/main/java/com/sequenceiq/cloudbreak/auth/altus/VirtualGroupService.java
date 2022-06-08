@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 
 import io.grpc.Status.Code;
 import io.grpc.StatusRuntimeException;
@@ -67,7 +66,7 @@ public class VirtualGroupService {
         for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
             try {
                 LOGGER.debug("Start deleting virtual groups from UMS for environment '{}'", environmentCrn);
-                grpcUmsClient.deleteWorkloadAdministrationGroupName(accountId, MDCUtils.getRequestId(), right, environmentCrn,
+                grpcUmsClient.deleteWorkloadAdministrationGroupName(accountId, right, environmentCrn,
                         regionAwareInternalCrnGeneratorFactory);
                 LOGGER.debug("Virtual groups deletion from UMS has been finished successfully for environment '{}'", environmentCrn);
             } catch (RuntimeException ex) {
@@ -79,7 +78,7 @@ public class VirtualGroupService {
     private String createOrGetVirtualGroup(String accountId, String environmentCrn, UmsVirtualGroupRight right) {
         String virtualGroup = getVirtualGroupFromUms(accountId, environmentCrn, right);
         if (StringUtils.isEmpty(virtualGroup)) {
-            virtualGroup = grpcUmsClient.setWorkloadAdministrationGroupName(accountId, MDCUtils.getRequestId(), right, environmentCrn,
+            virtualGroup = grpcUmsClient.setWorkloadAdministrationGroupName(accountId, right, environmentCrn,
                     regionAwareInternalCrnGeneratorFactory);
             LOGGER.info("{} workloadAdministrationGroup is created for {} right on {} environment", virtualGroup, right, environmentCrn);
         } else {
@@ -91,7 +90,7 @@ public class VirtualGroupService {
     private String getVirtualGroupFromUms(String accountId, String environmentCrn, UmsVirtualGroupRight right) {
         String virtualGroup = "";
         try {
-            virtualGroup = grpcUmsClient.getWorkloadAdministrationGroupName(accountId, MDCUtils.getRequestId(), right, environmentCrn,
+            virtualGroup = grpcUmsClient.getWorkloadAdministrationGroupName(accountId, right, environmentCrn,
                     regionAwareInternalCrnGeneratorFactory);
         } catch (StatusRuntimeException ex) {
             if (Code.NOT_FOUND != ex.getStatus().getCode()) {

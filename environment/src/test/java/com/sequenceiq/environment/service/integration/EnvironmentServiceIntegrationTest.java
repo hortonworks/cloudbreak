@@ -171,16 +171,16 @@ public class EnvironmentServiceIntegrationTest {
         credentialRequest = new CredentialRequest();
 
         when(entitlementService.azureEnabled(any())).thenReturn(true);
-        doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any(), any());
-        lenient().when(grpcUmsClient.hasRights(anyString(), anyList(), any(), any())).then(i -> {
+        doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString(), any());
+        lenient().when(grpcUmsClient.hasRights(anyString(), anyList(), any())).then(i -> {
             List<RightCheck> rightChecks = i.getArgument(1);
             return rightChecks.stream().map(r -> Boolean.TRUE).collect(toList());
         });
-        lenient().when(grpcUmsClient.checkAccountRight(anyString(), anyString(), any(), any())).thenReturn(true);
+        lenient().when(grpcUmsClient.checkAccountRight(anyString(), anyString(), any())).thenReturn(true);
         Map<String, Boolean> rightCheckMap = Maps.newHashMap();
         rightCheckMap.put(credential.getResourceCrn(), true);
         when(umsResourceAuthorizationService.getRightOfUserOnResources(anyString(), any(), anyList())).thenReturn(rightCheckMap);
-        when(grpcUmsClient.getResourceRoles(any(), any())).thenReturn(Set.of(
+        when(grpcUmsClient.getResourceRoles(any())).thenReturn(Set.of(
                 "crn:altus:iam:us-west-1:altus:resourceRole:Owner",
                 "crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentAdmin"));
     }

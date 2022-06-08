@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.saas.client.sdx;
 
 import static io.grpc.internal.GrpcUtil.DEFAULT_MAX_MESSAGE_SIZE;
 
-import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -13,7 +12,6 @@ import com.cloudera.thunderhead.service.sdxsvccommon.SDXSvcCommonProto;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.saas.client.sdx.config.SdxSaasChannelConfig;
 
 import io.grpc.ManagedChannelBuilder;
@@ -38,23 +36,20 @@ public class GrpcSdxSaasClient {
         return client;
     }
 
-    public String createInstance(Optional<String> requestId, String sdxInstanceName, String environmentCrn) {
+    public String createInstance(String sdxInstanceName, String environmentCrn) {
         SdxSaasClient sdxSaasClient = makeClient();
-        String generatedRequestId = requestId.orElse(MDCBuilder.getOrGenerateRequestId());
-        return sdxSaasClient.createInstance(generatedRequestId, sdxInstanceName, environmentCrn,
+        return sdxSaasClient.createInstance(sdxInstanceName, environmentCrn,
                 regionAwareInternalCrnGeneratorFactory.getRegion()).getCrn();
     }
 
-    public void deleteInstance(Optional<String> requestId, String sdxInstanceCrn) {
+    public void deleteInstance(String sdxInstanceCrn) {
         SdxSaasClient sdxSaasClient = makeClient();
-        String generatedRequestId = requestId.orElse(MDCBuilder.getOrGenerateRequestId());
-        sdxSaasClient.deleteInstance(generatedRequestId, sdxInstanceCrn);
+        sdxSaasClient.deleteInstance(sdxInstanceCrn);
     }
 
-    public Set<SDXSvcCommonProto.Instance> listInstances(Optional<String> requestId, String environmentCrn) {
+    public Set<SDXSvcCommonProto.Instance> listInstances(String environmentCrn) {
         SdxSaasClient sdxSaasClient = makeClient();
-        String generatedRequestId = requestId.orElse(MDCBuilder.getOrGenerateRequestId());
-        return sdxSaasClient.listInstances(generatedRequestId, environmentCrn);
+        return sdxSaasClient.listInstances(environmentCrn);
     }
 
     SdxSaasClient makeClient() {

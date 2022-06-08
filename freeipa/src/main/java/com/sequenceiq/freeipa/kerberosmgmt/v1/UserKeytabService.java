@@ -13,16 +13,15 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ActorKerberosKey;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.client.FreeIpaCapabilities;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.User;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.controller.exception.UnsupportedException;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigRepository;
@@ -93,7 +92,7 @@ public class UserKeytabService {
         String realm = getKerberosRealm(userAccountId, environmentCrn);
 
         GetActorWorkloadCredentialsResponse getActorWorkloadCredentialsResponse =
-                grpcUmsClient.getActorWorkloadCredentials(userCrn, MDCUtils.getRequestId(), regionAwareInternalCrnGeneratorFactory);
+                grpcUmsClient.getActorWorkloadCredentials(userCrn, regionAwareInternalCrnGeneratorFactory);
 
         validateHasCredentials(getActorWorkloadCredentialsResponse);
 

@@ -49,7 +49,7 @@ public class CrnUserDetailsServiceTest {
     @Test
     public void loadUserByCrn() {
         User user = User.newBuilder().setCrn("userCrn").setEmail("dummyuser@cloudera.com").setUserId("1").build();
-        when(mockedUmsClient.getUserDetails(eq(userCrn), any(), any())).thenReturn(user);
+        when(mockedUmsClient.getUserDetails(eq(userCrn), any())).thenReturn(user);
         UserDetails userDetails = underTest.loadUserByUsername(userCrn);
         assertTrue(userDetails.getAuthorities().iterator().next().getAuthority().equals("CRN_USER"));
     }

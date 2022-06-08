@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
@@ -237,7 +236,7 @@ public class DatabaseConfigService extends AbstractArchivistService<DatabaseConf
         }
 
         DatabaseConfig archived = super.delete(databaseConfig);
-        ownerAssignmentService.notifyResourceDeleted(archived.getResourceCrn().toString(), MDCUtils.getRequestId());
+        ownerAssignmentService.notifyResourceDeleted(archived.getResourceCrn().toString());
         return archived;
     }
 

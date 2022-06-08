@@ -1,7 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
-import java.util.Optional;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -24,9 +22,9 @@ public class UmsCredentialProvider {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public WorkloadCredential getCredentials(String userCrn, Optional<String> requestId) {
+    public WorkloadCredential getCredentials(String userCrn) {
         GetActorWorkloadCredentialsResponse response =
-                grpcUmsClient.getActorWorkloadCredentials(userCrn, requestId, regionAwareInternalCrnGeneratorFactory);
+                grpcUmsClient.getActorWorkloadCredentials(userCrn, regionAwareInternalCrnGeneratorFactory);
 
         return workloadCredentialConverter.toWorkloadCredential(response);
     }

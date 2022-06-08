@@ -39,10 +39,10 @@ public class RoleCrnGeneratorTest {
 
     @BeforeEach
     public void setup() {
-        when(grpcUmsClient.getRoles(any(), any())).thenReturn(Set.of(
+        when(grpcUmsClient.getRoles(any())).thenReturn(Set.of(
                 "crn:altus:iam:us-west-1:altus:role:TestRole1",
                 "crn:altus:iam:us-west-1:altus:role:TestRole2"));
-        when(grpcUmsClient.getResourceRoles(any(), any())).thenReturn(Set.of(
+        when(grpcUmsClient.getResourceRoles(any())).thenReturn(Set.of(
                 "crn:altus:iam:us-west-1:altus:resourceRole:TestRole1",
                 "crn:altus:iam:us-west-1:altus:resourceRole:TestRole2"));
     }

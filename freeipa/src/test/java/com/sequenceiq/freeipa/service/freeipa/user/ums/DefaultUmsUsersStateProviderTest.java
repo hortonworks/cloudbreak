@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -71,7 +70,7 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
                 .build();
 
         Map<String, UmsUsersState> umsUsersStateMap = underTest.get(
-                ACCOUNT_ID, List.of(ENVIRONMENT_CRN), Set.of(), Set.of(), Optional.empty(), options);
+                ACCOUNT_ID, List.of(ENVIRONMENT_CRN), Set.of(), Set.of(), options);
 
         verifyUmsUsersStateBuilderMap(umsUsersStateMap, options);
     }
@@ -86,19 +85,18 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
                     regionAwareInternalCrnGeneratorFactory);
         }).when(environmentAccessCheckerFactory).create(anyString());
 
-        when(grpcUmsClient.listAllGroups(eq(ACCOUNT_ID), any(Optional.class), any()))
+        when(grpcUmsClient.listAllGroups(eq(ACCOUNT_ID), any()))
                 .thenReturn(testData.groups);
-        when(grpcUmsClient.listWorkloadAdministrationGroups(eq(ACCOUNT_ID), any(Optional.class), any()))
+        when(grpcUmsClient.listWorkloadAdministrationGroups(eq(ACCOUNT_ID), any()))
                 .thenReturn(testData.allWags);
 
 
-        when(grpcUmsClient.listAllUsers(eq(ACCOUNT_ID), any(Optional.class), any()))
+        when(grpcUmsClient.listAllUsers(eq(ACCOUNT_ID), any()))
                 .thenReturn(testData.users);
 
         when(grpcUmsClient.listAllMachineUsers(eq(ACCOUNT_ID),
                 eq(DefaultUmsUsersStateProvider.DONT_INCLUDE_INTERNAL_MACHINE_USERS),
                 eq(DefaultUmsUsersStateProvider.INCLUDE_WORKLOAD_MACHINE_USERS),
-                any(Optional.class),
                 any()))
                 .thenReturn(testData.machineUsers);
 
@@ -108,7 +106,7 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
             return UserSyncConstants.RIGHTS.stream()
                     .map(right -> actorRights.get(right))
                     .collect(Collectors.toList());
-        }).when(grpcUmsClient).hasRightsNoCache(anyString(), any(List.class), any(Optional.class), any());
+        }).when(grpcUmsClient).hasRightsNoCache(anyString(), any(List.class), any());
 
         doAnswer(invocation -> {
             String memberCrn = invocation.getArgument(1, String.class);
@@ -117,7 +115,7 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
         }).when(grpcUmsClient)
-                .listGroupsForMember(eq(ACCOUNT_ID), anyString(), any(Optional.class), any());
+                .listGroupsForMember(eq(ACCOUNT_ID), anyString(), any());
 
         doAnswer(invocation -> {
             String memberCrn = invocation.getArgument(0, String.class);
@@ -126,13 +124,13 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
                     .map(Map.Entry::getKey)
                     .collect(Collectors.toList());
         }).when(grpcUmsClient)
-                .listWorkloadAdministrationGroupsForMember(anyString(), any(Optional.class), any());
+                .listWorkloadAdministrationGroupsForMember(anyString(), any());
 
         doAnswer(invocation -> workloadCredentialConverter
                 .toWorkloadCredential(
                         testData.memberCrnToWorkloadCredentials.get(invocation.getArgument(0, String.class))))
                 .when(umsCredentialProvider)
-                .getCredentials(anyString(), any(Optional.class));
+                .getCredentials(anyString());
 
         setupServicePrincipals();
     }

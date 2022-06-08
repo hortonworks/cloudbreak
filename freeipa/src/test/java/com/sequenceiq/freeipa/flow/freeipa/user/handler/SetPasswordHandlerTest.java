@@ -183,7 +183,7 @@ class SetPasswordHandlerTest {
     private void setupMocksForPasswordHashSupport(boolean hasUmsPassword, boolean credentialsUpdateOptimizationEnabled) {
         String hashedPassword = hasUmsPassword ? "hashedPassword" : " ";
         WorkloadCredential workloadCredential = UserSyncTestUtils.createWorkloadCredential(hashedPassword, UMS_WORKLOAD_CREDENTIALS_VERSION);
-        when(umsCredentialProvider.getCredentials(any(), any())).thenReturn(workloadCredential);
+        when(umsCredentialProvider.getCredentials(any())).thenReturn(workloadCredential);
 
         Stack stack = mock(Stack.class);
         when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);

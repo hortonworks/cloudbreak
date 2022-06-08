@@ -45,10 +45,10 @@ public class SaasSdxServiceTest {
 
     @Test
     public void testDelete() {
-        doNothing().when(grpcSdxSaasClient).deleteInstance(any(), any());
+        doNothing().when(grpcSdxSaasClient).deleteInstance(any());
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
         underTest.deleteSdx(SAAS_CRN, true);
-        verify(grpcSdxSaasClient).deleteInstance(any(), eq(SAAS_CRN));
+        verify(grpcSdxSaasClient).deleteInstance(eq(SAAS_CRN));
 
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.FALSE);
         underTest.deleteSdx(SAAS_CRN, true);
@@ -59,9 +59,9 @@ public class SaasSdxServiceTest {
     public void testListCrn() {
         SDXSvcCommonProto.Instance instance = getInstance();
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
-        when(grpcSdxSaasClient.listInstances(any(), anyString())).thenReturn(Set.of(instance));
+        when(grpcSdxSaasClient.listInstances(anyString())).thenReturn(Set.of(instance));
         assertTrue(underTest.listSdxCrns("envName", ENV_CRN).contains(SAAS_CRN));
-        verify(grpcSdxSaasClient).listInstances(any(), eq(ENV_CRN));
+        verify(grpcSdxSaasClient).listInstances(eq(ENV_CRN));
 
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.FALSE);
         assertTrue(underTest.listSdxCrns("envName", ENV_CRN).isEmpty());
@@ -72,10 +72,10 @@ public class SaasSdxServiceTest {
     public void testListStatusPairsCrn() {
         SDXSvcCommonProto.Instance instance = getInstance();
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.TRUE);
-        when(grpcSdxSaasClient.listInstances(any(), anyString())).thenReturn(Set.of(instance));
+        when(grpcSdxSaasClient.listInstances(anyString())).thenReturn(Set.of(instance));
         assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN, "env", Set.of(SAAS_CRN))
                 .contains(Pair.of(SAAS_CRN, SDXSvcCommonProto.InstanceHighLevelStatus.Value.HEALTHY))));
-        verify(grpcSdxSaasClient).listInstances(any(), anyString());
+        verify(grpcSdxSaasClient).listInstances(anyString());
 
         when(entitlementService.isEntitledFor(any(), any())).thenReturn(Boolean.FALSE);
         assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listSdxCrnStatusPair(ENV_CRN, "env", Set.of(SAAS_CRN)).isEmpty()));
