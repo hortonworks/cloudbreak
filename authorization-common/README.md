@@ -22,6 +22,7 @@ __Table of content__
         - [Notes on performance](#notes-on-performance)
     + [Example](#example)
 * [Introduction of new resources](#introduction-of-new-resources)
+* [Introduction of new service](#introduction-of-new-service)
 * [How does it work internally](#how-does-it-work-internally)
     + [Resource based authorization internals](#resource-based-authorization-internals)
     + [Example authorization](#example-authorization)
@@ -269,13 +270,19 @@ You can support authorization on new resources, and you can specify the rights a
 1. Define new resource types in `AuthorizationResourceType`,
 2. define new rights by extending `AuthorizationResourceAction` enum with new (String right, AuthorizationResourceType type) values (the new right should be defined in UMS previously),
 3. implement necessary interface as described in `Rules for annotation usage section`
-4. if certain resoures should be handled as default resources (for example default image catalog), and the authorization shouldn't call UMS at all, implement `DefaultResourceChecker` interface.
+4. if certain resources should be handled as default resources (for example default image catalog), and the authorization shouldn't call UMS at all, implement `DefaultResourceChecker` interface.
 
 Useful interfaces:
 
 `HierarchyAuthResourcePropertyProvider`: if hierarchical authorization needed, then this can be useful, since this will require all related methods' implementation
 
 `CompositeAuthResourcePropertyProvider`: if there is no need for hierarchical authorization, this can be a good choice for the new resource (requires basic methods' implenentation like getting CRN by name, getting CRN list by name list)
+
+## Introduction of new service
+
+When you are creating a new module for a new microservice, you should:
+* import `authorization-common` gradle module for authorization logics
+* add enforce unit tests in order to ensure proper authorization implementations: EnforceAuthorizationAnnotationsTest
 
 ## How does it work internally
 
