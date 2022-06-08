@@ -6,6 +6,8 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -29,19 +31,25 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.data.util.Pair;
 
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
+import com.amazonaws.services.ec2.model.DescribeVolumesResult;
+import com.amazonaws.services.ec2.model.ModifyInstanceAttributeRequest;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TagSpecification;
+import com.amazonaws.services.ec2.model.VolumeState;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -60,6 +68,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
+import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
@@ -151,8 +160,17 @@ class AwsVolumeResourceBuilderTest {
     @Mock
     private AmazonEc2Client amazonEC2Client;
 
+    @Mock
+    private VolumeResourceCollector volumeResourceCollector;
+
+    @Spy
+    private AwsMethodExecutor awsMethodExecutor;
+
     @Captor
     private ArgumentCaptor<CreateVolumeRequest> createVolumeRequestCaptor;
+
+    @Captor
+    private ArgumentCaptor<ModifyInstanceAttributeRequest> modifyInstanceAttributeRequestCaptor;
 
     @BeforeEach
     void setUp() {
@@ -342,6 +360,46 @@ class AwsVolumeResourceBuilderTest {
                 any(), eq("groupName"));
     }
 
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void deleteTurnOnDeleteOntermination() throws PreserveResourceException {
+        CloudResource cloudResource = mock(CloudResource.class);
+        VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
+        when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
+                .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
+        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult());
+        when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
+        when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
+        when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.TRUE);
+
+        underTest.delete(awsContext, authenticatedContext, cloudResource);
+
+        verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
+        ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
+
+        assertTrue(modifyInstanceAttributeRequest.getBlockDeviceMappings().get(0).getEbs().getDeleteOnTermination());
+    }
+
+    @Test()
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void deleteTurnOffDeleteOntermination() throws PreserveResourceException {
+        CloudResource cloudResource = mock(CloudResource.class);
+        VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
+        when(volumeResourceCollector.getVolumeIdsByVolumeResources(any(), any(), any()))
+                .thenReturn(Pair.of(List.of(VOLUME_ID), List.of(createVolumeSet(List.of(createVolumeForVolumeSet(TYPE_GP2))))));
+        when(amazonEC2Client.describeVolumes(any())).thenReturn(describeVolumesResult());
+        when(cloudResource.getParameter(any(), any())).thenReturn(volumeSetAttributes);
+        when(cloudResource.getInstanceId()).thenReturn(INSTANCE_ID);
+        when(volumeSetAttributes.getDeleteOnTermination()).thenReturn(Boolean.FALSE);
+
+        assertThrows(PreserveResourceException.class, () -> underTest.delete(awsContext, authenticatedContext, cloudResource));
+
+        verify(amazonEC2Client).modifyInstanceAttribute(modifyInstanceAttributeRequestCaptor.capture());
+        ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = modifyInstanceAttributeRequestCaptor.getValue();
+
+        assertTrue(!modifyInstanceAttributeRequest.getBlockDeviceMappings().get(0).getEbs().getDeleteOnTermination());
+    }
+
     @SuppressWarnings("unchecked")
     private void setUpTaskExecutors() {
         when(intermediateBuilderExecutor.submit(isA(Runnable.class))).thenAnswer(invocation -> {
@@ -390,6 +448,12 @@ class AwsVolumeResourceBuilderTest {
 
     private CreateVolumeResult createCreateVolumeResult() {
         return new CreateVolumeResult().withVolume(new com.amazonaws.services.ec2.model.Volume().withVolumeId(VOLUME_ID));
+    }
+
+    private DescribeVolumesResult describeVolumesResult() {
+        com.amazonaws.services.ec2.model.Volume volume = new com.amazonaws.services.ec2.model.Volume();
+        volume.setState(VolumeState.InUse);
+        return new DescribeVolumesResult().withVolumes(List.of(volume));
     }
 
     private List<VolumeSetAttributes.Volume> verifyResultAndGetVolumes(List<CloudResource> result) {
