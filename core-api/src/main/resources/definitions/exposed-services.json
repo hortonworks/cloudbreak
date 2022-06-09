@@ -713,7 +713,8 @@
       "apiIncluded": false,
       "visibleForDatalake": false,
       "visibleForDatahub": true,
-      "minVersion": "7.2.11"
+      "minVersion": "7.2.11",
+      "maxVersion": "7.2.15"
     },
     {
       "name": "SSB-SSC-WS",
@@ -728,7 +729,8 @@
       "apiIncluded": false,
       "visibleForDatalake": false,
       "visibleForDatahub": false,
-      "minVersion": "7.2.11"
+      "minVersion": "7.2.11",
+      "maxVersion": "7.2.15"
     },
     {
       "name": "SSB-MVE-API",
