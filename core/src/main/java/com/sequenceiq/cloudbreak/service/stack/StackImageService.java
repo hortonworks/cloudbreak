@@ -93,7 +93,19 @@ public class StackImageService {
     public void changeImageCatalog(Stack stack, String imageCatalog) {
         try {
             Image currentImage = componentConfigProviderService.getImage(stack.getId());
+            ImageCatalog sourceImageCatalog = imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), currentImage.getImageCatalogName());
+            if (imageCatalogService.isCustomImageCatalog(sourceImageCatalog)) {
+                throw new CloudbreakServiceException(
+                        String.format("Current image catalog '%s' is a non-JSON based one. Image catalog change is not supported.",
+                                sourceImageCatalog.getName()));
+            }
+
             ImageCatalog targetImageCatalog = imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), imageCatalog);
+            if (imageCatalogService.isCustomImageCatalog(targetImageCatalog)) {
+                throw new CloudbreakServiceException(String.format("Migrating from a JSON based catalog '%s' to a non-JSON based one '%s' is not supported.",
+                        sourceImageCatalog.getName(), targetImageCatalog.getName()));
+            }
+
             StatedImage targetImage = imageCatalogService.getImage(
                     targetImageCatalog.getImageCatalogUrl(),
                     targetImageCatalog.getName(),
