@@ -77,13 +77,6 @@ public class ParcelUrlProviderTest {
         verifyNoInteractions(parcelService);
     }
 
-    @Test
-    public void testGetCmRpmUrlShouldReturnTheUrlFromTheImage() {
-        Image image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
-        String actual = underTest.getCmRpmUrl(image);
-        assertEquals("http://cm/yumRPMS/x86_64/cloudera-manager-server-7.2.4-14450219.el7.x86_64.rpm", actual);
-    }
-
     private Set<ClusterComponent> createClusterComponents() {
         return Collections.singleton(new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, "SPARK3", null, null));
     }
