@@ -37,6 +37,7 @@ ExecStart=/opt/node_exporter/node_exporter --web.config=/opt/node_exporter/node_
      {%- endif %}
      {%- endfor %}
 {%- endif %}
+     --collector.textfile --collector.textfile.directory=/var/lib/node_exporter/files \
      --web.disable-exporter-metrics \
      --web.listen-address=:{{ monitoring.nodeExporterPort }}
 
