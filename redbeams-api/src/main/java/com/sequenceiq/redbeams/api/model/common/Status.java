@@ -27,6 +27,9 @@ public enum Status {
     STOP_FAILED,
     WAIT_FOR_SYNC,
     MAINTENANCE_MODE_ENABLED,
+    UPGRADE_REQUESTED,
+    UPGRADE_IN_PROGRESS,
+    UPGRADE_FAILED,
     UNKNOWN;
 
     private static final List<Status> IS_REMOVABLE_STATUS_LIST = Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED,
@@ -82,6 +85,11 @@ public enum Status {
         return START_REQUESTED.equals(this)
                 || START_IN_PROGRESS.equals(this)
                 || isAvailable();
+    }
+
+    public boolean isUpgradeInProgress() {
+        return UPGRADE_REQUESTED.equals(this) ||
+                UPGRADE_IN_PROGRESS.equals(this);
     }
 
     public static Set<Status> getAutoSyncStatuses() {
