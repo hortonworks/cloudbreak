@@ -26,7 +26,11 @@ public enum DetailedDBStackStatus {
     STOP_REQUESTED(Status.STOP_REQUESTED),
     STOP_IN_PROGRESS(Status.STOP_IN_PROGRESS),
     STOP_FAILED(Status.STOP_FAILED),
-    STOPPED(Status.STOPPED);
+    STOPPED(Status.STOPPED),
+
+    UPGRADE_REQUESTED(Status.UPGRADE_REQUESTED),
+    UPGRADE_IN_PROGRESS(Status.UPGRADE_IN_PROGRESS),
+    UPGRADE_FAILED(Status.UPGRADE_FAILED);
 
     private final Status status;
 

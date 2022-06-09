@@ -10,7 +10,7 @@ public class UpgradeDatabaseServerV4RequestTest {
 
     @Test
     void testGettersSetters() {
-        underTest.setMajorVersion("majorVersion");
-        assertEquals("majorVersion", underTest.getMajorVersion());
+        underTest.setUpgradeTargetMajorVersion(UpgradeTargetMajorVersion.VERSION_11);
+        assertEquals(UpgradeTargetMajorVersion.VERSION_11, underTest.getUpgradeTargetMajorVersion());
     }
 }

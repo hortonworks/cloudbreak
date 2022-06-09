@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests;
 
-import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.redbeams.doc.ModelDescriptions;
@@ -12,22 +12,22 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class UpgradeDatabaseServerV4Request {
 
-    @NotEmpty
+    @NotNull
     @ApiModelProperty(value = ModelDescriptions.UpgradeModelDescriptions.MAJOR_VERSION, required = true)
-    private String majorVersion;
+    private UpgradeTargetMajorVersion upgradeTargetMajorVersion;
 
-    public String getMajorVersion() {
-        return majorVersion;
+    public UpgradeTargetMajorVersion getUpgradeTargetMajorVersion() {
+        return upgradeTargetMajorVersion;
     }
 
-    public void setMajorVersion(String majorVersion) {
-        this.majorVersion = majorVersion;
+    public void setUpgradeTargetMajorVersion(UpgradeTargetMajorVersion upgradeTargetMajorVersion) {
+        this.upgradeTargetMajorVersion = upgradeTargetMajorVersion;
     }
 
     @Override
     public String toString() {
         return "UpgradeDatabaseServerV4Request{" +
-                "majorVersion='" + majorVersion + '\'' +
+                "majorVersion=" + upgradeTargetMajorVersion +
                 '}';
     }
 }

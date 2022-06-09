@@ -10,7 +10,9 @@ public enum MetricType implements Metric {
     DB_START_FINISHED("db.start.finished"),
     DB_START_FAILED("db.start.failed"),
     DB_STOP_FINISHED("db.stop.finished"),
-    DB_STOP_FAILED("db.stop.failed");
+    DB_STOP_FAILED("db.stop.failed"),
+    DB_UPGRADE_FINISHED("db.upgrade.finished"),
+    DB_UPGRADE_FAILED("db.upgrade.failed");
 
     private final String metricName;
 
