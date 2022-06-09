@@ -6,6 +6,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -896,6 +897,17 @@ public class ImageCatalogServiceTest {
         StatedImage actual = underTest.getImage(null, CUSTOM_CATALOG_NAME, CUSTOM_IMAGE_ID);
 
         assertEquals(statedImage.getImage(), actual.getImage());
+    }
+
+    @Test
+    public void testGetCustomStatedImageShouldThrowImageNotFoundExcceptionInCaseOfMissingCustomImage() {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setName(CUSTOM_CATALOG_NAME);
+        imageCatalog.setCustomImages(Collections.emptySet());
+
+        when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
+
+        assertThrows(CloudbreakImageNotFoundException.class, () -> underTest.getCustomStatedImage(WORKSPACE_ID, CUSTOM_CATALOG_NAME, CUSTOM_IMAGE_ID));
     }
 
     @Test

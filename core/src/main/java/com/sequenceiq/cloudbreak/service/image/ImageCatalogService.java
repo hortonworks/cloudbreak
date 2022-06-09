@@ -806,11 +806,13 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             StatedImage sourceImage = getSourceImageByImageType(customImage);
             LOGGER.info("Custom image '{}' is a {} image '{}' customization.", imageId, customImage.getImageType(), customImage.getCustomizedImageId());
             return customImageProvider.mergeSourceImageAndCustomImageProperties(
-                        sourceImage, customImage, imageCatalog.getImageCatalogUrl(), imageCatalog.getName());
+                    sourceImage, customImage, imageCatalog.getImageCatalogUrl(), imageCatalog.getName());
+        } else if (Strings.isNullOrEmpty(imageCatalog.getImageCatalogUrl())) {
+            throw new CloudbreakImageNotFoundException(
+                    String.format("Could not find any custom image with id: '%s' in catalog: '%s'", imageId, imageCatalog.getName()));
         } else {
-            return getImage(imageCatalog.getImageCatalogUrl(), imageCatalog.getName(), imageId);
+            return getImageByUrl(imageCatalog.getImageCatalogUrl(), imageCatalog.getName(), imageId);
         }
-
     }
 
     private Optional<CustomImage> getCustomImage(ImageCatalog imageCatalog, String imageId) {
