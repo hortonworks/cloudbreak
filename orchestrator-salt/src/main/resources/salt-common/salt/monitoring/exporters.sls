@@ -3,6 +3,24 @@
 
 {%- if monitoring.enabled and monitoring.nodeExporterExists and monitoring.blackboxExporterExists %}
 
+/var/lib/node_exporter/files:
+  file.directory:
+    - name: /var/lib/node_exporter/files
+    - user: "root"
+    - group: "root"
+    - mode: 750
+    - failhard: True
+    - makedirs: True
+
+/var/lib/node_exporter/scripts:
+  file.directory:
+    - name: /var/lib/node_exporter/scripts
+    - user: "root"
+    - group: "root"
+    - mode: 750
+    - failhard: True
+    - makedirs: True
+
 /etc/systemd/system/cdp-node-exporter.service:
   file.managed:
     - source: salt://monitoring/systemd/cdp-node-exporter.service.j2

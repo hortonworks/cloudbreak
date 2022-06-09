@@ -7,6 +7,7 @@ include:
   - monitoring.dev-stack
   {%- endif %}
   - monitoring.exporters
+  - monitoring.textfiles
   - monitoring.vmagent
 
 /etc/cron.d/monitoring_cert_check:
