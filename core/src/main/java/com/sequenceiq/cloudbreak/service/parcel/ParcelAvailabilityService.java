@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.CmUrlProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.ParcelUrlProvider;
 
 @Service
@@ -43,10 +44,13 @@ public class ParcelAvailabilityService {
     @Inject
     private PaywallCredentialPopulator paywallCredentialPopulator;
 
+    @Inject
+    private CmUrlProvider cmUrlProvider;
+
     public Set<Response> validateAvailability(Image image, Long resourceId) {
-        Set<String> requiredParcelsFromImage = new HashSet<>();
-        String cmRpmUrl = parcelUrlProvider.getCmRpmUrl(image);
-        requiredParcelsFromImage.addAll(parcelUrlProvider.getRequiredParcelsFromImage(image, stackService.getByIdWithListsInTransaction(resourceId)));
+        Set<String> requiredParcelsFromImage =
+                new HashSet<>(parcelUrlProvider.getRequiredParcelsFromImage(image, stackService.getByIdWithListsInTransaction(resourceId)));
+        String cmRpmUrl = cmUrlProvider.getCmRpmUrl(image);
         requiredParcelsFromImage.add(cmRpmUrl);
 
         Map<String, Optional<Response>> parcelsByResponse = getParcelsByResponse(requiredParcelsFromImage);
