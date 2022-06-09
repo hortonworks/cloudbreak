@@ -46,11 +46,13 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
 import com.sequenceiq.redbeams.converter.stack.AllocateDatabaseServerV4RequestToDBStackConverter;
+import com.sequenceiq.redbeams.converter.upgrade.UpgradeDatabaseServerV4RequestToUpgradeDatabaseServerRequestConverter;
 import com.sequenceiq.redbeams.converter.v4.databaseserver.DBStackToDatabaseServerStatusV4ResponseConverter;
 import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerConfigToDatabaseServerV4ResponseConverter;
 import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerV4RequestToDatabaseServerConfigConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
@@ -94,6 +96,9 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Inject
     private DatabaseServerV4RequestToDatabaseServerConfigConverter databaseServerV4RequestToDatabaseServerConfigConverter;
+
+    @Inject
+    private UpgradeDatabaseServerV4RequestToUpgradeDatabaseServerRequestConverter upgradeDatabaseServerV4RequestConverter;
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
@@ -229,6 +234,7 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @InternalOnly
     public void upgrade(@TenantAwareParam @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) String databaseServerCrn,
             @Valid @NotNull UpgradeDatabaseServerV4Request request) {
-        redbeamsUpgradeService.upgradeDatabaseServer(databaseServerCrn, request.getMajorVersion());
+        UpgradeDatabaseRequest upgradeDatabaseRequest = upgradeDatabaseServerV4RequestConverter.convert(request);
+        redbeamsUpgradeService.upgradeDatabaseServer(databaseServerCrn, upgradeDatabaseRequest);
     }
 }

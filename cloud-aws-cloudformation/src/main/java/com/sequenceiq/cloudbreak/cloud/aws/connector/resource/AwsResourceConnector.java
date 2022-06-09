@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 
 import freemarker.template.Configuration;
@@ -112,6 +113,12 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext ac, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier) throws Exception {
         return awsRdsLaunchService.launch(ac, stack, persistenceNotifier);
+    }
+
+    @Override
+    public List<CloudResourceStatus> upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) throws Exception {
+        return null;
     }
 
     private boolean deployingToSameVPC(AwsNetworkView awsNetworkView, boolean existingVPC) {

@@ -22,4 +22,11 @@ public class RedbeamsFailureEvent extends RedbeamsEvent {
     public Exception getException() {
         return exception;
     }
+
+    @Override
+    public String toString() {
+        return "RedbeamsFailureEvent{" +
+                "exception=" + exception +
+                "} " + super.toString();
+    }
 }

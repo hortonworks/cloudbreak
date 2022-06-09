@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 
 /**
@@ -92,6 +93,26 @@ public interface ResourceConnector<R> {
      */
     List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier)
             throws Exception;
+
+    /**
+     * Upgrades a database stack on a cloud platform. The stack consists of the following resources:
+     * - a single database server instance
+     * - depending on the platform, other associated, required resources (e.g., a DB subnet group for RDS)
+     * <br>
+     * This method initiates infrastructure upgrade on the cloud platform and returns a list of
+     * {@link CloudResourceStatus} values, one for each created resource. The caller does not need
+     * to wait/block until infrastructure upgrade is finished, but can return immediately and use
+     * {@link #check(AuthenticatedContext, List)} method to check regularly whether the
+     * infrastructure and all resources have been upgraded or not.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param stack                contains the full description of infrastructure
+     * @param persistenceNotifier  notifier for when a resource is allocated on the cloud platfrom
+     * @return the status of resources allocated on the cloud platform
+     * @throws Exception in case of any error
+     */
+    List<CloudResourceStatus> upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
+            TargetMajorVersion targetMajorVersion) throws Exception;
 
     /**
      * Invoked to check whether the resources have already reached a StatusGroup.PERMANENT state.
