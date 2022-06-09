@@ -38,11 +38,13 @@ import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerLaunchServ
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerStartService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerStopService;
 import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerTerminateService;
+import com.sequenceiq.cloudbreak.cloud.template.compute.DatabaseServerUpgradeService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.loadbalancer.LoadBalancerResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
+import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -76,6 +78,9 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Inject
     private DatabaseServerLaunchService databaseServerLaunchService;
+
+    @Inject
+    private DatabaseServerUpgradeService databaseServerUpgradeService;
 
     @Inject
     private DatabaseServerCheckerService databaseServerCheckerService;
@@ -119,6 +124,15 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
     public List<CloudResourceStatus> launchDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier) throws Exception {
         List<CloudResource> cloudResources = databaseServerLaunchService.launch(authenticatedContext, stack, persistenceNotifier);
+        return cloudResources.stream()
+                .map(e -> new CloudResourceStatus(e, ResourceStatus.CREATED))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<CloudResourceStatus> upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) throws Exception {
+        List<CloudResource> cloudResources = databaseServerUpgradeService.upgrade(authenticatedContext, stack, persistenceNotifier, targetMajorVersion);
         return cloudResources.stream()
                 .map(e -> new CloudResourceStatus(e, ResourceStatus.CREATED))
                 .collect(Collectors.toList());
