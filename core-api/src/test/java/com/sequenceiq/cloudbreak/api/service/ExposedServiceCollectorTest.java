@@ -192,6 +192,10 @@ class ExposedServiceCollectorTest {
                 "SSB-SSC-UI",
                 "SSB-SSC-WS",
                 "SSB-SSE-API",
+                "SSB-SSE-UI",
+                "SSB-SSE-UI-LB",
+                "SSB-SSE-WS",
+                "SSB-SSE-WS-LB",
                 "WEBHBASE",
                 "WEBHDFS",
                 "YARNUIV2",
@@ -438,6 +442,7 @@ class ExposedServiceCollectorTest {
             "SSB-SSE-API",
             "QUERY_PROCESSOR");
     }
+
     @Test
     void getNonTLSServicePortsPre7211() {
         underTest.init();
@@ -655,7 +660,7 @@ class ExposedServiceCollectorTest {
                 Map.entry("SSB-SSE-UI", 18121),
                 Map.entry("SSB-SSE-WS", 18121),
                 Map.entry("SSB-SSE-UI-LB", 18121),
-                Map.entry("SSB-SSE-WS-LB", 18121)
+                Map.entry("SSB-SSE-WS-LB", 18121),
                 Map.entry("SSB-MVE-API", 18131),
                 Map.entry("SSB-SSE-API", 18121),
                 Map.entry("WEBHBASE", 20550),
@@ -880,10 +885,10 @@ class ExposedServiceCollectorTest {
                 Map.entry("SOLR", 8985),
                 Map.entry("SPARKHISTORYUI", 18488),
                 Map.entry("SPARK3HISTORYUI", 18489),
-                Map.entry("SSB-SSC-UI", 18121),
-                Map.entry("SSB-SSC-UI-LB", 18121),
-                Map.entry("SSB-SSC-WS", 18121),
-                Map.entry("SSB-SSC-WS-LB", 18121),
+                Map.entry("SSB-SSE-UI", 18121),
+                Map.entry("SSB-SSE-UI-LB", 18121),
+                Map.entry("SSB-SSE-WS", 18121),
+                Map.entry("SSB-SSE-WS-LB", 18121),
                 Map.entry("SSB-MVE-API", 18131),
                 Map.entry("SSB-SSE-API", 18121),
                 Map.entry("WEBHBASE", 20550),
