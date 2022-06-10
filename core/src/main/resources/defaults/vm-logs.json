@@ -318,5 +318,17 @@
   {
     "path": "/var/log/mount-instance-storage.log",
     "label": "mount_instance_storage"
+  },
+  {
+    "path": "/var/log/check_atlas_updated.log",
+    "label": "check_atlas_updated_log"
+  },
+  {
+    "path": "/var/log/dl_postgres_restore.log",
+    "label": "dl_restore"
+  },
+  {
+    "path": "/var/log/dl_postgres_backup.log",
+    "label": "dl_backup"
   }
 ]

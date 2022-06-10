@@ -90,6 +90,7 @@ base:
 {%- endif %}
     - gateway.settings
     - postgresql.disaster_recovery
+    - atlas.check_atlas_updated
 
   'roles:knox_gateway':
     - match: grain
@@ -110,5 +111,5 @@ base:
     - smartsense.credentials
 
   'roles:startup_mount':
-      - match: grain
-      - mount.startup
+    - match: grain
+    - mount.startup
