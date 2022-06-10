@@ -49,6 +49,8 @@ message Event {
     AltusIamMachineUserCreated altusIamMachineUserCreated = 16;
     // An Altus machine user was deleted.
     AltusIamMachineUserDeleted altusIamMachineUserDeleted = 17;
+    // An IAM machine user was updated.
+    AltusIamMachineUserUpdated altusIamMachineUserUpdated = 98;
     // An Altus access key was created.
     AltusIamAccessKeyCreated altusIamAccessKeyCreated = 18;
     // An Altus access key was deleted.
@@ -117,10 +119,18 @@ message Event {
     CDPDFServiceNodesChanged cdpDFServiceNodesChanged = 50;
     // A CDP Flow Deployment (NiFi cluster) scaled up or down
     CDPDFDeploymentPodsChanged cdpDFDeploymentPodsChanged = 51;
+    // A CDP DataFlow Deployment's Current Pod Status
+    CDPDFDeploymentPodStatus cdpDFDeploymentPodStatus = 96;
+    // A CDP DataFlow Deployment's upgrade status changed
+    CDPDFDeploymentUpgradeStatusChanged cdpDFDeploymentUpgradeStatusChanged = 94;
+    // A CDP DataFlow Deployment was requested to upgrade
+    CDPDFDeploymentUpgradeRequested cdpDFDeploymentUpgradeRequested = 97;
     // A CDP Liftie cluster was requested to create / update / upgrade / delete.
     CDPLiftieRequested cdpLiftieRequested = 52;
     // A CDP Liftie cluster's status changed.
     CDPLiftieClusterStatusChanged cdpLiftieClusterStatusChanged = 53;
+    // A CDP Liftie heartbeat usage event
+    CDPLiftieClusterNodeStatesHeartbeat cdpLiftieClusterNodeStatesHeartbeat = 99;
     // A KPI was added to a DataFlow deployment.
     CDPDFDeploymentKpiCreated cdpDFDeploymentKpiCreated = 54;
     // A KPI of a DataFlow deployment was modified.
@@ -194,6 +204,8 @@ message Event {
     CDPCMLWorkspaceBackupStatusChanged cdpCMLWorkspaceBackupStatusChanged = 90;
     // A CDP FreeIPA's status changed
     CDPFreeIPAStatusChanged cdpFreeIPAStatusChanged = 93;
+    // A Replication Manager usage event was detected
+    RMUsageEvent rmUsageEvent = 95;
   }
 }
 
@@ -317,6 +329,16 @@ message AltusIamMachineUserDeleted {
   string machineUserId = 1;
 }
 
+// Generated when an IAM machine user is updated.
+message AltusIamMachineUserUpdated {
+  // The CDP account ID of the updated machine user.
+  string accountId = 1;
+  // The CRN of the update machine user.
+  string crn = 2;
+  // The updated status of the machine user. The possible values are ACTIVE and CONTROL_PLANE_LOCKED_OUT.
+  // More statuses could be added in future.
+  string status = 3;
+}
 
 // Generated when an Altus IAM access key has been created.
 message AltusIamAccessKeyCreated {
@@ -592,7 +614,7 @@ message CDPDatalakeBackupRestoreComplete {
   // The duration taken to perform operation on the edgeIndexCollection collection.
   int32 edgeIndexCollectionDuration = 13;
   // The duration taken to perform operation on the fulltextxIndexCollection collection.
-  int32 fulltextxIndexCollectionDuration = 14;
+  int32 fulltextIndexCollectionDuration = 14;
   // The duration taken to perform operation on the rangerAuditsCollection collection.
   int32 rangerAuditsCollectionDuration = 15;
   // The duration taken to perform deletion on the vertexIndexCollection collection.
@@ -600,7 +622,7 @@ message CDPDatalakeBackupRestoreComplete {
   // The duration taken to perform deletion on the edgeIndexCollection collection.
   int32 edgeIndexCollectionDeleteDuration = 17;
   // The duration taken to perform deletion on the fulltextxIndexCollection collection.
-  int32 fulltextxIndexCollectionDeleteDuration = 18;
+  int32 fulltextIndexCollectionDeleteDuration = 18;
   // The duration taken to perform deletion on the rangerAuditsCollection collection.
   int32 rangerAuditsCollectionDeleteDuration = 19;
   // The duration taken to perform operation on the postgress database
@@ -749,6 +771,13 @@ message CDPCMLWorkspaceStatus {
     SCALE_UP_AFTER_UPGRADE_FINISHED = 55;
     // The status when the operation to scale up after upgrading the storage has failed.
     SCALE_UP_AFTER_UPGRADE_FAILED = 56;
+
+    // The status when the CDSW migration has started.
+    MIGRATION_STARTED = 57;
+    // The status when the CDSW migration has finished.
+    MIGRATION_FINISHED = 58;
+    // The status when the CDSW migration has failed.
+    MIGRATION_FAILED = 59;
   }
 }
 
@@ -1069,6 +1098,8 @@ message CDPLiftieInstanceGroupMetadata {
   int32 rootVolume = 7;
   // Reqested instance group is single zone
   bool singleZone = 8;
+  // Whether the instance group is using availability zones or availability sets. Used in conjunction with singleZone for Azure
+  bool useAvailabilityZones = 9;
 }
 
 // Collection of Autoscaling Instance Groups metadata
@@ -1093,7 +1124,7 @@ message CDPLiftieGCPMetadata {
   string region = 1;
 }
 
-// Generated when a valid CDP Liftie cluster provisioning request has been made.
+// Usage Event generated when a create/update/upgrade/delete request is made in Liftie
 message CDPLiftieRequested {
   // The CDP actor CRN of the request.
   string actorCrn = 1;
@@ -1173,6 +1204,71 @@ message CDPLiftieClusterStatusChanged {
   string apiType = 16;
   // the paying customer
   string customer = 17;
+}
+
+// States of the nodes in a Liftie Cluster
+message CDPLiftieClusterNodeStatesHeartbeat {
+  // List of states of each node in a Liftie cluster.
+  repeated CDPLiftieClusterNodeState nodeStates = 1;
+  // The Compute Cluster CRN
+  string clusterCrn = 2;
+  // The Compute Cluster type (Dedicated or Shared)
+  string clusterType = 3;
+  // The CDP account ID (tenantID).
+  string accountId = 4;
+  // The environment type.
+  CDPEnvironmentsEnvironmentType.Value environmentType = 5;
+  // The CDP environment CRN.
+  string environmentCrn = 6;
+  // CDP Control Plane Liftie Version.
+  string liftieVersion = 7;
+  // The Kubernetes version.
+  string kubernetesVersion = 8;
+}
+
+message CDPLiftieClusterNodeState {
+  // ID of the node assigned by the cloud provider in the format: <ProviderName>://<ProviderSpecificNodeID>.
+  string providerId = 1;
+  // Unschedulable controls node schedulability of new pods. By default, node is schedulable. More info: https://kubernetes.io/docs/concepts/nodes/node/#manual-node-administration.
+  bool unschedulable = 2;
+  // The name of the node.
+  string name = 3;
+  // The pool (or nodegroup) this node belongs to.
+  string agentPool = 4;
+  // The architecture of the node's CPU.
+  string architecture = 5;
+  // The instance type of the node.
+  string instanceType = 6;
+  // The OS running on the node.
+  string os = 7;
+  // The region this node is running in.
+  string region = 8;
+  // The zone this node is running in.
+  string zone = 9;
+  // All labels present on this node.
+  repeated string labels = 10;
+  // The conditions present on this node.
+  CDPLiftieClusterNodeConditions nodeConditions = 11;
+  // Is this a metered node
+  bool metered = 12;
+  // workload CRN for which this node is metered (optional, should NOT be set for liftie-infra, ml-infra)
+  string workloadCRN = 13;
+  // Node’s annotations
+  repeated string annotations = 14;
+}
+
+// Conditions is an array of current observed node conditions. More info: https://kubernetes.io/docs/concepts/nodes/node/#condition.
+message CDPLiftieClusterNodeConditions {
+  // Indicates the Ready condition on this node.
+  string ready = 1;
+  // Indicates the NetworkUnavailable condition on this node.
+  string networkUnavailable = 2;
+  // Indicates the MemoryPressure condition on this node.
+  string memoryPressure = 3;
+  // Indicates the DiskPressure condition on this node.
+  string diskPressure = 4;
+  // Indicates the PIDPressure condition on this node.
+  string pidPressure = 5;
 }
 
 // The status of a CDP request
@@ -1451,6 +1547,7 @@ message CDPProxyDetails {
   string authentication = 3;
 }
 
+// Show services for which the customer has provided their own DNS zones
 message CDPOwnDnsZones {
     // Whether DNS is provided for the postgres by the customer or not
     bool postgres = 1;
@@ -1477,7 +1574,7 @@ message CDPNetworkDetails {
   string controlPlaneAndCCMAgentConnectionSecurity = 9;
   // Generated domain name
   string domain = 10;
-  // If the customer is using his own DNS zones for some services
+  // If the customer is using their own DNS zones for some services
   CDPOwnDnsZones ownDnsZones= 11;
 }
 
@@ -1890,6 +1987,8 @@ message CDPDFServiceStatus {
     UPGRADE_WORKLOAD_IN_PROGRESS = 24;
     // The status of a df service that is being rolled back.
     ROLLBACK_IN_PROGRESS = 25;
+    // The status of a df service that has deployments upgrade in progress
+    UPGRADE_DEPLOYMENTS_IN_PROGRESS = 26;
   }
 }
 
@@ -2070,6 +2169,22 @@ message CDPDFDeploymentStatus {
     START_FLOW_COMPLETED = 27;
     // The status of a deployment that failed to start the NiFi flow.
     START_FLOW_FAILED = 28;
+    // The status of deployment that has upgrade initiated.
+    UPGRADE_REQUESTED= 33;
+    // The status of deployment that is upgrading.
+    UPGRADE_IN_PROGRESS = 29;
+    // The status of a deployment that successfully completed upgrading.
+    UPGRADE_COMPLETED = 30;
+    // The status of a deployment that failed to upgrade.
+    UPGRADE_FAILED = 31;
+    // The status of a deployment that is being rolled back.
+    ROLLBACK_IN_PROGRESS = 32;
+    // The status of a deployment that has rollback initiated.
+    ROLLBACK_REQUESTED = 34;
+    // The status of a deployment that is failed to roll back.
+    ROLLBACK_FAILED = 35;
+    // The status of a deployment that is successfully rolled back.
+    ROLLBACK_COMPLETED = 36;
   }
 }
 
@@ -2118,6 +2233,75 @@ message CDPDFDeploymentStatusChanged {
   string flowVersionCrn = 5;
   // Deployment name
   string deploymentName = 6;
+}
+
+message CDPDFDeploymentPodStatus {
+  // The id of the DataFlow Deployment.
+  string id = 1;
+  // The crn of the DataFlow Deployment.
+  string crn = 2;
+  // The CDP account ID.
+  string accountId = 3;
+  // The crn of the CDP environment.
+  string environmentCrn = 4;
+  // The id of the DataFlow Service.
+  string dataFlowServiceId = 5;
+  // The crn of the DataFlow Service.
+  string dataFlowServiceCrn = 6;
+  // The number of pods running.
+  int32 currentPodCount = 7;
+}
+
+message CDPDFDeploymentUpgradeRequested {
+  // Operation metadata. Identifiers refer to the NiFi deployment within the environment.
+  CDPDFOperationDetails operationDetails = 1;
+  // The crn of the CDP environment of the deployment.
+  string environmentCrn = 2;
+  // The id of the DataFlow Service. This is the internal id used by dfx to refer to a dataflow-enabled cdp environment.
+  string dataFlowServiceId = 3;
+  // The crn of the DataFlow Service. This is the crn used by dfx to refer to a dataflow-enabled cdp environment.
+  string dataFlowServiceCrn = 4;
+  // The version of NiFi runtime in the deployment prior to the upgrade.
+  string oldNifiVersion = 5;
+  // The version of NiFi that deployment is upgraded to.
+  string newNifiVersion = 6;
+  // The initial status of the Deployment Upgrade. Should only be UPGRADE_REQUESTED/ROLLBACK_REQUESTED.
+  CDPDFDeploymentStatus.Value status = 7;
+  // CRN of the flow version
+  string flowVersionCrn = 8;
+  // Deployment name
+  string deploymentName = 9;
+  // The workflow run id of parent workflow that initiated deployments upgrade.
+  string parentRunId = 10;
+}
+
+message CDPDFDeploymentUpgradeStatusChanged {
+  // Removed parentRunId
+  reserved 12;
+  // Operation metadata
+  CDPDFOperationDetails operationDetails = 1;
+  // The status of the deployment before the change
+  CDPDFDeploymentStatus.Value oldStatus = 2;
+  // The status of the deployment after the change
+  CDPDFDeploymentStatus.Value newStatus = 3;
+  // A failure message for the df service. This will only be set if newStatus is
+  // *_FAILED.
+  string failureReason = 4;
+  // CRN of the flow version
+  string flowVersionCrn = 5;
+  // Deployment name
+  string deploymentName = 6;
+  // The crn of the DataFlow Service. This is the crn used by dfx to refer to a dataflow-enabled cdp environment.
+  string dataFlowServiceCrn = 7;
+  // The id of the DataFlow Service. This is the internal id used by dfx to refer to a dataflow-enabled cdp environment.
+  string dataFlowServiceId = 8;
+  // The crn of the CDP environment of the deployment.
+  string environmentCrn = 9;
+  // The version of NiFi before the upgrade is initiated
+  string oldNifiVersion = 10;
+  // The version of NiFi that deployment is upgraded to
+  string newNifiVersion = 11;
+
 }
 
 // Generated when users initiate diagnostics collection
@@ -3004,7 +3188,7 @@ message CDPVMDiagnosticsFailureType {
 
 // Generated when a service in CDP has diagnostic event to report.
 message CDPDiagnosticEvent {
-  // The resource CRN.
+  // The lowest level billable resource CRN.
   string resourceCrn = 1;
   // The CDP account ID.
   string accountId = 2;
@@ -3016,6 +3200,12 @@ message CDPDiagnosticEvent {
   string details = 5;
   // The failure message, if available.
   string failureMessage = 6;
+  // The environment CRN.
+  string environmentCrn = 7;
+  // The environment name.
+  string environmentName = 8;
+  // Additional event details, if any need to be captured, in a json format.
+  string eventDetails = 9;
 }
 
 // The service types. Any new services added to CDP which will have their own
@@ -3042,6 +3232,10 @@ message ServiceType {
     OPERATIONAL_DB = 5;
     // Data Flow
     DATA_FLOW = 6;
+    // Environment, which contains one or multiple services
+    ENVIRONMENT = 7;
+    // Liftie
+    LIFTIE = 8;
   }
 }
 
@@ -3054,6 +3248,8 @@ message CDPDiagnosticResult {
     DBUS_UNAVAILABLE = 1;
     // Metering heartbeat generation is failing.
     METERING_HB_FAILURE = 2;
+    // Cluster Not Reachable
+    CLUSTER_NOT_REACHABLE = 3;
   }
 }
 
@@ -3125,4 +3321,41 @@ message CDPPEMCertificateRequestDetails {
   string notAfter = 8;
   // Certificate Provider that issued the certificate.
   string certificateProvider = 9;
+}
+
+// Generic event emitted when a Replication Manager user makes requests of interest, such as
+// operations on policies, downloading logs and diagnostic bundles, etc
+message RMUsageEvent {
+  // The internal trace id of the request associated with the usage event
+  string requestId = 1;
+  // The CDP actor CRN of the request.
+  string actorCrn = 2;
+  // The usage event will be identified by the DMX controller which handles the event
+  string controller = 3;
+  // The timestamp of the start time of the request associated with the usage event
+  uint64 eventStarted = 4;
+  // The timestamp of the end time of the request associated with the usage event
+  uint64 eventFinished = 5;
+  // The result status of the request associated with the usage event
+  uint32 resultStatus = 6;
+  // The source which the usage event was originated from
+  RMUsageEventSource.Value eventSource = 7;
+  // The length of the request payload associated with the event
+  uint64 requestLength = 8;
+  // The length of the response payload associated with the event
+  uint64 responseLength = 9;
+  // The version of the application deployed when emitting the event
+  string applicationVersion = 10;
+}
+
+// Type holding the source of a Replication Manager usage event
+message RMUsageEventSource {
+  enum Value {
+    // A value indication that the enum is unset
+    UNSET = 0;
+    // A value indicating that the request was made from the browser UI
+    UI = 1;
+    // A value indication that the request was made from the CLI
+    CLI = 2;
+  }
 }

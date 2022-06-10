@@ -42,8 +42,9 @@ public class PreFlightCheckHandler implements EventHandler<PreFlightCheckRequest
         }
         try {
             diagnosticsFlowService.nodeStatusNetworkReport(resourceId);
+            diagnosticsFlowService.nodeStatusMeteringReport(resourceId);
         } catch (Exception e) {
-            LOGGER.debug("Error occurred during pre-flight network status checks (skipping): {}", e.getMessage());
+            LOGGER.debug("Error occurred during pre-flight node status checks (skipping): {}", e.getMessage());
         }
         PreFlightCheckSuccess result = new PreFlightCheckSuccess(resourceId);
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
