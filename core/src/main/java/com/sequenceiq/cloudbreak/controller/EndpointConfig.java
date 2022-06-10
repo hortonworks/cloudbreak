@@ -46,6 +46,7 @@ import com.sequenceiq.distrox.v1.distrox.controller.DistroXDatabaseServerV1Contr
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXInternalV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXUpgradeV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
+import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1EventController;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 
@@ -65,6 +66,7 @@ public class EndpointConfig extends ResourceConfig {
             BlueprintUtilV4Controller.class,
             CustomConfigurationsV4Controller.class,
             EventV4Controller.class,
+            DistroXV1EventController.class,
             ClusterTemplateV4Controller.class,
             DatabaseV4Controller.class,
             DatabaseConfigV4Controller.class,

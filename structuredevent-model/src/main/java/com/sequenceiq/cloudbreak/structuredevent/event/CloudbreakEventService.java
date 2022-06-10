@@ -23,6 +23,7 @@ public interface CloudbreakEventService {
 
     String CREDENTIAL_RESOURCE_TYPE = "credential";
 
+    @Deprecated
     String LEGACY_RESOURCE_TYPE = "stacks";
 
     String CONSUMPTION_RESOURCE_TYPE = "consumption";
