@@ -10,9 +10,12 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredRestCall
 
 public enum StructuredEventType {
 
+    @Deprecated
     REST(StructuredRestCallEvent.class, CDPStructuredRestCallEvent.class),
+    @Deprecated
     FLOW(StructuredFlowEvent.class, CDPStructuredFlowEvent.class),
     NOTIFICATION(StructuredNotificationEvent.class, CDPStructuredNotificationEvent.class),
+    @Deprecated
     SYNC(StructuredSyncEvent.class);
 
     private static final Map<Class<? extends StructuredEvent>, StructuredEventType> STRUCTURED_EVENT_TYPE_MAP = new HashMap<>();
