@@ -1,4 +1,1 @@
-{%- from 'monitoring/settings.sls' import monitoring with context %}
-{%- if monitoring.password %}
-{{ monitoring.password }}
-{%- endif %}
+{%- from 'monitoring/settings.sls' import monitoring with context %}{%- if monitoring.password %}{{ monitoring.password }}{%- endif %}

@@ -2,20 +2,13 @@
 {%- from 'monitoring/settings.sls' import monitoring with context %}
 
 {%- if monitoring.enabled %}
-{% set vmagent_installed = salt['file.directory_exists' ]('/opt/cdp-vmagent') %}
+{% set vmagent_installed = salt['file.directory_exists' ]('/opt/cdp-vmagent/bin') %}
 {%- if not vmagent_installed %}
 install_vmagent:
   cmd.run:
-    - name: "yum install -y cdp-vmagent --disablerepo='*' --enablerepo=cdp-infra-tools; exit 0"
-    - onlyif: "test -f /etc/yum.repos.d/cdp-infra-tools.repo && ! rpm -q cdp-vmagent"
+    - name: "yum install -y cdp-vmagent --disablerepo='*' --enablerepo=cdp-infra-tools"
+    - onlyif: "! rpm -q cdp-vmagent"
 {%- endif %}
-
-/opt/cdp-vmagent/noproxy_check.py:
-  file.managed:
-    - source: salt://monitoring/scripts/noproxy_check.py
-    - user: "root"
-    - group: "root"
-    - mode: 750
 
 generate_vmagent_cert_and_key:
   cmd.run:
@@ -35,8 +28,17 @@ generate_vmagent_cert_and_key:
     - template: jinja
     - user: "root"
     - group: "root"
-    - mode: 640
+    - mode: 600
 
+{%- if monitoring.requestSignerEnabled %}
+/opt/cdp-vmagent/request_signer_pwd_file:
+  file.managed:
+    - source: salt://monitoring/template/request_signer_pwd_file.j2
+    - template: jinja
+    - user: "root"
+    - group: "root"
+    - mode: 600
+{%- else %}
 {%- if monitoring.password %}
 /opt/cdp-vmagent/remote_pwd_file:
   file.managed:
@@ -54,6 +56,7 @@ generate_vmagent_cert_and_key:
     - group: "root"
     - mode: 600
 {%- endif %}
+{%- endif %}
 
 start_cdp_vmagent:
   service.running:
@@ -62,9 +65,13 @@ start_cdp_vmagent:
     - watch:
       - file: /etc/systemd/system/cdp-vmagent.service
       - file: /opt/cdp-vmagent/prometheus.yml
+{%- if monitoring.requestSignerEnabled %}
+      - file: /opt/cdp-vmagent/request_signer_pwd_file
+{%- else %}
 {%- if monitoring.password %}
       - file: /opt/cdp-vmagent/remote_pwd_file
 {%- elif monitoring.token %}
       - file: /opt/cdp-vmagent/remote_token_file
+{%- endif %}
 {%- endif %}
 {%- endif %}

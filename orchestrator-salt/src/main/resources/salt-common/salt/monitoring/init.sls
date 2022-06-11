@@ -8,6 +8,7 @@ include:
   {%- endif %}
   - monitoring.exporters
   - monitoring.textfiles
+  - monitoring.request-signer
   - monitoring.vmagent
 
 /etc/cron.d/monitoring_cert_check:

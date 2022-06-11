@@ -28,7 +28,7 @@ telemetry:
     enabled: false
     paas-support: false
     remote-write-url: ""
-    scrape-interval-seconds: 300
+    scrape-interval-seconds: 60
     dev-stack: false
     status-processor:
       enabled: true
@@ -44,6 +44,12 @@ telemetry:
       user: vmagent
       port: 8429
       max-disk-usage: "4GB"
+    request-signer:
+      enabled: true
+      port: 61095
+      user: signer
+      use-token: true
+      token-validity-min: 60
     node-exporter:
       user: nodeuser
       port: 9100
@@ -77,6 +83,8 @@ telemetry:
       desired-version: 0.2.16
     cdp-vm-agent:
       desired-version: 1.73.1
+    cdp-request-signer:
+      desired-version: 0.1.1
     metering-agent:
       desired-date: 2022-01-18
   usage:
