@@ -17,6 +17,8 @@ public class TelemetryUpgradeConfiguration {
 
     private TelemetryComponentUpgradeConfiguration cdpVmAgent;
 
+    private TelemetryComponentUpgradeConfiguration cdpRequestSigner;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -55,5 +57,13 @@ public class TelemetryUpgradeConfiguration {
 
     public void setCdpVmAgent(TelemetryComponentUpgradeConfiguration cdpVmAgent) {
         this.cdpVmAgent = cdpVmAgent;
+    }
+
+    public TelemetryComponentUpgradeConfiguration getCdpRequestSigner() {
+        return cdpRequestSigner;
+    }
+
+    public void setCdpRequestSigner(TelemetryComponentUpgradeConfiguration cdpRequestSigner) {
+        this.cdpRequestSigner = cdpRequestSigner;
     }
 }

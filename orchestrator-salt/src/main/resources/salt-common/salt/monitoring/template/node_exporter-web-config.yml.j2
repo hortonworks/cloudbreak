@@ -2,7 +2,7 @@
 tls_server_config:
   cert_file: /opt/node_exporter/node_exporter.crt
   key_file: /opt/node_exporter/node_exporter.key
-{%- if monitoring.exporterPassword %}
+{%- if monitoring.localPassword %}
 {%- set command = '/opt/salt/scripts/monitoring-secret-handler.sh ' + monitoring.nodeExporterUser + ' /opt/node_exporter/node_pwd /opt/node_exporter/basic_auth_cred' %}
 {%- set basic_auth_str = salt['cmd.run'](command)  %}
 basic_auth_users:

@@ -90,6 +90,7 @@
 {% set desired_cdp_telemetry_version = salt['pillar.get']('telemetry:desiredCdpTelemetryVersion') %}
 {% set desired_cdp_logging_agent_version = salt['pillar.get']('telemetry:desiredCdpLoggingAgentVersion') %}
 {% set desired_cdp_vmagent_version = salt['pillar.get']('telemetry:desiredCdpVmAgentVersion') %}
+{% set desired_cdp_request_signer_version = salt['pillar.get']('telemetry:desiredCdpRequestSignerVersion') %}
 {% set repo_name = salt['pillar.get']('telemetry:repoName') %}
 {% set repo_base_url = salt['pillar.get']('telemetry:repoBaseUrl') %}
 {% set repo_gpg_key = salt['pillar.get']('telemetry:repoGpgKey') %}
@@ -118,6 +119,7 @@
     "desiredCdpTelemetryVersion": desired_cdp_telemetry_version,
     "desiredCdpLoggingAgentVersion": desired_cdp_logging_agent_version,
     "desiredCdpVmAgentVersion": desired_cdp_vmagent_version,
+    "desiredCdpRequestSignerVersion": desired_cdp_request_signer_version,
     "repoName": repo_name,
     "repoBaseUrl": repo_base_url,
     "repoGpgKey": repo_gpg_key,
