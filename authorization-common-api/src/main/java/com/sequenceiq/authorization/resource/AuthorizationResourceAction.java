@@ -99,6 +99,9 @@ public enum AuthorizationResourceAction {
     STRUCTURED_EVENTS_READ("structured_events/read", AuthorizationResourceType.STRUCTURED_EVENT),
     UPDATE_AZURE_ENCRYPTION_RESOURCES("environments/updateAzureEncryptionResources", AuthorizationResourceType.ENVIRONMENT),
     ENVIRONMENT_CHANGE_FREEIPA_IMAGE("environments/changeFreeipaImageCatalog", AuthorizationResourceType.ENVIRONMENT),
+    DESCRIBE_PROXY("environments/useSharedResource", AuthorizationResourceType.PROXY),
+    DELETE_PROXY("environments/deleteProxyConfig", AuthorizationResourceType.PROXY),
+    CREATE_PROXY("environments/createProxyConfig", AuthorizationResourceType.PROXY),
     // deprecated actions, please do not use them
     ENVIRONMENT_READ("environments/read", AuthorizationResourceType.ENVIRONMENT),
     ENVIRONMENT_WRITE("environments/write", AuthorizationResourceType.ENVIRONMENT),

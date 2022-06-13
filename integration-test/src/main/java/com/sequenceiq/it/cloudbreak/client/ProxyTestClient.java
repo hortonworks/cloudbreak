@@ -8,6 +8,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.proxy.ProxyConfigCreateAction;
 import com.sequenceiq.it.cloudbreak.action.v4.proxy.ProxyConfigCreateIfNotExistsAction;
 import com.sequenceiq.it.cloudbreak.action.v4.proxy.ProxyConfigDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v4.proxy.ProxyConfigGetAction;
+import com.sequenceiq.it.cloudbreak.action.v4.proxy.ProxyConfigListAction;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
 
 @Service
@@ -27,6 +28,10 @@ public class ProxyTestClient {
 
     public Action<ProxyTestDto, EnvironmentClient> get() {
         return new ProxyConfigGetAction();
+    }
+
+    public Action<ProxyTestDto, EnvironmentClient> list() {
+        return new ProxyConfigListAction();
     }
 
 }
