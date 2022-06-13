@@ -167,6 +167,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
                     ApplicationDetailRequest applicationDetailRequest = new ApplicationDetailRequest();
                     applicationDetailRequest.setName(resource.getName());
                     ResponseContext responseContext = yarnClient.getApplicationDetail(applicationDetailRequest);
+                    LOGGER.debug("Yarn application '{}' status: {}", resource.getName(), responseContext);
                     if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_SUCCESS) {
                         ApplicationDetailResponse applicationDetailResponse = (ApplicationDetailResponse) responseContext.getResponseObject();
                         result.add(new CloudResourceStatus(resource, YarnApplicationStatus.mapResourceStatus(applicationDetailResponse.getState())));

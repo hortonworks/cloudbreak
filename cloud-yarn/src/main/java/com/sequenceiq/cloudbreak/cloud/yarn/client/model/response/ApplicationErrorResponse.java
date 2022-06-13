@@ -34,4 +34,13 @@ public class ApplicationErrorResponse  implements ApplicationResponse {
     public void setDiagnostics(String diagnostics) {
         this.diagnostics = diagnostics;
     }
+
+    @Override
+    public String toString() {
+        return "ApplicationErrorResponse{" +
+                "code='" + code + '\'' +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", diagnostics='" + diagnostics + '\'' +
+                '}';
+    }
 }

@@ -31,4 +31,13 @@ public class ResponseContext {
     public void setStatusCode(int statusCode) {
         this.statusCode = statusCode;
     }
+
+    @Override
+    public String toString() {
+        return "ResponseContext{" +
+                "statusCode=" + statusCode +
+                ", responseObject=" + responseObject +
+                ", responseError=" + responseError +
+                '}';
+    }
 }
