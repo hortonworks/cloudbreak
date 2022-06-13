@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigView;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigService;
-import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfigView;
 import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -108,8 +107,6 @@ public class TelemetryConfigServiceTest {
         given(fluentConfigService.createFluentConfigs(any(), anyBoolean(), anyBoolean(), isNull(), any()))
                 .willReturn(new FluentConfigView.Builder().build());
         given(nodeStatusConfigService.createNodeStatusConfig(isNull(), isNull(), anyBoolean())).willReturn(new NodeStatusConfigView.Builder().build());
-        given(monitoringConfigService.createMonitoringConfig(isNull(), any(), isNull(), isNull(), anyBoolean(), anyBoolean()))
-                .willReturn(new MonitoringConfigView.Builder().build());
         // WHEN
         Map<String, SaltPillarProperties> result = underTest.createTelemetryConfigs(STACK_ID, Set.of(TelemetryComponentType.CDP_TELEMETRY));
         // THEN

@@ -230,7 +230,7 @@ public class TelemetryDecorator {
 
     private void setupMonitoring(Map<String, SaltPillarProperties> servicePillar, boolean cdpSaasEnabled, boolean computeMonitoringEnabled, Stack stack,
             Telemetry telemetry, char[] passwordInput) {
-        if (telemetry.isMonitoringFeatureEnabled()) {
+        if (telemetry.getMonitoring() != null && telemetry.isMonitoringFeatureEnabled()) {
             LOGGER.debug("Filling monitoring configs.");
             MonitoringAuthConfig cmAuthConfig = null;
             if (stack.getCluster() != null && stack.getCluster().getCloudbreakClusterManagerMonitoringUser() != null

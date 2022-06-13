@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
+import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 public class TelemetryDecoratorTest {
@@ -215,9 +216,11 @@ public class TelemetryDecoratorTest {
         mockConfigServiceResults(dataConfigView, new FluentConfigView.Builder().build(), meteringConfigView,
                 monitoringConfigView, nodeStatusConfigView, telemetryCommonConfigView);
         given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(true);
+        Telemetry telemetry = new Telemetry();
+        telemetry.setMonitoring(new Monitoring());
         // WHEN
         Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar,
-                createStack(), new Telemetry());
+                createStack(), telemetry);
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(result, "monitoring");
         assertEquals(results.get("clusterType"), "datahub");
