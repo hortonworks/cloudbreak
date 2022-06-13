@@ -116,11 +116,36 @@ cb:
   address.resolving.timeout: 60000
 
   cloud.api.executorservice.pool.size: 40
-
+  max:
+     aws.resource.name.length: 50
+     aws.loadbalancer.resource.name.length: 32
   structuredevent:
     rest:
       enabled: true
       contentlogging: true
+  gcp:
+      hostkey.verify: false
+      disk.encryption.url: https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem
+      stopStart.batch.size: 10
+      create.batch.size: 5
+  aws:
+      spotinstances.enabled: true
+      disabled.instance.types: c5d,f1,i3,m5d,p3dn,r5d,z1d
+      hostkey.verify: false
+      credential.cache.ttl: 60
+      external.id: provision-ambari
+      role.session.name: cdp-provisioning
+      cf.template.new.path: templates/aws-cf-stack.ftl
+      cf.network.template.path: templates/aws-cf-network.ftl
+      cf.template.newdb.path: templates/aws-cf-dbstack.ftl
+      default.inbound.security.group:
+      vpc:
+      vpcendpoints:
+        enabled.gateway.services:
+        gateway:
+            services: s3,dynamodb
+        interface:
+            services: autoscaling,cloudformation,ec2,ecr.api,ecr.dkr,elasticfilesystem,elasticloadbalancing,sts,rds
 
 altus:
   audit:

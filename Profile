@@ -1,0 +1,4 @@
+export CB_INSTANCE_UUID="575afdca-11da-4dcd-8e71-1577ec566be2"
+export CB_INSTANCE_NODE_ID="7e36a90b-4f65-41fc-926e-5efd3969adb9"
+export CB_INSTANCE_PROVIDER="unknown"
+export CB_INSTANCE_REGION="unknown"

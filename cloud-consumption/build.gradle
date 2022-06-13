@@ -124,8 +124,14 @@ dependencies {
     implementation project(':secret-engine')
     implementation project(':notification-sender')
     implementation project(':cloud-consumption-api')
-    implementation project(':cloud-common')
     implementation project(':environment-api')
+    implementation project(':cloud-aws-common')
+    implementation project(':cloud-aws-cloudformation')
+    implementation project(":cloud-reactor-api")
+//    implementation project(":cloud-reactor")
+    implementation project(':cloud-common')
+//    runtimeOnly project(':cloud-mock')
+
 }
 
 bootRun {

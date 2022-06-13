@@ -3,18 +3,32 @@ package com.sequenceiq.consumption.flow.consumption.storage.handler;
 import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionHandlerSelectors.STORAGE_CONSUMPTION_COLLECTION_HANDLER;
 import static com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionStateSelectors.SEND_CONSUMPTION_EVENT_EVENT;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Comparator;
+import java.util.Date;
+
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.services.cloudwatch.model.Datapoint;
+import com.amazonaws.services.cloudwatch.model.GetMetricStatisticsResult;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.consumption.converter.CredentialToCloudCredentialConverter;
 import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.dto.Credential;
-import com.sequenceiq.consumption.flow.consumption.storage.event.SendStorageConsumptionEvent;
+import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionEvent;
 import com.sequenceiq.consumption.flow.consumption.storage.event.StorageConsumptionCollectionHandlerEvent;
+import com.sequenceiq.consumption.service.CloudWatchService;
+import com.sequenceiq.consumption.service.EnvironmentService;
+
 import com.sequenceiq.consumption.service.CredentialService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -29,6 +43,12 @@ public class StorageConsumptionCollectionHandler  extends AbstractStorageOperati
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
 
+    @Inject
+    private CloudWatchService cloudWatchService;
+
+    @Inject
+    private EnvironmentService environmentService;
+
     @Override
     public Selectable executeOperation(HandlerEvent<StorageConsumptionCollectionHandlerEvent> event) throws Exception {
         StorageConsumptionCollectionHandlerEvent data = event.getData();
@@ -37,12 +57,32 @@ public class StorageConsumptionCollectionHandler  extends AbstractStorageOperati
         String environmentCrn = consumption.getEnvironmentCrn();
         LOGGER.debug("Getting credential for environment with CRN [{}].", environmentCrn);
         Credential credential = credentialService.getCredentialByEnvCrn(environmentCrn);
-        credentialConverter.convert(credential);
+        CloudCredential cloudCredential = credentialConverter.convert(credential);
+
 
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
         LOGGER.debug("Storage consumption collection started. resourceCrn: '{}'", resourceCrn);
-        return new SendStorageConsumptionEvent(SEND_CONSUMPTION_EVENT_EVENT.selector(), resourceId, resourceCrn, null);
+
+        Date startTime = Date.from(Instant.now().minus(2, ChronoUnit.DAYS));
+        Date endTime = Date.from(Instant.now());
+        String bucketName = consumption.getStorageLocation().replace(FileSystemType.S3.getProtocol() + "://", "").split("/")[0];
+        LOGGER.debug("Getting the bucket size for the bucket {} from {} to {}", bucketName, startTime, endTime);
+
+
+        String region = environmentService.getByCrn(environmentCrn).getLocation().getName();
+        GetMetricStatisticsResult result = cloudWatchService.getBucketSize(cloudCredential, region, startTime, endTime, "cloudbreak-test");
+        Optional<Datapoint> optionalDatapoint = result.getDatapoints().stream().max(Comparator.comparing(Datapoint::getTimestamp));
+        if (optionalDatapoint.isPresent()) {
+            Datapoint datapoint = optionalDatapoint.get();
+            LOGGER.debug("The data point requested : {}", datapoint);
+        }
+
+        return StorageConsumptionCollectionEvent.builder()
+                .withResourceCrn(resourceCrn)
+                .withResourceId(resourceId)
+                .withSelector(SEND_CONSUMPTION_EVENT_EVENT.selector())
+                .build();
     }
 
     @Override
