@@ -43,6 +43,7 @@ function log() {
 function generate_cert_and_key() {
   local key_file=$1
   local cert_file=$2
+  local CN_ATTR=$3
   openssl req -x509 -newkey rsa:2048 -keyout ${key_file} -out ${cert_file} -days $VALIDITY_IN_DAYS -nodes -config <(
 cat <<-EOF
 [req]
@@ -56,7 +57,7 @@ CN = $CN_ATTR
 subjectAltName = @alt_names
 [alt_names]
 DNS.1 = localhost
-DNS.2 = $CN_ATTR
+DNS.2 = $ALT_DOMAIN
 EOF
 )
 
@@ -103,11 +104,11 @@ function generate_certs() {
         log "Cert/key won't be re-generated."
       else
         log "Cert/key needs to be re-generated ..."
-        generate_cert_and_key "${key_file}" "${cert_file}"
+        generate_cert_and_key "${key_file}" "${cert_file}" "$(basename $base)"
       fi
     else
       log "Files does not exist: ${cert_file} and/or ${key_file} - generating new cert/key ..."
-      generate_cert_and_key "${key_file}" "${cert_file}"
+      generate_cert_and_key "${key_file}" "${cert_file}" "$(basename $base)"
     fi
   done
   do_exit 0 "Cert/key generation finished."
@@ -124,10 +125,6 @@ function main() {
         ;;
         -c|--country-name)
           C_ATTR="$2"
-          shift 2
-        ;;
-        -cn|--common-name)
-          CN_ATTR="$2"
           shift 2
         ;;
         -s|--services-restart-on-regeneration)
@@ -147,9 +144,7 @@ function main() {
   if [[ "$C_ATTR" == "" ]]; then
     C_ATTR="us"
   fi
-  if [[ "$CN_ATTR" == "" ]]; then
-    CN_ATTR=$(hostname -f)
-  fi
+  ALT_DOMAIN=$(hostname -f)
   init_logfile
   generate_certs
 }
