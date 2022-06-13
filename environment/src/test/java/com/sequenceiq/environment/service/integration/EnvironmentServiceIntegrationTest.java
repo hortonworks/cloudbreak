@@ -344,7 +344,7 @@ public class EnvironmentServiceIntegrationTest {
 
     @Test
     public void testProxyGetByCrnNotFound() {
-        assertThrows(NotFoundException.class, () -> client.proxyV1Endpoint().getByResourceCrn("nonexisting"));
+        assertThrows(NotFoundException.class, () -> client.proxyV1Endpoint().getByResourceCrn("crn:cdp:environments:us-west-1:accid:proxyConfig:nonexisting"));
     }
 
     @Test
@@ -370,7 +370,7 @@ public class EnvironmentServiceIntegrationTest {
 
     @Test
     public void testProxyDeleteByCrnNotFound() {
-        assertThrows(NotFoundException.class, () -> client.proxyV1Endpoint().deleteByCrn("nonexisting"));
+        assertThrows(NotFoundException.class, () -> client.proxyV1Endpoint().deleteByCrn("crn:cdp:environments:us-west-1:accid:proxyConfig:nonexisting"));
     }
 
     @Test

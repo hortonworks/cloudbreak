@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.proxy.repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -10,6 +12,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.authorization.service.list.ResourceWithId;
+import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
 @Transactional(TxType.REQUIRED)
@@ -35,4 +39,17 @@ public interface ProxyConfigRepository extends JpaRepository<ProxyConfig, Long> 
     Optional<ProxyConfig> findByEnvironmentCrnAndAccountId(
             @Param("envCrn") String envCrn,
             @Param("accountId") String accountId);
+
+    @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(p.id, p.resourceCrn) FROM ProxyConfig p " +
+            "WHERE p.accountId = :accountId AND p.archived IS FALSE")
+    List<ResourceWithId> findAuthorizationResourcesByAccountId(@Param("accountId") String accountId);
+
+    @Query("SELECT p.resourceCrn FROM ProxyConfig p WHERE p.accountId = :accountId AND p.name IN (:names)")
+    List<String> findAllResourceCrnsByNamesAndTenantId(@Param("names") Collection<String> names, @Param("accountId") String accountId);
+
+    @Query("SELECT p.name as name, p.resourceCrn as crn FROM ProxyConfig p WHERE p.accountId = :accountId AND p.resourceCrn IN (:crns)")
+    List<ResourceCrnAndNameView> findAllResourceNamesByCrnsAndTenantId(@Param("crns") Collection<String> crns, @Param("accountId") String accountId);
+
+    @Query("SELECT p.resourceCrn FROM ProxyConfig p WHERE p.accountId = :accountId AND p.name = :name")
+    Optional<String> findResourceCrnByNameAndTenantId(@Param("name") String name, @Param("accountId") String accountId);
 }

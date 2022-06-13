@@ -47,6 +47,13 @@ public class ProxyTestDto extends AbstractEnvironmentTestDto<ProxyRequest, Proxy
         return this;
     }
 
+    public ProxyTestDto withGeneratedName() {
+        String name = getResourcePropertyProvider().getName(getCloudPlatform());
+        getRequest().setName(name);
+        setName(name);
+        return this;
+    }
+
     @Override
     public String getResourceNameType() {
         return PROXYCONFIG_RESOURCE_NAME;
@@ -85,6 +92,11 @@ public class ProxyTestDto extends AbstractEnvironmentTestDto<ProxyRequest, Proxy
     public ProxyTestDto withNoProxyHosts(String noProxyHosts) {
         getRequest().setNoProxyHosts(noProxyHosts);
         return this;
+    }
+
+    @Override
+    public String getCrn() {
+        return getResponse().getCrn();
     }
 
     @Override

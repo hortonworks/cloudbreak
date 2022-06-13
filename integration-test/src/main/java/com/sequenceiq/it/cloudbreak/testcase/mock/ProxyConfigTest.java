@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
 
 import org.testng.annotations.Test;
 
@@ -291,7 +290,7 @@ public class ProxyConfigTest extends AbstractMockTest {
                 .withServerUser(PROXY_USER)
                 .withPassword(PROXY_PASSWORD)
                 .withProtocol(HTTP)
-                .whenException(proxyTestClient.create(), ForbiddenException.class)
+                .whenException(proxyTestClient.create(), BadRequestException.class)
                 .validate();
     }
 }
