@@ -35,21 +35,33 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
     @Inject
     private LocationHelper locationHelper;
 
+    public void validateLog(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
+            CloudS3View cloudFileSystem, String logsLocationBase, ValidationResultBuilder validationResultBuilder) {
+        Arn instanceProfileArn = Arn.of(instanceProfile.getArn());
+        Map<String, String> logReplacements = Map.ofEntries(
+                Map.entry("${ARN_PARTITION}", instanceProfileArn.getPartition()),
+                Map.entry("${LOGS_LOCATION_BASE}", removeProtocol(logsLocationBase)),
+                Map.entry("${LOGS_BUCKET}", locationHelper.parseS3BucketName(logsLocationBase))
+        );
+        Policy logPolicy = awsIamService.getPolicy("aws-cdp-log-policy.json", logReplacements);
+        validate(iam, instanceProfile, cloudFileSystem, logsLocationBase, validationResultBuilder, logPolicy);
+    }
+
+    public void
+    validateBackup(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
+            CloudS3View cloudFileSystem, String backupLocationBase, ValidationResultBuilder validationResultBuilder) {
+        Map<String, String> backupReplacements = getBackupPolicyJsonReplacements(cloudFileSystem, backupLocationBase);
+        Policy restorePolicy = awsIamService.getPolicy(getRestorePolicy(), backupReplacements);
+        validate(iam, instanceProfile, cloudFileSystem, backupLocationBase, validationResultBuilder, restorePolicy);
+    }
+
     public void validate(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
-            CloudS3View cloudFileSystem, String logLocationBase, ValidationResultBuilder validationResultBuilder) {
+            CloudS3View cloudFileSystem, String locationBase, ValidationResultBuilder validationResultBuilder, Policy policy) {
         SortedSet<String> failedActions = new TreeSet<>();
         SortedSet<String> warnings = new TreeSet<>();
-        Arn instanceProfileArn = Arn.of(instanceProfile.getArn());
-        if (logLocationBase == null) {
+        if (locationBase == null) {
             return;
         }
-
-        Map<String, String> replacements = Map.ofEntries(
-                Map.entry("${ARN_PARTITION}", instanceProfileArn.getPartition()),
-                Map.entry("${LOGS_LOCATION_BASE}", removeProtocol(logLocationBase)),
-                Map.entry("${LOGS_BUCKET}", locationHelper.parseS3BucketName(logLocationBase))
-        );
-        Policy policy = awsIamService.getPolicy("aws-cdp-log-policy.json", replacements);
         List<Role> roles = instanceProfile.getRoles();
         List<Policy> policies = Collections.singletonList(policy);
         for (Role role : roles) {
@@ -88,9 +100,4 @@ public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyVali
             validationResultBuilder.error(validationErrorMessage);
         }
     }
-
-    private String removeProtocol(String logLocationBase) {
-        return logLocationBase.replaceFirst("^s3.?://", "");
-    }
-
 }
