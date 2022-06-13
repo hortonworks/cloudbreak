@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
@@ -48,8 +49,14 @@ public class SdxEventController implements SdxEventEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public Response getDatalakeEventsZip(@ResourceCrn String environmentCrn, List<StructuredEventType> types) {
-        List<CDPStructuredEvent> events = sdxEventsService.getDatalakeAuditEvents(environmentCrn, List.of(StructuredEventType.NOTIFICATION));
-        return getDatalakeEventsZipResponse(events);
+        try {
+            List<CDPStructuredEvent> events = sdxEventsService.getDatalakeAuditEvents(environmentCrn, List.of(StructuredEventType.NOTIFICATION));
+            return getDatalakeEventsZipResponse(events);
+        } catch (AccessDeniedException ade) {
+            return Response.status(Response.Status.FORBIDDEN).build();
+        } catch (Exception e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
     private Response getDatalakeEventsZipResponse(List<CDPStructuredEvent> events) {

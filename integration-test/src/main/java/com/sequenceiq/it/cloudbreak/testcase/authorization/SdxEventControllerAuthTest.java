@@ -112,9 +112,8 @@ public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
                 .then(checkZipEndpointStatusManually(200))
                 .when(sdxTestClient.getDatalakeEventsZip(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ENV_CREATOR_B)))
                 .then(checkZipEndpointStatusManually(200))
-                // CB-16345 to fix http 500 in this case
                 .when(sdxTestClient.getDatalakeEventsZip(), RunningParameter.who(cloudbreakActor.useRealUmsUser(AuthUserKeys.ZERO_RIGHTS)))
-                .then(checkZipEndpointStatusManually(500))
+                .then(checkZipEndpointStatusManually(403))
                 .validate();
     }
 
