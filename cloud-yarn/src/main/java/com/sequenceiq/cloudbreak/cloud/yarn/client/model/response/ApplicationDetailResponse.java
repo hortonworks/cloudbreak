@@ -121,4 +121,21 @@ public class ApplicationDetailResponse implements ApplicationResponse {
     public void setNumberOfRunningContainers(int numberOfRunningContainers) {
         this.numberOfRunningContainers = numberOfRunningContainers;
     }
+
+    @Override
+    public String toString() {
+        return "ApplicationDetailResponse{" +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
+                ", uri='" + uri + '\'' +
+                ", lifetime='" + lifetime + '\'' +
+                ", components=" + components +
+                ", containers=" + containers +
+                ", state='" + state + '\'' +
+                ", numberOfContainers=" + numberOfContainers +
+                ", expectedNumberOfContainers=" + expectedNumberOfContainers +
+                ", launchTime=" + launchTime +
+                ", numberOfRunningContainers=" + numberOfRunningContainers +
+                '}';
+    }
 }

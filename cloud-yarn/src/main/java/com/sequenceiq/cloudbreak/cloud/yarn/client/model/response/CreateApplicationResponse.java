@@ -21,4 +21,12 @@ public class CreateApplicationResponse  implements ApplicationResponse {
     public void setState(String state) {
         this.state = state;
     }
+
+    @Override
+    public String toString() {
+        return "CreateApplicationResponse{" +
+                "uri='" + uri + '\'' +
+                ", state='" + state + '\'' +
+                '}';
+    }
 }
