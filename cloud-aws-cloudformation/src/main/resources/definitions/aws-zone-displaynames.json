@@ -41,12 +41,16 @@
       "displayName": "US West (Oregon)"
     },
     {
+      "name": "ap-southeast-1",
+      "displayName": "Asia Pacific (Singapore)"
+    },
+    {
       "name": "ap-southeast-2",
       "displayName": "Asia Pacific (Sydney)"
     },
     {
-      "name": "ap-southeast-1",
-      "displayName": "Asia Pacific (Singapore)"
+      "name": "ap-southeast-3",
+      "displayName": "Asia Pacific (Jakarta)"
     },
     {
       "name": "ap-south-1",
