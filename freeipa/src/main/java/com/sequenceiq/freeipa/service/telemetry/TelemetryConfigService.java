@@ -132,8 +132,8 @@ public class TelemetryConfigService implements TelemetryConfigProvider {
     private Map<String, SaltPillarProperties> getMonitoringPillarConfig(Stack stack, Telemetry telemetry, char[] passwordInput, boolean cdpSaasEnabled,
             boolean computeMonitoring) {
         Map<String, Object> config = new HashMap<>();
-        if (telemetry.isMonitoringFeatureEnabled()) {
-            Monitoring monitoring = telemetry.getMonitoring();
+        Monitoring monitoring = telemetry.getMonitoring();
+        if (monitoring != null && telemetry.isMonitoringFeatureEnabled()) {
             LOGGER.debug("Monitoring is enabled, filling configs ...");
             MonitoringConfigView configView = monitoringConfigService.createMonitoringConfig(monitoring,
                     MonitoringClusterType.FREEIPA, null, passwordInput, cdpSaasEnabled, computeMonitoring);
