@@ -50,6 +50,7 @@ auth:
       multiaz.enable: true
       select.instance.type.enable: true
       zdu.osupgrade.enable: true
+      backup.restore.permission.checks.enabled: false
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
     datahub:

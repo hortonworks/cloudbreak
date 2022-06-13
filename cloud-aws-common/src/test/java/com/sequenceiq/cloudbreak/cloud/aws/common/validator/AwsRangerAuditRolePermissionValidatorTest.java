@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.amazonaws.auth.policy.Policy;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudS3View;
+import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.service.identitymapping.AccountMappingSubject;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.model.CloudIdentityType;
@@ -30,6 +32,9 @@ public class AwsRangerAuditRolePermissionValidatorTest extends AwsIDBrokerMapped
 
     @Mock
     private AwsIamService awsIamService;
+
+    @Mock
+    private LocationHelper locationHelper;
 
     @InjectMocks
     private AwsRangerAuditRolePermissionValidator awsRangerAuditRolePermissionValidator;
@@ -161,5 +166,55 @@ public class AwsRangerAuditRolePermissionValidatorTest extends AwsIDBrokerMapped
         assertEquals("bucket/cluster", replacements.get("${STORAGE_LOCATION_BASE}"));
         assertEquals("bucket", replacements.get("${DATALAKE_BUCKET}"));
         assertEquals("", replacements.get("${DYNAMODB_TABLE_NAME}"));
+    }
+
+    @Test
+    @Override
+    public void testGetBackupPolicyJsonReplacements() {
+        String backupLocation = "bucket/cluster";
+
+        Map<String, String> expectedPolicyJsonReplacements = Map.ofEntries(
+                Map.entry("${ARN_PARTITION}", "aws"),
+                Map.entry("${BACKUP_LOCATION_BASE}", backupLocation),
+                Map.entry("${BACKUP_BUCKET}", "bucket")
+        );
+        when(locationHelper.parseS3BucketName(anyString())).thenReturn("bucket");
+        CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.ID_BROKER);
+        cloudFileSystem.setInstanceProfile("arn:aws:iam::11111111111:instance-profile/instanceprofile");
+        Map<String, String> policyJsonReplacements = getValidator()
+                .getBackupPolicyJsonReplacements(cloudFileSystem, backupLocation);
+
+        assertThat(policyJsonReplacements).isEqualTo(expectedPolicyJsonReplacements);
+    }
+
+    @Test
+    @Override
+    public void testGetBackupPolicyJsonReplacementsWithEmptyBackupLocation() {
+        String backupLocation = null;
+        CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.ID_BROKER);
+        cloudFileSystem.setInstanceProfile("arn:aws:iam::11111111111:instance-profile/instanceprofile");
+        Map<String, String> policyJsonReplacements = getValidator()
+                .getBackupPolicyJsonReplacements(cloudFileSystem, backupLocation);
+
+        assertTrue(policyJsonReplacements.isEmpty());
+    }
+
+    @Test
+    @Override
+    public void testCollectBackupPolicies() {
+        String backupLocation = "bucket/cluster";
+        ArgumentCaptor<Map<String, String>> replacementsCaptor = ArgumentCaptor.forClass(Map.class);
+        when(awsIamService.getPolicy(anyString(), replacementsCaptor.capture())).thenReturn(new Policy());
+        when(locationHelper.parseS3BucketName(backupLocation)).thenReturn("bucket");
+        CloudS3View cloudFileSystem = new CloudS3View(CloudIdentityType.ID_BROKER);
+        cloudFileSystem.setInstanceProfile("arn:aws:iam::11111111111:instance-profile/instanceprofile");
+
+        List<Policy> policies = getValidator().collectBackupRestorePolicies(cloudFileSystem, backupLocation);
+
+        assertEquals(2, policies.size());
+        Map<String, String> replacements = replacementsCaptor.getValue();
+        assertEquals("bucket", replacements.get("${BACKUP_BUCKET}"));
+        assertEquals("bucket/cluster", replacements.get("${BACKUP_LOCATION_BASE}"));
+        assertEquals("aws", replacements.get("${ARN_PARTITION}"));
     }
 }

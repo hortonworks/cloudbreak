@@ -39,6 +39,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_SELECT_INSTANCE_TYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_ZDU_OS_UPGRADE;
@@ -402,6 +403,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datalake.backup.on.resize.enable}")
     private boolean datalakeBackupOnResize;
+
+    @Value("${auth.mock.datalake.backup.restore.permission.checks.enabled}")
+    private boolean datalakeBackupRestorePermissionChecks;
 
     @Value("${auth.mock.datalake.recovery.resize.enable}")
     private boolean datalakeResizeRecovery;
@@ -869,6 +873,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (datalakeBackupOnResize) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_ON_RESIZE));
+        }
+        if (datalakeBackupRestorePermissionChecks) {
+            builder.addEntitlements(createEntitlement(CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS));
         }
         if (datalakeResizeRecovery) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_RESIZE_RECOVERY));

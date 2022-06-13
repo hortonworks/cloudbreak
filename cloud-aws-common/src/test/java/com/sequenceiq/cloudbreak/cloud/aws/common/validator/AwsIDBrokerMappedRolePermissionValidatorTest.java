@@ -32,6 +32,12 @@ public abstract class AwsIDBrokerMappedRolePermissionValidatorTest {
 
     public abstract void testGetPolicyJsonReplacements();
 
+    public abstract void testGetBackupPolicyJsonReplacements();
+
+    public abstract void testGetBackupPolicyJsonReplacementsWithEmptyBackupLocation();
+
+    public abstract void testCollectBackupPolicies();
+
     public abstract void testGetPolicyJsonReplacementsNoDynamodb();
 
     public abstract void testCollectPolicies();

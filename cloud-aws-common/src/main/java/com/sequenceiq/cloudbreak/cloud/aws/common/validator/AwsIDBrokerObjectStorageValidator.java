@@ -8,11 +8,15 @@ import java.util.TreeSet;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.identitymanagement.model.InstanceProfile;
 import com.amazonaws.services.identitymanagement.model.Role;
+import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsIamService;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
@@ -25,6 +29,8 @@ import com.sequenceiq.common.model.CloudIdentityType;
 
 @Component
 public class AwsIDBrokerObjectStorageValidator {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsIDBrokerObjectStorageValidator.class);
 
     @Inject
     private AwsInstanceProfileEC2TrustValidator awsInstanceProfileEC2TrustValidator;
@@ -44,6 +50,9 @@ public class AwsIDBrokerObjectStorageValidator {
     @Inject
     private AwsLogRolePermissionValidator awsLogRolePermissionValidator;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public ValidationResult validateObjectStorage(AmazonIdentityManagementClient iam,
             SpiFileSystem spiFileSystem,
             String logsLocationBase,
@@ -58,9 +67,9 @@ public class AwsIDBrokerObjectStorageValidator {
             if (instanceProfile != null) {
                 CloudIdentityType cloudIdentityType = cloudFileSystem.getCloudIdentityType();
                 if (CloudIdentityType.ID_BROKER.equals(cloudIdentityType)) {
-                    validateIDBroker(iam, instanceProfile, cloudFileSystem, resultBuilder);
+                    validateIDBroker(iam, instanceProfile, cloudFileSystem, backupLocationBase, resultBuilder);
                 } else if (CloudIdentityType.LOG.equals(cloudIdentityType)) {
-                    validateLog(iam, instanceProfile, cloudFileSystem, logsLocationBase, backupLocationBase, resultBuilder);
+                    validateLocation(iam, instanceProfile, cloudFileSystem, logsLocationBase, backupLocationBase, resultBuilder);
                 }
             }
         }
@@ -68,20 +77,26 @@ public class AwsIDBrokerObjectStorageValidator {
     }
 
     private void validateIDBroker(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
-            CloudS3View cloudFileSystem, ValidationResultBuilder resultBuilder) {
+            CloudS3View cloudFileSystem, String backupLocationBase, ValidationResultBuilder resultBuilder) {
+        LOGGER.info("Permission validation on IBBroker role: {} on location {}", instanceProfile.getInstanceProfileName(),
+                backupLocationBase);
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, cloudFileSystem.getCloudIdentityType(), resultBuilder);
         Set<Role> allMappedRoles = getAllMappedRoles(iam, cloudFileSystem, resultBuilder);
         awsIDBrokerAssumeRoleValidator.canAssumeRoles(iam, instanceProfile, allMappedRoles, resultBuilder);
-        awsDataAccessRolePermissionValidator.validate(iam, cloudFileSystem, resultBuilder);
-        awsRangerAuditRolePermissionValidator.validate(iam, cloudFileSystem, resultBuilder);
+        awsDataAccessRolePermissionValidator.validate(iam, cloudFileSystem, backupLocationBase, resultBuilder, instanceProfile);
+        awsRangerAuditRolePermissionValidator.validate(iam, cloudFileSystem, backupLocationBase, resultBuilder, instanceProfile);
     }
 
-    private void validateLog(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile, CloudS3View cloudFileSystem,
+    private void validateLocation(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile, CloudS3View cloudFileSystem,
             String logsLocationBase, String backupLocationBase, ValidationResultBuilder resultBuilder) {
+        LOGGER.info("Permission validation on Role: {} on location {}", instanceProfile.getInstanceProfileName(),
+                backupLocationBase);
         awsInstanceProfileEC2TrustValidator.isTrusted(instanceProfile, cloudFileSystem.getCloudIdentityType(), resultBuilder);
-        awsLogRolePermissionValidator.validate(iam, instanceProfile, cloudFileSystem, logsLocationBase, resultBuilder);
-        if (StringUtils.isNotEmpty(backupLocationBase) && !backupLocationBase.equals(logsLocationBase)) {
-            awsLogRolePermissionValidator.validate(iam, instanceProfile, cloudFileSystem, backupLocationBase, resultBuilder);
+        awsLogRolePermissionValidator.validateLog(iam, instanceProfile, cloudFileSystem, logsLocationBase, resultBuilder);
+        if (entitlementService.isDatalakeBackupRestorePrechecksEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            awsLogRolePermissionValidator.validateBackup(iam, instanceProfile, cloudFileSystem,
+                    Strings.isNullOrEmpty(backupLocationBase) ? logsLocationBase : backupLocationBase,
+                    resultBuilder);
         }
     }
 

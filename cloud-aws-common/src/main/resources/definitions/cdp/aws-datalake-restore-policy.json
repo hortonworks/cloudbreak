@@ -1,0 +1,27 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "LimitedAccessToDataLakeBackupBucket",
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:${ARN_PARTITION}:s3:::${BACKUP_BUCKET}"
+      ]
+    },
+    {
+      "Sid": "DatalakeRestorePolicy",
+      "Effect": "Allow",
+      "Action": [
+        "s3:GetObject",
+        "s3:ListBucket"
+      ],
+      "Resource": [
+        "arn:${ARN_PARTITION}:s3:::${BACKUP_LOCATION_BASE}/*",
+        "arn:${ARN_PARTITION}:s3:::${BACKUP_LOCATION_BASE}"
+      ]
+    }
+  ]
+}
