@@ -48,6 +48,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
     @Inject
     private SdxUtil sdxUtil;
 
+    // This is an AWS E2E PR check.
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
