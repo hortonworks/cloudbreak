@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.usage.strategy;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,13 +20,18 @@ import com.sequenceiq.cloudbreak.usage.model.UsageContext;
 @Service
 public class HttpUsageProcessingStrategy implements UsageProcessingStrategy {
 
+    private static final String DATE_PATTERN = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+
     private final UsageHttpRecordProcessor usageHttpRecordProcessor;
 
     private final EdhHttpConfiguration edhHttpConfiguration;
 
+    private final SimpleDateFormat simpleDateFormat;
+
     public HttpUsageProcessingStrategy(UsageHttpRecordProcessor usageHttpRecordProcessor, EdhHttpConfiguration edhHttpConfiguration) {
         this.usageHttpRecordProcessor = usageHttpRecordProcessor;
         this.edhHttpConfiguration = edhHttpConfiguration;
+        this.simpleDateFormat = new SimpleDateFormat(DATE_PATTERN);
     }
 
     @Override
@@ -33,7 +40,7 @@ public class HttpUsageProcessingStrategy implements UsageProcessingStrategy {
         long timestamp = event.getTimestamp();
         String binaryUsageEvent = BaseEncoding.base64().encode(event.toByteArray());
         fields.put("@message", String.format("CDP_BINARY_USAGE_EVENT - %s", binaryUsageEvent));
-        fields.put("@timestamp", Instant.now().toEpochMilli());
+        fields.put("@timestamp", simpleDateFormat.format(Date.from(Instant.now())));
         edhHttpConfiguration.getAdditionalFields().stream()
                 .filter(f -> StringUtils.isNotBlank(f.getKey()))
                 .forEach(

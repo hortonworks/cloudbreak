@@ -64,7 +64,7 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
     }
 
     private boolean handleConnectException(T pollerObject, ApiException e) {
-        LOGGER.warn("{}. Notification is sent to the UI.", getErrorMessage(pollerObject, e), e.getMessage());
+        LOGGER.warn("{}.({}) Notification is sent to the UI.", getErrorMessage(pollerObject, e), e.getMessage());
         if (!connectExceptionOccurred) {
             connectExceptionOccurred = true;
             Stack stack = pollerObject.getStack();
