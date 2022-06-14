@@ -86,7 +86,7 @@ public enum AuthorizationResourceAction {
     DESCRIBE_RECIPE("environments/useSharedResource", AuthorizationResourceType.RECIPE),
     CREATE_RECIPE("environments/createRecipe", AuthorizationResourceType.RECIPE),
     DELETE_RECIPE("environments/deleteRecipe", AuthorizationResourceType.RECIPE),
-    UPGRADE_CCM("environments/upgradeCCM", AuthorizationResourceType.ENVIRONMENT),
+    UPGRADE_CCM("environments/upgradeCcm", AuthorizationResourceType.ENVIRONMENT),
     DESCRIBE_CUSTOM_CONFIGS("datahub/describeCustomConfigs", AuthorizationResourceType.CUSTOM_CONFIGURATIONS),
     CREATE_CUSTOM_CONFIGS("datahub/createCustomConfigs", AuthorizationResourceType.CUSTOM_CONFIGURATIONS),
     DELETE_CUSTOM_CONFIGS("datahub/deleteCustomConfigs", AuthorizationResourceType.CUSTOM_CONFIGURATIONS),
