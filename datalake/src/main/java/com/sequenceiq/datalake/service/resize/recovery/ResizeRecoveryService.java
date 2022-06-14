@@ -1,13 +1,24 @@
 package com.sequenceiq.datalake.service.resize.recovery;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CERT_RENEWAL_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CERT_ROTATION_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CLUSTER_AMBIGUOUS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CLUSTER_UNREACHABLE;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATAHUB_REFRESH_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_RESTORE_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DELETE_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.NODE_FAILURE;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.PROVISIONING_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RECOVERY_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.START_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STOPPED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STOP_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.SYNC_FAILED;
 
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -16,6 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -40,6 +52,13 @@ import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
  *
  */
 public class ResizeRecoveryService implements RecoveryService {
+
+    @VisibleForTesting
+    static final Set<DatalakeStatusEnum> FAILURE_STATES = Set.of(
+            PROVISIONING_FAILED, DELETE_FAILED, START_FAILED, STOP_FAILED, CLUSTER_AMBIGUOUS, CLUSTER_UNREACHABLE,
+            NODE_FAILURE, SYNC_FAILED, CERT_ROTATION_FAILED, CERT_RENEWAL_FAILED, DATALAKE_RESTORE_FAILED, RECOVERY_FAILED,
+            DATAHUB_REFRESH_FAILED
+    );
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResizeRecoveryService.class);
 
@@ -83,11 +102,7 @@ public class ResizeRecoveryService implements RecoveryService {
                 case STOP_FAILED:
                     return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxStartFlow(sdxCluster));
                 case STOPPED:
-                    if (sdxCluster.isDetached()) {
-                        return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, null));
-                    } else {
-                        return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxStartFlow(sdxCluster));
-                    }
+                    return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, null));
                 case PROVISIONING_FAILED:
                     return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(getOldClusterErrorIfNotFound(sdxCluster), sdxCluster));
                 case RUNNING:
@@ -130,9 +145,9 @@ public class ResizeRecoveryService implements RecoveryService {
     }
 
     private SdxRecoverableResponse validateRecoveryResizedClusterPresent(SdxCluster sdxCluster, DatalakeStatusEnum status, String statusReason) {
-        if (PROVISIONING_FAILED.equals(status)) {
-            return new SdxRecoverableResponse("Failed to provision, recovery will restart original data lake, and delete the new one",
-                    RecoveryStatus.RECOVERABLE);
+        if (FAILURE_STATES.contains(status)) {
+            return new SdxRecoverableResponse("Resized data lake is in failed state. Recovery will restart original data lake, " +
+                    "and delete the new one", RecoveryStatus.RECOVERABLE);
         } else if (RUNNING.equals(status) && statusReason.contains("Datalake restore failed")) {
             return new SdxRecoverableResponse(
                     "Failed to restore backup to new data lake, recovery will restart original data lake, and delete the new one",
