@@ -1,3 +1,10 @@
+/opt/salt/scripts/common_utils.sh:
+  file.managed:
+    - makedirs: True
+    - mode: 750
+    - source: salt://postgresql/scripts/common_utils.sh
+    - template: jinja
+
 /opt/salt/scripts/backup_db.sh:
   file.managed:
     - makedirs: True

@@ -90,6 +90,7 @@ base:
 {%- endif %}
     - gateway.settings
     - postgresql.disaster_recovery
+    - postgresql.upgrade
     - atlas.check_atlas_updated
 
   'roles:knox_gateway':
