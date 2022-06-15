@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.job.nodestatus;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.EnumSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -22,15 +23,17 @@ import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
 import com.google.protobuf.GeneratedMessageV3;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.node.health.client.model.CdpNodeStatusRequest;
 import com.sequenceiq.node.health.client.model.CdpNodeStatuses;
 
@@ -56,6 +59,9 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private NodeStatusCheckerJobService jobService;
+
+    @Inject
+    private ComponentConfigProviderService componentConfigProviderService;
 
     public NodeStatusCheckerJob(Tracer tracer) {
         super(tracer, "NodeStatus Checker Job");
@@ -86,23 +92,33 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
     }
 
     private void executeNodeStatusCheck(Stack stack) {
-        boolean nodeStatusCheckEnabled = true;
-        CdpNodeStatusRequest.Builder requestBuilder = CdpNodeStatusRequest.Builder.builder();
-        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-        if (StackType.WORKLOAD.equals(stack.getType())) {
-            nodeStatusCheckEnabled = entitlementService.datahubNodestatusCheckEnabled(accountId);
-        }
-        if (nodeStatusCheckEnabled) {
-            if (StackType.WORKLOAD.equals(stack.getType())) {
-                requestBuilder.withMetering(true);
-            }
-            CdpNodeStatusRequest request = requestBuilder.withCmMonitoring(true).withSkipObjectMapping(true).build();
-            CdpNodeStatuses statuses = nodeStatusService.getNodeStatuses(stack, request);
+        getNodeStatusRequest(stack).ifPresent(nodeStatusRequest -> {
+            CdpNodeStatuses statuses = nodeStatusService.getNodeStatuses(stack, nodeStatusRequest);
             processNodeStatusReport(statuses.getNetworkReport(), NodeStatusProto.NodeStatus::getNetworkDetails, stack, "Network");
             processNodeStatusReport(statuses.getServicesReport(), NodeStatusProto.NodeStatus::getServicesDetails, stack, "Services");
-            processNodeStatusReport(statuses.getSystemMetricsReport(), NodeStatusProto.NodeStatus::getSystemMetrics,
-                    stack, "System metrics");
+            processNodeStatusReport(statuses.getSystemMetricsReport(), NodeStatusProto.NodeStatus::getSystemMetrics, stack, "System metrics");
+            processNodeStatusReport(statuses.getMeteringReport(), NodeStatusProto.NodeStatus::getMeteringDetails, stack, "Metering");
             processCmMetricsReport(statuses.getCmMetricsReport(), stack);
+        });
+    }
+
+    private Optional<CdpNodeStatusRequest> getNodeStatusRequest(Stack stack) {
+        if (StackType.WORKLOAD.equals(stack.getType()) &&
+                !entitlementService.datahubNodestatusCheckEnabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId())) {
+            return Optional.empty();
+        }
+        Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
+        CdpNodeStatusRequest.Builder requestBuilder = CdpNodeStatusRequest.Builder.builder();
+        if (!Objects.isNull(telemetry) && telemetry.isComputeMonitoringEnabled()) {
+            return Optional.of(requestBuilder.withNetworkOnly().build());
+        } else {
+            if (StackType.WORKLOAD.equals(stack.getType())) {
+                requestBuilder.withMetering();
+            }
+            return Optional.of(requestBuilder
+                    .withCmMonitoring()
+                    .withSkipObjectMapping()
+                    .build());
         }
     }
 
@@ -139,7 +155,7 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
 
     private String getStatusDetailsStr(NodeStatusProto.StatusDetails statusDetails) {
         return statusDetails != null && StringUtils.isNotBlank(statusDetails.toString())
-                ? String.format("%n%s", statusDetails.toString()) : "";
+                ? String.format("%n%s", statusDetails) : "";
     }
 
     private Set<Status> unshedulableStates() {

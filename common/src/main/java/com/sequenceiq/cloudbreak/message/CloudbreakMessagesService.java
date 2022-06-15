@@ -19,10 +19,18 @@ public class CloudbreakMessagesService {
     private MessageSource messageSource;
 
     public String getMessage(String code) {
-        return messageSource.getMessage(code, null, Locale.getDefault());
+        try {
+            return messageSource.getMessage(code, null, Locale.getDefault());
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 
     public String getMessage(String code, Collection<?> args) {
-        return messageSource.getMessage(code, args == null ? null : args.toArray(), Locale.getDefault());
+        try {
+            return messageSource.getMessage(code, args == null ? null : args.toArray(), Locale.getDefault());
+        } catch (Exception e) {
+            return e.getMessage();
+        }
     }
 }
