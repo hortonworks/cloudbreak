@@ -12,6 +12,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.ST
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.model.Backup;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environmentcrn", "terminated"}))
@@ -393,6 +395,13 @@ public class Stack implements AccountAwareResource, OrchestratorAware {
         return instanceGroups.stream()
                 .flatMap(instanceGroup -> instanceGroup.getAllInstanceMetaData().stream())
                 .collect(Collectors.toList());
+    }
+
+    public Optional<InstanceMetaData> getPrimaryGateway() {
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getAllInstanceMetaData().stream())
+                .filter(instanceMetaData -> InstanceMetadataType.GATEWAY_PRIMARY.equals(instanceMetaData.getInstanceMetadataType()))
+                .findFirst();
     }
 
     public String getEnvironmentCrn() {

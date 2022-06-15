@@ -8,10 +8,13 @@ public class CdpNodeStatusRequest {
 
     private final boolean cmMonitoring;
 
+    private final boolean networkOnly;
+
     public CdpNodeStatusRequest(Builder builder) {
         this.metering = builder.metering;
         this.cmMonitoring = builder.cmMonitoring;
         this.skipObjectMapping = builder.skipObjectMapping;
+        this.networkOnly = builder.networkOnly;
     }
 
     public boolean isMetering() {
@@ -26,6 +29,10 @@ public class CdpNodeStatusRequest {
         return skipObjectMapping;
     }
 
+    public boolean isNetworkOnly() {
+        return networkOnly;
+    }
+
     public static class Builder {
 
         private boolean metering;
@@ -33,6 +40,8 @@ public class CdpNodeStatusRequest {
         private boolean cmMonitoring;
 
         private boolean skipObjectMapping;
+
+        private boolean networkOnly;
 
         private Builder() {
         }
@@ -45,18 +54,23 @@ public class CdpNodeStatusRequest {
             return new CdpNodeStatusRequest(this);
         }
 
-        public Builder withMetering(boolean metering) {
-            this.metering = metering;
+        public Builder withMetering() {
+            this.metering = true;
             return this;
         }
 
-        public Builder withCmMonitoring(boolean cmMonitoring) {
-            this.cmMonitoring = cmMonitoring;
+        public Builder withCmMonitoring() {
+            this.cmMonitoring = true;
             return this;
         }
 
-        public Builder withSkipObjectMapping(boolean skipObjectMapping) {
-            this.skipObjectMapping = skipObjectMapping;
+        public Builder withSkipObjectMapping() {
+            this.skipObjectMapping = true;
+            return this;
+        }
+
+        public Builder withNetworkOnly() {
+            this.networkOnly = true;
             return this;
         }
 
