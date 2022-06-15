@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.setup;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -20,13 +21,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
 import com.google.api.client.auth.oauth2.TokenResponseException;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Image;
-import com.google.api.services.compute.model.ImageList;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.RewriteResponse;
 import com.google.api.services.storage.model.StorageObject;
@@ -253,14 +255,53 @@ public class GcpProvisionSetupTest {
     }
 
     @Test
+    public void testPrepareImagewhenGoogleRespondWithBadRequet() throws IOException {
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudStack cloudStack = mock(CloudStack.class);
+        Compute compute = mock(Compute.class);
+        CloudCredential cloudCredential = mock(CloudCredential.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        Compute.Images images = mock(Compute.Images.class);
+        Compute.Images.Get imagesGet = mock(Compute.Images.Get.class);
+        com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image(
+                "super-image",
+                Map.of(),
+                "centos",
+                "redhat",
+                "http://url",
+                "default",
+                "1234-1234-123-123",
+                Map.of()
+        );
+
+        when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(gcpStackUtil.getProjectId(any(CloudCredential.class))).thenReturn("project-id");
+        when(gcpComputeFactory.buildCompute(any(CloudCredential.class))).thenReturn(compute);
+        when(compute.images()).thenReturn(images);
+        when(images.get(anyString(), anyString())).thenReturn(imagesGet);
+        when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
+        GoogleJsonResponseException googleError = mock(GoogleJsonResponseException.class);
+        when(googleError.getMessage()).thenReturn("Google error");
+        when(googleError.getSuppressed()).thenReturn(new Throwable[0]);
+        when(imagesGet.execute()).thenThrow(googleError);
+
+        CloudConnectorException actual = assertThrows(CloudConnectorException.class,
+                () -> underTest.prepareImage(authenticatedContext, cloudStack, image));
+
+        assertTrue(actual.getMessage().contains("Google error"));
+
+        verify(gcpStorageFactory, never()).buildStorage(any(), any());
+    }
+
+    @Test
     public void testPrepareImageWhenImageExistOnGoogle() throws IOException {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
         Compute compute = mock(Compute.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
         Compute.Images images = mock(Compute.Images.class);
-        Compute.Images.List imagesList = mock(Compute.Images.List.class);
-        ImageList list = mock(ImageList.class);
+        Compute.Images.Get imagesGet = mock(Compute.Images.Get.class);
         Image imageGoogle = mock(Image.class);
         com.sequenceiq.cloudbreak.cloud.model.Image image = new com.sequenceiq.cloudbreak.cloud.model.Image(
                 "super-image",
@@ -277,10 +318,8 @@ public class GcpProvisionSetupTest {
         when(gcpStackUtil.getProjectId(any(CloudCredential.class))).thenReturn("project-id");
         when(gcpComputeFactory.buildCompute(any(CloudCredential.class))).thenReturn(compute);
         when(compute.images()).thenReturn(images);
-        when(images.list(anyString())).thenReturn(imagesList);
-        when(imagesList.execute()).thenReturn(list);
-        when(list.getItems()).thenReturn(List.of(imageGoogle));
-        when(imageGoogle.getName()).thenReturn("super-image");
+        when(images.get(anyString(), anyString())).thenReturn(imagesGet);
+        when(imagesGet.execute()).thenReturn(imageGoogle);
         when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
 
         underTest.prepareImage(authenticatedContext, cloudStack, image);
@@ -294,10 +333,8 @@ public class GcpProvisionSetupTest {
         Compute compute = mock(Compute.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
         Compute.Images images = mock(Compute.Images.class);
-        Compute.Images.List imagesList = mock(Compute.Images.List.class);
-        ImageList list = mock(ImageList.class);
+        Compute.Images.Get imagesGet = mock(Compute.Images.Get.class);
         GcpImageAttemptMaker gcpImageAttemptMaker = mock(GcpImageAttemptMaker.class);
-        Image imageGoogle = mock(Image.class);
         Storage storage = mock(Storage.class);
         Storage.Objects storageObjects = mock(Storage.Objects.class);
         Storage.Objects.Rewrite storageObjectsRewrite = mock(Storage.Objects.Rewrite.class);
@@ -312,6 +349,7 @@ public class GcpProvisionSetupTest {
                 "1234-1234-123-123",
                 Map.of()
         );
+        GoogleJsonResponseException notFoundImageException = mock(GoogleJsonResponseException.class);
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(authenticatedContext.getCloudContext()).thenReturn(context);
@@ -319,10 +357,9 @@ public class GcpProvisionSetupTest {
         when(gcpStackUtil.getProjectId(any(CloudCredential.class))).thenReturn("project-id");
         when(gcpComputeFactory.buildCompute(any(CloudCredential.class))).thenReturn(compute);
         when(compute.images()).thenReturn(images);
-        when(images.list(anyString())).thenReturn(imagesList);
-        when(imagesList.execute()).thenReturn(list);
-        when(list.getItems()).thenReturn(List.of(imageGoogle));
-        when(imageGoogle.getName()).thenReturn("super-image1");
+        when(images.get(anyString(), anyString())).thenReturn(imagesGet);
+        when(imagesGet.execute()).thenThrow(notFoundImageException);
+        when(notFoundImageException.getStatusCode()).thenReturn(HttpStatus.NOT_FOUND.value());
         when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
         when(gcpStackUtil.getTarName(anyString())).thenReturn("tarname");
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
@@ -353,10 +390,8 @@ public class GcpProvisionSetupTest {
         Compute compute = mock(Compute.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
         Compute.Images images = mock(Compute.Images.class);
-        Compute.Images.List imagesList = mock(Compute.Images.List.class);
-        ImageList list = mock(ImageList.class);
+        Compute.Images.Get imagesGet = mock(Compute.Images.Get.class);
         GcpImageAttemptMaker gcpImageAttemptMaker = mock(GcpImageAttemptMaker.class);
-        Image imageGoogle = mock(Image.class);
         Storage storage = mock(Storage.class);
         Storage.Objects storageObjects = mock(Storage.Objects.class);
         Storage.Objects.Rewrite storageObjectsRewrite = mock(Storage.Objects.Rewrite.class);
@@ -378,10 +413,8 @@ public class GcpProvisionSetupTest {
         when(gcpStackUtil.getProjectId(any(CloudCredential.class))).thenReturn("project-id");
         when(gcpComputeFactory.buildCompute(any(CloudCredential.class))).thenReturn(compute);
         when(compute.images()).thenReturn(images);
-        when(images.list(anyString())).thenReturn(imagesList);
-        when(imagesList.execute()).thenReturn(list);
-        when(list.getItems()).thenReturn(List.of(imageGoogle));
-        when(imageGoogle.getName()).thenReturn("super-image1");
+        when(images.get(anyString(), anyString())).thenReturn(imagesGet);
+        when(imagesGet.execute()).thenReturn(null);
         when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
         when(gcpStackUtil.getTarName(anyString())).thenReturn("tarname");
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
@@ -413,10 +446,8 @@ public class GcpProvisionSetupTest {
         Compute compute = mock(Compute.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
         Compute.Images images = mock(Compute.Images.class);
-        Compute.Images.List imagesList = mock(Compute.Images.List.class);
-        ImageList list = mock(ImageList.class);
+        Compute.Images.Get imagesGet = mock(Compute.Images.Get.class);
         GcpImageAttemptMaker gcpImageAttemptMaker = mock(GcpImageAttemptMaker.class);
-        Image imageGoogle = mock(Image.class);
         Storage storage = mock(Storage.class);
         Storage.Objects storageObjects = mock(Storage.Objects.class);
         Storage.Objects.Rewrite storageObjectsRewrite = mock(Storage.Objects.Rewrite.class);
@@ -438,10 +469,8 @@ public class GcpProvisionSetupTest {
         when(gcpStackUtil.getProjectId(any(CloudCredential.class))).thenReturn("project-id");
         when(gcpComputeFactory.buildCompute(any(CloudCredential.class))).thenReturn(compute);
         when(compute.images()).thenReturn(images);
-        when(images.list(anyString())).thenReturn(imagesList);
-        when(imagesList.execute()).thenReturn(list);
-        when(list.getItems()).thenReturn(List.of(imageGoogle));
-        when(imageGoogle.getName()).thenReturn("super-image1");
+        when(images.get(anyString(), anyString())).thenReturn(imagesGet);
+        when(imagesGet.execute()).thenReturn(null);
         when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
         when(gcpStackUtil.getTarName(anyString())).thenReturn("tarname");
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
@@ -473,9 +502,7 @@ public class GcpProvisionSetupTest {
         Compute compute = mock(Compute.class);
         CloudCredential cloudCredential = mock(CloudCredential.class);
         Compute.Images images = mock(Compute.Images.class);
-        Compute.Images.List imagesList = mock(Compute.Images.List.class);
-        ImageList list = mock(ImageList.class);
-        Image imageGoogle = mock(Image.class);
+        Compute.Images.Get imagesGet = mock(Compute.Images.Get.class);
         Storage storage = mock(Storage.class);
         Storage.Objects storageObjects = mock(Storage.Objects.class);
         Storage.Objects.Rewrite storageObjectsRewrite = mock(Storage.Objects.Rewrite.class);
@@ -496,10 +523,8 @@ public class GcpProvisionSetupTest {
         when(gcpStackUtil.getProjectId(any(CloudCredential.class))).thenReturn("project-id");
         when(gcpComputeFactory.buildCompute(any(CloudCredential.class))).thenReturn(compute);
         when(compute.images()).thenReturn(images);
-        when(images.list(anyString())).thenReturn(imagesList);
-        when(imagesList.execute()).thenReturn(list);
-        when(list.getItems()).thenReturn(List.of(imageGoogle));
-        when(imageGoogle.getName()).thenReturn("super-image1");
+        when(images.get(anyString(), anyString())).thenReturn(imagesGet);
+        when(imagesGet.execute()).thenReturn(null);
         when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
         when(gcpStackUtil.getTarName(anyString())).thenReturn("tarname");
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
