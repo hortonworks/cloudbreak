@@ -56,6 +56,14 @@
     "label": "waagent"
   },
   {
+    "path": "/var/log/postgres_upgrade_backup.log",
+    "label": "rds_upgrade_backup"
+  },
+  {
+    "path": "/var/log/postgres_upgrade_restore.log",
+    "label": "rds_upgrade_restore"
+  },
+  {
     "path": "${serverLogFolderPrefix}/cloudera-scm-server/cloudera-scm-server.log*",
     "label": "cloudera_server_log"
   },
