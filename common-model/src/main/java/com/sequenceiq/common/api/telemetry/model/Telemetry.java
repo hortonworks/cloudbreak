@@ -4,6 +4,9 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -111,13 +114,18 @@ public class Telemetry implements Serializable {
 
     @JsonIgnore
     public boolean isAnyDataBusBasedFeatureEnablred() {
-        return  isClusterLogsCollectionEnabled() || isMeteringFeatureEnabled();
+        return isClusterLogsCollectionEnabled() || isMeteringFeatureEnabled();
     }
 
     @JsonIgnore
     public boolean isUseSharedAltusCredentialEnabled() {
         return features != null && features.getUseSharedAltusCredential() != null
                 && features.getUseSharedAltusCredential().isEnabled();
+    }
+
+    @JsonIgnore
+    public boolean isComputeMonitoringEnabled() {
+        return !Objects.isNull(monitoring) && StringUtils.isNotBlank(monitoring.getRemoteWriteUrl());
     }
 
     @JsonIgnore

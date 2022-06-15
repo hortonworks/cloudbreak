@@ -30,11 +30,8 @@ public class FreeIpaNodeStatusService {
     @Inject
     private FreeIpaNodeStatusClientFactory freeIpaNodeStatusClientFactory;
 
-    public CdpNodeStatuses nodeStatusReport(Stack stack, InstanceMetaData instance) throws FreeIpaClientException {
+    public CdpNodeStatuses nodeStatusReport(Stack stack, InstanceMetaData instance, CdpNodeStatusRequest request) throws FreeIpaClientException {
         try (CdpNodeStatusMonitorClient client = getClient(stack, instance)) {
-            CdpNodeStatusRequest request = CdpNodeStatusRequest.Builder.builder()
-                    .withSkipObjectMapping(true)
-                    .build();
             return client.nodeStatusReport(request);
         } catch (CdpNodeStatusMonitorClientException | MalformedURLException e) {
             throw new RetryableFreeIpaClientException("Could not get node status report from stack.", e);
