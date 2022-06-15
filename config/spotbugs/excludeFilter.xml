@@ -98,4 +98,7 @@
     <Match>
         <Package name="~com\.cloudera\.cdp\.servicediscovery.*"/>
     </Match>
+    <Match>
+        <Package name="~com\.cloudera\.thunderhead\.service\.metering\.events.*"/>
+    </Match>
 </FindBugsFilter>
