@@ -45,9 +45,8 @@ public interface SdxEventEndpoint {
 
     @GET
     @Path("zip")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ApiOperation(value = LIST_FOR_RESOURCE_ZIP, produces = MediaType.APPLICATION_OCTET_STREAM, notes = AUDIT_EVENTS_NOTES,
-            nickname = "getDatalakeEventsZipForResource")
+    @Produces({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON})
+    @ApiOperation(value = LIST_FOR_RESOURCE_ZIP, notes = AUDIT_EVENTS_NOTES, nickname = "getDatalakeEventsZipForResource")
     Response getDatalakeEventsZip(
             @QueryParam("environmentCrn") @NotNull(message = "The 'environmentCrn' query parameter must be specified.") String environmentCrn,
             @QueryParam("types") List<StructuredEventType> types);

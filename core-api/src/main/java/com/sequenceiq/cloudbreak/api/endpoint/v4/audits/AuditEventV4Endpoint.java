@@ -36,8 +36,8 @@ public interface AuditEventV4Endpoint {
 
     @GET
     @Path("zip")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE_ZIP, produces = MediaType.APPLICATION_OCTET_STREAM, notes = Notes.AUDIT_EVENTS_NOTES,
+    @Produces({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON})
+    @ApiOperation(value = AuditOpDescription.LIST_IN_WORKSPACE_ZIP, notes = Notes.AUDIT_EVENTS_NOTES,
             nickname = "getAuditEventsZipInWorkspace")
     Response getAuditEventsZip(@PathParam("workspaceId") Long workspaceId, @QueryParam("resourceType") String resourceType,
             @QueryParam("resourceId") Long resourceId, @QueryParam("resourceCrn") String resourceCrn);
