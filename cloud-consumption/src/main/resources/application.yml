@@ -116,11 +116,41 @@ cb:
   address.resolving.timeout: 60000
 
   cloud.api.executorservice.pool.size: 40
-
+  max:
+    azure.resource.name.length: 120
+    gcp.resource.name.length: 63
+    aws.resource.name.length: 50
+    aws.loadbalancer.resource.name.length: 32
+    yarn.resource.name.length: 63
   structuredevent:
     rest:
       enabled: true
       contentlogging: true
+  aws:
+    spotinstances.enabled: true
+    disabled.instance.types: c5d,f1,i3,m5d,p3dn,r5d,z1d
+    hostkey.verify: false
+    credential.cache.ttl: 60
+    external.id: provision-ambari
+    role.session.name: cdp-provisioning
+    cf.template.new.path: templates/aws-cf-stack.ftl
+    cf.template.newdb.path: templates/aws-cf-dbstack.ftl
+    vpcendpoints:
+      enabled.gateway.services:
+
+  azure:
+    host.name.prefix.length: 255
+    database.template.batchSize: 1
+
+  gcp:
+    hostkey.verify: false
+    disk.encryption.url: https://cloud-certs.storage.googleapis.com/google-cloud-csek-ingress.pem
+    stopStart.batch.size: 10
+    create.batch.size: 5
+
+  platform.default:
+    variants: AWS:AWS
+    regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1,YARN:default,MOCK:USA
 
 altus:
   audit:

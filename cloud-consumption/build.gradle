@@ -114,6 +114,9 @@ dependencies {
     implementation project(":structuredevent-service-cdp")
     implementation project(':audit-connector')
     implementation project(':authorization-common')
+    implementation project(':cloud-reactor-api')
+    implementation project(":cloud-reactor")
+    implementation project(':cloud-aws-common')
     implementation project(':orchestrator-api')
     implementation project(':flow')
     implementation project(':node-status-monitor-client')
@@ -124,8 +127,14 @@ dependencies {
     implementation project(':secret-engine')
     implementation project(':notification-sender')
     implementation project(':cloud-consumption-api')
-    implementation project(':cloud-common')
     implementation project(':environment-api')
+    implementation project(':cloud-common')
+    runtimeOnly project(':cloud-aws-cloudformation')
+    runtimeOnly project(':cloud-aws-native')
+    runtimeOnly project(':cloud-aws-gov')
+    runtimeOnly project(':cloud-azure')
+    runtimeOnly project(':cloud-gcp')
+    runtimeOnly project(':cloud-mock')
 }
 
 bootRun {

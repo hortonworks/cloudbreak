@@ -10,6 +10,7 @@ import com.google.api.services.storage.Storage;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpStorageFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.validator.GcpServiceAccountObjectStorageValidator;
@@ -19,6 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageSizeRequest;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageSizeResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -99,6 +102,11 @@ public class GcpObjectStorageConnector implements ObjectStorageConnector {
         return ObjectStorageValidateResponse.builder()
                 .withStatus(ResponseStatus.OK)
                 .build();
+    }
+
+    @Override
+    public ObjectStorageSizeResponse getObjectStorageSize(ObjectStorageSizeRequest request) {
+        throw new CloudOperationNotSupportedException("Get object storage size is not supported on GCP");
     }
 
     @Override

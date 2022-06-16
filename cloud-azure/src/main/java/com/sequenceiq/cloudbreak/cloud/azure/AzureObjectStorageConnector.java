@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.ObjectStorageConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureIDBrokerObjectStorageValidator;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -26,6 +27,8 @@ import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.AzureParameters;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageMetadataResponse;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageSizeRequest;
+import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageSizeResponse;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -102,6 +105,11 @@ public class AzureObjectStorageConnector implements ObjectStorageConnector {
             }
             throw azureUtils.convertToCloudConnectorException(e, "Object storage validation");
         }
+    }
+
+    @Override
+    public ObjectStorageSizeResponse getObjectStorageSize(ObjectStorageSizeRequest request) {
+        throw new CloudOperationNotSupportedException("Get object storage size is not supported on Azure");
     }
 
     private String getSingleResourceGroupName(ObjectStorageValidateRequest request) {
