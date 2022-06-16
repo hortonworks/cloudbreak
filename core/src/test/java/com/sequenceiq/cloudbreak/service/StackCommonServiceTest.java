@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -28,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
@@ -46,9 +48,11 @@ import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -71,8 +75,6 @@ class StackCommonServiceTest {
             NameOrCrn.ofCrn("crn:cdp:datahub:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:6b5a9aa7-223a-4d6a-93ca-27627be773b5");
 
     private static final String SUBNET_ID = "aSubnetId";
-
-    private static final String HOST_GROUP = "compute";
 
     @Mock
     private ImageCatalogService imageCatalogService;
@@ -118,6 +120,9 @@ class StackCommonServiceTest {
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    @Mock
+    private InstanceMetaDataService instanceMetaDataService;
 
     @InjectMocks
     private StackCommonService underTest;
@@ -346,4 +351,54 @@ class StackCommonServiceTest {
         assertEquals(actual.getMessage(), "Upscaling is not supported on AWS cloudplatform");
 
     }
+
+    @Test
+    public void testSyncWhenInvalidStackStatusThenBadRequest() {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setName(STACK_NAME.getName());
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOPPED));
+        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.syncComponentVersionsFromCmInWorkspace(STACK_NAME, WORKSPACE_ID, Set.of()));
+
+        assertEquals("Reading CM and parcel versions from CM cannot be initiated as the cluster is in STOPPED state.",
+                badRequestException.getMessage());
+        verify(instanceMetaDataService, never()).anyInstanceStopped(STACK_ID);
+    }
+
+    @Test
+    public void testSyncWhenInvalidInstanceStatusThenBadRequest() {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setName(STACK_NAME.getName());
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(instanceMetaDataService.anyInstanceStopped(STACK_ID)).thenReturn(true);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.syncComponentVersionsFromCmInWorkspace(STACK_NAME, WORKSPACE_ID, Set.of()));
+
+        assertEquals("Please start all stopped instances. Reading CM and parcel versions from CM can only be made when all your nodes in running state.",
+                badRequestException.getMessage());
+        verify(instanceMetaDataService, times(1)).anyInstanceStopped(STACK_ID);
+    }
+
+    @Test
+    public void testSyncWhenValidationsPassThenSuccess() {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setName(STACK_NAME.getName());
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(instanceMetaDataService.anyInstanceStopped(STACK_ID)).thenReturn(false);
+        when(stackOperationService.syncComponentVersionsFromCm(stack, Set.of())).thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
+
+        FlowIdentifier flowIdentifier = underTest.syncComponentVersionsFromCmInWorkspace(STACK_NAME, WORKSPACE_ID, Set.of());
+
+        assertEquals("1", flowIdentifier.getPollableId());
+        verify(instanceMetaDataService, times(1)).anyInstanceStopped(STACK_ID);
+    }
+
 }

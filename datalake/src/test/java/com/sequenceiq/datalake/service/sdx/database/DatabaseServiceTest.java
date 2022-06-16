@@ -159,7 +159,7 @@ public class DatabaseServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.REQUESTED);
-        when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(status);
+        when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
 
         assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env))).isInstanceOf(BadRequestException.class);
 
@@ -196,7 +196,7 @@ public class DatabaseServiceTest {
 
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.DELETE_REQUESTED);
-        when(sdxStatusService.getActualStatusForSdx(any())).thenReturn(status);
+        when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(status);
 
         assertThrows(CloudbreakServiceException.class, () -> {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.create(cluster, env));
