@@ -16,6 +16,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncFailedEvent;
@@ -24,6 +26,7 @@ import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncWaitEvent;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxCmSyncService;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
+import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -38,6 +41,9 @@ public class SdxCmSyncActions {
 
     @Inject
     private SdxUpgradeService sdxUpgradeService;
+
+    @Inject
+    private SdxStatusService sdxStatusService;
 
     @Bean(name = "CORE_CM_SYNC_STATE")
     public Action<?, ?> callCoreCmSync() {
@@ -88,11 +94,23 @@ public class SdxCmSyncActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxCmSyncFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Sdx cm sync failure, error: ", payload.getException());
+            protected void doExecute(SdxContext context, SdxCmSyncFailedEvent payload, Map<Object, Object> variables) {
+                Exception exception = payload.getException();
+                LOGGER.info("Sdx cm sync failure, error: ", exception);
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(payload.getException());
+                flow.setFlowFailed(exception);
+                Optional.ofNullable(exception)
+                        .map(Throwable::getMessage)
+                        .ifPresent(message -> setStatusForDatalakeAndNotify(payload.getResourceId(), message));
                 sendEvent(context, SDX_CM_SYNC_FAILED_HANDLED_EVENT.event(), payload);
+            }
+
+            private void setStatusForDatalakeAndNotify(Long resourceId, String exceptionMessage) {
+                Optional<SdxStatusEntity> actualStatus = sdxStatusService.getActualStatusForSdx(resourceId);
+                sdxStatusService.setStatusForDatalakeAndNotify(
+                        actualStatus.map(SdxStatusEntity::getStatus).orElse(DatalakeStatusEnum.RUNNING),
+                        exceptionMessage,
+                        resourceId);
             }
 
             @Override

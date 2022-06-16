@@ -70,5 +70,4 @@ public class SdxCmSyncWaitHandler extends ExceptionCatcherEventHandler<SdxCmSync
             return new SdxCmSyncFailedEvent(sdxCmSyncWaitEvent.getResourceId(), sdxCmSyncWaitEvent.getUserId(), e);
         }
     }
-
 }
