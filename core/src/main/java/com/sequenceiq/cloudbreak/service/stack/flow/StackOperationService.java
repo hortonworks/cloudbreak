@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
+import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
@@ -116,6 +117,9 @@ public class StackOperationService {
 
     @Inject
     private RotateSaltPasswordService rotateSaltPasswordService;
+
+    @Inject
+    private ShowTerminatedClusterConfigService showTerminatedClusterConfigService;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -449,5 +453,11 @@ public class StackOperationService {
         MDCBuilder.buildMdcContext(stack);
         rotateSaltPasswordService.validateRotateSaltPassword(stack);
         return flowManager.triggerRotateSaltPassword(stack.getId(), reason);
+    }
+
+    public FlowIdentifier checkAtlasUpdated(@NotNull NameOrCrn nameOrCrn, String accountId) {
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId, null, showTerminatedClusterConfigService.get());
+        MDCBuilder.buildMdcContext(stack);
+        return flowManager.triggerCheckAtlasUpdated(stack.getId());
     }
 }

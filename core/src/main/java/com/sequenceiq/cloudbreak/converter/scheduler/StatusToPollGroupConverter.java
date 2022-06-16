@@ -53,6 +53,7 @@ public class StatusToPollGroupConverter {
             case LOAD_BALANCER_UPDATE_FAILED:
             case RECOVERY_IN_PROGRESS:
             case RECOVERY_FAILED:
+            case CHECK_ATLAS_UPDATED_IN_PROGRESS:
                 return PollGroup.POLLABLE;
             case DELETE_COMPLETED:
                 return PollGroup.CANCELLED;

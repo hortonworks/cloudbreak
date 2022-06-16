@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.rotatepassword.RotateSaltPasswordEvent;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
+import com.sequenceiq.cloudbreak.core.flow2.event.CheckAtlasUpdatedTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
@@ -399,6 +400,11 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerClusterProxyConfigReRegistration(Long stackId) {
         String selector = ClusterProxyReRegistrationEvent.CLUSTER_PROXY_RE_REGISTRATION_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
+    }
+
+    public FlowIdentifier triggerCheckAtlasUpdated(Long stackId) {
+        String selector = FlowChainTriggers.CHECK_ATLAS_UPDATED_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, new CheckAtlasUpdatedTriggerEvent(selector, stackId));
     }
 
     private NetworkScaleDetails getStackNetworkScaleDetails(InstanceGroupAdjustmentV4Request instanceGroupAdjustment) {

@@ -74,7 +74,7 @@ import reactor.bus.EventBus;
 @Service
 public class SdxReactorFlowManager {
 
-    private static final long WAIT_FOR_ACCEPT = 10L;
+    private static final long WAIT_FOR_ACCEPT = 25L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxReactorFlowManager.class);
 
@@ -116,8 +116,13 @@ public class SdxReactorFlowManager {
                 newSdxCluster, entitlementService.isDatalakeBackupOnResizeEnabled(ThreadBasedUserCrnProvider.getAccountId())
         );
         eventSenderService.sendEventAndNotification(newSdxCluster, userId, DATALAKE_RESIZE_TRIGGERED);
-        return notify(SDX_RESIZE_FLOW_CHAIN_START_EVENT, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
-                environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup, performRestore), newSdxCluster.getClusterName());
+        return notify(
+                SDX_RESIZE_FLOW_CHAIN_START_EVENT,
+                new DatalakeResizeFlowChainStartEvent(
+                        sdxClusterId, newSdxCluster, userId, environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()),
+                        performBackup, performRestore
+                ), newSdxCluster.getClusterName()
+        );
     }
 
     public FlowIdentifier triggerSdxResizeRecovery(SdxCluster oldSdxCluster, SdxCluster newSdxCluster) {

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.job;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CHECK_ATLAS_UPDATED_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DECOMMISSION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
@@ -207,7 +208,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.RESTORE_IN_PROGRESS,
                 Status.LOAD_BALANCER_UPDATE_IN_PROGRESS,
                 Status.RECOVERY_IN_PROGRESS,
-                Status.RECOVERY_REQUESTED
+                Status.RECOVERY_REQUESTED,
+                CHECK_ATLAS_UPDATED_IN_PROGRESS
         );
     }
 

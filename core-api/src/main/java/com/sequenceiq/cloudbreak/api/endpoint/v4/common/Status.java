@@ -17,6 +17,7 @@ public enum Status {
     UPDATE_IN_PROGRESS(StatusKind.PROGRESS),
     UPDATE_REQUESTED(StatusKind.PROGRESS),
     UPDATE_FAILED(StatusKind.FINAL),
+    CHECK_ATLAS_UPDATED_IN_PROGRESS(StatusKind.PROGRESS),
     BACKUP_IN_PROGRESS(StatusKind.PROGRESS),
     BACKUP_FAILED(StatusKind.FINAL),
     BACKUP_FINISHED(StatusKind.FINAL),
@@ -90,6 +91,7 @@ public enum Status {
             .put(EXTERNAL_DATABASE_STOP_FINISHED, STOP_FAILED)
             .put(LOAD_BALANCER_UPDATE_IN_PROGRESS, UPDATE_FAILED)
             .put(UPGRADE_CCM_IN_PROGRESS, UPGRADE_CCM_FAILED)
+            .put(CHECK_ATLAS_UPDATED_IN_PROGRESS, AVAILABLE)
             .build();
 
     private final StatusKind statusKind;

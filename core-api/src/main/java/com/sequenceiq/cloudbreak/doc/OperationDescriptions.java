@@ -89,6 +89,7 @@ public class OperationDescriptions {
         public static final String RANGER_RAZ_ENABLED = "Determines if Ranger Raz is present in the cluster.";
         public static final String GENERATE_IMAGE_CATALOG = "Generates an image catalog that only contains the currently used image for creating instances";
         public static final String RE_REGISTER_CLUSTER_PROXY_CONFIG = "Re-registers the cluster proxy config for the cluster if needed.";
+        public static final String CHECK_ATLAS_UPDATED = "Checks if the Atlas service on the cluster is up to date with the lineage.";
     }
 
     public static class ClusterOpDescription {

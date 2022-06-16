@@ -76,6 +76,10 @@ public class CloudbreakPoller {
         waitForFlowStateByFlowId(process, flowId, sdxId, pollingConfig, Sets.immutableEnumSet(FINISHED), Sets.immutableEnumSet(FAILED, UNKNOWN));
     }
 
+    public void pollFlowChainStateUntilComplete(String process, SdxCluster sdxCluster, PollingConfig pollingConfig) {
+        waitForFlowChainState(process, sdxCluster, pollingConfig, Sets.immutableEnumSet(FINISHED), Sets.immutableEnumSet(FAILED, UNKNOWN));
+    }
+
     private void waitForState(
             String process,
             SdxCluster sdxCluster,
@@ -184,6 +188,37 @@ public class CloudbreakPoller {
         FlowState flowState = cloudbreakFlowService.getLastKnownFlowStateByFlowId(flowId);
         if (failedStates.contains(flowState)) {
             return AttemptResults.breakFor(process + " had flow with ID '" + flowId + "' fail with flow state: " + flowState.toString());
+        } else if (targetStates.contains(flowState)) {
+            return AttemptResults.finishWith(flowState);
+        } else {
+            return AttemptResults.justContinue();
+        }
+    }
+
+    private void waitForFlowChainState(
+            String process,
+            SdxCluster sdxCluster,
+            PollingConfig pollingConfig,
+            Set<FlowState> targetStates,
+            Set<FlowState> failedStates) {
+        Polling.waitPeriodly(pollingConfig.getSleepTime(), pollingConfig.getSleepTimeUnit())
+                .stopIfException(pollingConfig.getStopPollingIfExceptionOccurred())
+                .stopAfterDelay(pollingConfig.getDuration(), pollingConfig.getDurationTimeUnit())
+                .run(() -> checkFlowChainState(process, sdxCluster, targetStates, failedStates));
+    }
+
+    private AttemptResult<FlowState> checkFlowChainState(String process, SdxCluster sdxCluster, Set<FlowState> targetStates, Set<FlowState> failedStates) {
+        LOGGER.info("Polling CB for flow chain state of process '{}' for SDX cluster '{}'.", process, sdxCluster.getClusterName());
+        if (PollGroup.CANCELLED.equals(DatalakeInMemoryStateStore.get(sdxCluster.getId()))) {
+            LOGGER.info("{} polling cancelled in inmemory store, id: {}", process, sdxCluster.getId());
+            return AttemptResults.breakFor(process + " polling cancelled for SDX cluster '" + sdxCluster.getClusterName() + "'.");
+        }
+        FlowState flowState = cloudbreakFlowService.getLastKnownFlowState(sdxCluster);
+        if (failedStates.contains(flowState)) {
+            return AttemptResults.breakFor(
+                    process + " for SDX cluster '" + sdxCluster.getClusterName() + "' failed with flow state: " +
+                            flowState.toString()
+            );
         } else if (targetStates.contains(flowState)) {
             return AttemptResults.finishWith(flowState);
         } else {

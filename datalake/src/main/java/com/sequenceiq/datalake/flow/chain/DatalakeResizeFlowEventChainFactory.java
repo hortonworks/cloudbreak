@@ -6,6 +6,7 @@ import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_EVEN
 import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent.SDX_RESIZE_FLOW_CHAIN_START_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_TRIGGER_BACKUP_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
+import static com.sequenceiq.datalake.flow.atlas.updated.CheckAtlasUpdatedEvent.CHECK_ATLAS_UPDATED_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
 
 import java.util.Queue;
@@ -23,6 +24,7 @@ import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFailureReason;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent;
 import com.sequenceiq.datalake.flow.refresh.event.DatahubRefreshStartEvent;
+import com.sequenceiq.datalake.flow.atlas.updated.event.StartCheckAtlasUpdatedEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -41,17 +43,21 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
     public FlowTriggerEventQueue createFlowTriggerEventQueue(DatalakeResizeFlowChainStartEvent event) {
         Queue<Selectable> chain = new ConcurrentLinkedQueue<>();
 
+        // Pre-validation.
+        chain.add(new StartCheckAtlasUpdatedEvent(
+                CHECK_ATLAS_UPDATED_EVENT.event(), event.getResourceId(), event.getUserId(), event.accepted()
+        ));
+
         if (event.shouldTakeBackup()) {
             // Take a backup
             chain.add(new DatalakeTriggerBackupEvent(DATALAKE_TRIGGER_BACKUP_EVENT.event(),
                     event.getResourceId(), event.getUserId(), event.getBackupLocation(), "resize" + System.currentTimeMillis(),
-                    DatalakeBackupFailureReason.BACKUP_ON_RESIZE, event.accepted()));
+                    DatalakeBackupFailureReason.BACKUP_ON_RESIZE));
             // Stop datalake
             chain.add(new SdxStartStopEvent(SDX_STOP_EVENT.event(), event.getResourceId(), event.getUserId(), STOP_DATAHUBS));
         } else {
-            chain.add(new SdxStartStopEvent(SDX_STOP_EVENT.event(), event.getResourceId(), event.getUserId(), STOP_DATAHUBS, event.accepted()));
+            chain.add(new SdxStartStopEvent(SDX_STOP_EVENT.event(), event.getResourceId(), event.getUserId(), STOP_DATAHUBS));
         }
-
 
         // Detach sdx from environment
         chain.add(new SdxStartDetachEvent(SDX_DETACH_EVENT.event(), event.getResourceId(), event.getSdxCluster(), event.getUserId()));

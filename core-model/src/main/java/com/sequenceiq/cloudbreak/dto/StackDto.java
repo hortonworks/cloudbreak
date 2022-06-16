@@ -158,6 +158,10 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
         return cluster;
     }
 
+    public Long getClusterId() {
+        return cluster.getId();
+    }
+
     public Network getNetwork() {
         return network;
     }

@@ -58,6 +58,8 @@ public class FlowChainTriggers {
 
     public static final String UPGRADE_CCM_CHAIN_TRIGGER_EVENT = "UPGRADE_CCM_CHAIN_TRIGGER_EVENT";
 
+    public static final String CHECK_ATLAS_UPDATED_CHAIN_TRIGGER_EVENT = "CHECK_ATLAS_UPDATED_CHAIN_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

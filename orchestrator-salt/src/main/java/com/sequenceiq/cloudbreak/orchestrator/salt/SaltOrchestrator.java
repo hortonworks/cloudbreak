@@ -118,6 +118,8 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private static final String DATABASE_RESTORE = "postgresql.disaster_recovery.restore";
 
+    private static final String CHECK_ATLAS_UPDATED = "atlas.check_atlas_updated";
+
     private static final String CM_SERVER_RESTART = "cloudera.manager.restart";
 
     private static final String CM_AGENT_CERTDIR_PERMISSION = "cloudera.agent.agent-cert-permission";
@@ -155,6 +157,12 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Value("${cb.max.salt.database.dr.retry.onerror:5}")
     private int maxDatabaseDrRetryOnError;
+
+    @Value("${cb.max.salt.datalake.atlas.retry:300}")
+    private int maxCheckAtlasUpdatedRetry;
+
+    @Value("${cb.max.salt.datalake.atlas.retry.onerror:2}")
+    private int maxCheckAtlasUpdatedRetryOnError;
 
     @Value("${cb.max.salt.cloudstorage.validation.retry:3}")
     private int maxCloudStorageValidationRetry;
@@ -1279,6 +1287,31 @@ public class SaltOrchestrator implements HostOrchestrator {
         return saltStateService.unboundClusterConfigPresentOnAnyNodes(saltConnector, new HostList(nodes));
     }
 
+    @Override
+    public void checkAtlasUpdated(GatewayConfig primaryGateway, Set<String> target, Set<Node> allNodes, SaltConfig saltConfig,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            OrchestratorBootstrap pillarSave = PillarSave.createCustomPillar(
+                    sc, Sets.newHashSet(primaryGateway.getPrivateAddress()),
+                    saltConfig.getServicePillarConfig().entrySet().iterator().next().getValue()
+            );
+            Callable<Boolean> saltPillarRunner = saltRunner.runner(
+                    pillarSave, exitCriteria, exitModel, maxCheckAtlasUpdatedRetry, maxCheckAtlasUpdatedRetryOnError
+            );
+            saltPillarRunner.call();
+
+            StateRunner stateRunner = new StateRunner(saltStateService, target, allNodes, CHECK_ATLAS_UPDATED);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner);
+            Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(
+                    saltJobIdTracker, exitCriteria, exitModel, maxCheckAtlasUpdatedRetry, maxCheckAtlasUpdatedRetryOnError
+            );
+            saltJobRunBootstrapRunner.call();
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during check of Atlas being updated", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
     private StateRunner createStateRunner(OrchestratorStateParams stateParams) {
         if (stateParams.isParameterized()) {
             if (stateParams.isConcurrent()) {
@@ -1345,7 +1378,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             runSyncAll(sc, allHostnames, allNodes, exitCriteriaModel);
             if (phase == PRE_CLOUDERA_MANAGER_START) {
-                // Execute highstate before recipe. Otherwise ipa domain names will not be resolvable in recipe scripts.
+                // Execute highstate before recipe. Otherwise, ipa domain names will not be resolvable in recipe scripts.
                 runNewService(sc, new HighStateAllRunner(saltStateService, allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
             } else {
                 // Skip highstate and just execute other recipes for performace.

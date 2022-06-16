@@ -37,6 +37,8 @@ public enum ResourceEvent {
     SDX_DETACHED_CLUSTER_DELETION_FAILED("resource.sdx.detach.deletion.failed"),
     UPDATE_LOAD_BALANCER_DNS_FINISHED("resource.sdx.update_lb_dns.finished"),
     UPDATE_LOAD_BALANCER_DNS_FAILED("resource.sdx.update_lb_dns.failed"),
+    CHECK_ATLAS_UPDATED_FINISHED("resource.sdx.check_atlas_updated.finished"),
+    CHECK_ATLAS_UPDATED_FAILED("resource.sdx.check_atlas_updated.failed"),
     SDX_STOP_FAILED("resource.sdx.stop.failed"),
     SDX_VALIDATION_FAILED_AND_SKIPPED("resource.sdx.validation.skipped"),
     SDX_CHANGE_IMAGE_STARTED("resource.sdx.change.image.started"),

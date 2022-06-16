@@ -546,4 +546,10 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier reRegisterClusterProxyConfig(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.reRegisterClusterProxyConfig(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId());
     }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier checkAtlasUpdated(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperationService.checkAtlasUpdated(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId());
+    }
 }
