@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.validation.CmUrlProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.ParcelUrlProvider;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,6 +62,9 @@ public class ParcelAvailabilityServiceTest {
     @Mock
     private Client client;
 
+    @Mock
+    private CmUrlProvider cmUrlProvider;
+
     private final Image image = createImage();
 
     private final Stack stack = new Stack();
@@ -70,7 +74,7 @@ public class ParcelAvailabilityServiceTest {
         Set<String> requiredParcelsFromImage = createRequiredParcelsSet();
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stack)).thenReturn(requiredParcelsFromImage);
-        when(parcelUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
+        when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
 
         when(restClientFactory.getOrCreateDefault()).thenReturn(client);
 
@@ -93,7 +97,7 @@ public class ParcelAvailabilityServiceTest {
         Set<String> requiredParcelsFromImage = createRequiredParcelsSet();
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stack)).thenReturn(requiredParcelsFromImage);
-        when(parcelUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
+        when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
 
         when(restClientFactory.getOrCreateDefault()).thenReturn(client);
 
@@ -116,7 +120,7 @@ public class ParcelAvailabilityServiceTest {
         Set<String> requiredParcelsFromImage = createRequiredParcelsSet();
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stack)).thenReturn(requiredParcelsFromImage);
-        when(parcelUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
+        when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
 
         when(restClientFactory.getOrCreateDefault()).thenReturn(client);
 
@@ -133,7 +137,7 @@ public class ParcelAvailabilityServiceTest {
         Set<String> requiredParcelsFromImage = createRequiredParcelsSet();
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stack)).thenReturn(requiredParcelsFromImage);
-        when(parcelUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
+        when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
 
         when(restClientFactory.getOrCreateDefault()).thenReturn(client);
 
@@ -155,7 +159,7 @@ public class ParcelAvailabilityServiceTest {
         Set<String> requiredParcelsFromImage = createRequiredParcelsSet();
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(parcelUrlProvider.getRequiredParcelsFromImage(image, stack)).thenReturn(requiredParcelsFromImage);
-        when(parcelUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
+        when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
 
         when(restClientFactory.getOrCreateDefault()).thenReturn(client);
 

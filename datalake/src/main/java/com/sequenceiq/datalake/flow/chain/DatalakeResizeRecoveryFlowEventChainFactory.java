@@ -4,6 +4,7 @@ import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVEN
 import static com.sequenceiq.datalake.flow.detach.SdxDetachEvent.SDX_DETACH_EVENT;
 import static com.sequenceiq.datalake.flow.detach.SdxDetachRecoveryEvent.SDX_DETACH_RECOVERY_EVENT;
 import static com.sequenceiq.datalake.flow.detach.event.DatalakeResizeRecoveryFlowChainStartEvent.SDX_RESIZE_RECOVERY_FLOW_CHAIN_START_EVENT;
+import static com.sequenceiq.datalake.flow.loadbalancer.dns.UpdateLoadBalancerDNSEvent.UPDATE_LOAD_BALANCER_DNS_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 
 import java.util.Queue;
@@ -21,6 +22,7 @@ import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeRecoveryFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.detach.event.SdxStartDetachEvent;
 import com.sequenceiq.datalake.flow.detach.event.SdxStartDetachRecoveryEvent;
+import com.sequenceiq.datalake.flow.loadbalancer.dns.event.StartUpdateLoadBalancerDNSEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
@@ -49,6 +51,7 @@ public class DatalakeResizeRecoveryFlowEventChainFactory implements FlowEventCha
             flowChain.add(createStartDetachRecoveryEventForOldCluster(event));
         }
         flowChain.add(createStartEventForOldCluster(event));
+        flowChain.add(createUpdateLoadBalancerDNSEventForOldCluster(event));
         return new FlowTriggerEventQueue(getName(), event, flowChain);
     }
 
@@ -80,6 +83,13 @@ public class DatalakeResizeRecoveryFlowEventChainFactory implements FlowEventCha
         LOGGER.info("Generated a " + SDX_START_EVENT.event() + " for the datalake resize recovery flow chain.");
         return new SdxStartStartEvent(
                 SDX_START_EVENT.event(), event.getOldCluster().getId(), event.getUserId(), event.accepted()
+        );
+    }
+
+    private StartUpdateLoadBalancerDNSEvent createUpdateLoadBalancerDNSEventForOldCluster(DatalakeResizeRecoveryFlowChainStartEvent event) {
+        LOGGER.info("Generated a " + UPDATE_LOAD_BALANCER_DNS_EVENT.event() + " for the datalake resize recovery flow chain.");
+        return new StartUpdateLoadBalancerDNSEvent(
+                UPDATE_LOAD_BALANCER_DNS_EVENT.event(), event.getOldCluster().getId(), event.getUserId(), event.accepted()
         );
     }
 }

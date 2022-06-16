@@ -1,14 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
-import com.sequenceiq.cloudbreak.domain.CustomImage;
-import com.sequenceiq.cloudbreak.domain.VmImage;
-
-import org.apache.commons.lang3.StringUtils;
-
-import org.springframework.stereotype.Component;
+import static java.util.stream.Collectors.toMap;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,12 +9,19 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toMap;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
+import com.sequenceiq.cloudbreak.domain.CustomImage;
+import com.sequenceiq.cloudbreak.domain.VmImage;
 
 @Component
 public class CustomImageProvider {
 
-    private static final String INTERNAL_BASE_URL = "https://archive.cloudera.com/p/";
+    public static final String INTERNAL_BASE_URL = "https://archive.cloudera.com/p/";
 
     public StatedImage mergeSourceImageAndCustomImageProperties(
             StatedImage statedImage, CustomImage customImage, String imageCatalogUrl, String catalogName) {

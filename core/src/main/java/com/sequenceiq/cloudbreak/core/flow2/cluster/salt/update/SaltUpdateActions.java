@@ -84,14 +84,14 @@ public class SaltUpdateActions {
     public Action<?, ?> runHighstateAction() {
         return new AbstractClusterAction<>(KeytabConfigurationSuccess.class) {
             @Override
-            protected void doExecute(ClusterViewContext context, KeytabConfigurationSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, KeytabConfigurationSuccess payload, Map<Object, Object> variables) {
                 saltUpdateService.startingClusterServices(context.getStack());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(ClusterViewContext context) {
-                return new StartAmbariServicesRequest(context.getStackId());
+                return new StartAmbariServicesRequest(context.getStackId(), false);
             }
         };
     }
