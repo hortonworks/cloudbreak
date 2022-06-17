@@ -404,6 +404,10 @@ public class ClusterService {
         return repository.findByStatuses(statuses);
     }
 
+    public Set<Long> findDeletedClusterIds() {
+        return repository.findDeletedClusterIds();
+    }
+
     public Optional<Cluster> findOneByStackId(Long stackId) {
         return repository.findOneByStackId(stackId);
     }
