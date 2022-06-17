@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonReader;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationState;
@@ -89,7 +90,12 @@ public class TerminationTriggerService {
     private boolean isRunningFlowForced(FlowLog fl) {
         ClassValue payloadType = fl.getPayloadType();
         if (payloadType != null && payloadType.isOnClassPath() && TerminationEvent.class.equals(payloadType.getClassValue())) {
-            TerminationEvent payload = (TerminationEvent) JsonReader.jsonToJava(fl.getPayload());
+            TerminationEvent payload;
+            if (fl.getPayloadJackson() != null) {
+                payload = JsonUtil.readValueWithJsonIoFallback(fl.getPayloadJackson(), fl.getPayload(), TerminationEvent.class);
+            } else {
+                payload = (TerminationEvent) JsonReader.jsonToJava(fl.getPayload());
+            }
             return payload.getTerminationType().isForced();
         } else {
             LOGGER.warn("Payloadtype [{}] is not 'TerminationEvent' for flow [{}]", fl.getPayloadType(), fl.getFlowId());

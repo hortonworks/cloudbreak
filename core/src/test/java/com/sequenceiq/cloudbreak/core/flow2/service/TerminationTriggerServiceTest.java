@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
@@ -288,6 +289,7 @@ public class TerminationTriggerServiceTest {
         flowLog.setCurrentState("INIT_STATE");
         TerminationEvent event = new TerminationEvent("selector", 1L, forced ? TerminationType.FORCED : TerminationType.REGULAR);
         flowLog.setPayload(JsonWriter.objectToJson(event));
+        flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(event));
         flowLog.setPayloadType(ClassValue.of(TerminationEvent.class));
         return flowLog;
     }

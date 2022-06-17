@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -16,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -75,13 +77,24 @@ public class FlowLogDBService implements FlowLogService {
     @Inject
     private ResourceIdProvider resourceIdProvider;
 
+    @Value("${flow.immediateJacksonCheck.enabled:false}")
+    private boolean immediateJacksonCheck;
+
     @Override
-    public FlowLog save(FlowParameters flowParameters, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
+    public FlowLog save(FlowParameters flowParameters, String flowChainId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
             FlowState currentState) {
         String payloadAsString = getSerializedString(payload);
         String variablesJson = getSerializedString(variables);
-        FlowLog flowLog = new FlowLog(payload.getResourceId(), flowParameters.getFlowId(), flowChanId, flowParameters.getFlowTriggerUserCrn(), key,
-                payloadAsString, ClassValue.of(payload.getClass()), variablesJson, ClassValue.of(flowType), currentState.toString());
+        String payloadJackson = JsonUtil.writeValueAsStringSilent(payload);
+        String variablesJackson = JsonUtil.writeValueAsStringSilent(variables);
+        if (immediateJacksonCheck) {
+            JsonUtil.checkReadability(payloadJackson, Payload.class);
+            JsonUtil.checkReadability(variablesJackson, Map.class);
+        }
+
+        FlowLog flowLog = new FlowLog(payload.getResourceId(), flowParameters.getFlowId(), flowChainId, flowParameters.getFlowTriggerUserCrn(), key,
+                payloadAsString, payloadJackson, ClassValue.of(payload.getClass()), variablesJson, variablesJackson,
+                ClassValue.of(flowType), currentState.toString());
         flowLog.setOperationType(StringUtils.isNotBlank(flowParameters.getFlowOperationType())
                 ? OperationType.valueOf(flowParameters.getFlowOperationType())
                 : OperationType.UNKNOWN);
@@ -150,11 +163,21 @@ public class FlowLogDBService implements FlowLogService {
     public void saveChain(String flowChainId, String parentFlowChainId, FlowTriggerEventQueue chain, String flowTriggerUserCrn) {
         String chainType = chain.getFlowChainName();
         String chainJson = JsonWriter.objectToJson(chain.getQueue());
+        String chainJackson = JsonUtil.writeValueAsStringSilent(chain.getQueue());
+        if (immediateJacksonCheck) {
+            JsonUtil.checkReadability(chainJackson, Queue.class);
+        }
         String triggerEventJson = null;
+        String triggerEventJackson = null;
         if (chain.getTriggerEvent() != null) {
             triggerEventJson = JsonWriter.objectToJson(chain.getTriggerEvent(), writeOptions);
+            triggerEventJackson = JsonUtil.writeValueAsStringSilent(chain.getTriggerEvent());
+            if (immediateJacksonCheck) {
+                JsonUtil.checkReadability(triggerEventJackson, Payload.class);
+            }
         }
-        FlowChainLog chainLog = new FlowChainLog(chainType, flowChainId, parentFlowChainId, chainJson, flowTriggerUserCrn, triggerEventJson);
+        FlowChainLog chainLog = new FlowChainLog(chainType, flowChainId, parentFlowChainId, chainJson, chainJackson, flowTriggerUserCrn,
+                triggerEventJson, triggerEventJackson);
         flowChainLogService.save(chainLog);
     }
 
@@ -228,11 +251,21 @@ public class FlowLogDBService implements FlowLogService {
 
     public void updateLastFlowLogPayload(FlowLog lastFlowLog, Payload payload, Map<Object, Object> variables) {
         String payloadJson = JsonWriter.objectToJson(payload, writeOptions);
+        String payloadJackson = JsonUtil.writeValueAsStringSilent(payload);
+        if (immediateJacksonCheck) {
+            JsonUtil.checkReadability(payloadJackson, Payload.class);
+        }
         String variablesJson = JsonWriter.objectToJson(variables, writeOptions);
+        String variablesJackson = JsonUtil.writeValueAsStringSilent(variables);
+        if (immediateJacksonCheck) {
+            JsonUtil.checkReadability(variablesJackson, Map.class);
+        }
         Optional.ofNullable(lastFlowLog)
                 .ifPresent(flowLog -> {
                     flowLog.setPayload(payloadJson);
+                    flowLog.setPayloadJackson(payloadJackson);
                     flowLog.setVariables(variablesJson);
+                    flowLog.setVariablesJackson(variablesJackson);
                     flowLogRepository.save(flowLog);
                 });
     }

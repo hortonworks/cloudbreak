@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -492,7 +493,12 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     .findFirst();
             try {
                 String flowChainType = flowChainLogService.getFlowChainType(flowLog.getFlowChainId());
-                Payload payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
+                Payload payload;
+                if (null != flowLog.getPayloadJackson()) {
+                    payload = JsonUtil.readValueWithJsonIoFallback(flowLog.getPayloadJackson(), flowLog.getPayload(), Payload.class);
+                } else {
+                    payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
+                }
                 Flow flow = flowConfig.get().createFlow(flowLog.getFlowId(), flowLog.getFlowChainId(), payload.getResourceId(), flowChainType);
                 runningFlows.put(flow, flowLog.getFlowChainId());
                 flowStatCache.put(flow.getFlowId(), flowLog.getFlowChainId(), payload.getResourceId(),
@@ -500,7 +506,12 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 if (flowLog.getFlowChainId() != null) {
                     flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
                 }
-                Map<Object, Object> variables = (Map<Object, Object>) JsonReader.jsonToJava(flowLog.getVariables());
+                Map<Object, Object> variables;
+                if (null != flowLog.getVariablesJackson()) {
+                    variables = JsonUtil.readValueWithJsonIoFallback(flowLog.getVariablesJackson(), flowLog.getVariables(), Map.class);
+                } else {
+                    variables = (Map<Object, Object>) JsonReader.jsonToJava(flowLog.getVariables());
+                }
                 flow.initialize(flowLog.getCurrentState(), variables);
                 RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
                 if (restartAction != null) {
@@ -511,7 +522,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                             flowLog.getOperationType().name(), span.context()), flowLog.getFlowChainId(), flowLog.getNextEvent(), payload);
                     return;
                 }
-            } catch (RuntimeException e) {
+            } catch (Exception e) {
                 String message = String.format("Flow could not be restarted with id: '%s', flow chain id: '%s' and flow type: '%s'", flowLog.getFlowId(),
                         flowLog.getFlowChainId(), flowLog.getFlowType().getClassValue().getSimpleName());
                 LOGGER.error(message, e);

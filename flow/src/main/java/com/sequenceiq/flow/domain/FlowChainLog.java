@@ -29,21 +29,30 @@ public class FlowChainLog {
     @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT", nullable = false)
     private String chain;
 
+    @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT", nullable = false)
+    private String chainJackson;
+
     private String flowTriggerUserCrn;
 
     private String triggerEvent;
+
+    private String triggerEventJackson;
 
     public FlowChainLog() {
 
     }
 
-    public FlowChainLog(String flowChainType, String flowChainId, String parentFlowChainId, String chain, String flowTriggerUserCrn, String triggerEvent) {
+    public FlowChainLog(String flowChainType, String flowChainId, String parentFlowChainId, String chain, String chainJackson, String flowTriggerUserCrn,
+            String triggerEvent, String triggerEventJackson) {
+
         this.flowChainType = flowChainType;
         this.flowChainId = flowChainId;
         this.parentFlowChainId = parentFlowChainId;
         this.chain = chain;
+        this.chainJackson = chainJackson;
         this.flowTriggerUserCrn = flowTriggerUserCrn;
         this.triggerEvent = triggerEvent;
+        this.triggerEventJackson = triggerEventJackson;
     }
 
     public Long getId() {
@@ -108,5 +117,21 @@ public class FlowChainLog {
 
     public void setTriggerEvent(String triggerEvent) {
         this.triggerEvent = triggerEvent;
+    }
+
+    public String getChainJackson() {
+        return chainJackson;
+    }
+
+    public void setChainJackson(String chainJackson) {
+        this.chainJackson = chainJackson;
+    }
+
+    public String getTriggerEventJackson() {
+        return triggerEventJackson;
+    }
+
+    public void setTriggerEventJackson(String triggerEventJackson) {
+        this.triggerEventJackson = triggerEventJackson;
     }
 }

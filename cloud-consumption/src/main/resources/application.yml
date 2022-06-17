@@ -162,3 +162,6 @@ altus:
 crn:
   partition: cdp
   region: us-west-1
+
+flow:
+  immediateJacksonCheck.enabled: true

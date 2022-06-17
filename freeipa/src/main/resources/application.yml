@@ -333,3 +333,6 @@ crn:
 authdistributor:
   host: localhost
   port: 8982
+
+flow:
+  immediateJacksonCheck.enabled: true

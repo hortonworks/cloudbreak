@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cedarsoftware.util.io.JsonReader;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -88,6 +89,14 @@ public class JsonUtil {
         return MAPPER.writeValueAsString(object);
     }
 
+    public static String writeValueAsStringUnchecked(Object object) {
+        try {
+            return MAPPER.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Cannot convert object to Json string.", e);
+        }
+    }
+
     public static String writeValueAsStringSilent(Object object) {
         return writeValueAsStringSilent(object, false);
     }
@@ -160,6 +169,26 @@ public class JsonUtil {
             return true;
         } catch (IOException ignore) {
             return false;
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T readValueWithJsonIoFallback(String jackson, String jsonio, Class<T> valueType) {
+        try {
+            return readValue(jackson, valueType);
+        } catch (IOException e) {
+            LOGGER.error("Failed to deserialize with Jackson, falling back to json-io. JSON: {}", jackson, e);
+            return (T) JsonReader.jsonToJava(jsonio);
+        }
+    }
+
+    public static void checkReadability(String jackson, Class<?> valueType) {
+        if (jackson != null) {
+            try {
+                readValue(jackson, valueType);
+            } catch (IOException e) {
+                LOGGER.error("Failed to deserialize with Jackson: {}", jackson, e);
+            }
         }
     }
 }

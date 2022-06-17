@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -59,23 +60,29 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
     }
 
     public void restoreFlowChain(String flowChainId) {
-        Optional<FlowChainLog> chainLog = flowLogService.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
-        if (chainLog.isPresent()) {
-            String flowChainType = chainLog.get().getFlowChainType();
-            Queue<Selectable> queue = (Queue<Selectable>) JsonReader.jsonToJava(chainLog.get().getChain());
-            Payload triggerEvent = tryDeserializeTriggerEvent(chainLog.get());
-            FlowTriggerEventQueue chain = new FlowTriggerEventQueue(flowChainType, triggerEvent, queue);
-            if (chainLog.get().getParentFlowChainId() != null) {
-                chain.setParentFlowChainId(chainLog.get().getParentFlowChainId());
+        Optional<FlowChainLog> chainLogOpt = flowLogService.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId);
+        if (chainLogOpt.isPresent()) {
+            FlowChainLog chainLog = chainLogOpt.get();
+            String flowChainType = chainLog.getFlowChainType();
+            Queue<Selectable> queue;
+            if (null != chainLog.getChainJackson()) {
+                queue = JsonUtil.readValueWithJsonIoFallback(chainLog.getChainJackson(), chainLog.getChain(), Queue.class);
+            } else {
+                queue = (Queue<Selectable>) JsonReader.jsonToJava(chainLog.getChain());
             }
-            flowChains.putFlowChain(flowChainId, chainLog.get().getParentFlowChainId(), chain);
+            Payload triggerEvent = tryDeserializeTriggerEvent(chainLog);
+            FlowTriggerEventQueue chain = new FlowTriggerEventQueue(flowChainType, triggerEvent, queue);
+            if (chainLog.getParentFlowChainId() != null) {
+                chain.setParentFlowChainId(chainLog.getParentFlowChainId());
+            }
+            flowChains.putFlowChain(flowChainId, chainLog.getParentFlowChainId(), chain);
             Selectable selectable = queue.peek();
             if (selectable != null) {
                 OperationType operationType = flowChainOperationTypeConfig.getFlowTypeOperationTypeMap().getOrDefault(flowChainType, OperationType.UNKNOWN);
                 flowStatCache.putByFlowChainId(flowChainId, selectable.getResourceId(), operationType.name(), true);
             }
-            if (chainLog.get().getParentFlowChainId() != null) {
-                restoreFlowChain(chainLog.get().getParentFlowChainId());
+            if (chainLog.getParentFlowChainId() != null) {
+                restoreFlowChain(chainLog.getParentFlowChainId());
             }
         }
     }

@@ -87,6 +87,7 @@ flow:
   schema:
     migration:
       auto: false
+  immediateJacksonCheck.enabled: true
 
 distrox:
   gateway:

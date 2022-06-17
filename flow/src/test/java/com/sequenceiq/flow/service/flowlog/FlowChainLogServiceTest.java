@@ -20,6 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
 
@@ -156,6 +157,7 @@ public class FlowChainLogServiceTest {
             flowEventChain.add(new TestEvent());
         }
         flowChainLog.setChain(JsonWriter.objectToJson(flowEventChain));
+        flowChainLog.setChainJackson(JsonUtil.writeValueAsStringSilent(flowEventChain));
         return flowChainLog;
     }
 

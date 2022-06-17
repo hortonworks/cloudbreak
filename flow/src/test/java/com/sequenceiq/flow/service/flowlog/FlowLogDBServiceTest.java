@@ -25,6 +25,7 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 
 import org.assertj.core.util.Lists;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -36,12 +37,14 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
@@ -64,7 +67,7 @@ public class FlowLogDBServiceTest {
 
     private static final String FLOW_ID = "flowId";
 
-    private static final long ID = 1L;
+    private static final long ID = 2L;
 
     private static final String CLOUDBREAK_STACK_CRN = CrnTestUtil.getDatalakeCrnBuilder()
             .setAccountId("acc")
@@ -91,6 +94,11 @@ public class FlowLogDBServiceTest {
 
     @Mock
     private NodeConfig nodeConfig;
+
+    @Before
+    public void setUp() throws Exception {
+        ReflectionTestUtils.setField(underTest, "immediateJacksonCheck", true);
+    }
 
     @Test
     public void updateLastFlowLogStatus() {
@@ -127,7 +135,7 @@ public class FlowLogDBServiceTest {
         FlowLog flowLog = new FlowLog();
         flowLog.setId(ID);
 
-        Payload payload = mock(Selectable.class);
+        Payload payload = new TestSelectable();
         Map<Object, Object> variables = Map.of("repeated", 2);
 
         underTest.updateLastFlowLogPayload(flowLog, payload, variables);
@@ -140,8 +148,12 @@ public class FlowLogDBServiceTest {
 
         String payloadJson = JsonWriter.objectToJson(payload, Map.of());
         String variablesJson = JsonWriter.objectToJson(variables, Map.of());
+        String payloadJackson = JsonUtil.writeValueAsStringSilent(payload);
+        String variablesJackson = JsonUtil.writeValueAsStringSilent(variables);
         assertEquals(payloadJson, savedFlowLog.getPayload());
         assertEquals(variablesJson, savedFlowLog.getVariables());
+        assertEquals(payloadJackson, savedFlowLog.getPayloadJackson());
+        assertEquals(variablesJackson, savedFlowLog.getVariablesJackson());
     }
 
     @Test
@@ -394,6 +406,19 @@ public class FlowLogDBServiceTest {
 
         public TestEntity getEntity() {
             return entity;
+        }
+    }
+
+    private static class TestSelectable implements Selectable {
+
+        @Override
+        public String selector() {
+            return "selector";
+        }
+
+        @Override
+        public Long getResourceId() {
+            return ID;
         }
     }
 }

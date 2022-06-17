@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.flow.api.model.operation.OperationType;
@@ -507,6 +508,7 @@ public class Flow2HandlerTest {
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         flowLog.setPayload(JsonWriter.objectToJson(payload));
+        flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(payload));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
 
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
@@ -539,6 +541,7 @@ public class Flow2HandlerTest {
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         flowLog.setPayload(JsonWriter.objectToJson(payload));
+        flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(payload));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
 
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
@@ -561,6 +564,7 @@ public class Flow2HandlerTest {
         Payload payload = new TestPayload(STACK_ID);
         flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         flowLog.setPayload(JsonWriter.objectToJson(payload));
+        flowLog.setPayloadJackson(JsonUtil.writeValueAsStringSilent(payload));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
 
@@ -580,6 +584,7 @@ public class Flow2HandlerTest {
         FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, "START_STATE", true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
         flowLog.setFlowType(ClassValue.of(HelloWorldFlowConfig.class));
         flowLog.setVariables(JsonWriter.objectToJson(new HashMap<>()));
+        flowLog.setVariablesJackson(JsonUtil.writeValueAsStringSilent(new HashMap<>()));
         flowLog.setFlowChainId(flowChainId);
         flowLog.setNextEvent(NEXT_EVENT);
         flowLog.setFlowTriggerUserCrn(FLOW_TRIGGER_USERCRN);
