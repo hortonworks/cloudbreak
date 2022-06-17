@@ -7,19 +7,29 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -33,7 +43,7 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class CmTemplateValidatorTest {
 
     private static final String ACCOUNT_ID = "1";
@@ -47,6 +57,17 @@ public class CmTemplateValidatorTest {
     @Spy
     @SuppressFBWarnings(value = "URF_UNREAD_FIELD", justification = "Injected by Mockito")
     private CmTemplateProcessorFactory templateProcessorFactory = new CmTemplateProcessorFactory();
+
+    private static Stream<Arguments> blackListValueTest() {
+        return Stream.of(
+                Arguments.of("", false),
+                Arguments.of("7.2.11", false),
+                Arguments.of("7.1.12", false),
+                Arguments.of("7.2.12", true),
+                Arguments.of("7.2.13", true),
+                Arguments.of("7.2.16", true)
+        );
+    }
 
     @Test
     public void validWithZeroComputeNodesWhenCardinalityUnspecified() {
@@ -270,7 +291,7 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
         assertThrows(BadRequestException.class, () -> subject
-            .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of()));
     }
 
     @Test
@@ -284,7 +305,7 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
         assertDoesNotThrow(() -> subject
-            .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, +1, List.of()));
     }
 
     @Test
@@ -298,7 +319,7 @@ public class CmTemplateValidatorTest {
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
         assertDoesNotThrow(() -> subject
-            .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of()));
+                .validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, Optional.of(clouderaManagerRepo), hostGroup, -2, List.of()));
     }
 
     @Test
@@ -351,6 +372,34 @@ public class CmTemplateValidatorTest {
 
         subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint,
                 Optional.of(clouderaManagerRepo), hostGroup, -2, Set.of(compute, worker));
+    }
+
+    @ParameterizedTest
+    @MethodSource("blackListValueTest")
+    public void checkKafkaBrokerBlackListedUpscaleShouldDetermined(String version, boolean allowUpscale) {
+        String hostGroup = "compute";
+        ClouderaManagerProduct clouderaManagerRepo = new ClouderaManagerProduct();
+        clouderaManagerRepo.setVersion(version);
+        CmTemplateProcessor processor = mock(CmTemplateProcessor.class);
+        Map<String, Set<String>> componentsByHostGroup = new HashMap<>();
+        Set<String> components = new HashSet<>();
+        components.add("KAFKA_BROKER");
+        componentsByHostGroup.put("compute", components);
+        Mockito.lenient().when(processor.getComponentsByHostGroup()).thenReturn(componentsByHostGroup);
+        Optional<ClouderaManagerProduct> product = Optional.of(clouderaManagerRepo);
+        if (!allowUpscale) {
+            Throwable exception = Assertions.assertThrows(BadRequestException.class,
+                    () -> subject.validateBlackListedScalingRoles(ACCOUNT_ID, processor, hostGroup, 1, product));
+            assertEquals(String.format("'KAFKA_BROKER' service is not enabled to scale until CDP 7.2.12", version), exception.getMessage());
+        } else {
+            subject.validateBlackListedScalingRoles(ACCOUNT_ID, processor, hostGroup, 1, product);
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("blackListValueTest")
+    public void isVersionEnablesScaling(String versionParam, boolean allowedUpscale) {
+        assertEquals(allowedUpscale, subject.isVersionEnablesScaling(() -> versionParam, BlackListedUpScaleRole.KAFKA_BROKER));
     }
 
     @Test
