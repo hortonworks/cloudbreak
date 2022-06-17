@@ -350,24 +350,24 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public UpdateRecipesV4Response refreshRecipes(SdxCluster sdxCluster, UpdateRecipesV4Request request) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> stackV4Endpoint.refreshRecipesInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
-                        sdxCluster.getInitiatorUserCrn()));
+                () -> stackV4Endpoint.refreshRecipesInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(), userCrn));
     }
 
     public AttachRecipeV4Response attachRecipe(SdxCluster sdxCluster, AttachRecipeV4Request request) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> stackV4Endpoint.attachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
-                        sdxCluster.getInitiatorUserCrn()));
+                () -> stackV4Endpoint.attachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(), userCrn));
     }
 
     public DetachRecipeV4Response detachRecipe(SdxCluster sdxCluster, DetachRecipeV4Request request) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                () -> stackV4Endpoint.detachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
-                        sdxCluster.getInitiatorUserCrn()));
+                () -> stackV4Endpoint.detachRecipeInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(), userCrn));
     }
 
     public Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxCustomClusterRequest sdxCustomClusterRequest) {
