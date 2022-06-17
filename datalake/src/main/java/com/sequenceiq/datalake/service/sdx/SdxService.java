@@ -630,8 +630,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateRazEnablement(runtime, razEnabled, environmentResponse);
         validateMultiAz(enableMultiAz, environmentResponse);
         SdxCluster newSdxCluster = new SdxCluster();
-        // TODO keeping it for backward compatibility, should be removed in CB-17552
-        newSdxCluster.setInitiatorUserCrn(userCrn);
         newSdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
         newSdxCluster.setClusterName(clusterName);
         newSdxCluster.setAccountId(getAccountIdFromCrn(userCrn));
