@@ -476,6 +476,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 operation = executeStartOperation(projectId, availabilityZone, compute, instanceId, instance.getTemplate(), instanceResponse.getDisks());
             }
             CloudInstance operationAwareCloudInstance = createOperationAwareCloudInstance(instance, operation);
+            LOGGER.debug("Operation with {} successfully inited on {} instance.", operation.getName(), instance.getInstanceId());
             return new CloudVmInstanceStatus(operationAwareCloudInstance, InstanceStatus.IN_PROGRESS);
         } catch (TokenResponseException e) {
             throw gcpStackUtil.getMissingServiceAccountKeyError(e, context.getProjectId());
@@ -488,6 +489,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             List<AttachedDisk> disks) throws IOException {
 
         if (customGcpDiskEncryptionService.hasCustomEncryptionRequested(template)) {
+            LOGGER.info("Start the instance with custom encryption: {}", instanceId);
             CustomerEncryptionKey customerEncryptionKey = customGcpDiskEncryptionCreatorService.createCustomerEncryptionKey(template);
             List<CustomerEncryptionKeyProtectedDisk> protectedDisks = disks
                     .stream()
@@ -498,6 +500,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             request.setDisks(protectedDisks);
             return compute.instances().startWithEncryptionKey(projectId, availabilityZone, instanceId, request).setPrettyPrint(true).execute();
         } else {
+            LOGGER.info("Start the instance with instanceId: {}", instanceId);
             return compute.instances().start(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute();
         }
     }

@@ -43,6 +43,7 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
         StopInstancesRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
+            LOGGER.debug("Stop the stack with platform variant: {}", cloudContext.getPlatformVariant());
             CloudConnector<?> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             List<CloudInstance> instances = request.getCloudInstances();
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
@@ -50,6 +51,7 @@ public class StopStackHandler implements CloudPlatformEventHandler<StopInstances
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, cloudVmInstanceStatuses);
             StopInstancesResult result = new StopInstancesResult(request.getResourceId(), statusResult);
             request.getResult().onNext(result);
+            LOGGER.debug("Stack successfully stopped");
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (Exception e) {
             StopInstancesResult failure = new StopInstancesResult("Failed to stop stack", e, request.getResourceId());
