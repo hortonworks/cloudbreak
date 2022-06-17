@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -55,4 +56,16 @@ public interface LegacyStructuredEventRepository extends WorkspaceResourceReposi
     default Set<StructuredEventEntity> findByNameInAndWorkspaceId(Set<String> name, Long workspaceId) {
         throw new UnsupportedOperationException();
     }
+
+    @Modifying
+    @Query(value = "DELETE FROM structuredevent se WHERE se.resourceId = :resourceId AND se.timestamp <= :timestamp", nativeQuery = true)
+    void deleteRecordsByResourceIdOlderThan(@Param("resourceId") Long resourceid, @Param("timestamp") Long timestamp);
+
+    @Modifying
+    @Query(value = "DELETE FROM structuredevent se " +
+            "WHERE se.resourceCrn LIKE :accountId " +
+            "AND se.timestamp <= :timestamp " +
+            "AND se.resourceid IN (SELECT id from stack s WHERE s.terminated IS NOT NULL)", nativeQuery = true)
+    void deleteByResourceCrnLikeAndTimestampIsLessThan(@Param("accountId") String accountId, @Param("timestamp") Long timestamp);
+
 }

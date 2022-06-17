@@ -1,15 +1,10 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import javax.annotation.Resource;
+import javax.inject.Inject;
 import java.util.Date;
 import java.util.Map;
 import java.util.Set;
-
-import javax.annotation.Resource;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
@@ -30,6 +25,9 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationsVie
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurator;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.common.model.FileSystemType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 @Component
 public class ClusterTerminationService {
@@ -111,4 +109,5 @@ public class ClusterTerminationService {
             }
         }
     }
+
 }

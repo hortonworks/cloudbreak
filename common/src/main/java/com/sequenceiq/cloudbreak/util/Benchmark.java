@@ -44,6 +44,16 @@ public class Benchmark {
         return result;
     }
 
+    public static void measureAndWarnIfLong(Runnable callback, Logger logger, String message) {
+        long start = System.currentTimeMillis();
+        callback.run();
+        long duration = System.currentTimeMillis() - start;
+        Stream.of(SECONDS_60, SECONDS_30, SECONDS_15, SECONDS_5)
+                .filter(seconds -> duration > seconds * MILLIS_1000)
+                .findFirst()
+                .ifPresent(interval -> logger.warn("[MEASURE] {} duration was critical (>{}s) {}ms", message, interval, duration));
+    }
+
     public static <E extends Exception> void checkedMeasure(SingleCheckedRunnable<E> runnable, Logger logger, String message, Object... params) throws E {
         long start = System.currentTimeMillis();
         runnable.run();
