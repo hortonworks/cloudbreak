@@ -78,7 +78,6 @@ public class SdxRepairServiceTest {
     public void triggerHostGroupBasedCloudbreakRepair() {
         SdxCluster cluster = new SdxCluster();
         cluster.setId(CLUSTER_ID.incrementAndGet());
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
         cluster.setAccountId("accountid");
         SdxRepairRequest sdxRepairRequest = new SdxRepairRequest();
@@ -100,7 +99,6 @@ public class SdxRepairServiceTest {
         Boolean deleteVolumes = new Random().nextBoolean();
         SdxCluster cluster = new SdxCluster();
         cluster.setId(CLUSTER_ID.incrementAndGet());
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
         cluster.setAccountId("accountid");
         SdxRepairRequest sdxRepairRequest = new SdxRepairRequest();

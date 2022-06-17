@@ -92,7 +92,6 @@ public class SdxAttachServiceTest {
         testCluster.setClusterName(TEST_CLUSTER_NAME);
         testCluster.setCrn(TEST_CLUSTER_CRN);
         testCluster.setOriginalCrn(ORIGINAL_TEST_CLUSTER_CRN);
-        testCluster.setInitiatorUserCrn(TEST_CLUSTER_INITIATOR_USER_CRN);
         testCluster.setAccountId(TEST_CLUSTER_ACCOUNT_ID);
         testCluster.setDetached(true);
         testCluster.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
@@ -180,7 +179,7 @@ public class SdxAttachServiceTest {
     void testSaveSdxAndAssignResourceOwnerRole() {
         when(mockSdxService.save(any())).thenReturn(testCluster);
         testCluster.setCrn(ORIGINAL_TEST_CLUSTER_CRN);
-        sdxAttachService.saveSdxAndAssignResourceOwnerRole(testCluster);
+        sdxAttachService.saveSdxAndAssignResourceOwnerRole(testCluster, TEST_CLUSTER_INITIATOR_USER_CRN);
         verify(mockOwnerAssignmentService).assignResourceOwnerRoleIfEntitled(
                 eq(TEST_CLUSTER_INITIATOR_USER_CRN), eq(ORIGINAL_TEST_CLUSTER_CRN), eq(TEST_CLUSTER_ACCOUNT_ID)
         );

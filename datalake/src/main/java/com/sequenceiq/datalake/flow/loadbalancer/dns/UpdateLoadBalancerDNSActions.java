@@ -91,7 +91,7 @@ public class UpdateLoadBalancerDNSActions {
                         payload.getResourceId(), payload.getSdxName(), exception.getMessage(), exception);
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 eventSenderService.sendEventAndNotification(
-                        sdxCluster, sdxCluster.getInitiatorUserCrn(), ResourceEvent.UPDATE_LOAD_BALANCER_DNS_FAILED,
+                        sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.UPDATE_LOAD_BALANCER_DNS_FAILED,
                         Set.of(exception.getMessage())
                 );
                 getFlow(context.getFlowParameters().getFlowId()).setFlowFailed(payload.getException());

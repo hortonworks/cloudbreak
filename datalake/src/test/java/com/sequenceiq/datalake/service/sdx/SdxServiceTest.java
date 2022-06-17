@@ -520,7 +520,6 @@ class SdxServiceTest {
         assertEquals(LIGHT_DUTY, capturedSdx.getClusterShape());
         assertEquals("envir", capturedSdx.getEnvName());
         assertEquals("hortonworks", capturedSdx.getAccountId());
-        assertEquals(USER_CRN, capturedSdx.getInitiatorUserCrn());
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Datalake requested", createdSdxCluster);
 
         assertEquals(1L, capturedSdx.getCreated());
@@ -1161,7 +1160,6 @@ class SdxServiceTest {
     private SdxCluster getSdxCluster() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(SDX_ID);
-        sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setEnvCrn(ENVIRONMENT_CRN);
         sdxCluster.setEnvName("envir");
         sdxCluster.setClusterName("sdx-cluster-name");

@@ -68,9 +68,6 @@ public class SdxCluster implements AccountAwareResource {
     private String name;
 
     @NotNull
-    private String initiatorUserCrn;
-
-    @NotNull
     private String envName;
 
     @NotNull
@@ -199,14 +196,6 @@ public class SdxCluster implements AccountAwareResource {
 
     public void setStackId(Long stackId) {
         this.stackId = stackId;
-    }
-
-    public String getInitiatorUserCrn() {
-        return initiatorUserCrn;
-    }
-
-    public void setInitiatorUserCrn(String initiatorUserCrn) {
-        this.initiatorUserCrn = initiatorUserCrn;
     }
 
     public String getEnvName() {
@@ -430,7 +419,6 @@ public class SdxCluster implements AccountAwareResource {
                 Objects.equals(accountId, that.accountId) &&
                 Objects.equals(crn, that.crn) &&
                 Objects.equals(clusterName, that.clusterName) &&
-                Objects.equals(initiatorUserCrn, that.initiatorUserCrn) &&
                 Objects.equals(envName, that.envName) &&
                 Objects.equals(envCrn, that.envCrn) &&
                 Objects.equals(stackCrn, that.stackCrn) &&
@@ -455,7 +443,7 @@ public class SdxCluster implements AccountAwareResource {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, accountId, crn, clusterName, initiatorUserCrn, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
+        return Objects.hash(id, accountId, crn, clusterName, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
                 stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType,
                 databaseAvailabilityType, rangerRazEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz, databaseEngineVersion);
     }

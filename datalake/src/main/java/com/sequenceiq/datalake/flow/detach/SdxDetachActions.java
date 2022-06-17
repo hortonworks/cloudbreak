@@ -241,7 +241,7 @@ public class SdxDetachActions {
                     SdxCluster resizedCluster = (SdxCluster) variables.get(RESIZED_SDX);
                     LOGGER.info("Attaching of SDX cluster with ID {} in progress.", resizedCluster.getId());
                     MDCBuilder.buildMdcContext(resizedCluster);
-                    resizedCluster = sdxAttachService.saveSdxAndAssignResourceOwnerRole(resizedCluster);
+                    resizedCluster = sdxAttachService.saveSdxAndAssignResourceOwnerRole(resizedCluster, context.getFlowTriggerUserCrn());
                     sdxAttachService.markAsAttached(resizedCluster);
                     LOGGER.info("Attaching of SDX cluster with ID {} is complete.", resizedCluster.getId());
                     context.setSdxId(resizedCluster.getId());

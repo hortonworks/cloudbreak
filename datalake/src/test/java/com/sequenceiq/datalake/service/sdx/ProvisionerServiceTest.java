@@ -135,7 +135,6 @@ class ProvisionerServiceTest {
         sdxCluster.setId(clusterId);
         sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         sdxCluster.setEnvName("envir");
-        sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
 
@@ -399,7 +398,6 @@ class ProvisionerServiceTest {
         sdxCluster.setId(id);
         sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         sdxCluster.setEnvName("envir");
-        sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setAccountId("hortonworks");
         sdxCluster.setTags(Json.silent(new HashMap<>()));
         sdxCluster.setEnvCrn("");

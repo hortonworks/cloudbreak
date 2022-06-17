@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.controller.sdx.SdxClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -27,12 +28,12 @@ public class SdxNotificationService {
 
     public void send(ResourceEvent resourceEvent, Collection<?> messageArgs, SdxCluster sdx) {
         LOGGER.info("SDX Notification has been sent: {}", resourceEvent);
-        notificationService.send(resourceEvent, messageArgs, sdxClusterConverter.sdxClusterToResponse(sdx), sdx.getInitiatorUserCrn());
+        notificationService.send(resourceEvent, messageArgs, sdxClusterConverter.sdxClusterToResponse(sdx), ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     public void send(ResourceEvent resourceEvent, SdxCluster sdx) {
         LOGGER.info("SDX Notification has been sent: {}", resourceEvent);
         notificationService.send(resourceEvent, Collections.singleton(sdx.getClusterName()), sdxClusterConverter.sdxClusterToResponse(sdx),
-                sdx.getInitiatorUserCrn());
+                ThreadBasedUserCrnProvider.getUserCrn());
     }
 }

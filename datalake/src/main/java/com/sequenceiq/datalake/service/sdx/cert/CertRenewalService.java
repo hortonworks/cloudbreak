@@ -22,9 +22,9 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.cert.renew.event.SdxStartCertRenewalEvent;
 import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
-import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -65,8 +65,8 @@ public class CertRenewalService {
 
     public FlowIdentifier triggerInternalRenewCertificate(SdxCluster sdxCluster) {
         MDCBuilder.buildMdcContext(sdxCluster);
-        return sdxReactorFlowManager.triggerCertRenewal(
-                new SdxStartCertRenewalEvent(sdxCluster.getId(), sdxCluster.getInitiatorUserCrn(), true), sdxCluster.getClusterName());
+        return sdxReactorFlowManager.triggerCertRenewal(new SdxStartCertRenewalEvent(sdxCluster.getId(),
+                ThreadBasedUserCrnProvider.getUserCrn(), true), sdxCluster.getClusterName());
     }
 
     public void renewCertificate(SdxCluster sdxCluster, String userCrn) {

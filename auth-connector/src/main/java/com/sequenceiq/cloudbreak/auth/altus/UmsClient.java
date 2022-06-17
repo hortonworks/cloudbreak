@@ -792,7 +792,7 @@ public class UmsClient {
 
     public List<UserManagementProto.ResourceAssignee> listResourceAssigneesForResource(String requestId, String resourceCrn) {
         return newStub(requestId).listResourceAssignees(UserManagementProto.ListResourceAssigneesRequest.newBuilder()
-                        .setAccountId(Crn.fromString(resourceCrn).getAccountId())
+                        .setAccountId(Crn.safeFromString(resourceCrn).getAccountId())
                         .setResourceCrn(resourceCrn)
                         .build())
                 .getResourceAssigneeList();
