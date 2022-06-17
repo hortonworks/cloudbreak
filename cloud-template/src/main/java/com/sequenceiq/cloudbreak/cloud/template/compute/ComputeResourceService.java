@@ -140,6 +140,7 @@ public class ComputeResourceService {
         }
 
         for (ComputeResourceBuilder<ResourceBuilderContext> builder : builders) {
+            LOGGER.debug("The builder for the resource of {} is executed", builder.resourceType());
             List<CloudResource> resourceList = getResources(builder.resourceType(), resources);
             List<CloudInstance> allInstances = getCloudInstances(resourceList, instances);
 
@@ -161,6 +162,7 @@ public class ComputeResourceService {
                 if (!futures.isEmpty()) {
                     LOGGER.debug("Wait for all {} stop/start threads to finish", futures.size());
                     List<List<CloudVmInstanceStatus>> instancesStatuses = waitForRequests(futures).get(FutureResult.SUCCESS);
+                    LOGGER.debug("There are {} success operation. Instance statuses: {}", instancesStatuses.size(), instancesStatuses);
                     List<CloudVmInstanceStatus> allVmStatuses = instancesStatuses.stream().flatMap(Collection::stream).collect(Collectors.toList());
                     List<CloudInstance> checkInstances = allVmStatuses.stream().map(CloudVmInstanceStatus::getCloudInstance).collect(Collectors.toList());
                     PollTask<List<CloudVmInstanceStatus>> pollTask = resourcePollTaskFactory
@@ -227,7 +229,11 @@ public class ComputeResourceService {
         List<CloudInstance> result = new ArrayList<>();
         for (CloudResource resource : cloudResource) {
             for (CloudInstance instance : instances) {
-                if (instance.getInstanceId().equalsIgnoreCase(resource.getName()) || instance.getInstanceId().equalsIgnoreCase(resource.getReference())) {
+                if (instance.getInstanceId().equalsIgnoreCase(resource.getName())) {
+                    LOGGER.debug("Instance found by name: {}", resource.getName());
+                    result.add(instance);
+                } else if (instance.getInstanceId().equalsIgnoreCase(resource.getReference())) {
+                    LOGGER.debug("Instance found by reference: {}", resource.getReference());
                     result.add(instance);
                 }
             }
