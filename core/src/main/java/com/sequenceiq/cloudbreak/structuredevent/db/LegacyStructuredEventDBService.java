@@ -1,20 +1,16 @@
 package com.sequenceiq.cloudbreak.structuredevent.db;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 
+import javax.annotation.Nonnull;
+import javax.inject.Inject;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nonnull;
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -35,17 +31,28 @@ import com.sequenceiq.cloudbreak.structuredevent.service.converter.StructuredEve
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
 
 @Component
 public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResourceService<StructuredEventEntity> implements LegacyStructuredEventService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LegacyStructuredEventDBService.class);
 
-    @Inject
-    private LegacyStructuredEventRepository legacyStructuredEventRepository;
+    private static final long NINETY_DAYS = 90L;
+
+    private static final long THREE_MONTHS = Duration.ofDays(NINETY_DAYS).toMillis();
+
+    private static final int MILLISEC_MULTIPLIER = 1000;
 
     @Inject
-    private LegacyPagingStructuredEventRepository legacyPagingStructuredEventRepository;
+    private LegacyStructuredEventRepository repository;
+
+    @Inject
+    private LegacyPagingStructuredEventRepository pagingRepository;
 
     @Inject
     private StackService stackService;
@@ -70,7 +77,7 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     @Override
     public StructuredEventEntity create(StructuredEventEntity resource, Workspace workspace, User user) {
-        if (resource != null && resource.getEventType() == StructuredEventType.NOTIFICATION) {
+        if (resource != null && resource.getEventType() == NOTIFICATION) {
             resource.setWorkspace(workspace);
             LOGGER.info("Stored StructuredEvent type: {}, payload: {}", resource.getEventType().name(), resource.getStructuredEventJson().getValue());
             return repository().save(resource);
@@ -85,7 +92,7 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     @Override
     public <T extends StructuredEvent> List<T> getEventsForWorkspaceWithType(Workspace workspace, Class<T> eventClass) {
-        List<StructuredEventEntity> events = legacyStructuredEventRepository.findByWorkspaceAndEventType(workspace, StructuredEventType.getByClass(eventClass));
+        List<StructuredEventEntity> events = repository.findByWorkspaceAndEventType(workspace, StructuredEventType.getByClass(eventClass));
         return events != null ? (List<T>) events.stream()
                 .map(e -> structuredEventEntityToStructuredEventConverter.convert(e))
                 .collect(Collectors.toList()) : Collections.emptyList();
@@ -93,7 +100,7 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     @Override
     public <T extends StructuredEvent> List<T> getEventsForWorkspaceWithTypeSince(Workspace workspace, Class<T> eventClass, Long since) {
-        List<StructuredEventEntity> events = legacyStructuredEventRepository.findByWorkspaceIdAndEventTypeSince(workspace.getId(),
+        List<StructuredEventEntity> events = repository.findByWorkspaceIdAndEventTypeSince(workspace.getId(),
                 StructuredEventType.getByClass(eventClass), since);
         return events != null ? (List<T>) events.stream()
                 .map(e -> structuredEventEntityToStructuredEventConverter.convert(e))
@@ -102,7 +109,7 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     @Override
     public <T extends StructuredEvent> List<T> getEventsWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId) {
-        List<StructuredEventEntity> events = legacyStructuredEventRepository
+        List<StructuredEventEntity> events = repository
                 .findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByClass(eventClass), resourceType, resourceId);
         return events != null ? (List<T>) events.stream()
                 .map(e -> structuredEventEntityToStructuredEventConverter.convert(e))
@@ -112,8 +119,8 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
     @Override
     public <T extends StructuredEvent> Page<T> getEventsLimitedWithTypeAndResourceId(Class<T> eventClass, String resourceType, Long resourceId,
             Pageable pageable) {
-        Page<StructuredEventEntity> events = legacyPagingStructuredEventRepository
-                .findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByClass(eventClass), resourceType, resourceId, pageable);
+        Page<StructuredEventEntity> events = pagingRepository.findByEventTypeAndResourceTypeAndResourceId(StructuredEventType.getByClass(eventClass),
+                resourceType, resourceId, pageable);
         return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> structuredEventEntityToStructuredEventConverter.convert(event));
     }
 
@@ -128,7 +135,7 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
 
     @Override
     public WorkspaceResourceRepository<StructuredEventEntity, Long> repository() {
-        return legacyStructuredEventRepository;
+        return repository;
     }
 
     @Override
@@ -158,16 +165,24 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
         return getEventsForUserWithResourceId(stack.getType().getResourceType(), stack.getId());
     }
 
+    public void deleteEntriesByResourceIdsOlderThanThreeMonths(Long resourceIds) {
+        repository.deleteRecordsOlderThan(resourceIds, getTimestampThatThreeMonthsBeforeNow());
+    }
+
+    public void deleteEntriesForAccountThatIsOlderThanThreeMonths(String accountId) {
+        repository.deleteByResourceCrnLikeAndTimestampIsLessThan(decorateAccountIdForLikelinessSearch(accountId), getTimestampThatThreeMonthsBeforeNow());
+    }
+
     public StructuredEventEntity findByWorkspaceIdAndId(Long workspaceId, Long id) {
-        return legacyStructuredEventRepository.findByWorkspaceIdAndId(workspaceId, id);
+        return repository.findByWorkspaceIdAndId(workspaceId, id);
     }
 
     public List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceCrn(Workspace workspace, String resourceCrn) {
-        return legacyStructuredEventRepository.findByWorkspaceAndResourceCrn(workspace, resourceCrn);
+        return repository.findByWorkspaceAndResourceCrn(workspace, resourceCrn);
     }
 
     public List<StructuredEventEntity> findByWorkspaceAndResourceTypeAndResourceId(Workspace workspace, String resourceType, Long resourceId) {
-        return legacyStructuredEventRepository.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
+        return repository.findByWorkspaceAndResourceTypeAndResourceId(workspace, resourceType, resourceId);
     }
 
     private Stack getStackIfAvailable(Long workspaceId, String name, StackType stackType) {
@@ -184,4 +199,13 @@ public class LegacyStructuredEventDBService extends AbstractWorkspaceAwareResour
         return Optional.ofNullable(stackService.getByCrnInWorkspace(crn, workspaceId))
                 .orElseThrow(notFound(Crn.safeFromString(crn).getResourceType().toString(), crn));
     }
+
+    private Long getTimestampThatThreeMonthsBeforeNow() {
+        return Instant.now().getEpochSecond() * MILLISEC_MULTIPLIER - THREE_MONTHS;
+    }
+
+    private String decorateAccountIdForLikelinessSearch(String content) {
+        return "%:" + content + ":%";
+    }
+
 }
