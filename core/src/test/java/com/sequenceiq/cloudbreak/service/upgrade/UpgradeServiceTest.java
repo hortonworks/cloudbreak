@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 
 @ExtendWith(MockitoExtension.class)
@@ -155,7 +156,7 @@ public class UpgradeServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(eq(ofName), eq(WORKSPACE_ID))).thenReturn(stack);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         StatedImage currentImageFromCatalog = imageFromCatalog(true, image.getImageId());
-        when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(currentImageFromCatalog);
+        when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(currentImageFromCatalog);
 
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
                 Result.error(RepairValidation.of(List.of("Repair cannot be performed because there is an active flow running.",
@@ -289,7 +290,7 @@ public class UpgradeServiceTest {
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         StatedImage currentImageFromCatalog = imageFromCatalog(prewarmedImage, oldImage);
-        when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(currentImageFromCatalog);
+        when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(currentImageFromCatalog);
         StatedImage latestImage = imageFromCatalog(true, newImage);
         when(imageService.determineImageFromCatalog(anyLong(), any(), anyString(), any(), any(), anyBoolean(),
                 anyBoolean(), any(), any())).thenReturn(latestImage);
@@ -335,6 +336,10 @@ public class UpgradeServiceTest {
         cluster.setId(1L);
         cluster.setBlueprint(blueprint);
         stack.setCluster(cluster);
+
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        stack.setWorkspace(workspace);
         return stack;
     }
 

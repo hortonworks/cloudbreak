@@ -75,7 +75,7 @@ public class CmSyncerService {
         LOGGER.debug("Synced CM versions and found components: {}", cmSyncOperationResult);
         componentPersistingService.persistComponentsToDb(stack, cmSyncOperationResult);
         CmSyncOperationStatus cmSyncOperationStatus = cmSyncOperationSummaryService.evaluate(cmSyncOperationResult);
-        mixedPackageVersionService.validatePackageVersions(stack.getId(), cmSyncOperationResult, candidateImages);
+        mixedPackageVersionService.validatePackageVersions(stack.getWorkspace().getId(), stack.getId(), cmSyncOperationResult, candidateImages);
         LOGGER.info("CM sync was executed, summary: {}", cmSyncOperationStatus);
         return new CmSyncOperationSummary(cmSyncOperationStatus, cmSyncOperationResult);
     }

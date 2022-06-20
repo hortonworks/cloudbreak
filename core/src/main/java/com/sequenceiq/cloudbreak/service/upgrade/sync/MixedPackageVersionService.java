@@ -49,16 +49,16 @@ public class MixedPackageVersionService {
     @Inject
     private CandidateImageAwareMixedPackageVersionService candidateImageAwareMixedPackageVersionService;
 
-    public void validatePackageVersions(Long stackId, CmSyncOperationResult syncResult, Set<Image> candidateImages) {
+    public void validatePackageVersions(Long workspaceId, Long stackId, CmSyncOperationResult syncResult, Set<Image> candidateImages) {
         Optional<String> activeCmVersion = syncResult.getCmRepoSyncOperationResult().getInstalledCmVersion();
         if (activeCmVersion.isPresent()) {
             Set<ParcelInfo> activeParcels = syncResult.getCmParcelSyncOperationResult().getActiveParcels();
-            Optional<StatedImage> currentImage = findCurrentImage(stackId);
+            Optional<StatedImage> currentImage = findCurrentImage(workspaceId, stackId);
             if (currentImage.isPresent()) {
                 if (areComponentVersionsEqualWithTheOriginalImage(currentImage.get(), activeCmVersion.get(), activeParcels)) {
                     LOGGER.debug("The current component versions {} are the same as the versions on the cluster's image {}", activeParcels, currentImage);
                 } else {
-                    findTargetImage(stackId).ifPresentOrElse(
+                    findTargetImage(workspaceId, stackId).ifPresentOrElse(
                             image -> examinePackageVersionsWithTargetImage(stackId, image, activeCmVersion.get(), activeParcels),
                             () -> examinePackageVersionsWithAllCandidateImages(stackId, candidateImages, activeCmVersion.get(), activeParcels,
                                     getImageCatalogUrl(currentImage)));
@@ -71,14 +71,15 @@ public class MixedPackageVersionService {
         }
     }
 
-    private Optional<Image> findTargetImage(Long stackId) {
+    private Optional<Image> findTargetImage(Long workspaceId, Long stackId) {
         Optional<com.sequenceiq.cloudbreak.cloud.model.Image> targetImage = clusterUpgradeTargetImageService.findTargetImage(stackId);
-        return targetImage.isPresent() ? findImageInCatalog(targetImage.get()) : Optional.empty();
+        return targetImage.isPresent() ? findImageInCatalog(workspaceId, targetImage.get()) : Optional.empty();
     }
 
-    private Optional<Image> findImageInCatalog(com.sequenceiq.cloudbreak.cloud.model.Image image) {
+    private Optional<Image> findImageInCatalog(Long workspaceId, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         try {
-            return Optional.of(imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage());
+            return Optional.of(imageCatalogService.getImage(
+                    workspaceId, image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage());
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             LOGGER.warn("There is no image {} found in catalog {}.", image.getImageId(), image.getImageCatalogUrl());
             return Optional.empty();
@@ -105,10 +106,10 @@ public class MixedPackageVersionService {
         return clouderaManagerProductTransformer.transformToMap(image, true, true);
     }
 
-    private Optional<StatedImage> findCurrentImage(Long stackId) {
+    private Optional<StatedImage> findCurrentImage(Long workspaceId, Long stackId) {
         try {
             com.sequenceiq.cloudbreak.cloud.model.Image image = imageService.getImage(stackId);
-            return Optional.ofNullable(imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()));
+            return Optional.ofNullable(imageCatalogService.getImage(workspaceId, image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()));
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             LOGGER.warn("Current image not found for this cluster.");
             return Optional.empty();

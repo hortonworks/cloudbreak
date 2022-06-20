@@ -75,7 +75,7 @@ public class CmSyncImageCollectorServiceTest {
         StatedImage currentStatedImage = getCurrentStatedImage();
         StatedImage anotherStatedImage = getStatedImage(IMAGE_UUID_1);
         when(imageService.getCurrentImageCatalogName(STACK_ID)).thenReturn(CURRENT_IMAGE_CATALOG_NAME);
-        when(imageService.getCurrentImage(STACK_ID)).thenReturn(currentStatedImage);
+        when(imageService.getCurrentImage(WORKSPCE_ID, STACK_ID)).thenReturn(currentStatedImage);
         when(imageCatalogService.getImageByCatalogName(WORKSPCE_ID, IMAGE_UUID_1, CURRENT_IMAGE_CATALOG_NAME)).thenReturn(anotherStatedImage);
 
         Set<Image> collectedImages = underTest.collectImages(USER_CRN, stack, candidateImageUuids);
@@ -87,7 +87,7 @@ public class CmSyncImageCollectorServiceTest {
         ));
         verify(imageService).getCurrentImageCatalogName(STACK_ID);
         verify(imageCatalogService).getImageByCatalogName(WORKSPCE_ID, IMAGE_UUID_1, CURRENT_IMAGE_CATALOG_NAME);
-        verify(imageService).getCurrentImage(STACK_ID);
+        verify(imageService).getCurrentImage(WORKSPCE_ID, STACK_ID);
         verify(imageCatalogService, never()).getAllCdhImages(anyString(), anyLong(), anyString(), anySet());
     }
 
@@ -110,7 +110,7 @@ public class CmSyncImageCollectorServiceTest {
         ));
         verify(imageService).getCurrentImageCatalogName(STACK_ID);
         verify(imageCatalogService).getAllCdhImages(USER_CRN, WORKSPCE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform));
-        verify(imageService, never()).getCurrentImage(anyLong());
+        verify(imageService, never()).getCurrentImage(anyLong(), anyLong());
         verify(imageCatalogService, never()).getImageByCatalogName(anyLong(), anyString(), anyString());
     }
 
@@ -125,7 +125,7 @@ public class CmSyncImageCollectorServiceTest {
         assertThat(collectedImages, emptyCollectionOf(Image.class));
         verify(imageService).getCurrentImageCatalogName(STACK_ID);
         verify(imageCatalogService, never()).getAllCdhImages(anyString(), anyLong(), anyString(), anySet());
-        verify(imageService, never()).getCurrentImage(anyLong());
+        verify(imageService, never()).getCurrentImage(anyLong(), anyLong());
         verify(imageCatalogService, never()).getImageByCatalogName(anyLong(), anyString(), anyString());
     }
 
@@ -145,7 +145,7 @@ public class CmSyncImageCollectorServiceTest {
         assertThat(collectedImages, emptyCollectionOf(Image.class));
         verify(imageService).getCurrentImageCatalogName(STACK_ID);
         verify(imageCatalogService).getAllCdhImages(USER_CRN, WORKSPCE_ID, CURRENT_IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform));
-        verify(imageService, never()).getCurrentImage(anyLong());
+        verify(imageService, never()).getCurrentImage(anyLong(), anyLong());
         verify(imageCatalogService, never()).getImageByCatalogName(anyLong(), anyString(), anyString());
     }
 

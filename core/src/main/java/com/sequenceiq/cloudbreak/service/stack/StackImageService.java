@@ -107,6 +107,7 @@ public class StackImageService {
             }
 
             StatedImage targetImage = imageCatalogService.getImage(
+                    stack.getWorkspace().getId(),
                     targetImageCatalog.getImageCatalogUrl(),
                     targetImageCatalog.getName(),
                     currentImage.getImageId()
