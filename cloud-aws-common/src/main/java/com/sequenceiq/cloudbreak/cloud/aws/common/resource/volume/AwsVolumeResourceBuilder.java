@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiFunction;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -106,10 +105,10 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Inject
     private ResourceRetriever resourceRetriever;
 
-    private BiFunction<Volume, Boolean, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = (volume, flag) -> {
+    private Function<Volume, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = volume -> {
         EbsInstanceBlockDeviceSpecification device = new EbsInstanceBlockDeviceSpecification()
                 .withVolumeId(volume.getId())
-                .withDeleteOnTermination(flag);
+                .withDeleteOnTermination(Boolean.TRUE);
 
         return new InstanceBlockDeviceMappingSpecification()
                 .withEbs(device)
@@ -348,16 +347,16 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         List<CloudResourceStatus> cloudResourceStatuses = checkResources(ResourceType.AWS_VOLUMESET, context, auth, List.of(resource));
 
         boolean anyDeleted = cloudResourceStatuses.stream().map(CloudResourceStatus::getStatus).anyMatch(DELETED::equals);
-        AmazonEc2Client client = getAmazonEC2Client(auth);
         if (!volumeSetAttributes.getDeleteOnTermination() && !anyDeleted) {
             LOGGER.debug("Volumes will be preserved.");
             resource.setStatus(CommonStatus.DETACHED);
             volumeSetAttributes.setDeleteOnTermination(Boolean.TRUE);
-            turnOffDeleteOnterminationOnAttachedVolumes(resource, cloudResourceStatuses, client);
             resource.putParameter(CloudResource.ATTRIBUTES, volumeSetAttributes);
             resourceNotifier.notifyUpdate(resource, auth.getCloudContext());
             throw new PreserveResourceException("Resource will be preserved for later reattachment.");
         }
+
+        AmazonEc2Client client = getAmazonEC2Client(auth);
         deleteOrphanedVolumes(cloudResourceStatuses, client);
         turnOnDeleteOnterminationOnAttachedVolumes(resource, cloudResourceStatuses, client);
 
@@ -366,16 +365,6 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     private void turnOnDeleteOnterminationOnAttachedVolumes(CloudResource resource, List<CloudResourceStatus> cloudResourceStatuses,
             AmazonEc2Client client) {
-        modifyDeleteOnterminationOnAttachedVolumes(resource, cloudResourceStatuses, Boolean.TRUE, client);
-    }
-
-    private void turnOffDeleteOnterminationOnAttachedVolumes(CloudResource resource, List<CloudResourceStatus> cloudResourceStatuses,
-            AmazonEc2Client client) {
-        modifyDeleteOnterminationOnAttachedVolumes(resource, cloudResourceStatuses, Boolean.FALSE, client);
-    }
-
-    private void modifyDeleteOnterminationOnAttachedVolumes(CloudResource resource, List<CloudResourceStatus> cloudResourceStatuses,
-            Boolean deleteOnTermination, AmazonEc2Client client) {
         String instanceId = resource.getInstanceId();
         if (StringUtils.isNotEmpty(instanceId)) {
             List<InstanceBlockDeviceMappingSpecification> deviceMappingSpecifications = cloudResourceStatuses.stream()
@@ -384,7 +373,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .map(cloudResource -> cloudResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class))
                     .map(VolumeSetAttributes::getVolumes)
                     .flatMap(List::stream)
-                    .map(volume -> toInstanceBlockDeviceMappingSpecification.apply(volume, deleteOnTermination))
+                    .map(toInstanceBlockDeviceMappingSpecification)
                     .collect(Collectors.toList());
             ModifyInstanceAttributeRequest modifyInstanceAttributeRequest = new ModifyInstanceAttributeRequest()
                     .withInstanceId(instanceId)
@@ -396,7 +385,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             if (modifyIdentityIdFormatResult != null) {
                 result = modifyIdentityIdFormatResult.toString();
             }
-            LOGGER.info("Delete on termination set to '{}' on instance '{}'. {}", deleteOnTermination, instanceId, result);
+            LOGGER.info("Delete on termination set to true on instance '{}'. {}", instanceId, result);
         } else {
             LOGGER.info("No instance id found for volume set resource, skipping the modify instance attributes call to AWS.");
         }
