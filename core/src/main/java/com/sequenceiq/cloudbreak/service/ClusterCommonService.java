@@ -137,10 +137,10 @@ public class ClusterCommonService {
     }
 
     private FlowIdentifier clusterHostgroupAdjustmentChange(Long stackId, UpdateClusterV4Request updateJson, Stack stack) {
-        if (!stack.isAvailable()) {
+        if (!stack.isAvailable() && !stack.hasNodeFailure()) {
             throw new BadRequestException(String.format(
-                    "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stackId,
-                    stack.getStatus()));
+                    "Stack '%s' is currently in '%s' status. Cluster scale can only be made " +
+                            "if the underlying stack status is 'AVAILABLE' or 'NODE_FAILURE'.", stackId, stack.getStatus()));
         }
         LOGGER.debug("Cluster host adjustment request received. Stack id: {} ", stackId);
         Blueprint blueprint = stack.getCluster().getBlueprint();
