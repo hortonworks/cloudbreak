@@ -30,7 +30,8 @@ public class GenerateImageCatalogService {
         try {
             Image image = stackImageService.getCurrentImage(stack);
             if (!Strings.isNullOrEmpty(image.getImageCatalogUrl())) {
-                StatedImage statedImage = imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId());
+                StatedImage statedImage = imageCatalogService.getImage(stack.getWorkspace().getId(), image.getImageCatalogUrl(), image.getImageCatalogName(),
+                        image.getImageId());
                 if (Strings.isNullOrEmpty(statedImage.getImage().getSourceImageId())) {
                     Images images = new Images(null, List.of(copyCatalogImageAndSetAdvertisedFlag(statedImage.getImage())), null, null);
                     return new CloudbreakImageCatalogV3(images, null);

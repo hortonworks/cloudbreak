@@ -65,7 +65,7 @@ public class ParcelService {
                 cmProductMap.put(product.getName(), clusterComponent);
                 cmProducts.add(product);
             }
-            cmProducts = filterParcelsByBlueprint(stack.getId(), cmProducts, stack.getCluster().getBlueprint());
+            cmProducts = filterParcelsByBlueprint(stack.getWorkspace().getId(), stack.getId(), cmProducts, stack.getCluster().getBlueprint());
             Set<ClusterComponent> componentsByRequiredProducts = getComponentsByRequiredProducts(cmProductMap, cmProducts);
             LOGGER.debug("The following components are required for cluster {}", componentsByRequiredProducts);
             return componentsByRequiredProducts;
@@ -79,7 +79,7 @@ public class ParcelService {
         } else {
             Map<String, ClusterComponent> cmProductMap = collectClusterComponentsByName(components);
             Set<ClouderaManagerProduct> cmProducts = clouderaManagerProductTransformer.transform(image, true, true);
-            cmProducts = filterParcelsByBlueprint(stack.getId(), cmProducts, stack.getCluster().getBlueprint());
+            cmProducts = filterParcelsByBlueprint(stack.getWorkspace().getId(), stack.getId(), cmProducts, stack.getCluster().getBlueprint());
             LOGGER.debug("The following parcels are used in CM based on blueprint: {}", cmProducts);
             return getComponentsByRequiredProducts(cmProductMap, cmProducts);
         }
@@ -92,7 +92,7 @@ public class ParcelService {
 
     public ParcelOperationStatus removeUnusedParcelComponents(Stack stack, Set<ClusterComponent> clusterComponentsByBlueprint) throws CloudbreakException {
         LOGGER.debug("Starting to remove unused parcels from the cluster.");
-        Set<String> parcelsFromImage = imageReaderService.getParcelNames(stack.getId());
+        Set<String> parcelsFromImage = imageReaderService.getParcelNames(stack.getWorkspace().getId(), stack.getId());
         ParcelOperationStatus removalStatus = clusterApiConnectors.getConnector(stack).removeUnusedParcels(clusterComponentsByBlueprint, parcelsFromImage);
         clusterComponentUpdater.removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint, removalStatus);
         return removalStatus;
@@ -108,8 +108,8 @@ public class ParcelService {
                 .collect(Collectors.toSet());
     }
 
-    private Set<ClouderaManagerProduct> filterParcelsByBlueprint(Long stackId, Set<ClouderaManagerProduct> cmProducts, Blueprint blueprint) {
-        return parcelFilterService.filterParcelsByBlueprint(stackId, cmProducts, blueprint);
+    private Set<ClouderaManagerProduct> filterParcelsByBlueprint(Long workspaceId, Long stackId, Set<ClouderaManagerProduct> cmProducts, Blueprint blueprint) {
+        return parcelFilterService.filterParcelsByBlueprint(workspaceId, stackId, cmProducts, blueprint);
     }
 
     private Set<ClusterComponent> getDataLakeClusterComponents(Set<ClusterComponent> components) {
