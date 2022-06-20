@@ -1,12 +1,5 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres;
 
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_DATA_ON_ATTACHED_DISK_KEY;
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_DEFAULT_DIRECTORY;
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_DEFAULT_LOG_DIRECTORY;
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_DIRECTORY_KEY;
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_LOG_DIRECTORY_KEY;
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK;
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.EmbeddedDatabaseConfigProvider.POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,6 +20,23 @@ import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class EmbeddedDatabaseConfigProviderTest {
+
+    private static final String POSTGRES_DIRECTORY_KEY = "postgres_directory";
+
+    private static final String POSTGRES_LOG_DIRECTORY_KEY = "postgres_log_directory";
+
+    private static final String POSTGRES_DATA_ON_ATTACHED_DISK_KEY = "postgres_data_on_attached_disk";
+
+    private static final String POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK = "pgsql";
+
+    private static final String POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK = "pgsql/log";
+
+    private static final String POSTGRES_DEFAULT_DIRECTORY = "/var/lib/pgsql";
+
+    private static final String POSTGRES_DEFAULT_LOG_DIRECTORY = "/var/log";
+
+    private static final String POSTGRES_VERSION = "postgres_version";
+
     @Mock
     private EmbeddedDatabaseService embeddedDatabaseService;
 
@@ -44,6 +54,7 @@ public class EmbeddedDatabaseConfigProviderTest {
         assertTrue((Boolean) actualResult.get(POSTGRES_DATA_ON_ATTACHED_DISK_KEY));
         assertEquals(VolumeUtils.DATABASE_VOLUME + "/" + POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK, actualResult.get(POSTGRES_DIRECTORY_KEY));
         assertEquals(VolumeUtils.DATABASE_VOLUME + "/" + POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK, actualResult.get(POSTGRES_LOG_DIRECTORY_KEY));
+        assertFalse(actualResult.containsKey(POSTGRES_VERSION));
     }
 
     @Test
@@ -57,5 +68,36 @@ public class EmbeddedDatabaseConfigProviderTest {
         assertFalse((Boolean) actualResult.get(POSTGRES_DATA_ON_ATTACHED_DISK_KEY));
         assertEquals(POSTGRES_DEFAULT_DIRECTORY, actualResult.get(POSTGRES_DIRECTORY_KEY));
         assertEquals(POSTGRES_DEFAULT_LOG_DIRECTORY, actualResult.get(POSTGRES_LOG_DIRECTORY_KEY));
+        assertFalse(actualResult.containsKey(POSTGRES_VERSION));
+    }
+
+    @Test
+    public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWithVersion() {
+        // GIVEN
+        Stack stack = new Stack();
+        stack.setExternalDatabaseEngineVersion("testVersion");
+        when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(any())).thenReturn(true);
+        // WHEN
+        Map<String, Object> actualResult = underTest.collectEmbeddedDatabaseConfigs(stack);
+        // THEN
+        assertTrue((Boolean) actualResult.get(POSTGRES_DATA_ON_ATTACHED_DISK_KEY));
+        assertEquals(VolumeUtils.DATABASE_VOLUME + "/" + POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK, actualResult.get(POSTGRES_DIRECTORY_KEY));
+        assertEquals(VolumeUtils.DATABASE_VOLUME + "/" + POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK, actualResult.get(POSTGRES_LOG_DIRECTORY_KEY));
+        assertEquals(stack.getExternalDatabaseEngineVersion(), actualResult.get(POSTGRES_VERSION));
+    }
+
+    @Test
+    public void collectEmbeddedDatabaseConfigsWhenDbOnAttachedDiskDisabledOrNoAttachedVolumesWithVersion() {
+        // GIVEN
+        Stack stack = new Stack();
+        stack.setExternalDatabaseEngineVersion("testVersion");
+        when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(any())).thenReturn(false);
+        // WHEN
+        Map<String, Object> actualResult = underTest.collectEmbeddedDatabaseConfigs(stack);
+        // THEN
+        assertFalse((Boolean) actualResult.get(POSTGRES_DATA_ON_ATTACHED_DISK_KEY));
+        assertEquals(POSTGRES_DEFAULT_DIRECTORY, actualResult.get(POSTGRES_DIRECTORY_KEY));
+        assertEquals(POSTGRES_DEFAULT_LOG_DIRECTORY, actualResult.get(POSTGRES_LOG_DIRECTORY_KEY));
+        assertEquals(stack.getExternalDatabaseEngineVersion(), actualResult.get(POSTGRES_VERSION));
     }
 }
