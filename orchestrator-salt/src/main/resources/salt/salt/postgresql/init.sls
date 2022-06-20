@@ -6,6 +6,12 @@
 {% set postgres_log_directory = salt['pillar.get']('postgres:postgres_log_directory') %}
 {% set postgres_scripts_executed_directory = salt['pillar.get']('postgres:postgres_scripts_executed_directory') %}
 {% set postgres_data_on_attached_disk = salt['pillar.get']('postgres:postgres_data_on_attached_disk', 'False') %}
+
+{%- if 'None' == configure_remote_db and salt['pillar.get']('postgres:postgres_version', '10') | int == 11 %}
+include:
+  - postgresql.pg11
+{%- endif %}
+
 {% set command = 'systemctl show -p FragmentPath postgresql' %}
 {% set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
 
