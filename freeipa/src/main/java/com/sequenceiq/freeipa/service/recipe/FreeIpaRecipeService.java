@@ -7,6 +7,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import com.sequenceiq.authorization.service.AuthorizationResourceCrnListProvider
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.recipe.RecipeCrnListProviderService;
@@ -51,9 +53,13 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
         Set<String> recipes = getRecipeNamesForStack(stackId);
         LOGGER.info("Get recipes from core: {}", recipes);
         return recipes.stream().map(recipe -> {
-            RecipeV4Request recipeV4Request = recipeV4Endpoint.getRequest(0L, recipe);
-            return new RecipeModel(recipeV4Request.getName(), recipeType(recipeV4Request.getType()),
-                    new String(Base64.decodeBase64(recipeV4Request.getContent())));
+            try {
+                RecipeV4Request recipeV4Request = recipeV4Endpoint.getRequest(0L, recipe);
+                return new RecipeModel(recipeV4Request.getName(), recipeType(recipeV4Request.getType()),
+                        new String(Base64.decodeBase64(recipeV4Request.getContent())));
+            } catch (NotFoundException e) {
+                throw new CloudbreakServiceException(String.format("%s recipe is missing", recipe));
+            }
         }).collect(Collectors.toList());
     }
 

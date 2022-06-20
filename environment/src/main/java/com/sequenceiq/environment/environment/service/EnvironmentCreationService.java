@@ -116,6 +116,7 @@ public class EnvironmentCreationService {
 
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
         validateCreation(creationDto, environment);
+        validateRecipes(creationDto);
         try {
             environment = environmentService.save(environment);
             saveFreeIpaRecipes(creationDto, environment);
@@ -132,6 +133,12 @@ public class EnvironmentCreationService {
             throw e;
         }
         return environmentDtoConverter.environmentToDto(environment);
+    }
+
+    private void validateRecipes(EnvironmentCreationDto creationDto) {
+        if (creationDto.getFreeIpaCreation() != null && creationDto.getFreeIpaCreation().getRecipes() != null) {
+            validatorService.validateFreeipaRecipesExistsByName(creationDto.getFreeIpaCreation().getRecipes());
+        }
     }
 
     private void saveFreeIpaRecipes(EnvironmentCreationDto creationDto, Environment environment) {

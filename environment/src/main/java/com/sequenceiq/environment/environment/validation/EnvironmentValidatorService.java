@@ -42,6 +42,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParamete
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceService;
+import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
@@ -85,6 +86,8 @@ public class EnvironmentValidatorService {
 
     private final EncryptionKeyValidator encryptionKeyValidator;
 
+    private final EnvironmentRecipeService recipeService;
+
     public EnvironmentValidatorService(NetworkCreationValidator networkCreationValidator,
             PlatformParameterService platformParameterService,
             EnvironmentResourceService environmentResourceService,
@@ -96,7 +99,8 @@ public class EnvironmentValidatorService {
             EncryptionKeyArnValidator encryptionKeyArnValidator,
             EncryptionKeyUrlValidator encryptionKeyUrlValidator,
             EntitlementService entitlementService,
-            EncryptionKeyValidator encryptionKeyValidator) {
+            EncryptionKeyValidator encryptionKeyValidator,
+            EnvironmentRecipeService recipeService) {
         this.networkCreationValidator = networkCreationValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
@@ -109,6 +113,7 @@ public class EnvironmentValidatorService {
         this.encryptionKeyUrlValidator = encryptionKeyUrlValidator;
         this.entitlementService = entitlementService;
         this.encryptionKeyValidator = encryptionKeyValidator;
+        this.recipeService = recipeService;
     }
 
     public void validateFMSRecipesEntitlement(EnvironmentCreationDto creationDto) {
@@ -117,6 +122,10 @@ public class EnvironmentValidatorService {
                 && creationDto.getFreeIpaCreation().getRecipes().size() > 0) {
             throw new BadRequestException("FreeIpa recipe support is not enabled for this account");
         }
+    }
+
+    public void validateFreeipaRecipesExistsByName(Set<String> resourceNames) {
+        recipeService.validateFreeipaRecipesExistsByName(resourceNames);
     }
 
     public ValidationResultBuilder validateNetworkCreation(Environment environment, NetworkDto network) {

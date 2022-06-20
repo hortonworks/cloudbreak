@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.recipe;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -54,6 +56,34 @@ class RecipeCrnListProviderServiceTest {
         NotFoundException cloudbreakRuntimeException = Assertions.assertThrows(NotFoundException.class,
                 () -> recipeCrnListProviderService.getResourceCrnListByResourceNameList(List.of("recipe1", "recipe2")));
         Assertions.assertEquals("Following recipes does not exist: [recipe2]", cloudbreakRuntimeException.getMessage());
+    }
+
+    @Test
+    public void testValidateRequestedRecipesExistsByNameButOnlyOneRecipeWasFound() {
+        RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
+        RecipeViewV4Response recipeResponse1 = new RecipeViewV4Response();
+        recipeResponse1.setName("recipe1");
+        recipeResponse1.setCrn("crn1");
+        recipeViewV4Responses.setResponses(Set.of(recipeResponse1));
+        when(recipeV4Endpoint.list(any())).thenReturn(recipeViewV4Responses);
+        NotFoundException cloudbreakRuntimeException = Assertions.assertThrows(NotFoundException.class,
+                () -> recipeCrnListProviderService.validateRequestedRecipesExistsByName(List.of("recipe1", "recipe2")));
+        Assertions.assertEquals("Following recipes does not exist: [recipe2]", cloudbreakRuntimeException.getMessage());
+    }
+
+    @Test
+    public void testValidateRequestedRecipesExistsByName() {
+        RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
+        RecipeViewV4Response recipeResponse1 = new RecipeViewV4Response();
+        recipeResponse1.setName("recipe1");
+        recipeResponse1.setCrn("crn1");
+        RecipeViewV4Response recipeResponse2 = new RecipeViewV4Response();
+        recipeResponse2.setName("recipe2");
+        recipeResponse2.setCrn("crn2");
+        recipeViewV4Responses.setResponses(Set.of(recipeResponse1, recipeResponse2));
+        when(recipeV4Endpoint.list(any())).thenReturn(recipeViewV4Responses);
+        recipeCrnListProviderService.validateRequestedRecipesExistsByName(List.of("recipe1", "recipe2"));
+        verify(recipeV4Endpoint, times(1)).list(any());
     }
 
 }

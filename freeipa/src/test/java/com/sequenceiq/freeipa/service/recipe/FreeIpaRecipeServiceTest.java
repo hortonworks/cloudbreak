@@ -11,6 +11,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import javax.ws.rs.NotFoundException;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.recipe.RecipeCrnListProviderService;
@@ -73,6 +76,24 @@ class FreeIpaRecipeServiceTest {
         Assertions.assertEquals(RecipeType.PRE_TERMINATION, recipeModel2.getRecipeType());
         Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
         Assertions.assertEquals("bash2", recipeModel2.getGeneratedScript());
+    }
+
+    @Test
+    public void testGetRecipesButOneMissing() {
+        RecipeV4Request recipe1Request = new RecipeV4Request();
+        recipe1Request.setName("recipe1");
+        recipe1Request.setType(RecipeV4Type.PRE_CLOUDERA_MANAGER_START);
+        recipe1Request.setContent("YmFzaDE=");
+        RecipeV4Request recipe2Request = new RecipeV4Request();
+        recipe2Request.setName("recipe2");
+        recipe2Request.setType(RecipeV4Type.PRE_TERMINATION);
+        recipe2Request.setContent("YmFzaDI=");
+        when(recipeV4Endpoint.getRequest(0L, "recipe2")).thenThrow(new NotFoundException("recipe not found"));
+        List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"), new FreeIpaStackRecipe(1L, "recipe2"));
+        when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
+        CloudbreakServiceException cloudbreakServiceException = Assertions.assertThrows(CloudbreakServiceException.class,
+                () -> freeIpaRecipeService.getRecipes(1L));
+        assertEquals("recipe2 recipe is missing", cloudbreakServiceException.getMessage());
     }
 
     @Test

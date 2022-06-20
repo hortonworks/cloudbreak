@@ -18,6 +18,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -49,6 +50,7 @@ import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
+import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
@@ -318,6 +320,53 @@ class EnvironmentCreationServiceTest {
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any(), any());
         verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
+    }
+
+    @Test
+    void testRecipeValidated() {
+        Set<String> recipes = Set.of("recipe1", "recipe2");
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParameters(AwsParametersDto.builder().withDynamoDbTableName("dynamo").build()).build();
+        String environmentCrn = "crn";
+        final EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME)
+                .withCreator(CRN)
+                .withAccountId(ACCOUNT_ID)
+                .withCrn(environmentCrn)
+                .withAuthentication(AuthenticationDto.builder().build())
+                .withParameters(parametersDto)
+                .withFreeIpaCreation(FreeIpaCreationDto.builder().withRecipes(recipes).build())
+                .withLocation(LocationDto.builder()
+                        .withName("test")
+                        .withDisplayName("test")
+                        .withLatitude(0.1)
+                        .withLongitude(0.1)
+                        .build())
+                .build();
+        final Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        Credential credential = new Credential();
+        credential.setCloudPlatform("platform");
+        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID)))
+                .thenReturn(credential);
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
+        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
+        when(environmentService.save(any())).thenReturn(environment);
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        verify(validatorService, Mockito.times(1)).validatePublicKey(any());
+        verify(environmentService).save(any());
+        verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
+        verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any(), any());
+        verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
+        verify(validatorService, Mockito.times(1)).validateFreeipaRecipesExistsByName(recipes);
     }
 
     @Test

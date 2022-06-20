@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.recipe;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +23,7 @@ public class RecipeCrnListProviderService {
     @Inject
     private RecipeV4Endpoint recipeV4Endpoint;
 
-    public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+    public List<String> getResourceCrnListByResourceNameList(Collection<String> resourceNames) {
         LOGGER.info("Get resources crn list for recipes: {}", resourceNames);
         RecipeViewV4Responses recipes = recipeV4Endpoint.list(0L);
         validateRequestedRecipesExistsByName(resourceNames, recipes);
@@ -32,7 +33,13 @@ public class RecipeCrnListProviderService {
         return resourceCrns;
     }
 
-    private void validateRequestedRecipesExistsByName(List<String> resourceNames, RecipeViewV4Responses recipes) {
+    public void validateRequestedRecipesExistsByName(Collection<String> resourceNames) {
+        LOGGER.info("Get resources crn list for recipes: {}", resourceNames);
+        RecipeViewV4Responses recipes = recipeV4Endpoint.list(0L);
+        validateRequestedRecipesExistsByName(resourceNames, recipes);
+    }
+
+    private void validateRequestedRecipesExistsByName(Collection<String> resourceNames, RecipeViewV4Responses recipes) {
         List<String> recipeNamesFromCore = recipes.getResponses().stream().map(CompactViewV4Response::getName).collect(Collectors.toList());
         List<String> recipesNotFound = resourceNames.stream().filter(recipeName -> !recipeNamesFromCore.contains(recipeName)).collect(Collectors.toList());
         if (recipesNotFound.size() > 0) {

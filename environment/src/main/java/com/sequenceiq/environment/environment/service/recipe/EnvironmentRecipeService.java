@@ -49,6 +49,10 @@ public class EnvironmentRecipeService implements AuthorizationResourceCrnListPro
         freeIpaRecipeRepository.deleteFreeIpaRecipesByEnvironmentId(environmentId);
     }
 
+    public void validateFreeipaRecipesExistsByName(Set<String> resourceNames) {
+        recipeCrnListProviderService.validateRequestedRecipesExistsByName(resourceNames);
+    }
+
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
         return recipeCrnListProviderService.getResourceCrnListByResourceNameList(resourceNames);
