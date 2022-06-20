@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentViewRepository;
+import com.sequenceiq.cloudbreak.util.VersionNormalizer;
 
 @Service
 public class ClusterComponentConfigProvider {
@@ -76,7 +77,7 @@ public class ClusterComponentConfigProvider {
     public List<ClouderaManagerProduct> getClouderaManagerProductDetails(Long clusterId) {
         Set<ClusterComponentView> components = getComponentListByType(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
         return components.stream().map(component ->
-                retrieveFromAttribute(component, ClouderaManagerProduct.class))
+                        retrieveFromAttribute(component, ClouderaManagerProduct.class))
                 .collect(Collectors.toList());
     }
 
@@ -89,6 +90,15 @@ public class ClusterComponentConfigProvider {
                     .findAny();
         }
         return Optional.empty();
+    }
+
+    public Optional<ClouderaManagerProduct> getNormalizedCdhProductWithNormalizedVersion(Long clusterId) {
+        Optional<ClouderaManagerProduct> product = getCdhProduct(clusterId);
+        if (product.isPresent()) {
+            ClouderaManagerProduct prod = product.get();
+            prod.setVersion(VersionNormalizer.normalizeCdhVersion(prod.getVersion()));
+        }
+        return product;
     }
 
     public byte[] getSaltStateComponent(Long clusterId) {
