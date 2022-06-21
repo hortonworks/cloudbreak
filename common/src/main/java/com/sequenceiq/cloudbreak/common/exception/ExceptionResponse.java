@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.common.exception;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ExceptionResponse {
 
     private final String message;
@@ -11,7 +14,8 @@ public class ExceptionResponse {
         this.payload = null;
     }
 
-    public ExceptionResponse(String message, Object payload) {
+    @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+    public ExceptionResponse(@JsonProperty("message") String message, @JsonProperty("payload") Object payload) {
         this.message = message;
         this.payload = payload;
     }

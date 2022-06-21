@@ -2,16 +2,23 @@ package com.sequenceiq.freeipa.service.recipe;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import javax.ws.rs.NotFoundException;
+import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -25,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.recipe.RecipeCrnListProviderService;
@@ -65,8 +73,8 @@ class FreeIpaRecipeServiceTest {
         recipe2Request.setName("recipe2");
         recipe2Request.setType(RecipeV4Type.PRE_TERMINATION);
         recipe2Request.setContent("YmFzaDI=");
-        when(recipeV4Endpoint.getRequest(0L, "recipe1")).thenReturn(recipe1Request);
-        when(recipeV4Endpoint.getRequest(0L, "recipe2")).thenReturn(recipe2Request);
+        ArgumentCaptor<Set<String>> recipeSet = ArgumentCaptor.forClass(Set.class);
+        when(recipeV4Endpoint.getRequestsByNames(anyLong(), recipeSet.capture())).thenReturn(Set.of(recipe1Request, recipe2Request));
         List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"), new FreeIpaStackRecipe(1L, "recipe2"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
@@ -76,6 +84,7 @@ class FreeIpaRecipeServiceTest {
         Assertions.assertEquals(RecipeType.PRE_TERMINATION, recipeModel2.getRecipeType());
         Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
         Assertions.assertEquals("bash2", recipeModel2.getGeneratedScript());
+        assertThat(recipeSet.getValue()).containsExactlyInAnyOrder("recipe1", "recipe2");
     }
 
     @Test
@@ -88,12 +97,33 @@ class FreeIpaRecipeServiceTest {
         recipe2Request.setName("recipe2");
         recipe2Request.setType(RecipeV4Type.PRE_TERMINATION);
         recipe2Request.setContent("YmFzaDI=");
-        when(recipeV4Endpoint.getRequest(0L, "recipe2")).thenThrow(new NotFoundException("recipe not found"));
+        NotFoundException notFoundException = mock(NotFoundException.class);
+        Response response = mock(Response.class);
+        when(response.readEntity(ExceptionResponse.class)).thenReturn(new ExceptionResponse("recipe2 not found"));
+        when(notFoundException.getResponse()).thenReturn(response);
+        when(recipeV4Endpoint.getRequestsByNames(eq(0L), anySet())).thenThrow(notFoundException);
         List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"), new FreeIpaStackRecipe(1L, "recipe2"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
         CloudbreakServiceException cloudbreakServiceException = Assertions.assertThrows(CloudbreakServiceException.class,
                 () -> freeIpaRecipeService.getRecipes(1L));
-        assertEquals("recipe2 recipe is missing", cloudbreakServiceException.getMessage());
+        assertEquals("Missing recipe(s): recipe2 not found", cloudbreakServiceException.getMessage());
+    }
+
+    @Test
+    public void testGetRecipesButNoRecipeForFreeipa() {
+        RecipeV4Request recipe1Request = new RecipeV4Request();
+        recipe1Request.setName("recipe1");
+        recipe1Request.setType(RecipeV4Type.PRE_CLOUDERA_MANAGER_START);
+        recipe1Request.setContent("YmFzaDE=");
+        RecipeV4Request recipe2Request = new RecipeV4Request();
+        recipe2Request.setName("recipe2");
+        recipe2Request.setType(RecipeV4Type.PRE_TERMINATION);
+        recipe2Request.setContent("YmFzaDI=");
+        List<FreeIpaStackRecipe> freeIpaStackRecipes = Collections.emptyList();
+        when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
+        List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
+        assertThat(recipes).isEmpty();
+        verify(recipeV4Endpoint, times(0)).getRequestsByNames(any(), anySet());
     }
 
     @Test
