@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.termination.handler;
 
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -10,11 +11,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -27,6 +30,7 @@ import com.sequenceiq.freeipa.flow.stack.termination.event.recipes.ExecutePreTer
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
+import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -48,6 +52,9 @@ public class ExecutePreTerminationRecipesHandler extends ExceptionCatcherEventHa
     @Inject
     private StackService stackService;
 
+    @Inject
+    private FreeIpaRecipeService freeIpaRecipeService;
+
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ExecutePreTerminationRecipesRequest> event) {
         return new StackFailureEvent(StackTerminationEvent.TERMINATION_FAILED_EVENT.event(), resourceId, e);
@@ -58,12 +65,24 @@ public class ExecutePreTerminationRecipesHandler extends ExceptionCatcherEventHa
         ExecutePreTerminationRecipesRequest request = event.getData();
         Long stackId = request.getResourceId();
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-            Set<InstanceMetaData> instanceMetaDatas = stack.getNotDeletedInstanceMetaDataSet();
-            Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDatas);
-            LOGGER.info("Executing pre-termination recipes");
-            hostOrchestrator.preTerminationRecipes(primaryGatewayConfig, allNodes, StackBasedExitCriteriaModel.nonCancellableModel(), request.getForced());
+            Set<RecipeModel> preTerminationRecipes = freeIpaRecipeService.getRecipes(stackId).stream()
+                    .filter(recipeModel -> RecipeType.PRE_TERMINATION.equals(recipeModel.getRecipeType()))
+                    .collect(Collectors.toSet());
+            if (!preTerminationRecipes.isEmpty()) {
+                Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+                GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+                Set<InstanceMetaData> instanceMetaDatas = stack.getNotDeletedInstanceMetaDataSet();
+                if (runPreTerminationRecipesIfAnyNodeAvailable(instanceMetaDatas)) {
+                    Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDatas);
+                    LOGGER.info("Executing pre-termination recipes");
+                    hostOrchestrator.preTerminationRecipes(primaryGatewayConfig, allNodes,
+                            StackBasedExitCriteriaModel.nonCancellableModel(), request.getForced());
+                } else {
+                    LOGGER.info("Every instances in deleted state");
+                }
+            } else {
+                LOGGER.info("We have no pre-termination recipes for this cluster");
+            }
         } catch (CloudbreakOrchestratorFailedException e) {
             LOGGER.error("Pre-termination recipe execution failed", e);
             return new StackFailureEvent(EventSelectorUtil.failureSelector(TerminateStackResult.class), stackId, e);
@@ -72,6 +91,10 @@ public class ExecutePreTerminationRecipesHandler extends ExceptionCatcherEventHa
             return new StackFailureEvent(EventSelectorUtil.failureSelector(TerminateStackResult.class), stackId, e);
         }
         return new ExecutePreTerminationRecipesFinished(stackId, request.getForced());
+    }
+
+    private boolean runPreTerminationRecipesIfAnyNodeAvailable(Set<InstanceMetaData> instanceMetaDatas) {
+        return !instanceMetaDatas.isEmpty();
     }
 
     @Override

@@ -110,6 +110,7 @@ public class OperationDescriptions {
 
     public static class RecipeOpDescription {
         public static final String GET_REQUEST_BY_NAME = "retrieve recipe request by recipe name";
+        public static final String GET_REQUESTS_BY_NAMES = "retrieve recipes request by recipe names";
         public static final String LIST_BY_WORKSPACE = "list recipes for the given workspace";
         public static final String LIST_BY_WORKSPACE_INTERNAL = "list recipes for the given workspace internal";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get recipe by name in workspace";
