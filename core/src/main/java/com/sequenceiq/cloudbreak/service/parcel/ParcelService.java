@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -127,6 +128,7 @@ public class ParcelService {
     private Set<ClusterComponent> getComponentsByRequiredProducts(Map<String, ClusterComponent> cmProductMap, Set<ClouderaManagerProduct> cmProducts) {
         return cmProducts.stream()
                 .map(cmp -> cmProductMap.get(cmp.getName()))
+                .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
     }
 }
