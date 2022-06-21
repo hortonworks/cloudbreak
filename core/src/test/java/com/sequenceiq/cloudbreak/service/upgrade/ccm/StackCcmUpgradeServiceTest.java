@@ -78,7 +78,7 @@ class StackCcmUpgradeServiceTest {
     private StackCcmUpgradeService underTest;
 
     @ParameterizedTest
-    @EnumSource(value = Tunnel.class, names = { "CCM", "CCMV2" }, mode = Mode.INCLUDE)
+    @EnumSource(value = Tunnel.class, names = {"CCM", "CCMV2"}, mode = Mode.INCLUDE)
     void testUpgradeCcm(Tunnel tunnel) {
         Stack stack = createStack(tunnel, Status.AVAILABLE);
         DetailedEnvironmentResponse environment = createEnvironment(Tunnel.latestUpgradeTarget());
@@ -136,7 +136,7 @@ class StackCcmUpgradeServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = Status.class, names = { "AVAILABLE", "MAINTENANCE_MODE_ENABLED", "UPGRADE_CCM_FAILED" }, mode = Mode.EXCLUDE)
+    @EnumSource(value = Status.class, names = {"AVAILABLE", "MAINTENANCE_MODE_ENABLED", "UPGRADE_CCM_FAILED"}, mode = Mode.EXCLUDE)
     void testStackUnavailable(Status status) {
         Stack stack = createStack(Tunnel.CCM, status);
         DetailedEnvironmentResponse environment = createEnvironment(Tunnel.latestUpgradeTarget());
@@ -155,7 +155,7 @@ class StackCcmUpgradeServiceTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = Tunnel.class, names = { "CCM", "CCMV2", "CCMV2_JUMPGATE" }, mode = Mode.EXCLUDE)
+    @EnumSource(value = Tunnel.class, names = {"CCM", "CCMV2", "CCMV2_JUMPGATE"}, mode = Mode.EXCLUDE)
     void testWrongOldTunnel(Tunnel tunnel) {
         Stack stack = createStack(tunnel, Status.AVAILABLE);
         DetailedEnvironmentResponse environment = createEnvironment(Tunnel.latestUpgradeTarget());

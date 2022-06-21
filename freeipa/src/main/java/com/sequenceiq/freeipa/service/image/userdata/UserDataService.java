@@ -79,7 +79,9 @@ public class UserDataService {
     public void updateJumpgateFlagOnly(Long stackId) {
         LOGGER.debug("Updating Jumpgate flag in user data for stack {}", stackId);
         ImageEntity image = imageService.getByStackId(stackId);
-        image.setUserdata(image.getUserdata().replace("IS_CCM_V2_JUMPGATE_ENABLED=false", "IS_CCM_V2_JUMPGATE_ENABLED=true"));
+        image.setUserdata(image.getUserdata().replace("IS_CCM_ENABLED=true", "IS_CCM_ENABLED=false")
+                .replace("IS_CCM_V2_ENABLED=false", "IS_CCM_V2_ENABLED=true")
+                .replace("IS_CCM_V2_JUMPGATE_ENABLED=false", "IS_CCM_V2_JUMPGATE_ENABLED=true"));
         imageService.save(image);
     }
 
