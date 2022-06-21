@@ -165,4 +165,12 @@ public class RecipesV4Controller extends NotificationController implements Recip
         Recipe recipe = recipeService.getByNameForWorkspaceId(name, restRequestThreadLocalService.getRequestedWorkspaceId());
         return recipeToRecipeV4RequestConverter.convert(recipe);
     }
+
+    @Override
+    @CheckPermissionByResourceNameList(action = AuthorizationResourceAction.DESCRIBE_RECIPE)
+    public Set<RecipeV4Request> getRequestsByNames(Long workspaceId, @ResourceNameList Set<String> names) {
+        Set<Recipe> recipes = recipeService.getByNamesForWorkspaceId(names, restRequestThreadLocalService.getRequestedWorkspaceId());
+        return recipes.stream().map(recipe -> recipeToRecipeV4RequestConverter.convert(recipe)).collect(Collectors.toSet());
+    }
+
 }

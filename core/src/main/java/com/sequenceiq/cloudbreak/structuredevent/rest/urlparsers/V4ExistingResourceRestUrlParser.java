@@ -21,6 +21,7 @@ public class V4ExistingResourceRestUrlParser extends LegacyRestUrlParser {
     // Irregular GET requests with event but no resource name: v4/{workspaceId}/audits/zip and remaining patterns
     private static final Pattern ANTI_PATTERN = Pattern.compile(
             "v4/\\d+/(audits/.*"
+            + "|recipes/names"
             + "|blueprints/recommendation"
             + "|blueprints_util/.*"
             + "|image_catalogs/image(s\\b|\\b)"

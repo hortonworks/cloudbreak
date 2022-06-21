@@ -112,4 +112,11 @@ public interface RecipeV4Endpoint {
     @ApiOperation(value = RecipeOpDescription.GET_REQUEST_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.RECIPE_NOTES,
             nickname = "getRecipeRequestFromNameInWorkspace")
     RecipeV4Request getRequest(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name);
+
+    @GET
+    @Path("names")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RecipeOpDescription.GET_REQUESTS_BY_NAMES, produces = MediaType.APPLICATION_JSON, notes = Notes.RECIPE_NOTES,
+            nickname = "getRecipeRequestsFromNamesInWorkspace")
+    Set<RecipeV4Request> getRequestsByNames(@PathParam("workspaceId") Long workspaceId, @NotNull @QueryParam("names") Set<String> names);
 }
