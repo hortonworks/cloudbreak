@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image.userdata;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -17,8 +18,10 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.service.GetCloudParameterException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -59,6 +62,25 @@ public class UserDataService {
 
     @Inject
     private CcmUserDataService ccmUserDataService;
+
+    public void updateJumpgateFlagOnly(Long stackId) {
+        LOGGER.debug("Updating Jumpgate flag in user data for stack {}", stackId);
+        try {
+            Image image = imageService.getImage(stackId);
+            Map<InstanceGroupType, String> userdata = new HashMap<>(image.getUserdata());
+            String gatewayUserdata = userdata.get(InstanceGroupType.GATEWAY);
+            String result = gatewayUserdata.replace("IS_CCM_V2_JUMPGATE_ENABLED=false", "IS_CCM_V2_JUMPGATE_ENABLED=true")
+                    .replace("IS_CCM_V2_ENABLED=false", "IS_CCM_V2_ENABLED=true")
+                    .replace("IS_CCM_ENABLED=true", "IS_CCM_ENABLED=false");
+            userdata.put(InstanceGroupType.GATEWAY, result);
+            Stack stack = stackService.getByIdWithLists(stackId);
+            imageService.decorateImageWithUserDataForStack(stack, userdata);
+        } catch (CloudbreakImageNotFoundException e) {
+            String message = "Image not found for update jumpgate";
+            LOGGER.error(message);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
 
     public void createUserData(Long stackId) throws CloudbreakImageNotFoundException {
         Stack stack = stackService.getByIdWithLists(stackId);

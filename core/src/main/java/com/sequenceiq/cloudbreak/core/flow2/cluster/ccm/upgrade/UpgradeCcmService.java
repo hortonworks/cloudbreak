@@ -116,7 +116,7 @@ public class UpgradeCcmService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_DEREGISTER_AGENT);
     }
 
-    void ccmUpgradeFinished(Long stackId, Long clusterId) {
+    public void ccmUpgradeFinished(Long stackId, Long clusterId) {
         String statusReason = "CCM upgrade finished";
         LOGGER.debug(statusReason);
         InMemoryStateStore.deleteStack(stackId);
@@ -125,7 +125,7 @@ public class UpgradeCcmService {
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_FINISHED);
     }
 
-    void ccmUpgradeFailed(Long stackId, Long clusterId, Tunnel oldTunnel) {
+    public void ccmUpgradeFailed(Long stackId, Long clusterId, Tunnel oldTunnel) {
         String statusReason = "CCM upgrade failed";
         LOGGER.debug(statusReason);
         InMemoryStateStore.deleteStack(stackId);
