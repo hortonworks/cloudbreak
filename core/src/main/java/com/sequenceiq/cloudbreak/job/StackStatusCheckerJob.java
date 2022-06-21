@@ -277,7 +277,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         LOGGER.info("Updating status: Failed instances: {} New failed node names: {} New healthy host name: {} Host cert expiring: {}",
                 failedInstances, newFailedNodeNamesWithReason.keySet(), newHealthyHostNames, hostCertExpiring);
         clusterService.updateClusterCertExpirationState(stack.getCluster(), hostCertExpiring);
-        clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNamesWithReason, newHealthyHostNames);
         if (!failedInstances.isEmpty()) {
             if (stackUtil.stopStartScalingEntitlementEnabled(stack)) {
                 Set<InstanceMetaData> stoppedInstances = failedInstances.stream().filter(im -> im.getInstanceStatus().equals(STOPPED)).collect(toSet());
@@ -299,6 +298,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         } else if (statesFromAvailableAllowed().contains(stack.getStatus())) {
             clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE);
         }
+        clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNamesWithReason, newHealthyHostNames);
     }
 
     private void ifFlowNotRunning(Runnable function) {
