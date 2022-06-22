@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -62,6 +64,9 @@ public class ClusterTerminationService {
     @Inject
     private CmCloudStorageConfigProvider cmCloudStorageConfigProvider;
 
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
     public void finalizeClusterTermination(Long clusterId, boolean force) throws TransactionExecutionException {
         Cluster cluster = clusterService.findOneWithLists(clusterId)
                 .orElseThrow(NotFoundException.notFound("cluster", clusterId));
@@ -82,8 +87,18 @@ public class ClusterTerminationService {
             deleteClusterHostGroupsWithItsMetadata(cluster);
             rdsConfigService.deleteDefaultRdsConfigs(rdsConfigs);
             componentConfigProviderService.deleteComponentsForStack(stackId);
+            deleteClusterComponentAndItsAudits(cluster.getComponents(), clusterId);
             return null;
         });
+    }
+
+    private void  deleteClusterComponentAndItsAudits(Set<ClusterComponent> componentsToDelete, Long clusterId) {
+        LOGGER.debug("About to clean up the following ClusterComponents for cluster [id: {}] {}", componentsToDelete, clusterId);
+        clusterComponentConfigProvider.deleteClusterComponents(componentsToDelete);
+        LOGGER.debug("ClusterComponent cleanup has finished.");
+        LOGGER.debug("About to clean up ClusterComponent history for cluster [id: {}]", clusterId);
+        clusterComponentConfigProvider.cleanUpAudit(clusterId);
+        LOGGER.debug("ClusterComponent history cleanup has finished.");
     }
 
     private void deleteClusterHostGroupsWithItsMetadata(Cluster cluster) {

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
+import com.sequenceiq.cloudbreak.repository.ClusterComponentHistoryRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterComponentViewRepository;
 import com.sequenceiq.cloudbreak.util.VersionNormalizer;
@@ -43,6 +44,9 @@ public class ClusterComponentConfigProvider {
 
     @Inject
     private ClusterComponentViewRepository componentViewRepository;
+
+    @Inject
+    private ClusterComponentHistoryRepository clusterComponentHistoryRepository;
 
     @Inject
     private AuditReader auditReader;
@@ -162,6 +166,10 @@ public class ClusterComponentConfigProvider {
         return ret;
     }
 
+    public void cleanUpAudit(Long clusterId) {
+        clusterComponentHistoryRepository.deleteAll(clusterComponentHistoryRepository.findComponentByClusterId(clusterId));
+    }
+
     public void restorePreviousVersion(ClusterComponent clusterComponent) {
         LOGGER.info("Trying to revert to previous version for {}", clusterComponent);
         try {
@@ -189,6 +197,8 @@ public class ClusterComponentConfigProvider {
             LOGGER.debug("Components are going to be deleted: {}", components);
             componentRepository.deleteAll(components);
             LOGGER.debug("Components have been deleted: {}", components);
+        } else {
+            LOGGER.debug("No cluster components have provided for deletion.");
         }
     }
 
