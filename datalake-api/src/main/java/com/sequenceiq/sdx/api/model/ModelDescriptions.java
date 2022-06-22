@@ -170,6 +170,10 @@ public class ModelDescriptions {
 
     public static final String VOLUME_MAXIMUM_NUMBER = "Volume maximum number";
 
+    public static final String STOPPABLE = "Whether the cluster is stoppable or not";
+
+    public static final String UNSTOPPABLE_REASON = "Reason why the cluster is not stoppable";
+
     private ModelDescriptions() {
     }
 }

@@ -20,6 +20,7 @@ import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 
 @Service
 public class SdxService implements PaasRemoteDataContextSupplier {
@@ -87,6 +88,22 @@ public class SdxService implements PaasRemoteDataContextSupplier {
         }
     }
 
+    public SdxStopValidationResponse isStoppable(String crn) {
+        try {
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () -> sdxEndpoint.isStoppableInternal(crn, initiatorUserCrn)
+            );
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.warn(String.format(
+                    "Failed to check if SDX cluster with crn '%s' has unstoppable flow due to '%s'.", crn, errorMessage
+            ), e);
+            throw new SdxOperationFailedException(errorMessage, e);
+        }
+    }
+
     public SdxCcmUpgradeResponse upgradeCcm(String environmentCrn) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
@@ -109,7 +126,6 @@ public class SdxService implements PaasRemoteDataContextSupplier {
             LOGGER.error(String.format("Failed to get Operation for datalake CRN '%s' due to '%s'.", datalakeCrn, errorMessage), e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
-
     }
 
     @Override

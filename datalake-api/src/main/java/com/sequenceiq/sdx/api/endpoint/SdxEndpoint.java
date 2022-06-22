@@ -45,6 +45,7 @@ import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
@@ -317,4 +318,10 @@ public interface SdxEndpoint {
             @NotNull(message = "The 'cloudPlatform' query parameter must be specified.") @QueryParam("cloudPlatform") String cloudPlatform,
             @NotNull(message = "The 'region' query parameter must be specified.") @QueryParam("region") String region,
             @QueryParam("availabilityZone") String availabilityZone);
+
+    @GET
+    @Path("crn/{crn}/internal/stoppable")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Determines if the datalake can be stopped", nickname = "isStoppable")
+    SdxStopValidationResponse isStoppableInternal(@PathParam("crn") String crn, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

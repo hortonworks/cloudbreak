@@ -6,6 +6,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
@@ -71,6 +73,7 @@ import com.sequenceiq.sdx.api.model.SdxDefaultTemplateResponse;
 import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxRecommendationResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
+import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
@@ -428,6 +431,14 @@ public class SdxController implements SdxEndpoint {
     public SdxRecommendationResponse getRecommendation(@ResourceCrn String credentialCrn, SdxClusterShape clusterShape, String runtimeVersion,
             String cloudPlatform, String region, String availabilityZone) {
         return sdxRecommendationService.getRecommendation(credentialCrn, clusterShape, runtimeVersion, cloudPlatform, region, availabilityZone);
+    }
+
+    @Override
+    @InternalOnly
+    public SdxStopValidationResponse isStoppableInternal(@TenantAwareParam String crn, @InitiatorUserCrn String initiatorUserCrn) {
+        SdxCluster sdxCluster = sdxService.getByCrn(initiatorUserCrn, crn);
+        Optional<String> unstoppableReason = sdxStopService.checkIfStoppable(sdxCluster);
+        return new SdxStopValidationResponse(unstoppableReason.isEmpty(), unstoppableReason.orElse(null));
     }
 
     private SdxCluster getSdxClusterByName(String name) {
