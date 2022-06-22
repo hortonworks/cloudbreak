@@ -174,7 +174,7 @@ public class UpgradeCcmActions {
                 UpgradeCcmFailedEvent concretePayload = (UpgradeCcmFailedEvent) payload;
                 upgradeCcmService.ccmUpgradeFailed(concretePayload.getResourceId(),
                         Optional.ofNullable(context.getStackView().getClusterView()).map(ClusterView::getId).orElse(null),
-                        concretePayload.getOldTunnel());
+                        concretePayload.getOldTunnel(), concretePayload.getFailureOrigin());
                 sendEvent(context);
             }
 

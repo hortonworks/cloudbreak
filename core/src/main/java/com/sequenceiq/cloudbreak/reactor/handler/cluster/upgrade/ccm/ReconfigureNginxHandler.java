@@ -34,7 +34,7 @@ public class ReconfigureNginxHandler extends ExceptionCatcherEventHandler<Upgrad
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmReconfigureNginxRequest> event) {
         LOGGER.error("Reconfiguring NGINX for CCM upgrade has failed", e);
-        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), e);
+        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), getClass(), e);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class ReconfigureNginxHandler extends ExceptionCatcherEventHandler<Upgrad
             upgradeCcmService.reconfigureNginx(stackId);
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.debug("Failed reconfiguring NGINX with salt state");
-            return new UpgradeCcmFailedEvent(stackId, request.getOldTunnel(), e);
+            return new UpgradeCcmFailedEvent(stackId, request.getOldTunnel(), getClass(), e);
         }
         return new UpgradeCcmReconfigureNginxResult(stackId, request.getClusterId(), request.getOldTunnel());
     }

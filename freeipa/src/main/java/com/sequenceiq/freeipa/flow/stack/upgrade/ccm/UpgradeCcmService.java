@@ -211,6 +211,7 @@ public class UpgradeCcmService {
     public void failedState(UpgradeCcmContext context, UpgradeCcmFailureEvent payload) {
         InMemoryStateStore.deleteStack(payload.getResourceId());
         DetailedStackStatus detailedStatus = payload.getTransitionStatusAfterFailure().orElse(UPGRADE_CCM_FAILED);
+        stackService.setTunnelByStackId(payload.getResourceId(), payload.getOldTunnel());
         String statusReason = "Upgrade CCM failed";
         stackUpdater.updateStackStatus(payload.getResourceId(), detailedStatus, statusReason);
     }

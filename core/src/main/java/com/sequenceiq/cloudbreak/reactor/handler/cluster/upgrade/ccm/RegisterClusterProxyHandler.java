@@ -33,7 +33,7 @@ public class RegisterClusterProxyHandler extends ExceptionCatcherEventHandler<Up
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmRegisterClusterProxyRequest> event) {
         LOGGER.error("Registering cluster proxy for CCM upgrade has failed", e);
-        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), e);
+        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), getClass(), e);
     }
 
     @Override

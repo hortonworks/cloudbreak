@@ -34,7 +34,7 @@ public class RemoveAgentHandler extends ExceptionCatcherEventHandler<UpgradeCcmR
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmRemoveAgentRequest> event) {
         LOGGER.error("Removing agent for CCM upgrade has failed", e);
-        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), e);
+        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), getClass(), e);
     }
 
     @Override
@@ -46,7 +46,7 @@ public class RemoveAgentHandler extends ExceptionCatcherEventHandler<UpgradeCcmR
             upgradeCcmService.removeAgent(stackId, request.getOldTunnel());
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.debug("Failed removing agent with a salt state");
-            return new UpgradeCcmFailedEvent(stackId, request.getOldTunnel(), e);
+            return new UpgradeCcmFailedEvent(stackId, request.getOldTunnel(), getClass(), e);
         }
         return new UpgradeCcmRemoveAgentResult(stackId, request.getClusterId(), request.getOldTunnel());
     }

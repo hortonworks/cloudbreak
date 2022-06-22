@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_EVENT;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -145,7 +147,7 @@ class UpgradeCcmFlowIntegrationTest {
         inOrder.verify(upgradeCcmService, times(1)).healthCheck(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).removeAgent(STACK_ID, Tunnel.CCM);
         inOrder.verify(upgradeCcmService, times(1)).deregisterAgent(STACK_ID, Tunnel.CCM);
-        verify(upgradeCcmService, never()).ccmUpgradeFailed(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        verify(upgradeCcmService, never()).ccmUpgradeFailed(eq(STACK_ID), eq(CLUSTER_ID), eq(Tunnel.CCM), any());
     }
 
     @Test
@@ -160,7 +162,7 @@ class UpgradeCcmFlowIntegrationTest {
         Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
         InOrder inOrder = Mockito.inOrder(upgradeCcmService);
         inOrder.verify(upgradeCcmService, times(1)).updateTunnel(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID, CLUSTER_ID, Tunnel.CCM, TunnelUpdateHandler.class);
         verify(upgradeCcmService, never()).pushSaltState(STACK_ID, CLUSTER_ID);
         verify(upgradeCcmService, never()).reconfigureNginx(STACK_ID);
         verify(upgradeCcmService, never()).registerClusterProxy(STACK_ID);
@@ -184,7 +186,7 @@ class UpgradeCcmFlowIntegrationTest {
         inOrder.verify(upgradeCcmService, times(1)).pushSaltState(STACK_ID, CLUSTER_ID);
         inOrder.verify(upgradeCcmService, times(1)).reconfigureNginx(STACK_ID);
         inOrder.verify(upgradeCcmService, times(1)).registerClusterProxy(STACK_ID);
-        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID, CLUSTER_ID, Tunnel.CCM);
+        inOrder.verify(upgradeCcmService, times(1)).ccmUpgradeFailed(STACK_ID, CLUSTER_ID, Tunnel.CCM, RegisterClusterProxyHandler.class);
         verify(upgradeCcmService, never()).healthCheckState(STACK_ID);
         verify(upgradeCcmService, never()).deregisterAgent(STACK_ID, Tunnel.CCM);
         verify(upgradeCcmService, never()).removeAgent(STACK_ID, Tunnel.CCM);

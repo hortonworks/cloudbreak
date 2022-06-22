@@ -34,7 +34,7 @@ public class UpgradeCcmHealthCheckHandler extends AbstractUpgradeCcmEventHandler
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Health check for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId, e);
+        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId, event.getData().getOldTunnel(), getClass(), e);
     }
 
     @Override

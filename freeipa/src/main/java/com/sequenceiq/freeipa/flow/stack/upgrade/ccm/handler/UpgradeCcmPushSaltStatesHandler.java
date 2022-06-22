@@ -35,7 +35,7 @@ public class UpgradeCcmPushSaltStatesHandler extends AbstractUpgradeCcmEventHand
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Pushing salt states for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId, e);
+        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId, event.getData().getOldTunnel(), getClass(), e);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class UpgradeCcmPushSaltStatesHandler extends AbstractUpgradeCcmEventHand
                 upgradeCcmService.pushSaltStates(request.getResourceId());
             } catch (CloudbreakOrchestratorException e) {
                 LOGGER.debug("Failed pushing salt states");
-                return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), request.getResourceId(), e);
+                return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), request.getResourceId(), event.getData().getOldTunnel(), getClass(), e);
             }
         } else {
             LOGGER.info("Pushing salt states step is skipped for previous tunnel type '{}'", request.getOldTunnel());
