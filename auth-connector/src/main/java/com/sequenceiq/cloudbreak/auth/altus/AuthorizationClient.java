@@ -11,6 +11,7 @@ import org.springframework.util.StringUtils;
 import com.cloudera.thunderhead.service.authorization.AuthorizationGrpc;
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
+import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
@@ -84,6 +85,9 @@ public class AuthorizationClient {
             if (Status.Code.DEADLINE_EXCEEDED.equals(statusRuntimeException.getStatus().getCode())) {
                 LOGGER.error("Deadline exceeded for hasRights {} for actor {} and rights {}", actorCrn, rightChecks, statusRuntimeException);
                 throw new CloudbreakServiceException("Authorization failed due to user management service call timed out.");
+            } else if (Status.Code.NOT_FOUND.equals(statusRuntimeException.getStatus().getCode())) {
+                LOGGER.error("NOT_FOUND for hasRights for actor {} and rights {}, cause: {}", actorCrn, rightChecks, statusRuntimeException);
+                throw new UnauthorizedException("Authorization failed for user: " + actorCrn);
             } else {
                 LOGGER.error("Status runtime exception while checking hasRights {} for actor {} and rights {}", actorCrn, rightChecks, statusRuntimeException);
                 throw new CloudbreakServiceException("Authorization failed due to user management service call failed.");
