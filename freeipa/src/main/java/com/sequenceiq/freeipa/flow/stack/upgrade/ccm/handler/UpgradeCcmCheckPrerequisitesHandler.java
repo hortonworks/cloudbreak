@@ -37,7 +37,8 @@ public class UpgradeCcmCheckPrerequisitesHandler extends AbstractUpgradeCcmEvent
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmEvent> event) {
         LOGGER.error("Checking prerequisites for CCM upgrade has failed", e);
-        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId, e, Optional.of(DetailedStackStatus.AVAILABLE));
+        return new UpgradeCcmFailureEvent(UPGRADE_CCM_FAILED_EVENT.event(), resourceId,
+                event.getData().getOldTunnel(), getClass(), e, Optional.of(DetailedStackStatus.AVAILABLE));
     }
 
     @Override

@@ -33,7 +33,7 @@ public class PushSaltStateHandler extends ExceptionCatcherEventHandler<UpgradeCc
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmPushSaltStatesRequest> event) {
         LOGGER.error("Pushing salt states for CCM upgrade has failed", e);
-        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), e);
+        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), getClass(), e);
     }
 
     @Override

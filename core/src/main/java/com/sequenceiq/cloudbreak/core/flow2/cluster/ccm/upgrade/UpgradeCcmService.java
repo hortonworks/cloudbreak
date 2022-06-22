@@ -29,11 +29,13 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.AbstractUpgradeCcmEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.HealthCheckService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.UpgradeCcmOrchestratorService;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
 @Service
 public class UpgradeCcmService {
@@ -125,11 +127,14 @@ public class UpgradeCcmService {
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_FINISHED);
     }
 
-    public void ccmUpgradeFailed(Long stackId, Long clusterId, Tunnel oldTunnel) {
+    public void ccmUpgradeFailed(Long stackId, Long clusterId, Tunnel oldTunnel,
+            Class<? extends ExceptionCatcherEventHandler<? extends AbstractUpgradeCcmEvent>> failureOrigin) {
+
         String statusReason = "CCM upgrade failed";
         LOGGER.debug(statusReason);
         InMemoryStateStore.deleteStack(stackId);
         InMemoryStateStore.deleteCluster(clusterId);
+        stackService.setTunnelByStackId(stackId, oldTunnel);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CCM_UPGRADE_FAILED, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CCM_UPGRADE_FAILED);
     }

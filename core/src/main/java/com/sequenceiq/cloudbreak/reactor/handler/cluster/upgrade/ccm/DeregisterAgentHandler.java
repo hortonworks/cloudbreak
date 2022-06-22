@@ -33,7 +33,7 @@ public class DeregisterAgentHandler extends ExceptionCatcherEventHandler<Upgrade
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<UpgradeCcmDeregisterAgentRequest> event) {
         LOGGER.error("Deregistering agent for CCM upgrade has failed", e);
-        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), e);
+        return new UpgradeCcmFailedEvent(resourceId, event.getData().getOldTunnel(), getClass(), e);
     }
 
     @Override
