@@ -146,7 +146,7 @@ public class ResizeRecoveryService implements RecoveryService {
 
     private SdxRecoverableResponse validateRecoveryResizedClusterPresent(SdxCluster sdxCluster, DatalakeStatusEnum status, String statusReason) {
         if (FAILURE_STATES.contains(status)) {
-            return new SdxRecoverableResponse("Resized data lake is in failed state. Recovery will restart original data lake, " +
+            return new SdxRecoverableResponse("Resized data lake is in a failed state. Recovery will restart the original data lake, " +
                     "and delete the new one", RecoveryStatus.RECOVERABLE);
         } else if (RUNNING.equals(status) && statusReason.contains("Datalake restore failed")) {
             return new SdxRecoverableResponse(

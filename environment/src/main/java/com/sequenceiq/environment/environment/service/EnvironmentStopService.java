@@ -15,7 +15,10 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDt
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.service.sdx.SdxService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
 
 @Service
 public class EnvironmentStopService {
@@ -24,10 +27,13 @@ public class EnvironmentStopService {
 
     private final EnvironmentService environmentService;
 
+    private final SdxService sdxService;
+
     public EnvironmentStopService(EnvironmentReactorFlowManager reactorFlowManager,
-            EnvironmentService environmentService) {
+            EnvironmentService environmentService, SdxService sdxService) {
         this.reactorFlowManager = reactorFlowManager;
         this.environmentService = environmentService;
+        this.sdxService = sdxService;
     }
 
     public FlowIdentifier stopByCrn(String crn) {
@@ -52,6 +58,7 @@ public class EnvironmentStopService {
     private void validateStoppable(EnvironmentDto environment, String accountId) {
         validateNoChildEnvironmentIsRunning(environment, accountId);
         validaFreeIpaIsNotRunningOnSpotInstances(environment);
+        validateAttachedSDXClustersCanBeStopped(environment);
     }
 
     private void validateNoChildEnvironmentIsRunning(EnvironmentDto environment, String accountId) {
@@ -78,6 +85,20 @@ public class EnvironmentStopService {
         if (freeIpaSpotPercentage != 0) {
             String message = String.format("Environment [%s] can not be stopped because FreeIpa is running on spot instances.", environment.getName());
             throw new BadRequestException(message);
+        }
+    }
+
+    private void validateAttachedSDXClustersCanBeStopped(EnvironmentDto environment) {
+        List<SdxClusterResponse> attachedSdxClusters = sdxService.list(environment.getName());
+        for (SdxClusterResponse response : attachedSdxClusters) {
+            SdxStopValidationResponse sdxStopValidationResponse = sdxService.isStoppable(response.getCrn());
+            if (!sdxStopValidationResponse.isStoppable()) {
+                String message = String.format(
+                        "Environment [%s] can not be stopped because: [%s].",
+                        environment.getName(), sdxStopValidationResponse.getUnstoppableReason()
+                );
+                throw new BadRequestException(message);
+            }
         }
     }
 }
