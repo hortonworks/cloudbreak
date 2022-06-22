@@ -1,10 +1,10 @@
 package com.sequenceiq.datalake.service.resize.recovery;
 
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STOPPED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.STOP_FAILED;
 import static com.sequenceiq.datalake.service.resize.recovery.ResizeRecoveryService.FAILURE_STATES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -23,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -44,6 +43,9 @@ public class ResizeRecoveryServiceTest {
 
     @Mock
     private SdxCluster cluster;
+
+    @Mock
+    private SdxCluster otherCluster;
 
     @Mock
     private SdxStatusService sdxStatusService;
@@ -72,9 +74,11 @@ public class ResizeRecoveryServiceTest {
         request.setType(SdxRecoveryType.RECOVER_WITHOUT_DATA);
         lenient().when(sdxStatusService.getActualStatusForSdx(cluster)).thenReturn(sdxStatusEntity);
         lenient().when(entitlementService.isDatalakeResizeRecoveryEnabled(anyString())).thenReturn(true);
-        lenient().when(sdxReactorFlowManager.triggerSdxStartFlow(cluster))
-                .thenReturn(flowId);
-        lenient().when(cluster.getClusterName()).thenReturn("new");
+        lenient().when(sdxReactorFlowManager.triggerSdxResizeRecovery(any(), any())).thenReturn(flowId);
+        lenient().when(cluster.getId()).thenReturn(0L);
+        lenient().when(otherCluster.getId()).thenReturn(1L);
+        lenient().when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
+                .thenReturn(Optional.of(otherCluster));
         sdxStatusEntity.setStatusReason("");
     }
 
@@ -91,36 +95,25 @@ public class ResizeRecoveryServiceTest {
     }
 
     @Test
-    public void testStatusNullNoError() {
-        testGetClusterRecoverableForStatusNotRecoverable(null);
+    public void testStatusReasonNullNoError() {
+        sdxStatusEntity.setStatusReason(null);
+        testGetClusterRecoverableForStatusNotRecoverable(RUNNING);
     }
 
     @Test
     public void testRestoreFailedAndRunningRecoverable() {
-        SdxCluster old = new SdxCluster();
-        old.setClusterName("old");
-        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
-                .thenReturn(Optional.of(old));
         sdxStatusEntity.setStatusReason("Datalake is running, Datalake restore failed");
-        testGetClusterRecoverableForStatusRecoverable(DatalakeStatusEnum.RUNNING);
+        testGetClusterRecoverableForStatusRecoverable(RUNNING);
     }
 
     @Test
     public void testRestoreNotFailedAndRunningNotRecoverable() {
-        SdxCluster old = new SdxCluster();
-        old.setClusterName("old");
-        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
-                .thenReturn(Optional.of(old));
         sdxStatusEntity.setStatusReason("Datalake is running");
-        testGetClusterRecoverableForStatusNotRecoverable(DatalakeStatusEnum.RUNNING);
+        testGetClusterRecoverableForStatusNotRecoverable(RUNNING);
     }
 
     @Test
     public void testKnownNonRecoverableStates() {
-        SdxCluster old = new SdxCluster();
-        old.setClusterName("old");
-        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
-                .thenReturn(Optional.of(old));
         for (DatalakeStatusEnum datalakeStatusEnum : DatalakeStatusEnum.values()) {
             if (!FAILURE_STATES.contains(datalakeStatusEnum)) {
                 testGetClusterRecoverableForStatusNotRecoverable(datalakeStatusEnum);
@@ -130,32 +123,14 @@ public class ResizeRecoveryServiceTest {
 
     @Test
     public void testKnownRecoverableStates() {
-        SdxCluster old = new SdxCluster();
-        old.setClusterName("old");
-        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
-                .thenReturn(Optional.of(old));
         for (DatalakeStatusEnum datalakeStatusEnum : FAILURE_STATES) {
             testGetClusterRecoverableForStatusRecoverable(datalakeStatusEnum);
         }
     }
 
     @Test
-    public void testTriggerRecoveryShouldStartFlow() {
-        sdxStatusEntity.setStatus(STOP_FAILED);
-
-        SdxRecoveryResponse sdxRecoveryResponse =
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(cluster, request));
-
-        verify(sdxReactorFlowManager).triggerSdxStartFlow(cluster);
-        assertEquals(flowId, sdxRecoveryResponse.getFlowIdentifier());
-
-    }
-
-    @Test
     public void testNoEntitlementValidate() {
         when(entitlementService.isDatalakeResizeRecoveryEnabled(anyString())).thenReturn(false);
-
-        sdxStatusEntity.setStatus(STOP_FAILED);
         SdxRecoverableResponse sdxRecoverableResponse =
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecovery(cluster));
         assertEquals(RecoveryStatus.NON_RECOVERABLE, sdxRecoverableResponse.getStatus());
@@ -163,36 +138,59 @@ public class ResizeRecoveryServiceTest {
     }
 
     @Test
-    public void testNoEntitlementTrigger() {
-        when(entitlementService.isDatalakeResizeRecoveryEnabled(anyString())).thenReturn(false);
-
-        sdxStatusEntity.setStatus(STOP_FAILED);
-                BadRequestException result = assertThrows(BadRequestException.class, () ->
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(cluster, request)));
-        assertEquals("Entitlement for resize recovery is missing", result.getMessage());
-
+    public void testTriggerRecoveryShouldStartFlow() {
+        SdxRecoveryResponse sdxRecoveryResponse =
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(cluster, request));
+        verify(sdxReactorFlowManager).triggerSdxResizeRecovery(otherCluster, cluster);
+        assertEquals(flowId, sdxRecoveryResponse.getFlowIdentifier());
     }
 
     @Test
-    public void testStoppedAndDetachedRecoverable() {
-        SdxCluster old = new SdxCluster();
-        old.setClusterName("old");
+    public void testOnlyOneClusterStatusNullNoError() {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
-                .thenReturn(Optional.of(old));
-        when(cluster.getClusterName()).thenReturn("old");
+                .thenReturn(Optional.empty());
+        testGetClusterRecoverableForStatusNotRecoverable(null);
+    }
+
+    @Test
+    public void testOnlyOneClusterStatusReasonNullNoError() {
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
+                .thenReturn(Optional.empty());
+        sdxStatusEntity.setStatusReason(null);
+        testGetClusterRecoverableForStatusNotRecoverable(STOP_FAILED);
+    }
+
+    @Test
+    public void testOnlyOneClusterStoppedAndDetachedRecoverable() {
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
+                .thenReturn(Optional.of(cluster));
         when(cluster.isDetached()).thenReturn(true);
         testGetClusterRecoverableForStatusRecoverable(STOPPED);
     }
 
     @Test
-    public void testStoppedDuringResizeRecoverable() {
+    public void testOnlyOneClusterStoppedDuringResizeRecoverable() {
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
+                .thenReturn(Optional.empty());
         sdxStatusEntity.setStatusReason("SDX detach failed");
         testGetClusterRecoverableForStatusRecoverable(STOPPED);
     }
 
     @Test
-    public void testStopFailedDuringResizeRecoverable() {
+    public void testOnlyOneClusterStopFailedDuringResizeRecoverable() {
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
+                .thenReturn(Optional.empty());
         sdxStatusEntity.setStatusReason("Datalake resize failure");
         testGetClusterRecoverableForStatusRecoverable(STOP_FAILED);
+    }
+
+    @Test
+    public void testOnlyOneClusterTriggerRecoveryShouldStartFlow() {
+        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(any(), any()))
+                .thenReturn(Optional.empty());
+        SdxRecoveryResponse sdxRecoveryResponse =
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(cluster, request));
+        verify(sdxReactorFlowManager).triggerSdxResizeRecovery(cluster, null);
+        assertEquals(flowId, sdxRecoveryResponse.getFlowIdentifier());
     }
 }
