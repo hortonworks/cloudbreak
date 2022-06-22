@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.auth.altus;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,6 +20,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -37,12 +39,15 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
+import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import io.opentracing.Tracer;
 
 @ExtendWith(MockitoExtension.class)
@@ -54,6 +59,11 @@ public class GrpcUmsClientTest {
             .build().toString();
 
     private static final Optional<String> REQUEST_ID = Optional.of("requeest-id");
+
+    private static final String RESOURCE_CRN = CrnTestUtil.getEnvironmentCrnBuilder()
+            .setResource(UUID.randomUUID().toString())
+            .setAccountId("account")
+            .build().toString();
 
     @Mock
     private ManagedChannelWrapper channelWrapper;
@@ -161,6 +171,17 @@ public class GrpcUmsClientTest {
                         "environments/describeEnvironment", "invalidCrn", REQUEST_ID,
                         regionAwareInternalCrnGeneratorFactory)).getMessage(),
                 "Provided resource [invalidCrn] is not in CRN format");
+    }
+
+    @Test
+    public void testCheckRightWhenNotFound() {
+        doThrow(new StatusRuntimeException(Status.NOT_FOUND)).when(authorizationClient).checkRight(any(), any(), any(), any());
+        UnauthorizedException unauthorizedException = assertThrows(
+                UnauthorizedException.class,
+                () -> underTest.checkResourceRight(USER_CRN, "environments/describeEnvironment", RESOURCE_CRN, REQUEST_ID,
+                regionAwareInternalCrnGeneratorFactory));
+        assertNotNull(unauthorizedException);
+        assertEquals("Authorization failed for user: " + USER_CRN, unauthorizedException.getMessage());
     }
 
     @Test

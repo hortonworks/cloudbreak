@@ -50,6 +50,7 @@ import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
+import com.sequenceiq.cloudbreak.auth.altus.exception.UnauthorizedException;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
@@ -558,12 +559,13 @@ public class GrpcUmsClient {
     private boolean makeCheckRightCall(String userCrn, String right, String resource, Optional<String> requestId,
         RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         checkArgument(VALID_AUTHZ_RESOURCE.test(resource), String.format("Provided resource [%s] is not in CRN format", resource));
+        return makeCheckRightCallAndHandleExceptions(userCrn, right, resource, requestId, regionAwareInternalCrnGeneratorFactory);
+    }
+
+    private boolean makeCheckRightCallAndHandleExceptions(String userCrn, String right, String resource, Optional<String> requestId,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         try {
-            AuthorizationClient client = makeAuthorizationClient(regionAwareInternalCrnGeneratorFactory);
-            LOGGER.info("Checking right {} for user {} on resource {}!", right, userCrn, resource != null ? resource : "account");
-            client.checkRight(RequestIdUtil.getOrGenerate(requestId), userCrn, right, resource);
-            LOGGER.info("User {} has right {} on resource {}!", userCrn, right, resource != null ? resource : "account");
-            return true;
+            return checkRight(userCrn, right, resource, requestId, regionAwareInternalCrnGeneratorFactory);
         } catch (StatusRuntimeException statusRuntimeException) {
             if (Status.Code.PERMISSION_DENIED.equals(statusRuntimeException.getStatus().getCode())) {
                 LOGGER.error("Checking right {} failed for user {}, thus access is denied! Cause: {}", right, userCrn, statusRuntimeException.getMessage());
@@ -572,6 +574,10 @@ public class GrpcUmsClient {
                 LOGGER.error("Deadline exceeded for check right {} for user {} on resource {}", right, userCrn, resource != null ? resource : "account",
                         statusRuntimeException);
                 throw new CloudbreakServiceException("Authorization failed due to user management service call timed out.");
+            } else if (Status.Code.NOT_FOUND.equals(statusRuntimeException.getStatus().getCode())) {
+                LOGGER.error("NOT_FOUND for check right {} for user {} on resource {}, thus access is denied! Cause: {}",
+                        right, userCrn, resource, statusRuntimeException.getMessage());
+                throw new UnauthorizedException("Authorization failed for user: " + userCrn);
             } else {
                 LOGGER.error("Status runtime exception while checking right {} for user {} on resource {}", right, userCrn, resource != null ? resource :
                         "account", statusRuntimeException);
@@ -582,6 +588,15 @@ public class GrpcUmsClient {
                     "account", e);
             throw new CloudbreakServiceException("Authorization failed due to user management service call failed with error.");
         }
+    }
+
+    private boolean checkRight(String userCrn, String right, String resource, Optional<String> requestId,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+        AuthorizationClient client = makeAuthorizationClient(regionAwareInternalCrnGeneratorFactory);
+        LOGGER.info("Checking right {} for user {} on resource {}!", right, userCrn, resource != null ? resource : "account");
+        client.checkRight(RequestIdUtil.getOrGenerate(requestId), userCrn, right, resource);
+        LOGGER.info("User {} has right {} on resource {}!", userCrn, right, resource != null ? resource : "account");
+        return true;
     }
 
     /**
