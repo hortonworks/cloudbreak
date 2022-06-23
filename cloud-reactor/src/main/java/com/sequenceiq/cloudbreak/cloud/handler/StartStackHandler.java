@@ -43,6 +43,7 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
         StartInstancesRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         try {
+            LOGGER.debug("Start the stack with platform variant: {}", cloudContext.getPlatformVariant());
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext authenticatedContext = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudInstance> instances = request.getCloudInstances();
@@ -50,6 +51,7 @@ public class StartStackHandler implements CloudPlatformEventHandler<StartInstanc
             InstancesStatusResult statusResult = new InstancesStatusResult(cloudContext, instanceStatuses);
             StartInstancesResult result = new StartInstancesResult(request.getResourceId(), statusResult);
             request.getResult().onNext(result);
+            LOGGER.debug("Stack successfully started");
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (Exception e) {
             StartInstancesResult failure = new StartInstancesResult("Failed to start stack", e, request.getResourceId());

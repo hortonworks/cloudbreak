@@ -25,6 +25,8 @@ public class MonitoringConfiguration {
 
     private ExporterConfiguration blackboxExporter;
 
+    private RequestSignerConfiguration requestSigner;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -95,5 +97,13 @@ public class MonitoringConfiguration {
 
     public void setAgent(MonitoringAgentConfiguration agent) {
         this.agent = agent;
+    }
+
+    public RequestSignerConfiguration getRequestSigner() {
+        return requestSigner;
+    }
+
+    public void setRequestSigner(RequestSignerConfiguration requestSigner) {
+        this.requestSigner = requestSigner;
     }
 }

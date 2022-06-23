@@ -82,4 +82,8 @@ public class AuthorizationTestUtil {
         return String.format("[\\[]name: %s, crn: crn:cdp:datahub:us-west-1:.*:recipe:.*[]]\\.", recipeName);
     }
 
+    public static String proxyConfigPattern(String proxyConfig) {
+        return String.format("[\\[]name: %s, crn: crn:cdp:environments:us-west-1:.*:proxyConfig:.*[]]\\.", proxyConfig);
+    }
+
 }

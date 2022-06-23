@@ -1,0 +1,14 @@
+[Unit]
+Description=CDP Request Signer Proxy
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/opt/cdp-request-signer/bin/cdp-request-signer --config /opt/cdp-request-signer/conf/cdp-request-signer.yaml
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

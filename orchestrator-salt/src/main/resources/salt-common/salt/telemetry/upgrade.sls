@@ -30,7 +30,7 @@ delete_repo_file:
         - source: salt://telemetry/scripts/cdp-telemetry-deployer.sh
         - template: jinja
         - mode: '0750'
-{%- if telemetry.desiredCdpTelemetryVersion or telemetry.desiredCdpLoggingAgentVersion %}
+{%- if telemetry.desiredCdpTelemetryVersion or telemetry.desiredCdpLoggingAgentVersion or telemetry.desiredCdpVmAgentVersion or telemetry.desiredCdpRequestSignerVersion %}
 upgrade_cdp_infra_tools_components:
     cmd.run:
         - names:
@@ -42,6 +42,9 @@ upgrade_cdp_infra_tools_components:
 {%- endif %}
 {%- if telemetry.desiredCdpVmAgentVersion %}
           - /bin/bash -c 'source /opt/cdp-telemetry/conf/proxy.env; /opt/salt/scripts/cdp-telemetry-deployer.sh upgrade -c cdp-vmagent -v {{ telemetry.desiredCdpVmAgentVersion }}';exit 0
+{%- endif %}
+{%- if telemetry.desiredCdpRequestSignerVersion %}
+          - /bin/bash -c 'source /opt/cdp-telemetry/conf/proxy.env; /opt/salt/scripts/cdp-telemetry-deployer.sh upgrade -c cdp-request-signer -v {{ telemetry.desiredCdpRequestSignerVersion }}';exit 0
 {%- endif %}
         - onlyif: source /opt/cdp-telemetry/conf/proxy.env; {{ test_cmd }}
 {%- endif %}

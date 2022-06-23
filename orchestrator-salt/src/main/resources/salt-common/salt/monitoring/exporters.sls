@@ -61,7 +61,7 @@ generate_blackbox_exporter_cert_and_key:
   cmd.run:
     - name: "/opt/salt/scripts/cert-helper.sh -b /opt/blackbox_exporter/blackbox_exporter"
 
-{%- if monitoring.exporterPassword %}
+{%- if monitoring.localPassword %}
 /opt/node_exporter/node_pwd:
   file.managed:
     - source: salt://monitoring/template/exporter_pwd_file.j2

@@ -312,26 +312,26 @@ public class ClusterProxyService {
         return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), crn, FREEIPA_SERVICE_NAME);
     }
 
-    public String getProxyPath(Stack stack, Optional<String> serviceName) {
+    public String getProxyPath(Stack stack, String serviceName) {
         String freeIpaFqdn = generateFreeIpaFqdn(stack);
         return getProxyPath(stack, serviceName, freeIpaFqdn);
     }
 
-    public String getProxyPathPgwAsFallBack(Stack stack, Optional<String> serviceName) {
+    public String getProxyPathPgwAsFallBack(Stack stack, String serviceName) {
         return getProxyPath(stack, serviceName, FREEIPA_SERVICE_NAME);
     }
 
-    private String getProxyPath(Stack stack, Optional<String> serviceName, String defaultServiceName) {
+    private String getProxyPath(Stack stack, String serviceName, String defaultServiceName) {
         Optional<String> registeredServiceName = getRegisteredServiceNameOrEmpty(stack.getResourceCrn(), serviceName);
         String proxyServiceName = registeredServiceName.orElse(defaultServiceName);
         LOGGER.info("Service name used for connection: [{}]", proxyServiceName);
         return String.format("%s/proxy/%s/%s", clusterProxyConfiguration.getClusterProxyBasePath(), stack.getResourceCrn(), proxyServiceName);
     }
 
-    private Optional<String> getRegisteredServiceNameOrEmpty(String crn, Optional<String> serviceName) {
-        if (serviceName.isPresent() && isServiceEndpointWithIdentityRegistered(crn, serviceName.get())) {
+    private Optional<String> getRegisteredServiceNameOrEmpty(String crn, String serviceName) {
+        if (StringUtils.isNotBlank(serviceName) && isServiceEndpointWithIdentityRegistered(crn, serviceName)) {
             LOGGER.info("ServiceName [{}] is registered", serviceName);
-            return serviceName;
+            return Optional.of(serviceName);
         } else {
             LOGGER.info("ServiceName [{}] is not registered or not defined", serviceName);
             return Optional.empty();

@@ -1,0 +1,40 @@
+{%- from 'telemetry/settings.sls' import telemetry with context %}
+{%- from 'monitoring/settings.sls' import monitoring with context %}
+port: {{ monitoring.requestSignerPort }}
+endpoint: "{{ monitoring.remoteWriteUrl }}"
+credential:
+  file: "/opt/cdp-request-signer/conf/databus_credential"
+  profile: dbus
+  access_key_name: dbus_access_key_id
+  secret_key_name: dbus_access_secret_key
+sign:
+  auth_header_name: "x-altus-auth"
+  date_header_name: "x-altus-date"
+  msg_header_name: "x-altus-msg"
+  token_header_name: "x-altus-token"
+  token_date_file: "/opt/cdp-request-signer/conf/token_exp"
+  token_validity_min: {{ monitoring.requestSignerTokenValidityMin }}
+  use_token_heder: {{ monitoring.requestSignerUseToken }}
+  use_msg_header: true
+client:
+  dump: false
+tls:
+  key: "/opt/cdp-request-signer/conf/request-signer.key"
+  cert: "/opt/cdp-request-signer/conf/request-signer.crt"
+auth:
+  username: "{{ monitoring.requestSignerUser }}"
+  password: "{{ monitoring.localPassword }}"
+logger:
+  level: debug
+  file: true
+{%- if telemetry.proxyUrl %}
+proxy:
+{%- if monitoring.remoteWriteUrl.startswith('https://') %}
+  https_proxy: "{{ telemetry.proxyUrl }}"
+{%- else %}
+  http_proxy: "{{ telemetry.proxyUrl }}"
+{%- endif %}
+{%- if telemetry.noProxyHosts %}
+  no_proxy: "{{ telemetry.noProxyHosts }}"
+{%- endif %}
+{%- endif %}

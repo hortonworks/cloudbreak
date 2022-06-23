@@ -32,6 +32,8 @@ public class ParcelFilterServiceTest {
 
     private static final long STACK_ID = 1L;
 
+    private static final long WORKSPACE_ID = 2L;
+
     private static final String BLUEPRINT_TEXT = "bpText";
 
     @Mock
@@ -81,7 +83,7 @@ public class ParcelFilterServiceTest {
         when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of(serviceNameInTheBlueprint)));
         when(manifestRetrieverService.readRepoManifest(parcelUrl)).thenReturn(ImmutablePair.of(status, getManifest(manifest)));
 
-        assertEquals(parcelCount, underTest.filterParcelsByBlueprint(STACK_ID, getParcels(parcelUrl), getBlueprint()).size());
+        assertEquals(parcelCount, underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, getParcels(parcelUrl), getBlueprint()).size());
     }
 
     @Test
@@ -90,10 +92,10 @@ public class ParcelFilterServiceTest {
         String parcelName = "NIFI";
         ClouderaManagerProduct parcel = new ClouderaManagerProduct().withParcel(parcelUrl).withName(parcelName);
         when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of(parcelName)));
-        when(imageReaderService.getParcelNames(STACK_ID)).thenReturn(Set.of(parcelName));
+        when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(Set.of(parcelName));
         when(manifestRetrieverService.readRepoManifest(parcelUrl)).thenReturn(ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("otherService1")));
 
-        assertEquals(0, underTest.filterParcelsByBlueprint(STACK_ID, Set.of(parcel), getBlueprint()).size());
+        assertEquals(0, underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, Set.of(parcel), getBlueprint()).size());
     }
 
     @Test
@@ -102,10 +104,10 @@ public class ParcelFilterServiceTest {
         String parcelName = "CUSTOM";
         ClouderaManagerProduct parcel = new ClouderaManagerProduct().withParcel(parcelUrl).withName(parcelName);
         when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("NIFI")));
-        when(imageReaderService.getParcelNames(STACK_ID)).thenReturn(Set.of("NIFI"));
+        when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(Set.of("NIFI"));
         when(manifestRetrieverService.readRepoManifest(parcelUrl)).thenReturn(ImmutablePair.of(ManifestStatus.SUCCESS, getManifest(parcelName)));
 
-        assertEquals(1, underTest.filterParcelsByBlueprint(STACK_ID, Set.of(parcel), getBlueprint()).size());
+        assertEquals(1, underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, Set.of(parcel), getBlueprint()).size());
     }
 
     @Test
@@ -119,7 +121,7 @@ public class ParcelFilterServiceTest {
         supportedServices.setServices(Set.of(supportedService));
         when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(supportedServices);
 
-        assertEquals(1, underTest.filterParcelsByBlueprint(STACK_ID, Set.of(parcel), getBlueprint()).size());
+        assertEquals(1, underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, Set.of(parcel), getBlueprint()).size());
     }
 
     @Test
@@ -129,7 +131,7 @@ public class ParcelFilterServiceTest {
         ClouderaManagerProduct nifiParcel = new ClouderaManagerProduct().withParcel("nifi-parcel-url").withName("NIFI");
         when(manifestRetrieverService.readRepoManifest(cdhParcel.getParcel())).thenReturn(ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("hdfs", "hive")));
 
-        Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(STACK_ID, createParcelSet(cdhParcel, nifiParcel), getBlueprint());
+        Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, createParcelSet(cdhParcel, nifiParcel), getBlueprint());
         assertEquals(1, actual.size());
         assertTrue(actual.contains(cdhParcel));
     }
@@ -142,7 +144,7 @@ public class ParcelFilterServiceTest {
         when(manifestRetrieverService.readRepoManifest(cdhParcel.getParcel())).thenReturn(ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("hdfs", "hive")));
         when(manifestRetrieverService.readRepoManifest(nifiParcel.getParcel())).thenReturn(ImmutablePair.of(ManifestStatus.FAILED, null));
 
-        Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(STACK_ID, createParcelSet(cdhParcel, nifiParcel), getBlueprint());
+        Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, createParcelSet(cdhParcel, nifiParcel), getBlueprint());
         assertEquals(2, actual.size());
         assertTrue(actual.contains(cdhParcel));
         assertTrue(actual.contains(nifiParcel));

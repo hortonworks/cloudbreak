@@ -21,12 +21,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.poller.ClusterPollerResultEvaluator;
 import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
+import com.sequenceiq.environment.environment.poller.FlowResultPollerEvaluator;
 import com.sequenceiq.environment.environment.service.datahub.DatahubPollerService;
 import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
+import com.sequenceiq.flow.api.FlowEndpoint;
 
 import net.jcip.annotations.NotThreadSafe;
 
@@ -39,11 +42,17 @@ class DatahubPollerServiceTest {
 
     private static final String STACK_CRN = "stackCrn";
 
-    private DatahubService datahubService = Mockito.mock(DatahubService.class);
+    private final DatahubService datahubService = Mockito.mock(DatahubService.class);
 
-    private DatahubPollerProvider datahubPollerProvider = new DatahubPollerProvider(datahubService, new ClusterPollerResultEvaluator());
+    private final FlowEndpoint flowEndpoint = Mockito.mock(FlowEndpoint.class);
 
-    private DatahubPollerService underTest = new DatahubPollerService(datahubService, datahubPollerProvider, new WebApplicationExceptionMessageExtractor());
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory = Mockito.mock(RegionAwareInternalCrnGeneratorFactory.class);
+
+    private final DatahubPollerProvider datahubPollerProvider = new DatahubPollerProvider(datahubService, new ClusterPollerResultEvaluator(), flowEndpoint,
+            regionAwareInternalCrnGeneratorFactory, new FlowResultPollerEvaluator());
+
+    private final DatahubPollerService underTest =
+            new DatahubPollerService(datahubService, datahubPollerProvider, new WebApplicationExceptionMessageExtractor());
 
     @BeforeEach
     void setup() {

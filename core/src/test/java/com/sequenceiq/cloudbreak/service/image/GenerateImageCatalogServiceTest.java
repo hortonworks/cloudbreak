@@ -18,9 +18,12 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @ExtendWith(MockitoExtension.class)
 public class GenerateImageCatalogServiceTest {
+
+    private static final Long WORKSPACE_ID = 1L;
 
     private static final String IMAGE_CATALOG_NAME = "image catalog name";
 
@@ -49,6 +52,9 @@ public class GenerateImageCatalogServiceTest {
     private StatedImage statedImage;
 
     @Mock
+    private Workspace workspace;
+
+    @Mock
     private com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogImage;
 
     @Test
@@ -57,7 +63,9 @@ public class GenerateImageCatalogServiceTest {
         when(image.getImageCatalogUrl()).thenReturn(IMAGE_CATALOG_URL);
         when(image.getImageCatalogName()).thenReturn(IMAGE_CATALOG_NAME);
         when(image.getImageId()).thenReturn(IMAGE_ID);
-        when(imageCatalogService.getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(statedImage);
+        when(stack.getWorkspace()).thenReturn(workspace);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(statedImage);
         when(statedImage.getImage()).thenReturn(catalogImage);
 
         CloudbreakImageCatalogV3 actual = victim.generateImageCatalogForStack(stack);
@@ -97,7 +105,9 @@ public class GenerateImageCatalogServiceTest {
         when(image.getImageCatalogUrl()).thenReturn(IMAGE_CATALOG_URL);
         when(image.getImageCatalogName()).thenReturn(IMAGE_CATALOG_NAME);
         when(image.getImageId()).thenReturn(IMAGE_ID);
-        when(imageCatalogService.getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(statedImage);
+        when(stack.getWorkspace()).thenReturn(workspace);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(statedImage);
         when(statedImage.getImage()).thenReturn(catalogImage);
         when(catalogImage.getSourceImageId()).thenReturn(SOURCE_IMAGE_ID);
 
@@ -110,7 +120,9 @@ public class GenerateImageCatalogServiceTest {
         when(image.getImageCatalogUrl()).thenReturn(IMAGE_CATALOG_URL);
         when(image.getImageCatalogName()).thenReturn(IMAGE_CATALOG_NAME);
         when(image.getImageId()).thenReturn(IMAGE_ID);
-        when(imageCatalogService.getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenThrow(new CloudbreakImageNotFoundException(""));
+        when(stack.getWorkspace()).thenReturn(workspace);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenThrow(new CloudbreakImageNotFoundException(""));
 
         Assertions.assertThrows(NotFoundException.class, () -> victim.generateImageCatalogForStack(stack));
     }
@@ -122,7 +134,9 @@ public class GenerateImageCatalogServiceTest {
         when(image.getImageCatalogUrl()).thenReturn(IMAGE_CATALOG_URL);
         when(image.getImageCatalogName()).thenReturn(IMAGE_CATALOG_NAME);
         when(image.getImageId()).thenReturn(IMAGE_ID);
-        when(imageCatalogService.getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenThrow(new CloudbreakImageCatalogException(""));
+        when(stack.getWorkspace()).thenReturn(workspace);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenThrow(new CloudbreakImageCatalogException(""));
 
         Assertions.assertThrows(CloudbreakServiceException.class, () -> victim.generateImageCatalogForStack(stack));
     }

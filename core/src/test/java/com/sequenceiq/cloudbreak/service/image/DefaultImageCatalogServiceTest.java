@@ -34,6 +34,8 @@ public class DefaultImageCatalogServiceTest {
 
     private static final String IMAGE_ID = "image id";
 
+    private static final Long WORKSPACE_ID = 1L;
+
     private static final String DEFAULT_FREEIPA_CATALOG_URL = "http://freeipa.url";
 
     private static final String DEFAULT_CATALOG_URL = "http://cb.url";
@@ -59,9 +61,9 @@ public class DefaultImageCatalogServiceTest {
     public void testGetFreeIpaImageFromDefaultCatalog() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage expected = mock(StatedImage.class);
 
-        when(imageCatalogService.getImage(DEFAULT_FREEIPA_CATALOG_URL, FREEIPA_DEFAULT_CATALOG_NAME, IMAGE_ID)).thenReturn(expected);
+        when(imageCatalogService.getImage(WORKSPACE_ID, DEFAULT_FREEIPA_CATALOG_URL, FREEIPA_DEFAULT_CATALOG_NAME, IMAGE_ID)).thenReturn(expected);
 
-        StatedImage actual = victim.getImageFromDefaultCatalog(IMAGE_ID);
+        StatedImage actual = victim.getImageFromDefaultCatalog(WORKSPACE_ID, IMAGE_ID);
 
         assertEquals(expected, actual);
     }
@@ -71,11 +73,11 @@ public class DefaultImageCatalogServiceTest {
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage expected = mock(StatedImage.class);
 
-        when(imageCatalogService.getImage(DEFAULT_FREEIPA_CATALOG_URL, FREEIPA_DEFAULT_CATALOG_NAME, IMAGE_ID))
+        when(imageCatalogService.getImage(WORKSPACE_ID, DEFAULT_FREEIPA_CATALOG_URL, FREEIPA_DEFAULT_CATALOG_NAME, IMAGE_ID))
                 .thenThrow(new CloudbreakImageNotFoundException(""));
-        when(imageCatalogService.getImage(IMAGE_ID)).thenReturn(expected);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_ID)).thenReturn(expected);
 
-        StatedImage actual = victim.getImageFromDefaultCatalog(IMAGE_ID);
+        StatedImage actual = victim.getImageFromDefaultCatalog(WORKSPACE_ID, IMAGE_ID);
 
         assertEquals(expected, actual);
     }

@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
@@ -119,7 +120,7 @@ public class SdxCcmUpgradeService {
     }
 
     private SdxCcmUpgradeResponse checkPrerequisitesAndTrigger(SdxCluster sdxCluster, StackV4Response stack) {
-        if (!stack.getStatus().isAvailable()) {
+        if (!stack.getStatus().isAvailable() && Status.UPGRADE_CCM_FAILED != stack.getStatus()) {
             LOGGER.debug("Datalake stack {} is not available for CCM upgrade", stack.getName());
             return new SdxCcmUpgradeResponse(CcmUpgradeResponseType.ERROR, FlowIdentifier.notTriggered(),
                     getMessage(DATALAKE_UPGRADE_CCM_NOT_AVAILABLE), stack.getCrn());

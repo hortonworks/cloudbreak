@@ -18,10 +18,10 @@ scrape_configs:
     relabel_configs:
       - target_label: instance
         replacement: {{ hostname }}:{{ monitoring.nodeExporterPort }}
-{%- if monitoring.exporterPassword %}
+{%- if monitoring.localPassword %}
     basic_auth:
       username: {{ monitoring.nodeExporterUser }}
-      password: {{ monitoring.exporterPassword }}
+      password: {{ monitoring.localPassword }}
 {%- endif %}
     tls_config:
        insecure_skip_verify: true
@@ -49,10 +49,10 @@ scrape_configs:
         replacement: 127.0.0.1:{{ monitoring.blackboxExporterPort }}
       - target_label: instance
         replacement: {{ hostname }}:{{ monitoring.blackboxExporterPort }}
-{%- if monitoring.exporterPassword %}
+{%- if monitoring.localPassword %}
     basic_auth:
       username: {{ monitoring.blackboxExporterUser }}
-      password: {{ monitoring.exporterPassword }}
+      password: {{ monitoring.localPassword }}
 {%- endif %}
     tls_config:
       insecure_skip_verify: true

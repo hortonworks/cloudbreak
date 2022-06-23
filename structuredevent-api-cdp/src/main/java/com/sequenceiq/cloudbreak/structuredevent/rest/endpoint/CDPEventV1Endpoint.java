@@ -57,8 +57,7 @@ public interface CDPEventV1Endpoint {
 
     @GET
     @Path("{name}/zip")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ApiOperation(value = GET_EVENTS_ZIP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = EVENT_NOTES,
-            nickname = "getStructuredEventsZipInAccount")
+    @Produces({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON})
+    @ApiOperation(value = GET_EVENTS_ZIP_BY_NAME, notes = EVENT_NOTES, nickname = "getStructuredEventsZipInAccount")
     Response download(@PathParam("name") String name);
 }

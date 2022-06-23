@@ -32,7 +32,7 @@ public class ParcelFilterService {
     @Inject
     private ManifestRetrieverService manifestRetrieverService;
 
-    public Set<ClouderaManagerProduct> filterParcelsByBlueprint(Long stackId, Set<ClouderaManagerProduct> parcels, Blueprint blueprint) {
+    public Set<ClouderaManagerProduct> filterParcelsByBlueprint(Long workspaceId, Long stackId, Set<ClouderaManagerProduct> parcels, Blueprint blueprint) {
         LOGGER.debug("Filtering the following parcels based on the blueprint {}", parcels);
         Set<String> serviceNamesInBlueprint = getServiceNamesInBlueprint(blueprint);
         LOGGER.debug("The following services are found in the blueprint: {}", serviceNamesInBlueprint);
@@ -40,12 +40,13 @@ public class ParcelFilterService {
             LOGGER.debug("We can not identify one of the service from the blueprint so to stay on the safe side we will add every parcel");
             return parcels;
         }
-        Set<ClouderaManagerProduct> requiredParcels = filterParcels(stackId, parcels, serviceNamesInBlueprint);
+        Set<ClouderaManagerProduct> requiredParcels = filterParcels(workspaceId, stackId, parcels, serviceNamesInBlueprint);
         LOGGER.debug("The following parcels are used in CM based on blueprint: {}", requiredParcels);
         return requiredParcels;
     }
 
-    private Set<ClouderaManagerProduct> filterParcels(Long stackId, Set<ClouderaManagerProduct> parcels, Set<String> requiredServicesInBlueprint) {
+    private Set<ClouderaManagerProduct> filterParcels(Long workspaceId, Long stackId, Set<ClouderaManagerProduct> parcels,
+            Set<String> requiredServicesInBlueprint) {
         Set<ClouderaManagerProduct> requiredParcels = new HashSet<>();
         Set<ClouderaManagerProduct> notAccessibleParcels = new HashSet<>();
         Iterator<ClouderaManagerProduct> parcelIterator = parcels.iterator();
@@ -55,7 +56,7 @@ public class ParcelFilterService {
             if (manifestAvailable(manifest)) {
                 Set<String> servicesInParcel = getAllServiceNameInParcel(manifest.right);
                 LOGGER.debug("The {} parcel contains the following services: {}", parcel.getName(), servicesInParcel);
-                if (servicesArePresentInTheBlueprint(requiredServicesInBlueprint, servicesInParcel, parcel) || isCustomParcel(stackId, parcel)) {
+                if (servicesArePresentInTheBlueprint(requiredServicesInBlueprint, servicesInParcel, parcel) || isCustomParcel(workspaceId, stackId, parcel)) {
                     requiredParcels.add(parcel);
                     LOGGER.debug("Removing {} from the remaining required services because these services are found in {} parcel.", servicesInParcel, parcel);
                     requiredServicesInBlueprint.removeAll(servicesInParcel);
@@ -89,8 +90,8 @@ public class ParcelFilterService {
         }
     }
 
-    private boolean isCustomParcel(Long stackId, ClouderaManagerProduct parcel) {
-        Set<String> parcelNamesFromImage = imageReaderService.getParcelNames(stackId);
+    private boolean isCustomParcel(Long workspaceId, Long stackId, ClouderaManagerProduct parcel) {
+        Set<String> parcelNamesFromImage = imageReaderService.getParcelNames(workspaceId, stackId);
         if (parcelNamesFromImage.stream().noneMatch(preWarmParcel -> preWarmParcel.equals(parcel.getName()))) {
             LOGGER.debug("Add custom parcel {}", parcel);
             return true;

@@ -29,9 +29,23 @@
 {% set node_exporter_collectors = salt['pillar.get']('monitoring:nodeExporterCollectors', []) %}
 {% set blackbox_exporter_user = salt['pillar.get']('monitoring:blackboxExporterUser', 'blackboxuser') %}
 {% set blackbox_exporter_port = salt['pillar.get']('monitoring:blackboxExporterPort', 9115) %}
-{% set exporter_password = salt['pillar.get']('monitoring:exporterPassword') %}
+{% set local_password = salt['pillar.get']('monitoring:localPassword') %}
 {% set scrape_interval_seconds = salt['pillar.get']('monitoring:scrapeIntervalSeconds') %}
 {% set cm_metrics_exporter_port = salt['pillar.get']('monitoring:cmMetricsExporterPort', 61010) %}
+
+{% set request_signer_enabled = salt['pillar.get']('monitoring:requestSignerEnabled', False) %}
+{% set request_signer_port = salt['pillar.get']('monitoring:requestSignerPort', 61095) %}
+{% set request_signer_use_token = salt['pillar.get']('monitoring:requestSignerUseToken', True) %}
+{% set request_signer_token_validity_min = salt['pillar.get']('monitoring:requestSignerTokenValidityMin', 60) %}
+{% set request_signer_user = salt['pillar.get']('monitoring:requestSignerUser', 'signer') %}
+
+{% if salt['pillar.get']('databus:enabled') %}
+    {% set databus_enabled = True %}
+{% else %}
+    {% set databus_enabled = False %}
+{% endif %}
+{% set databus_access_key_id = salt['pillar.get']('databus:accessKeyId') %}
+{% set databus_access_key_secret = salt['pillar.get']('databus:accessKeySecret') %}
 
 {%- if use_dev_stack %}
   {%- if salt['pillar.get']('cloudera-manager:address') %}
@@ -72,6 +86,14 @@
     "blackboxExporterUser": blackbox_exporter_user,
     "blackboxExporterPort": blackbox_exporter_port,
     "blackboxExporterExists" : blackbox_exporter_exists,
-    "exporterPassword": exporter_password,
-    "useDevStack": use_dev_stack
+    "localPassword": local_password,
+    "useDevStack": use_dev_stack,
+    "requestSignerEnabled" : request_signer_enabled,
+    "requestSignerPort" : request_signer_port,
+    "requestSignerUseToken" : request_signer_use_token,
+    "requestSignerTokenValidityMin" : request_signer_token_validity_min,
+    "requestSignerUser" : request_signer_user,
+    "databusEnabled": databus_enabled,
+    "databusAccessKeyId": databus_access_key_id,
+    "databusAccessKeySecret": databus_access_key_secret
 }) %}

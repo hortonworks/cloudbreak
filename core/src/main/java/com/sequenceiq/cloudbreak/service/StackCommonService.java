@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -143,6 +144,9 @@ public class StackCommonService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
+
     public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
     }
@@ -216,16 +220,31 @@ public class StackCommonService {
     public FlowIdentifier syncComponentVersionsFromCmInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> candidateImageUuids) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
-        if (stack.getStackStatus().getStatus().isStopState()) {
-            String message = String.format("Reading CM and parcel versions from CM cannot be initiated as the cluster is in %s state",
-                    stack.getStackStatus().getStatus());
-            LOGGER.debug(message);
-            throw new BadRequestException(message);
-        }
+        String operationDescription = "Reading CM and parcel versions from CM";
+        ensureStackAvailability(stack, operationDescription);
+        ensureInstanceAvailability(stack, operationDescription);
 
         LOGGER.debug("Triggering sync from CM to db: syncing versions from CM to db, nameOrCrn: {}, workspaceId: {}, candidateImageUuids: {}",
                 nameOrCrn, workspaceId, candidateImageUuids);
         return syncComponentVersionsFromCm(stack, candidateImageUuids);
+    }
+
+    private void ensureInstanceAvailability(Stack stack, String operationDescription) {
+        if (instanceMetaDataService.anyInstanceStopped(stack.getId())) {
+            String message = String.format("Please start all stopped instances. %s can only be made when all your nodes in running state.",
+                    operationDescription);
+            LOGGER.debug(message);
+            throw new BadRequestException(message);
+        }
+    }
+
+    private void ensureStackAvailability(Stack stack, String operationDescription) {
+        if (stack.getStackStatus().getStatus().isStopState()) {
+            String message = String.format("%s cannot be initiated as the cluster is in %s state.",
+                    operationDescription, stack.getStackStatus().getStatus());
+            LOGGER.debug(message);
+            throw new BadRequestException(message);
+        }
     }
 
     public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {

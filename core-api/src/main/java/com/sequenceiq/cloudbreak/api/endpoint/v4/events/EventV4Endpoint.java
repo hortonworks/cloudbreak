@@ -88,8 +88,8 @@ public interface EventV4Endpoint {
 
     @GET
     @Path("{name}/zip")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ApiOperation(value = EventOpDescription.GET_EVENTS_ZIP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
+    @Produces({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON})
+    @ApiOperation(value = EventOpDescription.GET_EVENTS_ZIP_BY_NAME, notes = Notes.EVENT_NOTES,
             nickname = "getStructuredEventsZipInWorkspace")
     Response download(@PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
 }

@@ -60,8 +60,8 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     Map<String, Pair<Integer, String>> certValidityCmdResultByIpsMap =
-                            sshJClientActions.executeSshCommandOnHost(getInstanceGroups(testDto, client), List.of(HostGroupType.MASTER.getName(),
-                                    HostGroupType.IDBROKER.getName()), HOST_CERT_VALIDITY_CMD, false);
+                            sshJClientActions.executeSshCommandOnHost(testDto.getResponse().getStackV4Response().getInstanceGroups(),
+                                    List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()), HOST_CERT_VALIDITY_CMD, false);
                     originalCertValidityOutput.addAll(certValidityCmdResultByIpsMap.values().stream()
                             .map(Pair::getValue).collect(Collectors.toList()));
                     return testDto;
@@ -72,8 +72,8 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     Map<String, Pair<Integer, String>> certValidityCmdResultByIpsMap =
-                            sshJClientActions.executeSshCommandOnHost(getInstanceGroups(testDto, client), List.of(HostGroupType.MASTER.getName(),
-                                    HostGroupType.IDBROKER.getName()), HOST_CERT_VALIDITY_CMD, false);
+                            sshJClientActions.executeSshCommandOnHost(testDto.getResponse().getStackV4Response().getInstanceGroups(),
+                                    List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()), HOST_CERT_VALIDITY_CMD, false);
                     renewedCertValidityOutput.addAll(certValidityCmdResultByIpsMap.entrySet().stream()
                             .map(e -> e.getValue().getValue()).collect(Collectors.toList()));
                     return testDto;

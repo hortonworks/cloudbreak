@@ -23,7 +23,7 @@ public class ProxyTestSource {
 
     public static final String PASSWORD = "pwd";
 
-    public static final String RESCRN = "rescrn";
+    public static final String RESCRN = "crn:cdp:environments:us-west-1:accid:proxyConfig:crn1";
 
     public static final String CREATOR = "creator";
 

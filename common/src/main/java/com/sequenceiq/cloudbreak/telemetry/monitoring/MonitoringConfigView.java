@@ -26,7 +26,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private final char[] cmPassword;
 
-    private final char[] exporterPassword;
+    private final char[] localPassword;
 
     private final Integer cmMetricsExporterPort;
 
@@ -60,13 +60,15 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private final TelemetryClusterDetails clusterDetails;
 
+    private final RequestSignerConfigView requestSigner;
+
     private MonitoringConfigView(Builder builder) {
         this.enabled = builder.enabled;
         this.type = builder.type;
         this.cmUsername = builder.cmUsername;
         this.cmPassword = builder.cmPassword;
         this.cmMetricsExporterPort = builder.cmMetricsExporterPort;
-        this.exporterPassword = builder.exporterPassword;
+        this.localPassword = builder.localPassword;
         this.nodeExporterUser = builder.nodeExporterUser;
         this.nodeExporterPort = builder.nodeExporterPort;
         this.nodeExporterCollectors = builder.nodeExporterCollectors;
@@ -82,6 +84,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.username = builder.username;
         this.password = builder.password;
         this.token = builder.token;
+        this.requestSigner = builder.requestSigner;
     }
 
     public boolean isEnabled() {
@@ -116,8 +119,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return scrapeIntervalSeconds;
     }
 
-    public char[] getExporterPassword() {
-        return exporterPassword;
+    public char[] getLocalPassword() {
+        return localPassword;
     }
 
     public String getNodeExporterUser() {
@@ -168,6 +171,10 @@ public class MonitoringConfigView implements TelemetryConfigView {
         return token;
     }
 
+    public RequestSignerConfigView getRequestSigner() {
+        return requestSigner;
+    }
+
     @Override
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -179,7 +186,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("cmUsername", ObjectUtils.defaultIfNull(this.cmUsername, EMPTY_CONFIG_DEFAULT));
         map.put("cmPassword", ObjectUtils.defaultIfNull(this.cmPassword, EMPTY_CONFIG_DEFAULT));
         map.put("cmMetricsExporterPort", ObjectUtils.defaultIfNull(this.cmMetricsExporterPort, DEFAULT_CM_SMON_PORT));
-        map.put("exporterPassword", this.exporterPassword != null ? new String(this.exporterPassword) : EMPTY_CONFIG_DEFAULT);
+        map.put("localPassword", this.localPassword != null ? new String(this.localPassword) : EMPTY_CONFIG_DEFAULT);
         map.put("nodeExporterUser", ObjectUtils.defaultIfNull(this.nodeExporterUser, EMPTY_CONFIG_DEFAULT));
         map.put("nodeExporterPort", this.nodeExporterPort);
         map.put("nodeExporterCollectors", ObjectUtils.defaultIfNull(this.nodeExporterCollectors, new ArrayList<>()));
@@ -193,6 +200,9 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("token", this.token != null ? new String(this.token) : EMPTY_CONFIG_DEFAULT);
         if (this.clusterDetails != null) {
             map.putAll(clusterDetails.toMap());
+        }
+        if (this.requestSigner != null) {
+            map.putAll(requestSigner.toMap());
         }
         return map;
     }
@@ -219,7 +229,7 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         private char[] cmPassword;
 
-        private char[] exporterPassword;
+        private char[] localPassword;
 
         private Integer cmMetricsExporterPort;
 
@@ -240,6 +250,8 @@ public class MonitoringConfigView implements TelemetryConfigView {
         private String agentMaxDiskUsage;
 
         private TelemetryClusterDetails clusterDetails;
+
+        private RequestSignerConfigView requestSigner;
 
         public MonitoringConfigView build() {
             return new MonitoringConfigView(this);
@@ -305,8 +317,13 @@ public class MonitoringConfigView implements TelemetryConfigView {
             return this;
         }
 
-        public Builder withExporterPassword(char[] exporterPassword) {
-            this.exporterPassword = exporterPassword;
+        public Builder withRequestSigner(RequestSignerConfigView requestSigner) {
+            this.requestSigner = requestSigner;
+            return this;
+        }
+
+        public Builder withLocalPassword(char[] localPassword) {
+            this.localPassword = localPassword;
             return this;
         }
 

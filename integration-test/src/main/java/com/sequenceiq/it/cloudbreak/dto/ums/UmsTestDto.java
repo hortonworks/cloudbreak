@@ -36,6 +36,8 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, UserManag
 
     private static final String ENVIRONMENT_PRIVILEGED_USER = "crn:altus:iam:us-west-1:altus:resourceRole:EnvironmentPrivilegedUser";
 
+    private static final String OWNER_CRN = "crn:altus:iam:us-west-1:altus:resourceRole:Owner";
+
     public UmsTestDto(TestContext testContext) {
         super(new AssignResourceRequest(), testContext);
     }
@@ -47,6 +49,11 @@ public class UmsTestDto extends AbstractTestDto<AssignResourceRequest, UserManag
 
     public UmsTestDto withDatahubCreator() {
         getRequest().setRoleCrn(DH_CREATOR_CRN);
+        return this;
+    }
+
+    public UmsTestDto withOwner() {
+        getRequest().setRoleCrn(OWNER_CRN);
         return this;
     }
 

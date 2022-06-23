@@ -22,7 +22,7 @@ public class MonitoringConfigService {
     }
 
     public MonitoringConfigView createMonitoringConfig(Monitoring monitoring, MonitoringClusterType clusterType,
-            MonitoringAuthConfig cmAuthConfig, char[] exporterPassword, boolean cdpSaasEnabled, boolean computeMonitoringEnabled) {
+            MonitoringAuthConfig cmAuthConfig, char[] localPassword, boolean cdpSaasEnabled, boolean computeMonitoringEnabled) {
         final MonitoringConfigView.Builder builder = new MonitoringConfigView.Builder();
         boolean enabled = isMonitoringEnabled(cdpSaasEnabled, computeMonitoringEnabled);
         LOGGER.debug("Tyring to set monitoring configurations.");
@@ -39,7 +39,8 @@ public class MonitoringConfigService {
             builder.withAgentPort(monitoringConfiguration.getAgent().getPort());
             builder.withAgentUser(monitoringConfiguration.getAgent().getUser());
             builder.withAgentMaxDiskUsage(monitoringConfiguration.getAgent().getMaxDiskUsage());
-            fillExporterConfigs(builder, exporterPassword);
+            fillExporterConfigs(builder, localPassword);
+            fillRequestSignerConfigs(monitoringConfiguration.getRequestSigner(), builder);
         }
         if (monitoringGlobalAuthConfig.isEnabled()) {
             builder.withUsername(monitoringGlobalAuthConfig.getUsername());
@@ -55,8 +56,8 @@ public class MonitoringConfigService {
                 .build();
     }
 
-    private void fillExporterConfigs(MonitoringConfigView.Builder builder, char[] exporterPassword) {
-        builder.withExporterPassword(exporterPassword);
+    private void fillExporterConfigs(MonitoringConfigView.Builder builder, char[] localPassword) {
+        builder.withLocalPassword(localPassword);
         if (monitoringConfiguration.getNodeExporter() != null) {
             builder.withNodeExporterUser(monitoringConfiguration.getNodeExporter().getUser())
                     .withNodeExporterPort(monitoringConfiguration.getNodeExporter().getPort())
@@ -80,6 +81,20 @@ public class MonitoringConfigService {
             } else {
                 LOGGER.debug("Monitoring for Cloudera Manager has invalid authentication configs, Monitoring will be disabled.");
             }
+        }
+    }
+
+    private void fillRequestSignerConfigs(RequestSignerConfiguration config, MonitoringConfigView.Builder builder) {
+        if (config.isEnabled()) {
+            RequestSignerConfigView requestSignerConfigView = RequestSignerConfigView.newBuilder()
+                    .withEnabled(config.isEnabled())
+                    .withPort(config.getPort())
+                    .withUser(config.getUser())
+                    .withUseToken(config.isUseToken())
+                    .withTokenValidityMin(config.getTokenValidityMin())
+                    .build();
+            LOGGER.debug("Request signer is enabled, filling it for monitoring: {}", requestSignerConfigView);
+            builder.withRequestSigner(requestSignerConfigView);
         }
     }
 

@@ -19,6 +19,8 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
 
     public static final String DESIRED_CDP_VMAGENT_VERSION = "desiredCdpVmAgentVersion";
 
+    public static final String DESIRED_CDP_REQUEST_SIGNER_VERSION = "desiredCdpRequestSignerVersion";
+
     private final TelemetryClusterDetails clusterDetails;
 
     private final List<AnonymizationRule> rules;
@@ -39,6 +41,8 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
 
     private final String desiredCdpVmAgentVersion;
 
+    private final String desiredCdpRequestSignerVersion;
+
     private final String repoName;
 
     private final String repoBaseUrl;
@@ -58,6 +62,7 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
         desiredCdpLoggingAgentVersion = builder.desiredCdpLoggingAgentVersion;
         desiredCdpTelemetryVersion = builder.desiredCdpTelemetryVersion;
         desiredCdpVmAgentVersion = builder.desiredCdpVmAgentVersion;
+        desiredCdpRequestSignerVersion = builder.desiredCdpRequestSignerVersion;
         repoName = builder.repoName;
         repoBaseUrl = builder.repoBaseUrl;
         repoGpgKey = builder.repoGpgKey;
@@ -83,6 +88,7 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
         map.put(DESIRED_CDP_LOGGING_AGENT_VERSION, desiredCdpLoggingAgentVersion);
         map.put(DESIRED_CDP_TELEMETRY_VERSION, desiredCdpTelemetryVersion);
         map.put(DESIRED_CDP_VMAGENT_VERSION, desiredCdpVmAgentVersion);
+        map.put(DESIRED_CDP_REQUEST_SIGNER_VERSION, desiredCdpRequestSignerVersion);
         map.put("repoName", repoName);
         map.put("repoBaseUrl", repoBaseUrl);
         map.put("repoGpgCheck", repoGpgCheck);
@@ -111,6 +117,8 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
         private String desiredCdpTelemetryVersion;
 
         private String desiredCdpVmAgentVersion;
+
+        private String desiredCdpRequestSignerVersion;
 
         private String repoName;
 
@@ -171,6 +179,11 @@ public class TelemetryCommonConfigView implements TelemetryConfigView {
 
         public Builder withDesiredCdpVmAgentVersion(String desiredCdpVmAgentVersion) {
             this.desiredCdpVmAgentVersion = desiredCdpVmAgentVersion;
+            return this;
+        }
+
+        public Builder withDesiredCdpRequestSignerVersion(String desiredCdpRequestSignerVersion) {
+            this.desiredCdpRequestSignerVersion = desiredCdpRequestSignerVersion;
             return this;
         }
 

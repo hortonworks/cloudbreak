@@ -39,6 +39,9 @@ public class MonitoringConfigServiceTest {
     @Mock
     private Monitoring monitoring;
 
+    @Mock
+    private RequestSignerConfiguration requestSignerConfiguration;
+
     @Before
     public void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -55,6 +58,7 @@ public class MonitoringConfigServiceTest {
         given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
         given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
         given(cmMonitoringConfiguration.getPort()).willReturn(DEFAULT_CM_SMON_PORT);
+        given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
         given(monitoring.getRemoteWriteUrl()).willReturn("https://myendpoint/api/v1/receive");
         // WHEN
         MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, true, false);
@@ -75,6 +79,7 @@ public class MonitoringConfigServiceTest {
         given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
         given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
         given(monitoring.getRemoteWriteUrl()).willReturn("https://myendpoint/api/v1/receive");
+        given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
         given(monitoringGlobalAuthConfig.isEnabled()).willReturn(true);
         given(monitoringGlobalAuthConfig.getToken()).willReturn("my-token");
         // WHEN
@@ -93,6 +98,7 @@ public class MonitoringConfigServiceTest {
         given(monitoringConfiguration.isEnabled()).willReturn(true);
         given(monitoringConfiguration.isDevStack()).willReturn(true);
         given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
+        given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
         given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
         given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("https://myendpoint/$accountid");
         // WHEN
@@ -111,6 +117,7 @@ public class MonitoringConfigServiceTest {
         given(monitoringConfiguration.isEnabled()).willReturn(true);
         given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
         given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
+        given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
         given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("https://myendpoint/$accountid");
         // WHEN
         MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, false, false);
@@ -127,6 +134,7 @@ public class MonitoringConfigServiceTest {
         given(monitoringConfiguration.isPaasSupport()).willReturn(true);
         given(monitoringConfiguration.getClouderaManagerExporter()).willReturn(cmMonitoringConfiguration);
         given(monitoringConfiguration.getAgent()).willReturn(monitoringAgentConfiguration);
+        given(monitoringConfiguration.getRequestSigner()).willReturn(requestSignerConfiguration);
         given(monitoringConfiguration.getRemoteWriteUrl()).willReturn("https://myendpoint/$accountid");
         // WHEN
         MonitoringConfigView result = underTest.createMonitoringConfig(monitoring, clusterType, authConfig, null, false, false);

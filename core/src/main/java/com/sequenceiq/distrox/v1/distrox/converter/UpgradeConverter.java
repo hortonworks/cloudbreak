@@ -6,8 +6,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
@@ -37,5 +39,9 @@ public class UpgradeConverter {
 
     public DistroXUpgradeV1Response convert(UpgradeV4Response source) {
         return new DistroXUpgradeV1Response(source.getCurrent(), source.getUpgradeCandidates(), source.getReason(), source.getFlowIdentifier());
+    }
+
+    public DistroXCcmUpgradeV1Response convert(StackCcmUpgradeV4Response source) {
+        return new DistroXCcmUpgradeV1Response(source.getResponseType(), source.getFlowIdentifier(), source.getReason(), source.getResourceCrn());
     }
 }

@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
+import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -80,9 +81,10 @@ class StackV4ControllerTest {
 
     @Test
     public void testCcmUpgrade() {
-        FlowIdentifier actual = new FlowIdentifier(FlowType.FLOW, "1");
+        FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "1");
+        StackCcmUpgradeV4Response actual = new StackCcmUpgradeV4Response(CcmUpgradeResponseType.TRIGGERED, flowId, null, STACK_CRN);
         when(stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(STACK_CRN))).thenReturn(actual);
         StackCcmUpgradeV4Response result = underTest.upgradeCcmByCrnInternal(WORKSPACE_ID, STACK_CRN, USER_CRN);
-        Assertions.assertSame(actual, result.getFlowIdentifier());
+        Assertions.assertSame(actual, result);
     }
 }

@@ -1,20 +1,26 @@
 package com.sequenceiq.environment.proxy.v1.service;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
+
+import javax.ws.rs.BadRequestException;
 
 import org.hibernate.JDBCException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.access.AccessDeniedException;
 
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
 import com.sequenceiq.environment.proxy.service.ProxyConfigService;
@@ -38,12 +44,22 @@ public class ProxyConfigServiceTest {
     @Mock
     private final RegionAwareCrnGenerator regionAwareCrnGenerator;
 
+    @Mock
+    private final TransactionService transactionService;
+
+    @Mock
+    private final OwnerAssignmentService ownerAssignmentService;
+
     private ProxyConfigService underTestProxyConfigService;
 
-    public ProxyConfigServiceTest() {
+    public ProxyConfigServiceTest() throws TransactionService.TransactionExecutionException {
         proxyConfigRepository = mock(ProxyConfigRepository.class);
         regionAwareCrnGenerator = mock(RegionAwareCrnGenerator.class);
-        underTestProxyConfigService = new ProxyConfigService(proxyConfigRepository, regionAwareCrnGenerator);
+        ownerAssignmentService = mock(OwnerAssignmentService.class);
+        transactionService = mock(TransactionService.class);
+        underTestProxyConfigService = new ProxyConfigService(proxyConfigRepository, regionAwareCrnGenerator, ownerAssignmentService, transactionService);
+        lenient().doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(any(), any(), anyString());
+        lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 
     @Test
@@ -105,8 +121,8 @@ public class ProxyConfigServiceTest {
 
     @Test
     public void testCreateAlreadyExist() {
-        when(proxyConfigRepository.save(PROXY_CONFIG)).thenThrow(DataIntegrityViolationException.class);
-        Assertions.assertThrows(AccessDeniedException.class, () -> underTestProxyConfigService.create(PROXY_CONFIG, ACCOUNT_ID, CREATOR));
+        when(proxyConfigRepository.findResourceCrnByNameAndTenantId(anyString(), any())).thenReturn(Optional.of(PROXY_CONFIG.getName()));
+        Assertions.assertThrows(BadRequestException.class, () -> underTestProxyConfigService.create(PROXY_CONFIG, ACCOUNT_ID, CREATOR));
     }
 
     @Test

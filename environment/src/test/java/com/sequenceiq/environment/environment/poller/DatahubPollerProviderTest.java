@@ -7,35 +7,65 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_FAILE
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static java.util.Collections.emptyList;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.environment.environment.service.datahub.DatahubService;
+import com.sequenceiq.flow.api.FlowEndpoint;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 
+@ExtendWith(MockitoExtension.class)
 class DatahubPollerProviderTest {
 
     private static final Long ENV_ID = 1000L;
 
-    private final DatahubService datahubService = Mockito.mock(DatahubService.class);
+    @Mock
+    private DatahubService datahubService;
 
-    private final ClusterPollerResultEvaluator clusterPollerResultEvaluator = new ClusterPollerResultEvaluator();
+    @Mock
+    private FlowEndpoint flowEndpoint;
 
-    private final DatahubPollerProvider underTest = new DatahubPollerProvider(datahubService, clusterPollerResultEvaluator);
+    @Spy
+    private ClusterPollerResultEvaluator clusterPollerResultEvaluator;
+
+    @Spy
+    private FlowResultPollerEvaluator flowResultPollerEvaluator;
+
+    @Mock
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    @Mock
+    private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
+
+    @InjectMocks
+    private DatahubPollerProvider underTest;
 
     @Test
     void testStopPollerWhenPollerCrnIsEmpty() throws Exception {
@@ -80,6 +110,36 @@ class DatahubPollerProviderTest {
         assertEquals(attemptState, result.getState());
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("upgradeCcmPollerScenarios")
+    void testUpgradeCcmPoller(String testName, boolean flow1Active, boolean flow1Failed, boolean flow2Active, boolean flow2Failed, AttemptState expectedResult)
+            throws Exception {
+        when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+
+        FlowIdentifier flowId1 = createFlowIdentifier();
+        FlowIdentifier flowId2 = createFlowIdentifier();
+        FlowCheckResponse checkResponse1 = createFlowCheckResponse(flowId1, flow1Active, flow1Failed);
+        FlowCheckResponse checkResponse2 = createFlowCheckResponse(flowId2, flow2Active, flow2Failed);
+        when(flowEndpoint.hasFlowRunningByFlowId(flowId1.getPollableId())).thenReturn(checkResponse1);
+        when(flowEndpoint.hasFlowRunningByFlowId(flowId2.getPollableId())).thenReturn(checkResponse2);
+
+        List<FlowIdentifier> flows = List.of(flowId1, flowId2);
+        AttemptResult<Void> result = underTest.upgradeCcmPoller(ENV_ID, flows).process();
+        assertThat(result.getState()).isEqualTo(expectedResult);
+    }
+
+    private FlowIdentifier createFlowIdentifier() {
+        return new FlowIdentifier(FlowType.FLOW, UUID.randomUUID().toString());
+    }
+
+    private FlowCheckResponse createFlowCheckResponse(FlowIdentifier flowId, boolean flowActive, boolean flowFailed) {
+        FlowCheckResponse checkResponse = new FlowCheckResponse();
+        checkResponse.setFlowId(flowId.getPollableId());
+        checkResponse.setHasActiveFlow(flowActive);
+        checkResponse.setLatestFlowFinalizedAndFailed(flowFailed);
+        return checkResponse;
+    }
+
     private static Stream<Arguments> distroxStopStatuses() {
         return Stream.of(
                 Arguments.of(STOPPED, STOPPED, STOPPED, STOPPED, AttemptState.FINISH, "", Collections.emptyList()),
@@ -115,4 +175,21 @@ class DatahubPollerProviderTest {
         stack1.setStatusReason("reason");
         return stack1;
     }
+
+    // @formatter:off
+    // CHECKSTYLE:OFF
+    public static Object[][] upgradeCcmPollerScenarios() {
+        return new Object[][] {
+                // testName                     flow1Active flow1Failed flow2Active flow2Result AttemptState
+                { "Flow1 and Flow2 finished",   false,      false,      false,      false,      AttemptState.FINISH },
+                { "Flow1 active",               true,       false,      false,      false,      AttemptState.CONTINUE },
+                { "Flow1 failed",               false,      true,       false,      false,      AttemptState.FINISH },
+                { "Flow2 active",               false,      false,      true,       false,      AttemptState.CONTINUE },
+                { "Flow2 failed",               false,      false,      false,      true,       AttemptState.FINISH },
+                { "Flow1 and Flow2 active",     true,       false,      true,       false,      AttemptState.CONTINUE },
+                { "Flow1 and Flow2 failed",     false,      true,       false,      true,       AttemptState.FINISH },
+        };
+    }
+    // CHECKSTYLE:ON
+    // @formatter:on
 }

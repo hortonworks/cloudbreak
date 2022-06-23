@@ -11,9 +11,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXMultiDeleteV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.environment.exception.DatahubOperationFailedException;
 
 @Service
@@ -23,12 +27,21 @@ public class DatahubService {
 
     private final DistroXV1Endpoint distroXV1Endpoint;
 
+    private final DistroXUpgradeV1Endpoint distroXUpgradeV1Endpoint;
+
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public DatahubService(DistroXV1Endpoint distroXV1Endpoint,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
+            DistroXUpgradeV1Endpoint distroXUpgradeV1Endpoint,
+            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+
         this.distroXV1Endpoint = distroXV1Endpoint;
+        this.distroXUpgradeV1Endpoint = distroXUpgradeV1Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     public StackViewV4Responses list(String environmentCrn) {
@@ -79,5 +92,18 @@ public class DatahubService {
             LOGGER.error(String.format("Failed delete multiple Datahub clusters for environment %s due to: '%s'.", environmentCrn, errorMessage), e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }
+    }
+
+    public DistroXCcmUpgradeV1Response upgradeCcm(String datahubCrn) {
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                    () ->  distroXUpgradeV1Endpoint.upgradeCcmByCrnInternal(datahubCrn, initiatorUserCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to Upgrade Cluster Connectivity Manager for Data Hub CRN '%s' due to '%s'.", datahubCrn, errorMessage), e);
+            throw new DatahubOperationFailedException(errorMessage, e);
+        }
+
     }
 }

@@ -10,16 +10,17 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.google.api.client.auth.oauth2.TokenResponseException;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Images.Get;
 import com.google.api.services.compute.model.Image;
-import com.google.api.services.compute.model.ImageList;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.RewriteResponse;
 import com.google.api.services.storage.model.StorageObject;
@@ -75,9 +76,10 @@ public class GcpProvisionSetup implements Setup {
         try {
             String projectId = gcpStackUtil.getProjectId(credential);
             String imageName = image.getImageName();
+            finalImageName = gcpStackUtil.getImageName(imageName);
             Compute compute = gcpComputeFactory.buildCompute(credential);
-            ImageList imageList = compute.images().list(projectId).execute();
-            if (!containsSpecificImage(imageList, imageName)) {
+            Image gcpImage = getGcpImage(projectId, finalImageName, compute);
+            if (gcpImage == null) {
                 Storage storage = gcpStorageFactory.buildStorage(credential, cloudContext.getName());
                 String bucketName = gcpBucketRegisterService.register(authenticatedContext);
                 String tarName = gcpStackUtil.getTarName(imageName);
@@ -91,6 +93,19 @@ public class GcpProvisionSetup implements Setup {
             LOGGER.warn(msg, e);
             throw new CloudConnectorException(msg, e);
         }
+    }
+
+    private Image getGcpImage(String projectId, String imageName, Compute compute) throws IOException {
+        try {
+            return compute.images().get(projectId, imageName).execute();
+        } catch (GoogleJsonResponseException e) {
+            if (e.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                LOGGER.debug("Cannot find image with name: {}", imageName);
+            } else {
+                throw e;
+            }
+        }
+        return null;
     }
 
     public void copyImage(
@@ -170,18 +185,5 @@ public class GcpProvisionSetup implements Setup {
     @Override
     public void scalingPrerequisites(AuthenticatedContext authenticatedContext, CloudStack stack, boolean upscale) {
 
-    }
-
-    private boolean containsSpecificImage(ImageList imageList, String imageUrl) {
-        try {
-            for (Image image : imageList.getItems()) {
-                if (image.getName().equals(gcpStackUtil.getImageName(imageUrl))) {
-                    return true;
-                }
-            }
-        } catch (NullPointerException ignored) {
-            return false;
-        }
-        return false;
     }
 }

@@ -126,7 +126,7 @@ public class MaintenanceModeValidationService {
         List<Warning> warnings = new ArrayList<>();
         try {
             Image image = componentConfigProviderService.getImage(stack.getId());
-            StatedImage statedImage = imageCatalogService.getImage(image.getImageCatalogUrl(),
+            StatedImage statedImage = imageCatalogService.getImage(stack.getWorkspace().getId(), image.getImageCatalogUrl(),
                     image.getImageCatalogName(), image.getImageId());
 
             if (!image.getPackageVersions().isEmpty()) {

@@ -74,6 +74,8 @@ public class ClouderaManagerDecomissioner {
 
     private static final String SUMMARY_REQUEST_VIEW = "SUMMARY";
 
+    private static final String FULL_REQUEST_VIEW = "FULL";
+
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
@@ -134,7 +136,7 @@ public class ClouderaManagerDecomissioner {
         HostServiceStatuses hostServiceStates = getHostServiceStatuses(hosts, client);
         if (hostServiceStates.anyHostBusy()) {
             Set<String> busyHostNames = hostServiceStates.getBusyHosts();
-            LOGGER.info("Cannot downscale, some nodes are is BUSY state : ", busyHostNames);
+            LOGGER.info("Cannot downscale, some nodes are is BUSY state : {}", busyHostNames);
             throw new NodeIsBusyException(String.format("Node is in 'busy' state, cannot be decommissioned right now. " +
                     "Please try to remove the node later. Busy hosts: %s", busyHostNames));
         }
@@ -182,7 +184,7 @@ public class ClouderaManagerDecomissioner {
             int replication = hostGroupNodesAreDataNodes(hostTemplates, hostGroup.getName()) ? getReplicationFactor(client, stack.getName()) : 0;
             verifyNodeCount(replication, scalingAdjustment, instancesForHostGroup.size(), 0, stack);
 
-            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
+            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, FULL_REQUEST_VIEW);
             Set<InstanceMetaData> instancesToRemove = getUnusedInstances(scalingAdjustment, instancesForHostGroup, hostRefList);
 
             List<ApiHost> apiHosts = hostRefList.getItems().stream()

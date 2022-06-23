@@ -42,9 +42,8 @@ public interface CDPStructuredEventV1Endpoint {
 
     @GET
     @Path("zip")
-    @Produces(MediaType.APPLICATION_OCTET_STREAM)
-    @ApiOperation(value = LIST_FOR_RESOURCE_ZIP, produces = MediaType.APPLICATION_JSON, notes = AUDIT_EVENTS_NOTES,
-            nickname = "getAuditEventsZipForResource")
+    @Produces({MediaType.APPLICATION_OCTET_STREAM, MediaType.APPLICATION_JSON})
+    @ApiOperation(value = LIST_FOR_RESOURCE_ZIP, notes = AUDIT_EVENTS_NOTES, nickname = "getAuditEventsZipForResource")
     Response getAuditEventsZip(
             @QueryParam("resourceCrn") @NotNull(message = "The 'resourceCrn' query parameter must be specified.") String resourceCrn,
             @QueryParam("types") List<StructuredEventType> types);

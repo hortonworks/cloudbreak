@@ -56,6 +56,9 @@ public class TelemetryCommonConfigService {
             if (telemetryUpgradeConfiguration.getCdpVmAgent() != null) {
                 builder.withDesiredCdpVmAgentVersion(telemetryUpgradeConfiguration.getCdpVmAgent().getDesiredVersion());
             }
+            if (telemetryUpgradeConfiguration.getCdpRequestSigner() != null) {
+                builder.withDesiredCdpRequestSignerVersion(telemetryUpgradeConfiguration.getCdpRequestSigner().getDesiredVersion());
+            }
         }
         return builder
                 .withClusterDetails(clusterDetails)

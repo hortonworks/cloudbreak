@@ -829,4 +829,10 @@ public class ModelDescriptions {
         public static final String IMAGE_IDS = "List of image UUIDs to find CM and parcel information. " +
                 "If left empty, all images are used from the image catalog.";
     }
+
+    public static class UpgradeCcmDescription {
+        public static final String FLOW_ID = "Flow identifier for the current Upgrade CCM operation.";
+        public static final String CCM_UPGRADE_RESPONSE_TYPE = "Information about the Upgrade CCM operation acceptance.";
+        public static final String CCM_UPGRADE_ERROR_REASON = "Reason of the error if Upgrade CCM could not be started.";
+    }
 }

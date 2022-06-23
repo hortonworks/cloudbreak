@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -197,7 +196,7 @@ public class EnvironmentTest extends AbstractMockTest {
             given = "there is a running cloudbreak",
             when = "valid create environment request is sent with freeipa recipe",
             then = "environment should be created with freeipa and recipes was passed")
-    public void testCreateEnvironmentAndFreeIpaRecipesPassed(MockedTestContext testContext) throws IOException {
+    public void testCreateEnvironmentAndFreeIpaRecipesPassed(MockedTestContext testContext) {
         String preCMRecipeName = resourcePropertyProvider().getName();
         String preTerminationRecipeName = resourcePropertyProvider().getName();
         testContext

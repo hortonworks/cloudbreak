@@ -140,11 +140,11 @@ public class UpgradeService {
             if (!isLatestImage(stack, image, latestImage)) {
                 upgradeResponse = currentImageNotLatest(stack, image, latestImage);
             } else {
-                upgradeResponse = notUpgradable(image,
+                upgradeResponse = notUpgradable(stack.getWorkspace().getId(), image,
                         String.format("According to the image catalog, the current image %s is already the latest version.", image.getImageId()));
             }
         } else {
-            upgradeResponse = notUpgradableWithValidationResult(image, repairResult.getError());
+            upgradeResponse = notUpgradableWithValidationResult(stack.getWorkspace().getId(), image, repairResult.getError());
         }
         return upgradeResponse;
     }
@@ -207,7 +207,7 @@ public class UpgradeService {
 
     private UpgradeOptionV4Response upgradeable(Image image, StatedImage latestImage, Stack stack)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        UpgradeOptionV4Response response = createUpgradeBaseWithCurrent(image);
+        UpgradeOptionV4Response response = createUpgradeBaseWithCurrent(stack.getWorkspace().getId(), image);
         ImageInfoV4Response upgradeImageInfo = new ImageInfoV4Response(
                 getImageNameForStack(stack, latestImage),
                 latestImage.getImage().getUuid(),
@@ -222,7 +222,7 @@ public class UpgradeService {
 
     private UpgradeOptionV4Response upgradeableAfterAction(Image image, StatedImage latestImage, Stack stack, String reason)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        UpgradeOptionV4Response response = notUpgradable(image, reason);
+        UpgradeOptionV4Response response = notUpgradable(stack.getWorkspace().getId(), image, reason);
         ImageInfoV4Response upgradeImageInfo = new ImageInfoV4Response(
                 getImageNameForStack(stack, latestImage),
                 latestImage.getImage().getUuid(),
@@ -234,13 +234,15 @@ public class UpgradeService {
         return response;
     }
 
-    private UpgradeOptionV4Response notUpgradableWithValidationResult(Image image, RepairValidation validationResult)
+    private UpgradeOptionV4Response notUpgradableWithValidationResult(Long workspaceId, Image image, RepairValidation validationResult)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        return notUpgradable(image, validationResult.getValidationErrors().stream().collect(Collectors.joining("; ")));
+        return notUpgradable(workspaceId, image, validationResult.getValidationErrors().stream().collect(Collectors.joining("; ")));
     }
 
-    private UpgradeOptionV4Response createUpgradeBaseWithCurrent(Image image) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    private UpgradeOptionV4Response createUpgradeBaseWithCurrent(Long workspaceId, Image image)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentImage = imageCatalogService.getImage(
+                workspaceId,
                 image.getImageCatalogUrl(),
                 image.getImageCatalogName(),
                 image.getImageId()).getImage();
@@ -260,8 +262,9 @@ public class UpgradeService {
         return componentVersionProvider.getComponentVersions(image.getPackageVersions(), image.getOs(), image.getDate());
     }
 
-    private UpgradeOptionV4Response notUpgradable(Image image, String reason) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        UpgradeOptionV4Response response = createUpgradeBaseWithCurrent(image);
+    private UpgradeOptionV4Response notUpgradable(Long workspaceId, Image image, String reason)
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        UpgradeOptionV4Response response = createUpgradeBaseWithCurrent(workspaceId, image);
         response.setReason(reason);
         LOGGER.error("Datalake upgrade option evaluation finished with error, reason: {}", response.getReason());
         return response;
