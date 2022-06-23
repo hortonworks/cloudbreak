@@ -109,7 +109,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider {
         Telemetry telemetry = stack.getTelemetry();
         if (telemetry != null) {
             String databusEndpoint = getDatabusEndpoint(stack, telemetry);
-            boolean databusEnabled = telemetry.isClusterLogsCollectionEnabled();
+            boolean databusEnabled = telemetry.isAnyDataBusBasedFeatureEnablred();
             boolean databusEndpointValidation = entitlementService.isFreeIpaDatabusEndpointValidationEnabled(stack.getAccountId());
             boolean cdpSaasEnabled = entitlementService.isCdpSaasEnabled(stack.getAccountId());
             boolean computeMonitoring = entitlementService.isComputeMonitoringEnabled(stack.getAccountId());
