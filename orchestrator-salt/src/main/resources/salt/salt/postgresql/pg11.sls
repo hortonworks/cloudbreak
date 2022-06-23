@@ -1,5 +1,26 @@
 {%- from 'metadata/settings.sls' import metadata with context %}
 
+{% if not salt['file.file_exists']('/usr/pgsql-11/bin/psql') %}
+include:
+  - postgresql.repo.pg11
+
+install-centos-scl-rh:
+  pkg.installed:
+    - failhard: True
+    - name: centos-release-scl-rh
+
+install-postgres11:
+  pkg.installed:
+    - failhard: True
+    - pkgs:
+        - postgresql11-server
+        - postgresql-jdbc
+        - postgresql11
+        - postgresql11-contrib
+        - postgresql11-docs
+        - postgresql11-devel
+{% endif %}
+
 pgsql-ld-conf:
   alternatives.set:
     - path: /usr/pgsql-11/share/postgresql-11-libs.conf
