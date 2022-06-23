@@ -2,9 +2,12 @@ package com.sequenceiq.it.cloudbreak.listener;
 
 import static com.sequenceiq.it.cloudbreak.log.Log.log;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -89,19 +92,35 @@ public class ReportListener extends TestListenerAdapter {
         }
         Iterable<Searchable> searchables = Iterables.filter(testContext.getResourceNames().values(), Searchable.class);
         List<Searchable> listOfSearchables = StreamSupport.stream(searchables.spliterator(), false).collect(Collectors.toList());
-        if (listOfSearchables.size() == 0) {
+        if (listOfSearchables.isEmpty()) {
             return;
         }
         SearchUrl searchUrl = new KibanaSearchUrl();
-        tr.getTestContext().setAttribute(tr.getName() + SEARCH_URL,
-                searchUrl.getSearchUrl(listOfSearchables, new Date(tr.getStartMillis()), new Date(tr.getEndMillis())));
+        Date startTime = tr.getTestContext().getStartDate();
+        Date endTime = tr.getTestContext().getEndDate();
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
+        if (startTime == null) {
+            startTime = new Date(tr.getStartMillis());
+            LOGGER.warn(String.format("ITestResult Test Context ::: Start date is null! So we are using ITestResult Start time: %s!",
+                    formatter.format(startTime)));
+        }
+        if (endTime == null) {
+            endTime = new Date(tr.getEndMillis());
+            LOGGER.warn(String.format("ITestResult Test Context ::: End date is null! So we are using ITestResult End time: %s!",
+                    formatter.format(endTime)));
+        }
+        tr.getTestContext().setAttribute(tr.getName() + SEARCH_URL, searchUrl.getSearchUrl(listOfSearchables, startTime, endTime));
 
         String baseLocation = getCloudStorageBaseLocation(testContext);
         CloudProviderProxy cloudProvider = testContext.getCloudProvider();
-        generateClusterLogsUrl(FreeIpaTestDto.class, tr, testContext.getResourceNames(), testContext.getResourceCrns(), baseLocation, cloudProvider);
-        generateClusterLogsUrl(SdxTestDto.class, tr, testContext.getResourceNames(), testContext.getResourceCrns(), baseLocation, cloudProvider);
-        generateClusterLogsUrl(SdxInternalTestDto.class, tr, testContext.getResourceNames(), testContext.getResourceCrns(), baseLocation, cloudProvider);
-        generateClusterLogsUrl(DistroXTestDto.class, tr, testContext.getResourceNames(), testContext.getResourceCrns(), baseLocation, cloudProvider);
+        generateClusterLogsUrl(testContext.get(FreeIpaTestDto.class), tr, testContext.getResourceNames(), testContext.getResourceCrns(), baseLocation,
+                cloudProvider);
+        generateClusterLogsUrl(testContext.get(SdxTestDto.class), tr, testContext.getResourceNames(), testContext.getResourceCrns(), baseLocation,
+                cloudProvider);
+        generateClusterLogsUrl(testContext.get(SdxInternalTestDto.class), tr, testContext.getResourceNames(), testContext.getResourceCrns(), baseLocation,
+                cloudProvider);
+        generateClusterLogsUrl(testContext.get(DistroXTestDto.class), tr, testContext.getResourceNames(), testContext.getResourceCrns(), baseLocation,
+                cloudProvider);
     }
 
     private void logMeasurements(ITestResult tr) {
@@ -117,33 +136,40 @@ public class ReportListener extends TestListenerAdapter {
         tr.setAttribute(tr.getName() + MEASUREMENTS, measuredTestContext.getMeasure());
     }
 
-    private <T extends CloudbreakTestDto> void generateClusterLogsUrl(Class<T> dtoClass, ITestResult tr, Map<String, CloudbreakTestDto> resourceNames,
+    private <T extends CloudbreakTestDto> void generateClusterLogsUrl(T testDto, ITestResult tr, Map<String, CloudbreakTestDto> resourceNames,
             Map<String, CloudbreakTestDto> resourceCrns, String baseLocation, CloudProviderProxy cloudProvider) {
-        try {
-            String resourceName = getResourceName(dtoClass, resourceNames);
-            String resourceCrn = getResourceCrn(dtoClass, resourceCrns);
-            if (StringUtils.isEmpty(resourceCrn)) {
-                LOGGER.info("{} resource is not present in Cluster Logs", dtoClass.getSimpleName());
-            } else {
-                switch (dtoClass.getSimpleName()) {
-                    case "FreeIpaTestDto":
-                        getFreeIpaCloudStorageUrl(tr, resourceName, resourceCrn, baseLocation, cloudProvider);
-                        break;
-                    case "DistroXTestDto":
-                        getDistroxCloudStorageUrl(tr, resourceName, resourceCrn, baseLocation, cloudProvider);
-                        break;
-                    case "SdxInternalTestDto":
-                    case "SdxTestDto":
-                        getSdxCloudStorageUrl(tr, resourceName, resourceCrn, baseLocation, cloudProvider);
-                        break;
-                    default:
-                        LOGGER.warn("The given {} TestDTO is not in the list of Cluster Logs related testDTOs (freeIPA, Data Lake, Data Hub)!",
-                                dtoClass.getSimpleName());
-                        break;
+        if (testDto != null) {
+            String testDtoName = testDto.getClass().getSimpleName();
+            try {
+                String resourceName = getResourceKey(testDto, resourceNames);
+                String resourceCrn = getResourceKey(testDto, resourceCrns);
+                if (StringUtils.equalsIgnoreCase(testDtoName, resourceCrn)) {
+                    LOGGER.info("Cannot find resource for '{}' testDTO in Test Context!", testDtoName);
+                } else {
+                    if (StringUtils.equalsIgnoreCase(testDtoName, resourceName)) {
+                        resourceName = testDto.getName();
+                    }
+                    LOGGER.info("Getting cluster logs for '{}' resource with '{}' name and '{}' Crn...", testDtoName, resourceName, resourceCrn);
+                    switch (testDtoName) {
+                        case "FreeIpaTestDto":
+                            getFreeIpaCloudStorageUrl(tr, resourceName, resourceCrn, baseLocation, cloudProvider);
+                            break;
+                        case "DistroXTestDto":
+                            getDistroxCloudStorageUrl(tr, resourceName, resourceCrn, baseLocation, cloudProvider);
+                            break;
+                        case "SdxInternalTestDto":
+                        case "SdxTestDto":
+                            getSdxCloudStorageUrl(tr, resourceName, resourceCrn, baseLocation, cloudProvider);
+                            break;
+                        default:
+                            LOGGER.warn("Cluster logs have not been generated to '{}' testDTO (appropriate resources: freeIPA, Data Lake, Data Hub)!",
+                                    testDtoName);
+                            break;
+                    }
                 }
+            } catch (Exception e) {
+                LOGGER.warn("Cannot generate cluster logs for '{}' resource, because of the following ERROR: ", testDtoName, e);
             }
-        } catch (Exception e) {
-            LOGGER.info("{} resource is not present in Test Context.", dtoClass.getSimpleName(), e);
         }
     }
 
@@ -185,20 +211,14 @@ public class ReportListener extends TestListenerAdapter {
         }
     }
 
-    private <T extends CloudbreakTestDto> String getResourceName(Class<T> dtoClass, Map<String, CloudbreakTestDto> resourceNames) {
-        return resourceNames.values().stream()
-                .filter(cloudbreakTestDto -> dtoClass.getSimpleName().equalsIgnoreCase(cloudbreakTestDto.getClass().getSimpleName()))
-                .map(CloudbreakTestDto::getName)
-                .findAny()
-                .orElse(null);
-    }
-
-    private <T extends CloudbreakTestDto> String getResourceCrn(Class<T> dtoClass, Map<String, CloudbreakTestDto> resourceCrns) {
-        return resourceCrns.entrySet().stream()
-                .filter(resourceMap -> dtoClass.getSimpleName().equalsIgnoreCase(resourceMap.getValue().getClass().getSimpleName()))
-                .map(Map.Entry::getKey)
-                .findAny()
-                .orElse(null);
+    private <T extends CloudbreakTestDto> String getResourceKey(T testDto, Map<String, CloudbreakTestDto> resources) {
+        Optional<Entry<String, CloudbreakTestDto>> foundEntry = resources.entrySet().stream()
+                .filter(entry -> entry.getValue() == testDto)
+                .findFirst();
+        if (foundEntry.isPresent()) {
+            return foundEntry.get().getKey();
+        }
+        return testDto.getClass().getSimpleName();
     }
 }
 
