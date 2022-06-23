@@ -10,7 +10,7 @@ Type=simple
 User=root
 Group=root
 ExecStart=/opt/cdp-vmagent/bin/vmagent-prod \
-{%- if monitoring.requestSignerEnabled %}
+{%- if monitoring.requestSignerEnabled and monitoring.databusEnabled%}
      -remoteWrite.url=https://localhost:{{ monitoring.requestSignerPort }} \
      -remoteWrite.tlsInsecureSkipVerify=true \
      -remoteWrite.basicAuth.username={{ monitoring.requestSignerUser }} \

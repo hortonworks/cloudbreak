@@ -91,7 +91,7 @@ public class TelemetryDecoratorTest {
         DataBusCredential dataBusCredential = new DataBusCredential();
         dataBusCredential.setAccessKey("myAccessKey");
         dataBusCredential.setPrivateKey("mySecretKey");
-        given(altusMachineUserService.isMeteringOrAnyDataBusBasedFeatureSupported(any(Stack.class), any(Telemetry.class)))
+        given(altusMachineUserService.isAnyDataBusBasedFeatureSupported(any(Telemetry.class)))
                 .willReturn(true);
         given(altusMachineUserService.storeDataBusCredential(any(Optional.class), any(Stack.class)))
                 .willReturn(dataBusCredential);
