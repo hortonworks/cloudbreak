@@ -83,7 +83,7 @@ public class MetricsClient {
                                 .build())
                         .addLabels(Types.Label.newBuilder()
                                 .setName(CLUSTER_TYPE_LABEL_NAME)
-                                .setValue(crn.getResourceType().getName())
+                                .setValue(crn.getService().getName())
                                 .build())
                         .addSamples(Types.Sample.newBuilder()
                                 .setValue(statusOrdinal.doubleValue())
