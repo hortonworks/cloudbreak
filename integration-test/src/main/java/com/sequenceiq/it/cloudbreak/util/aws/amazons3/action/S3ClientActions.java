@@ -154,8 +154,12 @@ public class S3ClientActions extends S3Client {
 
         if (s3Client.doesBucketExistV2(bucketName)) {
             try {
-                return String.format("https://s3.console.aws.amazon.com/s3/buckets/%s?region=%s&prefix=%s%s/&showversions=false",
-                        bucketName, amazonS3URI.getRegion(), keyPrefix, clusterLogPath);
+                String deploymentS3Console = "https://s3.console.aws.amazon.com/s3/buckets/";
+                if (StringUtils.containsIgnoreCase(amazonS3URI.getRegion(), "us-gov")) {
+                    deploymentS3Console = "https://console.amazonaws-us-gov.com/s3/buckets/";
+                }
+                return format("%s%s?region=%s&prefix=%s%s/&showversions=false",
+                        deploymentS3Console, bucketName, amazonS3URI.getRegion(), keyPrefix, clusterLogPath);
             } catch (AmazonServiceException e) {
                 LOGGER.error("Amazon S3 couldn't process the call. So it has been returned with error!", e);
                 throw new TestFailException("Amazon S3 couldn't process the call.", e);
