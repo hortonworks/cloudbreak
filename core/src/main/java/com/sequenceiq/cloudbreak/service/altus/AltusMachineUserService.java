@@ -59,7 +59,7 @@ public class AltusMachineUserService {
      * Generate machine user for fluentd - databus communication
      */
     public Optional<AltusCredential> generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry, boolean forced) {
-        if (isMeteringOrAnyDataBusBasedFeatureSupported(stack, telemetry) || forced) {
+        if (isAnyDataBusBasedFeatureSupported(telemetry) || forced) {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                     () -> altusIAMService.generateMachineUserWithAccessKey(
@@ -79,7 +79,7 @@ public class AltusMachineUserService {
      * Delete machine user for fluent based upload with its access keys (and unassign databus role if required)
      */
     public void clearFluentMachineUser(Stack stack, Telemetry telemetry) {
-        if (isMeteringOrAnyDataBusBasedFeatureSupported(stack, telemetry) || isDataBusCredentialAvailable(stack)) {
+        if (isAnyDataBusBasedFeatureSupported(telemetry) || isDataBusCredentialAvailable(stack)) {
             String machineUserName = getFluentDatabusMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
@@ -171,11 +171,8 @@ public class AltusMachineUserService {
                         telemetry.isUseSharedAltusCredentialEnabled()));
     }
 
-    // for datalake metering is not supported/required right now
-    // TODO: monitoring do not need databus machine user - until fluent based metrics pushing is not supported
-    public boolean isMeteringOrAnyDataBusBasedFeatureSupported(Stack stack, Telemetry telemetry) {
-        return telemetry != null && (telemetry.isAnyDataBusBasedFeatureEnablred() || (telemetry.isMeteringFeatureEnabled()
-                && !StackType.DATALAKE.equals(stack.getType())));
+    public boolean isAnyDataBusBasedFeatureSupported(Telemetry telemetry) {
+        return telemetry != null && telemetry.isAnyDataBusBasedFeatureEnablred();
     }
 
     public List<UserManagementProto.MachineUser> getAllInternalMachineUsers(String accountId) {

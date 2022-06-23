@@ -196,7 +196,7 @@ public class TelemetryDecorator {
     }
 
     private AltusCredential getAltusCredentialForDataBus(Stack stack, Telemetry telemetry, DataBusCredential dataBusCredential) {
-        if (altusMachineUserService.isMeteringOrAnyDataBusBasedFeatureSupported(stack, telemetry)) {
+        if (altusMachineUserService.isAnyDataBusBasedFeatureSupported(telemetry)) {
             if (dataBusCredential == null || dataBusCredential.getAccessKey() == null || dataBusCredential.getPrivateKey() == null) {
                 LOGGER.debug("No databus access/secret key is attached to the stack, generate new api key for machine user.");
                 Optional<AltusCredential> altusCredential = altusMachineUserService.generateDatabusMachineUserForFluent(stack, telemetry);
