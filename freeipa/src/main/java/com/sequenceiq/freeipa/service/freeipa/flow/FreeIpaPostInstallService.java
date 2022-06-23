@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
@@ -32,6 +33,7 @@ import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.user.UserSyncService;
+import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -75,6 +77,9 @@ public class FreeIpaPostInstallService {
     @Inject
     private FreeIpaNodeUtilService freeIpaNodeUtilService;
 
+    @Inject
+    private FreeIpaRecipeService freeIpaRecipeService;
+
     @Retryable(value = FreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
@@ -88,7 +93,11 @@ public class FreeIpaPostInstallService {
             setInitialFreeIpaPolicies(freeIpaClient);
             synchronizeUsers(stack);
         }
-        executePostInstallRecipes(stack);
+        if (freeIpaRecipeService.hasRecipeType(stackId, RecipeType.POST_CLUSTER_INSTALL)) {
+            executePostInstallRecipes(stack);
+        } else {
+            LOGGER.info("We have no post-install recipes for this stack");
+        }
     }
 
     private void executePostInstallRecipes(Stack stack) throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
