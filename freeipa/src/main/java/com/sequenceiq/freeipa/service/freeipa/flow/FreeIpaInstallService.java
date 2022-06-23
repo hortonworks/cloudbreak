@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -57,11 +58,19 @@ public class FreeIpaInstallService {
     private void installFreeIpa(Long stackId, Stack stack, List<GatewayConfig> gatewayConfigs, Set<Node> allNodes) throws CloudbreakOrchestratorException {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(stackId);
-        LOGGER.info("Recipes for stack: {}", recipes);
-        Map<String, List<RecipeModel>> recipeMap = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName)
-                .collect(Collectors.toMap(instanceGroup -> instanceGroup, instanceGroup -> recipes));
-        hostOrchestrator.uploadRecipes(gatewayConfigs, recipeMap, new StackBasedExitCriteriaModel(stackId));
-        hostOrchestrator.preClusterManagerStartRecipes(primaryGatewayConfig, allNodes, new StackBasedExitCriteriaModel(stackId));
+        if (!recipes.isEmpty()) {
+            LOGGER.info("Recipes for stack: {}", recipes);
+            Map<String, List<RecipeModel>> recipeMap = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName)
+                    .collect(Collectors.toMap(instanceGroup -> instanceGroup, instanceGroup -> recipes));
+            hostOrchestrator.uploadRecipes(gatewayConfigs, recipeMap, new StackBasedExitCriteriaModel(stackId));
+            if (freeIpaRecipeService.hasRecipeType(recipes, RecipeType.PRE_CLOUDERA_MANAGER_START)) {
+                hostOrchestrator.preClusterManagerStartRecipes(primaryGatewayConfig, allNodes, new StackBasedExitCriteriaModel(stackId));
+            } else {
+                LOGGER.info("We have no pre-start recipes for this stack");
+            }
+        } else {
+            LOGGER.info("Recipes are empty");
+        }
         hostOrchestrator.installFreeIpa(primaryGatewayConfig, gatewayConfigs, allNodes, new StackBasedExitCriteriaModel(stackId));
     }
 }

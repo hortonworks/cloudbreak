@@ -23,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
@@ -39,6 +40,7 @@ import com.sequenceiq.freeipa.flow.stack.termination.event.recipes.ExecutePreTer
 import com.sequenceiq.freeipa.orchestrator.StackBasedExitCriteriaModel;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
+import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 import reactor.bus.Event;
@@ -56,6 +58,9 @@ class ExecutePreTerminationRecipesHandlerTest {
     private FreeIpaNodeUtilService freeIpaNodeUtilService;
 
     @Mock
+    private FreeIpaRecipeService freeIpaRecipeService;
+
+    @Mock
     private StackService stackService;
 
     @InjectMocks
@@ -70,6 +75,7 @@ class ExecutePreTerminationRecipesHandlerTest {
         Set<Node> nodes = Set.of(mock(Node.class));
         when(freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet)).thenReturn(nodes);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION)).thenReturn(true);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         ArgumentCaptor<ExitCriteriaModel> exitCriteriaModelArgumentCaptor = ArgumentCaptor.forClass(ExitCriteriaModel.class);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
@@ -93,6 +99,7 @@ class ExecutePreTerminationRecipesHandlerTest {
         Set<Node> nodes = Set.of(mock(Node.class));
         when(freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet)).thenReturn(nodes);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION)).thenReturn(true);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
         ExecutePreTerminationRecipesRequest executePreTerminationRecipesRequest = new ExecutePreTerminationRecipesRequest(1L, false);
@@ -114,6 +121,7 @@ class ExecutePreTerminationRecipesHandlerTest {
         Set<Node> nodes = Set.of(mock(Node.class));
         when(freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet)).thenReturn(nodes);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION)).thenReturn(true);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
         ExecutePreTerminationRecipesRequest executePreTerminationRecipesRequest = new ExecutePreTerminationRecipesRequest(1L, false);
@@ -131,6 +139,7 @@ class ExecutePreTerminationRecipesHandlerTest {
         Set<InstanceMetaData> instanceMetaDataSet = Collections.emptySet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetaDataSet);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION)).thenReturn(true);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
         ExecutePreTerminationRecipesRequest executePreTerminationRecipesRequest = new ExecutePreTerminationRecipesRequest(1L, true);
@@ -151,6 +160,7 @@ class ExecutePreTerminationRecipesHandlerTest {
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData1, instanceMetaData2);
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetaDataSet);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION)).thenReturn(true);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
         ExecutePreTerminationRecipesRequest executePreTerminationRecipesRequest = new ExecutePreTerminationRecipesRequest(1L, true);
@@ -174,6 +184,7 @@ class ExecutePreTerminationRecipesHandlerTest {
         ArgumentCaptor<Set<InstanceMetaData>> instanceMetadatasArgumentCaptor = ArgumentCaptor.forClass(Set.class);
         when(freeIpaNodeUtilService.mapInstancesToNodes(instanceMetadatasArgumentCaptor.capture())).thenReturn(nodes);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION)).thenReturn(true);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         ArgumentCaptor<ExitCriteriaModel> exitCriteriaModelArgumentCaptor = ArgumentCaptor.forClass(ExitCriteriaModel.class);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
@@ -184,6 +195,17 @@ class ExecutePreTerminationRecipesHandlerTest {
         assertThat(instanceMetadatasArgumentCaptorValue).containsExactly(instanceMetaData2);
         ExitCriteriaModel exitCriteriaModel = exitCriteriaModelArgumentCaptor.getValue();
         assertTrue(((StackBasedExitCriteriaModel) exitCriteriaModel).getStackId().isEmpty());
+        assertEquals(ExecutePreTerminationRecipesFinished.class, selectable.getClass());
+        assertTrue(((ExecutePreTerminationRecipesFinished) selectable).getForced());
+        assertEquals(1L, selectable.getResourceId());
+    }
+
+    @Test
+    public void doAcceptTestIfPreTerminationRecipesEmpty() throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
+        when(freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION)).thenReturn(false);
+        ExecutePreTerminationRecipesRequest executePreTerminationRecipesRequest = new ExecutePreTerminationRecipesRequest(1L, true);
+        Selectable selectable = executePreTerminationRecipesHandler.doAccept(new HandlerEvent<>(new Event<>(executePreTerminationRecipesRequest)));
+        verify(hostOrchestrator, times(0)).preTerminationRecipes(any(), any(), any(), anyBoolean());
         assertEquals(ExecutePreTerminationRecipesFinished.class, selectable.getClass());
         assertTrue(((ExecutePreTerminationRecipesFinished) selectable).getForced());
         assertEquals(1L, selectable.getResourceId());
