@@ -73,7 +73,6 @@ public class CloudStorageManifesterTest {
         mockFileSystemResponseForCloudbreakClient();
         SdxCluster sdxCluster = new SdxCluster();
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setClusterName("sdx-cluster");
         SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
         cloudStorageRequest.setBaseLocation("s3a://example-path");
@@ -105,7 +104,6 @@ public class CloudStorageManifesterTest {
         mockFileSystemResponseForCloudbreakClient();
         SdxCluster sdxCluster = new SdxCluster();
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setClusterName("sdx-cluster");
         SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
         cloudStorageRequest.setBaseLocation("s3a://example-path");
@@ -180,7 +178,6 @@ public class CloudStorageManifesterTest {
         mockFileSystemResponseForCloudbreakClient();
         SdxCluster sdxCluster = new SdxCluster();
         SdxClusterRequest sdxClusterRequest = new SdxClusterRequest();
-        sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setClusterName("sdx-cluster");
         SdxCloudStorageRequest cloudStorageRequest = new SdxCloudStorageRequest();
         cloudStorageRequest.setBaseLocation("gs://example-path");

@@ -1,8 +1,10 @@
 package com.sequenceiq.datalake.flow;
 
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.ws.rs.InternalServerErrorException;
 
 import org.springframework.stereotype.Component;
 
@@ -18,15 +20,8 @@ public class SdxEventParameterFactory implements EventParameterFactory {
     private SdxService sdxService;
 
     public Map<String, Object> createEventParameters(Long stackId) {
-        String userCrn;
-        try {
-            userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-            if (userCrn == null) {
-                userCrn = sdxService.getById(stackId).getInitiatorUserCrn();
-            }
-        } catch (RuntimeException ex) {
-            userCrn = sdxService.getById(stackId).getInitiatorUserCrn();
-        }
+        String userCrn = Optional.ofNullable(ThreadBasedUserCrnProvider.getUserCrn()).orElseThrow(() ->
+                new InternalServerErrorException("There is no user present to perform the given operation."));
         return Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
     }
 }
