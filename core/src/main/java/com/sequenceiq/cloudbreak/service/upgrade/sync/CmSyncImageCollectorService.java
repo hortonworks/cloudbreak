@@ -61,7 +61,7 @@ public class CmSyncImageCollectorService {
         Set<Image> candidateImages = candidateImageUuids.stream()
                 .map(uuid -> getImage(imageCatalogName, workspaceId, uuid))
                 .collect(Collectors.toCollection(HashSet::new));
-        candidateImages.add(imageService.getCurrentImage(stack.getId()).getImage());
+        candidateImages.add(imageService.getCurrentImage(stack.getWorkspace().getId(), stack.getId()).getImage());
         return candidateImages;
     }
 

@@ -76,6 +76,8 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
 
     private static final long STACK_ID = 1L;
 
+    private static final long WORKSPACE_ID = 2L;
+
     @Mock
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
 
@@ -112,6 +114,8 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
     public void init() throws CloudbreakImageCatalogException {
         MockitoAnnotations.initMocks(this);
         Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+
         clusterRequest = new ClusterV4Request();
         stack = new Stack();
         stack.setId(STACK_ID);
@@ -185,13 +189,13 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         clouderaManagerProductSet.add(clouderaManagerProduct("CDH", "1.5.0"));
 
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
-        when(parcelFilterService.filterParcelsByBlueprint(eq(STACK_ID), anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
+        when(parcelFilterService.filterParcelsByBlueprint(eq(WORKSPACE_ID), eq(STACK_ID), anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster, Optional.of(cmRepoComponent),
                 productComponentList, Optional.of(imageComponent));
 
         assertVersionsMatch(clusterComponents, CM_VERSION, SOME_CDH_VERSION);
-        verify(parcelFilterService, times(1)).filterParcelsByBlueprint(eq(STACK_ID), anySet(), any(Blueprint.class));
+        verify(parcelFilterService, times(1)).filterParcelsByBlueprint(eq(WORKSPACE_ID), eq(STACK_ID), anySet(), any(Blueprint.class));
     }
 
     @Test

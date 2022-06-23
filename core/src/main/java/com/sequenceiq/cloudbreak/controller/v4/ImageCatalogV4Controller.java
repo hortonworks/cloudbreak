@@ -243,7 +243,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @AccountIdNotNeeded
     @DisableCheckPermissions
     public ImageV4Response getImageFromDefaultById(Long workspaceId, @ResourceName String imageId) throws Exception {
-        StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(imageId);
+        StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(workspaceId, imageId);
         return imageToImageV4ResponseConverter.convert(statedImage.getImage());
     }
 

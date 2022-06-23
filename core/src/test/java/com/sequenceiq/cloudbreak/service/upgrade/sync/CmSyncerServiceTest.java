@@ -30,11 +30,14 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOper
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationStatus;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummary;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationSummaryService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @ExtendWith(MockitoExtension.class)
 public class CmSyncerServiceTest {
 
     private static final long STACK_ID = 1L;
+
+    private static final long WORKSPACE_ID = 2L;
 
     @Mock
     private CmInstalledComponentFinderService cmInstalledComponentFinderService;
@@ -64,6 +67,9 @@ public class CmSyncerServiceTest {
         CmRepoSyncOperationResult cmRepoSyncOperationResult = mock(CmRepoSyncOperationResult.class);
         CmParcelSyncOperationResult cmParcelSyncOperationResult = mock(CmParcelSyncOperationResult.class);
         when(stack.getId()).thenReturn(STACK_ID);
+        Workspace workspace = mock(Workspace.class);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        when(stack.getWorkspace()).thenReturn(workspace);
         when(cmInstalledComponentFinderService.findCmRepoComponent(stack, candidateImages)).thenReturn(cmRepoSyncOperationResult);
         when(cmInstalledComponentFinderService.findParcelComponents(stack, candidateImages)).thenReturn(cmParcelSyncOperationResult);
         when(cmSyncOperationSummaryService.evaluate(any())).thenReturn(CmSyncOperationStatus.builder().withSuccess("myMessage").build());
@@ -76,7 +82,7 @@ public class CmSyncerServiceTest {
         verify(cmInstalledComponentFinderService).findCmRepoComponent(stack, candidateImages);
         verify(cmInstalledComponentFinderService).findParcelComponents(stack, candidateImages);
         verify(stack).getId();
-        verify(mixedPackageVersionService).validatePackageVersions(eq(STACK_ID), any(), eq(candidateImages));
+        verify(mixedPackageVersionService).validatePackageVersions(eq(WORKSPACE_ID), eq(STACK_ID), any(), eq(candidateImages));
         verifyEvaluateCmSyncResults(cmRepoSyncOperationResult, cmParcelSyncOperationResult);
         verifyPersistComponentsToDb(cmRepoSyncOperationResult, cmParcelSyncOperationResult);
     }
