@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDiagnosticsService;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterHealthService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
@@ -66,5 +67,10 @@ public class ClouderaManagerConnector implements ClusterApi {
     @Override
     public ClusterDiagnosticsService clusterDiagnosticsService() {
         return applicationContext.getBean(ClouderaManagerDiagnosticsService.class, stack, clientConfig);
+    }
+
+    @Override
+    public ClusterHealthService clusterHealthService() {
+        return applicationContext.getBean(ClouderaManagerClusterHealthService.class, stack, clientConfig);
     }
 }
