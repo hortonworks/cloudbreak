@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.DatabaseInstance;
-import com.google.api.services.sqladmin.model.InstancesListResponse;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
@@ -37,18 +36,11 @@ public class GcpDatabaseServerCheckService extends GcpDatabaseServerBaseService 
         String projectId = gcpStackUtil.getProjectId(ac.getCloudCredential());
 
         try {
-            InstancesListResponse list = sqlAdmin.instances().list(projectId).execute();
-            Optional<DatabaseInstance> first = Optional.empty();
-            if (!list.isEmpty()) {
-                first = list.getItems()
-                        .stream()
-                        .filter(e -> e.getName().equals(deploymentName))
-                        .findFirst();
-            }
-            if (!first.isEmpty()) {
-                switch (first.get().getState()) {
+            Optional<DatabaseInstance> databaseInstance = getDatabaseInstance(deploymentName, sqlAdmin, projectId);
+            if (!databaseInstance.isEmpty()) {
+                switch (databaseInstance.get().getState()) {
                     case "RUNNABLE":
-                        if ("ALWAYS".equals(first.get().getSettings().getActivationPolicy())) {
+                        if ("ALWAYS".equals(databaseInstance.get().getSettings().getActivationPolicy())) {
                             return ExternalDatabaseStatus.STARTED;
                         } else {
                             return ExternalDatabaseStatus.STOPPED;

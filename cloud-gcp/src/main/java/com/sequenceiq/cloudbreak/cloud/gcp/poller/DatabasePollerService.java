@@ -32,44 +32,30 @@ public class DatabasePollerService {
     }
 
     public void launchDatabasePoller(AuthenticatedContext ac, List<CloudResource> resources) {
-        executeLaunchDatabasePollerPolling(provider.launchDatabasePoller(ac, resources), resources);
+        executePolling(provider.launchDatabasePoller(ac, resources), resources, attemptCount);
     }
 
     public void startDatabasePoller(AuthenticatedContext ac, List<CloudResource> resources) {
-        executeLaunchDatabasePollerPolling(provider.stopStartDatabasePoller(ac, resources), resources);
+        executePolling(provider.stopStartDatabasePoller(ac, resources), resources, attemptCount);
     }
 
     public void stopDatabasePoller(AuthenticatedContext ac, List<CloudResource> resources) {
-        executeLaunchDatabasePollerPolling(provider.stopStartDatabasePoller(ac, resources), resources);
+        executePolling(provider.stopStartDatabasePoller(ac, resources), resources, attemptCount);
     }
 
     public void insertUserPoller(AuthenticatedContext ac, List<CloudResource> resources) {
-        executeUserInsertPollerPolling(provider.insertUserPoller(ac, resources), resources);
+        executePolling(provider.insertUserPoller(ac, resources), resources, attemptCount);
+    }
+
+    public void upgradeDatabasePoller(AuthenticatedContext ac, List<CloudResource> resources) {
+        executePolling(provider.upgradeDatabasePoller(ac, resources), resources, attemptCount);
     }
 
     public void terminateDatabasePoller(AuthenticatedContext ac, List<CloudResource> resources) {
-        executeTerminateDatabasePollerPolling(provider.terminateDatabasePoller(ac, resources), resources);
+        executePolling(provider.terminateDatabasePoller(ac, resources), resources, attemptCount);
     }
 
-    private void executeUserInsertPollerPolling(AttemptMaker<Void> attemptMaker, List<CloudResource> resources) {
-        if (CollectionUtils.isNotEmpty(resources)) {
-            Polling.stopAfterAttempt(attemptCount)
-                    .stopIfException(true)
-                    .waitPeriodly(sleepTime, TimeUnit.SECONDS)
-                    .run(attemptMaker);
-        }
-    }
-
-    private void executeLaunchDatabasePollerPolling(AttemptMaker<Void> attemptMaker, List<CloudResource> resources) {
-        if (CollectionUtils.isNotEmpty(resources)) {
-            Polling.stopAfterAttempt(attemptCount)
-                    .stopIfException(true)
-                    .waitPeriodly(sleepTime, TimeUnit.SECONDS)
-                    .run(attemptMaker);
-        }
-    }
-
-    private void executeTerminateDatabasePollerPolling(AttemptMaker<Void> attemptMaker, List<CloudResource> resources) {
+    private void executePolling(AttemptMaker<Void> attemptMaker, List<CloudResource> resources, Integer attemptCount) {
         if (CollectionUtils.isNotEmpty(resources)) {
             Polling.stopAfterAttempt(attemptCount)
                     .stopIfException(true)

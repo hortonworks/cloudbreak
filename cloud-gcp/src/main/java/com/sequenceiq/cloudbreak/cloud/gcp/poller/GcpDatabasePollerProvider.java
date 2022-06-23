@@ -60,6 +60,10 @@ public class GcpDatabasePollerProvider {
         return () -> fetchOperationResults(ac, resources, ResourceStatus.CREATED);
     }
 
+    public AttemptMaker<Void> upgradeDatabasePoller(AuthenticatedContext ac, List<CloudResource> resources) {
+        return () -> fetchOperationResults(ac, resources, ResourceStatus.CREATED);
+    }
+
     public AttemptMaker<Void> terminateDatabasePoller(AuthenticatedContext ac, List<CloudResource> resources) {
         return () -> fetchOperationResults(ac, resources, ResourceStatus.DELETED);
     }
