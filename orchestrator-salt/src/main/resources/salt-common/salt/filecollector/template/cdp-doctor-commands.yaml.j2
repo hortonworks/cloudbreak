@@ -28,17 +28,28 @@ commands:
     - command: cdp-doctor network status {{network_params}}
       output: /tmp/doctor_network.txt
     - command: cdp-doctor service status
-      output: /tmp/doctor_services.txt{% if filecollector.clusterType == "FREEIPA" %}
+      output: /tmp/doctor_services.txt
+{%- if filecollector.clusterType == "FREEIPA" %}
     - command: /usr/local/bin/freeipa_backup -pl
-      output: /tmp/doctor_backup_permissions_check.txt{% if salt['file.file_exists']('/usr/local/bin/cipa') %}
+      output: /tmp/doctor_backup_permissions_check.txt
+  {%- if salt['file.file_exists']('/usr/local/bin/cipa') %}
+    {%- if salt['file.file_exists']('/root/.config/checkipaconsistency') and not salt['file.contains']('/root/.config/checkipaconsistency', 'ipa.example.com') %}
+    - command: /usr/local/bin/cipa
+    {%- else %}
     - command: /usr/local/bin/cipa -d $(hostname -d) -W $(tail -n +2 /srv/pillar/freeipa/init.sls | jq -r '.freeipa.password')
-      output: /tmp/doctor_freeipa_consistency_check.txt{% endif %}{% else %}
+    {%-endif %}
+      output: /tmp/doctor_freeipa_consistency_check.txt
+  {%- endif %}
+{%- else %}
     - command: cdp-doctor recipe results
       output: /tmp/doctor_recipes.txt
     - command: cdp-doctor scm list-commands
-      output: /tmp/doctor_scm_agent_commands.txt{% endif %}{% if filecollector.clusterType == "DATAHUB" and (filecollector.updatePackage or telemetry.cdpTelemetryVersion > 0) %}
+      output: /tmp/doctor_scm_agent_commands.txt
+{%- endif %}
+{%- if filecollector.clusterType == "DATAHUB" and (filecollector.updatePackage or telemetry.cdpTelemetryVersion > 0) %}
     - command: cdp-doctor metering status
-      output: /tmp/doctor_metering.txt{% endif %}
+      output: /tmp/doctor_metering.txt
+{%- endif %}
 report:
     location: /tmp/cdp_report.html
     title: CDP commands report
