@@ -517,6 +517,16 @@ public class SdxBackupRestoreService {
      * Checks if Sdx backup can be performed.
      *
      * @param cluster Sdx cluster.
+     * @return true if backup can be performed, False otherwise.
+     */
+    public boolean shouldSdxBackupBePerformed(SdxCluster cluster) {
+        return shouldSdxBackupBePerformed(cluster, true);
+    }
+
+    /**
+     * Checks if Sdx backup can be performed.
+     *
+     * @param cluster Sdx cluster.
      * @param entitlementEnabled Whether the entitlement required for backups with this operation is enabled.
      * @return true if backup can be performed, False otherwise.
      */
@@ -549,6 +559,16 @@ public class SdxBackupRestoreService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * Checks if Sdx restore can be performed.
+     *
+     * @param cluster Sdx cluster.
+     * @return true if restore can be performed, False otherwise.
+     */
+    public boolean shouldSdxRestoreBePerformed(SdxCluster cluster) {
+        return shouldSdxRestoreBePerformed(cluster, true);
     }
 
     /**
