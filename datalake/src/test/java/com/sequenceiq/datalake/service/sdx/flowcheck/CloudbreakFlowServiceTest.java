@@ -71,7 +71,6 @@ public class CloudbreakFlowServiceTest {
         when(flowCheckResponseToFlowStatusConverter.convert(any())).thenCallRealMethod();
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(createFlowCheckResponse(TRUE));
@@ -90,7 +89,6 @@ public class CloudbreakFlowServiceTest {
         when(flowCheckResponseToFlowStatusConverter.convert(any())).thenCallRealMethod();
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenReturn(createFlowCheckResponse(FALSE, TRUE));
@@ -108,7 +106,6 @@ public class CloudbreakFlowServiceTest {
     public void testFlowCheckIfExceptionOccured() {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
         when(flowEndpoint.hasFlowRunningByChainId(eq(FLOW_CHAIN_ID))).thenThrow(new RuntimeException("something"));
@@ -121,7 +118,6 @@ public class CloudbreakFlowServiceTest {
     public void testFlowCheckIfNotFoundExceptionOccured() {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
@@ -135,7 +131,6 @@ public class CloudbreakFlowServiceTest {
         when(flowCheckResponseToFlowStatusConverter.convert(any())).thenCallRealMethod();
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowId(FLOW_ID);
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
@@ -153,7 +148,6 @@ public class CloudbreakFlowServiceTest {
     public void testSaveFlowIdWhenNoFlowIdentifierIsPresent() {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
         FlowLogResponse response = new FlowLogResponse();
@@ -177,7 +171,6 @@ public class CloudbreakFlowServiceTest {
     public void testSaveFlowChainIdWhenNoFlowIdentifierIsPresent() {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
         FlowLogResponse response = new FlowLogResponse();
@@ -202,7 +195,6 @@ public class CloudbreakFlowServiceTest {
     public void testSaveFlowChainIdWhenNoFlowIdentifierIsPresentAndBothFlowIdAndFlowChainIdIsPresentInFlowLog() {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
         FlowLogResponse response = new FlowLogResponse();
@@ -228,7 +220,6 @@ public class CloudbreakFlowServiceTest {
     public void testSaveFlowInfoResetWhenThereIsNoFlow() {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
         when(flowEndpoint.getLastFlowByResourceName(any(), anyString())).thenThrow(new NotFoundException("something"));
@@ -246,7 +237,6 @@ public class CloudbreakFlowServiceTest {
     public void testSaveFlowIdWhenFlowTypeIsFlow() {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, FLOW_ID);
@@ -262,7 +252,6 @@ public class CloudbreakFlowServiceTest {
     public void testSaveFlowChainIdWhenFlowTypeIsFlowChain() {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, FLOW_CHAIN_ID);
@@ -278,7 +267,6 @@ public class CloudbreakFlowServiceTest {
     public void testResetCbFlowInfoWhenNotTriggeredFlow() {
         SdxCluster cluster = new SdxCluster();
         cluster.setLastCbFlowChainId(FLOW_CHAIN_ID);
-        cluster.setInitiatorUserCrn(USER_CRN);
         cluster.setClusterName(CLUSTER_NAME);
 
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();

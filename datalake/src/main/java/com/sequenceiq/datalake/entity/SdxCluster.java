@@ -67,7 +67,10 @@ public class SdxCluster implements AccountAwareResource {
     @Column(name = "clusterName", insertable = false, updatable = false)
     private String name;
 
-    @NotNull
+    /**
+     * @deprecated should not be used, since user may leave the given company
+     */
+    @Deprecated
     private String initiatorUserCrn;
 
     @NotNull
@@ -201,10 +204,18 @@ public class SdxCluster implements AccountAwareResource {
         this.stackId = stackId;
     }
 
+    /**
+     * @deprecated should not be used, since user may leave the given company
+     */
+    @Deprecated
     public String getInitiatorUserCrn() {
         return initiatorUserCrn;
     }
 
+    /**
+     * @deprecated should not be used, since user may leave the given company
+     */
+    @Deprecated
     public void setInitiatorUserCrn(String initiatorUserCrn) {
         this.initiatorUserCrn = initiatorUserCrn;
     }

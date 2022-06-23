@@ -168,12 +168,10 @@ public class SdxAttachService {
      *      - Cluster cannot be saved.
      *      - The resource owner role assignment fails its UMS GRPC call.
      */
-    public SdxCluster saveSdxAndAssignResourceOwnerRole(SdxCluster cluster) {
+    public SdxCluster saveSdxAndAssignResourceOwnerRole(SdxCluster cluster, String userCrn) {
         SdxCluster created = sdxService.save(cluster);
         try {
-            ownerAssignmentService.assignResourceOwnerRoleIfEntitled(
-                    created.getInitiatorUserCrn(), created.getCrn(), created.getAccountId()
-            );
+            ownerAssignmentService.assignResourceOwnerRoleIfEntitled(userCrn, created.getCrn(), created.getAccountId());
             return created;
         } catch (Exception e) {
             LOGGER.error("Failed to assign resource owner role to new SDX with CRN '" + created.getCrn() +

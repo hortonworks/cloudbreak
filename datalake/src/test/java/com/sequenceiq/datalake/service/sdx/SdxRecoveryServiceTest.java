@@ -96,7 +96,6 @@ public class SdxRecoveryServiceTest {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName(CLUSTER_NAME);
         sdxCluster.setClusterShape(SdxClusterShape.LIGHT_DUTY);
-        sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");
         sdxCluster.setRuntime("7.2.0");

@@ -458,7 +458,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         try {
             savedSdxCluster = transactionService.required(() -> {
                 SdxCluster created = sdxClusterRepository.save(sdxCluster);
-                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(created.getInitiatorUserCrn(), created.getCrn(), created.getAccountId());
+                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(userCrn, created.getCrn(), created.getAccountId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Datalake requested", created);
                 return created;
             });
@@ -628,6 +628,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateRazEnablement(runtime, razEnabled, environmentResponse);
         validateMultiAz(enableMultiAz, environmentResponse);
         SdxCluster newSdxCluster = new SdxCluster();
+        // TODO keeping it for backward compatibility, should be removed in CB-17552
         newSdxCluster.setInitiatorUserCrn(userCrn);
         newSdxCluster.setCrn(createCrn(getAccountIdFromCrn(userCrn)));
         newSdxCluster.setClusterName(clusterName);

@@ -528,6 +528,7 @@ class SdxServiceTest {
         assertEquals(LIGHT_DUTY, capturedSdx.getClusterShape());
         assertEquals("envir", capturedSdx.getEnvName());
         assertEquals("hortonworks", capturedSdx.getAccountId());
+        // TODO keeping it for backward compatibility, should be removed in CB-17552
         assertEquals(USER_CRN, capturedSdx.getInitiatorUserCrn());
         verify(sdxStatusService, times(1)).setStatusForDatalakeAndNotify(DatalakeStatusEnum.REQUESTED, "Datalake requested", createdSdxCluster);
 
@@ -1170,7 +1171,6 @@ class SdxServiceTest {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(SDX_ID);
         sdxCluster.setCrn(SDX_CRN);
-        sdxCluster.setInitiatorUserCrn(USER_CRN);
         sdxCluster.setEnvCrn(ENVIRONMENT_CRN);
         sdxCluster.setEnvName("envir");
         sdxCluster.setClusterName("sdx-cluster-name");

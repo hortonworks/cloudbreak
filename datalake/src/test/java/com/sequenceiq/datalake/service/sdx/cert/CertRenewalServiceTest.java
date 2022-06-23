@@ -230,9 +230,8 @@ public class CertRenewalServiceTest {
     public void testInternalCertRenewalTriggering() {
         when(sdxCluster.getId()).thenReturn(1L);
         when(sdxCluster.getClusterName()).thenReturn("cluster");
-        when(sdxCluster.getInitiatorUserCrn()).thenReturn("userCrn");
 
-        underTest.triggerInternalRenewCertificate(sdxCluster);
+        ThreadBasedUserCrnProvider.doAs("userCrn", () -> underTest.triggerInternalRenewCertificate(sdxCluster));
 
         verify(sdxReactorFlowManager).triggerCertRenewal(captor.capture(), anyString());
 
