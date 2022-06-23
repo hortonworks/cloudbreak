@@ -20,7 +20,6 @@ import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.BackupConfiguration;
 import com.google.api.services.sqladmin.model.DatabaseInstance;
 import com.google.api.services.sqladmin.model.DiskEncryptionConfiguration;
-import com.google.api.services.sqladmin.model.InstancesListResponse;
 import com.google.api.services.sqladmin.model.IpConfiguration;
 import com.google.api.services.sqladmin.model.Operation;
 import com.google.api.services.sqladmin.model.Settings;
@@ -75,21 +74,14 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
         String projectId = gcpStackUtil.getProjectId(ac.getCloudCredential());
         List<CloudResource> buildableResource = new ArrayList<>();
         String availabilityZone = ac.getCloudContext().getLocation().getAvailabilityZone().value();
-        buildableResource.add(getGcpDatabase(deploymentName, availabilityZone));
+        buildableResource.add(getDatabaseCloudResource(deploymentName, availabilityZone));
         buildableResource.add(getRdsPort(availabilityZone));
 
         try {
-            InstancesListResponse list = sqlAdmin.instances().list(projectId).execute();
-            Optional<DatabaseInstance> first = Optional.empty();
-            if (!list.isEmpty()) {
-                first = list.getItems()
-                        .stream()
-                        .filter(e -> e.getName().equals(deploymentName))
-                        .findFirst();
-            }
-            if (first.isEmpty()) {
-                DatabaseInstance databaseInstance = getDatabaseInstance(stack, deploymentName, compute, projectId);
-                SQLAdmin.Instances.Insert insert = sqlAdmin.instances().insert(projectId, databaseInstance);
+            Optional<DatabaseInstance> databaseInstance = getDatabaseInstance(deploymentName, sqlAdmin, projectId);
+            if (databaseInstance.isEmpty()) {
+                DatabaseInstance newDatabaseInstance = createDatabaseInstance(stack, deploymentName, compute, projectId);
+                SQLAdmin.Instances.Insert insert = sqlAdmin.instances().insert(projectId, newDatabaseInstance);
                 insert.setPrettyPrint(Boolean.TRUE);
                 try {
                     Operation operation = insert.execute();
@@ -131,14 +123,6 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
                 .build();
     }
 
-    public CloudResource getGcpDatabase(String deploymentName, String availabilityZone) {
-        return new CloudResource.Builder()
-                .withType(ResourceType.GCP_DATABASE)
-                .withName(deploymentName)
-                .withAvailabilityZone(availabilityZone)
-                .build();
-    }
-
     public CloudResource getRdsHostName(DatabaseInstance instance, CloudResource.Builder rdsInstance,
         String instanceName, String availabilityZone) {
         return rdsInstance
@@ -159,7 +143,7 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
         return ipAddress;
     }
 
-    private DatabaseInstance getDatabaseInstance(DatabaseStack stack, String deploymentName, Compute compute, String projectId) throws java.io.IOException {
+    private DatabaseInstance createDatabaseInstance(DatabaseStack stack, String deploymentName, Compute compute, String projectId) throws java.io.IOException {
         DatabaseServer databaseServer = stack.getDatabaseServer();
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(databaseServer);
         GcpDatabaseNetworkView databaseNetworkView = new GcpDatabaseNetworkView(stack.getNetwork());
