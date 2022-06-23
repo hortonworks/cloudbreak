@@ -234,7 +234,8 @@ public class ClouderaManagerClusterCreationSetupService {
             return Set.of(clouderaManagerProductsProvider.getCdhProducts(products));
         } else {
             LOGGER.info("Product list before filter out products by blueprint: {}", products);
-            Set<ClouderaManagerProduct> filteredProducts = parcelFilterService.filterParcelsByBlueprint(stack.getId(), products, cluster.getBlueprint());
+            Set<ClouderaManagerProduct> filteredProducts = parcelFilterService
+                    .filterParcelsByBlueprint(stack.getWorkspace().getId(), stack.getId(), products, cluster.getBlueprint());
             LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
             return filteredProducts;
         }

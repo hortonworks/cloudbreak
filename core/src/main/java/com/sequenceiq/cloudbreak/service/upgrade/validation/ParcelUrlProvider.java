@@ -32,7 +32,7 @@ public class ParcelUrlProvider {
     public Set<String> getRequiredParcelsFromImage(Image image, Stack stack) {
         LOGGER.debug("Retrieving parcel URLs from image {}", image.getUuid());
         String cdhParcelUrl = getCdhParcelUrl(image);
-        return StackType.DATALAKE.equals(stack.getType()) ? Collections.singleton(cdhParcelUrl) : getAllParcel(cdhParcelUrl, image, stack);
+        return StackType.DATALAKE.equals(stack.getType()) ? Collections.singleton(cdhParcelUrl) : getAllParcels(cdhParcelUrl, image, stack);
     }
 
     private String getCdhParcelUrl(Image image) {
@@ -51,7 +51,7 @@ public class ParcelUrlProvider {
                 .orElseThrow(() -> new CloudbreakServiceException(String.format("Stack repository version is not found on image: %s", imageId)));
     }
 
-    private Set<String> getAllParcel(String cdhRepoUrl, Image image, Stack stack) {
+    private Set<String> getAllParcels(String cdhRepoUrl, Image image, Stack stack) {
         Set<String> requiredParcelNames = getRequiredParcelNames(stack, image);
         Set<String> parcelUrls = getPreWarmParcelUrls(image, requiredParcelNames);
         parcelUrls.addAll(getPreWarmCsdUrls(image, requiredParcelNames));

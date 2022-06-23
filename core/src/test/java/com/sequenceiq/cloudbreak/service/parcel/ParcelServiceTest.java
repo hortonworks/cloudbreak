@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @ExtendWith(MockitoExtension.class)
 public class ParcelServiceTest {
@@ -30,6 +31,8 @@ public class ParcelServiceTest {
     private static final long CLUSTER_ID = 2L;
 
     private static final long STACK_ID = 1L;
+
+    private static final long WORKSPACE_ID = 3L;
 
     private static final String PARCEL_NAME = "parcel1";
 
@@ -59,12 +62,12 @@ public class ParcelServiceTest {
         ParcelOperationStatus removalStatus = new ParcelOperationStatus();
 
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
-        when(imageReaderService.getParcelNames(STACK_ID)).thenReturn(parcelNames);
+        when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(parcelNames);
         when(clusterApi.removeUnusedParcels(clusterComponentsByBlueprint, parcelNames)).thenReturn(removalStatus);
 
         underTest.removeUnusedParcelComponents(stack, clusterComponentsByBlueprint);
 
-        verify(imageReaderService).getParcelNames(STACK_ID);
+        verify(imageReaderService).getParcelNames(WORKSPACE_ID, STACK_ID);
         verify(clusterApiConnectors).getConnector(stack);
         verify(clusterApi).removeUnusedParcels(clusterComponentsByBlueprint, parcelNames);
         verify(clusterComponentUpdater).removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint, removalStatus);
@@ -76,6 +79,10 @@ public class ParcelServiceTest {
         cluster.setId(CLUSTER_ID);
         stack.setId(STACK_ID);
         stack.setCluster(cluster);
+
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        stack.setWorkspace(workspace);
         return stack;
     }
 }

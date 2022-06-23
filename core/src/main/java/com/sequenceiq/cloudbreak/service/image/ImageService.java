@@ -96,9 +96,9 @@ public class ImageService {
         return getImage(stackId).getImageCatalogName();
     }
 
-    public StatedImage getCurrentImage(Long stackId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public StatedImage getCurrentImage(Long workspaceId, Long stackId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image image = getImage(stackId);
-        return imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId());
+        return imageCatalogService.getImage(workspaceId, image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId());
     }
 
     @Measure(ImageService.class)

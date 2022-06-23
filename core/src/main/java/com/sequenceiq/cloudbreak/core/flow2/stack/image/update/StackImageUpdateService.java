@@ -65,7 +65,7 @@ public class StackImageUpdateService {
 
             Image currentImage = stackImageService.getCurrentImage(stack);
 
-            StatedImage newImage = getNewImage(newImageId, imageCatalogName, imageCatalogUrl, currentImage);
+            StatedImage newImage = getNewImage(stack.getWorkspace().getId(), newImageId, imageCatalogName, imageCatalogUrl, currentImage);
 
             if (!isCloudPlatformMatches(stack, newImage)) {
                 String message = messagesService.getMessage(Msg.CLOUDPLATFORM_DIFFERENT.code(),
@@ -107,12 +107,12 @@ public class StackImageUpdateService {
                 && newImage.getImage().getOsType().equalsIgnoreCase(currentImage.getOsType());
     }
 
-    private StatedImage getNewImage(String newImageId, String imageCatalogName, String imageCatalogUrl, Image currentImage)
+    private StatedImage getNewImage(Long workspaceId, String newImageId, String imageCatalogName, String imageCatalogUrl, Image currentImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage newImage;
         newImage = StringUtils.isNotBlank(imageCatalogName) && StringUtils.isNotBlank(imageCatalogUrl)
-                ? imageCatalogService.getImage(imageCatalogUrl, imageCatalogName, newImageId)
-                : imageCatalogService.getImage(currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), newImageId);
+                ? imageCatalogService.getImage(workspaceId, imageCatalogUrl, imageCatalogName, newImageId)
+                : imageCatalogService.getImage(workspaceId, currentImage.getImageCatalogUrl(), currentImage.getImageCatalogName(), newImageId);
         return newImage;
     }
 
@@ -165,7 +165,7 @@ public class StackImageUpdateService {
         if (isCbVersionOk(stack)) {
             try {
                 Image currentImage = stackImageService.getCurrentImage(stack);
-                StatedImage newImage = getNewImage(newImageId, imageCatalogName, imageCatalogUrl, currentImage);
+                StatedImage newImage = getNewImage(stack.getWorkspace().getId(), newImageId, imageCatalogName, imageCatalogUrl, currentImage);
 
                 boolean cloudPlatformMatches = isCloudPlatformMatches(stack, newImage);
                 boolean osVersionsMatch = isOsVersionsMatch(currentImage, newImage);
