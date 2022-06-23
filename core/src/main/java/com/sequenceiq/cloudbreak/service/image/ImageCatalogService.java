@@ -70,7 +70,6 @@ import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -133,9 +132,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     @Inject
     private CustomImageProvider customImageProvider;
-
-    @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
@@ -406,13 +402,13 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         return images;
     }
 
-    public StatedImage getImage(String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        return getImage(defaultCatalogUrl, CDP_DEFAULT_CATALOG_NAME, imageId);
+    public StatedImage getImage(Long workspaceId, String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        return getImage(workspaceId, defaultCatalogUrl, CDP_DEFAULT_CATALOG_NAME, imageId);
     }
 
-    public StatedImage getImage(String catalogUrl, String catalogName, String imageId) throws CloudbreakImageNotFoundException,
+    public StatedImage getImage(Long workspaceId, String catalogUrl, String catalogName, String imageId) throws CloudbreakImageNotFoundException,
             CloudbreakImageCatalogException {
-        ImageCatalog imageCatalog = getImageCatalogByNameIfUrlIsEmpty(catalogUrl, catalogName);
+        ImageCatalog imageCatalog = getImageCatalogByNameIfUrlIsEmpty(workspaceId, catalogUrl, catalogName);
         if (isCustomImageCatalog(imageCatalog)) {
             LOGGER.debug(String.format("'%s' image catalog is a custom image catalog.", catalogName));
             return getCustomStatedImage(imageCatalog, imageId);
@@ -423,10 +419,10 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    private ImageCatalog getImageCatalogByNameIfUrlIsEmpty(String catalogUrl, String catalogName) {
+    private ImageCatalog getImageCatalogByNameIfUrlIsEmpty(Long workspaceId, String catalogUrl, String catalogName) {
         if (Strings.isNullOrEmpty(catalogUrl)) {
             try {
-                return getImageCatalogByName(restRequestThreadLocalService.getRequestedWorkspaceId(), catalogName);
+                return getImageCatalogByName(workspaceId, catalogName);
             } catch (Exception ex) {
                 LOGGER.debug(String.format("Failed to lookup '%s' image catalog by name.", catalogName));
                 return null;
@@ -439,7 +435,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     public StatedImage getImageByCatalogName(Long workspaceId, String imageId, String catalogName)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         if (StringUtils.isEmpty(catalogName)) {
-            return getImage(imageId);
+            return getImage(workspaceId, imageId);
         } else {
             try {
                 return getCustomStatedImage(workspaceId, catalogName, imageId);
@@ -825,7 +821,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             case FREEIPA:
                 return getImageByUrl(defaultFreeIpaCatalogUrl, FREEIPA_DEFAULT_CATALOG_NAME, customImage.getCustomizedImageId());
             case RUNTIME:
-                return getImage(customImage.getCustomizedImageId());
+                return getImage(customImage.getImageCatalog().getWorkspace().getId(), customImage.getCustomizedImageId());
             default:
                 throw new CloudbreakImageCatalogException("Image type is not supported.");
         }

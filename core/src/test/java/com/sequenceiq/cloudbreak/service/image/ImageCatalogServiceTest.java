@@ -91,7 +91,6 @@ import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.TestConstants;
@@ -119,8 +118,6 @@ public class ImageCatalogServiceTest {
     private static final String DEV_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-dev-image-catalog.json";
 
     private static final String RC_CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-rc-image-catalog.json";
-
-    private static final long ORG_ID = 100L;
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -227,9 +224,6 @@ public class ImageCatalogServiceTest {
 
     @Captor
     private ArgumentCaptor<StatedImage> sourceImageCaptor;
-
-    @Mock
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
@@ -552,9 +546,9 @@ public class ImageCatalogServiceTest {
         ImageCatalog ret = new ImageCatalog();
         ret.setImageCatalogUrl(null);
         ret.setName(CUSTOM_CATALOG_NAME);
-        when(imageCatalogRepository.findByNameAndWorkspaceId("name", ORG_ID)).thenReturn(Optional.of(ret));
+        when(imageCatalogRepository.findByNameAndWorkspaceId("name", WORKSPACE_ID)).thenReturn(Optional.of(ret));
 
-        StatedImages actual = underTest.getImages(ORG_ID, "name", imageCatalogPlatform("aws"));
+        StatedImages actual = underTest.getImages(WORKSPACE_ID, "name", imageCatalogPlatform("aws"));
         assertEquals(CUSTOM_CATALOG_NAME, actual.getImageCatalogName());
         assertNull(actual.getImageCatalogUrl());
     }
@@ -566,7 +560,7 @@ public class ImageCatalogServiceTest {
         thrown.expectMessage("The verycool catalog does not exist or does not belongs to your account.");
         thrown.expect(CloudbreakImageCatalogException.class);
 
-        underTest.getImages(ORG_ID, "verycool", imageCatalogPlatform("aws")).getImages();
+        underTest.getImages(WORKSPACE_ID, "verycool", imageCatalogPlatform("aws")).getImages();
 
         verify(entitlementService, times(1))
                 .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
@@ -581,10 +575,10 @@ public class ImageCatalogServiceTest {
         imageCatalog.setName(name);
         imageCatalog.setArchived(false);
         doNothing().when(userProfileHandler).destroyProfileImageCatalogPreparation(any(ImageCatalog.class));
-        when(imageCatalogRepository.findByNameAndWorkspaceId(name, ORG_ID)).thenReturn(Optional.of(imageCatalog));
+        when(imageCatalogRepository.findByNameAndWorkspaceId(name, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
         setupUserProfileService();
 
-        underTest.delete(ORG_ID, name);
+        underTest.delete(WORKSPACE_ID, name);
 
         verify(imageCatalogRepository, times(1)).save(imageCatalog);
 
@@ -599,15 +593,15 @@ public class ImageCatalogServiceTest {
         thrown.expectMessage("cdp-default cannot be deleted because it is an environment default image catalog.");
         thrown.expect(BadRequestException.class);
 
-        underTest.delete(ORG_ID, name);
+        underTest.delete(WORKSPACE_ID, name);
     }
 
     @Test
     public void testGet() {
         String name = "img-name";
         ImageCatalog imageCatalog = new ImageCatalog();
-        when(imageCatalogRepository.findByNameAndWorkspaceId(name, ORG_ID)).thenReturn(Optional.of(imageCatalog));
-        ImageCatalog actual = underTest.getImageCatalogByName(ORG_ID, name);
+        when(imageCatalogRepository.findByNameAndWorkspaceId(name, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
+        ImageCatalog actual = underTest.getImageCatalogByName(WORKSPACE_ID, name);
 
         assertEquals(actual, imageCatalog);
     }
@@ -618,7 +612,7 @@ public class ImageCatalogServiceTest {
         ImageCatalog actual = ThreadBasedUserCrnProvider.doAs(CrnTestUtil.getUserCrnBuilder()
                 .setAccountId("ACCOUNT_ID")
                 .setResource("USER")
-                .build().toString(), () -> underTest.getImageCatalogByName(ORG_ID, name));
+                .build().toString(), () -> underTest.getImageCatalogByName(WORKSPACE_ID, name));
 
         verify(imageCatalogRepository, times(0)).findByNameAndWorkspace(eq(name), any(Workspace.class));
 
@@ -631,7 +625,7 @@ public class ImageCatalogServiceTest {
         setupUserProfileService();
         thrown.expect(BadRequestException.class);
 
-        underTest.getImagesFromDefault(ORG_ID, null, null, Collections.emptySet(), false);
+        underTest.getImagesFromDefault(WORKSPACE_ID, null, null, Collections.emptySet(), false);
 
         verify(entitlementService, times(1))
                 .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
@@ -644,7 +638,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesFromDefaultGivenBothInput() throws CloudbreakImageCatalogException {
         thrown.expect(BadRequestException.class);
 
-        underTest.getImagesFromDefault(ORG_ID, "stack", imageCatalogPlatform("AWS"), Collections.emptySet(), false);
+        underTest.getImagesFromDefault(WORKSPACE_ID, "stack", imageCatalogPlatform("AWS"), Collections.emptySet(), false);
 
         verify(entitlementService, times(1))
                 .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
@@ -658,7 +652,7 @@ public class ImageCatalogServiceTest {
         when(stackImageFilterService.getApplicableImages(anyLong(), anyString())).thenReturn(new Images(Lists.newArrayList(),
                 Lists.newArrayList(), Lists.newArrayList(), Sets.newHashSet()));
 
-        underTest.getImagesFromDefault(ORG_ID, "stack", null, Collections.emptySet(), false);
+        underTest.getImagesFromDefault(WORKSPACE_ID, "stack", null, Collections.emptySet(), false);
 
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString(), anyString());
         verify(stackImageFilterService, times(1)).getApplicableImages(anyLong(), anyString());
@@ -670,7 +664,7 @@ public class ImageCatalogServiceTest {
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, V2_CB_CATALOG_FILE);
         ImageCatalogPlatform imageCatalogPlatform = imageCatalogPlatform("AWS");
         when(platformStringTransformer.getPlatformStringForImageCatalog(any(ImageCatalogPlatform.class), anyBoolean())).thenReturn(imageCatalogPlatform);
-        underTest.getImagesFromDefault(ORG_ID, null, imageCatalogPlatform, Collections.emptySet(), false);
+        underTest.getImagesFromDefault(WORKSPACE_ID, null, imageCatalogPlatform, Collections.emptySet(), false);
 
         verify(entitlementService, times(1))
                 .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
@@ -683,7 +677,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesWithEmptyInput() throws CloudbreakImageCatalogException {
         thrown.expect(BadRequestException.class);
 
-        underTest.getImagesByCatalogName(ORG_ID, "catalog", null, null, false);
+        underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, null, false);
 
         verify(entitlementService, times(1))
                 .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
@@ -696,7 +690,7 @@ public class ImageCatalogServiceTest {
     public void testGetImagesGivenBothInput() throws CloudbreakImageCatalogException {
         thrown.expect(BadRequestException.class);
 
-        underTest.getImagesByCatalogName(ORG_ID, "catalog", "stack", imageCatalogPlatform("AWS"), false);
+        underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", "stack", imageCatalogPlatform("AWS"), false);
 
         verify(entitlementService, times(1))
                 .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
@@ -710,7 +704,7 @@ public class ImageCatalogServiceTest {
         when(stackImageFilterService.getApplicableImages(anyLong(), anyString(), anyString())).thenReturn(new Images(Lists.newArrayList(),
                 Lists.newArrayList(), Lists.newArrayList(), Sets.newHashSet()));
 
-        underTest.getImagesByCatalogName(ORG_ID, "catalog", "stack", null, false);
+        underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", "stack", null, false);
 
         verify(stackImageFilterService, times(1)).getApplicableImages(anyLong(), anyString(), anyString());
         verify(stackImageFilterService, never()).getApplicableImages(anyLong(), anyString());
@@ -726,7 +720,7 @@ public class ImageCatalogServiceTest {
         when(platformStringTransformer.getPlatformStringForImageCatalog(any(String.class), anyBoolean())).thenReturn(imageCatalogPlatform);
         when(imageCatalogRepository.findByNameAndWorkspaceId(anyString(), anyLong())).thenReturn(Optional.of(imageCatalog));
 
-        underTest.getImagesByCatalogName(ORG_ID, "catalog", null, imageCatalogPlatform, false);
+        underTest.getImagesByCatalogName(WORKSPACE_ID, "catalog", null, imageCatalogPlatform, false);
 
         verify(entitlementService, times(1))
                 .baseImageEnabled(Objects.requireNonNull(Crn.fromString(user.getUserCrn())).getAccountId());
@@ -890,11 +884,10 @@ public class ImageCatalogServiceTest {
         StatedImage statedImage = StatedImage.statedImage(getImage(), CUSTOM_IMAGE_CATALOG_URL, CUSTOM_CATALOG_NAME);
 
         setupImageCatalogProvider(DEFAULT_CATALOG_URL, DEV_CATALOG_FILE);
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
         when(imageCatalogRepository.findByNameAndWorkspaceId(CUSTOM_CATALOG_NAME, WORKSPACE_ID)).thenReturn(Optional.of(imageCatalog));
         when(customImageProvider.mergeSourceImageAndCustomImageProperties(any(), any(), any(), any())).thenReturn(statedImage);
 
-        StatedImage actual = underTest.getImage(null, CUSTOM_CATALOG_NAME, CUSTOM_IMAGE_ID);
+        StatedImage actual = underTest.getImage(WORKSPACE_ID, null, CUSTOM_CATALOG_NAME, CUSTOM_IMAGE_ID);
 
         assertEquals(statedImage.getImage(), actual.getImage());
     }
@@ -1011,7 +1004,7 @@ public class ImageCatalogServiceTest {
         imageCatalog.setImageCatalogUrl(DEFAULT_CATALOG_URL);
         imageCatalog.setName("default");
         Workspace ws = new Workspace();
-        ws.setId(ORG_ID);
+        ws.setId(WORKSPACE_ID);
         imageCatalog.setWorkspace(ws);
         imageCatalog.setCreator("someone");
         imageCatalog.setResourceCrn("someCrn");
@@ -1032,6 +1025,7 @@ public class ImageCatalogServiceTest {
         customImage.setImageType(imageType);
         customImage.setCustomizedImageId(customizedImageId);
         customImage.setBaseParcelUrl(baseParcelUrl);
+        customImage.setImageCatalog(getImageCatalog());
         return customImage;
     }
 

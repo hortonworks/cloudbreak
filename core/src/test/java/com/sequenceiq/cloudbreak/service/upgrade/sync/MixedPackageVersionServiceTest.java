@@ -38,6 +38,8 @@ public class MixedPackageVersionServiceTest {
 
     private static final long STACK_ID = 1L;
 
+    private static final long WORKSPACE_ID = 2L;
+
     private static final String CM_VERSION = "7.2.0";
 
     private static final String CDH_VERSION = "7.2.2";
@@ -84,15 +86,15 @@ public class MixedPackageVersionServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentImage = createCatalogImage(CM_VERSION);
 
         when(imageService.getImage(STACK_ID)).thenReturn(createModelImage(CURRENT_IMAGE_ID));
-        when(imageCatalogService.getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID)).thenReturn(createStatedImage(currentImage));
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID)).thenReturn(createStatedImage(currentImage));
         when(clouderaManagerProductTransformer.transformToMap(currentImage, true, true)).thenReturn(parcels);
         Set<ParcelInfo> activeParcels = cmSyncOperationResult.getCmParcelSyncOperationResult().getActiveParcels();
         when(mixedPackageVersionComparator.areAllComponentVersionsMatchingWithImage(CM_VERSION, parcels, CM_VERSION, activeParcels)).thenReturn(true);
 
-        underTest.validatePackageVersions(STACK_ID, cmSyncOperationResult, Collections.emptySet());
+        underTest.validatePackageVersions(WORKSPACE_ID, STACK_ID, cmSyncOperationResult, Collections.emptySet());
 
         verify(imageService).getImage(STACK_ID);
-        verify(imageCatalogService).getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID);
+        verify(imageCatalogService).getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID);
         verify(clouderaManagerProductTransformer).transformToMap(currentImage, true, true);
         verify(mixedPackageVersionComparator).areAllComponentVersionsMatchingWithImage(CM_VERSION, parcels, CM_VERSION, activeParcels);
         verifyNoInteractions(clusterUpgradeTargetImageService);
@@ -107,13 +109,13 @@ public class MixedPackageVersionServiceTest {
         Set<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> candidateImages = Set.of(createCatalogImage("image1", CM_VERSION));
 
         when(imageService.getImage(STACK_ID)).thenReturn(createModelImage(CURRENT_IMAGE_ID));
-        when(imageCatalogService.getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID)).thenReturn(null);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID)).thenReturn(null);
         when(imageCatalogService.getCloudbreakDefaultImageCatalog()).thenReturn(createImageCatalog());
 
-        underTest.validatePackageVersions(STACK_ID, cmSyncOperationResult, candidateImages);
+        underTest.validatePackageVersions(WORKSPACE_ID, STACK_ID, cmSyncOperationResult, candidateImages);
 
         verify(imageService).getImage(STACK_ID);
-        verify(imageCatalogService).getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID);
+        verify(imageCatalogService).getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID);
         verify(imageCatalogService).getCloudbreakDefaultImageCatalog();
         verify(candidateImageAwareMixedPackageVersionService).examinePackageVersionsWithAllCandidateImages(STACK_ID, candidateImages, CM_VERSION, activeParcels,
                 IMAGE_CATALOG_URL);
@@ -129,22 +131,22 @@ public class MixedPackageVersionServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentImage = createCatalogImage(CM_VERSION);
 
         when(imageService.getImage(STACK_ID)).thenReturn(createModelImage(CURRENT_IMAGE_ID));
-        when(imageCatalogService.getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID)).thenReturn(createStatedImage(currentImage));
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID)).thenReturn(createStatedImage(currentImage));
         when(clouderaManagerProductTransformer.transformToMap(currentImage, true, true)).thenReturn(parcels);
         when(mixedPackageVersionComparator.areAllComponentVersionsMatchingWithImage(CM_VERSION, parcels, CM_VERSION, activeParcels)).thenReturn(false);
 
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetImage = createCatalogImage(CM_VERSION);
         when(clusterUpgradeTargetImageService.findTargetImage(STACK_ID)).thenReturn(Optional.of(createModelImage(TARGET_IMAGE_ID)));
-        when(imageCatalogService.getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID)).thenReturn(createStatedImage(targetImage));
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID)).thenReturn(createStatedImage(targetImage));
 
-        underTest.validatePackageVersions(STACK_ID, cmSyncOperationResult, Collections.emptySet());
+        underTest.validatePackageVersions(WORKSPACE_ID, STACK_ID, cmSyncOperationResult, Collections.emptySet());
 
         verify(imageService).getImage(STACK_ID);
-        verify(imageCatalogService).getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID);
+        verify(imageCatalogService).getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID);
         verify(clouderaManagerProductTransformer).transformToMap(currentImage, true, true);
         verify(mixedPackageVersionComparator).areAllComponentVersionsMatchingWithImage(CM_VERSION, parcels, CM_VERSION, activeParcels);
         verify(clusterUpgradeTargetImageService).findTargetImage(STACK_ID);
-        verify(imageCatalogService).getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID);
+        verify(imageCatalogService).getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID);
         verify(targetImageAwareMixedPackageVersionService).examinePackageVersionsWithTargetImage(STACK_ID, targetImage, CM_VERSION, activeParcels);
     }
 
@@ -158,15 +160,15 @@ public class MixedPackageVersionServiceTest {
         Set<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> candidateImages = Set.of(createCatalogImage("image1", CM_VERSION));
 
         when(imageService.getImage(STACK_ID)).thenReturn(createModelImage(CURRENT_IMAGE_ID));
-        when(imageCatalogService.getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID)).thenReturn(createStatedImage(currentImage));
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID)).thenReturn(createStatedImage(currentImage));
         when(clouderaManagerProductTransformer.transformToMap(currentImage, true, true)).thenReturn(parcels);
         when(mixedPackageVersionComparator.areAllComponentVersionsMatchingWithImage(CM_VERSION, parcels, CM_VERSION, activeParcels)).thenReturn(false);
         when(clusterUpgradeTargetImageService.findTargetImage(STACK_ID)).thenReturn(Optional.empty());
 
-        underTest.validatePackageVersions(STACK_ID, cmSyncOperationResult, candidateImages);
+        underTest.validatePackageVersions(WORKSPACE_ID, STACK_ID, cmSyncOperationResult, candidateImages);
 
         verify(imageService).getImage(STACK_ID);
-        verify(imageCatalogService).getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID);
+        verify(imageCatalogService).getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID);
         verify(clouderaManagerProductTransformer).transformToMap(currentImage, true, true);
         verify(mixedPackageVersionComparator).areAllComponentVersionsMatchingWithImage(CM_VERSION, parcels, CM_VERSION, activeParcels);
         verify(clusterUpgradeTargetImageService).findTargetImage(STACK_ID);
@@ -179,7 +181,7 @@ public class MixedPackageVersionServiceTest {
         CmSyncOperationResult cmSyncOperationResult = createCmSyncResult(null, Collections.emptyMap());
         Set<com.sequenceiq.cloudbreak.cloud.model.catalog.Image> candidateImages = Set.of(createCatalogImage("image1", CM_VERSION));
 
-        underTest.validatePackageVersions(STACK_ID, cmSyncOperationResult, candidateImages);
+        underTest.validatePackageVersions(WORKSPACE_ID, STACK_ID, cmSyncOperationResult, candidateImages);
 
         verifyNoInteractions(clusterUpgradeTargetImageService);
         verifyNoInteractions(clouderaManagerProductTransformer);

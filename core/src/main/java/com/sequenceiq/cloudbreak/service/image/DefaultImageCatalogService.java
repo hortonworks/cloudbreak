@@ -38,12 +38,12 @@ public class DefaultImageCatalogService {
     @Inject
     private ImageCatalogProvider imageCatalogProvider;
 
-    public StatedImage getImageFromDefaultCatalog(String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    public StatedImage getImageFromDefaultCatalog(Long workspaceId, String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         StatedImage statedImage;
         try {
-            statedImage = imageCatalogService.getImage(defaultFreeIpaCatalogUrl, FREEIPA_DEFAULT_CATALOG_NAME, imageId);
+            statedImage = imageCatalogService.getImage(workspaceId, defaultFreeIpaCatalogUrl, FREEIPA_DEFAULT_CATALOG_NAME, imageId);
         } catch (CloudbreakImageNotFoundException ex) {
-            statedImage = imageCatalogService.getImage(imageId);
+            statedImage = imageCatalogService.getImage(workspaceId, imageId);
         }
         return statedImage;
     }

@@ -15,14 +15,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @ExtendWith(MockitoExtension.class)
 public class UpgradeImageInfoFactoryTest {
 
     private static final long STACK_ID = 1L;
+
+    private static final long WORKSPACE_ID = 2L;
 
     private static final String CURRENT_IMAGE_ID = "currentImageId";
 
@@ -38,6 +43,9 @@ public class UpgradeImageInfoFactoryTest {
     @Mock
     private ImageCatalogService imageCatalogService;
 
+    @Mock
+    private StackService stackService;
+
     @InjectMocks
     private UpgradeImageInfoFactory underTest;
 
@@ -45,10 +53,15 @@ public class UpgradeImageInfoFactoryTest {
     void testCreate() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image image = getImage();
         when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(image);
+        Stack stack = mock(Stack.class);
+        when(stackService.get(STACK_ID)).thenReturn(stack);
+        Workspace workspace = mock(Workspace.class);
+        when(stack.getWorkspace()).thenReturn(workspace);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
         StatedImage currentStatedImage = StatedImage.statedImage(getCatalogImage(), IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID);
-        when(imageCatalogService.getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID)).thenReturn(currentStatedImage);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID)).thenReturn(currentStatedImage);
         StatedImage targetStatedImage = StatedImage.statedImage(getCatalogImage(), IMAGE_CATALOG_NAME, TARGET_IMAGE_ID);
-        when(imageCatalogService.getImage(IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID)).thenReturn(targetStatedImage);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID)).thenReturn(targetStatedImage);
 
         UpgradeImageInfo upgradeImageInfo = underTest.create(TARGET_IMAGE_ID, STACK_ID);
 
