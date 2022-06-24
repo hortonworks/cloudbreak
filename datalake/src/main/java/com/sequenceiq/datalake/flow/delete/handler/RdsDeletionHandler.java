@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.flow.delete.handler;
 
-import javax.inject.Inject;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +19,7 @@ import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionWaitRequest;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeletionFailedEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
+import com.sequenceiq.datalake.service.consumption.ConsumptionService;
 import com.sequenceiq.datalake.service.sdx.database.DatabaseService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -32,20 +31,28 @@ import reactor.bus.Event;
 public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletionWaitRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsDeletionHandler.class);
 
-    @Value("${sdx.db.operation.duration_min:60}")
-    private int durationInMinutes;
+    private final int durationInMinutes;
 
-    @Inject
-    private SdxClusterRepository sdxClusterRepository;
+    private final SdxClusterRepository sdxClusterRepository;
 
-    @Inject
-    private DatabaseService databaseService;
+    private final DatabaseService databaseService;
 
-    @Inject
-    private SdxStatusService sdxStatusService;
+    private final SdxStatusService sdxStatusService;
 
-    @Inject
-    private OwnerAssignmentService ownerAssignmentService;
+    private final OwnerAssignmentService ownerAssignmentService;
+
+    private final ConsumptionService consumptionService;
+
+    public RdsDeletionHandler(@Value("${sdx.db.operation.duration_min:60}") int durationInMinutes, SdxClusterRepository sdxClusterRepository,
+            DatabaseService databaseService, SdxStatusService sdxStatusService, OwnerAssignmentService ownerAssignmentService,
+            ConsumptionService consumptionService) {
+        this.durationInMinutes = durationInMinutes;
+        this.sdxClusterRepository = sdxClusterRepository;
+        this.databaseService = databaseService;
+        this.sdxStatusService = sdxStatusService;
+        this.ownerAssignmentService = ownerAssignmentService;
+        this.consumptionService = consumptionService;
+    }
 
     @Override
     public String selector() {
@@ -65,11 +72,13 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
         Selectable response;
         try {
             sdxClusterRepository.findById(sdxId).ifPresent(sdxCluster -> {
+                consumptionService.unscheduleStorageConsumptionCollectionIfNeeded(sdxCluster);
+
                 if (sdxCluster.hasExternalDatabase() && StringUtils.isNotEmpty(sdxCluster.getDatabaseCrn())) {
-                    LOGGER.debug("start polling database termination for sdx: {}", sdxId);
+                    LOGGER.debug("start polling database termination for SDX: {}", sdxId);
                     databaseService.terminate(sdxCluster, rdsWaitRequest.isForced());
                 } else {
-                    LOGGER.debug("skipping deletion of database for sdx: {}", sdxId);
+                    LOGGER.debug("skipping deletion of database for SDX: {}", sdxId);
                 }
                 setDeletedStatus(sdxCluster);
             });
@@ -78,15 +87,15 @@ public class RdsDeletionHandler extends ExceptionCatcherEventHandler<RdsDeletion
             LOGGER.error("Database polling exited before timeout. Cause: ", userBreakException);
             response = new SdxDeletionFailedEvent(sdxId, userId, userBreakException, rdsWaitRequest.isForced());
         } catch (PollerStoppedException pollerStoppedException) {
-            LOGGER.error("Database poller stopped for sdx: {}", sdxId, pollerStoppedException);
+            LOGGER.error("Database poller stopped for SDX: {}", sdxId, pollerStoppedException);
             response = new SdxDeletionFailedEvent(sdxId, userId,
                     new PollerStoppedException("Database deletion timed out after " + durationInMinutes + " minutes"),
                     rdsWaitRequest.isForced());
         } catch (PollerException exception) {
-            LOGGER.error("Database polling failed for sdx: {}", sdxId, exception);
+            LOGGER.error("Database polling failed for SDX: {}", sdxId, exception);
             response = new SdxDeletionFailedEvent(sdxId, userId, exception, rdsWaitRequest.isForced());
         } catch (Exception anotherException) {
-            LOGGER.error("Something wrong happened in sdx database deletion wait phase", anotherException);
+            LOGGER.error("Something wrong happened in SDX database deletion wait phase", anotherException);
             response = new SdxDeletionFailedEvent(sdxId, userId, anotherException, rdsWaitRequest.isForced());
         }
         return response;
