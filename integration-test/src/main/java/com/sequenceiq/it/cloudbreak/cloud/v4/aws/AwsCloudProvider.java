@@ -14,7 +14,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.AwsStackV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.AwsInstanceTemplateV4Parameters;
@@ -391,33 +390,8 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        if (awsProperties.getBaseimage().getImageId() == null || awsProperties.getBaseimage().getImageId().isEmpty()) {
-            try {
-                List<ImageV4Response> images = cloudbreakClient
-                        .getDefaultClient()
-                        .imageCatalogV4Endpoint()
-                        .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                                CloudPlatform.AWS.name(), null, null, false).getCdhImages();
-
-                ImageV4Response olderImage = images.get(images.size() - 2);
-                Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
-                Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
-                Log.log(LOGGER, format(" Selected Pre-warmed Image Date: %s | ID: %s | Description: %s | Stack Version: %s ", olderImage.getDate(),
-                        olderImage.getUuid(), olderImage.getStackDetails().getVersion(), olderImage.getDescription()));
-                awsProperties.getBaseimage().setImageId(olderImage.getUuid());
-
-                return olderImage.getUuid();
-            } catch (Exception e) {
-                LOGGER.error("Cannot fetch pre-warmed images of {} image catalog!", imageCatalogTestDto.getRequest().getName());
-                throw new TestFailException(" Cannot fetch pre-warmed images of " + imageCatalogTestDto.getRequest().getName() + " image catalog!", e);
-            }
-        } else {
-            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
-            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
-            Log.log(LOGGER, format(" Image ID for SDX create: %s ", awsProperties.getBaseimage().getImageId()));
-            return awsProperties.getBaseimage().getImageId();
-        }
+    public String getLatestPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        return getLatestPreWarmedImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), false);
     }
 
     @Override

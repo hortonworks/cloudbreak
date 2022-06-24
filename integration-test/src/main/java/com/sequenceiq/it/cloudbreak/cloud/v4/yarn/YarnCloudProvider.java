@@ -206,7 +206,9 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
-    public String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+    public String getLatestPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        // At cloudbreak-default (https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.jsonDelete) catalog we have only
+        // Base Image for YCloud provider.
         return throwNotImplementedException();
     }
 

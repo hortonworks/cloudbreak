@@ -9,6 +9,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.assertion.datalake.RecipeTestAssertion;
@@ -19,10 +22,12 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.InstanceGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.RecipeUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
@@ -31,6 +36,8 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(InternalSdxRepairWithRecipeTest.class);
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -62,6 +69,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
         String clouderaManager = resourcePropertyProvider().getName();
         String recipeName = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
+        String imageSettings = resourcePropertyProvider().getName();
         String filePath = "/post-ambari";
         String fileName = "post-ambari";
         String masterInstanceGroup = "master";
@@ -69,8 +77,14 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+        sdxDatabaseRequest.setCreate(false);
+
+        String selectedImageID = getLatestPrewarmedImageId(testContext);
 
         testContext
+                .given(imageSettings, ImageSettingsTestDto.class)
+                    .withImageCatalog(commonCloudProperties().getImageCatalogName())
+                    .withImageId(selectedImageID)
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
                     .withBlueprintName(getDefaultSDXBlueprintName())
@@ -92,6 +106,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .given(stack, StackTestDto.class)
                     .withCluster(cluster)
                     .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
+                    .withImageSettings(imageSettings)
                 .given(sdxInternal, SdxInternalTestDto.class)
                     .withCloudStorage(getCloudStorageRequest(testContext))
                     .withDatabase(sdxDatabaseRequest)
@@ -100,6 +115,13 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()
                 .then(RecipeTestAssertion.validateFilesOnHost(List.of(MASTER.getName(), IDBROKER.getName()), filePath, fileName, 1, null, null, sshJUtil))
+                .then((tc, dto, client) -> {
+                    if (!StringUtils.equalsIgnoreCase(dto.getResponse().getStackV4Response().getImage().getId(), selectedImageID)) {
+                        throw new TestFailException(String.format("The datalake image Id (%s) do NOT match with the selected pre-warmed image Id: '%s'!",
+                                dto.getResponse().getStackV4Response().getImage().getId(), selectedImageID));
+                    }
+                    return dto;
+                })
                 .then((tc, testDto, client) -> {
                     List<String> instanceIdsToStop = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());
                     instanceIdsToStop.addAll(sdxUtil.getInstanceIds(testDto, client, IDBROKER.getName()));

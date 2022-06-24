@@ -61,7 +61,7 @@ public interface CloudProvider {
 
     DistroXImageTestDto imageSettings(DistroXImageTestDto imageSettings);
 
-    String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient);
+    String getLatestPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient);
 
     String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient);
 
