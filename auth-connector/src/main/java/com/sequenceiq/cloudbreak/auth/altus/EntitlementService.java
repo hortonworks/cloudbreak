@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AUTOMATIC_USERSYNC_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AWS_RESTRICTED_POLICY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_AZURE_IMAGE_MARKETPLACE;
@@ -192,10 +191,6 @@ public class EntitlementService {
 
     public boolean isCdpSaasEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_SAAS);
-    }
-
-    public boolean automaticUsersyncPollerEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_AUTOMATIC_USERSYNC_POLLER);
     }
 
     public boolean enableDistroxInstanceTypesEnabled(String accountId) {

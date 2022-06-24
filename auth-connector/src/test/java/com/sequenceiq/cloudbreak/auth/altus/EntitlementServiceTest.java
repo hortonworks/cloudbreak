@@ -64,9 +64,6 @@ class EntitlementServiceTest {
                 {"CDP_BASE_IMAGE", (EntitlementCheckFunction) EntitlementService::baseImageEnabled, false},
                 {"CDP_BASE_IMAGE", (EntitlementCheckFunction) EntitlementService::baseImageEnabled, true},
 
-                {"CDP_AUTOMATIC_USERSYNC_POLLER", (EntitlementCheckFunction) EntitlementService::automaticUsersyncPollerEnabled, false},
-                {"CDP_AUTOMATIC_USERSYNC_POLLER", (EntitlementCheckFunction) EntitlementService::automaticUsersyncPollerEnabled, true},
-
                 {"CDP_FREEIPA_HA_REPAIR", (EntitlementCheckFunction) EntitlementService::freeIpaHaRepairEnabled, false},
                 {"CDP_FREEIPA_HA_REPAIR", (EntitlementCheckFunction) EntitlementService::freeIpaHaRepairEnabled, true},
 
