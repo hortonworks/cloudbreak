@@ -149,7 +149,7 @@ public class StackImageServiceTest {
         when(imageCatalogService.isCustomImageCatalog(targetImageCatalog)).thenReturn(false);
         when(targetImageCatalog.getName()).thenReturn(TARGET_IMAGE_CATALOG);
         when(targetImageCatalog.getImageCatalogUrl()).thenReturn(TARGET_IMAGE_CATALOG_URL);
-        when(imageCatalogService.getImage(TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG, IMAGE_ID)).thenReturn(targetStatedImage);
+        when(imageCatalogService.getImage(WORKSPACE_ID, TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG, IMAGE_ID)).thenReturn(targetStatedImage);
         when(imageService.determineImageName(stack.getCloudPlatform().toLowerCase(), imageCatalogPlatform,
                 stack.getRegion(), targetStatedImage.getImage())).thenReturn(IMAGE_NAME);
         when(platformStringTransformer.getPlatformStringForImageCatalog(stack.getCloudPlatform(), stack.getPlatformVariant()))
@@ -191,7 +191,8 @@ public class StackImageServiceTest {
         when(imageCatalogService.isCustomImageCatalog(targetImageCatalog)).thenReturn(false);
         when(targetImageCatalog.getName()).thenReturn(TARGET_IMAGE_CATALOG);
         when(targetImageCatalog.getImageCatalogUrl()).thenReturn(TARGET_IMAGE_CATALOG_URL);
-        when(imageCatalogService.getImage(TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG, IMAGE_ID)).thenThrow(new CloudbreakImageNotFoundException(""));
+        when(imageCatalogService.getImage(WORKSPACE_ID, TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG, IMAGE_ID))
+                .thenThrow(new CloudbreakImageNotFoundException(""));
 
         assertThrows(NotFoundException.class, () -> victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG));
     }
@@ -209,7 +210,8 @@ public class StackImageServiceTest {
         when(imageCatalogService.isCustomImageCatalog(targetImageCatalog)).thenReturn(false);
         when(targetImageCatalog.getName()).thenReturn(TARGET_IMAGE_CATALOG);
         when(targetImageCatalog.getImageCatalogUrl()).thenReturn(TARGET_IMAGE_CATALOG_URL);
-        when(imageCatalogService.getImage(TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG, IMAGE_ID)).thenThrow(new CloudbreakImageCatalogException(""));
+        when(imageCatalogService.getImage(WORKSPACE_ID, TARGET_IMAGE_CATALOG_URL, TARGET_IMAGE_CATALOG, IMAGE_ID))
+                .thenThrow(new CloudbreakImageCatalogException(""));
 
         assertThrows(CloudbreakServiceException.class, () -> victim.changeImageCatalog(stack, TARGET_IMAGE_CATALOG));
     }

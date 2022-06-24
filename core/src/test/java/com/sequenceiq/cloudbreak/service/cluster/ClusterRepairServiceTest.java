@@ -80,6 +80,7 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -101,6 +102,8 @@ public class ClusterRepairServiceTest {
     private static final String ENV_CRN = "ENV_CRN";
 
     private static final long CLUSTER_ID = 1;
+
+    private static final Long WORKSPACE_ID = 2L;
 
     @Mock
     private TransactionService transactionService;
@@ -176,6 +179,10 @@ public class ClusterRepairServiceTest {
         stack.setStackStatus(stackStatus);
         stack.setInstanceGroups(Set.of());
         cluster.setStack(stack);
+
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        stack.setWorkspace(workspace);
 
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
@@ -266,7 +273,7 @@ public class ClusterRepairServiceTest {
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(mock(Image.class));
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.isPrewarmed()).thenReturn(true);
-        when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
+        when(imageCatalogService.getImage(any(), any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(true);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
@@ -292,7 +299,7 @@ public class ClusterRepairServiceTest {
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(mock(Image.class));
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.isPrewarmed()).thenReturn(false);
-        when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
+        when(imageCatalogService.getImage(any(), any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(true);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
@@ -317,7 +324,7 @@ public class ClusterRepairServiceTest {
         when(componentConfigProviderService.getImage(stack.getId())).thenReturn(mock(Image.class));
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         when(image.isPrewarmed()).thenReturn(true);
-        when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
+        when(imageCatalogService.getImage(any(), any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(false);
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);

@@ -50,9 +50,9 @@ public class ImageReaderService {
         return foundParcelProducts;
     }
 
-    public Set<String> getParcelNames(Long stackId) {
+    public Set<String> getParcelNames(Long workspaceId, Long stackId) {
         try {
-            StatedImage currentImage = imageService.getCurrentImage(stackId);
+            StatedImage currentImage = imageService.getCurrentImage(workspaceId, stackId);
             return getParcels(Set.of(currentImage.getImage()), false)
                     .stream()
                     .map(ClouderaManagerProduct::getName)

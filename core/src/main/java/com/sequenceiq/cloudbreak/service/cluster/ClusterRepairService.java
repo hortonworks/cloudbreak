@@ -370,7 +370,8 @@ public class ClusterRepairService {
     private boolean isCreatedFromBaseImage(Stack stack) {
         try {
             Image image = componentConfigProviderService.getImage(stack.getId());
-            return !imageCatalogService.getImage(image.getImageCatalogUrl(), image.getImageCatalogName(), image.getImageId()).getImage().isPrewarmed();
+            return !imageCatalogService.getImage(stack.getWorkspace().getId(), image.getImageCatalogUrl(), image.getImageCatalogName(),
+                    image.getImageId()).getImage().isPrewarmed();
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             throw new BadRequestException(e.getMessage(), e);
         }

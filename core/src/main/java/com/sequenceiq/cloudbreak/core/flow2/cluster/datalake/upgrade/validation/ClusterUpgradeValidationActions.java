@@ -301,8 +301,9 @@ public class ClusterUpgradeValidationActions {
                 Long resourceId = payload.getResourceId();
                 LOGGER.debug("Cluster upgrade validation failed with validation error: {}", errorMessage);
                 ResourceEvent validationFailedResourceEvent = ResourceEvent.CLUSTER_UPGRADE_VALIDATION_FAILED;
-                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FAILED.name(), validationFailedResourceEvent, List.of(errorMessage));
-                String reason = messagesService.getMessage(validationFailedResourceEvent.getMessage(), List.of(errorMessage));
+                List<String> errorMessageAsList = Collections.singletonList(errorMessage);
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_FAILED.name(), validationFailedResourceEvent, errorMessageAsList);
+                String reason = messagesService.getMessage(validationFailedResourceEvent.getMessage(), errorMessageAsList);
                 stackUpdater.updateStackStatus(resourceId, DetailedStackStatus.AVAILABLE, reason);
                 sendEvent(context, HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.event(), payload);
             }

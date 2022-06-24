@@ -41,6 +41,8 @@ public class ImageReaderServiceTest {
 
     private static final long STACK_ID = 1L;
 
+    private static final Long WORKSPACE_ID = 1L;
+
     private static final String PARCEL_NAME = "NIFI";
 
     @Mock
@@ -103,22 +105,22 @@ public class ImageReaderServiceTest {
         Image currentImage = Mockito.mock(Image.class);
         Set<ClouderaManagerProduct> products = Set.of(new ClouderaManagerProduct().withName(PARCEL_NAME));
 
-        when(imageService.getCurrentImage(STACK_ID)).thenReturn(StatedImage.statedImage(currentImage, null, null));
+        when(imageService.getCurrentImage(WORKSPACE_ID, STACK_ID)).thenReturn(StatedImage.statedImage(currentImage, null, null));
         when(clouderaManagerProductTransformer.transform(currentImage, true, true)).thenReturn(products);
 
-        Set<String> actual = underTest.getParcelNames(STACK_ID);
+        Set<String> actual = underTest.getParcelNames(WORKSPACE_ID, STACK_ID);
 
         assertTrue(actual.contains(PARCEL_NAME));
-        verify(imageService).getCurrentImage(STACK_ID);
+        verify(imageService).getCurrentImage(WORKSPACE_ID, STACK_ID);
         verify(clouderaManagerProductTransformer).transform(currentImage, true, true);
     }
 
     @Test
     public void testGetPreWarmParcelNamesFromImageShouldThrowException() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(imageService.getCurrentImage(STACK_ID)).thenThrow(new CloudbreakImageCatalogException("error"));
+        when(imageService.getCurrentImage(WORKSPACE_ID, STACK_ID)).thenThrow(new CloudbreakImageCatalogException("error"));
 
-        assertThrows(CloudbreakRuntimeException.class, () -> underTest.getParcelNames(STACK_ID));
-        verify(imageService).getCurrentImage(STACK_ID);
+        assertThrows(CloudbreakRuntimeException.class, () -> underTest.getParcelNames(WORKSPACE_ID, STACK_ID));
+        verify(imageService).getCurrentImage(WORKSPACE_ID, STACK_ID);
         verifyNoInteractions(clouderaManagerProductTransformer);
     }
 

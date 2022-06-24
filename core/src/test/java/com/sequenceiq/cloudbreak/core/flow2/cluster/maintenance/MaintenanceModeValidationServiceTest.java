@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -36,8 +37,11 @@ import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 public class MaintenanceModeValidationServiceTest {
+
+    private static final Long WORKSPACE_ID = 1L;
 
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
@@ -85,6 +89,10 @@ public class MaintenanceModeValidationServiceTest {
         stack.setCloudPlatform("AWS");
         stack.setCluster(cluster);
         cluster.setStack(stack);
+
+        Workspace workspace = mock(Workspace.class);
+        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        stack.setWorkspace(workspace);
 
         image = new Image("asdf", System.currentTimeMillis(), System.currentTimeMillis(), "asdf", "centos7", "uuid", "2.8.0", Collections.emptyMap(),
                 Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions,
@@ -166,7 +174,7 @@ public class MaintenanceModeValidationServiceTest {
                         "uuid",
                         packageVersions);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
-        when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(statedImage);
+        when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(imageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.ok());
         warnings.addAll(underTest.validateImageCatalog(stack));
         assertEquals(0, warnings.size());
@@ -187,7 +195,7 @@ public class MaintenanceModeValidationServiceTest {
                         "uuid",
                         packageVersions);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageInComponent);
-        when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(statedImage);
+        when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         when(imageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.failed("Failure"));
         warnings.addAll(underTest.validateImageCatalog(stack));
         assertEquals(1, warnings.size());
