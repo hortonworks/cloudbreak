@@ -117,7 +117,9 @@ freeipa:
     threadpool:
       core.size: 100
       capacity.size: 4000
-    scale.large-group-size: 500
+    scale.large-group:
+      size: 500
+      limit: 750
   cloudidsync:
     poller:
       timeoutMs: 4000

@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import org.apache.commons.lang3.tuple.Triple;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,10 +62,10 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
     public Map<String, UmsUsersState> get(
             String accountId, Collection<String> environmentCrns,
             Set<String> userCrns, Set<String> machineUserCrns,
-            Optional<String> requestIdOptional, boolean fullSync) {
-        List<UserManagementProto.User> users = getUsers(accountId, requestIdOptional, fullSync, userCrns);
+            Optional<String> requestIdOptional, UserSyncOptions options) {
+        List<UserManagementProto.User> users = getUsers(accountId, requestIdOptional, options.isFullSync(), userCrns);
         List<UserManagementProto.MachineUser> machineUsers =
-                getMachineUsers(accountId, requestIdOptional, fullSync, machineUserCrns);
+                getMachineUsers(accountId, requestIdOptional, options.isFullSync(), machineUserCrns);
 
         Map<String, FmsGroup> crnToFmsGroup = convertGroupsToFmsGroups(
                 grpcUmsClient.listAllGroups(accountId, requestIdOptional, regionAwareInternalCrnGeneratorFactory));
@@ -102,7 +103,11 @@ public class DefaultUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                     grpcUmsClient.listServicePrincipalCloudIdentities(
                             accountId, environmentCrn, requestIdOptional));
 
-            umsUsersStateBuilder.setUsersState(usersStateBuilder.build());
+            UsersState usersState = usersStateBuilder.build();
+            umsUsersStateBuilder.setUsersState(usersState);
+
+            setLargeGroups(umsUsersStateBuilder, usersState, options);
+
             umsUsersStateMap.put(environmentCrn, umsUsersStateBuilder.build());
         });
         return umsUsersStateMap;

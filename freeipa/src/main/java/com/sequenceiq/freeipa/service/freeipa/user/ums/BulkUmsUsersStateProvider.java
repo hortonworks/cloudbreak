@@ -11,6 +11,7 @@ import java.util.stream.IntStream;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
@@ -49,7 +50,8 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
 
     public Map<String, UmsUsersState> get(
             String accountId, Collection<String> environmentCrns,
-            Optional<String> requestIdOptional) {
+            Optional<String> requestIdOptional,
+            UserSyncOptions options) {
         List<String> environmentCrnList = List.copyOf(environmentCrns);
         UserManagementProto.GetUserSyncStateModelResponse userSyncStateModel = grpcUmsClient.getUserSyncStateModel(
                 accountId,
@@ -97,7 +99,11 @@ public class BulkUmsUsersStateProvider extends BaseUmsUsersStateProvider {
                             grpcUmsClient.listServicePrincipalCloudIdentities(
                                     accountId, environmentCrn, requestIdOptional));
 
-                    umsUsersStateBuilder.setUsersState(usersStateBuilder.build());
+                    UsersState usersState = usersStateBuilder.build();
+                    umsUsersStateBuilder.setUsersState(usersState);
+
+                    setLargeGroups(umsUsersStateBuilder, usersState, options);
+
                     umsUsersStateMap.put(environmentCrn, umsUsersStateBuilder.build());
                 });
         return umsUsersStateMap;

@@ -105,14 +105,15 @@ class UserSyncForEnvServiceTest {
         Stack stack2 = mock(Stack.class);
         when(stack2.getEnvironmentCrn()).thenReturn(ENV_CRN_2);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
-        UserSyncOptions options = new UserSyncOptions(true, true, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+        UserSyncOptions options = createUserSyncOptions();
         doAnswer(inv -> {
             inv.getArgument(2, Runnable.class).run();
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(OPERATION_ID), eq(ACCOUNT_ID), any(Runnable.class));
         UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
         UmsUsersState umsUsersState2 = mock(UmsUsersState.class);
-        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN, ENV_CRN_2)), eq(Set.of()), eq(Set.of()), any()))
+        when(umsUsersStateProviderDispatcher
+                .getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN, ENV_CRN_2)), eq(Set.of()), eq(Set.of()), any(), eq(options)))
                 .thenReturn(Map.of(ENV_CRN, umsUsersState1, ENV_CRN_2, umsUsersState2));
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
             SyncStatusDetail result = (SyncStatusDetail) inv.getArgument(0, Callable.class).call();
@@ -147,14 +148,15 @@ class UserSyncForEnvServiceTest {
         Stack stack2 = mock(Stack.class);
         when(stack2.getEnvironmentCrn()).thenReturn(ENV_CRN_2);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
-        UserSyncOptions options = new UserSyncOptions(true, true, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+        UserSyncOptions options = createUserSyncOptions();
         doAnswer(inv -> {
             inv.getArgument(2, Runnable.class).run();
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(OPERATION_ID), eq(ACCOUNT_ID), any(Runnable.class));
         UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
         UmsUsersState umsUsersState2 = mock(UmsUsersState.class);
-        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN, ENV_CRN_2)), eq(Set.of()), eq(Set.of()), any()))
+        when(umsUsersStateProviderDispatcher
+                .getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN, ENV_CRN_2)), eq(Set.of()), eq(Set.of()), any(), eq(options)))
                 .thenReturn(Map.of(ENV_CRN, umsUsersState1, ENV_CRN_2, umsUsersState2));
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
             SyncStatusDetail result = (SyncStatusDetail) inv.getArgument(0, Callable.class).call();
@@ -195,13 +197,13 @@ class UserSyncForEnvServiceTest {
         Stack stack1 = mock(Stack.class);
         when(stack1.getEnvironmentCrn()).thenReturn(ENV_CRN);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
-        UserSyncOptions options = new UserSyncOptions(true, true, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+        UserSyncOptions options = createUserSyncOptions();
         doAnswer(inv -> {
             inv.getArgument(2, Runnable.class).run();
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(OPERATION_ID), eq(ACCOUNT_ID), any(Runnable.class));
         UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
-        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), any()))
+        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), any(), eq(options)))
                 .thenReturn(Map.of(ENV_CRN, umsUsersState1));
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
             Future future = mock(Future.class);
@@ -233,13 +235,13 @@ class UserSyncForEnvServiceTest {
         Stack stack1 = mock(Stack.class);
         when(stack1.getEnvironmentCrn()).thenReturn(ENV_CRN);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
-        UserSyncOptions options = new UserSyncOptions(true, true, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+        UserSyncOptions options = createUserSyncOptions();
         doAnswer(inv -> {
             inv.getArgument(2, Runnable.class).run();
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(OPERATION_ID), eq(ACCOUNT_ID), any(Runnable.class));
         UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
-        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), any()))
+        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), any(), eq(options)))
                 .thenReturn(Map.of(ENV_CRN, umsUsersState1));
         Future<?> future = mock(Future.class);
         when(asyncTaskExecutor.submit(any(Callable.class))).thenAnswer(inv -> {
@@ -273,13 +275,13 @@ class UserSyncForEnvServiceTest {
         Stack stack1 = mock(Stack.class);
         when(stack1.getEnvironmentCrn()).thenReturn(ENV_CRN);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
-        UserSyncOptions options = new UserSyncOptions(true, true, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+        UserSyncOptions options = createUserSyncOptions();
         doAnswer(inv -> {
             inv.getArgument(2, Runnable.class).run();
             return null;
         }).when(operationService).tryWithOperationCleanup(eq(OPERATION_ID), eq(ACCOUNT_ID), any(Runnable.class));
         UmsUsersState umsUsersState1 = mock(UmsUsersState.class);
-        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), any()))
+        when(umsUsersStateProviderDispatcher.getEnvToUmsUsersStateMap(eq(ACCOUNT_ID), eq(Set.of(ENV_CRN)), eq(Set.of()), eq(Set.of()), any(), eq(options)))
                 .thenReturn(Map.of(ENV_CRN, umsUsersState1));
         when(userSyncForStackService.synchronizeStack(stack1, umsUsersState1, options, OPERATION_ID))
                 .thenReturn(new SyncStatusDetail(ENV_CRN, SynchronizationStatus.COMPLETED, "", ImmutableMultimap.of()));
@@ -311,7 +313,7 @@ class UserSyncForEnvServiceTest {
         Stack stack2 = mock(Stack.class);
         when(stack2.getEnvironmentCrn()).thenReturn(ENV_CRN_2);
         UserSyncRequestFilter userSyncFilter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.of("deleteMe"));
-        UserSyncOptions options = new UserSyncOptions(true, true, WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED);
+        UserSyncOptions options = createUserSyncOptions();
         doAnswer(inv -> {
             inv.getArgument(2, Runnable.class).run();
             return null;
@@ -336,5 +338,16 @@ class UserSyncForEnvServiceTest {
         assertTrue(failureCaptor.getValue().isEmpty());
         assertTrue(successCaptor.getValue().contains(new SuccessDetails(ENV_CRN)));
         assertTrue(successCaptor.getValue().contains(new SuccessDetails(ENV_CRN_2)));
+    }
+
+    private UserSyncOptions createUserSyncOptions() {
+        return UserSyncOptions.newBuilder()
+                .fullSync(true)
+                .fmsToFreeIpaBatchCallEnabled(true)
+                .workloadCredentialsUpdateType(WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED)
+                .enforceGroupMembershipLimitEnabled(true)
+                .largeGroupThreshold(500)
+                .largeGroupLimit(750)
+                .build();
     }
 }

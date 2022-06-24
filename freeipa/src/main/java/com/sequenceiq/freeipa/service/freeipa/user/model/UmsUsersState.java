@@ -30,11 +30,18 @@ public class UmsUsersState {
 
     private final ImmutableList<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities;
 
+    private final ImmutableSet<String> groupsExceedingThreshold;
+
+    private final ImmutableSet<String> groupsExceedingLimit;
+
+    @SuppressWarnings("checkstyle:ExecutableStatementCount")
     private UmsUsersState(
             UsersState usersState, Map<String, WorkloadCredential> usersWorkloadCredentialMap,
             Collection<String> requestedWorkloadUsernames, Collection<FmsGroup> workloadAdministrationGroups,
             Map<String, List<CloudIdentity>> userToCloudIdentityMap,
-            Collection<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities) {
+            Collection<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities,
+            Collection<String> groupsExceedingThreshold,
+            Collection<String> groupsExceedingLimit) {
         this.usersState = requireNonNull(usersState, "UsersState is null");
         this.usersWorkloadCredentialMap = ImmutableMap.copyOf(
                 requireNonNull(usersWorkloadCredentialMap, "workload credential map is null"));
@@ -46,6 +53,10 @@ public class UmsUsersState {
                 requireNonNull(userToCloudIdentityMap, "userToCloudIdentityMap is null"));
         this.servicePrincipalCloudIdentities = ImmutableList.copyOf(
                 requireNonNull(servicePrincipalCloudIdentities, "servicePrincipalCloudIdentities is null"));
+        this.groupsExceedingThreshold = ImmutableSet.copyOf(
+                requireNonNull(groupsExceedingThreshold, "groupsExceedingThreshold is null"));
+        this.groupsExceedingLimit = ImmutableSet.copyOf(
+                requireNonNull(groupsExceedingLimit, "groupsExceedingLimit is null"));
     }
 
     public UsersState getUsersState() {
@@ -72,6 +83,14 @@ public class UmsUsersState {
         return servicePrincipalCloudIdentities;
     }
 
+    public ImmutableSet<String> getGroupsExceedingThreshold() {
+        return groupsExceedingThreshold;
+    }
+
+    public ImmutableSet<String> getGroupsExceedingLimit() {
+        return groupsExceedingLimit;
+    }
+
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -88,6 +107,10 @@ public class UmsUsersState {
         private Map<String, List<CloudIdentity>> userToCloudIdentityMap = new HashMap<>();
 
         private Collection<ServicePrincipalCloudIdentities> servicePrincipalCloudIdentities = new ArrayList<>();
+
+        private Collection<String> groupsExceedingThreshold = Set.of();
+
+        private Collection<String> groupsExceedingLimit = Set.of();
 
         public Builder setUsersState(UsersState usersState) {
             this.usersState = usersState;
@@ -110,7 +133,7 @@ public class UmsUsersState {
         }
 
         public Builder setWorkloadAdministrationGroups(Collection<FmsGroup> workloadAdministrationGroups) {
-            this.workloadAdministrationGroups = workloadAdministrationGroups;
+            this.workloadAdministrationGroups = requireNonNull(workloadAdministrationGroups);
             return this;
         }
 
@@ -124,9 +147,20 @@ public class UmsUsersState {
             return this;
         }
 
+        public Builder setGroupsExceedingThreshold(Collection<String> groupsExceedingThreshold) {
+            this.groupsExceedingThreshold = requireNonNull(groupsExceedingThreshold);
+            return this;
+        }
+
+        public Builder setGroupsExceedingLimit(Collection<String> groupsExceedingLimit) {
+            this.groupsExceedingLimit = requireNonNull(groupsExceedingLimit);
+            return this;
+        }
+
         public UmsUsersState build() {
             return new UmsUsersState(usersState, workloadCredentialMap, requestedWorkloadUsernames,
-                    workloadAdministrationGroups, userToCloudIdentityMap, servicePrincipalCloudIdentities);
+                    workloadAdministrationGroups, userToCloudIdentityMap, servicePrincipalCloudIdentities,
+                    groupsExceedingThreshold, groupsExceedingLimit);
         }
     }
 

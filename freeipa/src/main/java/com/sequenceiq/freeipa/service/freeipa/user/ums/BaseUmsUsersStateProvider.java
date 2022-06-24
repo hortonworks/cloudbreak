@@ -6,6 +6,7 @@ import com.sequenceiq.freeipa.service.freeipa.user.UserSyncConstants;
 import com.sequenceiq.freeipa.service.freeipa.user.conversion.FmsGroupConverter;
 import com.sequenceiq.freeipa.service.freeipa.user.model.FmsGroup;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UmsUsersState;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class BaseUmsUsersStateProvider {
@@ -87,5 +89,18 @@ public class BaseUmsUsersStateProvider {
             LOGGER.debug("Invalid resource is assigned to workload admin group: {}", e.getMessage());
         }
         return resourceCrn;
+    }
+
+    protected void setLargeGroups(UmsUsersState.Builder umsUsersStateBuilder, UsersState usersState, UserSyncOptions options) {
+        umsUsersStateBuilder.setGroupsExceedingThreshold(getLargeGroups(usersState, options.getLargeGroupThreshold()));
+        umsUsersStateBuilder.setGroupsExceedingLimit(getLargeGroups(usersState, options.getLargeGroupLimit()));
+    }
+
+    private Set<String> getLargeGroups(UsersState usersState, int sizeThreshold) {
+        return usersState.getGroupMembership().asMap().entrySet().stream()
+                .filter(entry -> entry.getValue().size() > sizeThreshold)
+                .map(Map.Entry::getKey)
+                .filter(Predicate.not(UserSyncConstants.ALLOWED_LARGE_GROUP_PREDICATE))
+                .collect(Collectors.toSet());
     }
 }

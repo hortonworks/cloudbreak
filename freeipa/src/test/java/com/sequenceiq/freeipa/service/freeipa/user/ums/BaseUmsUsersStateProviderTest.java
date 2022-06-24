@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -61,7 +63,7 @@ class BaseUmsUsersStateProviderTest {
                 .thenReturn(testData.servicePrincipalCloudIdentities);
     }
 
-    protected void verifyUmsUsersStateBuilderMap(Map<String, UmsUsersState> umsUsersStateMap) {
+    protected void verifyUmsUsersStateBuilderMap(Map<String, UmsUsersState> umsUsersStateMap, UserSyncOptions options) {
         assertEquals(1, umsUsersStateMap.size());
         UmsUsersState state = umsUsersStateMap.get(ENVIRONMENT_CRN);
         assertNotNull(state);
@@ -110,7 +112,45 @@ class BaseUmsUsersStateProviderTest {
                         state.getUsersWorkloadCredentialMap().get(mu.getWorkloadUsername()),
                         usersState.getUserMetadataMap().get(mu.getWorkloadUsername())));
 
+        verifyLargeGroups(state, options);
+
         assertEquals(testData.servicePrincipalCloudIdentities, state.getServicePrincipalCloudIdentities());
+    }
+
+    private void verifyLargeGroups(UmsUsersState state, UserSyncOptions options) {
+        Map<String, String> groupCrnToName = testData.groups.stream()
+                .collect(Collectors.toMap(UserManagementProto.Group::getCrn, UserManagementProto.Group::getGroupName));
+        Map<String, Integer> groupMembershipCount = new HashMap<>();
+        Set<String> wagNamesForThisEnvironment = testData.wagsForThisEnvironment.stream()
+                .map(UserManagementProto.WorkloadAdministrationGroup::getWorkloadAdministrationGroupName)
+                .collect(Collectors.toSet());
+        testData.memberCrnToActorRights.entrySet().stream()
+                .filter(entry -> entry.getValue().get(UserSyncConstants.RIGHTS.get(0)))
+                .map(Map.Entry::getKey)
+                .forEach(actor -> {
+                    testData.memberCrnToGroupMembership.get(actor).forEach((groupCrn, member) -> {
+                        if (member) {
+                            String groupName = groupCrnToName.get(groupCrn);
+                            groupMembershipCount.put(groupName, groupMembershipCount.getOrDefault(groupName, 0) + 1);
+                        }
+                    });
+                    testData.memberCrnToWagMembership.get(actor).forEach((wagName, member) -> {
+                        if (member && wagNamesForThisEnvironment.contains(wagName)) {
+                            groupMembershipCount.put(wagName, groupMembershipCount.getOrDefault(wagName, 0) + 1);
+                        }
+                    });
+                });
+        Set<String> expectedGroupsExceedingThreshold = groupMembershipCount.entrySet().stream()
+                .filter(entry -> entry.getValue() > options.getLargeGroupThreshold())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+        Set<String> expectedGroupsExceedingLimit = groupMembershipCount.entrySet().stream()
+                .filter(entry -> entry.getValue() > options.getLargeGroupLimit())
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
+
+        assertTrue(state.getGroupsExceedingThreshold().containsAll(expectedGroupsExceedingThreshold));
+        assertTrue(state.getGroupsExceedingLimit().containsAll(expectedGroupsExceedingLimit));
     }
 
     private void verifyActor(
@@ -169,7 +209,11 @@ class BaseUmsUsersStateProviderTest {
 
     public static class UserSyncTestData {
         // groups
-        List<UserManagementProto.Group> groups = createGroups("testGroup", 10);
+        List<UserManagementProto.Group> testGroups = createGroups("testGroup", 10);
+
+        List<UserManagementProto.Group> largeGroups = createGroups("largeGroup", 1);
+
+        List<UserManagementProto.Group> groups = Stream.concat(testGroups.stream(), largeGroups.stream()).collect(Collectors.toList());
 
         // wags
         List<UserManagementProto.WorkloadAdministrationGroup> wagsForThisEnvironment =
@@ -184,9 +228,9 @@ class BaseUmsUsersStateProviderTest {
                 .collect(Collectors.toList());
 
         // users and machine users
-        List<UserManagementProto.User> users = createUsers("testUser", 10);
+        List<UserManagementProto.User> users = createUsers("testUser", 20);
 
-        List<UserManagementProto.MachineUser> machineUsers = createMachineUsers(10);
+        List<UserManagementProto.MachineUser> machineUsers = createMachineUsers(20);
 
         List<String> allActorCrns = Stream.concat(users.stream().map(UserManagementProto.User::getCrn),
                 machineUsers.stream().map(UserManagementProto.MachineUser::getCrn))
@@ -251,13 +295,19 @@ class BaseUmsUsersStateProviderTest {
         }
 
         private Map<String, Map<String, Boolean>> createGroupMembership(List<String> allActorCrns) {
-            List<String> groupCrns = groups.stream()
+            List<String> testGroupCrns = testGroups.stream()
+                    .map(UserManagementProto.Group::getCrn)
+                    .collect(Collectors.toList());
+            List<String> largeGroupCrns = largeGroups.stream()
                     .map(UserManagementProto.Group::getCrn)
                     .collect(Collectors.toList());
             return allActorCrns.stream()
                     .collect(Collectors.toMap(
                             Function.identity(),
-                            actor -> createRandomBooleans(groupCrns)));
+                            actor ->
+                                Stream.concat(createRandomBooleans(testGroupCrns).entrySet().stream(),
+                                        createBooleansMap(largeGroupCrns, true).entrySet().stream())
+                                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))));
         }
 
         private Map<String, Map<String, Boolean>> createWagMembership(List<String> allActorCrns) {
@@ -275,6 +325,13 @@ class BaseUmsUsersStateProviderTest {
                     .collect(Collectors.toMap(
                             Function.identity(),
                             right -> RANDOM.nextBoolean()));
+        }
+
+        private <U> Map<U, Boolean> createBooleansMap(List<U> keys, boolean value) {
+            return keys.stream()
+                    .collect(Collectors.toMap(
+                            Function.identity(),
+                            right -> value));
         }
 
         private List<UserManagementProto.User> createUsers(String userNameBasis, int numUsers) {

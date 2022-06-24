@@ -100,13 +100,18 @@ class UserSyncForStackServiceTest {
     @Test
     public void testSynchronizeStackSuccessFullAtFirst() throws Exception {
         UmsUsersState umsUsersState = mock(UmsUsersState.class);
-        UserSyncOptions options = new UserSyncOptions(true, false, WorkloadCredentialsUpdateType.FORCE_UPDATE);
+        UserSyncOptions options = UserSyncOptions.newBuilder()
+                .fullSync(true)
+                .fmsToFreeIpaBatchCallEnabled(false)
+                .workloadCredentialsUpdateType(WorkloadCredentialsUpdateType.FORCE_UPDATE)
+                .build();
         UsersState usersState = mock(UsersState.class);
         when(usersState.getUsers()).thenReturn(ImmutableSet.of());
         when(usersState.getGroups()).thenReturn(ImmutableSet.of());
         when(freeIpaUsersStateProvider.getUsersState(FREE_IPA_CLIENT)).thenReturn(usersState);
         UsersStateDifference usersStateDifference = mock(UsersStateDifference.class);
-        when(userStateDifferenceCalculator.fromUmsAndIpaUsersStates(umsUsersState, usersState, options)).thenReturn(usersStateDifference);
+        when(userStateDifferenceCalculator.fromUmsAndIpaUsersStates(eq(umsUsersState), eq(usersState), eq(options), any()))
+                .thenReturn(usersStateDifference);
         when(entitlementService.cloudIdentityMappingEnabled(ACCOUNT)).thenReturn(TRUE);
         when(entitlementService.isEnvironmentPrivilegedUserEnabled(ACCOUNT)).thenReturn(TRUE);
 
@@ -126,13 +131,18 @@ class UserSyncForStackServiceTest {
     @Test
     public void testSynchronizeFailsToSetupSudoRules() throws Exception {
         UmsUsersState umsUsersState = mock(UmsUsersState.class);
-        UserSyncOptions options = new UserSyncOptions(true, false, WorkloadCredentialsUpdateType.FORCE_UPDATE);
+        UserSyncOptions options = UserSyncOptions.newBuilder()
+                .fullSync(true)
+                .fmsToFreeIpaBatchCallEnabled(false)
+                .workloadCredentialsUpdateType(WorkloadCredentialsUpdateType.FORCE_UPDATE)
+                .build();
         UsersState usersState = mock(UsersState.class);
         when(usersState.getUsers()).thenReturn(ImmutableSet.of());
         when(usersState.getGroups()).thenReturn(ImmutableSet.of());
         when(freeIpaUsersStateProvider.getUsersState(FREE_IPA_CLIENT)).thenReturn(usersState);
         UsersStateDifference usersStateDifference = mock(UsersStateDifference.class);
-        when(userStateDifferenceCalculator.fromUmsAndIpaUsersStates(umsUsersState, usersState, options)).thenReturn(usersStateDifference);
+        when(userStateDifferenceCalculator.fromUmsAndIpaUsersStates(eq(umsUsersState), eq(usersState), eq(options), any()))
+                .thenReturn(usersStateDifference);
         when(entitlementService.cloudIdentityMappingEnabled(ACCOUNT)).thenReturn(TRUE);
         when(entitlementService.isEnvironmentPrivilegedUserEnabled(ACCOUNT)).thenReturn(TRUE);
         doThrow(new Exception(ERROR_MESSAGE)).when(sudoRuleService).setupSudoRule(STACK, FREE_IPA_CLIENT);
@@ -152,13 +162,18 @@ class UserSyncForStackServiceTest {
     @Test
     public void testSynchronizeStackSuccessFullWithRetry() throws Exception {
         UmsUsersState umsUsersState = mock(UmsUsersState.class);
-        UserSyncOptions options = new UserSyncOptions(true, true, WorkloadCredentialsUpdateType.FORCE_UPDATE);
+        UserSyncOptions options = UserSyncOptions.newBuilder()
+                .fullSync(true)
+                .fmsToFreeIpaBatchCallEnabled(true)
+                .workloadCredentialsUpdateType(WorkloadCredentialsUpdateType.FORCE_UPDATE)
+                .build();
         UsersState usersState = mock(UsersState.class);
         when(usersState.getUsers()).thenReturn(ImmutableSet.of());
         when(usersState.getGroups()).thenReturn(ImmutableSet.of());
         when(freeIpaUsersStateProvider.getUsersState(FREE_IPA_CLIENT)).thenReturn(usersState);
         UsersStateDifference usersStateDifference = mock(UsersStateDifference.class);
-        when(userStateDifferenceCalculator.fromUmsAndIpaUsersStates(umsUsersState, usersState, options)).thenReturn(usersStateDifference);
+        when(userStateDifferenceCalculator.fromUmsAndIpaUsersStates(eq(umsUsersState), eq(usersState), eq(options), any()))
+                .thenReturn(usersStateDifference);
         when(userStateDifferenceCalculator.usersStateDifferenceChanged(any(), any())).thenReturn(TRUE);
         when(entitlementService.cloudIdentityMappingEnabled(ACCOUNT)).thenReturn(TRUE);
         when(entitlementService.isEnvironmentPrivilegedUserEnabled(ACCOUNT)).thenReturn(TRUE);
@@ -185,13 +200,18 @@ class UserSyncForStackServiceTest {
     public void testSynchronizeStackSuccessPartialAtFirst() throws FreeIpaClientException, TimeoutException {
         UmsUsersState umsUsersState = mock(UmsUsersState.class);
         when(umsUsersState.getRequestedWorkloadUsernames()).thenReturn(ImmutableSet.of("user1", "user2"));
-        UserSyncOptions options = new UserSyncOptions(false, false, WorkloadCredentialsUpdateType.FORCE_UPDATE);
+        UserSyncOptions options = UserSyncOptions.newBuilder()
+                .fullSync(false)
+                .fmsToFreeIpaBatchCallEnabled(false)
+                .workloadCredentialsUpdateType(WorkloadCredentialsUpdateType.FORCE_UPDATE)
+                .build();
         UsersState usersState = mock(UsersState.class);
         when(usersState.getUsers()).thenReturn(ImmutableSet.of());
         when(usersState.getGroups()).thenReturn(ImmutableSet.of());
         when(freeIpaUsersStateProvider.getFilteredFreeIpaState(FREE_IPA_CLIENT, Set.of("user1", "user2"))).thenReturn(usersState);
         UsersStateDifference usersStateDifference = mock(UsersStateDifference.class);
-        when(userStateDifferenceCalculator.fromUmsAndIpaUsersStates(umsUsersState, usersState, options)).thenReturn(usersStateDifference);
+        when(userStateDifferenceCalculator.fromUmsAndIpaUsersStates(eq(umsUsersState), eq(usersState), eq(options), any()))
+                .thenReturn(usersStateDifference);
 
         SyncStatusDetail result = underTest.synchronizeStack(STACK, umsUsersState, options, OPERATION_ID);
 
@@ -210,13 +230,18 @@ class UserSyncForStackServiceTest {
     public void testSynchronizeStackFailsPartial() throws FreeIpaClientException, TimeoutException {
         UmsUsersState umsUsersState = mock(UmsUsersState.class);
         when(umsUsersState.getRequestedWorkloadUsernames()).thenReturn(ImmutableSet.of("user1", "user2"));
-        UserSyncOptions options = new UserSyncOptions(false, false, WorkloadCredentialsUpdateType.FORCE_UPDATE);
+        UserSyncOptions options = UserSyncOptions.newBuilder()
+                .fullSync(false)
+                .fmsToFreeIpaBatchCallEnabled(false)
+                .workloadCredentialsUpdateType(WorkloadCredentialsUpdateType.FORCE_UPDATE)
+                .build();
         UsersState usersState = mock(UsersState.class);
         when(usersState.getUsers()).thenReturn(ImmutableSet.of());
         when(usersState.getGroups()).thenReturn(ImmutableSet.of());
         when(freeIpaUsersStateProvider.getFilteredFreeIpaState(FREE_IPA_CLIENT, Set.of("user1", "user2"))).thenReturn(usersState);
         UsersStateDifference usersStateDifference = mock(UsersStateDifference.class);
-        when(userStateDifferenceCalculator.fromUmsAndIpaUsersStates(umsUsersState, usersState, options)).thenReturn(usersStateDifference);
+        when(userStateDifferenceCalculator.fromUmsAndIpaUsersStates(eq(umsUsersState), eq(usersState), eq(options), any()))
+                .thenReturn(usersStateDifference);
         doAnswer(invocation -> {
             Multimap<String, String> warnings = invocation.getArgument(2, Multimap.class);
             warnings.put(ENV_CRN, "failed");
@@ -240,7 +265,11 @@ class UserSyncForStackServiceTest {
     @Test
     public void testSynchronizeStackFailsToGetClient() throws FreeIpaClientException {
         UmsUsersState umsUsersState = mock(UmsUsersState.class);
-        UserSyncOptions options = new UserSyncOptions(false, false, WorkloadCredentialsUpdateType.FORCE_UPDATE);
+        UserSyncOptions options = UserSyncOptions.newBuilder()
+                .fullSync(false)
+                .fmsToFreeIpaBatchCallEnabled(false)
+                .workloadCredentialsUpdateType(WorkloadCredentialsUpdateType.FORCE_UPDATE)
+                .build();
         when(freeIpaClientFactory.getFreeIpaClientForStack(STACK)).thenThrow(new FreeIpaClientException("potty"));
 
         SyncStatusDetail result = underTest.synchronizeStack(STACK, umsUsersState, options, OPERATION_ID);

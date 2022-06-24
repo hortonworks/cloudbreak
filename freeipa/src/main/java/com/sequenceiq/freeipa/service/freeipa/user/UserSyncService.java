@@ -48,6 +48,12 @@ public class UserSyncService {
     @Value("#{${freeipa.operation.cleanup.timeout-millis} * 0.95 }")
     private Long operationTimeout;
 
+    @Value("${freeipa.usersync.scale.large-group.size}")
+    private int largeGroupThreshold;
+
+    @Value("${freeipa.usersync.scale.large-group.limit}")
+    private int largeGroupLimit;
+
     @Inject
     private StackService stackService;
 
@@ -114,8 +120,14 @@ public class UserSyncService {
         WorkloadCredentialsUpdateType credentialsUpdateType = requestedCredentialsUpdateType == WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED &&
                 !entitlementService.usersyncCredentialsUpdateOptimizationEnabled(accountId) ?
                 WorkloadCredentialsUpdateType.FORCE_UPDATE : requestedCredentialsUpdateType;
-        UserSyncOptions userSyncOptions = new UserSyncOptions(fullSync, entitlementService.isFmsToFreeipaBatchCallEnabled(accountId),
-                credentialsUpdateType);
+        UserSyncOptions userSyncOptions = UserSyncOptions.newBuilder()
+                .fullSync(fullSync)
+                .fmsToFreeIpaBatchCallEnabled(entitlementService.isFmsToFreeipaBatchCallEnabled(accountId))
+                .workloadCredentialsUpdateType(credentialsUpdateType)
+                .enforceGroupMembershipLimitEnabled(entitlementService.isUserSyncEnforceGroupMembershipLimitEnabled(accountId))
+                .largeGroupThreshold(largeGroupThreshold)
+                .largeGroupLimit(largeGroupLimit)
+                .build();
         LOGGER.info("Credentials update optimization is{} enabled for this sync request",
                 userSyncOptions.isCredentialsUpdateOptimizationEnabled() ? "" : " not");
         return userSyncOptions;

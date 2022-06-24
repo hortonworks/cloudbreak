@@ -2,7 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.user.ums;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -15,6 +15,8 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -54,64 +56,68 @@ class UmsUsersStateProviderDispatcherTest {
     void testFullSync() {
         Set<String> userCrns = Set.of();
         Set<String> machineUserCrns = Set.of();
+        UserSyncOptions userSyncOptions = createUserSyncOptions(true);
 
         Map<String, UmsUsersState> expected = createExpectedResponse();
-        when(bulkUmsUsersStateProvider.get(anyString(), any(Set.class), any(Optional.class)))
+        when(bulkUmsUsersStateProvider.get(anyString(), any(Set.class), any(Optional.class), any(UserSyncOptions.class)))
                 .thenReturn(expected);
 
         Optional<String> requestIdOptional = Optional.of(UUID.randomUUID().toString());
         Map<String, UmsUsersState> response = underTest.getEnvToUmsUsersStateMap(
                 ACCOUNT_ID, ENVIRONMENT_CRNS,
-                userCrns, machineUserCrns, requestIdOptional);
+                userCrns, machineUserCrns, requestIdOptional, userSyncOptions);
 
         assertEquals(expected, response);
-        verify(bulkUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS, requestIdOptional);
+        verify(bulkUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS, requestIdOptional, userSyncOptions);
         verify(defaultUmsUsersStateProvider, never()).get(anyString(), any(Set.class),
-                any(Set.class), any(Set.class), any(Optional.class), anyBoolean());
+                any(Set.class), any(Set.class), any(Optional.class), any(UserSyncOptions.class));
     }
 
     @Test
     void testBulkFallsBackToDefault() {
         Set<String> userCrns = Set.of();
         Set<String> machineUserCrns = Set.of();
+        UserSyncOptions userSyncOptions = createUserSyncOptions(true);
 
-        when(bulkUmsUsersStateProvider.get(anyString(), any(Set.class), any(Optional.class)))
+        when(bulkUmsUsersStateProvider.get(anyString(), any(Set.class), any(Optional.class), any(UserSyncOptions.class)))
                 .thenThrow(StatusRuntimeException.class);
         Map<String, UmsUsersState> expected = createExpectedResponse();
         when(defaultUmsUsersStateProvider.get(anyString(), any(Set.class),
-                any(Set.class), any(Set.class), any(Optional.class), anyBoolean()))
+                any(Set.class), any(Set.class), any(Optional.class), any(UserSyncOptions.class)))
                 .thenReturn(expected);
 
         Optional<String> requestIdOptional = Optional.of(UUID.randomUUID().toString());
         Map<String, UmsUsersState> response = underTest.getEnvToUmsUsersStateMap(
                 ACCOUNT_ID, ENVIRONMENT_CRNS,
-                userCrns, machineUserCrns, requestIdOptional);
+                userCrns, machineUserCrns, requestIdOptional, userSyncOptions);
 
         assertEquals(expected, response);
-        verify(bulkUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS, requestIdOptional);
+        verify(bulkUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS, requestIdOptional, userSyncOptions);
         verify(defaultUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS,
-                userCrns, machineUserCrns, requestIdOptional, true);
+                userCrns, machineUserCrns, requestIdOptional, userSyncOptions);
     }
 
     @Test
     void testPartialSync() {
         Set<String> userCrns = Set.of(createActorCrn(CrnResourceDescriptor.USER));
         Set<String> machineUserCrns = Set.of(createActorCrn(CrnResourceDescriptor.MACHINE_USER));
+        UserSyncOptions userSyncOptions = createUserSyncOptions(false);
 
         Map<String, UmsUsersState> expected = createExpectedResponse();
         when(defaultUmsUsersStateProvider.get(anyString(), any(Set.class),
-                any(Set.class), any(Set.class), any(Optional.class), anyBoolean()))
+                any(Set.class), any(Set.class), any(Optional.class), any(UserSyncOptions.class)))
                 .thenReturn(expected);
 
         Optional<String> requestIdOptional = Optional.of(UUID.randomUUID().toString());
         Map<String, UmsUsersState> response = underTest.getEnvToUmsUsersStateMap(
                 ACCOUNT_ID, ENVIRONMENT_CRNS,
-                userCrns, machineUserCrns, requestIdOptional);
+                userCrns, machineUserCrns, requestIdOptional, userSyncOptions);
 
         assertEquals(expected, response);
-        verify(bulkUmsUsersStateProvider, never()).get(ACCOUNT_ID, ENVIRONMENT_CRNS, requestIdOptional);
+        verify(bulkUmsUsersStateProvider, never())
+                .get(anyString(), anyCollection(), any(Optional.class), any(UserSyncOptions.class));
         verify(defaultUmsUsersStateProvider).get(ACCOUNT_ID, ENVIRONMENT_CRNS,
-                userCrns, machineUserCrns, requestIdOptional, false);
+                userCrns, machineUserCrns, requestIdOptional, userSyncOptions);
     }
 
     private Map<String, UmsUsersState> createExpectedResponse() {
@@ -127,5 +133,16 @@ class UmsUsersStateProviderDispatcherTest {
                 .setAccountId(ACCOUNT_ID)
                 .build()
                 .toString();
+    }
+
+    private UserSyncOptions createUserSyncOptions(boolean fullSync) {
+        return UserSyncOptions.newBuilder()
+                .fullSync(fullSync)
+                .fmsToFreeIpaBatchCallEnabled(true)
+                .workloadCredentialsUpdateType(WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED)
+                .enforceGroupMembershipLimitEnabled(false)
+                .largeGroupThreshold(500)
+                .largeGroupLimit(750)
+                .build();
     }
 }

@@ -140,7 +140,7 @@ public class UserSyncForEnvService {
             LOGGER.debug("Starting {} for environments {} ...", logRetrieveUmsEvent, environmentCrns);
             Map<String, UmsUsersState> envToUmsStateMap = umsUsersStateProviderDispatcher
                     .getEnvToUmsUsersStateMap(accountId, environmentCrns, userSyncFilter.getUserCrnFilter(),
-                            userSyncFilter.getMachineUserCrnFilter(), MDCUtils.getRequestId());
+                            userSyncFilter.getMachineUserCrnFilter(), MDCUtils.getRequestId(), options);
             LOGGER.debug("Finished {}.", logRetrieveUmsEvent);
             UmsEventGenerationIds umsEventGenerationIds = options.isFullSync() ?
                     umsEventGenerationIdsProvider.getEventGenerationIds(accountId, MDCUtils.getRequestId()) : null;

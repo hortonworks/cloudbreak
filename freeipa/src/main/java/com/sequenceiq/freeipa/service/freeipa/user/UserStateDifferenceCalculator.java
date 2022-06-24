@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -30,14 +31,20 @@ public class UserStateDifferenceCalculator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UserStateDifferenceCalculator.class);
 
-    public UsersStateDifference fromUmsAndIpaUsersStates(UmsUsersState umsState, UsersState ipaState, UserSyncOptions options) {
+    private static final String GROUP_SIZE_LIMIT_EXCEEDED_ERROR = "Group size limit exceeded";
+
+    private static final String GROUP_SIZE_LIMIT_EXCEEDED_MESSAGE =
+            "%s contains %d users. This exceeds maximum group size limit of %d. New members will not be added to this group.";
+
+    public UsersStateDifference fromUmsAndIpaUsersStates(UmsUsersState umsState, UsersState ipaState,
+            UserSyncOptions options, BiConsumer<String, String> warnings) {
         return new UsersStateDifference(
                 calculateGroupsToAdd(umsState, ipaState),
                 calculateGroupsToRemove(umsState, ipaState),
                 calculateUsersToAdd(umsState, ipaState),
                 calculateUsersWithCredentialsToUpdate(umsState, ipaState, options.isCredentialsUpdateOptimizationEnabled()),
                 calculateUsersToRemove(umsState, ipaState),
-                calculateGroupMembershipToAdd(umsState, ipaState),
+                calculateGroupMembershipToAdd(umsState, ipaState, options, warnings),
                 calculateGroupMembershipToRemove(umsState, ipaState),
                 calculateUsersToDisable(umsState, ipaState),
                 calculateUsersToEnable(umsState, ipaState));
@@ -127,12 +134,26 @@ public class UserStateDifferenceCalculator {
         return usersToRemove;
     }
 
-    public ImmutableMultimap<String, String> calculateGroupMembershipToAdd(UmsUsersState umsState, UsersState ipaState) {
+    public ImmutableMultimap<String, String> calculateGroupMembershipToAdd(UmsUsersState umsState, UsersState ipaState,
+            UserSyncOptions options, BiConsumer<String, String> warnings) {
         Multimap<String, String> groupMembershipToAdd = HashMultimap.create();
-        umsState.getUsersState().getGroupMembership().forEach((group, user) -> {
-            if (!FreeIpaChecks.IPA_UNMANAGED_GROUPS.contains(group) && !ipaState.getGroupMembership().containsEntry(group, user)) {
-                LOGGER.debug("adding user : {} to group : {}", user, group);
-                groupMembershipToAdd.put(group, user);
+        Set<String> groupsExceedingLimit = umsState.getGroupsExceedingLimit();
+        boolean enforceGroupLimits = options.isEnforceGroupMembershipLimitEnabled();
+        int groupLimit = options.getLargeGroupLimit();
+
+        umsState.getUsersState().getGroupMembership().asMap().forEach((group, users) -> {
+            if (!FreeIpaChecks.IPA_UNMANAGED_GROUPS.contains(group)) {
+                if (enforceGroupLimits && groupsExceedingLimit.contains(group)) {
+                    String message = String.format(GROUP_SIZE_LIMIT_EXCEEDED_MESSAGE, group, users.size(), groupLimit);
+                    LOGGER.debug(message);
+                    warnings.accept(GROUP_SIZE_LIMIT_EXCEEDED_ERROR, message);
+                } else {
+                    Set<String> usersToAdd = users.stream()
+                            .filter(user -> !ipaState.getGroupMembership().containsEntry(group, user))
+                            .collect(Collectors.toSet());
+                    LOGGER.debug("adding users : {} to group : {}", usersToAdd, group);
+                    groupMembershipToAdd.putAll(group, usersToAdd);
+                }
             }
         });
 

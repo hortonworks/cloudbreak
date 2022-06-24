@@ -75,6 +75,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UNBOUND_ELIMINATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_DATABUS_CNAME_ENDPOINT;
@@ -512,6 +513,10 @@ public class EntitlementService {
 
     public boolean isSaltUserPasswordRotationEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_ROTATE_SALTUSER_PASSWORD);
+    }
+
+    public boolean isUserSyncEnforceGroupMembershipLimitEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT);
     }
 
     public List<String> getEntitlements(String accountId) {
