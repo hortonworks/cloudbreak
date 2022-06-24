@@ -17,6 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -138,6 +139,16 @@ public class AvailabilityCheckerTest {
 
         packageVersions.put(PACKAGE_NAME, " ");
         assertFalse(underTest.isPackageAvailable(stack, PACKAGE_NAME, AFTER_VERSION));
+    }
+
+    @Test
+    public void testImageNotFoundForPackageVersion() {
+        Stack stack = new Stack();
+        when(imageService.getImageForStack(stack)).thenThrow(ImageNotFoundException.class);
+
+        boolean result = underTest.isPackageAvailable(stack, PACKAGE_NAME, AFTER_VERSION);
+
+        assertFalse(result);
     }
 
     private Map<String, String> createPackageVersions(Stack stack) {
