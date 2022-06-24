@@ -2,8 +2,10 @@ package com.sequenceiq.it.cloudbreak.cloud.v4;
 
 import static java.lang.String.format;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
@@ -269,6 +272,35 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     protected abstract ClusterTestDto withCluster(ClusterTestDto cluster);
 
     protected abstract DistroXClusterTestDto withCluster(DistroXClusterTestDto cluster);
+
+    public String getLatestPreWarmedImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform, boolean govCloud) {
+        try {
+            List<ImageV4Response> prewarmedImagesForRuntime = cloudbreakClient
+                    .getDefaultClient()
+                    .imageCatalogV4Endpoint()
+                    .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
+                            platform, null, null, govCloud)
+                    .getCdhImages().stream()
+                    .filter(image -> StringUtils.equalsIgnoreCase(image.getStackDetails().getVersion(),
+                            commonClusterManagerProperties.getRuntimeVersion()))
+                    .sorted(Comparator.comparing(ImageV4Response::getPublished))
+                    .collect(Collectors.toList());
+
+            if (prewarmedImagesForRuntime.isEmpty()) {
+                throw new IllegalStateException(format("Cannot find pre-warmed images at '%s' provider for '%s' runtime version!", platform,
+                        commonClusterManagerProperties.getRuntimeVersion()));
+            }
+            ImageV4Response latestPrewarmedImage = prewarmedImagesForRuntime.get(prewarmedImagesForRuntime.size() - 1);
+            Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
+            Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
+            Log.log(LOGGER, format(" Selected Pre-warmed Image Date: %s | ID: %s | Description: %s ", latestPrewarmedImage.getDate(),
+                    latestPrewarmedImage.getUuid(), latestPrewarmedImage.getDescription()));
+            return latestPrewarmedImage.getUuid();
+        } catch (Exception e) {
+            LOGGER.error("Cannot fetch pre-warmed images from '{}' image catalog, because of: {}", imageCatalogTestDto.getRequest().getName(), e);
+            throw new TestFailException(format("Cannot fetch pre-warmed images from '%s' image catalog!", imageCatalogTestDto.getRequest().getName(), e));
+        }
+    }
 
     public String getLatestBaseImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform, boolean govCloud) {
         try {

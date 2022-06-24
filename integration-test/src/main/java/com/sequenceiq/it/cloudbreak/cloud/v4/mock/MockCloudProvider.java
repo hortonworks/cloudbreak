@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.cloud.v4.mock;
 
 import static java.lang.String.format;
 
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.MockStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -51,7 +49,6 @@ import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCloudStorageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
@@ -208,39 +205,14 @@ public class MockCloudProvider extends AbstractCloudProvider {
                 .withImageCatalog(imageSettings.getTestContext().given(ImageSettingsTestDto.class).getName());
     }
 
-    @Override
-    public String getPreviousPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        if (mockProperties.getBaseimage().getRedhat7().getImageId() == null || mockProperties.getBaseimage().getRedhat7().getImageId().isEmpty()) {
-            try {
-                List<ImageV4Response> images = cloudbreakClient
-                        .getDefaultClient()
-                        .imageCatalogV4Endpoint()
-                        .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                                CloudPlatform.MOCK.name(), null, null, false).getCdhImages();
-
-                ImageV4Response olderImage = images.get(images.size() - 2);
-                Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
-                Log.log(LOGGER, format(" Image Catalog URL: %s ", imageCatalogTestDto.getRequest().getUrl()));
-                Log.log(LOGGER, format(" Selected Pre-warmed Image Date: %s | ID: %s | Description: %s | Stack Version: %s ", olderImage.getDate(),
-                        olderImage.getUuid(), olderImage.getStackDetails().getVersion(), olderImage.getDescription()));
-                mockProperties.getBaseimage().getRedhat7().setImageId(olderImage.getUuid());
-
-                return olderImage.getUuid();
-            } catch (Exception e) {
-                LOGGER.error("Cannot fetch pre-warmed images of {} image catalog!", imageCatalogTestDto.getRequest().getName());
-                throw new TestFailException(" Cannot fetch pre-warmed images of " + imageCatalogTestDto.getRequest().getName() + " image catalog!", e);
-            }
-        } else {
-            Log.log(LOGGER, format(" Image Catalog Name: %s ", commonCloudProperties().getImageCatalogName()));
-            Log.log(LOGGER, format(" Image Catalog URL: %s ", commonCloudProperties().getImageCatalogUrl()));
-            Log.log(LOGGER, format(" Image ID for SDX create: %s ", mockProperties.getBaseimage().getRedhat7().getImageId()));
-            return mockProperties.getBaseimage().getRedhat7().getImageId();
-        }
-    }
-
     private <T> T throwNotImplementedException() {
         throw new NotImplementedException(String.format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
                 "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
+    }
+
+    @Override
+    public String getLatestPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
+        return getLatestPreWarmedImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.MOCK.name(), false);
     }
 
     @Override
