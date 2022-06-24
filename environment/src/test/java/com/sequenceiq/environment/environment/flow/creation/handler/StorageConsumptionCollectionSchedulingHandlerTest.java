@@ -16,6 +16,9 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
@@ -57,6 +60,8 @@ class StorageConsumptionCollectionSchedulingHandlerTest {
     private static final String LOGGING_STORAGE_LOCATION = "s3a://foo/bar";
 
     private static final String BACKUP_STORAGE_LOCATION = "s3a://baz";
+
+    private static final String EMPTY_STORAGE_LOCATION = "";
 
     @Mock
     private EventSender eventSender;
@@ -226,12 +231,14 @@ class StorageConsumptionCollectionSchedulingHandlerTest {
         verify(consumptionService, never()).scheduleStorageConsumptionCollection(anyString(), any(StorageConsumptionRequest.class));
     }
 
-    @Test
-    void acceptTestSkipWhenNoStorageLocations() {
+    @ParameterizedTest(name = "storageLocation={0}")
+    @ValueSource(strings = {EMPTY_STORAGE_LOCATION})
+    @NullSource
+    void acceptTestSkipWhenNoStorageLocations(String storageLocation) {
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
         when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
-        environmentDto.getTelemetry().getLogging().setStorageLocation(null);
-        environmentDto.getBackup().setStorageLocation(null);
+        environmentDto.getTelemetry().getLogging().setStorageLocation(storageLocation);
+        environmentDto.getBackup().setStorageLocation(storageLocation);
 
         underTest.accept(environmentDtoEvent);
 
@@ -275,13 +282,11 @@ class StorageConsumptionCollectionSchedulingHandlerTest {
         verifySuccessEvent();
 
         verify(consumptionService).scheduleStorageConsumptionCollection(eq(ACCOUNT_ID), storageConsumptionRequestCaptor.capture());
-        List<StorageConsumptionRequest> storageConsumptionRequests = storageConsumptionRequestCaptor.getAllValues();
-        assertThat(storageConsumptionRequests).hasSize(1);
-        verifyStorageConsumptionRequest(storageConsumptionRequests.get(0), LOGGING_STORAGE_LOCATION);
+        verifyStorageConsumptionRequest(storageConsumptionRequestCaptor.getValue(), LOGGING_STORAGE_LOCATION);
     }
 
     @Test
-    void acceptTestSuccessWhenOnlyLoggingLocationProvided() {
+    void acceptTestSuccessWhenOnlyLoggingLocationProvidedAndNoBackup() {
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
         when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
         environmentDto.setBackup(null);
@@ -291,13 +296,27 @@ class StorageConsumptionCollectionSchedulingHandlerTest {
         verifySuccessEvent();
 
         verify(consumptionService).scheduleStorageConsumptionCollection(eq(ACCOUNT_ID), storageConsumptionRequestCaptor.capture());
-        List<StorageConsumptionRequest> storageConsumptionRequests = storageConsumptionRequestCaptor.getAllValues();
-        assertThat(storageConsumptionRequests).hasSize(1);
-        verifyStorageConsumptionRequest(storageConsumptionRequests.get(0), LOGGING_STORAGE_LOCATION);
+        verifyStorageConsumptionRequest(storageConsumptionRequestCaptor.getValue(), LOGGING_STORAGE_LOCATION);
+    }
+
+    @ParameterizedTest(name = "backupStorageLocation={0}")
+    @ValueSource(strings = {EMPTY_STORAGE_LOCATION})
+    @NullSource
+    void acceptTestSuccessWhenOnlyLoggingLocationProvided(String backupStorageLocation) {
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
+        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
+        environmentDto.getBackup().setStorageLocation(backupStorageLocation);
+
+        underTest.accept(environmentDtoEvent);
+
+        verifySuccessEvent();
+
+        verify(consumptionService).scheduleStorageConsumptionCollection(eq(ACCOUNT_ID), storageConsumptionRequestCaptor.capture());
+        verifyStorageConsumptionRequest(storageConsumptionRequestCaptor.getValue(), LOGGING_STORAGE_LOCATION);
     }
 
     @Test
-    void acceptTestSuccessWhenOnlyBackupLocationProvided() {
+    void acceptTestSuccessWhenOnlyBackupLocationProvidedAndNoTelemetry() {
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
         when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
         environmentDto.setTelemetry(null);
@@ -307,9 +326,37 @@ class StorageConsumptionCollectionSchedulingHandlerTest {
         verifySuccessEvent();
 
         verify(consumptionService).scheduleStorageConsumptionCollection(eq(ACCOUNT_ID), storageConsumptionRequestCaptor.capture());
-        List<StorageConsumptionRequest> storageConsumptionRequests = storageConsumptionRequestCaptor.getAllValues();
-        assertThat(storageConsumptionRequests).hasSize(1);
-        verifyStorageConsumptionRequest(storageConsumptionRequests.get(0), BACKUP_STORAGE_LOCATION);
+        verifyStorageConsumptionRequest(storageConsumptionRequestCaptor.getValue(), BACKUP_STORAGE_LOCATION);
+    }
+
+    @Test
+    void acceptTestSuccessWhenOnlyBackupLocationProvidedAndNoLogging() {
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
+        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
+        environmentDto.getTelemetry().setLogging(null);
+
+        underTest.accept(environmentDtoEvent);
+
+        verifySuccessEvent();
+
+        verify(consumptionService).scheduleStorageConsumptionCollection(eq(ACCOUNT_ID), storageConsumptionRequestCaptor.capture());
+        verifyStorageConsumptionRequest(storageConsumptionRequestCaptor.getValue(), BACKUP_STORAGE_LOCATION);
+    }
+
+    @ParameterizedTest(name = "loggingStorageLocation={0}")
+    @ValueSource(strings = {EMPTY_STORAGE_LOCATION})
+    @NullSource
+    void acceptTestSuccessWhenOnlyBackupLocationProvided(String loggingStorageLocation) {
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(new Environment()));
+        when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
+        environmentDto.getTelemetry().getLogging().setStorageLocation(loggingStorageLocation);
+
+        underTest.accept(environmentDtoEvent);
+
+        verifySuccessEvent();
+
+        verify(consumptionService).scheduleStorageConsumptionCollection(eq(ACCOUNT_ID), storageConsumptionRequestCaptor.capture());
+        verifyStorageConsumptionRequest(storageConsumptionRequestCaptor.getValue(), BACKUP_STORAGE_LOCATION);
     }
 
 }

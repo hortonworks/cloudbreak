@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.service.consumption;
+package com.sequenceiq.datalake.service.consumption;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -9,18 +9,17 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
 import com.sequenceiq.consumption.client.ConsumptionInternalCrnClient;
-import com.sequenceiq.environment.exception.ConsumptionOperationFailedException;
 
 @Service
-public class ConsumptionService {
+public class ConsumptionClientService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConsumptionService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConsumptionClientService.class);
 
     private final ConsumptionInternalCrnClient consumptionInternalCrnClient;
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    public ConsumptionService(ConsumptionInternalCrnClient consumptionInternalCrnClient,
+    public ConsumptionClientService(ConsumptionInternalCrnClient consumptionInternalCrnClient,
             WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         this.consumptionInternalCrnClient = consumptionInternalCrnClient;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
