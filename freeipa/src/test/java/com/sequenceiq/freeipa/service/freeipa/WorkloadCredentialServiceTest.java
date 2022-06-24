@@ -234,7 +234,12 @@ class WorkloadCredentialServiceTest {
         WorkloadCredentialsUpdateType credentialsUpdateType = updateOptimizationEnabled ?
                 WorkloadCredentialsUpdateType.UPDATE_IF_CHANGED : WorkloadCredentialsUpdateType.FORCE_UPDATE;
 
-        underTest.setWorkloadCredentials(new UserSyncOptions(false, batchCallEnabled, credentialsUpdateType), ipaClient, credentialUpdates,
+        UserSyncOptions options = UserSyncOptions.newBuilder()
+                .fullSync(false)
+                .fmsToFreeIpaBatchCallEnabled(batchCallEnabled)
+                .workloadCredentialsUpdateType(credentialsUpdateType)
+                .build();
+        underTest.setWorkloadCredentials(options, ipaClient, credentialUpdates,
                 warnings);
     }
 }

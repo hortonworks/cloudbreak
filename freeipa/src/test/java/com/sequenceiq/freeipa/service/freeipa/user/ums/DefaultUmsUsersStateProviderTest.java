@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -63,10 +64,16 @@ class DefaultUmsUsersStateProviderTest extends BaseUmsUsersStateProviderTest {
     void getEnvToUmsUsersStateMap() {
         setupMocks();
 
-        Map<String, UmsUsersState> umsUsersStateMap = underTest.get(
-                ACCOUNT_ID, List.of(ENVIRONMENT_CRN), Set.of(), Set.of(), Optional.empty(), true);
+        UserSyncOptions options = UserSyncOptions.newBuilder()
+                .fullSync(true)
+                .largeGroupThreshold(5)
+                .largeGroupLimit(10)
+                .build();
 
-        verifyUmsUsersStateBuilderMap(umsUsersStateMap);
+        Map<String, UmsUsersState> umsUsersStateMap = underTest.get(
+                ACCOUNT_ID, List.of(ENVIRONMENT_CRN), Set.of(), Set.of(), Optional.empty(), options);
+
+        verifyUmsUsersStateBuilderMap(umsUsersStateMap, options);
     }
 
     private void setupMocks() {

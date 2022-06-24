@@ -70,7 +70,9 @@ auth:
     nodestatus.salt.ping.enable: true
     diagnostics.vm.enable: true
     compute.monitoring.enable: false
-    user.sync.credentials.update.optimization.enable: true
+    user.sync:
+      credentials.update.optimization.enable: true
+      group-size.enforce-limit.enable: true
     azure:
       disk:
         SSEWithCMK.enable: true

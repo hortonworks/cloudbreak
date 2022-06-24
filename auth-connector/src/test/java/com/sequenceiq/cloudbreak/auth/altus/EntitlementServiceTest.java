@@ -227,7 +227,10 @@ class EntitlementServiceTest {
                 {"CDP_FMS_DELAYED_STOP_START", (EntitlementCheckFunction) EntitlementService::isFmsDelayedStopStartEnabled, true},
 
                 {"CDP_FMS_RECIPE", (EntitlementCheckFunction) EntitlementService::isFmsRecipesEnabled, false},
-                {"CDP_FMS_RECIPE", (EntitlementCheckFunction) EntitlementService::isFmsRecipesEnabled, true}
+                {"CDP_FMS_RECIPE", (EntitlementCheckFunction) EntitlementService::isFmsRecipesEnabled, true},
+
+                {"CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", (EntitlementCheckFunction) EntitlementService::isUserSyncEnforceGroupMembershipLimitEnabled, false},
+                {"CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT", (EntitlementCheckFunction) EntitlementService::isUserSyncEnforceGroupMembershipLimitEnabled, true}
         };
     }
 

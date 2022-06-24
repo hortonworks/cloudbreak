@@ -2,12 +2,16 @@ package com.sequenceiq.freeipa.service.freeipa.user;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserSyncOptions;
 import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMultimap;
@@ -185,19 +189,29 @@ class UsersStateDifferenceCalculatorTest {
 
     @Test
     void testCalculateGroupMembershipsToAdd() {
+        int groupSizeLimit = 10;
+
         String group = "group";
         String unmanagedGroup = FreeIpaChecks.IPA_UNMANAGED_GROUPS.get(0);
+        String largeGroup = "largeGroup";
 
         String userUms = "userUms";
         String userBoth = "userBoth";
         String userIPA = "userIPA";
 
+        String userLargeGroupBase = "userLargeGroup";
+
+        UsersState.Builder usersStateBuilder = UsersState.newBuilder()
+                .addMemberToGroup(group, userUms)
+                .addMemberToGroup(group, userBoth)
+                .addMemberToGroup(unmanagedGroup, userUms);
+
+        for (int i = 0; i <= groupSizeLimit; ++i) {
+            usersStateBuilder.addMemberToGroup(largeGroup, userLargeGroupBase + i);
+        }
+
         UmsUsersState umsUsersState = new UmsUsersState.Builder()
-                .setUsersState(new UsersState.Builder()
-                        .addMemberToGroup(group, userUms)
-                        .addMemberToGroup(group, userBoth)
-                        .addMemberToGroup(unmanagedGroup, userUms)
-                        .build())
+                .setUsersState(usersStateBuilder.build())
                 .build();
 
         UsersState ipaUsersState = new UsersState.Builder()
@@ -205,16 +219,82 @@ class UsersStateDifferenceCalculatorTest {
                 .addMemberToGroup(group, userIPA)
                 .build();
 
-        ImmutableMultimap<String, String> groupMembershipsToAdd = new UserStateDifferenceCalculator()
-                .calculateGroupMembershipToAdd(umsUsersState, ipaUsersState);
+        UserSyncOptions options = UserSyncOptions.newBuilder()
+                .enforceGroupMembershipLimitEnabled(false)
+                .largeGroupLimit(groupSizeLimit)
+                .build();
 
-        // group that exists only in UMS will be added
+        Multimap<String, String> warnings = ArrayListMultimap.create();
+
+        ImmutableMultimap<String, String> groupMembershipsToAdd = new UserStateDifferenceCalculator()
+                .calculateGroupMembershipToAdd(umsUsersState, ipaUsersState, options, warnings::put);
+
+        // members will be added to group that exists only in UMS
         assertTrue(groupMembershipsToAdd.get(group).contains(userUms));
         // unmanaged groups will be ignored
         assertFalse(groupMembershipsToAdd.get(unmanagedGroup).contains(userUms));
-        // groups that exist in both or only ipa will not be added
+        // members will not be added to groups that exist in both or only ipa
         assertFalse(groupMembershipsToAdd.get(group).contains(userBoth));
         assertFalse(groupMembershipsToAdd.get(group).contains(userIPA));
+        // limit + 1 users added to large group
+        assertNotNull(groupMembershipsToAdd.get(largeGroup));
+        assertEquals(groupSizeLimit + 1, groupMembershipsToAdd.get(largeGroup).size());
+        assertTrue(warnings.isEmpty());
+    }
+
+    @Test
+    void testCalculateGroupMembershipsToAddExceedsLimit() {
+        int groupSizeLimit = 10;
+
+        String group = "group";
+        String unmanagedGroup = FreeIpaChecks.IPA_UNMANAGED_GROUPS.get(0);
+        String largeGroup = "largeGroup";
+
+        String userUms = "userUms";
+        String userBoth = "userBoth";
+        String userIPA = "userIPA";
+
+        String userLargeGroupBase = "userLargeGroup";
+
+        UsersState.Builder usersStateBuilder = UsersState.newBuilder()
+                .addMemberToGroup(group, userUms)
+                .addMemberToGroup(group, userBoth)
+                .addMemberToGroup(unmanagedGroup, userUms);
+
+        for (int i = 0; i <= groupSizeLimit; ++i) {
+            usersStateBuilder.addMemberToGroup(largeGroup, userLargeGroupBase + i);
+        }
+
+        UmsUsersState umsUsersState = new UmsUsersState.Builder()
+                .setUsersState(usersStateBuilder.build())
+                .setGroupsExceedingLimit(Set.of(largeGroup))
+                .build();
+
+        UsersState ipaUsersState = new UsersState.Builder()
+                .addMemberToGroup(group, userBoth)
+                .addMemberToGroup(group, userIPA)
+                .build();
+
+        UserSyncOptions options = UserSyncOptions.newBuilder()
+                .enforceGroupMembershipLimitEnabled(true)
+                .largeGroupLimit(groupSizeLimit)
+                .build();
+
+        Multimap<String, String> warnings = ArrayListMultimap.create();
+
+        ImmutableMultimap<String, String> groupMembershipsToAdd = new UserStateDifferenceCalculator()
+                .calculateGroupMembershipToAdd(umsUsersState, ipaUsersState, options, warnings::put);
+
+        // members will be added to group that exists only in UMS
+        assertTrue(groupMembershipsToAdd.get(group).contains(userUms));
+        // unmanaged groups will be ignored
+        assertFalse(groupMembershipsToAdd.get(unmanagedGroup).contains(userUms));
+        // members will not be added to groups that exist in both or only ipa
+        assertFalse(groupMembershipsToAdd.get(group).contains(userBoth));
+        assertFalse(groupMembershipsToAdd.get(group).contains(userIPA));
+        // no members added to large group
+        assertFalse(groupMembershipsToAdd.containsKey(largeGroup));
+        assertEquals(1, warnings.size());
     }
 
     @Test
