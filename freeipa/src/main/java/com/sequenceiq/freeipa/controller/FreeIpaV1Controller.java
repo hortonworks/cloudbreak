@@ -340,10 +340,10 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @InternalOnly
-    public void rotateSaltPasswordInternal(@ResourceCrn @NotEmpty String environmentCrn, @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ROTATE_SALTUSER_PASSWORD_ENVIRONMENT)
+    public FlowIdentifier rotateSaltPassword(@ResourceCrn @NotEmpty String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        rotateSaltPasswordService.rotateSaltPassword(environmentCrn, accountId);
+        return rotateSaltPasswordService.triggerRotateSaltPassword(environmentCrn, accountId);
     }
 
     @Override
