@@ -38,7 +38,7 @@ public class ClusterUpgradeTargetImageService {
     private StackImageService stackImageService;
 
     @Inject
-    private ImageProvider imageProvider;
+    private ImageConverter imageConverter;
 
     public void saveImage(Long stackId, StatedImage targetImage) {
         Optional<Component> existingTargetImage = findTargetImageComponent(stackId);
@@ -54,7 +54,7 @@ public class ClusterUpgradeTargetImageService {
 
     public Optional<Image> findTargetImage(Long stackId) {
         Optional<Component> targetImageComponent = findTargetImageComponent(stackId);
-        return targetImageComponent.map(image -> imageProvider.convertJsonToImage(image.getAttributes()));
+        return targetImageComponent.map(image -> imageConverter.convertJsonToImage(image.getAttributes()));
     }
 
     private void removeOldTargetImage(Component existingTargetImage) {
@@ -67,7 +67,7 @@ public class ClusterUpgradeTargetImageService {
     }
 
     private boolean isTheSameImage(StatedImage targetImage, Component existingTargetImage) {
-        Image image = imageProvider.convertJsonToImage(existingTargetImage.getAttributes());
+        Image image = imageConverter.convertJsonToImage(existingTargetImage.getAttributes());
         return Objects.equals(image.getImageId(), targetImage.getImage().getUuid()) &&
                 Objects.equals(image.getImageCatalogName(), targetImage.getImageCatalogName()) &&
                 Objects.equals(image.getImageCatalogUrl(), targetImage.getImageCatalogUrl());
