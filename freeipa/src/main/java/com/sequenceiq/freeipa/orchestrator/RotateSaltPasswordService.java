@@ -16,9 +16,13 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordEvent;
+import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.SaltBootstrapVersionChecker;
 
@@ -45,19 +49,18 @@ public class RotateSaltPasswordService {
     @Inject
     private SaltBootstrapVersionChecker saltBootstrapVersionChecker;
 
-    public void rotateSaltPassword(String environmentCrn, String accountId) {
-        if (!entitlementService.isSaltUserPasswordRotationEnabled(accountId)) {
-            throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
-        }
+    @Inject
+    private FreeIpaFlowManager flowManager;
 
+    public FlowIdentifier triggerRotateSaltPassword(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
-        MDCBuilder.buildMdcContext(stack);
+        validateRotateSaltPassword(stack);
+        String selector = RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event();
+        return flowManager.notify(selector, new StackEvent(selector, stack.getId()));
+    }
 
-        if (!saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)) {
-            throw new BadRequestException("Rotating SaltStack user password is not supported with your image version, " +
-                    "please upgrade to an image with salt-bootstrap version >= 0.13.6 (you can find this information in the image catalog)");
-        }
-
+    public void rotateSaltPassword(Stack stack) {
+        validateRotateSaltPassword(stack);
         try {
             String oldPassword = stack.getSecurityConfig().getSaltSecurityConfig().getSaltPassword();
             String newPassword = PasswordUtil.generatePassword();
@@ -67,6 +70,17 @@ public class RotateSaltPasswordService {
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.error("Failed to rotate salt password", e);
             throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
+    private void validateRotateSaltPassword(Stack stack) {
+        MDCBuilder.buildMdcContext(stack);
+        if (!entitlementService.isSaltUserPasswordRotationEnabled(stack.getAccountId())) {
+            throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
+        }
+        if (!saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)) {
+            throw new BadRequestException("Rotating SaltStack user password is not supported with your image version, " +
+                    "please upgrade to an image with salt-bootstrap version >= 0.13.6 (you can find this information in the image catalog)");
         }
     }
 }

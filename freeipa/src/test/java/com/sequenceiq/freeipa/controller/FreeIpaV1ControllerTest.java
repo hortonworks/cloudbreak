@@ -291,9 +291,9 @@ class FreeIpaV1ControllerTest {
     void rotateSaltPasswordInternal() {
         when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
 
-        underTest.rotateSaltPasswordInternal(ENVIRONMENT_CRN, INITIATOR_USER_CRN);
+        underTest.rotateSaltPassword(ENVIRONMENT_CRN);
 
-        verify(rotateSaltPasswordService).rotateSaltPassword(ENVIRONMENT_CRN, ACCOUNT_ID);
+        verify(rotateSaltPasswordService).triggerRotateSaltPassword(ENVIRONMENT_CRN, ACCOUNT_ID);
     }
 
 }
