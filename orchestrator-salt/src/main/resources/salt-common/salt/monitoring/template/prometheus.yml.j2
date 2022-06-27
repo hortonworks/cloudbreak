@@ -2,8 +2,35 @@
 {%- from 'monitoring/settings.sls' import monitoring with context %}
 {%- set hostname = salt['grains.get']('fqdn') %}
 {%- set hostgroup = salt['grains.get']('hostgroup') %}
+{%- set cdp_prometheus_installed = salt['file.directory_exists' ]('/opt/cdp-prometheus') %}
 global:
   scrape_interval: {{ monitoring.scrapeIntervalSeconds }}s
+{%- if cdp_prometheus_installed %}
+remote_write:
+  {%- if monitoring.requestSignerEnabled and monitoring.databusEnabled %}
+  - url: https://localhost:{{ monitoring.requestSignerPort }}
+    basic_auth:
+      username: {{ monitoring.requestSignerUser }}
+      password_file: /opt/cdp-prometheus/request_signer_pwd_file
+  {%- else %}
+  - url: {{ monitoring.remoteWriteUrl }}
+    {%- if telemetry.proxyUrl %}
+    proxy_url: {{ telemetry.proxyUrl }}
+    {%- endif %}
+    {%- if monitoring.username %}
+    basic_auth:
+      username: {{ monitoring.username }}
+      {%- if monitoring.password %}
+      password_file: /opt/cdp-prometheus/remote_pwd_file
+      {%- endif %}
+    {%- elif monitoring.token %}
+    authorization:
+      credentials_file: /opt/cdp-prometheus/remote_token_file
+    {%- endif %}
+  {%- endif %}
+    tls_config:
+      insecure_skip_verify: true
+{%- endif %}
 scrape_configs:
   - job_name: node_exporter
     scheme: 'https'

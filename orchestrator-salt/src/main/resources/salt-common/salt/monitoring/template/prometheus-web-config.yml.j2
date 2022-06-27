@@ -1,0 +1,10 @@
+{%- from 'monitoring/settings.sls' import monitoring with context %}
+tls_server_config:
+  cert_file: /opt/cdp-prometheus/cdp-prometheus.crt
+  key_file: /opt/cdp-prometheus/cdp-prometheus.key
+{%- if monitoring.localPassword %}
+{%- set command = '/opt/salt/scripts/monitoring-secret-handler.sh ' + monitoring.agentUser + ' /opt/cdp-prometheus/prometheus_pwd /opt/cdp-prometheus/basic_auth_cred' %}
+{%- set basic_auth_str = salt['cmd.run'](command)  %}
+basic_auth_users:
+  {{ monitoring.agentUser }}: {{ basic_auth_str }}
+{%- endif %}
