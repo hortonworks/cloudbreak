@@ -24,6 +24,9 @@
 {% set agent_user = salt['pillar.get']('monitoring:agentUser', 'vmagent') %}
 {% set agent_port = salt['pillar.get']('monitoring:agentPort', 8429) %}
 {% set agent_max_disk_usage = salt['pillar.get']('monitoring:agentMaxDiskUsage', '4GB') %}
+{% set retention_min_time = salt['pillar.get']('monitoring:retentionMinTime', '5m') %}
+{% set retention_max_time = salt['pillar.get']('monitoring:retentionMaxTime', '4h') %}
+{% set wal_truncate_frequency = salt['pillar.get']('monitoring:walTruncateFrequency', '2h') %}
 {% set node_exporter_user = salt['pillar.get']('monitoring:nodeExporterUser', 'nodeuser') %}
 {% set node_exporter_port = salt['pillar.get']('monitoring:nodeExporterPort', 9100) %}
 {% set node_exporter_collectors = salt['pillar.get']('monitoring:nodeExporterCollectors', []) %}
@@ -79,6 +82,9 @@
     "agentUser": agent_user,
     "agentPort": agent_port,
     "agentMaxDiskUsage": agent_max_disk_usage,
+    "retentionMinTime": retention_min_time,
+    "retentionMaxTime": retention_max_time,
+    "walTruncateFrequency": wal_truncate_frequency,
     "nodeExporterUser": node_exporter_user,
     "nodeExporterPort": node_exporter_port,
     "nodeExporterCollectors": node_exporter_collectors,

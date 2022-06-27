@@ -8,6 +8,12 @@ public class MonitoringAgentConfiguration {
 
     private String maxDiskUsage;
 
+    private String retentionMinTime;
+
+    private String retentionMaxTime;
+
+    private String walTruncateFrequency;
+
     public Integer getPort() {
         return port;
     }
@@ -30,5 +36,29 @@ public class MonitoringAgentConfiguration {
 
     public void setMaxDiskUsage(String maxDiskUsage) {
         this.maxDiskUsage = maxDiskUsage;
+    }
+
+    public String getRetentionMinTime() {
+        return retentionMinTime;
+    }
+
+    public void setRetentionMinTime(String retentionMinTime) {
+        this.retentionMinTime = retentionMinTime;
+    }
+
+    public String getRetentionMaxTime() {
+        return retentionMaxTime;
+    }
+
+    public void setRetentionMaxTime(String retentionMaxTime) {
+        this.retentionMaxTime = retentionMaxTime;
+    }
+
+    public String getWalTruncateFrequency() {
+        return walTruncateFrequency;
+    }
+
+    public void setWalTruncateFrequency(String walTruncateFrequency) {
+        this.walTruncateFrequency = walTruncateFrequency;
     }
 }

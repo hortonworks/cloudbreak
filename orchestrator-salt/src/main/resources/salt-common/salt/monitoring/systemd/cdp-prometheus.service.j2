@@ -1,0 +1,32 @@
+{%- from 'telemetry/settings.sls' import telemetry with context %}
+{%- from 'monitoring/settings.sls' import monitoring with context %}
+[Unit]
+Description=CDP Prometheus agent for collecting metrics
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+ExecStart=/opt/cdp-prometheus/prometheus \
+     --enable-feature=agent \
+     --storage.agent.path=/opt/cdp-prometheus/data-agent \
+     --storage.agent.wal-compression \
+     {%- if monitoring.retentionMinTime %}
+     --storage.agent.retention.min-time={{ monitoring.retentionMinTime }} \
+     {%- endif %}
+     {%- if monitoring.retentionMaxTime %}
+     --storage.agent.retention.max-time={{ monitoring.retentionMaxTime }} \
+     {%- endif %}
+     {%- if monitoring.walTruncateFrequency %}
+     --storage.agent.wal-truncate-frequency={{ monitoring.walTruncateFrequency }} \
+     {%- endif %}
+     --storage.agent.no-lockfile \
+     --config.file=/opt/cdp-prometheus/prometheus.yml \
+     --web.config.file=/opt/cdp-prometheus/prometheus-web-config.yml \
+     --web.listen-address=:{{ monitoring.agentPort }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

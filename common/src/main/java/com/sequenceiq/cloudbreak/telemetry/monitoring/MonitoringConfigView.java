@@ -16,6 +16,12 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
     private static final String AGENT_MAX_DISK_USAGE_DEFAULT = "4GB";
 
+    private static final String RETENTION_MIN_TIME = "5m";
+
+    private static final String RETENTION_MAX_TIME = "4h";
+
+    private static final String WAL_TRUNCATE_FREQUENCY = "2h";
+
     private static final Integer DEFAULT_CM_SMON_PORT = 61010;
 
     private final boolean enabled;
@@ -45,6 +51,12 @@ public class MonitoringConfigView implements TelemetryConfigView {
     private final String agentUser;
 
     private final String agentMaxDiskUsage;
+
+    private final String retentionMinTime;
+
+    private final String retentionMaxTime;
+
+    private final String walTruncateFrequency;
 
     private final String remoteWriteUrl;
 
@@ -85,6 +97,9 @@ public class MonitoringConfigView implements TelemetryConfigView {
         this.password = builder.password;
         this.token = builder.token;
         this.requestSigner = builder.requestSigner;
+        this.retentionMinTime = builder.retentionMinTime;
+        this.retentionMaxTime = builder.retentionMaxTime;
+        this.walTruncateFrequency = builder.walTruncateFrequency;
     }
 
     public boolean isEnabled() {
@@ -195,6 +210,9 @@ public class MonitoringConfigView implements TelemetryConfigView {
         map.put("agentUser", ObjectUtils.defaultIfNull(this.agentUser, EMPTY_CONFIG_DEFAULT));
         map.put("agentPort", this.agentPort);
         map.put("agentMaxDiskUsage", ObjectUtils.defaultIfNull(this.agentMaxDiskUsage, AGENT_MAX_DISK_USAGE_DEFAULT));
+        map.put("retentionMinTime", ObjectUtils.defaultIfNull(this.retentionMinTime, RETENTION_MIN_TIME));
+        map.put("retentionMaxTime", ObjectUtils.defaultIfNull(this.retentionMaxTime, RETENTION_MAX_TIME));
+        map.put("walTruncateFrequency", ObjectUtils.defaultIfNull(this.walTruncateFrequency, WAL_TRUNCATE_FREQUENCY));
         map.put("username", ObjectUtils.defaultIfNull(this.username, EMPTY_CONFIG_DEFAULT));
         map.put("password", this.password != null ? new String(this.password) : EMPTY_CONFIG_DEFAULT);
         map.put("token", this.token != null ? new String(this.token) : EMPTY_CONFIG_DEFAULT);
@@ -248,6 +266,12 @@ public class MonitoringConfigView implements TelemetryConfigView {
         private Integer agentPort;
 
         private String agentMaxDiskUsage;
+
+        private String retentionMinTime;
+
+        private String retentionMaxTime;
+
+        private String walTruncateFrequency;
 
         private TelemetryClusterDetails clusterDetails;
 
@@ -364,6 +388,21 @@ public class MonitoringConfigView implements TelemetryConfigView {
 
         public Builder withAgentMaxDiskUsage(String maxDiskUsage) {
             this.agentMaxDiskUsage = maxDiskUsage;
+            return this;
+        }
+
+        public Builder withRetentionMinTime(String retentionMinTime) {
+            this.retentionMinTime = retentionMinTime;
+            return this;
+        }
+
+        public Builder withRetentionMaxTime(String retentionMaxTime) {
+            this.retentionMaxTime = retentionMaxTime;
+            return this;
+        }
+
+        public Builder withWalTruncateFrequency(String walTruncateFrequency) {
+            this.walTruncateFrequency = walTruncateFrequency;
             return this;
         }
     }

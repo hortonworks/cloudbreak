@@ -39,6 +39,9 @@ public class MonitoringConfigService {
             builder.withAgentPort(monitoringConfiguration.getAgent().getPort());
             builder.withAgentUser(monitoringConfiguration.getAgent().getUser());
             builder.withAgentMaxDiskUsage(monitoringConfiguration.getAgent().getMaxDiskUsage());
+            builder.withRetentionMinTime(monitoringConfiguration.getAgent().getRetentionMinTime());
+            builder.withRetentionMaxTime(monitoringConfiguration.getAgent().getRetentionMaxTime());
+            builder.withWalTruncateFrequency(monitoringConfiguration.getAgent().getWalTruncateFrequency());
             fillExporterConfigs(builder, localPassword);
             fillRequestSignerConfigs(monitoringConfiguration.getRequestSigner(), builder);
         }
@@ -64,8 +67,8 @@ public class MonitoringConfigService {
                     .withNodeExporterCollectors(monitoringConfiguration.getNodeExporter().getCollectors());
         }
         if (monitoringConfiguration.getBlackboxExporter() != null) {
-                builder.withBlackboxExporterUser(monitoringConfiguration.getBlackboxExporter().getUser())
-                .withBlackboxExporterPort(monitoringConfiguration.getBlackboxExporter().getPort());
+            builder.withBlackboxExporterUser(monitoringConfiguration.getBlackboxExporter().getUser())
+                    .withBlackboxExporterPort(monitoringConfiguration.getBlackboxExporter().getPort());
         }
     }
 
