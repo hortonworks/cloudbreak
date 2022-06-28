@@ -194,7 +194,10 @@ public class AzureIDBrokerObjectStorageValidator {
                 getRoleAssignmentsOfSubscription(roleAssignments, storageAccountResourceId.subscriptionId(), client, differentSubscriptions);
         for (Identity identity : identities) {
             validateRoleAssigmentAndScope(roleAssignmentsForSubscription, resultBuilder, identity,
-                    List.of(storageAccountName, storageAccountResourceId.resourceGroupName(), storageAccountResourceId.subscriptionId()),
+                    List.of(adlsGen2Config.getFileSystem(),
+                            storageAccountName,
+                            storageAccountResourceId.resourceGroupName(),
+                            storageAccountResourceId.subscriptionId()),
                     differentSubscriptions, cloudIdentityType);
         }
     }
@@ -263,7 +266,7 @@ public class AzureIDBrokerObjectStorageValidator {
         for (String scope : scopes) {
             numberOfMatchingRoles += roleAssignments.stream()
                     .filter(roleAssignment -> roleAssignment.principalId().equals(identity.principalId())
-                            && roleAssignment.scope().contains(scope))
+                            && roleAssignment.scope().endsWith(scope))
                     .count();
         }
         return numberOfMatchingRoles > 0;
