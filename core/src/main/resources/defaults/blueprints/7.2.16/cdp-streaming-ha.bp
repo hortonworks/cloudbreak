@@ -22,11 +22,11 @@
         ]
       },
       {
-        "refName": "core_settings",
-        "serviceType": "CORE_SETTINGS",
+        "refName": "stub_dfs",
+        "serviceType": "STUB_DFS",
         "roleConfigGroups": [
           {
-            "refName": "core_settings-STORAGEOPERATIONS-BASE",
+            "refName": "stub_dfs-STORAGEOPERATIONS-BASE",
             "roleType": "STORAGEOPERATIONS",
             "base": true
           }
@@ -113,7 +113,7 @@
         "refName": "master",
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
-          "core_settings-STORAGEOPERATIONS-BASE",
+          "stub_dfs-STORAGEOPERATIONS-BASE",
           "cruise_control-CRUISE_CONTROL_SERVER-BASE",
           "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
           "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE",
@@ -126,7 +126,7 @@
         "roleConfigGroupsRefNames": [
           "zookeeper-SERVER-BASE",
           "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
-          "core_settings-STORAGEOPERATIONS-BASE"
+          "stub_dfs-STORAGEOPERATIONS-BASE"
         ]
       },
       {
