@@ -22,11 +22,11 @@
         ]
       },
       {
-        "refName": "core_settings",
-        "serviceType": "CORE_SETTINGS",
+        "refName": "stub_dfs",
+        "serviceType": "STUB_DFS",
         "roleConfigGroups": [
           {
-            "refName": "core_settings-STORAGEOPERATIONS-BASE",
+            "refName": "stub_dfs-STORAGEOPERATIONS-BASE",
             "roleType": "STORAGEOPERATIONS",
             "base": true
           }
@@ -114,7 +114,7 @@
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "zookeeper-SERVER-BASE",
-          "core_settings-STORAGEOPERATIONS-BASE"
+          "stub_dfs-STORAGEOPERATIONS-BASE"
         ]
       },
       {
