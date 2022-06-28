@@ -378,9 +378,9 @@ public class AzureIDBrokerObjectStorageValidatorTest {
         assertTrue(validationResult.hasError());
         assertEquals(1, validationResult.getErrors().size());
         String actual = validationResult.getErrors().get(0);
-        assertEquals(actual, String.format("Identity with id %s has no role assignment on scope(s) [%s, %s, %s]. " +
+        assertEquals(actual, String.format("Identity with id %s has no role assignment on scope(s) [%s, %s, %s, %s]. " +
                         "Please check if you've used the correct Identity when setting up Logs-Storage and Audit.", LOG_IDENTITY,
-                ABFS_STORAGE_ACCOUNT_NAME, STORAGE_RESOURCE_GROUP_NAME, SUBSCRIPTION_ID));
+                ABFS_FILESYSTEM_NAME, ABFS_STORAGE_ACCOUNT_NAME, STORAGE_RESOURCE_GROUP_NAME, SUBSCRIPTION_ID));
     }
 
     @Test
