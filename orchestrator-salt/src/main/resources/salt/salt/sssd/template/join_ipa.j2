@@ -15,8 +15,8 @@ ipa-client-install \
   --mkhomedir \
   --principal={{ pillar['sssd-ipa']['principal'] }} \
   {%- if "ID_BROKER_CLOUD_IDENTITY_ROLE" in grains.get('roles', []) %}
-    --no-sshd \
-    --no-ssh \
+  --no-sshd \
+  --no-ssh \
   {%- endif %}
   --password "$PW" \
   --unattended \
@@ -25,6 +25,9 @@ ipa-client-install \
   {%- if salt['pillar.get']('freeipa:host', None) != None %}
   --server={{ pillar['freeipa']['host'] }} \
   {%- endif %}
+{%- if salt['pillar.get']('unbound_elimination_supported',False) == True %}
+  --no-dns-sshfp \
+{%- endif %}
   --no-ntp
 
 echo "$PW" | kinit {{ pillar['sssd-ipa']['principal'] }}
