@@ -17,11 +17,11 @@ public class CertificatesRotationV4Request implements JsonEntity {
     @ApiModelProperty(value = ClusterModelDescription.CERTIFICATE_ROTATION_TYPE, allowableValues = "HOST_CERTS")
     private CertificateRotationType certificateRotationType = CertificateRotationType.HOST_CERTS;
 
-    public CertificateRotationType getRotateCertificatesType() {
+    public CertificateRotationType getCertificateRotationType() {
         return certificateRotationType;
     }
 
-    public void setRotateCertificatesType(CertificateRotationType certificateRotationType) {
+    public void setCertificateRotationType(CertificateRotationType certificateRotationType) {
         this.certificateRotationType = certificateRotationType;
     }
 

@@ -430,6 +430,18 @@ public class SdxCluster implements AccountAwareResource {
         this.databaseEngineVersion = databaseEngineVersion;
     }
 
+    public void setResourceCrn(String resourceCrn) {
+        this.resourceCrn = resourceCrn;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setRepairFlowChainId(String repairFlowChainId) {
+        this.repairFlowChainId = repairFlowChainId;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {

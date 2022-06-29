@@ -49,6 +49,14 @@ public class SdxOperation {
         this.status = SdxOperationStatus.INIT;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getOperationId() {
         return operationId;
     }

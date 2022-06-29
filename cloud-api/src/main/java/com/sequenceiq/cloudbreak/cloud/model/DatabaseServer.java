@@ -12,7 +12,7 @@ public class DatabaseServer extends DynamicModel {
      * The exact interpretation of this setting is up to the target cloud provider. Relevant only if {@code useSslEnforcement == true}.
      *
      * <p>
-     *     When set, the value shall be a nonempty {@link String} containing the SSL root certificate identifier in a cloud provider specific syntax.
+     * When set, the value shall be a nonempty {@link String} containing the SSL root certificate identifier in a cloud provider specific syntax.
      * </p>
      *
      * @see #isUseSslEnforcement()
@@ -47,6 +47,29 @@ public class DatabaseServer extends DynamicModel {
     private final String location;
 
     private final boolean highAvailability;
+
+    /*
+     * We need this constructor because flow request objects use this class, and it can not be deserialized to object
+     */
+    private DatabaseServer(String serverId, String flavor, DatabaseEngine engine, String connectionDriver, String connectorJarUrl, String rootUserName,
+            String rootPassword, Integer port, boolean useSslEnforcement, Long storageSize, Security security, InstanceStatus status, String location,
+            boolean highAvailability, Map<String, Object> params) {
+        super(params);
+        this.serverId = serverId;
+        this.flavor = flavor;
+        this.engine = engine;
+        this.connectionDriver = connectionDriver;
+        this.connectorJarUrl = connectorJarUrl;
+        this.rootUserName = rootUserName;
+        this.rootPassword = rootPassword;
+        this.port = port;
+        this.useSslEnforcement = useSslEnforcement;
+        this.storageSize = storageSize;
+        this.security = security;
+        this.status = status;
+        this.location = location;
+        this.highAvailability = highAvailability;
+    }
 
     private DatabaseServer(Builder builder) {
         super(builder.params);

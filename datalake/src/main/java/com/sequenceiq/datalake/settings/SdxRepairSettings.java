@@ -14,9 +14,9 @@ import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 public class SdxRepairSettings {
 
-    private List<String> hostGroupNames = new ArrayList<>();
+    private final List<String> hostGroupNames = new ArrayList<>();
 
-    private List<String> nodeIds = new ArrayList<>();
+    private final List<String> nodeIds = new ArrayList<>();
 
     private boolean deleteVolumes;
 
@@ -58,6 +58,10 @@ public class SdxRepairSettings {
 
     public boolean isDeleteVolumes() {
         return deleteVolumes;
+    }
+
+    public void setDeleteVolumes(boolean deleteVolumes) {
+        this.deleteVolumes = deleteVolumes;
     }
 
     @Override
