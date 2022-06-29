@@ -4,11 +4,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -73,55 +71,9 @@ class FreeIpaInstallServiceTest {
         List<RecipeModel> recipeModelList = List.of(new RecipeModel("recipe1", RecipeType.PRE_CLOUDERA_MANAGER_START, "bash"),
                 new RecipeModel("recipe1", RecipeType.PRE_TERMINATION, "bash"));
         when(freeIpaRecipeService.getRecipes(1L)).thenReturn(recipeModelList);
-        when(freeIpaRecipeService.hasRecipeType(recipeModelList, RecipeType.PRE_CLOUDERA_MANAGER_START)).thenReturn(true);
         freeIpaInstallService.installFreeIpa(1L);
         verify(hostOrchestrator).uploadRecipes(eq(allGatewayConfigs), eq(Map.of("master", recipeModelList)), any(StackBasedExitCriteriaModel.class));
         verify(hostOrchestrator).preClusterManagerStartRecipes(eq(gatewayConfig), eq(nodes), any(StackBasedExitCriteriaModel.class));
-        verify(hostOrchestrator).installFreeIpa(eq(gatewayConfig), eq(allGatewayConfigs), eq(nodes), any(StackBasedExitCriteriaModel.class));
-        verify(hostOrchestrator, never()).postClusterManagerStartRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
-    }
-
-    @Test
-    public void testInstallButNoPreRecipe() throws CloudbreakOrchestratorException {
-        Stack stack = mock(Stack.class);
-        Set<InstanceMetaData> instanceMetaDataSet = Set.of(new InstanceMetaData());
-        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetaDataSet);
-        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
-        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig);
-        when(gatewayConfigService.getGatewayConfigs(stack, instanceMetaDataSet)).thenReturn(allGatewayConfigs);
-        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
-        Node node = mock(Node.class);
-        Set<Node> nodes = Set.of(node);
-        when(freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet)).thenReturn(nodes);
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
-        List<RecipeModel> recipeModelList = List.of(new RecipeModel("recipe1", RecipeType.PRE_CLOUDERA_MANAGER_START, "bash"),
-                new RecipeModel("recipe1", RecipeType.PRE_TERMINATION, "bash"));
-        when(freeIpaRecipeService.getRecipes(1L)).thenReturn(recipeModelList);
-        when(freeIpaRecipeService.hasRecipeType(recipeModelList, RecipeType.PRE_CLOUDERA_MANAGER_START)).thenReturn(false);
-        freeIpaInstallService.installFreeIpa(1L);
-        verify(hostOrchestrator, times(1)).uploadRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
-        verify(hostOrchestrator, times(0)).preClusterManagerStartRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
-        verify(hostOrchestrator).installFreeIpa(eq(gatewayConfig), eq(allGatewayConfigs), eq(nodes), any(StackBasedExitCriteriaModel.class));
-        verify(hostOrchestrator, never()).postClusterManagerStartRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
-    }
-
-    @Test
-    public void testInstallButNoRecipe() throws CloudbreakOrchestratorException {
-        Stack stack = mock(Stack.class);
-        Set<InstanceMetaData> instanceMetaDataSet = Set.of(new InstanceMetaData());
-        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(instanceMetaDataSet);
-        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
-        List<GatewayConfig> allGatewayConfigs = List.of(gatewayConfig);
-        when(gatewayConfigService.getGatewayConfigs(stack, instanceMetaDataSet)).thenReturn(allGatewayConfigs);
-        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
-        Node node = mock(Node.class);
-        Set<Node> nodes = Set.of(node);
-        when(freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDataSet)).thenReturn(nodes);
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
-        when(freeIpaRecipeService.getRecipes(1L)).thenReturn(Collections.emptyList());
-        freeIpaInstallService.installFreeIpa(1L);
-        verify(hostOrchestrator, times(0)).uploadRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
-        verify(hostOrchestrator, times(0)).preClusterManagerStartRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
         verify(hostOrchestrator).installFreeIpa(eq(gatewayConfig), eq(allGatewayConfigs), eq(nodes), any(StackBasedExitCriteriaModel.class));
         verify(hostOrchestrator, never()).postClusterManagerStartRecipes(any(), any(), any(StackBasedExitCriteriaModel.class));
     }

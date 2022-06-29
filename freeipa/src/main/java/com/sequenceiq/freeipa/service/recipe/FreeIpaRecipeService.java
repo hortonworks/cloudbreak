@@ -49,14 +49,6 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
         return freeIpaStackRecipeRepository.findByStackId(stackId).stream().map(FreeIpaStackRecipe::getRecipe).collect(Collectors.toSet());
     }
 
-    public boolean hasRecipeType(List<RecipeModel> recipeModelList, RecipeType recipeType) {
-        return recipeModelList.stream().anyMatch(recipeModel -> recipeType.equals(recipeModel.getRecipeType()));
-    }
-
-    public boolean hasRecipeType(Long stackId, RecipeType recipeType) {
-        return hasRecipeType(getRecipes(stackId), recipeType);
-    }
-
     public List<RecipeModel> getRecipes(Long stackId) {
         Set<String> recipes = getRecipeNamesForStack(stackId);
         LOGGER.info("Get recipes from core: {}", recipes);
