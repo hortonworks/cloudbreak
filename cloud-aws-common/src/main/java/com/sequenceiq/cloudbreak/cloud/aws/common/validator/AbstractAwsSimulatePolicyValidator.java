@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.springframework.util.CollectionUtils;
 
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
+import com.amazonaws.services.identitymanagement.model.OrganizationsDecisionDetail;
 import com.amazonaws.services.identitymanagement.model.Role;
 
 public abstract class AbstractAwsSimulatePolicyValidator {
@@ -16,8 +17,16 @@ public abstract class AbstractAwsSimulatePolicyValidator {
     SortedSet<String> getFailedActions(Role role, List<EvaluationResult> evaluationResults) {
         return evaluationResults.stream()
                 .filter(this::isEvaluationFailed)
-                .map(evaluationResult -> String.format("%s:%s:%s", role.getArn(),
-                        evaluationResult.getEvalActionName(), evaluationResult.getEvalResourceName()))
+                .map(evaluationResult -> {
+                    OrganizationsDecisionDetail organizationsDecisionDetail = evaluationResult.getOrganizationsDecisionDetail();
+                    if (organizationsDecisionDetail != null && !organizationsDecisionDetail.getAllowedByOrganizations()) {
+                        return String.format("%s:%s:%s", role.getArn(),
+                                evaluationResult.getEvalActionName(), evaluationResult.getEvalResourceName() + " -> Denied by Organization Rule");
+                    } else {
+                        return String.format("%s:%s:%s", role.getArn(),
+                                evaluationResult.getEvalActionName(), evaluationResult.getEvalResourceName());
+                    }
+                })
                 .collect(Collectors.toCollection(TreeSet::new));
     }
 
