@@ -11,4 +11,6 @@ base:
     - freeipa
     - freeipa.services
     - upgradeccm
+{%- if salt['file.file_exists']('/srv/pillar/recipes/init.sls') %}
     - recipes
+{%- endif %}

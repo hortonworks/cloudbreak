@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.service.recipe;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -142,4 +144,48 @@ class FreeIpaRecipeServiceTest {
         verify(freeIpaStackRecipeRepository, times(1)).deleteFreeIpaStackRecipesByStackId(1L);
     }
 
+    @Test
+    void testHasRecipeType() {
+        RecipeV4Request recipe1Request = new RecipeV4Request();
+        recipe1Request.setName("recipe1");
+        recipe1Request.setType(RecipeV4Type.PRE_CLOUDERA_MANAGER_START);
+        recipe1Request.setContent("YmFzaDE=");
+        RecipeV4Request recipe2Request = new RecipeV4Request();
+        recipe2Request.setName("recipe2");
+        recipe2Request.setType(RecipeV4Type.PRE_TERMINATION);
+        recipe2Request.setContent("YmFzaDI=");
+        ArgumentCaptor<Set<String>> recipeSet = ArgumentCaptor.forClass(Set.class);
+        when(recipeV4Endpoint.getRequestsByNames(anyLong(), recipeSet.capture())).thenReturn(Set.of(recipe1Request, recipe2Request));
+        List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"), new FreeIpaStackRecipe(1L, "recipe2"));
+        when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
+        List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
+        RecipeModel recipeModel1 = recipes.stream().filter(recipeModel -> "recipe1".equals(recipeModel.getName())).findFirst().get();
+        RecipeModel recipeModel2 = recipes.stream().filter(recipeModel -> "recipe2".equals(recipeModel.getName())).findFirst().get();
+        Assertions.assertEquals(RecipeType.PRE_CLOUDERA_MANAGER_START, recipeModel1.getRecipeType());
+        Assertions.assertEquals(RecipeType.PRE_TERMINATION, recipeModel2.getRecipeType());
+        Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
+        Assertions.assertEquals("bash2", recipeModel2.getGeneratedScript());
+        boolean hasRecipeType = freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION);
+        assertTrue(hasRecipeType);
+        assertThat(recipeSet.getValue()).containsExactlyInAnyOrder("recipe1", "recipe2");
+    }
+
+    @Test
+    void testHasRecipeTypeButHasOnlyPreStartRecipe() {
+        RecipeV4Request recipe1Request = new RecipeV4Request();
+        recipe1Request.setName("recipe1");
+        recipe1Request.setType(RecipeV4Type.PRE_CLOUDERA_MANAGER_START);
+        recipe1Request.setContent("YmFzaDE=");
+        ArgumentCaptor<Set<String>> recipeSet = ArgumentCaptor.forClass(Set.class);
+        when(recipeV4Endpoint.getRequestsByNames(anyLong(), recipeSet.capture())).thenReturn(Set.of(recipe1Request));
+        List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"));
+        when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
+        List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
+        RecipeModel recipeModel1 = recipes.stream().filter(recipeModel -> "recipe1".equals(recipeModel.getName())).findFirst().get();
+        Assertions.assertEquals(RecipeType.PRE_CLOUDERA_MANAGER_START, recipeModel1.getRecipeType());
+        Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
+        boolean hasRecipeType = freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION);
+        assertFalse(hasRecipeType);
+        assertThat(recipeSet.getValue()).containsExactly("recipe1");
+    }
 }
