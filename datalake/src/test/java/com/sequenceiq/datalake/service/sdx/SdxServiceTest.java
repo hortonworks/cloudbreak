@@ -27,7 +27,6 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -108,6 +107,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
@@ -115,7 +115,6 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
-import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.sdx.api.model.SdxAwsRequest;
 import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
@@ -229,7 +228,7 @@ class SdxServiceTest {
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
     @Mock
-    private FlowLogService flowLogService;
+    private CloudbreakFlowService cloudbreakFlowService;
 
     @InjectMocks
     private SdxService underTest;
@@ -1652,28 +1651,20 @@ class SdxServiceTest {
     @Test
     void rotateSaltPassword() {
         SdxCluster sdxCluster = getSdxCluster();
-        when(flowLogService.isOtherFlowRunning(sdxCluster.getId())).thenReturn(false);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
+        FlowIdentifier cbFlowIdentifier = mock(FlowIdentifier.class);
+        when(stackV4Endpoint.rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, USER_CRN)).thenReturn(cbFlowIdentifier);
+        FlowIdentifier sdxFlowIdentifier = mock(FlowIdentifier.class);
+        when(sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster)).thenReturn(sdxFlowIdentifier);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPassword(sdxCluster));
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPassword(sdxCluster));
 
+        assertEquals(sdxFlowIdentifier, result);
         verify(stackV4Endpoint).rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, SDX_CRN, USER_CRN);
         verify(regionAwareInternalCrnGenerator).getInternalCrnForServiceAsString();
-    }
-
-    @Test
-    void rotateSaltPasswordWithRunningFlow() {
-        SdxCluster sdxCluster = getSdxCluster();
-        when(flowLogService.isOtherFlowRunning(sdxCluster.getId())).thenReturn(true);
-
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPassword(sdxCluster)));
-
-        assertEquals(String.format("Operation is running for cluster '%s'. Please try again later.", sdxCluster.getName()), exception.getMessage());
-
-        verify(stackV4Endpoint, never()).rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getName(), USER_CRN);
-        verify(regionAwareInternalCrnGenerator, never()).getInternalCrnForServiceAsString();
+        verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, cbFlowIdentifier);
+        verify(sdxReactorFlowManager).triggerSaltPasswordRotationTracker(sdxCluster);
     }
 
 }

@@ -61,7 +61,7 @@ public class RotateSaltPasswordActions {
             protected void doExecute(StackCreationContext context, RotateSaltPasswordSuccessResponse payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Rotating salt password for stack {} finished", context.getStack().getResourceCrn());
                 stackUpdaterService.updateStatus(payload.getResourceId(), DetailedStackStatus.AVAILABLE,
-                        CLUSTER_SALT_PASSWORD_ROTATE_FINISHED, "Salt password rotated");
+                        CLUSTER_SALT_PASSWORD_ROTATE_FINISHED, "SaltStack user password rotated");
                 sendEvent(context);
             }
 
@@ -80,7 +80,7 @@ public class RotateSaltPasswordActions {
             protected void doExecute(StackCreationContext context, RotateSaltPasswordFailureResponse payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.warn("Rotating salt password for stack {} failed", context.getStack().getResourceCrn());
                 stackUpdaterService.updateStatusAndSendEventWithArgs(payload.getResourceId(), DetailedStackStatus.SALT_UPDATE_FAILED,
-                        CLUSTER_SALT_PASSWORD_ROTATE_FAILED, "Failed to rotate salt password", payload.getException().getMessage());
+                        CLUSTER_SALT_PASSWORD_ROTATE_FAILED, "Failed to rotate SaltStack user password", payload.getException().getMessage());
                 sendEvent(context);
             }
 

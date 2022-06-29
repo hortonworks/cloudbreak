@@ -66,6 +66,14 @@ public class SdxStatusService {
         }).orElseThrow(() -> new NotFoundException("SdxCluster was not found with ID: " + datalakeId));
     }
 
+    public SdxCluster setStatusForDatalakeAndNotify(DatalakeStatusEnum status, Collection<?> messageArgs, String statusReason, Long datalakeId) {
+        return sdxClusterRepository.findById(datalakeId).map(cluster -> {
+            setStatusForDatalake(status, statusReason, cluster);
+            sdxNotificationService.send(status.getDefaultResourceEvent(), messageArgs, cluster);
+            return cluster;
+        }).orElseThrow(() -> new NotFoundException("SdxCluster was not found with ID: " + datalakeId));
+    }
+
     public void setStatusForDatalakeAndNotify(DatalakeStatusEnum status, ResourceEvent event, String statusReason,
             SdxCluster sdxCluster) {
         setStatusForDatalake(status, statusReason, sdxCluster);

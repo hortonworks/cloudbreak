@@ -53,9 +53,11 @@ public enum DatalakeStatusEnum {
     DATALAKE_UPGRADE_CCM_IN_PROGRESS(ResourceEvent.DATALAKE_UPGRADE_CCM_IN_PROGRESS),
     DATALAKE_UPGRADE_CCM_FAILED(ResourceEvent.DATALAKE_UPGRADE_CCM_FAILED),
     DATAHUB_REFRESH_IN_PROGRESS(ResourceEvent.DATAHUB_REFRESH_IN_PROGRESS),
-    DATAHUB_REFRESH_FAILED(ResourceEvent.DATAHUB_REFRESH_FAILED);
+    DATAHUB_REFRESH_FAILED(ResourceEvent.DATAHUB_REFRESH_FAILED),
+    SALT_PASSWORD_ROTATION_IN_PROGRESS(ResourceEvent.DATALAKE_SALT_PASSWORD_ROTATION_IN_PROGRESS),
+    SALT_PASSWORD_ROTATION_FAILED(ResourceEvent.DATALAKE_SALT_PASSWORD_ROTATION_FAILED);
 
-    private ResourceEvent resourceEvent;
+    private final ResourceEvent resourceEvent;
 
     DatalakeStatusEnum(ResourceEvent resourceEvent) {
         this.resourceEvent = resourceEvent;
@@ -98,6 +100,8 @@ public enum DatalakeStatusEnum {
                 return RECOVERY_FAILED;
             case DATALAKE_UPGRADE_CCM_IN_PROGRESS:
                 return DATALAKE_UPGRADE_CCM_FAILED;
+            case SALT_PASSWORD_ROTATION_IN_PROGRESS:
+                return SALT_PASSWORD_ROTATION_FAILED;
             default:
                 return this;
         }

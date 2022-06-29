@@ -321,7 +321,7 @@ public class ClusterBootstrapperTest {
 
         Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Rotating salt password is only available for stacks in available status");
+                .hasMessage("Rotating SaltStack user password is only available for stacks in available status");
     }
 
     @Test
@@ -333,7 +333,7 @@ public class ClusterBootstrapperTest {
 
         Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Rotating salt password is not supported with your image version, " +
+                .hasMessage("Rotating SaltStack user password is not supported with your image version, " +
                         "please upgrade to an image with salt-bootstrap version >= 0.13.6 (you can find this information in the image catalog)");
     }
 

@@ -66,6 +66,9 @@ sdx:
     cmsync:
       sleeptime_sec: 10
       duration_min: 10
+    rotatesaltpassword:
+      sleeptime_sec: 10
+      duration_min: 10
   gateway:
     topology:
       name: cdp-proxy

@@ -372,7 +372,7 @@ class StackCommonServiceTest {
 
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, WORKSPACE_ID)))
                 .isInstanceOf(BadRequestException.class)
-                .hasMessage("Rotating salt password is not supported in your account");
+                .hasMessage("Rotating SaltStack user password is not supported in your account");
     }
 
     @Test

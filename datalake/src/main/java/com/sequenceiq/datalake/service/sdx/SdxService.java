@@ -109,11 +109,11 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -203,10 +203,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
-    private FlowLogService flowLogService;
+    private DistroXV1Endpoint distroXV1Endpoint;
 
     @Inject
-    private DistroXV1Endpoint distroXV1Endpoint;
+    private CloudbreakFlowService cloudbreakFlowService;
 
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
@@ -1353,12 +1353,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public FlowIdentifier rotateSaltPassword(SdxCluster sdxCluster) {
-        if (flowLogService.isOtherFlowRunning(sdxCluster.getId())) {
-            throw new BadRequestException(String.format("Operation is running for cluster '%s'. Please try again later.", sdxCluster.getName()));
-        }
-        return ThreadBasedUserCrnProvider.doAsInternalActor(
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 initiatorUserCrn -> stackV4Endpoint.rotateSaltPasswordInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), initiatorUserCrn)
         );
+        cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
+        return sdxReactorFlowManager.triggerSaltPasswordRotationTracker(sdxCluster);
     }
 }

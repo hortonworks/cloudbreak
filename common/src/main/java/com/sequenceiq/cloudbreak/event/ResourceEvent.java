@@ -499,6 +499,9 @@ public enum ResourceEvent {
     DATAHUB_REFRESH_IN_PROGRESS("datalake.datahub.refresh.in.progress"),
     DATAHUB_REFRESH_FAILED("datalake.datahub.refresh.failed"),
 
+    DATALAKE_SALT_PASSWORD_ROTATION_IN_PROGRESS("datalake.salt.passwordrotation.in.progress"),
+    DATALAKE_SALT_PASSWORD_ROTATION_FAILED("datalake.salt.passwordrotation.failed"),
+
     // deprecated
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped");
 

@@ -58,6 +58,6 @@ public class RotateSaltPasswordFlowConfig extends StackStatusFinalizerAbstractFl
 
     @Override
     public String getDisplayName() {
-        return "Rotate salt password";
+        return "Rotate SaltStack user password";
     }
 }
