@@ -378,7 +378,7 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerAutoTlsCertificatesRotation(Long stackId, CertificatesRotationV4Request certificatesRotationV4Request) {
         String selector = FlowChainTriggers.ROTATE_CLUSTER_CERTIFICATES_CHAIN_TRIGGER_EVENT;
         ClusterCertificatesRotationTriggerEvent clusterCertificatesRotationTriggerEvent = new ClusterCertificatesRotationTriggerEvent(selector, stackId,
-                certificatesRotationV4Request.getRotateCertificatesType());
+                certificatesRotationV4Request.getCertificateRotationType());
         return reactorNotifier.notify(stackId, selector, clusterCertificatesRotationTriggerEvent);
     }
 

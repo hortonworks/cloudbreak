@@ -64,6 +64,10 @@ public class CloudCredential extends DynamicModel {
         return accountId;
     }
 
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
+    }
+
     // Must not reveal any secrets, hence not including DynamicModel.toString()!
     @Override
     public String toString() {
