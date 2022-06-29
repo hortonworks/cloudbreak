@@ -14,6 +14,7 @@ import java.util.TreeSet;
 import org.junit.jupiter.api.Test;
 
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
+import com.amazonaws.services.identitymanagement.model.OrganizationsDecisionDetail;
 import com.amazonaws.services.identitymanagement.model.PolicyEvaluationDecisionType;
 import com.amazonaws.services.identitymanagement.model.Role;
 
@@ -77,6 +78,11 @@ public abstract class AwsIDBrokerMappedRolePermissionValidatorTest {
                 .withEvalActionName("doAction")
                 .withEvalResourceName("badResource")
                 .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny);
+        EvaluationResult denyOrganizationsDecisionEvalResult = new EvaluationResult()
+                .withEvalActionName("doAction")
+                .withEvalResourceName("badResource")
+                .withOrganizationsDecisionDetail(new OrganizationsDecisionDetail().withAllowedByOrganizations(false))
+                .withEvalDecision(PolicyEvaluationDecisionType.ImplicitDeny);
 
         assertThat(getValidator().getFailedActions(role,
                 Collections.emptyList())).isEqualTo(Collections.emptySortedSet());
@@ -88,12 +94,14 @@ public abstract class AwsIDBrokerMappedRolePermissionValidatorTest {
         SortedSet<String> expectedFailedActions = new TreeSet<>();
         expectedFailedActions.add(String.format("%s:%s:%s", role.getArn(),
                 denyEvalResult.getEvalActionName(), denyEvalResult.getEvalResourceName()));
-        List<EvaluationResult> denyEvalResults = Collections.singletonList(denyEvalResult);
+        expectedFailedActions.add(String.format("%s:%s:%s", role.getArn(),
+                denyEvalResult.getEvalActionName(), denyEvalResult.getEvalResourceName() + " -> Denied by Organization Rule"));
+        List<EvaluationResult> denyEvalResults = List.of(denyEvalResult, denyOrganizationsDecisionEvalResult);
         assertThat(getValidator().getFailedActions(role, denyEvalResults))
                 .isEqualTo(expectedFailedActions);
 
         List<EvaluationResult> multipleEvalResults = Arrays.asList(denyEvalResult,
-                allowEvalResult, denyEvalResult, denyEvalResult, allowEvalResult);
+                allowEvalResult, denyEvalResult, denyEvalResult, denyOrganizationsDecisionEvalResult, allowEvalResult);
         assertThat(getValidator().getFailedActions(role, multipleEvalResults))
                 .isEqualTo(expectedFailedActions);
     }
