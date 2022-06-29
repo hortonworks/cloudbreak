@@ -48,10 +48,10 @@ class KafkaAuthConfigProviderTest {
             config("ldap.auth.user.dn.template", "pattern"),
             config("ldap.auth.enable", "true"));
 
-    private static final Set<ApiClusterTemplateConfig> PAM_AUTH_EXPECTED_CONFIGS = Set.of(
+    private static final Set<ApiClusterTemplateConfig> SASL_LDAP_AUTH_EXPECTED_CONFIGS = Set.of(
             config("ldap.auth.url", "protocol://host:1234"),
             config("ldap.auth.user.dn.template", "pattern"),
-            config("sasl.plain.auth", "PAM"));
+            config("sasl.plain.auth", "LDAP"));
 
     private KafkaAuthConfigProvider underTest;
 
@@ -101,12 +101,12 @@ class KafkaAuthConfigProviderTest {
         return Stream.of(
                 Arguments.of("7.0.1", cdhParcelVersion("7.0.1", 5), NO_AUTH_EXPECTED_CONFIGS),
                 Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 0), LDAP_AUTH_EXPECTED_CONFIGS),
-                Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 2), PAM_AUTH_EXPECTED_CONFIGS),
-                Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 3), PAM_AUTH_EXPECTED_CONFIGS),
+                Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 2), SASL_LDAP_AUTH_EXPECTED_CONFIGS),
+                Arguments.of("7.0.2", cdhParcelVersion("7.0.2", 3), SASL_LDAP_AUTH_EXPECTED_CONFIGS),
                 Arguments.of("7.0.2", "irregularCdhVersion-123", GENERAL_AUTH_EXPECTED_CONFIGS),
                 Arguments.of("7.0.3", cdhParcelVersion("7.0.3", 0), LDAP_AUTH_EXPECTED_CONFIGS),
                 Arguments.of("7.0.3", cdhParcelVersion("7.0.3", 3), LDAP_AUTH_EXPECTED_CONFIGS),
-                Arguments.of("7.1.0", cdhParcelVersion("7.1.0", 0), PAM_AUTH_EXPECTED_CONFIGS));
+                Arguments.of("7.1.0", cdhParcelVersion("7.1.0", 0), SASL_LDAP_AUTH_EXPECTED_CONFIGS));
     }
 
     @ParameterizedTest
