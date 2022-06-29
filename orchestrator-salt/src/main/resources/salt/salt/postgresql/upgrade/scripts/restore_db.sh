@@ -77,7 +77,7 @@ restore_database_for_service() {
       limit_incomming_connection $SERVICE 0
       close_existing_connections $SERVICE
       doLog "INFO Restoring $SERVICE"
-      psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE} --if-exists;" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to drop database ${SERVICE}"
+      psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database if exists ${SERVICE} ;" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to drop database ${SERVICE}"
       psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to re-create database ${SERVICE}"
       pg_restore -v --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" -j 8 ${BACKUP} > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore ${SERVICE}"
       doLog "INFO Successfully restored ${SERVICE}"

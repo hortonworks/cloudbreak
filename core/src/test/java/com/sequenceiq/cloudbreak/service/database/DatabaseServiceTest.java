@@ -8,14 +8,17 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
+import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
@@ -34,6 +37,8 @@ class DatabaseServiceTest {
 
     private static final String CLUSTER_CRN = "clusterCrn";
 
+    private static final String CLUSTER_NAME = "clusterName";
+
     private static final String DATABASE_CRN = "databaseCrn";
 
     @Mock
@@ -48,11 +53,12 @@ class DatabaseServiceTest {
     @InjectMocks
     private DatabaseService underTest;
 
-    @Test
-    public void testGetDatabaseServerShouldReturnDatabaseServer() {
-        when(stackOperations.getStackByCrn(CLUSTER_CRN)).thenReturn(createStack());
+    @ParameterizedTest
+    @MethodSource("nameOrCrnProvider")
+    public void testGetDatabaseServerShouldReturnDatabaseServer(NameOrCrn nameOrCrn) {
+        when(stackOperations.getStackByNameOrCrn(nameOrCrn)).thenReturn(createStack());
         when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(createDatabaseServerV4Response());
-        StackDatabaseServerResponse response = underTest.getDatabaseServer(CLUSTER_CRN);
+        StackDatabaseServerResponse response = underTest.getDatabaseServer(nameOrCrn);
 
         assertThat(response.getClusterCrn()).isEqualTo(CLUSTER_CRN);
         assertThat(response.getCrn()).isEqualTo(DATABASE_CRN);
@@ -60,27 +66,29 @@ class DatabaseServiceTest {
         assertThat(response.getStatus()).isEqualTo(DatabaseServerStatus.AVAILABLE);
     }
 
-    @Test
-    public void testGetDatabaseServerWhenNoClusterShouldThrowNotFoundException() {
-        when(stackOperations.getStackByCrn(CLUSTER_CRN)).thenReturn(new Stack());
+    @ParameterizedTest
+    @MethodSource("nameOrCrnProvider")
+    public void testGetDatabaseServerWhenNoClusterShouldThrowNotFoundException(NameOrCrn nameOrCrn) {
+        when(stackOperations.getStackByNameOrCrn(nameOrCrn)).thenReturn(new Stack());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> underTest.getDatabaseServer(CLUSTER_CRN));
+                () -> underTest.getDatabaseServer(nameOrCrn));
 
-        assertThat(exception.getMessage()).isEqualTo("Data Hub with crn: 'clusterCrn' not found.");
+        assertThat(exception.getMessage()).isEqualTo(String.format("Data Hub with id: '%s' not found.", nameOrCrn.getNameOrCrn()));
         verify(databaseServerV4Endpoint, never()).getByCrn(anyString());
     }
 
-    @Test
-    public void testGetDatabaseServerWhenNoDatabaseCrnShouldThrowNotFoundException() {
+    @ParameterizedTest
+    @MethodSource("nameOrCrnProvider")
+    public void testGetDatabaseServerWhenNoDatabaseCrnShouldThrowNotFoundException(NameOrCrn nameOrCrn) {
         Stack stack = createStack();
         stack.getCluster().setDatabaseServerCrn(null);
-        when(stackOperations.getStackByCrn(CLUSTER_CRN)).thenReturn(stack);
+        when(stackOperations.getStackByNameOrCrn(nameOrCrn)).thenReturn(stack);
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> underTest.getDatabaseServer(CLUSTER_CRN));
+                () -> underTest.getDatabaseServer(nameOrCrn));
 
-        assertThat(exception.getMessage()).isEqualTo("Database for Data Hub with Data Hub crn: 'clusterCrn' not found.");
+        assertThat(exception.getMessage()).isEqualTo(String.format("Database for Data Hub with Data Hub id: '%s' not found.", nameOrCrn.getNameOrCrn()));
         verify(databaseServerV4Endpoint, never()).getByCrn(anyString());
     }
 
@@ -100,6 +108,10 @@ class DatabaseServiceTest {
         databaseServerV4Response.setStatusReason("Everything is great");
         databaseServerV4Response.setClusterCrn(CLUSTER_CRN);
         return databaseServerV4Response;
+    }
+
+    private static Stream<NameOrCrn> nameOrCrnProvider() {
+        return Stream.of(NameOrCrn.ofName(CLUSTER_NAME), NameOrCrn.ofCrn(CLUSTER_CRN));
     }
 
     private Stack createStack() {

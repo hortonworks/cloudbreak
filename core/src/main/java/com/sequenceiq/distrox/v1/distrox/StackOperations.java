@@ -359,6 +359,10 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackService.getNotTerminatedByCrnInWorkspace(crn, workspaceService.getForCurrentUser().getId());
     }
 
+    public Stack getStackByNameOrCrn(NameOrCrn nameOrCrn) {
+        return stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceService.getForCurrentUser().getId());
+    }
+
     public List<RetryableFlow> getRetryableFlows(String name, Long workspaceId) {
         return stackCommonService.getRetryableFlows(name, workspaceId);
     }

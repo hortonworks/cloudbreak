@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,6 +41,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
@@ -90,8 +92,6 @@ public class StackServiceTest {
 
     private static final Long STACK_ID = 1L;
 
-    private static final Long DATALAKE_RESOURCE_ID = 2L;
-
     private static final Long WORKSPACE_ID = 1L;
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
@@ -99,6 +99,8 @@ public class StackServiceTest {
     private static final String VARIANT_VALUE = "VARIANT_VALUE";
 
     private static final String STACK_NAME = "name";
+
+    private static final String STACK_CRN = "stackCrn";
 
     private static final String STACK_NOT_FOUND_BY_ID_MESSAGE = "Stack '%d' not found";
 
@@ -480,6 +482,26 @@ public class StackServiceTest {
             return callback.get();
         });
         return underTest.findClustersConnectedToDatalakeByDatalakeStackId(1L);
+    }
+
+    @Test
+    public void testWhenGetByNameOrCrnInWorkspaceIsCalledWithNameThenGetByNameInWorkspaceIsCalled() {
+        when(stackRepository.findByNameAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
+
+        underTest.getByNameOrCrnInWorkspace(NameOrCrn.ofName(STACK_NAME), WORKSPACE_ID);
+
+        verify(stackRepository).findByNameAndWorkspaceId(eq(STACK_NAME), eq(WORKSPACE_ID));
+        verify(stackRepository, never()).findNotTerminatedByCrnAndWorkspaceId(anyString(), eq(WORKSPACE_ID));
+    }
+
+    @Test
+    public void testWhenGetByNameOrCrnInWorkspaceIsCalledWithCrnThenGetNotTerminatedByCrnInWorkspaceIsCalled() {
+        when(stackRepository.findNotTerminatedByCrnAndWorkspaceId(STACK_CRN, WORKSPACE_ID)).thenReturn(Optional.of(stack));
+
+        underTest.getByNameOrCrnInWorkspace(NameOrCrn.ofCrn(STACK_CRN), WORKSPACE_ID);
+
+        verify(stackRepository, never()).findByNameAndWorkspaceId(anyString(), eq(WORKSPACE_ID));
+        verify(stackRepository).findNotTerminatedByCrnAndWorkspaceId(eq(STACK_CRN), eq(WORKSPACE_ID));
     }
 
     private StackImageView createStackImageView(String json) {

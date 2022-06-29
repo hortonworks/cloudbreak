@@ -9,7 +9,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FAIL
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_FINISHED_NOVERSION;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPGRADE_NOT_NEEDED;
-import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -80,7 +79,7 @@ public class ClusterUpgradeServiceTest {
 
     @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -208,7 +207,7 @@ public class ClusterUpgradeServiceTest {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         underTest.handleUpgradeClusterFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED);
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_FAILED.name()), captor.capture(), eq(ERROR_MESSAGE));
-        assertEquals(CLUSTER_MANAGER_UPGRADE_FAILED, captor.getValue());
+        Assertions.assertEquals(CLUSTER_MANAGER_UPGRADE_FAILED, captor.getValue());
     }
 
     @Test
@@ -216,7 +215,7 @@ public class ClusterUpgradeServiceTest {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         underTest.handleUpgradeClusterFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_FAILED.name()), captor.capture(), eq(ERROR_MESSAGE));
-        assertEquals(CLUSTER_UPGRADE_FAILED, captor.getValue());
+        Assertions.assertEquals(CLUSTER_UPGRADE_FAILED, captor.getValue());
     }
 
     private static Image createImage(String cmBuildNumber, String stackBuildNumber) {

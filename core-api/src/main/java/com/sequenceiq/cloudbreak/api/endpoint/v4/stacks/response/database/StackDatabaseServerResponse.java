@@ -4,6 +4,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.DatabaseServerModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -55,6 +56,9 @@ public class StackDatabaseServerResponse {
 
     @ApiModelProperty(DatabaseServerModelDescription.SSL_CONFIG)
     private DatabaseServerSslConfig sslConfig;
+
+    @ApiModelProperty(DatabaseServerModelDescription.MAJOR_VERSION)
+    private MajorVersion majorVersion;
 
     public StackDatabaseServerResponse() {
     }
@@ -171,6 +175,14 @@ public class StackDatabaseServerResponse {
         this.sslConfig = sslConfig;
     }
 
+    public MajorVersion getMajorVersion() {
+        return majorVersion;
+    }
+
+    public void setMajorVersion(MajorVersion majorVersion) {
+        this.majorVersion = majorVersion;
+    }
+
     @Override
     public String toString() {
         return "StackDatabaseServerResponse{" +
@@ -180,6 +192,7 @@ public class StackDatabaseServerResponse {
                 ", host='" + host + '\'' +
                 ", port=" + port +
                 ", clusterCrn='" + clusterCrn + '\'' +
+                ", majorVersion='" + majorVersion + '\'' +
                 '}';
     }
 }
