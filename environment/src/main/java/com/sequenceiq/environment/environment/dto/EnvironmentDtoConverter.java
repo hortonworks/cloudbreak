@@ -11,8 +11,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -41,8 +39,6 @@ import com.sequenceiq.environment.tags.v1.converter.AccountTagToAccountTagRespon
 
 @Component
 public class EnvironmentDtoConverter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentDtoConverter.class);
 
     private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
 
@@ -99,20 +95,20 @@ public class EnvironmentDtoConverter {
                 .withCloudPlatform(environmentView.getCloudPlatform())
                 .withCredentialView(environmentView.getCredential())
                 .withDeletionTimestamp(environmentView.getDeletionTimestamp())
-                .withLocationDto(environmentToLocationDto(environmentView))
+                .withLocationDto(environmentViewToLocationDto(environmentView))
                 .withRegions(environmentView.getRegionSet())
                 .withTelemetry(environmentView.getTelemetry())
                 .withBackup(environmentView.getBackup())
                 .withEnvironmentStatus(environmentView.getStatus())
                 .withCreator(environmentView.getCreator())
                 .withAuthentication(authenticationDtoConverter.authenticationToDto(environmentView.getAuthentication()))
-                .withFreeIpaCreation(environmentToFreeIpaCreationDto(environmentView))
+                .withFreeIpaCreation(environmentViewToFreeIpaCreationDto(environmentView))
                 .withCreated(environmentView.getCreated())
                 .withStatusReason(environmentView.getStatusReason())
                 .withExperimentalFeatures(environmentView.getExperimentalFeaturesJson())
                 .withTags(environmentView.getEnvironmentTags())
                 .withSecurityAccess(environmentToSecurityAccessDto(environmentView.getCidr(), environmentView.getSecurityGroupIdForKnox(),
-                        environmentView.getSecurityGroupIdForKnox()))
+                        environmentView.getDefaultSecurityGroupId()))
                 .withAdminGroupName(environmentView.getAdminGroupName())
                 .withProxyConfig(environmentView.getProxyConfig())
                 .withEnvironmentDeletionType(environmentView.getDeletionType())
@@ -156,7 +152,7 @@ public class EnvironmentDtoConverter {
                 .withExperimentalFeatures(environment.getExperimentalFeaturesJson())
                 .withTags(environment.getEnvironmentTags())
                 .withSecurityAccess(environmentToSecurityAccessDto(environment.getCidr(), environment.getSecurityGroupIdForKnox(),
-                        environment.getSecurityGroupIdForKnox()))
+                        environment.getDefaultSecurityGroupId()))
                 .withAdminGroupName(environment.getAdminGroupName())
                 .withProxyConfig(environment.getProxyConfig())
                 .withEnvironmentDeletionType(environment.getDeletionType())
@@ -204,21 +200,17 @@ public class EnvironmentDtoConverter {
         environment.setCreated(System.currentTimeMillis());
         environment.setTags(getTags(creationDto));
         environment.setExperimentalFeaturesJson(creationDto.getExperimentalFeatures());
-        setLocation(creationDto, environment, location);
+        setRegions(creationDto, environment);
         return environment;
     }
 
-    private void setLocation(EnvironmentCreationDto creationDto, Environment environment, LocationDto location) {
+    private void setRegions(EnvironmentCreationDto creationDto, Environment environment) {
         Set<Region> regions = creationDto.getRegions().stream().map(r -> {
             Region region = new Region();
             region.setName(r);
             return region;
         }).collect(Collectors.toSet());
         environment.setRegions(regions);
-        environment.setLocation(location.getName());
-        environment.setLocationDisplayName(location.getDisplayName());
-        environment.setLongitude(location.getLongitude());
-        environment.setLatitude(location.getLatitude());
     }
 
     public LocationDto environmentToLocationDto(Environment environment) {
@@ -230,7 +222,7 @@ public class EnvironmentDtoConverter {
                 .build();
     }
 
-    public LocationDto environmentToLocationDto(EnvironmentView environment) {
+    private LocationDto environmentViewToLocationDto(EnvironmentView environment) {
         return LocationDto.builder()
                 .withName(environment.getLocation())
                 .withDisplayName(environment.getLocationDisplayName())
@@ -293,7 +285,7 @@ public class EnvironmentDtoConverter {
         return freeIpaCreationDto;
     }
 
-    private FreeIpaCreationDto environmentToFreeIpaCreationDto(EnvironmentView environment) {
+    private FreeIpaCreationDto environmentViewToFreeIpaCreationDto(EnvironmentView environment) {
         FreeIpaCreationDto freeIpaCreationDto = getFreeIpaCreationDto(environment.isCreateFreeIpa(), environment.getFreeIpaInstanceCountByGroup(),
                 environment.getFreeIpaInstanceType(), environment.getFreeIpaImageCatalog(), environment.getFreeIpaImageId(),
                 environment.isFreeIpaEnableMultiAz(), environment.getFreeipaRecipes());
@@ -327,4 +319,5 @@ public class EnvironmentDtoConverter {
         builder.withRecipes(freeipaRecipes);
         return builder.build();
     }
+
 }
