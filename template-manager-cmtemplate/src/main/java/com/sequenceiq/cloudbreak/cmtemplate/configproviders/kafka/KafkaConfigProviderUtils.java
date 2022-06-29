@@ -84,10 +84,10 @@ public class KafkaConfigProviderUtils {
         VERSION_7_0_0(KafkaAuthConfigType.NO_AUTH),
         VERSION_7_0_2(KafkaAuthConfigType.LDAP_AUTH),
         VERSION_7_0_2_MISSING_PATCH_VERSION(KafkaAuthConfigType.LDAP_BASE_CONFIG),
-        VERSION_7_0_2_X(KafkaAuthConfigType.SASL_PAM_AUTH),
+        VERSION_7_0_2_X(KafkaAuthConfigType.SASL_LDAP_AUTH),
         VERSION_7_0_X(KafkaAuthConfigType.LDAP_AUTH),
-        VERSION_7_1_0(KafkaAuthConfigType.SASL_PAM_AUTH),
-        VERSION_7_X_X(KafkaAuthConfigType.SASL_PAM_AUTH);
+        VERSION_7_1_0(KafkaAuthConfigType.SASL_LDAP_AUTH),
+        VERSION_7_X_X(KafkaAuthConfigType.SASL_LDAP_AUTH);
 
         private static final EnumSet<CdhVersionForStreaming> SUPPORTS_RANGER_SERVICE_CREATION = EnumSet.of(
                 VERSION_7_0_2_X, VERSION_7_1_0, VERSION_7_X_X);
@@ -123,7 +123,7 @@ public class KafkaConfigProviderUtils {
         NO_AUTH,
         LDAP_BASE_CONFIG,
         LDAP_AUTH,
-        SASL_PAM_AUTH
+        SASL_LDAP_AUTH
     }
 
 }
