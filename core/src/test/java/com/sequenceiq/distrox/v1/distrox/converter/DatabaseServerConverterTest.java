@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.Databa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerSslMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -57,6 +58,8 @@ class DatabaseServerConverterTest {
         assertThat(result.getPort()).isEqualTo(source.getPort());
         assertThat(result.getDatabaseVendor()).isEqualTo(source.getDatabaseVendor());
         assertThat(result.getDatabaseVendorDisplayName()).isEqualTo(source.getDatabaseVendorDisplayName());
+        // TODO: re-wire to fetch this from source once available
+        assertThat(result.getMajorVersion()).isEqualTo(MajorVersion.VERSION_10);
         assertThat(result.getCreationDate()).isEqualTo(source.getCreationDate());
         assertThat(result.getResourceStatus()).isEqualTo(DatabaseServerResourceStatus.SERVICE_MANAGED);
         assertThat(result.getStatus()).isEqualTo(DatabaseServerStatus.AVAILABLE);

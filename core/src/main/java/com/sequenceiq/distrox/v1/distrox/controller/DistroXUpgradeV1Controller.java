@@ -28,9 +28,12 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Response;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeAvailabilityService;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
+import com.sequenceiq.distrox.v1.distrox.service.upgrade.rds.DistroXRdsUpgradeService;
 
 @Controller
 public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
@@ -48,6 +51,9 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
 
     @Inject
     private DistroXUpgradeService upgradeService;
+
+    @Inject
+    private DistroXRdsUpgradeService rdsUpgradeService;
 
     @Inject
     private StackCcmUpgradeService stackCcmUpgradeService;
@@ -78,6 +84,20 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     public DistroXUpgradeV1Response prepareClusterUpgradeByCrn(@ResourceCrn String clusterCrn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest) {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(clusterCrn);
         return upgradeCluster(clusterCrn, distroxUpgradeRequest, nameOrCrn, true);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
+    public DistroXRdsUpgradeV1Response upgradeRdsByName(@ResourceName String name, @Valid DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest) {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(name);
+        return upgradeRds(distroxRdsUpgradeRequest, nameOrCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
+    public DistroXRdsUpgradeV1Response upgradeRdsByCrn(@ResourceCrn String crn, @Valid DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest) {
+        NameOrCrn nameOrCrn = NameOrCrn.ofCrn(crn);
+        return upgradeRds(distroxRdsUpgradeRequest, nameOrCrn);
     }
 
     @Override
@@ -132,5 +152,9 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
             UpgradeV4Response upgradeV4Response = upgradeService.triggerUpgrade(nameOrCrn, workspaceId, userCrn, request, upgradePreparation);
             return upgradeConverter.convert(upgradeV4Response);
         }
+    }
+
+    private DistroXRdsUpgradeV1Response upgradeRds(DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest, NameOrCrn nameOrCrn) {
+        return rdsUpgradeService.triggerUpgrade(nameOrCrn, distroxRdsUpgradeRequest);
     }
 }
