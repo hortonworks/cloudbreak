@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.Databa
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerSslMode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
+import com.sequenceiq.cloudbreak.common.database.MajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -48,6 +49,8 @@ public class DatabaseServerConverter {
                 databaseServerSslConfig.setSslCertificateType(sslCertificateTypeToDatabaseServerSslCertificateType(sslConfig.getSslCertificateType()));
             }
             stackDatabaseServerResponse.setSslConfig(databaseServerSslConfig);
+            // TODO: Wire in major version parameter into databaseServerV4Response
+            stackDatabaseServerResponse.setMajorVersion(MajorVersion.VERSION_10);
         }
         return stackDatabaseServerResponse;
     }

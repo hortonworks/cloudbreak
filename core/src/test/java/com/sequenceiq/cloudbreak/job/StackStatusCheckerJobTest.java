@@ -322,16 +322,16 @@ public class StackStatusCheckerJobTest {
 
     @Test
     public void testHandledAllStatesSeparately() {
-        Set<Status> unshedulableStates = Status.getUnschedulableStatuses();
+        Set<Status> unschedulableStates = Status.getUnschedulableStatuses();
         Set<Status> ignoredStates = underTest.ignoredStates();
         Set<Status> syncableStates = underTest.syncableStates();
 
-        assertTrue(Sets.intersection(unshedulableStates, ignoredStates).isEmpty());
-        assertTrue(Sets.intersection(unshedulableStates, syncableStates).isEmpty());
+        assertTrue(Sets.intersection(unschedulableStates, ignoredStates).isEmpty());
+        assertTrue(Sets.intersection(unschedulableStates, syncableStates).isEmpty());
         assertTrue(Sets.intersection(ignoredStates, syncableStates).isEmpty());
 
         Set<Status> allPossibleStates = EnumSet.allOf(Status.class);
-        Set<Status> allHandledStates = EnumSet.copyOf(unshedulableStates);
+        Set<Status> allHandledStates = EnumSet.copyOf(unschedulableStates);
         allHandledStates.addAll(ignoredStates);
         allHandledStates.addAll(syncableStates);
         assertEquals(allPossibleStates, allHandledStates);

@@ -444,6 +444,17 @@ public enum ResourceEvent {
     CLUSTER_EXTERNAL_DATABASE_STOP_FAILED("cluster.externaldatabase.stop.failed"),
     CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED("cluster.externaldatabase.stop.finished"),
 
+    CLUSTER_RDS_UPGRADE_STOP_SERVICES("cluster.externaldatabase.upgrade.stop.services"),
+    CLUSTER_RDS_UPGRADE_BACKUP_DATA("cluster.externaldatabase.upgrade.backup.data"),
+    CLUSTER_RDS_UPGRADE_DBSERVER_UPGRADE("cluster.externaldatabase.upgrade.dbserver"),
+    CLUSTER_RDS_UPGRADE_RESTORE_DATA("cluster.externaldatabase.upgrade.restore.data"),
+    CLUSTER_RDS_UPGRADE_START_SERVICES("cluster.externaldatabase.upgrade.start.services"),
+    CLUSTER_RDS_UPGRADE_FINISHED("cluster.externaldatabase.upgrade.finished"),
+    CLUSTER_RDS_UPGRADE_FAILED("cluster.externaldatabase.upgrade.failed"),
+
+    CLUSTER_RDS_UPGRADE_NOT_AVAILABLE("cluster.externaldatabase.upgrade.not.available"),
+    CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED("cluster.externaldatabase.upgrade.already.upgraded"),
+
     CLUSTER_CCM_UPGRADE_TUNNEL_UPDATE("cluster.ccm.upgrade.tunnel.update"),
     CLUSTER_CCM_UPGRADE_PUSH_SALT_STATES("cluster.ccm.upgrade.push.salt.states"),
     CLUSTER_CCM_UPGRADE_RECONFIGURE_NGINX("cluster.ccm.upgrade.reconfigure.nginx"),

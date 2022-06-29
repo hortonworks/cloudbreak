@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -36,13 +37,13 @@ public class DatabaseService {
     @Inject
     private DatabaseServerConverter databaseServerConverter;
 
-    public StackDatabaseServerResponse getDatabaseServer(String clusterCrn) {
-        Stack stack = stackOperations.getStackByCrn(clusterCrn);
+    public StackDatabaseServerResponse getDatabaseServer(NameOrCrn nameOrCrn) {
+        Stack stack = stackOperations.getStackByNameOrCrn(nameOrCrn);
         if (stack.getCluster() == null) {
-            throw notFound("Data Hub with crn:", clusterCrn).get();
+            throw notFound("Data Hub with id:", nameOrCrn.getNameOrCrn()).get();
         }
         if (stack.getCluster().getDatabaseServerCrn() == null) {
-            throw notFound("Database for Data Hub with Data Hub crn:", clusterCrn).get();
+            throw notFound("Database for Data Hub with Data Hub id:", nameOrCrn.getNameOrCrn()).get();
         }
         DatabaseServerV4Response databaseServerV4Response = databaseServerV4Endpoint.getByCrn(stack.getCluster().getDatabaseServerCrn());
 

@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Response;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,16 +32,28 @@ import io.swagger.annotations.ApiOperation;
 @Api(value = "/v1/distrox", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface DistroXUpgradeV1Endpoint {
 
+    @PUT
+    @Path("{name}/rds_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Upgrades the external database of the distrox cluster", nickname = "upgradeDistroXRdsByName")
+    DistroXRdsUpgradeV1Response upgradeRdsByName(@PathParam("name") String clusterName, @Valid DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest);
+
+    @PUT
+    @Path("/crn/{crn}/rds_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Upgrades the external database of the distrox cluster", nickname = "upgradeDistroXRdsByCrn")
+    DistroXRdsUpgradeV1Response upgradeRdsByCrn(@PathParam("crn") String clusterCrn, @Valid DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest);
+
     @POST
     @Path("{name}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "upgrades the distrox cluster", nickname = "upgradeDistroxCluster")
+    @ApiOperation(value = "Upgrades the distrox cluster", nickname = "upgradeDistroxCluster")
     DistroXUpgradeV1Response upgradeClusterByName(@PathParam("name") String name, @Valid DistroXUpgradeV1Request distroxUpgradeRequest);
 
     @POST
     @Path("/crn/{crn}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "upgrades the distrox cluster", nickname = "upgradeDistroxClusterByCrn")
+    @ApiOperation(value = "Upgrades the distrox cluster", nickname = "upgradeDistroxClusterByCrn")
     DistroXUpgradeV1Response upgradeClusterByCrn(@PathParam("crn") String crn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest);
 
     @POST
@@ -57,14 +71,14 @@ public interface DistroXUpgradeV1Endpoint {
     @POST
     @Path("internal/{name}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "upgrades the distrox cluster internal", nickname = "upgradeDistroxClusterInternal")
+    @ApiOperation(value = "Upgrades the distrox cluster internal", nickname = "upgradeDistroxClusterInternal")
     DistroXUpgradeV1Response upgradeClusterByNameInternal(@PathParam("name") String name, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
     @Path("internal/crn/{crn}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "upgrades the distrox cluster internal", nickname = "upgradeDistroxClusterByCrnInternal")
+    @ApiOperation(value = "Upgrades the distrox cluster internal", nickname = "upgradeDistroxClusterByCrnInternal")
     DistroXUpgradeV1Response upgradeClusterByCrnInternal(@PathParam("crn") String crn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 

@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
@@ -50,9 +51,9 @@ class DatabaseServiceTest {
 
     @Test
     public void testGetDatabaseServerShouldReturnDatabaseServer() {
-        when(stackOperations.getStackByCrn(CLUSTER_CRN)).thenReturn(createStack());
+        when(stackOperations.getStackByNameOrCrn(NameOrCrn.ofCrn(CLUSTER_CRN))).thenReturn(createStack());
         when(databaseServerV4Endpoint.getByCrn(DATABASE_CRN)).thenReturn(createDatabaseServerV4Response());
-        StackDatabaseServerResponse response = underTest.getDatabaseServer(CLUSTER_CRN);
+        StackDatabaseServerResponse response = underTest.getDatabaseServer(NameOrCrn.ofCrn(CLUSTER_CRN));
 
         assertThat(response.getClusterCrn()).isEqualTo(CLUSTER_CRN);
         assertThat(response.getCrn()).isEqualTo(DATABASE_CRN);
@@ -62,12 +63,12 @@ class DatabaseServiceTest {
 
     @Test
     public void testGetDatabaseServerWhenNoClusterShouldThrowNotFoundException() {
-        when(stackOperations.getStackByCrn(CLUSTER_CRN)).thenReturn(new Stack());
+        when(stackOperations.getStackByNameOrCrn(NameOrCrn.ofCrn(CLUSTER_CRN))).thenReturn(new Stack());
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> underTest.getDatabaseServer(CLUSTER_CRN));
+                () -> underTest.getDatabaseServer(NameOrCrn.ofCrn(CLUSTER_CRN)));
 
-        assertThat(exception.getMessage()).isEqualTo("Data Hub with crn: 'clusterCrn' not found.");
+        assertThat(exception.getMessage()).isEqualTo("Data Hub with id: 'clusterCrn' not found.");
         verify(databaseServerV4Endpoint, never()).getByCrn(anyString());
     }
 
@@ -75,12 +76,12 @@ class DatabaseServiceTest {
     public void testGetDatabaseServerWhenNoDatabaseCrnShouldThrowNotFoundException() {
         Stack stack = createStack();
         stack.getCluster().setDatabaseServerCrn(null);
-        when(stackOperations.getStackByCrn(CLUSTER_CRN)).thenReturn(stack);
+        when(stackOperations.getStackByNameOrCrn(NameOrCrn.ofCrn(CLUSTER_CRN))).thenReturn(stack);
 
         NotFoundException exception = assertThrows(NotFoundException.class,
-                () -> underTest.getDatabaseServer(CLUSTER_CRN));
+                () -> underTest.getDatabaseServer(NameOrCrn.ofCrn(CLUSTER_CRN)));
 
-        assertThat(exception.getMessage()).isEqualTo("Database for Data Hub with Data Hub crn: 'clusterCrn' not found.");
+        assertThat(exception.getMessage()).isEqualTo("Database for Data Hub with Data Hub id: 'clusterCrn' not found.");
         verify(databaseServerV4Endpoint, never()).getByCrn(anyString());
     }
 
