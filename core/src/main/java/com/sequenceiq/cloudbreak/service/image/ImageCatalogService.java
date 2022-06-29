@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
+import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -844,5 +845,17 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     public List<String> getRuntimeVersionsFromDefault()
             throws CloudbreakImageCatalogException {
         return imageCatalogProvider.getImageCatalogMetaData(defaultCatalogUrl).getRuntimeVersions();
+    }
+
+    public ImageFilterResult getImageFilterResult(Long workspaceId, String imageCatalogName, ImageCatalogPlatform imageCatalogPlatform)
+            throws CloudbreakImageCatalogException {
+        ImageCatalog imageCatalog = getImageCatalogByName(workspaceId, imageCatalogName);
+        if (isCustomImageCatalog(imageCatalog)) {
+            StatedImages statedImages = getImages(workspaceId, imageCatalogName, imageCatalogPlatform);
+            return new ImageFilterResult(statedImages.getImages().getCdhImages());
+        } else {
+            CloudbreakImageCatalogV3 v3ImageCatalog = imageCatalogProvider.getImageCatalogV3(imageCatalog.getImageCatalogUrl());
+            return imageCatalogServiceProxy.getImageFilterResult(v3ImageCatalog);
+        }
     }
 }

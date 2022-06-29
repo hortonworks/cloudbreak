@@ -34,7 +34,7 @@ public class CurrentImageUsageConditionTest {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Spy
-    private ImageProvider imageProvider;
+    private ImageConverter imageConverter;
 
     @Test
     public void testFilterCurrentImageShouldReturnTrueWhenThereAreInstanceWithOtherImage() {
