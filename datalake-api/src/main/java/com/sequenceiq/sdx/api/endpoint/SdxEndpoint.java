@@ -208,7 +208,7 @@ public interface SdxEndpoint {
     @POST
     @Path("{crn}/rotate_salt_password")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "rotate salt password", produces = MediaType.APPLICATION_JSON, nickname = "rotateSaltPasswordSdxByCrn")
+    @ApiOperation(value = "rotate SaltStack user password", produces = MediaType.APPLICATION_JSON, nickname = "rotateSaltPasswordSdxByCrn")
     FlowIdentifier rotateSaltPasswordByCrn(@PathParam("crn") String crn);
 
     @GET

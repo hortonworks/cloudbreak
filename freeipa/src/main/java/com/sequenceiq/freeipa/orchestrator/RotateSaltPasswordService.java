@@ -47,14 +47,14 @@ public class RotateSaltPasswordService {
 
     public void rotateSaltPassword(String environmentCrn, String accountId) {
         if (!entitlementService.isSaltUserPasswordRotationEnabled(accountId)) {
-            throw new BadRequestException("Rotating salt password is not supported in your account");
+            throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
         }
 
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
 
         if (!saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(stack)) {
-            throw new BadRequestException("Rotating salt password is not supported with your image version, " +
+            throw new BadRequestException("Rotating SaltStack user password is not supported with your image version, " +
                     "please upgrade to an image with salt-bootstrap version >= 0.13.6 (you can find this information in the image catalog)");
         }
 

@@ -280,7 +280,7 @@ public class StackCommonService {
 
     public FlowIdentifier rotateSaltPassword(NameOrCrn nameOrCrn, Long workspaceId) {
         if (!entitlementService.isSaltUserPasswordRotationEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            throw new BadRequestException("Rotating salt password is not supported in your account");
+            throw new BadRequestException("Rotating SaltStack user password is not supported in your account");
         }
         return stackOperationService.rotateSaltPassword(nameOrCrn, workspaceId);
     }

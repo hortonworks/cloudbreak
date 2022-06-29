@@ -22,7 +22,7 @@ public class EnvironmentOpDescription {
     public static final String START_BY_CRN = "Start an environment by CRN. The freeipa, datalake and datahubs will be started in this order";
     public static final String STOP_BY_NAME = "Stop an environment by name. The datahubs, datalake and freeipa will be stopped in this order";
     public static final String STOP_BY_CRN = "Stop an environment by CRN. The datahubs, datalake and freeipa will be stopped in this order";
-    public static final String ROTATE_SALT_PASSWORD_BY_CRN = "Rotate Salt password of an environment by crn.";
+    public static final String ROTATE_SALT_PASSWORD_BY_CRN = "Rotate SaltStack user password of an environment by crn.";
     public static final String VERIFY_CREDENTIAL_BY_CRN = "Verifies the credential used by the given environment.";
     public static final String CLI_COMMAND = "produce cli command input for environment creation";
     public static final String GET_CRN_BY_NAME = "Get the crn of an environment by name.";

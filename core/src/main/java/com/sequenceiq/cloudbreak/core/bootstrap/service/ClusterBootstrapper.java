@@ -477,10 +477,10 @@ public class ClusterBootstrapper {
 
     public void validateRotateSaltPassword(Stack stack) {
         if (!stack.isAvailable()) {
-            throw new BadRequestException("Rotating salt password is only available for stacks in available status");
+            throw new BadRequestException("Rotating SaltStack user password is only available for stacks in available status");
         }
         if (!isChangeSaltuserPasswordSupported(stack)) {
-            throw new BadRequestException(String.format("Rotating salt password is not supported with your image version, " +
+            throw new BadRequestException(String.format("Rotating SaltStack user password is not supported with your image version, " +
                             "please upgrade to an image with salt-bootstrap version >= %s (you can find this information in the image catalog)",
                     SaltBootstrapVersionChecker.CHANGE_SALTUSER_PASSWORD_SUPPORT_MIN_VERSION));
         }
