@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateOnProviderRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateOnProviderResult;
@@ -95,6 +96,11 @@ public class UserDataUpdateActions {
             @Override
             protected void doExecute(StackContext context, UserDataUpdateOnProviderResult payload, Map<Object, Object> variables) {
                 sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new StackEvent(UpdateUserDataEvents.UPDATE_USERDATA_FINISHED_EVENT.selector(), context.getStack().getId());
             }
 
             @Override
