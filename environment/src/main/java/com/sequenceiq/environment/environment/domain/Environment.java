@@ -498,11 +498,7 @@ public class Environment implements AuthResource, AccountAwareResource {
     }
 
     public EnvironmentTags getEnvironmentTags() {
-        if (tags != null && tags.getValue() != null) {
-            return JsonUtil.readValueOpt(tags.getValue(), EnvironmentTags.class)
-                    .orElse(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
-        }
-        return new EnvironmentTags(new HashMap<>(), new HashMap<>());
+        return EnvironmentTags.fromJson(tags);
     }
 
     public Environment getParentEnvironment() {

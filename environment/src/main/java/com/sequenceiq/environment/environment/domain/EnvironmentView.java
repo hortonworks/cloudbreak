@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.domain;
 
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
 
@@ -402,11 +401,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
     }
 
     public EnvironmentTags getEnvironmentTags() {
-        if (tags != null && tags.getValue() != null) {
-            return JsonUtil.readValueOpt(tags.getValue(), EnvironmentTags.class)
-                    .orElse(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
-        }
-        return new EnvironmentTags(new HashMap<>(), new HashMap<>());
+        return EnvironmentTags.fromJson(tags);
     }
 
     public String getAdminGroupName() {

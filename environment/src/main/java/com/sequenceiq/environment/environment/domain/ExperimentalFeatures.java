@@ -79,6 +79,17 @@ public class ExperimentalFeatures implements Serializable {
         return tunnel == null && idBrokerMappingSource == null && cloudStorageValidation == null && ccmV2TlsType == null;
     }
 
+    @Override
+    public String toString() {
+        return "ExperimentalFeatures{" +
+                "tunnel=" + tunnel +
+                ", overrideTunnel=" + overrideTunnel +
+                ", idBrokerMappingSource=" + idBrokerMappingSource +
+                ", cloudStorageValidation=" + cloudStorageValidation +
+                ", ccmV2TlsType=" + ccmV2TlsType +
+                '}';
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -104,11 +115,7 @@ public class ExperimentalFeatures implements Serializable {
         }
 
         public Builder withOverrideTunnel(Boolean overrideTunnel) {
-            if (overrideTunnel == null || !overrideTunnel) {
-                this.overrideTunnel = false;
-            } else {
-                this.overrideTunnel = true;
-            }
+            this.overrideTunnel = Boolean.TRUE.equals(overrideTunnel);
             return this;
         }
 
