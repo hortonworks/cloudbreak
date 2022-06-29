@@ -23,7 +23,7 @@ public class CurrentImageUsageCondition {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private ImageProvider imageProvider;
+    private ImageConverter imageConverter;
 
     public boolean currentImageUsedOnInstances(Long stackId, String currentImageId) {
         Set<Image> imagesFromInstances = getImagesFromInstanceMetadata(stackId);
@@ -42,7 +42,7 @@ public class CurrentImageUsageCondition {
     }
 
     private Image convertJsonToImage(Json imageJson) {
-        return imageProvider.convertJsonToImage(imageJson);
+        return imageConverter.convertJsonToImage(imageJson);
     }
 
     private Set<String> getImageIds(Set<Image> imagesFromInstances) {

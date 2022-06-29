@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.service.resize.recovery;
 
-import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CERT_RENEWAL_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CERT_ROTATION_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.CLUSTER_AMBIGUOUS;
@@ -22,7 +21,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -31,7 +29,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -83,8 +80,8 @@ public class ResizeRecoveryService implements RecoveryService {
         DatalakeStatusEnum status = actualStatusForSdx.getStatus();
         String statusReason = actualStatusForSdx.getStatusReason();
 
-        if (getOldCluster(sdxCluster).isPresent()) {
-            return validateRecoveryResizedClusterPresent(sdxCluster, status, statusReason);
+        if (getDetachedCluster(sdxCluster).isPresent()) {
+            return validateRecoveryResizedClusterPresent(status, statusReason);
         }
         return validateRecoveryOnlyOriginalCluster(sdxCluster, status, statusReason);
     }
@@ -96,42 +93,21 @@ public class ResizeRecoveryService implements RecoveryService {
 
     @Override
     public SdxRecoveryResponse triggerRecovery(SdxCluster sdxCluster, SdxRecoveryRequest sdxRecoveryRequest) {
-        SdxStatusEntity actualStatusForSdx = sdxStatusService.getActualStatusForSdx(sdxCluster);
-        if (entitlementService.isDatalakeResizeRecoveryEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            switch (actualStatusForSdx.getStatus()) {
-                case STOP_FAILED:
-                    return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxStartFlow(sdxCluster));
-                case STOPPED:
-                    return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, null));
-                case PROVISIONING_FAILED:
-                    return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(getOldClusterErrorIfNotFound(sdxCluster), sdxCluster));
-                case RUNNING:
-                    if (actualStatusForSdx.getStatusReason().contains("Datalake restore failed")) {
-                        return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(getOldClusterErrorIfNotFound(sdxCluster), sdxCluster));
-                    } else {
-                        throw new NotImplementedException("Cluster is currently running and cannot be recovered");
-                    }
-                default:
-                    throw new NotImplementedException("Cluster is currently in an unrecoverable state");
-            }
-        } else {
-            throw new BadRequestException("Entitlement for resize recovery is missing");
+        Optional<SdxCluster> detachedCluster = getDetachedCluster(sdxCluster);
+        if (detachedCluster.isPresent()) {
+            return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(detachedCluster.get(), sdxCluster));
         }
+        return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, null));
     }
 
-    private SdxCluster getOldClusterErrorIfNotFound(SdxCluster newCluster) {
-        return getOldCluster(newCluster).orElseThrow(notFound(
-                "detached SDX cluster",
-                "Env CRN: " + newCluster.getEnvCrn() + ", Account ID: " + newCluster.getAccountId()
-        ));
-    }
-
-    private Optional<SdxCluster> getOldCluster(SdxCluster newCluster) {
-        Optional<SdxCluster> oldCluster = sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(
-                newCluster.getAccountId(), newCluster.getEnvCrn()
+    private Optional<SdxCluster> getDetachedCluster(SdxCluster cluster) {
+        Optional<SdxCluster> detachedCluster = sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(
+                cluster.getAccountId(), cluster.getEnvCrn()
         );
-        return (oldCluster.isPresent() && !oldCluster.get().getClusterName().equals(newCluster.getClusterName())) ?
-                oldCluster : Optional.empty();
+        if (detachedCluster.isPresent() && !detachedCluster.get().getId().equals(cluster.getId())) {
+            return detachedCluster;
+        }
+        return Optional.empty();
     }
 
     private String getReasonNonRecoverable(DatalakeStatusEnum status) {
@@ -144,11 +120,11 @@ public class ResizeRecoveryService implements RecoveryService {
         return reason.isEmpty() ? reason : (": " + reason);
     }
 
-    private SdxRecoverableResponse validateRecoveryResizedClusterPresent(SdxCluster sdxCluster, DatalakeStatusEnum status, String statusReason) {
+    private SdxRecoverableResponse validateRecoveryResizedClusterPresent(DatalakeStatusEnum status, String statusReason) {
         if (FAILURE_STATES.contains(status)) {
             return new SdxRecoverableResponse("Resized data lake is in a failed state. Recovery will restart the original data lake, " +
                     "and delete the new one", RecoveryStatus.RECOVERABLE);
-        } else if (RUNNING.equals(status) && statusReason.contains("Datalake restore failed")) {
+        } else if (RUNNING.equals(status) && statusReason != null && statusReason.contains("Datalake restore failed")) {
             return new SdxRecoverableResponse(
                     "Failed to restore backup to new data lake, recovery will restart original data lake, and delete the new one",
                     RecoveryStatus.RECOVERABLE
@@ -164,10 +140,10 @@ public class ResizeRecoveryService implements RecoveryService {
         if (STOPPED.equals(status)) {
             if (sdxCluster.isDetached()) {
                 return new SdxRecoverableResponse("Resize can recover detached cluster", RecoveryStatus.RECOVERABLE);
-            } else if (statusReason.contains("SDX detach failed")) {
+            } else if (statusReason != null && statusReason.contains("SDX detach failed")) {
                 return new SdxRecoverableResponse("Resize can recover stopped cluster", RecoveryStatus.RECOVERABLE);
             }
-        } else if (STOP_FAILED.equals(status) && statusReason.contains("Datalake resize failure")) {
+        } else if (STOP_FAILED.equals(status) && statusReason != null && statusReason.contains("Datalake resize failure")) {
             return new SdxRecoverableResponse("Resize can be recovered from a failed stop", RecoveryStatus.RECOVERABLE);
         }
         return new SdxRecoverableResponse(

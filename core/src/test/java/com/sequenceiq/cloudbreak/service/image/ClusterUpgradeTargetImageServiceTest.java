@@ -55,7 +55,7 @@ public class ClusterUpgradeTargetImageServiceTest {
     private StackImageService stackImageService;
 
     @Mock
-    private ImageProvider imageProvider;
+    private ImageConverter imageConverter;
 
     @Mock
     private Stack stack;
@@ -93,7 +93,7 @@ public class ClusterUpgradeTargetImageServiceTest {
         Image targetModelImage = createTargetModelImage(IMAGE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
         Image oldTargetImage = createTargetModelImage("old-image-id", IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
         Optional<Component> existingTargetImageComponent = createExistingTargetImageComponent(oldTargetImage);
-        when(imageProvider.convertJsonToImage(existingTargetImageComponent.get().getAttributes())).thenReturn(oldTargetImage);
+        when(imageConverter.convertJsonToImage(existingTargetImageComponent.get().getAttributes())).thenReturn(oldTargetImage);
         when(stackImageService.findImageComponentByName(STACK_ID, TARGET_IMAGE)).thenReturn(existingTargetImageComponent);
         when(stackService.getById(STACK_ID)).thenReturn(stack);
         when(stackImageService.getCurrentImage(stack)).thenReturn(currentImage);
@@ -120,7 +120,7 @@ public class ClusterUpgradeTargetImageServiceTest {
         Image targetModelImage = createTargetModelImage(IMAGE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
         Image oldTargetImage = createTargetModelImage(IMAGE_ID, "old-image-catalog-url", IMAGE_CATALOG_NAME);
         Optional<Component> existingTargetImageComponent = createExistingTargetImageComponent(oldTargetImage);
-        when(imageProvider.convertJsonToImage(existingTargetImageComponent.get().getAttributes())).thenReturn(oldTargetImage);
+        when(imageConverter.convertJsonToImage(existingTargetImageComponent.get().getAttributes())).thenReturn(oldTargetImage);
         when(stackImageService.findImageComponentByName(STACK_ID, TARGET_IMAGE)).thenReturn(existingTargetImageComponent);
         when(stackService.getById(STACK_ID)).thenReturn(stack);
         when(stackImageService.getCurrentImage(stack)).thenReturn(currentImage);
@@ -146,12 +146,12 @@ public class ClusterUpgradeTargetImageServiceTest {
         Image targetModelImageImage = createTargetModelImage(IMAGE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
         Optional<Component> existingTargetImageComponent = createExistingTargetImageComponent(targetModelImageImage);
         when(stackImageService.findImageComponentByName(STACK_ID, TARGET_IMAGE)).thenReturn(existingTargetImageComponent);
-        when(imageProvider.convertJsonToImage(existingTargetImageComponent.get().getAttributes())).thenReturn(targetModelImageImage);
+        when(imageConverter.convertJsonToImage(existingTargetImageComponent.get().getAttributes())).thenReturn(targetModelImageImage);
 
         underTest.saveImage(STACK_ID, targetImage);
 
         verify(stackImageService).findImageComponentByName(STACK_ID, TARGET_IMAGE);
-        verify(imageProvider).convertJsonToImage(existingTargetImageComponent.get().getAttributes());
+        verify(imageConverter).convertJsonToImage(existingTargetImageComponent.get().getAttributes());
         verifyNoInteractions(stackService);
         verifyNoInteractions(componentConfigProviderService);
     }

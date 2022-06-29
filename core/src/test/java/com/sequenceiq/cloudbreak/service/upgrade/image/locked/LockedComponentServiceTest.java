@@ -17,32 +17,34 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
-import com.sequenceiq.cloudbreak.service.image.ImageProvider;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterParamsFactory;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LockedComponentServiceTest {
+
+    private static final Long WORKSPACE_ID = 4L;
 
     private static final Long STACK_ID = 3L;
 
     private static final String TARGET_IMAGE_ID = "target-image-id";
 
+    private static final String IMAGE_CATALOG_URL = "image catalog url";
+
+    private static final String IMAGE_CATALOG_NAME = "image catalog name";
+
+    private static final String CURRENT_IMAGE_ID = "current image id";
+
     private static final Map<String, String> ACTIVATED_PARCELS = Collections.emptyMap();
 
     @InjectMocks
     private LockedComponentService underTest;
-
-    @Mock
-    private ImageCatalogProvider imageCatalogProvider;
-
-    @Mock
-    private ImageProvider imageProvider;
 
     @Mock
     private LockedComponentChecker lockedComponentChecker;
@@ -53,36 +55,40 @@ public class LockedComponentServiceTest {
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
 
+    @Mock
+    private ImageCatalogService imageCatalogService;
+
     private Stack stack;
 
     @Before
     public void setup() {
         stack = new Stack();
         stack.setId(STACK_ID);
+
+        Workspace workspace = new Workspace();
+        workspace.setId(WORKSPACE_ID);
+        stack.setWorkspace(workspace);
     }
 
     @Test
     public void testIsComponentsLockedShouldReturnTrueWhenTheComponentVersionsAreNotMatches()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        Image currentImage = new Image("imageName", Map.of(), "redhat6", "redhat6", "", "default", "default-id", Map.of());
+        Image currentImage = new Image("imageName", Map.of(), "redhat6", "redhat6", IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID, Map.of());
         when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(currentImage);
 
-        CloudbreakImageCatalogV3 imageCatalog = new CloudbreakImageCatalogV3(null, null);
-        when(imageCatalogProvider.getImageCatalogV3(currentImage.getImageCatalogUrl())).thenReturn(imageCatalog);
-
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
-        when(imageProvider.getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog)).thenReturn(currentCatalogImage);
+        when(currentCatalogImage.getUuid()).thenReturn(CURRENT_IMAGE_ID);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID))
+                .thenReturn(StatedImage.statedImage(currentCatalogImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME));
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
-        when(imageProvider.getCurrentImageFromCatalog(TARGET_IMAGE_ID, imageCatalog)).thenReturn(targetCatalogImage);
-
+        when(targetCatalogImage.getUuid()).thenReturn(TARGET_IMAGE_ID);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID))
+                .thenReturn(StatedImage.statedImage(targetCatalogImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME));
         when(imageFilterParamsFactory.getStackRelatedParcels(stack)).thenReturn(ACTIVATED_PARCELS);
         when(lockedComponentChecker.isUpgradePermitted(currentCatalogImage, targetCatalogImage, ACTIVATED_PARCELS)).thenReturn(true);
 
         assertTrue(underTest.isComponentsLocked(stack, TARGET_IMAGE_ID));
         verify(componentConfigProviderService).getImage(STACK_ID);
-        verify(imageCatalogProvider).getImageCatalogV3(currentImage.getImageCatalogUrl());
-        verify(imageProvider).getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
-        verify(imageProvider).getCurrentImageFromCatalog(TARGET_IMAGE_ID, imageCatalog);
         verify(imageFilterParamsFactory).getStackRelatedParcels(stack);
         verify(lockedComponentChecker).isUpgradePermitted(currentCatalogImage, targetCatalogImage, ACTIVATED_PARCELS);
     }
@@ -90,27 +96,24 @@ public class LockedComponentServiceTest {
     @Test
     public void testIsComponentsLockedShouldReturnFalseWhenTheComponentVersionsAreMatches()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        Image currentImage = new Image("imageName", Map.of(), "redhat6", "redhat6", "", "default", "default-id", Map.of());
+        Image currentImage = new Image("imageName", Map.of(), "redhat6", "redhat6", IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID, Map.of());
         when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(currentImage);
 
-        CloudbreakImageCatalogV3 imageCatalog = new CloudbreakImageCatalogV3(null, null);
-        when(imageCatalogProvider.getImageCatalogV3(currentImage.getImageCatalogUrl())).thenReturn(imageCatalog);
-
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image currentCatalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
-        when(imageProvider.getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog)).thenReturn(currentCatalogImage);
+        when(currentCatalogImage.getUuid()).thenReturn(CURRENT_IMAGE_ID);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, CURRENT_IMAGE_ID))
+                .thenReturn(StatedImage.statedImage(currentCatalogImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME));
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image targetCatalogImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
-        when(imageProvider.getCurrentImageFromCatalog(TARGET_IMAGE_ID, imageCatalog)).thenReturn(targetCatalogImage);
+        when(targetCatalogImage.getUuid()).thenReturn(TARGET_IMAGE_ID);
+        when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, TARGET_IMAGE_ID))
+                .thenReturn(StatedImage.statedImage(targetCatalogImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME));
 
         when(imageFilterParamsFactory.getStackRelatedParcels(stack)).thenReturn(ACTIVATED_PARCELS);
         when(lockedComponentChecker.isUpgradePermitted(currentCatalogImage, targetCatalogImage, ACTIVATED_PARCELS)).thenReturn(false);
 
         assertFalse(underTest.isComponentsLocked(stack, TARGET_IMAGE_ID));
         verify(componentConfigProviderService).getImage(STACK_ID);
-        verify(imageCatalogProvider).getImageCatalogV3(currentImage.getImageCatalogUrl());
-        verify(imageProvider).getCurrentImageFromCatalog(currentImage.getImageId(), imageCatalog);
-        verify(imageProvider).getCurrentImageFromCatalog(TARGET_IMAGE_ID, imageCatalog);
         verify(imageFilterParamsFactory).getStackRelatedParcels(stack);
         verify(lockedComponentChecker).isUpgradePermitted(currentCatalogImage, targetCatalogImage, ACTIVATED_PARCELS);
     }
-
 }
