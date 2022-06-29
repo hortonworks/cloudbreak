@@ -24,8 +24,8 @@ public class KafkaAuthConfigProvider implements CmTemplateComponentConfigProvide
         switch (authType) {
             case LDAP_AUTH:
                 return ldapConfig(ldapView);
-            case SASL_PAM_AUTH:
-                return ldapAndPamConfig(ldapView);
+            case SASL_LDAP_AUTH:
+                return saslLdapConfig(ldapView);
             case LDAP_BASE_CONFIG:
                 return generalAuthConfig(ldapView);
             default:
@@ -39,9 +39,9 @@ public class KafkaAuthConfigProvider implements CmTemplateComponentConfigProvide
         return config;
     }
 
-    private List<ApiClusterTemplateConfig> ldapAndPamConfig(LdapView ldapView) {
+    private List<ApiClusterTemplateConfig> saslLdapConfig(LdapView ldapView) {
         List<ApiClusterTemplateConfig> config = generalAuthConfig(ldapView);
-        config.add(config(KafkaConfigs.SASL_AUTH_METHOD, "PAM"));
+        config.add(config(KafkaConfigs.SASL_AUTH_METHOD, "LDAP"));
         return config;
     }
 
