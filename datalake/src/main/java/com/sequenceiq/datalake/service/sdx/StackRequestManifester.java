@@ -59,6 +59,7 @@ import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.FileSystemType;
+import com.sequenceiq.datalake.converter.DatabaseRequestConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
@@ -108,6 +109,9 @@ public class StackRequestManifester {
 
     @Inject
     private MultiAzDecorator multiAzDecorator;
+
+    @Inject
+    private DatabaseRequestConverter databaseRequestConverter;
 
     public void configureStackForSdxCluster(SdxCluster sdxCluster, DetailedEnvironmentResponse environment) {
         StackV4Request generatedStackV4Request = setupStackRequestForCloudbreak(sdxCluster, environment);
@@ -165,6 +169,7 @@ public class StackRequestManifester {
             setupInstanceVolumeEncryption(stackRequest, environment);
             setupGovCloud(sdxCluster, environment, stackRequest);
             setupMultiAz(sdxCluster, environment, stackRequest);
+            stackRequest.setExternalDatabase(databaseRequestConverter.createExternalDbRequest(sdxCluster));
             return stackRequest;
         } catch (IOException e) {
             LOGGER.error("Can not parse JSON to stack request");
