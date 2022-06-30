@@ -843,7 +843,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         Collection<ApiService> apiServices = readServices(stack);
         boolean anyServiceNotStopped = apiServices.stream()
                 .anyMatch(service -> !ApiServiceState.STOPPED.equals(service.getServiceState())
-                        && !ApiServiceState.STOPPING.equals(service.getServiceState()));
+                        && !ApiServiceState.STOPPING.equals(service.getServiceState())
+                        && !ApiServiceState.NA.equals(service.getServiceState()));
         if (anyServiceNotStopped) {
             ApiCommand apiCommand = clustersResourceApi.stopCommand(cluster.getName());
             ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmShutdown(stack, apiClient, apiCommand.getId());
