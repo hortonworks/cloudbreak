@@ -292,7 +292,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         } else {
             parameters = awsCredentialDetailsArn();
         }
-        if (awsProperties.getGovCloud()) {
+        if (getGovCloud()) {
             parameters.setGovCloud(true);
         }
         return credential
@@ -391,13 +391,13 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getLatestPreWarmedImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
-        return getLatestPreWarmedImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), false);
+        return getLatestPreWarmedImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), getGovCloud());
     }
 
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (awsProperties.getBaseimage().getImageId() == null || awsProperties.getBaseimage().getImageId().isEmpty()) {
-            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), false);
+            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), getGovCloud());
             awsProperties.getBaseimage().setImageId(imageId);
             return imageId;
         } else {
@@ -448,7 +448,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     public String getVariant() {
         if (awsProperties.getMultiaz()) {
             return "AWS_NATIVE";
-        } else if (awsProperties.getGovCloud()) {
+        } else if (getGovCloud()) {
             return "AWS_NATIVE_GOV";
         } else {
             return "AWS";

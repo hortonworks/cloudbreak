@@ -113,7 +113,8 @@ public class EnvironmentTestDto
                 .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
                 .withResourceGroup(getResourceGroupUsage(), getResourceGroupName())
                 .withNetwork()
-                .withCloudStorageValidation(CloudStorageValidation.ENABLED);
+                .withCloudStorageValidation(CloudStorageValidation.ENABLED)
+                .withTunnel(getTestContext().getTunnel());
     }
 
     public EnvironmentTestDto withCreateFreeIpa(Boolean create) {
