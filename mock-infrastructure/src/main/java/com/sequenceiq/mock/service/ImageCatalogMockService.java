@@ -30,7 +30,7 @@ public class ImageCatalogMockService {
                 .replace("MOCK_SERVER_ADDRESS", mockServerAddress);
     }
 
-    private String getNextRuntimeVersion(String runtime) {
+    public String getNextRuntimeVersion(String runtime) {
         String[] splitted = runtime.split("\\.");
         int last = Integer.parseInt(splitted[splitted.length - 1]);
         List<String> elements = new ArrayList<>(Arrays.asList(splitted).subList(0, splitted.length - 1));

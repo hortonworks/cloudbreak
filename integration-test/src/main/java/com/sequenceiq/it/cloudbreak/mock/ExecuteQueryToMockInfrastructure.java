@@ -51,7 +51,7 @@ public class ExecuteQueryToMockInfrastructure {
     }
 
     public <T> T execute(String path, Function<WebTarget, WebTarget> decorateWebTarget, Function<Response, T> handleResponse) {
-        WebTarget target = buildWebTarget(path, decorateWebTarget);
+        WebTarget target = buildWebTarget(path, decorateWebTarget, Map.of());
         try (Response response = target.request().get()) {
             if (response.getStatus() >= 200 && response.getStatus() < 300) {
                 return handleResponse.apply(response);
@@ -62,15 +62,13 @@ public class ExecuteQueryToMockInfrastructure {
 
     public void executeMethod(Method method, String path, Map<String, String> parameters, Entity<?> body, Consumer<Response> proc, Function<WebTarget,
             WebTarget> deco) {
-        WebTarget target = buildWebTarget(path, deco);
-        parameters.forEach(target::queryParam);
+        WebTarget target = buildWebTarget(path, deco, parameters);
         proc.accept(target.request().method(method.getMethodName().toUpperCase(), body));
     }
 
     public <T> T executeMethod(HttpMethod method, String path, Map<String, String> parameters, Entity<?> body, Function<Response, T> proc, Function<WebTarget,
             WebTarget> deco) {
-        WebTarget target = buildWebTarget(path, deco);
-        parameters.forEach(target::queryParam);
+        WebTarget target = buildWebTarget(path, deco, parameters);
         return proc.apply(target.request().method(method.name(), body));
     }
 
@@ -83,14 +81,14 @@ public class ExecuteQueryToMockInfrastructure {
         for (Map.Entry<String, String> entry : pathVariables.entrySet()) {
             configuredPath = configuredPath.replace("{" + entry.getKey() + "}", entry.getValue());
         }
-        Invocation.Builder invocation = buildWebTarget("/configure", decorateWebTarget).request();
+        Invocation.Builder invocation = buildWebTarget("/configure", decorateWebTarget, Map.of()).request();
         body.setPath(configuredPath);
         try (Response ignore = invocation.post(Entity.json(body))) {
 
         }
     }
 
-    private WebTarget buildWebTarget(String path, Function<WebTarget, WebTarget> decorateWebTarget) {
+    private WebTarget buildWebTarget(String path, Function<WebTarget, WebTarget> decorateWebTarget, Map<String, String> parameters) {
         CertificateTrustManager.SavingX509TrustManager x509TrustManager = new CertificateTrustManager.SavingX509TrustManager();
         TrustManager[] trustManagers = {x509TrustManager};
         SSLContext sslContext = SslConfigurator.newInstance().createSSLContext();
@@ -101,6 +99,9 @@ public class ExecuteQueryToMockInfrastructure {
         }
         Client client = RestClientUtil.createClient(sslContext, true);
         WebTarget target = client.target(getUrl());
+        for (Map.Entry<String, String> param : parameters.entrySet()) {
+            target = target.queryParam(param.getKey(), param.getValue());
+        }
         target = decorateWebTarget.apply(target.path(path));
         return target;
     }
