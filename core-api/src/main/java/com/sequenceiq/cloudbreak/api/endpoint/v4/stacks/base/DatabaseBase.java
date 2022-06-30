@@ -32,4 +32,12 @@ public abstract class DatabaseBase implements Serializable {
     public void setDatabaseEngineVersion(String databaseEngineVersion) {
         this.databaseEngineVersion = databaseEngineVersion;
     }
+
+    @Override
+    public String toString() {
+        return "DatabaseBase{" +
+                "availabilityType=" + availabilityType +
+                ", databaseEngineVersion='" + databaseEngineVersion + '\'' +
+                '}';
+    }
 }
