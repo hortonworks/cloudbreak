@@ -56,7 +56,7 @@ public class CmVersionQueryService {
      * @param stack The stack, with metadata to be able to build the client to query package versions
      * @return List of package info found in each host (map key is host fqdn)
      */
-    Map<String, List<PackageInfo>> queryCmPackageInfo(Stack stack) throws CloudbreakOrchestratorFailedException {
+    public Map<String, List<PackageInfo>> queryCmPackageInfo(Stack stack) throws CloudbreakOrchestratorFailedException {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         Map<String, Optional<String>> packageMap = packages.stream()
                 .filter(aPackage -> aPackage.getName().equals(ImagePackageVersion.CM.getKey()))
@@ -68,7 +68,7 @@ public class CmVersionQueryService {
         return fullPackageVersionsFromAllHosts;
     }
 
-    PackageInfo checkCmPackageInfoConsistency(Map<String, List<PackageInfo>> cmPackageVersionsFromAllHosts) {
+    public PackageInfo checkCmPackageInfoConsistency(Map<String, List<PackageInfo>> cmPackageVersionsFromAllHosts) {
         Multimap<String, PackageInfo> pkgVersionsMMap = HashMultimap.create();
         cmPackageVersionsFromAllHosts.values()
                 .forEach(packageInfoList -> packageInfoList.forEach(
