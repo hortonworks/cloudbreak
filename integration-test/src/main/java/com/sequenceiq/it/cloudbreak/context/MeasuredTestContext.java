@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.context;
 
+import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
@@ -7,6 +8,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
@@ -283,6 +285,21 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     public CloudPlatform getCloudPlatform() {
         return wrappedTestContext.getCloudPlatform();
+    }
+
+    @Override
+    public void waitingFor(Duration duration, String interruptedMessage) {
+        wrappedTestContext.waitingFor(duration, interruptedMessage);
+    }
+
+    @Override
+    public Tunnel getTunnel() {
+        return wrappedTestContext.getTunnel();
+    }
+
+    @Override
+    public void checkNonEmpty(String name, String value) {
+        wrappedTestContext.checkNonEmpty(name, value);
     }
 
     @Override
