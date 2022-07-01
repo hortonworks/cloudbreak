@@ -1,5 +1,7 @@
 package com.sequenceiq.consumption.endpoint;
 
+import java.util.Optional;
+
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.ValidationException;
@@ -55,8 +57,8 @@ public class ConsumptionInternalV1Controller implements ConsumptionInternalEndpo
             CloudStorageLocationUtil.validateCloudStorageType(FileSystemType.S3, consumptionCreationDto.getStorageLocation());
             LOGGER.info("Registering storage consumption collection for resource with CRN [{}] and location [{}]",
                     consumptionCreationDto.getMonitoredResourceCrn(), consumptionCreationDto.getStorageLocation());
-            Consumption consumption = consumptionService.create(consumptionCreationDto);
-            jobService.schedule(consumption.getId());
+            Optional<Consumption> consumptionOpt = consumptionService.create(consumptionCreationDto);
+            consumptionOpt.ifPresent(consumption -> jobService.schedule(consumption.getId()));
         } catch (ValidationException e) {
             throw new BadRequestException(String.format("Storage location validation failed, error: %s", e.getMessage()));
         }
@@ -67,10 +69,13 @@ public class ConsumptionInternalV1Controller implements ConsumptionInternalEndpo
     public void unscheduleStorageConsumptionCollection(@AccountId String accountId,
             @NotNull @ValidCrn(resource = {CrnResourceDescriptor.ENVIRONMENT, CrnResourceDescriptor.DATALAKE}) String monitoredResourceCrn,
             @NotEmpty String storageLocation) {
-        LOGGER.info("Deregistering storage consumption collection for resource with CRN [{}] and location [{}]", monitoredResourceCrn, storageLocation);
-        Consumption consumption = consumptionService.findStorageConsumptionByMonitoredResourceCrnAndLocation(monitoredResourceCrn, storageLocation);
-        jobService.unschedule(consumption.getId().toString());
-        consumptionService.delete(consumption);
+        LOGGER.info("Unregistering storage consumption collection for resource with CRN [{}] and location [{}]", monitoredResourceCrn, storageLocation);
+        Optional<Consumption> consumptionOpt =
+                consumptionService.findStorageConsumptionByMonitoredResourceCrnAndLocation(monitoredResourceCrn, storageLocation);
+        consumptionOpt.ifPresent(consumption -> {
+            jobService.unschedule(consumption.getId().toString());
+            consumptionService.delete(consumption);
+        });
     }
 
     @Override
