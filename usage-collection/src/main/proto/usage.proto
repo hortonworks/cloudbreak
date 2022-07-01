@@ -1450,6 +1450,13 @@ message CDPClusterStatus {
     STOP_START_DOWNSCALE_FINISHED = 41;
     // The status when a cluster failed to downscale via stop-start
     STOP_START_DOWNSCALE_FAILED = 42;
+
+    // The status when a datalake trying to resize
+    DATALAKE_RESIZE_START = 43;
+    // The status when a datalake resize finished
+    DATALAKE_RESIZE_FINISHED = 44;
+    // The status when a datalake resize failed
+    DATALAKE_RESIZE_FAILED = 45;
   }
 }
 
