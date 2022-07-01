@@ -367,6 +367,14 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    @InternalOnly
+    public int getNotCcmUpgradedStackCount(Long workspaceId,
+            @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String envCrn,
+            @InitiatorUserCrn @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.USER) String initiatorUserCrn) {
+        return stackCcmUpgradeService.getNotUpgradedStackCount(envCrn);
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public FlowIdentifier updateSaltByName(Long workspaceId, String name, @AccountId String accountId) {
         return stackOperations.updateSalt(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());

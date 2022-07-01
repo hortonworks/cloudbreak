@@ -46,4 +46,10 @@ public interface EnvironmentInternalEndpoint {
     SimpleEnvironmentResponse internalGetByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
         @QueryParam("withNetwork") @DefaultValue("false") boolean withNetwork);
 
+    @GET
+    @Path("/crn/{crn}/upgrade_ccm_available")
+    @Produces(MediaType.TEXT_PLAIN)
+    @ApiOperation(value = EnvironmentOpDescription.INTERNAL_UPGRADE_CCM_AVAILABLE, produces = MediaType.TEXT_PLAIN, notes = ENVIRONMENT_NOTES,
+            nickname = "isUpgradeCcmAvailableV1InternalByCrn")
+    boolean isUpgradeCcmAvailable(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 }

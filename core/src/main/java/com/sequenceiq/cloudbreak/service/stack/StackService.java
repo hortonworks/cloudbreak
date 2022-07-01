@@ -1032,4 +1032,8 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
     public int setTunnelByStackId(Long stackId, Tunnel tunnel) {
         return stackRepository.setTunnelByStackId(stackId, tunnel);
     }
+
+    public int getNotUpgradedStackCount(String envCrn, Tunnel latestTunnel) {
+        return stackRepository.getNotUpgradedStackCount(envCrn, latestTunnel);
+    }
 }

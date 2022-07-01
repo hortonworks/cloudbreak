@@ -7,6 +7,8 @@ public class EnvironmentOpDescription {
     public static final String LIST = "List all environments.";
     public static final String INTERNAL_LIST = "List all environments by account ID using the internal actor.";
     public static final String INTERNAL_CONSUMPTION_LIST = "List all environments for consumption.";
+    public static final String INTERNAL_UPGRADE_CCM_AVAILABLE =
+            "Determine if Upgrade CCM is available in the environment, i.e. is there any component which is not upgraded.";
     public static final String DELETE_BY_NAME = "Delete an environment by name. Only possible if no cluster is running in the environment.";
     public static final String DELETE_BY_CRN = "Delete an environment by CRN. Only possible if no cluster is running in the environment.";
     public static final String DELETE_MULTIPLE_BY_NAME = "Delete multiple environment by names. Only possible if no cluster is running in the environments.";

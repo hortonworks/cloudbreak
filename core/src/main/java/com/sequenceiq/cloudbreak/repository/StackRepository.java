@@ -443,4 +443,11 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Modifying
     @Query("UPDATE Stack s SET s.tunnel = :tunnel WHERE s.id = :id")
     int setTunnelByStackId(@Param("id") Long id, @Param("tunnel") Tunnel tunnel);
+
+    @Query("SELECT COUNT(*) " +
+            "FROM Stack s " +
+            "WHERE s.environmentCrn = :envCrn " +
+            "AND s.terminated IS NULL " +
+            "AND tunnel <> :latestTunnel")
+    int getNotUpgradedStackCount(@Param("envCrn") String envCrn, @Param("latestTunnel") Tunnel latestTunnel);
 }
