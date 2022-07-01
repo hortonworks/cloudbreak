@@ -8,8 +8,11 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentInternalEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.PolicyValidationErrorResponses;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
@@ -30,13 +33,21 @@ public class EnvironmentInternalV1Controller extends NotificationController impl
 
     private final EnvironmentResponseConverter environmentResponseConverter;
 
+    private final StackV4Endpoint stackV4Endpoint;
+
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public EnvironmentInternalV1Controller(
             CredentialService credentialService,
             EnvironmentService environmentService,
-            EnvironmentResponseConverter environmentResponseConverter) {
+            EnvironmentResponseConverter environmentResponseConverter,
+            StackV4Endpoint stackV4Endpoint,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.credentialService = credentialService;
         this.environmentService = environmentService;
         this.environmentResponseConverter = environmentResponseConverter;
+        this.stackV4Endpoint = stackV4Endpoint;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -50,8 +61,20 @@ public class EnvironmentInternalV1Controller extends NotificationController impl
     @AccountIdNotNeeded
     @InternalOnly
     public SimpleEnvironmentResponse internalGetByCrn(String crn, boolean withNetwork) {
-        EnvironmentDto environmentDtos = environmentService.internalGetByCrn(crn);
-        return environmentResponseConverter.dtoToSimpleResponse(environmentDtos, withNetwork, false);
+        EnvironmentDto environmentDto = environmentService.internalGetByCrn(crn);
+        return environmentResponseConverter.dtoToSimpleResponse(environmentDto, withNetwork, false);
+    }
+
+    @Override
+    @AccountIdNotNeeded
+    @InternalOnly
+    public boolean isUpgradeCcmAvailable(String crn) {
+        EnvironmentDto environmentDto = environmentService.internalGetByCrn(crn);
+        return Tunnel.getUpgradables().contains(environmentDto.getTunnel()) ||
+                environmentDto.getTunnel() == Tunnel.latestUpgradeTarget() &&
+                        ThreadBasedUserCrnProvider.doAsInternalActor(
+                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                                () -> stackV4Endpoint.getNotCcmUpgradedStackCount(0L, crn, ThreadBasedUserCrnProvider.getUserCrn()) > 0);
     }
 
 }

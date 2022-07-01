@@ -441,6 +441,14 @@ public interface StackV4Endpoint {
             @NotEmpty @ValidCrn(resource = { CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE }) @PathParam("crn") String crn,
             @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.USER) @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
+    @GET
+    @Path("internal/{envCrn}/upgrade_ccm_stacks_remaining")
+    @Produces(MediaType.TEXT_PLAIN)
+    @ApiOperation(value = "Returns the count of not upgraded stacks for an environment CRN", nickname = "getNotCcmUpgradedStackCountInternal")
+    int getNotCcmUpgradedStackCount(@PathParam("workspaceId") Long workspaceId,
+            @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("envCrn") String envCrn,
+            @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.USER) @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
     @PUT
     @Path("{name}/salt_update")
     @Produces(MediaType.APPLICATION_JSON)

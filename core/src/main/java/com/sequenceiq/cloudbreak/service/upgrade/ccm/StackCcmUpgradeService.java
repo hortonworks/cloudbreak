@@ -117,4 +117,8 @@ public class StackCcmUpgradeService {
     private String getMessage(ResourceEvent resourceEvent, List<String> args) {
         return messagesService.getMessage(resourceEvent.getMessage(), args);
     }
+
+    public int getNotUpgradedStackCount(String envCrn) {
+        return stackService.getNotUpgradedStackCount(envCrn, Tunnel.latestUpgradeTarget());
+    }
 }
