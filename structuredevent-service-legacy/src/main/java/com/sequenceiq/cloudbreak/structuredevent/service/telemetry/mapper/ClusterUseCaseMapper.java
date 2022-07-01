@@ -55,6 +55,7 @@ public class ClusterUseCaseMapper {
         firstStepUseCaseMap.put(Pair.of("BackupDatalakeDatabaseFlowEventChainFactory", "SaltUpdateFlowConfig"),
                 UsageProto.CDPClusterStatus.Value.BACKUP_STARTED);
         firstStepUseCaseMap.put(Pair.of("", "DiagnosticsCollectionFlowConfig"), UsageProto.CDPClusterStatus.Value.DIAGNOSTIC_COLLECTION_STARTED);
+        firstStepUseCaseMap.put(Pair.of("", "DatalakeResizeFlowEventChainFactory"), UsageProto.CDPClusterStatus.Value.DATALAKE_RESIZE_START);
     }
 
     // At the moment we need to introduce a complex logic to figure out the use case
@@ -149,6 +150,11 @@ public class ClusterUseCaseMapper {
                     useCase = getClusterStatus(nextFlowState, "DIAGNOSTICS_COLLECTION_FINISHED_STATE",
                             UsageProto.CDPClusterStatus.Value.DIAGNOSTIC_COLLECTION_FINISHED,
                             UsageProto.CDPClusterStatus.Value.DIAGNOSTIC_COLLECTION_FAILED);
+                    break;
+                case "DatalakeResizeFlowEventChainFactory":
+                    useCase = getClusterStatus(nextFlowState, "DATAHUB_REFRESH_FINISHED_STATE",
+                            UsageProto.CDPClusterStatus.Value.DATALAKE_RESIZE_FINISHED,
+                            UsageProto.CDPClusterStatus.Value.DATALAKE_RESIZE_FAILED);
                     break;
                 default:
                     LOGGER.debug("Next flow state: {}", nextFlowState);
