@@ -1,0 +1,23 @@
+package com.sequenceiq.consumption.endpoint.mapper;
+
+
+import org.springframework.stereotype.Component;
+import javax.ws.rs.core.Response.Status;
+
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
+
+@Component
+public class BadRequestExceptionMapper extends BaseExceptionMapper<BadRequestException> {
+
+    @Override
+    public Status getResponseStatus(BadRequestException exception) {
+        return Status.BAD_REQUEST;
+    }
+
+    @Override
+    public Class<BadRequestException> getExceptionType() {
+        return BadRequestException.class;
+    }
+
+}
