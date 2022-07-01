@@ -73,6 +73,7 @@ public class PollingService<T> {
             attempts++;
             timeout = timeoutChecker.checkTimeout();
             exit = statusCheckerTask.exitPolling(t);
+            statusCheckerTask.sendWarningTimeoutEventIfNecessary(t);
         }
         if (timeout) {
             LOGGER.debug("Poller timeout.");

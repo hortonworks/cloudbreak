@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerApiCheck
 import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandListCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerBatchCommandsListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDecommissionWarningListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDefaultListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostHealthyStatusChecker;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostStatusChecker;
@@ -211,7 +212,7 @@ public class ClouderaManagerPollingServiceProvider {
                     new SilentCMDecommissionHostListenerTask(clouderaManagerApiPojoFactory, clusterEventService));
         } else {
             return pollCommandWithAttemptListener(stack, apiClient, commandId, INFINITE_ATTEMPT,
-                    new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService, "Decommission host"));
+                    new ClouderaManagerDecommissionWarningListenerTask(clouderaManagerApiPojoFactory, clusterEventService, "Decommission host"));
         }
     }
 

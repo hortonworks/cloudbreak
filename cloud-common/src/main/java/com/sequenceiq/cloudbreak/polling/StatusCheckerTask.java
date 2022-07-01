@@ -32,6 +32,9 @@ public interface StatusCheckerTask<T> {
 
     }
 
+    default void sendWarningTimeoutEventIfNecessary(T t) {
+    }
+
     default Optional<String> additionalTimeoutErrorMessage() {
         return Optional.empty();
     }
