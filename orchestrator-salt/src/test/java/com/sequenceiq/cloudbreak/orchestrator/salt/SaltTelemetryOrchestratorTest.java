@@ -1,17 +1,26 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
@@ -27,12 +36,20 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltFileUpload;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUploadWithPermission;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConcurrentParameterizedStateRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltRetryConfig;
 
 @ExtendWith(MockitoExtension.class)
@@ -67,6 +84,15 @@ class SaltTelemetryOrchestratorTest {
     @Mock
     private TelemetrySaltRetryConfig telemetrySaltRetryConfig;
 
+    @Mock
+    private Retry retry;
+
+    @Mock
+    private SaltConnector saltConnector;
+
+    @Mock
+    private PingResponse pingResponse;
+
     @InjectMocks
     private SaltTelemetryOrchestrator underTest;
 
@@ -74,11 +100,11 @@ class SaltTelemetryOrchestratorTest {
     void setupTest() throws CloudbreakOrchestratorFailedException {
         underTest = new SaltTelemetryOrchestrator();
         MockitoAnnotations.openMocks(this);
-        when(telemetrySaltRetryConfig.getDiagnosticsCollect()).thenReturn(MAX_DIAGNOSTICS_COLLECTION_RETRY);
+        lenient().when(telemetrySaltRetryConfig.getDiagnosticsCollect()).thenReturn(MAX_DIAGNOSTICS_COLLECTION_RETRY);
         when(saltService.getPrimaryGatewayConfig(gatewayConfigs)).thenReturn(gatewayConfig);
-        when(saltService.createSaltConnector(gatewayConfig)).thenReturn(null);
-        when(saltRunner.runner(orchestratorBootstrapArgumentCaptor.capture(), any(), any(), anyInt(), anyBoolean()))
-                .thenReturn(callable);
+        when(saltService.createSaltConnector(gatewayConfig)).thenReturn(saltConnector);
+        lenient().when(saltRunner.runner(orchestratorBootstrapArgumentCaptor.capture(), any(), any(), anyInt(), anyBoolean())).thenReturn(callable);
+        lenient().when(saltRunner.runner(orchestratorBootstrapArgumentCaptor.capture(), any(), any())).thenReturn(callable);
     }
 
     @Test
@@ -92,7 +118,7 @@ class SaltTelemetryOrchestratorTest {
 
         Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals(SaltTelemetryOrchestrator.FILECOLLECTOR_INIT, saltJobRunner.getState());
-        verify(callable, Mockito.times(1)).call();
+        verify(callable, times(1)).call();
     }
 
     @Test
@@ -106,10 +132,10 @@ class SaltTelemetryOrchestratorTest {
 
         Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals(SaltTelemetryOrchestrator.FILECOLLECTOR_COLLECT, saltJobRunner.getState());
-        verify(callable, Mockito.times(1)).call();
-        verify(saltService, Mockito.times(1)).getPrimaryGatewayConfig(gatewayConfigs);
-        verify(saltRunner, Mockito.times(1)).runner(any(), any(), any(), anyInt(), anyBoolean());
-        verify(telemetrySaltRetryConfig, Mockito.times(1)).getDiagnosticsCollect();
+        verify(callable, times(1)).call();
+        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltRunner, times(1)).runner(any(), any(), any(), anyInt(), anyBoolean());
+        verify(telemetrySaltRetryConfig, times(1)).getDiagnosticsCollect();
     }
 
     @Test
@@ -123,7 +149,7 @@ class SaltTelemetryOrchestratorTest {
 
         Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals(SaltTelemetryOrchestrator.FILECOLLECTOR_UPLOAD, saltJobRunner.getState());
-        verify(callable, Mockito.times(1)).call();
+        verify(callable, times(1)).call();
     }
 
     @Test
@@ -137,7 +163,192 @@ class SaltTelemetryOrchestratorTest {
 
         Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals(SaltTelemetryOrchestrator.FILECOLLECTOR_CLEANUP, saltJobRunner.getState());
-        verify(callable, Mockito.times(1)).call();
+        verify(callable, times(1)).call();
+    }
+
+    @Test
+    void testValidateCloudStorage() throws Exception {
+        Set<String> targetHostNames = targets
+                .stream()
+                .map(Node::getHostname)
+                .collect(Collectors.toSet());
+        Map<String, Object> parameters = getParametersMap();
+        doThrow(new CloudbreakOrchestratorFailedException("Error")).when(callable).call();
+
+        CloudbreakOrchestratorException cloudbreakOrchestratorException = assertThrows(CloudbreakOrchestratorException.class,
+                () -> underTest.validateCloudStorage(gatewayConfigs, targets, targetHostNames, parameters, exitCriteriaModel));
+
+        assertNotNull(cloudbreakOrchestratorException);
+        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
+    }
+
+    @Test
+    void testStopTelemetryAgent() throws CloudbreakOrchestratorFailedException {
+        underTest.stopTelemetryAgent(gatewayConfigs, targets, exitCriteriaModel);
+
+        SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
+        ConcurrentParameterizedStateRunner saltJobRunner = (ConcurrentParameterizedStateRunner) saltJobIdTracker.getSaltJobRunner();
+
+        Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
+        assertEquals("fluent.agent-stop", saltJobRunner.getState());
+        verify(telemetrySaltRetryConfig, times(1)).getLoggingAgentStop();
+        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
+        verify(saltRunner, times(1)).runner(any(), any(), any(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    void testUpdateTelemetryComponent() throws CloudbreakOrchestratorFailedException {
+        Map<String, Object> parameters = getParametersMap();
+
+        underTest.updateTelemetryComponent(gatewayConfigs, targets, exitCriteriaModel, parameters);
+
+        SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
+        ConcurrentParameterizedStateRunner saltJobRunner = (ConcurrentParameterizedStateRunner) saltJobIdTracker.getSaltJobRunner();
+
+        Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
+        assertEquals("telemetry.upgrade", saltJobRunner.getState());
+        verify(telemetrySaltRetryConfig, times(1)).getTelemetryUpgrade();
+        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
+        verify(saltRunner, times(1)).runner(any(), any(), any(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    void testExecuteNodeStatusCollection() throws CloudbreakOrchestratorFailedException {
+        underTest.executeNodeStatusCollection(gatewayConfigs, targets, exitCriteriaModel);
+
+        SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
+        StateRunner saltJobRunner = (StateRunner) saltJobIdTracker.getSaltJobRunner();
+
+        Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
+        assertEquals(SaltTelemetryOrchestrator.NODESTATUS_COLLECT, saltJobRunner.getState());
+        verify(telemetrySaltRetryConfig, times(1)).getNodeStatusCollect();
+        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
+        verify(saltRunner, times(1)).runner(any(), any(), any(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    void testCollectUnresponsiveNodes() throws CloudbreakOrchestratorFailedException {
+        Node node = new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg");
+        node.setHostname("Test_Unresponsive_Node");
+        Set<Node> nodes = new HashSet<>() {{
+            add(node);
+        }};
+        when(pingResponse.getResultByMinionId()).thenReturn(new HashMap<>() {{
+            put("Test_Unresponsive_Node", false);
+        }});
+        when(SaltStates.ping(saltConnector)).thenReturn(pingResponse);
+
+        Set<Node> result = underTest.collectUnresponsiveNodes(gatewayConfigs, nodes, exitCriteriaModel);
+
+        assertEquals(result.stream().findFirst().orElse(null), node);
+        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
+    }
+
+    @Test
+    void testExecuteLoggingAgentDiagnostics() throws CloudbreakOrchestratorFailedException {
+        List<String> saltJobRunnerStates = new ArrayList<>();
+        saltJobRunnerStates.add("fluent.crontab");
+        saltJobRunnerStates.add("fluent.doctor");
+
+        underTest.executeLoggingAgentDiagnostics(new byte[0], gatewayConfigs, targets, exitCriteriaModel);
+
+        List<OrchestratorBootstrap> orchestratorBootstraps = orchestratorBootstrapArgumentCaptor.getAllValues();
+
+        for (OrchestratorBootstrap ob : orchestratorBootstraps) {
+            if (ob instanceof SaltJobIdTracker) {
+                StateRunner saltJobRunner = (StateRunner) ((SaltJobIdTracker) ob).getSaltJobRunner();
+                Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
+                Assertions.assertTrue(saltJobRunnerStates.contains(saltJobRunner.getState()));
+            } else if (ob instanceof SaltUploadWithPermission) {
+                String saltUploadTarget = ((SaltFileUpload) ob).getTargets().stream().findFirst().orElse(null);
+                assertEquals(saltUploadTarget, gatewayConfig.getPrivateAddress());
+            }
+        }
+        verify(saltService, times(3)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltService, times(3)).createSaltConnector(gatewayConfig);
+        verify(saltRunner, times(2)).runner(any(), any(), any(), anyInt(), anyBoolean());
+        verify(saltRunner, times(2)).runner(any(), any(), any());
+    }
+
+    @Test
+    void testUpdateMeteringSaltDefinition() throws CloudbreakOrchestratorFailedException {
+        underTest.updateMeteringSaltDefinition(new byte[0], gatewayConfigs, exitCriteriaModel);
+
+        SaltFileUpload saltFileUpload = (SaltFileUpload) orchestratorBootstrapArgumentCaptor.getValue();
+        String saltUploadTarget = saltFileUpload.getTargets().stream().findFirst().orElse(null);
+
+        assertEquals(saltUploadTarget, gatewayConfig.getPrivateAddress());
+        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
+    }
+
+    @Test
+    void testUpgradeMetering() throws CloudbreakOrchestratorFailedException {
+        underTest.upgradeMetering(gatewayConfigs, targets, exitCriteriaModel, "", "");
+
+        SaltJobIdTracker saltJobIdTracker = (SaltJobIdTracker) orchestratorBootstrapArgumentCaptor.getValue();
+        StateRunner saltJobRunner = (StateRunner) saltJobIdTracker.getSaltJobRunner();
+
+        Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
+        assertEquals(SaltTelemetryOrchestrator.METERING_UPGRADE, saltJobRunner.getState());
+        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
+        verify(saltRunner, times(1)).runner(any(), any(), any(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    void testUpdatePartialSaltDefinition() throws CloudbreakOrchestratorFailedException {
+        underTest.updatePartialSaltDefinition(new byte[0], anyList(), gatewayConfigs, exitCriteriaModel);
+
+        List<OrchestratorBootstrap> orchestratorBootstraps = orchestratorBootstrapArgumentCaptor.getAllValues();
+
+        for (OrchestratorBootstrap ob : orchestratorBootstraps) {
+            String saltUploadTarget = ((SaltFileUpload) ob).getTargets().stream().findFirst().orElse(null);
+            assertEquals(saltUploadTarget, gatewayConfig.getPrivateAddress());
+        }
+        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
+        verify(saltRunner, times(2)).runner(any(), any(), any());
+    }
+
+    @Test
+    void testPreFlightDiagnosticsCheck() throws CloudbreakOrchestratorFailedException {
+        Map<String, Object> parameters = getParametersMap();
+        when(SaltStates.runCommandOnHosts(retry, saltConnector, any(), "")).thenReturn(new HashMap<>() {{
+            put("", "");
+        }});
+
+        CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException = assertThrows(CloudbreakOrchestratorFailedException.class,
+                () -> underTest.preFlightDiagnosticsCheck(gatewayConfigs, targets, parameters, exitCriteriaModel));
+
+        assertNotNull(cloudbreakOrchestratorFailedException);
+        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
+        verify(saltRunner, times(2)).runner(any(), any(), any());
+    }
+
+    @Test
+    void testPreFlightDiagnosticsCheckWithFileCollectorParameter() throws CloudbreakOrchestratorFailedException {
+        Map<String, Object> parameters = getParametersMap();
+        Map<String, Object> fileCollectorConfig = new HashMap<>() {{
+            put("hosts", "hosts");
+            put("excludeHosts", "excludeHosts");
+            put("hostGroups", "hostGroups");
+        }};
+        parameters.put("filecollector", fileCollectorConfig);
+
+        CloudbreakOrchestratorFailedException cloudbreakOrchestratorFailedException = assertThrows(CloudbreakOrchestratorFailedException.class,
+                () -> underTest.preFlightDiagnosticsCheck(gatewayConfigs, targets, parameters, exitCriteriaModel));
+
+        assertNotNull(cloudbreakOrchestratorFailedException);
+        verify(saltService, times(1)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltService, times(1)).createSaltConnector(gatewayConfig);
+        verify(saltRunner, times(2)).runner(any(), any(), any());
     }
 
     private Map<String, Object> getParametersMap() {
