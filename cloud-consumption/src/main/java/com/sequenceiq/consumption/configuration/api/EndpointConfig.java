@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
+import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPStructuredEventFilter;
 import com.sequenceiq.consumption.api.v1.ConsumptionApi;
@@ -78,6 +79,7 @@ public class EndpointConfig extends ResourceConfig {
         for (ExceptionMapper<?> mapper : exceptionMappers) {
             register(mapper);
         }
+        register(DefaultExceptionMapper.class);
     }
 
     private void registerEndpoints() {
