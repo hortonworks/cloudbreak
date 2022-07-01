@@ -20,6 +20,7 @@
         + [Running FreeIPA in IDEA](#running-freeipa-in-idea)
         + [Running Redbeams in IDEA](#running-redbeams-in-idea)
         + [Running the Environment service in IDEA](#running-the-environment-service-in-idea)
+        + [Running the Consumption service in IDEA](#running-the-consumption-service-in-idea)
         + [Running Thunderhead Mock in IDEA](#running-thunderhead-mock-in-idea)
     * [Command line](#command-line)
         + [Running Cloudbreak from the Command Line](#running-cloudbreak-from-the-command-line)
@@ -353,6 +354,27 @@ After importing the `cloudbreak` repo root, launch the Environment application b
 ```
 -Dvault.root.token=<VAULT_ROOT_TOKEN>
 -Denvironment.cloudbreak.url=http://localhost:8080
+-Denvironment.enabledplatforms="YARN,YCLOUD,AWS,AZURE,MOCK"
+-Dinstance.node.id=<NODE_ID>
+````
+
+Replace `<VAULT_ROOT_TOKEN>` and `<NODE_ID>` with the value of `VAULT_ROOT_TOKEN` and `CB_INSTANCE_NODE_ID` respectively from the `Profile` file.
+
+then add these entries to the environment variables (the same values the you set in Profile):
+```
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+CB_AWS_ACCOUNT_ID=
+```
+
+### Running the Consumption service in IDEA
+
+After importing the `cloudbreak` repo root, launch the Consumption application by executing the `com.sequenceiq.consumption.ConsumptionApplication` class (set `Use classpath of module` to `cloudbreak.cloud-consumption.main`) with the following JVM options:
+* Note: If cloudbreak is in the CB_LOCAL_DEV_LIST variable, the environment.cloudbreak.url should be http://localhost:9091
+```
+-Dvault.root.token=<VAULT_ROOT_TOKEN>
+-Denvironment.cloudbreak.url=http://localhost:8080
+-Dserver.port=8099
 -Denvironment.enabledplatforms="YARN,YCLOUD,AWS,AZURE,MOCK"
 -Dinstance.node.id=<NODE_ID>
 ````
