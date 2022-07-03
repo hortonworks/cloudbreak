@@ -23,9 +23,10 @@ public class UpgradeV4Response {
     public UpgradeV4Response() {
     }
 
-    public UpgradeV4Response(String reason, FlowIdentifier flowIdentifier) {
+    public UpgradeV4Response(String reason, FlowIdentifier flowIdentifier, boolean replaceVms) {
         this.reason = reason;
         this.flowIdentifier = flowIdentifier;
+        this.replaceVms = replaceVms;
     }
 
     public UpgradeV4Response(ImageInfoV4Response current,

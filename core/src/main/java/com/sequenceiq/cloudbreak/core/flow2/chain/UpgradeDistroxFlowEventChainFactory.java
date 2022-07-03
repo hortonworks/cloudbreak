@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
@@ -56,6 +57,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         LOGGER.debug("Creating flow trigger event queue for distrox upgrade with event {}", event);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         createUpgradeValidationEvent(event).ifPresent(flowEventChain::add);
+        flowEventChain.add(createClusterUpgradePreparationTriggerEvent(event));
         flowEventChain.add(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
         flowEventChain.add(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
                 event.getImageChangeDto().getImageId()));
@@ -77,6 +79,10 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
             LOGGER.info("Upgrade validation disabled");
             return Optional.empty();
         }
+    }
+
+    private ClusterUpgradePreparationTriggerEvent createClusterUpgradePreparationTriggerEvent(DistroXUpgradeTriggerEvent event) {
+        return new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto());
     }
 
     private Map<String, List<String>> getReplaceableInstancesByHostgroup(DistroXUpgradeTriggerEvent event) {

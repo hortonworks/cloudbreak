@@ -18,6 +18,8 @@ public class ClouderaManagerProduct implements Serializable, ClouderaManagerProd
 
     private String parcel;
 
+    private String parcelFileUrl;
+
     private List<String> csd;
 
     public String getName() {
@@ -52,6 +54,14 @@ public class ClouderaManagerProduct implements Serializable, ClouderaManagerProd
         this.parcel = parcel;
     }
 
+    public String getParcelFileUrl() {
+        return parcelFileUrl;
+    }
+
+    public void setParcelFileUrl(String parcelFileUrl) {
+        this.parcelFileUrl = parcelFileUrl;
+    }
+
     public List<String> getCsd() {
         return csd;
     }
@@ -80,6 +90,11 @@ public class ClouderaManagerProduct implements Serializable, ClouderaManagerProd
         return this;
     }
 
+    public ClouderaManagerProduct withParcelFileUrl(String parcelFileUrl) {
+        this.parcelFileUrl = parcelFileUrl;
+        return this;
+    }
+
     public ClouderaManagerProduct withCsd(List<String> csd) {
         this.csd = csd;
         return this;
@@ -92,6 +107,7 @@ public class ClouderaManagerProduct implements Serializable, ClouderaManagerProd
                 ", displayName='" + displayName + '\'' +
                 ", version='" + version + '\'' +
                 ", parcel='" + parcel + '\'' +
+                ", parcelFileUrl='" + parcelFileUrl + '\'' +
                 ", csd=" + csd +
                 '}';
     }

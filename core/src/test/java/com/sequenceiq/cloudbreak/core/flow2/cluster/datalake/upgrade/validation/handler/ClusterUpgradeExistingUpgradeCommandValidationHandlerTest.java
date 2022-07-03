@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
@@ -21,6 +22,8 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.model.ClusterManagerCommand;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
@@ -111,7 +114,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
     }
 
     @Test
-    public void testUpgradeCommandNotActiveNotSuccessfulRetryableAndEmptyactiveRuntimeParcelVersionThenValidationShouldPass() {
+    public void testUpgradeCommandNotActiveNotSuccessfulRetryableAndEmptyActiveRuntimeParcelVersionThenValidationShouldPass() {
 
         ClusterManagerCommand command = new ClusterManagerCommand();
         command.setActive(false);
@@ -119,8 +122,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
         command.setRetryable(true);
 
         when(clusterStatusService.findCommand(stack, ClusterCommandType.UPGRADE_CLUSTER)).thenReturn(Optional.of(command));
-        Map<String, String> parcelNameToVersionMap = Map.of();
-        when(connector.gatherInstalledParcels(STACK_NAME)).thenReturn(parcelNameToVersionMap);
+        when(connector.gatherInstalledParcels(STACK_NAME)).thenReturn(Collections.emptySet());
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
@@ -136,8 +138,8 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
         command.setRetryable(true);
 
         when(clusterStatusService.findCommand(stack, ClusterCommandType.UPGRADE_CLUSTER)).thenReturn(Optional.of(command));
-        Map<String, String> parcelNameToVersionMap = Map.of(CDH, "7.2.7-1.cdh7.2.7.p7.12569826");
-        when(connector.gatherInstalledParcels(STACK_NAME)).thenReturn(parcelNameToVersionMap);
+        ParcelInfo activeParcel = new ParcelInfo(CDH, "7.2.7-1.cdh7.2.7.p7.12569826", ParcelStatus.ACTIVATED);
+        when(connector.gatherInstalledParcels(STACK_NAME)).thenReturn(Collections.singleton(activeParcel));
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent("12569826"));
 
@@ -153,8 +155,8 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
         command.setRetryable(true);
 
         when(clusterStatusService.findCommand(stack, ClusterCommandType.UPGRADE_CLUSTER)).thenReturn(Optional.of(command));
-        Map<String, String> parcelNameToVersionMap = Map.of(CDH, "7.2.7-1.cdh7.2.7.p7.12569826");
-        when(connector.gatherInstalledParcels(STACK_NAME)).thenReturn(parcelNameToVersionMap);
+        ParcelInfo activeParcel = new ParcelInfo(CDH, "7.2.7-1.cdh7.2.7.p7.12569826", ParcelStatus.ACTIVATED);
+        when(connector.gatherInstalledParcels(STACK_NAME)).thenReturn(Collections.singleton(activeParcel));
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent("23569826"));
 

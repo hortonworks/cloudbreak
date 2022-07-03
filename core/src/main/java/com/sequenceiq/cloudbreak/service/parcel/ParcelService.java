@@ -85,6 +85,10 @@ public class ParcelService {
         }
     }
 
+    public Set<String> getComponentNamesByImage(Stack stack, Image image) {
+        return getComponentsByImage(stack, image).stream().map(ClusterComponent::getName).collect(Collectors.toSet());
+    }
+
     public ParcelOperationStatus removeUnusedParcelComponents(Stack stack) throws CloudbreakException {
         Set<ClusterComponent> clusterComponentsByBlueprint = getParcelComponentsByBlueprint(stack);
         return removeUnusedParcelComponents(stack, clusterComponentsByBlueprint);
@@ -96,6 +100,14 @@ public class ParcelService {
         ParcelOperationStatus removalStatus = clusterApiConnectors.getConnector(stack).removeUnusedParcels(clusterComponentsByBlueprint, parcelsFromImage);
         clusterComponentUpdater.removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint, removalStatus);
         return removalStatus;
+    }
+
+    public Set<ClouderaManagerProduct> getRequiredProductsFromImage(Stack stack, Image image) {
+        Set<String> requiredParcelNames = getComponentNamesByImage(stack, image);
+        return clouderaManagerProductTransformer.transform(image, true, !stack.isDatalake())
+                .stream()
+                .filter(products -> requiredParcelNames.contains(products.getName()))
+                .collect(Collectors.toSet());
     }
 
     private Map<String, ClusterComponent> collectClusterComponentsByName(Set<ClusterComponent> components) {

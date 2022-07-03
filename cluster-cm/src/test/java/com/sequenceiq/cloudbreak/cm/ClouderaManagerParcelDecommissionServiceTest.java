@@ -1,12 +1,10 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,7 +16,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,8 +32,9 @@ import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
-import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
@@ -215,23 +213,23 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn(STACK_NAME);
         ClouderaManagerProduct currentProductWithVersionToKeep = new ClouderaManagerProduct().withName("CDH").withVersion("current");
-        doReturn(List.of(
-                new ApiParcel().product("ignored").version("current"),
-                new ApiParcel().product(currentProductWithVersionToKeep.getName()).version("old"),
-                new ApiParcel().product(currentProductWithVersionToKeep.getName()).version("old2"),
-                new ApiParcel().product(currentProductWithVersionToKeep.getName()).version(currentProductWithVersionToKeep.getVersion())))
-                .when(parcelManagementService).getClouderaManagerParcelsByStatus(parcelsResourceApi, STACK_NAME, ParcelStatus.DISTRIBUTED);
+        doReturn(Set.of(
+                new ParcelInfo("ignored", "current", ParcelStatus.DISTRIBUTED),
+                new ParcelInfo(currentProductWithVersionToKeep.getName(), "old", ParcelStatus.DISTRIBUTED),
+                new ParcelInfo(currentProductWithVersionToKeep.getName(), "old2", ParcelStatus.DISTRIBUTED),
+                new ParcelInfo(currentProductWithVersionToKeep.getName(), currentProductWithVersionToKeep.getVersion(), ParcelStatus.DISTRIBUTED)))
+                .when(parcelManagementService).getParcelsInStatus(parcelsResourceApi, STACK_NAME, ParcelStatus.DISTRIBUTED);
         ArgumentCaptor<Multimap<String, String>> parcelVersionsCaptorForDownloaded = ArgumentCaptor.forClass(Multimap.class);
         when(clouderaManagerPollingServiceProvider
                 .startPollingCmParcelStatus(eq(stack), eq(apiClient), parcelVersionsCaptorForDownloaded.capture(), eq(ParcelStatus.DOWNLOADED)))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
+        doReturn(Set.of(
+                new ParcelInfo("ignored", "current", ParcelStatus.DOWNLOADED),
+                new ParcelInfo(currentProductWithVersionToKeep.getName(), "old", ParcelStatus.DOWNLOADED),
+                new ParcelInfo(currentProductWithVersionToKeep.getName(), "old2", ParcelStatus.DOWNLOADED),
+                new ParcelInfo(currentProductWithVersionToKeep.getName(), currentProductWithVersionToKeep.getVersion(), ParcelStatus.DOWNLOADED)))
+                .when(parcelManagementService).getParcelsInStatus(parcelsResourceApi, STACK_NAME, ParcelStatus.DOWNLOADED);
 
-        doReturn(List.of(
-                new ApiParcel().product("ignored").version("current"),
-                new ApiParcel().product(currentProductWithVersionToKeep.getName()).version("old"),
-                new ApiParcel().product(currentProductWithVersionToKeep.getName()).version("old2"),
-                new ApiParcel().product(currentProductWithVersionToKeep.getName()).version(currentProductWithVersionToKeep.getVersion())))
-                .when(parcelManagementService).getClouderaManagerParcelsByStatus(parcelsResourceApi, STACK_NAME, ParcelStatus.DOWNLOADED);
         ArgumentCaptor<Multimap<String, String>> parcelVersionsCaptorForDelete = ArgumentCaptor.forClass(Multimap.class);
         when(clouderaManagerPollingServiceProvider
                 .startPollingCmParcelDelete(eq(stack), eq(apiClient), parcelVersionsCaptorForDelete.capture()))
@@ -250,18 +248,6 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         assertTrue(parcelVersionsCaptorForDelete.getValue().containsEntry("CDH", "old"));
         assertTrue(parcelVersionsCaptorForDelete.getValue().containsEntry("CDH", "old2"));
         verifyNoMoreInteractions(parcelResourceApi);
-    }
-
-    @Test
-    public void testGetParcelsInStatusThrowsException() throws ApiException {
-
-        doThrow(new ApiException("Operation failed")).
-                when(parcelManagementService).getClouderaManagerParcelsByStatus(parcelsResourceApi, STACK_NAME, ParcelStatus.ACTIVATED);
-
-        ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class, () ->
-        underTest.getParcelsInStatus(parcelsResourceApi, STACK_NAME, ParcelStatus.ACTIVATED));
-
-        Assertions.assertEquals(actual.getMessage(), "Unable to fetch the list of activated parcels due to: Operation failed");
     }
 
     private ApiParcelList createApiParcelList(Map<String, String> products, ParcelStatus parcelStatus) {

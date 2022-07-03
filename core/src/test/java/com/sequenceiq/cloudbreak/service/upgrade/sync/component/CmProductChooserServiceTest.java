@@ -17,7 +17,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 
 @ExtendWith(MockitoExtension.class)
 public class CmProductChooserServiceTest {
@@ -33,7 +34,7 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseParcelProductWhenMatchingNameAndVersionThenReturns() {
-        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1));
+        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1, ParcelStatus.ACTIVATED));
         Set<ClouderaManagerProduct> candidateProducts = Set.of(new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_1));
 
         Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(activeParcels, candidateProducts);
@@ -47,8 +48,8 @@ public class CmProductChooserServiceTest {
     @Test
     void testChooseParcelProductWhenMultipleMatchingNameAndVersionThenReturnsAllMatches() {
         Set<ParcelInfo> activeParcels = Set.of(
-                new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1),
-                new ParcelInfo(PARCEL_NAME_2, PARCEL_VERSION_2)
+                new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1, ParcelStatus.ACTIVATED),
+                new ParcelInfo(PARCEL_NAME_2, PARCEL_VERSION_2, ParcelStatus.ACTIVATED)
         );
         Set<ClouderaManagerProduct> candidateProducts = Set.of(
                 new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_1),
@@ -68,7 +69,7 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseParcelProductWhenMultipleMatchingNameAndVersionThenReturnsOne() {
-        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1));
+        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_1, ParcelStatus.ACTIVATED));
         Set<ClouderaManagerProduct> candidateProducts = Set.of(
                 new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_1),
                 new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_1)
@@ -84,7 +85,7 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseParcelProductWhenMatchingNameButDifferentVersionThenEmptyResult() {
-        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_2));
+        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_1, PARCEL_VERSION_2, ParcelStatus.ACTIVATED));
         Set<ClouderaManagerProduct> candidateProducts = Set.of(new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_1));
 
         Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(activeParcels, candidateProducts);
@@ -94,7 +95,7 @@ public class CmProductChooserServiceTest {
 
     @Test
     void testChooseParcelProductWhenDifferentNameButSameVersionThenEmptyResult() {
-        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_2, PARCEL_VERSION_1));
+        Set<ParcelInfo> activeParcels = Set.of(new ParcelInfo(PARCEL_NAME_2, PARCEL_VERSION_1, ParcelStatus.ACTIVATED));
         Set<ClouderaManagerProduct> candidateProducts = Set.of(new ClouderaManagerProduct().withName(PARCEL_NAME_1).withVersion(PARCEL_VERSION_1));
 
         Set<ClouderaManagerProduct> foundProducts = underTest.chooseParcelProduct(activeParcels, candidateProducts);

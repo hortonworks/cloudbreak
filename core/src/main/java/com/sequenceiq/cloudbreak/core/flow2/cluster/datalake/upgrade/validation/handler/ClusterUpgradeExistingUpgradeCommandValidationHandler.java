@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_EXISTING_UPGRADE_COMMAND_EVENT;
 
-import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -17,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ClusterManagerCommand;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationEvent;
@@ -110,11 +110,10 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandler extends Excep
 
     private String getActiveRuntimeParcelVersion(Stack stack, ClusterApi connector) {
         return connector.gatherInstalledParcels(stack.getName())
-                .entrySet()
                 .stream()
-                .filter(parcel -> parcel.getKey().equals(StackType.CDH.name()))
+                .filter(parcel -> parcel.getName().equals(StackType.CDH.name()))
                 .findFirst()
-                .map(Map.Entry::getValue)
+                .map(ParcelInfo::getVersion)
                 .orElse("");
     }
 

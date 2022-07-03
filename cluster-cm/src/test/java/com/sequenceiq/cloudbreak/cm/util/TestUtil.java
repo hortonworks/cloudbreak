@@ -12,6 +12,10 @@ public class TestUtil {
 
     public static final String CDH = "CDH";
 
+    public static final String SPARK3 = "SPARK3";
+
+    public static final String FLINK = "FLINK";
+
     public static final String CDH_VERSION = "7.0.0-1.cdh7.0.0.p0.1376867";
 
     public static final String CDSW = "CDSW";

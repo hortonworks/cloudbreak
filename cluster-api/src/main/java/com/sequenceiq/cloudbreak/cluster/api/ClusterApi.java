@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
@@ -85,12 +87,24 @@ public interface ClusterApi {
         return clusterModificationService().deployConfigAndStartClusterServices();
     }
 
-    default Map<String, String> gatherInstalledParcels(String stackName) {
+    default Set<ParcelInfo> gatherInstalledParcels(String stackName) {
         return clusterModificationService().gatherInstalledParcels(stackName);
     }
 
-    default void downloadAndDistributeParcels(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException {
-        clusterModificationService().downloadAndDistributeParcels(components, patchUpgrade);
+    default Set<ParcelInfo> getAllParcels(String stackName) {
+        return clusterModificationService().getAllParcels(stackName);
+    }
+
+    default void updateParcelSettings(Set<ClouderaManagerProduct> products) throws CloudbreakException {
+        clusterModificationService().updateParcelSettings(products);
+    }
+
+    default void downloadParcels(Set<ClouderaManagerProduct> products) throws CloudbreakException {
+        clusterModificationService().downloadParcels(products);
+    }
+
+    default void distributeParcels(Set<ClouderaManagerProduct> products) throws CloudbreakException {
+        clusterModificationService().distributeParcels(products);
     }
 
     default ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents, Set<String> parcelNamesFromImage)

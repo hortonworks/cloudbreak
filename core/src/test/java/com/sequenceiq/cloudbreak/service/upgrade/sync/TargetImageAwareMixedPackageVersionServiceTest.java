@@ -22,8 +22,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
-import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
 @ExtendWith(MockitoExtension.class)
@@ -162,7 +163,7 @@ public class TargetImageAwareMixedPackageVersionServiceTest {
     }
 
     private Set<ParcelInfo> createParcelInfo(Map<String, String> parcels) {
-        return parcels.entrySet().stream().map(entry -> new ParcelInfo(entry.getKey(), entry.getValue())).collect(Collectors.toSet());
+        return parcels.entrySet().stream().map(entry -> new ParcelInfo(entry.getKey(), entry.getValue(), ParcelStatus.ACTIVATED)).collect(Collectors.toSet());
     }
 
 }
