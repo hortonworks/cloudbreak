@@ -1,7 +1,12 @@
 package com.sequenceiq.cloudbreak.service.parcel;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 
 import java.util.Collections;
 import java.util.Set;
@@ -12,10 +17,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
@@ -36,6 +44,8 @@ public class ParcelServiceTest {
 
     private static final String PARCEL_NAME = "parcel1";
 
+    private static final Blueprint BLUEPRINT = new Blueprint();
+
     @Mock
     private ClusterApiConnectors clusterApiConnectors;
 
@@ -51,11 +61,20 @@ public class ParcelServiceTest {
     @Mock
     private ImageReaderService imageReaderService;
 
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
+    private ParcelFilterService parcelFilterService;
+
+    @Mock
+    private Image image;
+
     @InjectMocks
     private ParcelService underTest;
 
     @Test
-    void testRemoveUnusedComponents() throws CloudbreakException, CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+    void testRemoveUnusedComponents() throws CloudbreakException {
         Stack stack = createStack();
         Set<String> parcelNames = Set.of(PARCEL_NAME);
         Set<ClusterComponent> clusterComponentsByBlueprint = Collections.emptySet();
@@ -73,12 +92,44 @@ public class ParcelServiceTest {
         verify(clusterComponentUpdater).removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint, removalStatus);
     }
 
+    @Test
+    void testGetRequiredProductsFromImageShouldOnlyTheRequiredParcels() {
+        Stack stack = createStack();
+        ClouderaManagerProduct cdhParcel = createClouderaManagerProduct("CDH");
+        Set<ClouderaManagerProduct> parcelsInImage = Set.of(cdhParcel, createClouderaManagerProduct("FLINK"));
+        when(clusterComponentConfigProvider.getComponentsByClusterId(CLUSTER_ID)).thenReturn(
+                Set.of(createClusterComponent("CDH"), createClusterComponent("FLINK")));
+        when(clouderaManagerProductTransformer.transform(image, true, true)).thenReturn(parcelsInImage);
+        when(parcelFilterService.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, parcelsInImage, BLUEPRINT)).thenReturn(Collections.singleton(cdhParcel));
+
+        Set<ClouderaManagerProduct> actual = underTest.getRequiredProductsFromImage(stack, image);
+
+        assertEquals(1, actual.size());
+        assertTrue(actual.contains(cdhParcel));
+        verify(clusterComponentConfigProvider).getComponentsByClusterId(CLUSTER_ID);
+        verify(clouderaManagerProductTransformer, times(2)).transform(image, true, true);
+        verify(parcelFilterService).filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, parcelsInImage, BLUEPRINT);
+    }
+
+    private ClouderaManagerProduct createClouderaManagerProduct(String name) {
+        return new ClouderaManagerProduct().withName(name);
+    }
+
+    private ClusterComponent createClusterComponent(String name) {
+        ClusterComponent clusterComponent = new ClusterComponent();
+        clusterComponent.setName(name);
+        clusterComponent.setComponentType(CDH_PRODUCT_DETAILS);
+        return clusterComponent;
+    }
+
     private Stack createStack() {
         Stack stack = new Stack();
         Cluster cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
+        cluster.setBlueprint(BLUEPRINT);
         stack.setId(STACK_ID);
         stack.setCluster(cluster);
+        stack.setType(StackType.WORKLOAD);
 
         Workspace workspace = new Workspace();
         workspace.setId(WORKSPACE_ID);

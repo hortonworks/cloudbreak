@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeEvent.CLUSTER_UPGRADE_INIT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_PREPARATION_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
 
@@ -24,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
@@ -62,8 +64,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, false, false, "variant");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(4, flowChainQueue.getQueue().size());
+        assertEquals(5, flowChainQueue.getQueue().size());
         assertUpdateValidationEvent(flowChainQueue);
+        assertUpdatePreparationEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
@@ -78,8 +81,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
                 imageChangeDto, true, true, "variant");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(5, flowChainQueue.getQueue().size());
+        assertEquals(6, flowChainQueue.getQueue().size());
         assertUpdateValidationEvent(flowChainQueue);
+        assertUpdatePreparationEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue);
         assertImageUpdateEvent(flowChainQueue);
@@ -92,6 +96,14 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertEquals(STACK_ID, upgradeValidationEvent.getResourceId());
         assertTrue(upgradeValidationEvent instanceof ClusterUpgradeValidationTriggerEvent);
         assertEquals(imageChangeDto.getImageId(), ((ClusterUpgradeValidationTriggerEvent) upgradeValidationEvent).getImageId());
+    }
+
+    private void assertUpdatePreparationEvent(FlowTriggerEventQueue flowChainQueue) {
+        Selectable upgradePreparationEvent = flowChainQueue.getQueue().remove();
+        assertEquals(START_CLUSTER_UPGRADE_PREPARATION_INIT_EVENT.event(), upgradePreparationEvent.selector());
+        assertEquals(STACK_ID, upgradePreparationEvent.getResourceId());
+        assertTrue(upgradePreparationEvent instanceof ClusterUpgradePreparationTriggerEvent);
+        assertEquals(imageChangeDto, ((ClusterUpgradePreparationTriggerEvent) upgradePreparationEvent).getImageChangeDto());
     }
 
     private void assertImageUpdateEvent(FlowTriggerEventQueue flowChainQueue) {

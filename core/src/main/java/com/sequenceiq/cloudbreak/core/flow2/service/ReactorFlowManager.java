@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
@@ -189,7 +190,7 @@ public class ReactorFlowManager {
 
         ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
         ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
-                Collections.singletonMap(hostGroup, privateIds), ScalingType.DOWNSCALE_TOGETHER,  new Promise<>(), details);
+                Collections.singletonMap(hostGroup, privateIds), ScalingType.DOWNSCALE_TOGETHER, new Promise<>(), details);
         return reactorNotifier.notify(stackId, selector, event);
     }
 
@@ -231,6 +232,11 @@ public class ReactorFlowManager {
         String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
         return reactorNotifier.notify(stackId, selector, new DistroXUpgradeTriggerEvent(selector, stackId, imageChangeDto, replaceVms, lockComponents,
                 variant));
+    }
+
+    public FlowIdentifier triggerDistroXUpgradePreparation(Long stackId, ImageChangeDto imageChangeDto, boolean lockComponents) {
+        String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_PREPARATION_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, new DistroXUpgradePreparationChainTriggerEvent(selector, stackId, imageChangeDto, lockComponents));
     }
 
     public FlowIdentifier triggerDatalakeClusterRecovery(Long stackId) {

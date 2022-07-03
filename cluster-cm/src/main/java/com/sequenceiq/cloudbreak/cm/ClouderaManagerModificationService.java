@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
@@ -68,6 +69,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
@@ -75,7 +77,6 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
@@ -378,25 +379,38 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void downloadAndDistributeParcels(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException {
+    public void updateParcelSettings(Set<ClouderaManagerProduct> products) throws CloudbreakException {
         try {
-            ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
-            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
             checkParcelApiAvailability();
-            Set<ClouderaManagerProduct> products = getProducts(components);
-            LOGGER.info("The following products will be downloaded and distributed: {}", products);
+            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
             setParcelRepo(products, clouderaManagerResourceApi);
             refreshParcelRepos(clouderaManagerResourceApi);
-            if (patchUpgrade) {
-                LOGGER.info("Downloading parcels for {} products...", products);
-                downloadAndActivateParcels(products, parcelResourceApi, false);
-            } else {
-                ClouderaManagerProduct cdhProduct = clouderaManagerProductsProvider.getCdhProducts(products);
-                upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi, false);
-                downloadAndActivateParcels(Collections.singleton(cdhProduct), parcelResourceApi, false);
-            }
         } catch (ApiException e) {
-            LOGGER.info("Error during downloading parcels!", e);
+            LOGGER.error("Error during updating parcel settings!", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void downloadParcels(Set<ClouderaManagerProduct> products) throws CloudbreakException {
+        try {
+            LOGGER.debug("Downloading parcels: {}", products);
+            ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
+            downloadParcels(products, parcelResourceApi);
+        } catch (ApiException e) {
+            LOGGER.error("Error during downloading parcels!", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void distributeParcels(Set<ClouderaManagerProduct> products) throws CloudbreakException {
+        try {
+            LOGGER.debug("Distributing parcels: {}", products);
+            ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
+            distributeParcels(products, parcelResourceApi);
+        } catch (ApiException e) {
+            LOGGER.error("Error during distributing parcels!", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }
@@ -910,9 +924,21 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public Map<String, String> gatherInstalledParcels(String stackName) {
-        return clouderaManagerParcelDecommissionService.getParcelsInStatus(clouderaManagerApiFactory.getParcelsResourceApi(apiClient), stackName,
-                ParcelStatus.ACTIVATED);
+    public Set<ParcelInfo> gatherInstalledParcels(String stackName) {
+        return clouderaManagerParcelManagementService.getParcelsInStatus(clouderaManagerApiFactory.getParcelsResourceApi(apiClient), stackName, ACTIVATED);
+    }
+
+    @Override
+    public Set<ParcelInfo> getAllParcels(String stackName) {
+        try {
+            ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiClient);
+            Set<ParcelInfo> availableParcels = clouderaManagerParcelManagementService.getAllParcels(parcelsResourceApi, stackName);
+            LOGGER.debug("The following parcels are available on the CM server: {}", availableParcels);
+            return availableParcels;
+        } catch (ApiException e) {
+            LOGGER.error("Error during retrieving parcels!", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
     }
 
     @Override

@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static java.util.stream.Collectors.toList;
+import static java.util.Objects.requireNonNull;
 
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,11 +19,11 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
-import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
-import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -42,6 +41,28 @@ class ClouderaManagerParcelManagementService {
 
     @Inject
     private PollingResultErrorHandler pollingResultErrorHandler;
+
+    public Set<ParcelInfo> getParcelsInStatus(ParcelsResourceApi parcelsResourceApi, String stackName, ParcelStatus parcelStatus) {
+        requireNonNull(parcelStatus, "Parcel status cannot be null");
+        try {
+            Set<ParcelInfo> parcelResponse = getAllParcels(parcelsResourceApi, stackName).stream()
+                    .filter(parcelInfo -> parcelStatus.equals(parcelInfo.getStatus()))
+                    .collect(Collectors.toSet());
+            LOGGER.debug("The following parcels are found in {} status: {}", parcelStatus, parcelResponse);
+            return parcelResponse;
+        } catch (ApiException e) {
+            String errorMessage = String.format("Unable to fetch the list of %s parcels due to: %s", parcelStatus.name().toLowerCase(), e.getMessage());
+            LOGGER.error(errorMessage, e);
+            throw new ClouderaManagerOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public Set<ParcelInfo> getAllParcels(ParcelsResourceApi parcelsResourceApi, String stackName) throws ApiException {
+        LOGGER.debug("Retrieving all available parcels from CM");
+        return getClouderaManagerParcels(parcelsResourceApi, stackName).getItems().stream()
+                .map(apiParcel -> new ParcelInfo(apiParcel.getProduct(), apiParcel.getVersion(), ParcelStatus.valueOf(apiParcel.getStage())))
+                .collect(Collectors.toSet());
+    }
 
     public void setParcelRepos(Set<ClouderaManagerProduct> products, ClouderaManagerResourceApi clouderaManagerResourceApi) throws ApiException {
         Set<String> stackProductParcels = products.stream()
@@ -112,15 +133,6 @@ class ClouderaManagerParcelManagementService {
 
     private void handlePollingResult(PollingResult pollingResult, String cancellationMessage, String timeoutMessage) throws CloudbreakException {
         pollingResultErrorHandler.handlePollingResult(pollingResult, cancellationMessage, timeoutMessage);
-    }
-
-    public List<ApiParcel> getClouderaManagerParcelsByStatus(ParcelsResourceApi parcelsResourceApi, String stackName, ParcelStatus parcelStatus)
-            throws ApiException {
-        ApiParcelList parcelList = getClouderaManagerParcels(parcelsResourceApi, stackName);
-        return parcelList.getItems().stream()
-                .filter(parcel -> parcelStatus.name().equals(parcel.getStage()))
-                .peek(parcel -> LOGGER.debug("Parcel {} is found with status {}", parcel.getDisplayName(), parcelStatus))
-                .collect(toList());
     }
 
     private ApiParcelList getClouderaManagerParcels(ParcelsResourceApi parcelsResourceApi, String stackName) throws ApiException {

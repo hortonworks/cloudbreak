@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeInitSuccess;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -27,9 +26,6 @@ import reactor.bus.Event;
 @Component
 public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<ClusterUpgradeInitRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeInitHandler.class);
-
-    @Inject
-    private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
     private StackService stackService;
@@ -56,7 +52,6 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
         try {
             Set<ClusterComponent> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stack);
             parcelService.removeUnusedParcelComponents(stack, componentsByBlueprint);
-            clusterApiConnectors.getConnector(stack).downloadAndDistributeParcels(componentsByBlueprint, request.isPatchUpgrade());
             result = new ClusterUpgradeInitSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Cluster Manager parcel deactivation failed", e);

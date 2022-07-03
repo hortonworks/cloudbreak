@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
-import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerApiCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandCheckerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandListCheckerTask;
