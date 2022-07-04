@@ -9,14 +9,7 @@ import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 public class RecipeTypeToRecipeV4TypeConverter {
 
     public RecipeV4Type convert(RecipeType recipeType) {
-        switch (recipeType) {
-            case PRE_SERVICE_DEPLOYMENT:
-                return RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
-            case POST_SERVICE_DEPLOYMENT:
-                return RecipeV4Type.POST_CLUSTER_INSTALL;
-            default:
-                return RecipeV4Type.valueOf(recipeType.name());
-        }
+        return RecipeV4Type.valueOf(recipeType.name());
     }
 
 }

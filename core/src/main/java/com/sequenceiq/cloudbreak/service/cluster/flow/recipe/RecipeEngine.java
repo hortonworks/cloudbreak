@@ -69,15 +69,15 @@ public class RecipeEngine {
         LOGGER.info("Upload recipes finished successfully for stack with name {}", stackDto.getName());
     }
 
-    public void executePreClusterManagerRecipes(StackDto stackDto, Map<String, String> candidateAddresses, Set<HostGroup> hostGroups)
+    public void executePreServiceDeploymentRecipes(StackDto stackDto, Map<String, String> candidateAddresses, Set<HostGroup> hostGroups)
             throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
         if (shouldExecuteRecipeOnStack(recipes, PRE_CLOUDERA_MANAGER_START, PRE_SERVICE_DEPLOYMENT)) {
             uploadRecipesIfNeeded(stackDto, hostGroups);
             if (MapUtils.isEmpty(candidateAddresses)) {
-                orchestratorRecipeExecutor.preClusterManagerStartRecipes(stackDto);
+                orchestratorRecipeExecutor.preServiceDeploymentRecipes(stackDto);
             } else {
-                orchestratorRecipeExecutor.preClusterManagerStartRecipesOnTargets(stackDto, candidateAddresses);
+                orchestratorRecipeExecutor.preServiceDeploymentRecipesOnTargets(stackDto, candidateAddresses);
             }
         }
     }
@@ -99,23 +99,25 @@ public class RecipeEngine {
         }
     }
 
-    public void executePostInstallRecipes(StackDto stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePostServiceDeploymentRecipes(StackDto stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
         if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL, POST_SERVICE_DEPLOYMENT)) {
             uploadRecipesIfNeeded(stack, hostGroups);
         }
-        // Post cluster install should be executed even if we don't have post install recipe because we have the internal createuserhome.sh recipe
-        orchestratorRecipeExecutor.postClusterInstall(stack);
+        // Post service deployment recipes should be executed even if we don't have post service
+        // deployment recipe because we have the internal createuserhome.sh recipe
+        orchestratorRecipeExecutor.postServiceDeploymentRecipes(stack);
     }
 
-    public void executePostInstallRecipesOnTargets(StackDto stack, Set<HostGroup> hostGroups, Map<String, String> candidateAddresses)
+    public void executePostServiceDeploymentRecipes(StackDto stack, Set<HostGroup> hostGroups, Map<String, String> candidateAddresses)
             throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
         if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL, POST_SERVICE_DEPLOYMENT)) {
             uploadRecipesIfNeeded(stack, hostGroups);
         }
-        // Post cluster install should be executed even if we don't have post install recipe because we have the internal createuserhome.sh recipe
-        orchestratorRecipeExecutor.postClusterInstallOnTargets(stack, candidateAddresses);
+        // Post service deployment recipes should be executed even if we don't have post service
+        // deployment recipe because we have the internal createuserhome.sh recipe
+        orchestratorRecipeExecutor.postServiceDeploymentRecipesOnTargets(stack, candidateAddresses);
     }
 
     public void executePreTerminationRecipes(StackDto stack, Set<HostGroup> hostGroups, boolean forced) throws CloudbreakException {

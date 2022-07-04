@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.recipe;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceType.RECIPE;
 
 import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -60,12 +61,13 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
         return freeIpaStackRecipeRepository.findByStackId(stackId).stream().map(FreeIpaStackRecipe::getRecipe).collect(Collectors.toSet());
     }
 
-    public boolean hasRecipeType(List<RecipeModel> recipeModelList, RecipeType recipeType) {
-        return recipeModelList.stream().anyMatch(recipeModel -> recipeType.equals(recipeModel.getRecipeType()));
+    public boolean hasRecipeType(List<RecipeModel> recipeModelList, RecipeType... recipeTypes) {
+        return recipeModelList.stream().anyMatch(recipeModel -> Arrays.stream(recipeTypes)
+                .anyMatch(recipeType -> recipeType.equals(recipeModel.getRecipeType())));
     }
 
-    public boolean hasRecipeType(Long stackId, RecipeType recipeType) {
-        return hasRecipeType(getRecipes(stackId), recipeType);
+    public boolean hasRecipeType(Long stackId, RecipeType... recipeTypes) {
+        return hasRecipeType(getRecipes(stackId), recipeTypes);
     }
 
     public List<RecipeModel> getRecipes(Long stackId) {
@@ -112,7 +114,11 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
         if (recipeType.equals(RecipeV4Type.POST_AMBARI_START)) {
             return RecipeType.POST_CLOUDERA_MANAGER_START;
         } else if (recipeType.equals(RecipeV4Type.PRE_AMBARI_START)) {
-            return RecipeType.PRE_CLOUDERA_MANAGER_START;
+            return RecipeType.PRE_SERVICE_DEPLOYMENT;
+        } else if (recipeType.equals(RecipeV4Type.POST_CLUSTER_INSTALL)) {
+            return RecipeType.POST_SERVICE_DEPLOYMENT;
+        } else if (recipeType.equals(RecipeV4Type.PRE_CLOUDERA_MANAGER_START)) {
+            return RecipeType.PRE_SERVICE_DEPLOYMENT;
         }
         return RecipeType.valueOf(recipeType.name());
     }

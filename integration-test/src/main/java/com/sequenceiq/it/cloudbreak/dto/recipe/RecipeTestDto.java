@@ -42,7 +42,7 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     public RecipeTestDto valid() {
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withDescription(getResourcePropertyProvider().getDescription("recipe"))
-                .withRecipeType(RecipeV4Type.PRE_CLOUDERA_MANAGER_START)
+                .withRecipeType(RecipeV4Type.PRE_SERVICE_DEPLOYMENT)
                 .withContent(new String(Base64.getEncoder().encode("#!/bin/bash%necho ALMAA".getBytes())));
     }
 

@@ -82,7 +82,7 @@ public class OrchestratorRecipeExecutorTest {
     private ArgumentCaptor<ExitCriteriaModel> exitCriteriaModelCaptor;
 
     @Test
-    public void preClusterManagerStartRecipesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
+    public void preServiceDeploymentRecipesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
             CloudbreakOrchestratorTimeoutException {
         when(stack.getId()).thenReturn(1L);
         Cluster cluster = new Cluster();
@@ -92,11 +92,11 @@ public class OrchestratorRecipeExecutorTest {
         Set<Node> nodes = Set.of(node);
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
 
-        underTest.preClusterManagerStartRecipes(stack);
+        underTest.preServiceDeploymentRecipes(stack);
 
         verify(gatewayConfigService).getPrimaryGatewayConfig(stack);
         verify(stackUtil).collectReachableNodes(stack);
-        verify(hostOrchestrator).preClusterManagerStartRecipes(eq(gatewayConfig), eq(nodes), any());
+        verify(hostOrchestrator).preServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any());
     }
 
     @Test
@@ -125,11 +125,11 @@ public class OrchestratorRecipeExecutorTest {
         Set<Node> nodes = Set.of(this.node);
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
 
-        underTest.postClusterInstall(stack);
+        underTest.postServiceDeploymentRecipes(stack);
 
         verify(gatewayConfigService).getPrimaryGatewayConfig(stack);
         verify(stackUtil).collectReachableNodes(stack);
-        verify(hostOrchestrator).postInstallRecipes(eq(gatewayConfig), eq(nodes), any());
+        verify(hostOrchestrator).postServiceDeploymentRecipes(eq(gatewayConfig), eq(nodes), any());
     }
 
     @Test

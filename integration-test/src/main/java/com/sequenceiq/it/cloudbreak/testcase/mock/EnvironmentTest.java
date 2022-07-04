@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -202,13 +203,13 @@ public class EnvironmentTest extends AbstractMockTest {
         testContext
                 .given(RecipeTestDto.class)
                     .withName(preCMRecipeName)
-                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
-                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                    .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
+                    .withRecipeType(PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given(RecipeTestDto.class)
                     .withName(preTerminationRecipeName)
-                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
-                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                    .withContent(recipeUtil.generatePreTerminationRecipeContent(applicationContext))
+                    .withRecipeType(PRE_TERMINATION)
                 .when(recipeTestClient.createV4())
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())

@@ -73,7 +73,7 @@ class FreeIpaRecipeServiceTest {
     public void testGetRecipes() {
         RecipeV4Request recipe1Request = new RecipeV4Request();
         recipe1Request.setName("recipe1");
-        recipe1Request.setType(RecipeV4Type.PRE_CLOUDERA_MANAGER_START);
+        recipe1Request.setType(RecipeV4Type.PRE_SERVICE_DEPLOYMENT);
         recipe1Request.setContent("YmFzaDE=");
         RecipeV4Request recipe2Request = new RecipeV4Request();
         recipe2Request.setName("recipe2");
@@ -86,7 +86,7 @@ class FreeIpaRecipeServiceTest {
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
         RecipeModel recipeModel1 = recipes.stream().filter(recipeModel -> "recipe1".equals(recipeModel.getName())).findFirst().get();
         RecipeModel recipeModel2 = recipes.stream().filter(recipeModel -> "recipe2".equals(recipeModel.getName())).findFirst().get();
-        Assertions.assertEquals(RecipeType.PRE_CLOUDERA_MANAGER_START, recipeModel1.getRecipeType());
+        Assertions.assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
         Assertions.assertEquals(RecipeType.PRE_TERMINATION, recipeModel2.getRecipeType());
         Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
         Assertions.assertEquals("bash2", recipeModel2.getGeneratedScript());
@@ -174,7 +174,7 @@ class FreeIpaRecipeServiceTest {
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
         RecipeModel recipeModel1 = recipes.stream().filter(recipeModel -> "recipe1".equals(recipeModel.getName())).findFirst().get();
         RecipeModel recipeModel2 = recipes.stream().filter(recipeModel -> "recipe2".equals(recipeModel.getName())).findFirst().get();
-        Assertions.assertEquals(RecipeType.PRE_CLOUDERA_MANAGER_START, recipeModel1.getRecipeType());
+        Assertions.assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
         Assertions.assertEquals(RecipeType.PRE_TERMINATION, recipeModel2.getRecipeType());
         Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
         Assertions.assertEquals("bash2", recipeModel2.getGeneratedScript());
@@ -195,7 +195,7 @@ class FreeIpaRecipeServiceTest {
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
         RecipeModel recipeModel1 = recipes.stream().filter(recipeModel -> "recipe1".equals(recipeModel.getName())).findFirst().get();
-        Assertions.assertEquals(RecipeType.PRE_CLOUDERA_MANAGER_START, recipeModel1.getRecipeType());
+        Assertions.assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
         Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
         boolean hasRecipeType = freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION);
         assertFalse(hasRecipeType);
