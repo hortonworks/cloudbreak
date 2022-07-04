@@ -25,6 +25,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.responses.CreateDatabase
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeTargetMajorVersion;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Responses;
@@ -327,10 +328,10 @@ public class DatabaseServerV4ControllerTest {
     @Test
     public void testUpgrade() {
         UpgradeDatabaseServerV4Request request = new UpgradeDatabaseServerV4Request();
-        request.setMajorVersion("MajorVersion");
+        request.setUpgradeTargetMajorVersion(UpgradeTargetMajorVersion.VERSION_11);
 
         underTest.upgrade(SERVER_CRN, request);
 
-        verify(redbeamsUpgradeService).upgradeDatabaseServer(SERVER_CRN, "MajorVersion");
+        verify(redbeamsUpgradeService).upgradeDatabaseServer(SERVER_CRN, "VERSION_11");
     }
 }

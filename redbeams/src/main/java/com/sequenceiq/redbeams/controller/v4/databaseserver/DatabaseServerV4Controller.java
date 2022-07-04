@@ -229,6 +229,6 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @InternalOnly
     public void upgrade(@TenantAwareParam @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATABASE_SERVER) String databaseServerCrn,
             @Valid @NotNull UpgradeDatabaseServerV4Request request) {
-        redbeamsUpgradeService.upgradeDatabaseServer(databaseServerCrn, request.getMajorVersion());
+        redbeamsUpgradeService.upgradeDatabaseServer(databaseServerCrn, request.getUpgradeTargetMajorVersion().name());
     }
 }
