@@ -1,0 +1,7 @@
+package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests;
+
+public enum UpgradeTargetMajorVersion {
+
+    VERSION_11;
+
+}
