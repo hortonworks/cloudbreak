@@ -3,6 +3,7 @@ package com.sequenceiq.consumption.service;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -13,13 +14,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.dal.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.account.AbstractAccountAwareResourceService;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
-import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.configuration.repository.ConsumptionRepository;
+import com.sequenceiq.consumption.domain.Consumption;
 import com.sequenceiq.consumption.dto.ConsumptionCreationDto;
 import com.sequenceiq.consumption.dto.converter.ConsumptionDtoConverter;
 import com.sequenceiq.flow.core.PayloadContextProvider;
@@ -72,25 +72,34 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
                 .orElseThrow(() -> new NotFoundException(String.format("Consumption with ID [%s] not found", id)));
     }
 
-    public Consumption findStorageConsumptionByMonitoredResourceCrnAndLocation(String monitoredResourceCrn, String storageLocation) {
-        return consumptionRepository.findStorageConsumptionByMonitoredResourceCrnAndLocation(monitoredResourceCrn, storageLocation)
-                .orElseThrow(() -> new NotFoundException(String.format("Storage consumption with location [%s] not found for resource with CRN [%s].",
-                        storageLocation, monitoredResourceCrn)));
+    public Optional<Consumption> findStorageConsumptionByMonitoredResourceCrnAndLocation(String monitoredResourceCrn, String storageLocation) {
+        Optional<Consumption> result = consumptionRepository.findStorageConsumptionByMonitoredResourceCrnAndLocation(monitoredResourceCrn, storageLocation);
+        result.ifPresentOrElse(
+                consumption -> LOGGER.debug("Storage consumption with location [{}] found for resource with CRN [{}].", storageLocation, monitoredResourceCrn),
+                () -> LOGGER.warn("Storage consumption with location [{}] not found for resource with CRN [{}].", storageLocation, monitoredResourceCrn));
+        return result;
     }
 
-    public Consumption create(ConsumptionCreationDto creationDto) {
-        validateStorageLocationCollision(creationDto);
-        Consumption consumption = consumptionDtoConverter.creationDtoToConsumption(creationDto);
-        return create(consumption, consumption.getAccountId());
+    public Optional<Consumption> create(ConsumptionCreationDto creationDto) {
+        if (!hasStorageLocationCollision(creationDto)) {
+            Consumption consumption = consumptionDtoConverter.creationDtoToConsumption(creationDto);
+            return Optional.of(create(consumption, consumption.getAccountId()));
+        } else {
+            return Optional.empty();
+        }
     }
 
-    private void validateStorageLocationCollision(ConsumptionCreationDto creationDto) {
+    private boolean hasStorageLocationCollision(ConsumptionCreationDto creationDto) {
         if (ConsumptionType.STORAGE.equals(creationDto.getConsumptionType())) {
             if (isConsumptionPresentForLocationAndMonitoredCrn(creationDto.getMonitoredResourceCrn(), creationDto.getStorageLocation())) {
-                throw new BadRequestException(String.format("Storage consumption with location [%s] already exists for resource with CRN [%s].",
-                        creationDto.getStorageLocation(), creationDto.getMonitoredResourceCrn()));
+                LOGGER.warn("Storage consumption with location [{}] already exists for resource with CRN [{}].",
+                        creationDto.getStorageLocation(), creationDto.getMonitoredResourceCrn());
+                return true;
             }
         }
+        LOGGER.debug("Storage consumption with location [{}] does not exist for resource with CRN [{}] yet.",
+                creationDto.getStorageLocation(), creationDto.getMonitoredResourceCrn());
+        return false;
     }
 
     public boolean isConsumptionPresentForLocationAndMonitoredCrn(String monitoredResourceCrn, String storageLocation) {
@@ -100,4 +109,5 @@ public class ConsumptionService extends AbstractAccountAwareResourceService<Cons
     public List<JobResource> findAllStorageConsumptionJobResource() {
         return consumptionRepository.findAllStorageConsumptionJobResource();
     }
+
 }

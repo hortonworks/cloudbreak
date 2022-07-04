@@ -1,7 +1,7 @@
 package com.sequenceiq.consumption.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,8 +16,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ConsumptionType;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ResourceType;
 import com.sequenceiq.consumption.configuration.repository.ConsumptionRepository;
@@ -65,8 +63,12 @@ public class ConsumptionServiceTest {
         when(consumptionRepository
                 .findStorageConsumptionByMonitoredResourceCrnAndLocation(eq(MONITORED_RESOURCE_CRN), eq(STORAGE_LOCATION)))
                 .thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> underTest
-                .findStorageConsumptionByMonitoredResourceCrnAndLocation(MONITORED_RESOURCE_CRN, STORAGE_LOCATION));
+
+        Optional<Consumption> result =
+                underTest.findStorageConsumptionByMonitoredResourceCrnAndLocation(MONITORED_RESOURCE_CRN, STORAGE_LOCATION);
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
     }
 
     @Test
@@ -74,8 +76,13 @@ public class ConsumptionServiceTest {
         when(consumptionRepository
                 .findStorageConsumptionByMonitoredResourceCrnAndLocation(eq(MONITORED_RESOURCE_CRN), eq(STORAGE_LOCATION)))
                 .thenReturn(Optional.of(consumption));
-        assertEquals(consumption, underTest
-                .findStorageConsumptionByMonitoredResourceCrnAndLocation(MONITORED_RESOURCE_CRN, STORAGE_LOCATION));
+
+        Optional<Consumption> result = underTest
+                .findStorageConsumptionByMonitoredResourceCrnAndLocation(MONITORED_RESOURCE_CRN, STORAGE_LOCATION);
+
+        assertThat(result).isNotNull();
+        assertThat(result).isPresent();
+        assertThat(result).hasValue(consumption);
     }
 
     @Test
@@ -98,9 +105,11 @@ public class ConsumptionServiceTest {
         when(consumptionRepository.save(consumption)).thenReturn(consumption);
         when(consumptionRepository.doesStorageConsumptionExistWithLocationForMonitoredCrn(MONITORED_RESOURCE_CRN, STORAGE_LOCATION)).thenReturn(false);
 
-        Consumption result = underTest.create(consumptionCreationDto);
+        Optional<Consumption> result = underTest.create(consumptionCreationDto);
 
-        assertEquals(consumption, result);
+        assertThat(result).isNotNull();
+        assertThat(result).isPresent();
+        assertEquals(consumption, result.get());
         verify(consumptionRepository, Mockito.times(1))
                 .doesStorageConsumptionExistWithLocationForMonitoredCrn(MONITORED_RESOURCE_CRN, STORAGE_LOCATION);
         verify(consumptionRepository).save(consumption);
@@ -125,11 +134,14 @@ public class ConsumptionServiceTest {
         consumption.setAccountId(ACCOUNT_ID);
         when(consumptionRepository.doesStorageConsumptionExistWithLocationForMonitoredCrn(MONITORED_RESOURCE_CRN, STORAGE_LOCATION)).thenReturn(true);
 
-        assertThrows(BadRequestException.class, () -> underTest.create(consumptionCreationDto));
+        Optional<Consumption> result = underTest.create(consumptionCreationDto);
 
+        assertThat(result).isNotNull();
+        assertThat(result).isEmpty();
         verify(consumptionRepository, Mockito.times(1))
                 .doesStorageConsumptionExistWithLocationForMonitoredCrn(MONITORED_RESOURCE_CRN, STORAGE_LOCATION);
         verify(consumptionRepository, Mockito.times(0)).save(consumption);
         verify(consumptionDtoConverter, Mockito.times(0)).creationDtoToConsumption(eq(consumptionCreationDto));
     }
+
 }
