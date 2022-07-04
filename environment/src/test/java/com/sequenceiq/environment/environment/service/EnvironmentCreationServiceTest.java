@@ -172,7 +172,7 @@ class EnvironmentCreationServiceTest {
                 { Tunnel.CCMV2,           false,    false,       false,                false, null,                   BadRequestException.class, "CCMV2 not enabled for account." },
                 { Tunnel.CCMV2,           false,    false,       true,                 false, null,                   BadRequestException.class, "CCMV2 not enabled for account." },
                 { Tunnel.CCMV2,           false,    true,        false,                true,  Tunnel.CCMV2,           null,              null },
-                { Tunnel.CCMV2,           false,    true,        true,                 true,  Tunnel.CCMV2,           null,              null },
+                { Tunnel.CCMV2,           false,    true,        true,                 true,  Tunnel.CCMV2_JUMPGATE,  null,              null },
                 { Tunnel.CCMV2,           true,     false,       false,                false, null,                   BadRequestException.class, "CCMV2 not enabled for account." },
                 { Tunnel.CCMV2,           true,     false,       true,                 false, null,                   BadRequestException.class, "CCMV2 not enabled for account." },
                 { Tunnel.CCMV2,           true,     true,        false,                true,  Tunnel.CCMV2,           null,              null },

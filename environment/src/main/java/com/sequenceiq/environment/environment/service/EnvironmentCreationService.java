@@ -169,7 +169,7 @@ public class EnvironmentCreationService {
         boolean ccmV2JumpgateEnabled = entitlementService.ccmV2JumpgateEnabled(environment.getAccountId());
         checkCcmEntitlements(tunnel, ccmV2Enabled, ccmV2JumpgateEnabled);
         if (!overrideTunnel) {
-            if (Tunnel.CCM == tunnel) {
+            if (Tunnel.CCM == tunnel || Tunnel.CCMV2 == tunnel) {
                 if (ccmV2JumpgateEnabled) {
                     tunnel = Tunnel.CCMV2_JUMPGATE;
                 } else if (ccmV2Enabled) {
@@ -178,7 +178,6 @@ public class EnvironmentCreationService {
                 experimentalFeatures.setTunnel(tunnel);
                 environment.setExperimentalFeaturesJson(experimentalFeatures);
             }
-            // TODO: if we want the Jumpgate to be default then this logic needs to be added for CCMV2 as well
         }
         LOGGER.info("Environment is initialized with [{}] tunnel.", tunnel);
     }
