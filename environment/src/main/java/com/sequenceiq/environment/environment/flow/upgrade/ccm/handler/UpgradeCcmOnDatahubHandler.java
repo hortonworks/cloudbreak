@@ -53,16 +53,20 @@ public class UpgradeCcmOnDatahubHandler extends EventSenderAwareHandler<Environm
         EnvironmentDto environmentDto = environmentDtoEvent.getData();
         try {
             List<String> dataHubCrns = getDatahubCrns(environmentDto.getResourceCrn());
-            LOGGER.debug("The following datahub crns will be tried for upgrade CCM: {}", dataHubCrns);
-            List<DistroXCcmUpgradeV1Response> upgradeResponses = initUpgradeCcm(dataHubCrns);
-            if (hasAllErroredOut(upgradeResponses)) {
-                String message = "All of the Data Hubs returned error for Upgrade CCM trigger: " + getReasons(upgradeResponses);
-                LOGGER.warn(message);
-                sendFailedEvent(environmentDtoEvent, environmentDto, new DatahubOperationFailedException(message));
-                return;
+            if (!dataHubCrns.isEmpty()) {
+                LOGGER.debug("The following datahub crns will be tried for upgrade CCM: {}", dataHubCrns);
+                List<DistroXCcmUpgradeV1Response> upgradeResponses = initUpgradeCcm(dataHubCrns);
+                if (hasAllErroredOut(upgradeResponses)) {
+                    String message = "All of the Data Hubs returned error for Upgrade CCM trigger: " + getReasons(upgradeResponses);
+                    LOGGER.warn(message);
+                    sendFailedEvent(environmentDtoEvent, environmentDto, new DatahubOperationFailedException(message));
+                    return;
+                }
+                logNotTriggered(upgradeResponses);
+                upgradeCcmService.waitForUpgradeOnFlowIds(environmentDto.getId(), getTriggeredFlows(upgradeResponses));
+            } else {
+                LOGGER.info("There were no Data Hubs created for environment {}", environmentDto.getResourceCrn());
             }
-            logNotTriggered(upgradeResponses);
-            upgradeCcmService.waitForUpgradeOnFlowIds(environmentDto.getId(), getTriggeredFlows(upgradeResponses));
             UpgradeCcmEvent upgradeCcmEvent = UpgradeCcmEvent.builder()
                     .withSelector(UpgradeCcmStateSelectors.FINISH_UPGRADE_CCM_EVENT.selector())
                     .withResourceCrn(environmentDto.getResourceCrn())
