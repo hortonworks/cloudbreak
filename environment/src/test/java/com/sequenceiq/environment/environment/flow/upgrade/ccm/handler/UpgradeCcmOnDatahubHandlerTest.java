@@ -111,6 +111,7 @@ class UpgradeCcmOnDatahubHandlerTest {
         underTest.accept(mockEnvironmentDtoEvent);
 
         verify(upgradeCcmPollerService, never()).waitForUpgradeOnFlowIds(any(), any());
+        assertThat(baseNamedFlowEvent.getValue()).isInstanceOf(UpgradeCcmFailedEvent.class);
         UpgradeCcmFailedEvent capturedUpgradeCcmEvent = (UpgradeCcmFailedEvent) baseNamedFlowEvent.getValue();
         assertThat(capturedUpgradeCcmEvent.getResourceName()).isEqualTo(TEST_ENV_NAME);
         assertThat(capturedUpgradeCcmEvent.getResourceId()).isEqualTo(TEST_ENV_ID);
@@ -141,6 +142,7 @@ class UpgradeCcmOnDatahubHandlerTest {
 
         underTest.accept(mockEnvironmentDtoEvent);
         verify(upgradeCcmPollerService).waitForUpgradeOnFlowIds(TEST_ENV_ID, List.of(flowId1));
+        assertThat(baseNamedFlowEvent.getValue()).isInstanceOf(UpgradeCcmFailedEvent.class);
         UpgradeCcmFailedEvent capturedUpgradeCcmEvent = (UpgradeCcmFailedEvent) baseNamedFlowEvent.getValue();
         assertThat(capturedUpgradeCcmEvent.getResourceName()).isEqualTo(TEST_ENV_NAME);
         assertThat(capturedUpgradeCcmEvent.getResourceId()).isEqualTo(TEST_ENV_ID);
@@ -165,6 +167,7 @@ class UpgradeCcmOnDatahubHandlerTest {
         underTest.accept(mockEnvironmentDtoEvent);
 
         verify(upgradeCcmPollerService).waitForUpgradeOnFlowIds(TEST_ENV_ID, List.of());
+        assertThat(baseNamedFlowEvent.getValue()).isInstanceOf(UpgradeCcmEvent.class);
         UpgradeCcmEvent capturedUpgradeCcmEvent = (UpgradeCcmEvent) baseNamedFlowEvent.getValue();
         assertThat(capturedUpgradeCcmEvent.getResourceName()).isEqualTo(TEST_ENV_NAME);
         assertThat(capturedUpgradeCcmEvent.getResourceId()).isEqualTo(TEST_ENV_ID);
@@ -193,6 +196,7 @@ class UpgradeCcmOnDatahubHandlerTest {
         underTest.accept(mockEnvironmentDtoEvent);
 
         verify(upgradeCcmPollerService).waitForUpgradeOnFlowIds(TEST_ENV_ID, List.of(flowId2));
+        assertThat(baseNamedFlowEvent.getValue()).isInstanceOf(UpgradeCcmEvent.class);
         UpgradeCcmEvent capturedUpgradeCcmEvent = (UpgradeCcmEvent) baseNamedFlowEvent.getValue();
         assertThat(capturedUpgradeCcmEvent.getResourceName()).isEqualTo(TEST_ENV_NAME);
         assertThat(capturedUpgradeCcmEvent.getResourceId()).isEqualTo(TEST_ENV_ID);
@@ -215,6 +219,23 @@ class UpgradeCcmOnDatahubHandlerTest {
         underTest.accept(mockEnvironmentDtoEvent);
 
         verify(upgradeCcmPollerService).waitForUpgradeOnFlowIds(TEST_ENV_ID, List.of(flowId));
+        assertThat(baseNamedFlowEvent.getValue()).isInstanceOf(UpgradeCcmEvent.class);
+        UpgradeCcmEvent capturedUpgradeCcmEvent = (UpgradeCcmEvent) baseNamedFlowEvent.getValue();
+        assertThat(capturedUpgradeCcmEvent.getResourceName()).isEqualTo(TEST_ENV_NAME);
+        assertThat(capturedUpgradeCcmEvent.getResourceId()).isEqualTo(TEST_ENV_ID);
+        assertThat(capturedUpgradeCcmEvent.getResourceCrn()).isEqualTo(TEST_ENV_CRN);
+        assertThat(capturedUpgradeCcmEvent.selector()).isEqualTo("FINISH_UPGRADE_CCM_EVENT");
+    }
+
+    @Test
+    void testAcceptWhenNoDistroX() {
+        when(datahubService.list(TEST_ENV_CRN)).thenReturn(new StackViewV4Responses());
+
+        underTest.accept(mockEnvironmentDtoEvent);
+
+        verify(datahubService, never()).upgradeCcm(any());
+        verify(upgradeCcmPollerService, never()).waitForUpgradeOnFlowIds(any(), any());
+        assertThat(baseNamedFlowEvent.getValue()).isInstanceOf(UpgradeCcmEvent.class);
         UpgradeCcmEvent capturedUpgradeCcmEvent = (UpgradeCcmEvent) baseNamedFlowEvent.getValue();
         assertThat(capturedUpgradeCcmEvent.getResourceName()).isEqualTo(TEST_ENV_NAME);
         assertThat(capturedUpgradeCcmEvent.getResourceId()).isEqualTo(TEST_ENV_ID);
