@@ -81,6 +81,10 @@ base:
     - match: grain
     - recipes.pre-cloudera-manager-start
 
+  'recipes:pre-service-deployment':
+    - match: grain
+    - recipes.pre-service-deployment
+
   'roles:manager_server':
     - match: grain
     - cloudera.manager.start
@@ -101,6 +105,10 @@ base:
   'recipes:post-cluster-install':
     - match: grain
     - recipes.post-cluster-install
+
+  'recipes:post-service-deployment':
+    - match: grain
+    - recipes.post-service-deployment
 
   'G@roles:ad_leave and G@os_family:RedHat':
     - match: compound

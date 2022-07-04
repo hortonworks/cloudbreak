@@ -93,20 +93,20 @@ public class FreeIpaPostInstallService {
             setInitialFreeIpaPolicies(freeIpaClient);
             synchronizeUsers(stack);
         }
-        if (freeIpaRecipeService.hasRecipeType(stackId, RecipeType.POST_CLUSTER_INSTALL)) {
-            executePostInstallRecipes(stack);
+        if (freeIpaRecipeService.hasRecipeType(stackId, RecipeType.POST_SERVICE_DEPLOYMENT, RecipeType.POST_CLUSTER_INSTALL)) {
+            executePostServiceDeploymentRecipes(stack);
         } else {
             LOGGER.info("We have no post-install recipes for this stack");
         }
     }
 
-    private void executePostInstallRecipes(Stack stack) throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
+    private void executePostServiceDeploymentRecipes(Stack stack) throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         Set<InstanceMetaData> instanceMetaDatas = stack.getNotDeletedInstanceMetaDataSet();
         Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(instanceMetaDatas);
         LOGGER.info("Execute post install recipes for freeipa: {}. Instances: {}", stack.getName(),
                 instanceMetaDatas.stream().map(InstanceMetaData::getInstanceId).collect(Collectors.joining()));
-        hostOrchestrator.postInstallRecipes(primaryGatewayConfig, allNodes, new StackBasedExitCriteriaModel(stack.getId()));
+        hostOrchestrator.postServiceDeploymentRecipes(primaryGatewayConfig, allNodes, new StackBasedExitCriteriaModel(stack.getId()));
     }
 
     private void setInitialFreeIpaPolicies(FreeIpaClient freeIpaClient) throws Exception {

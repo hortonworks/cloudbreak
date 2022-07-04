@@ -143,7 +143,7 @@ public class ClusterUpscaleService {
     public void executePostRecipesOnNewHosts(Long stackId, Map<String, Integer> hostGroupWithAdjustment) throws CloudbreakException {
         StackDto stackDto = stackDtoService.getById(stackId);
         LOGGER.debug("Start executing post recipes");
-        recipeEngine.executePostInstallRecipesOnTargets(stackDto, hostGroupService.getByClusterWithRecipes(stackDto.getCluster().getId()),
+        recipeEngine.executePostServiceDeploymentRecipes(stackDto, hostGroupService.getByClusterWithRecipes(stackDto.getCluster().getId()),
                 clusterHostServiceRunner.collectUpscaleCandidates(stackDto, hostGroupWithAdjustment, false));
     }
 

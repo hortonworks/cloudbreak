@@ -70,8 +70,8 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
         String recipeName = resourcePropertyProvider().getName();
         String stack = resourcePropertyProvider().getName();
         String imageSettings = resourcePropertyProvider().getName();
-        String filePath = "/post-ambari";
-        String fileName = "post-ambari";
+        String filePath = "/post-cm-start";
+        String fileName = "post-cm-start";
         String masterInstanceGroup = "master";
         String idbrokerInstanceGroup = "idbroker";
 
@@ -83,34 +83,34 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
 
         testContext
                 .given(imageSettings, ImageSettingsTestDto.class)
-                    .withImageCatalog(commonCloudProperties().getImageCatalogName())
-                    .withImageId(selectedImageID)
+                .withImageCatalog(commonCloudProperties().getImageCatalogName())
+                .withImageId(selectedImageID)
                 .given(clouderaManager, ClouderaManagerTestDto.class)
                 .given(cluster, ClusterTestDto.class)
-                    .withBlueprintName(getDefaultSDXBlueprintName())
-                    .withValidateBlueprint(Boolean.FALSE)
-                    .withClouderaManager(clouderaManager)
+                .withBlueprintName(getDefaultSDXBlueprintName())
+                .withValidateBlueprint(Boolean.FALSE)
+                .withClouderaManager(clouderaManager)
                 .given(RecipeTestDto.class)
-                    .withName(recipeName)
-                    .withContent(recipeUtil.generatePostCmStartRecipeContent(applicationContext))
-                    .withRecipeType(POST_CLOUDERA_MANAGER_START)
+                .withName(recipeName)
+                .withContent(recipeUtil.generatePostCmStartRecipeContent(applicationContext))
+                .withRecipeType(POST_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
                 .given(masterInstanceGroup, InstanceGroupTestDto.class)
-                    .withHostGroup(MASTER)
-                    .withNodeCount(1)
-                    .withRecipes(recipeName)
+                .withHostGroup(MASTER)
+                .withNodeCount(1)
+                .withRecipes(recipeName)
                 .given(idbrokerInstanceGroup, InstanceGroupTestDto.class)
-                    .withHostGroup(IDBROKER)
-                    .withNodeCount(1)
-                    .withRecipes(recipeName)
+                .withHostGroup(IDBROKER)
+                .withNodeCount(1)
+                .withRecipes(recipeName)
                 .given(stack, StackTestDto.class)
-                    .withCluster(cluster)
-                    .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
-                    .withImageSettings(imageSettings)
+                .withCluster(cluster)
+                .withInstanceGroups(masterInstanceGroup, idbrokerInstanceGroup)
+                .withImageSettings(imageSettings)
                 .given(sdxInternal, SdxInternalTestDto.class)
-                    .withCloudStorage(getCloudStorageRequest(testContext))
-                    .withDatabase(sdxDatabaseRequest)
-                    .withStackRequest(key(cluster), key(stack))
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .withDatabase(sdxDatabaseRequest)
+                .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .awaitForHealthyInstances()

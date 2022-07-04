@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -63,8 +62,8 @@ public class FreeIpaInstallService {
             Map<String, List<RecipeModel>> recipeMap = stack.getInstanceGroups().stream().map(InstanceGroup::getGroupName)
                     .collect(Collectors.toMap(instanceGroup -> instanceGroup, instanceGroup -> recipes));
             hostOrchestrator.uploadRecipes(gatewayConfigs, recipeMap, new StackBasedExitCriteriaModel(stackId));
-            if (freeIpaRecipeService.hasRecipeType(recipes, RecipeType.PRE_CLOUDERA_MANAGER_START)) {
-                hostOrchestrator.preClusterManagerStartRecipes(primaryGatewayConfig, allNodes, new StackBasedExitCriteriaModel(stackId));
+            if (freeIpaRecipeService.hasRecipeType(recipes, RecipeType.PRE_SERVICE_DEPLOYMENT, RecipeType.PRE_CLOUDERA_MANAGER_START)) {
+                hostOrchestrator.preServiceDeploymentRecipes(primaryGatewayConfig, allNodes, new StackBasedExitCriteriaModel(stackId));
             } else {
                 LOGGER.info("We have no pre-start recipes for this stack");
             }

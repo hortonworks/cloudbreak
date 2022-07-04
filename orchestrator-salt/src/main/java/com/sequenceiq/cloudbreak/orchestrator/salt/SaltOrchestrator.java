@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START;
+import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase.convert;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
 import static java.util.function.Predicate.not;
@@ -1047,10 +1048,10 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void preClusterManagerStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void preServiceDeploymentRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
-        LOGGER.debug("Executing pre-cloudera-manager-start recipes.");
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START, false);
+        LOGGER.debug("Executing pre-service-deployment recipes.");
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE_SERVICE_DEPLOYMENT, false);
     }
 
     @Override
@@ -1061,10 +1062,10 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void postInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    public void postServiceDeploymentRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
-        LOGGER.debug("Executing post-cluster-install recipes.");
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLUSTER_INSTALL, false);
+        LOGGER.debug("Executing post-service-deployment recipes.");
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_SERVICE_DEPLOYMENT, false);
     }
 
     @Override
@@ -1341,25 +1342,21 @@ public class SaltOrchestrator implements HostOrchestrator {
     private void executeRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel,
             RecipeExecutionPhase phase, boolean forced) throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
         int maxRetry = forced ? maxRetryRecipeForced : maxRetryRecipe;
+        RecipeExecutionPhase executedPhase = phase;
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            // add 'recipe' grain to all nodes
+            executedPhase = fallbackToOldRecipeExecutionPhaseIfNecessary(phase, gatewayConfig, sc);
             Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-            saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(saltStateService, targetHostnames, allNodes, "recipes", phase.value()),
-                    exitCriteriaModel, maxRetry, exitCriteria);
+            addRecipeGrainToNodes(allNodes, exitCriteriaModel, maxRetry, executedPhase, sc, targetHostnames);
             Set<String> allHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
             runSyncAll(sc, allHostnames, allNodes, exitCriteriaModel);
-            if (phase == PRE_CLOUDERA_MANAGER_START) {
+            if (executedPhase == PRE_CLOUDERA_MANAGER_START || executedPhase == PRE_SERVICE_DEPLOYMENT) {
                 // Execute highstate before recipe. Otherwise ipa domain names will not be resolvable in recipe scripts.
                 runNewService(sc, new HighStateAllRunner(saltStateService, allHostnames, allNodes), exitCriteriaModel, maxRetryRecipe, true);
             } else {
-                // Skip highstate and just execute other recipes for performace.
-                StateRunner stateAllRunner = new StateRunner(saltStateService, targetHostnames, allNodes, "recipes." + phase.value());
-                OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateAllRunner);
-                Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, false);
-                saltJobRunBootstrapRunner.call();
+                runStateRunnerForRecipe(saltStateService, allNodes, exitCriteriaModel, executedPhase, maxRetry, sc, targetHostnames);
             }
         } catch (CloudbreakOrchestratorTimeoutException e) {
-            LOGGER.info("Recipe execution timeout. {}", phase, e);
+            LOGGER.info("Recipe execution timeout. {}", executedPhase, e);
             throw e;
         } catch (CloudbreakOrchestratorFailedException e) {
             LOGGER.info("Orchestration error occurred during execution of recipes.", e);
@@ -1371,13 +1368,44 @@ public class SaltOrchestrator implements HostOrchestrator {
             try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
                 // remove 'recipe' grain from all nodes
                 Set<String> targetHostnames = allNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-                saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(saltStateService, targetHostnames, allNodes, "recipes", phase.value()),
+                saltCommandRunner.runSaltCommand(sc, new GrainRemoveRunner(saltStateService, targetHostnames, allNodes, "recipes", executedPhase.value()),
                         exitCriteriaModel, maxRetry, exitCriteria);
             } catch (Exception e) {
                 LOGGER.info("Error occurred during removing recipe roles.", e);
                 throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
             }
         }
+    }
+
+    private void addRecipeGrainToNodes(Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, int maxRetry, RecipeExecutionPhase executedPhase,
+            SaltConnector sc, Set<String> targetHostnames) throws Exception {
+        saltCommandRunner.runSaltCommand(sc, new GrainAddRunner(saltStateService, targetHostnames, allNodes, "recipes", executedPhase.value()),
+                exitCriteriaModel, maxRetry, exitCriteria);
+    }
+
+    private RecipeExecutionPhase fallbackToOldRecipeExecutionPhaseIfNecessary(RecipeExecutionPhase phase, GatewayConfig gatewayConfig, SaltConnector sc) {
+        boolean phaseSlsExists = doesPhaseSlsExist(saltStateService, gatewayConfig, phase, sc);
+        if (!phaseSlsExists) {
+            RecipeExecutionPhase oldRecipeExecutionPhase = phase.oldRecipeExecutionPhase();
+            LOGGER.info("Salt state file for new recipe execution phase ({}) was not found, it is a cluster with old salt states, fallback to the old " +
+                    "recipe execution phase: {}", phase, oldRecipeExecutionPhase);
+            return oldRecipeExecutionPhase;
+        } else {
+            return phase;
+        }
+    }
+
+    private boolean doesPhaseSlsExist(SaltStateService saltStateService, GatewayConfig gatewayConfig, RecipeExecutionPhase phase, SaltConnector sc) {
+        Target<String> gatewayTargets = new HostList(Set.of(gatewayConfig.getHostname()));
+        return saltStateService.stateSlsExists(sc, gatewayTargets, "recipes." + phase.value());
+    }
+
+    private void runStateRunnerForRecipe(SaltStateService saltStateService, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, RecipeExecutionPhase phase,
+            int maxRetry, SaltConnector sc, Set<String> targetHostnames) throws Exception {
+        StateRunner stateAllRunner = new StateRunner(saltStateService, targetHostnames, allNodes, "recipes." + phase.value());
+        OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateAllRunner);
+        Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry, false);
+        saltJobRunBootstrapRunner.call();
     }
 
     private void uploadSaltConfig(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel)

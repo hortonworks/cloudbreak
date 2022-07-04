@@ -25,7 +25,11 @@ public class RecipeV4RequestToRecipeConverter {
         if (recipeType.equals(RecipeV4Type.POST_AMBARI_START)) {
             return RecipeType.POST_CLOUDERA_MANAGER_START;
         } else if (recipeType.equals(RecipeV4Type.PRE_AMBARI_START)) {
-            return RecipeType.PRE_CLOUDERA_MANAGER_START;
+            return RecipeType.PRE_SERVICE_DEPLOYMENT;
+        } else if (recipeType.equals(RecipeV4Type.POST_CLUSTER_INSTALL)) {
+            return RecipeType.POST_SERVICE_DEPLOYMENT;
+        } else if (recipeType.equals(RecipeV4Type.PRE_CLOUDERA_MANAGER_START)) {
+            return RecipeType.PRE_SERVICE_DEPLOYMENT;
         }
         return RecipeType.valueOf(recipeType.name());
     }

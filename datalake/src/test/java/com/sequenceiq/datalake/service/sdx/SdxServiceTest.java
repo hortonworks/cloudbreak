@@ -1074,7 +1074,7 @@ class SdxServiceTest {
         withCustomInstanceGroups(sdxClusterRequest);
         RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
         RecipeViewV4Response recipeViewV4Response = new RecipeViewV4Response();
-        recipeViewV4Response.setName("post-install");
+        recipeViewV4Response.setName("post-service-deployment");
         recipeViewV4Responses.setResponses(List.of(recipeViewV4Response));
         when(recipeV4Endpoint.listInternal(anyLong(), anyString())).thenReturn(recipeViewV4Responses);
         long id = 10L;
@@ -1198,7 +1198,7 @@ class SdxServiceTest {
     private void withRecipe(SdxClusterRequest sdxClusterRequest) {
         SdxRecipe recipe = new SdxRecipe();
         recipe.setHostGroup("master");
-        recipe.setName("post-install");
+        recipe.setName("post-service-deployment");
         sdxClusterRequest.setRecipes(Set.of(recipe));
     }
 
@@ -1566,7 +1566,7 @@ class SdxServiceTest {
         withRecipe(sdxClusterRequest);
         RecipeViewV4Responses recipeViewV4Responses = new RecipeViewV4Responses();
         RecipeViewV4Response recipeViewV4Response = new RecipeViewV4Response();
-        recipeViewV4Response.setName("post-install");
+        recipeViewV4Response.setName("post-service-deployment");
         recipeViewV4Responses.setResponses(List.of(recipeViewV4Response));
         when(recipeV4Endpoint.listInternal(anyLong(), anyString())).thenReturn(recipeViewV4Responses);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");

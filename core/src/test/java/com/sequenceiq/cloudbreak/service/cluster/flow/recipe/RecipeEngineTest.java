@@ -92,14 +92,14 @@ public class RecipeEngineTest {
     }
 
     @Test
-    public void testExecutePostInstallRecipes() throws CloudbreakException {
+    public void testExecutePostServiceDeploymentRecipes() throws CloudbreakException {
         // GIVEN
         Recipe recipe = new Recipe();
-        recipe.setRecipeType(RecipeType.POST_CLUSTER_INSTALL);
+        recipe.setRecipeType(RecipeType.POST_SERVICE_DEPLOYMENT);
         given(hostGroupService.getRecipesByHostGroups(anySet())).willReturn(Set.of(recipe));
         given(recipeTemplateService.isGeneratedRecipesInDbStale(anySet(), anyMap())).willReturn(false);
         // WHEN
-        recipeEngine.executePostInstallRecipes(stack(), hostGroups());
+        recipeEngine.executePostServiceDeploymentRecipes(stack(), hostGroups());
         // THEN
         verify(recipeTemplateService, times(1)).updateAllGeneratedRecipes(anySet(), anyMap());
     }

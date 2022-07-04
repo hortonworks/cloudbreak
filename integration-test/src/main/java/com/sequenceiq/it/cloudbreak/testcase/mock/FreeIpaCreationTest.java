@@ -1,7 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_CLUSTER_INSTALL;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.POST_SERVICE_DEPLOYMENT;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 
 import java.util.Map;
@@ -56,13 +56,13 @@ public class FreeIpaCreationTest extends AbstractMockTest {
         testContext
                 .given(RecipeTestDto.class)
                     .withName(preRecipeName)
-                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
-                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                    .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
+                    .withRecipeType(PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given(RecipeTestDto.class)
                     .withName(postInstallRecipeName)
-                    .withContent(recipeUtil.generatePostInstallRecipeContent(applicationContext))
-                    .withRecipeType(POST_CLUSTER_INSTALL)
+                    .withContent(recipeUtil.generatePostDeploymentRecipeContent(applicationContext))
+                    .withRecipeType(POST_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given(RecipeTestDto.class)
                     .withName(preTerminationRecipeName)

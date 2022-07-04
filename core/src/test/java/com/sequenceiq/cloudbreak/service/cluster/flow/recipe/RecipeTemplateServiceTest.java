@@ -61,7 +61,7 @@ public class RecipeTemplateServiceTest {
         HostGroup hgMaster = hostGroup("master", Set.of(recipe("r1", DUMMY_CONTENT_1)));
         hgs.add(hgMaster);
         Map<HostGroup, List<RecipeModel>> recipeModels = new HashMap<>();
-        recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_1)));
+        recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_SERVICE_DEPLOYMENT, DUMMY_CONTENT_1)));
         // WHEN
         boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN
@@ -81,7 +81,7 @@ public class RecipeTemplateServiceTest {
         HostGroup hgMaster = hostGroup("master", Set.of(recipe), generatedRecipes);
         hgs.add(hgMaster);
         Map<HostGroup, List<RecipeModel>> recipeModels = new HashMap<>();
-        recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_2)));
+        recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_SERVICE_DEPLOYMENT, DUMMY_CONTENT_2)));
         // WHEN
         boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN
@@ -114,7 +114,7 @@ public class RecipeTemplateServiceTest {
         HostGroup hgMaster = hostGroup("master", Set.of(recipe("r1", DUMMY_CONTENT_1)));
         hgs.add(hgMaster);
         Map<HostGroup, List<RecipeModel>> recipeModels = new HashMap<>();
-        recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_2)));
+        recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_SERVICE_DEPLOYMENT, DUMMY_CONTENT_2)));
         // WHEN
         boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN
@@ -128,7 +128,7 @@ public class RecipeTemplateServiceTest {
         HostGroup hgMaster = hostGroup("master", Set.of(recipe("r1", DUMMY_CONTENT_1), recipe("r2", DUMMY_CONTENT_1)));
         hgs.add(hgMaster);
         Map<HostGroup, List<RecipeModel>> recipeModels = new HashMap<>();
-        recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_1)));
+        recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_SERVICE_DEPLOYMENT, DUMMY_CONTENT_1)));
         // WHEN
         boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN
@@ -142,7 +142,7 @@ public class RecipeTemplateServiceTest {
         HostGroup hgMaster = hostGroup("master", Set.of(recipe("r1", DUMMY_CONTENT_1)), new HashSet<>());
         hgs.add(hgMaster);
         Map<HostGroup, List<RecipeModel>> recipeModels = new HashMap<>();
-        recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_1)));
+        recipeModels.put(hgMaster, List.of(new RecipeModel("r1", RecipeType.PRE_SERVICE_DEPLOYMENT, DUMMY_CONTENT_1)));
         // WHEN
         boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN
@@ -182,9 +182,9 @@ public class RecipeTemplateServiceTest {
         hgs.add(hgWorker);
         Map<HostGroup, List<RecipeModel>> recipeModels = new HashMap<>();
         recipeModels.put(hgMaster, List.of(
-                new RecipeModel("r1", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_1),
-                new RecipeModel("r2", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_2)));
-        recipeModels.put(hgWorker, List.of(new RecipeModel("r2", RecipeType.PRE_CLOUDERA_MANAGER_START, DUMMY_CONTENT_2)));
+                new RecipeModel("r1", RecipeType.PRE_SERVICE_DEPLOYMENT, DUMMY_CONTENT_1),
+                new RecipeModel("r2", RecipeType.PRE_SERVICE_DEPLOYMENT, DUMMY_CONTENT_2)));
+        recipeModels.put(hgWorker, List.of(new RecipeModel("r2", RecipeType.PRE_SERVICE_DEPLOYMENT, DUMMY_CONTENT_2)));
         // WHEN
         boolean result = recipeTemplateService.isGeneratedRecipesInDbStale(hgs, recipeModels);
         // THEN

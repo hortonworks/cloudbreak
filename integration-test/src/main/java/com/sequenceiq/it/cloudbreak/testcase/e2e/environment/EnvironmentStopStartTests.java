@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.environment;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
 
 import java.util.Map;
 import java.util.Set;
@@ -98,14 +98,14 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
         DistroXDatabaseRequest distroXDatabaseRequest = new DistroXDatabaseRequest();
         distroXDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
         String recipeName = resourcePropertyProvider().getName();
-        String filePath = "/pre-ambari";
-        String fileName = "pre-ambari";
+        String filePath = "/pre-service-deployment";
+        String fileName = "pre-service-deployment";
 
         testContext
                 .given(RecipeTestDto.class)
                     .withName(recipeName)
-                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
-                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                    .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
+                    .withRecipeType(PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())

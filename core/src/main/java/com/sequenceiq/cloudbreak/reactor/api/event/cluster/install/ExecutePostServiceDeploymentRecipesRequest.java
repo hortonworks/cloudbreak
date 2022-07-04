@@ -4,9 +4,9 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
-public class ExecutePostInstallRecipesSuccess extends StackEvent {
+public class ExecutePostServiceDeploymentRecipesRequest extends StackEvent {
     @JsonCreator
-    public ExecutePostInstallRecipesSuccess(
+    public ExecutePostServiceDeploymentRecipesRequest(
             @JsonProperty("resourceId") Long stackId) {
         super(stackId);
     }

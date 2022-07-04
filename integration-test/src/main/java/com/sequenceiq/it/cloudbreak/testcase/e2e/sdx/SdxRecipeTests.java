@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 
 import java.util.List;
@@ -42,14 +42,14 @@ public class SdxRecipeTests extends PreconditionSdxE2ETest {
     )
     public void testSDXPreClouderaManagerStartRecipe(TestContext testContext) {
         String recipeName = resourcePropertyProvider().getName();
-        String filePath = "/pre-ambari";
-        String fileName = "pre-ambari";
+        String filePath = "/pre-service-deployment";
+        String fileName = "pre-service-deployment";
         String masterInstanceGroup = "master";
         testContext
                 .given(RecipeTestDto.class)
                     .withName(recipeName)
-                    .withContent(recipeUtil.generatePreCmStartRecipeContent(applicationContext))
-                    .withRecipeType(PRE_CLOUDERA_MANAGER_START)
+                    .withContent(recipeUtil.generatePreDeploymentRecipeContent(applicationContext))
+                    .withRecipeType(PRE_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given(SdxTestDto.class)
                     .withRecipe(recipeName, masterInstanceGroup)
