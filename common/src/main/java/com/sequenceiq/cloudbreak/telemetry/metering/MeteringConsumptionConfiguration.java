@@ -13,7 +13,7 @@ public class MeteringConsumptionConfiguration extends AbstractDatabusStreamConfi
     private final boolean consumptionEnabled;
 
     public MeteringConsumptionConfiguration(MeteringConfiguration meteringConfiguration,
-            @Value("${metering.consumption.enabled:true}") boolean consumptionEnabled) {
+            @Value("${metering.consumption.enabled:false}") boolean consumptionEnabled) {
         super(meteringConfiguration.isEnabled(), meteringConfiguration.getDbusAppName(), meteringConfiguration.getDbusStreamName());
         this.meteringConfiguration = meteringConfiguration;
         this.consumptionEnabled = consumptionEnabled;
