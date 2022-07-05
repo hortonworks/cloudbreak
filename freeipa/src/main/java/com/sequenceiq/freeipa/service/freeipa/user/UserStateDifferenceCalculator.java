@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -48,21 +49,6 @@ public class UserStateDifferenceCalculator {
                 calculateGroupMembershipToRemove(umsState, ipaState),
                 calculateUsersToDisable(umsState, ipaState),
                 calculateUsersToEnable(umsState, ipaState));
-    }
-
-    public UsersStateDifference forDeletedUser(String deletedUser, Collection<String> groupMembershipsToRemove) {
-        Multimap<String, String> groupMembershipsToRemoveMap = HashMultimap.create();
-        groupMembershipsToRemoveMap.putAll(deletedUser, groupMembershipsToRemove);
-        return new UsersStateDifference(
-                ImmutableSet.of(),
-                ImmutableSet.of(),
-                ImmutableSet.of(),
-                ImmutableSet.of(),
-                ImmutableSet.of(deletedUser),
-                ImmutableMultimap.of(),
-                ImmutableMultimap.copyOf(groupMembershipsToRemoveMap),
-                ImmutableSet.of(),
-                ImmutableSet.of());
     }
 
     public ImmutableSet<FmsGroup> calculateGroupsToAdd(UmsUsersState umsState, UsersState ipaState) {
@@ -137,7 +123,9 @@ public class UserStateDifferenceCalculator {
     public ImmutableMultimap<String, String> calculateGroupMembershipToAdd(UmsUsersState umsState, UsersState ipaState,
             UserSyncOptions options, BiConsumer<String, String> warnings) {
         Multimap<String, String> groupMembershipToAdd = HashMultimap.create();
-        Set<String> groupsExceedingLimit = umsState.getGroupsExceedingLimit();
+        Set<String> groupsExceedingLimit = umsState.getGroupsExceedingLimit().stream()
+                .filter(Predicate.not(UserSyncConstants.ALLOWED_LARGE_GROUP_PREDICATE))
+                .collect(Collectors.toSet());
         boolean enforceGroupLimits = options.isEnforceGroupMembershipLimitEnabled();
         int groupLimit = options.getLargeGroupLimit();
 

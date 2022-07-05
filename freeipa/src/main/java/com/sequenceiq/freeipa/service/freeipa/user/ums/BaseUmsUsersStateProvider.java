@@ -17,7 +17,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class BaseUmsUsersStateProvider {
@@ -100,7 +99,6 @@ public class BaseUmsUsersStateProvider {
         return usersState.getGroupMembership().asMap().entrySet().stream()
                 .filter(entry -> entry.getValue().size() > sizeThreshold)
                 .map(Map.Entry::getKey)
-                .filter(Predicate.not(UserSyncConstants.ALLOWED_LARGE_GROUP_PREDICATE))
                 .collect(Collectors.toSet());
     }
 }
