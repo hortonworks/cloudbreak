@@ -7,6 +7,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
@@ -24,6 +26,8 @@ import com.sequenceiq.flow.domain.FlowLog;
 
 @Component
 public class CloudbreakFlowInformation implements ApplicationFlowInformation {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakFlowInformation.class);
 
     private static final List<String> ALLOWED_PARALLEL_FLOWS = List.of(
             ClusterTerminationEvent.TERMINATION_EVENT.event(),
@@ -47,6 +51,7 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
     @Override
     public void handleFlowFail(FlowLog flowLog) {
         Stack stack = stackService.getById(flowLog.getResourceId());
+        LOGGER.info("Handling failed flow {} for {}", flowLog, stack);
         if (stack.getStackStatus() != null && stack.getStackStatus().getDetailedStackStatus() != null) {
             stack.setStackStatus(new StackStatus(stack, stack.getStackStatus().getStatus().mapToFailedIfInProgress(), "Flow failed", UNKNOWN));
             stackService.save(stack);

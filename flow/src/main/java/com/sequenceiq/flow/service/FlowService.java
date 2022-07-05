@@ -31,9 +31,7 @@ import com.sequenceiq.flow.api.model.operation.OperationFlowsView;
 import com.sequenceiq.flow.converter.FlowLogConverter;
 import com.sequenceiq.flow.converter.FlowProgressResponseConverter;
 import com.sequenceiq.flow.core.FlowConstants;
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
-import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
@@ -99,13 +97,6 @@ public class FlowService {
         return flowLogs.stream().map(flowLog -> flowLogConverter.convert(flowLog)).collect(Collectors.toList());
     }
 
-    public <T extends AbstractFlowConfiguration> List<FlowLogResponse> getFlowLogsByCrnAndType(String resourceCrn, ClassValue classValue) {
-        checkState(Crn.isCrn(resourceCrn));
-        LOGGER.info("Getting flow logs by resource crn {} and type {}", resourceCrn, classValue.getClassValue().getCanonicalName());
-        List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByCrnAndType(resourceCrn, classValue);
-        return flowLogs.stream().map(flowLog -> flowLogConverter.convert(flowLog)).collect(Collectors.toList());
-    }
-
     public List<FlowLogResponse> getFlowLogsByResourceName(String resourceName) {
         checkState(!Crn.isCrn(resourceName));
         LOGGER.info("Getting flow logs by resource name {}", resourceName);
@@ -125,7 +116,7 @@ public class FlowService {
                 resourceIds = Collections.singletonList(resourceId);
             }
         } catch (CrnParseException crnParseException) {
-            resourceIds = Collections.EMPTY_LIST;
+            resourceIds = Collections.emptyList();
         }
 
         return getFlowChainStateSafe(resourceIds, chainId);
@@ -250,19 +241,6 @@ public class FlowService {
         LOGGER.info("Getting flow logs (progress) for all recent flows by resource crn {}", resourceCrn);
         List<FlowLog> flowLogs = flowLogDBService.getAllFlowLogsByResourceCrnOrName(resourceCrn);
         return flowProgressResponseConverter.convertList(flowLogs, resourceCrn);
-    }
-
-    public <T extends AbstractFlowConfiguration> Optional<FlowProgressResponse> getLastFlowProgressByResourceCrnAndType(
-            String resourceCrn, ClassValue classValue) {
-        checkState(Crn.isCrn(resourceCrn));
-        LOGGER.info("Getting flow logs (progress) by resource crn {} and type {}", resourceCrn, classValue.getClassValue().getCanonicalName());
-        List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByCrnAndType(resourceCrn, classValue);
-        FlowProgressResponse response = flowProgressResponseConverter.convert(flowLogs, resourceCrn);
-        if (StringUtils.isBlank(response.getFlowId())) {
-            LOGGER.debug("Not found any historical flow data for requested resource (crn: {})", resourceCrn);
-            return Optional.empty();
-        }
-        return Optional.ofNullable(flowProgressResponseConverter.convert(flowLogs, resourceCrn));
     }
 
     public Optional<OperationFlowsView> getLastFlowOperationByResourceCrn(String resourceCrn) {
