@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
 
 import java.util.Objects;
@@ -18,7 +17,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 public class StackDownscaleValidatorService {
 
     public void checkInstanceIsTheClusterManagerServerOrNot(String instancePublicIp, InstanceMetadataType metadataType) {
-        if (GATEWAY.equals(metadataType) || GATEWAY_PRIMARY.equals(metadataType)) {
+        if (GATEWAY_PRIMARY.equals(metadataType)) {
             String additionalIpPartForTemplate = "";
             String messageTemplate = "Downscale for the given node%s is prohibited because it " +
                     "serves as a host the Cluster Manager server";
