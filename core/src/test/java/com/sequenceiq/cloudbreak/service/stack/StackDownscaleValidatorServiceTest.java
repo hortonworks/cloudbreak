@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.CORE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
 
 import org.junit.Rule;
@@ -49,7 +48,7 @@ public class StackDownscaleValidatorServiceTest {
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage(CLUSTER_MANAGER_SERVER_HOST_EXCEPTION_MESSAGE);
 
-        underTest.checkInstanceIsTheClusterManagerServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY);
+        underTest.checkInstanceIsTheClusterManagerServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY_PRIMARY);
     }
 
     @Test
@@ -113,7 +112,7 @@ public class StackDownscaleValidatorServiceTest {
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage(CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
 
-        underTest.checkInstanceIsTheClusterManagerServerOrNot(null, GATEWAY);
+        underTest.checkInstanceIsTheClusterManagerServerOrNot(null, GATEWAY_PRIMARY);
     }
 
     @Test
@@ -121,7 +120,7 @@ public class StackDownscaleValidatorServiceTest {
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage(CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
 
-        underTest.checkInstanceIsTheClusterManagerServerOrNot("", GATEWAY);
+        underTest.checkInstanceIsTheClusterManagerServerOrNot("", GATEWAY_PRIMARY);
     }
 
 }
