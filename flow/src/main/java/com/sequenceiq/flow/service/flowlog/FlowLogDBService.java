@@ -115,6 +115,7 @@ public class FlowLogDBService implements FlowLogService {
 
     @Override
     public FlowLog terminate(Long resourceId, String flowId) throws TransactionExecutionException {
+        LOGGER.info("Terminate flow [{}] for resource [{}]", flowId, resourceId);
         FlowLog flowLog = finalize(resourceId, flowId, FlowConstants.TERMINATED_STATE, false);
         applicationFlowInformation.handleFlowFail(flowLog);
         return flowLog;
@@ -126,16 +127,19 @@ public class FlowLogDBService implements FlowLogService {
 
     private FlowLog finalize(Long resourceId, String flowId, String state, boolean failed) throws TransactionExecutionException {
         return transactionService.required(() -> {
+            LOGGER.info("Finalize flow [{}] with state [{}] and failed [{}] for resource [{}]", flowId, state, failed, resourceId);
             flowLogRepository.finalizeByFlowId(flowId);
             Optional<FlowLog> lastFlowLogOpt = getLastFlowLog(flowId);
             OperationType operationType = OperationType.UNKNOWN;
             if (lastFlowLogOpt.isPresent()) {
                 FlowLog lastFlowLog = lastFlowLogOpt.get();
+                LOGGER.info("Last FlowLog is available: {}", lastFlowLog);
                 updateLastFlowLogStatus(lastFlowLog, failed);
                 operationType = lastFlowLog.getOperationType();
             }
             FlowLog flowLog = new FlowLog(resourceId, flowId, state, Boolean.TRUE, StateStatus.SUCCESSFUL, operationType);
             flowLog.setCloudbreakNodeId(nodeConfig.getId());
+            LOGGER.info("Persisting final FlowLog: {}", flowLog);
             return flowLogRepository.save(flowLog);
         });
     }
@@ -310,7 +314,7 @@ public class FlowLogDBService implements FlowLogService {
         if (Crn.isCrn(resource)) {
             return resourceIdProvider.getResourceIdsByResourceCrn(resource);
         } else {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
     }
 
@@ -349,13 +353,8 @@ public class FlowLogDBService implements FlowLogService {
 
     public Boolean hasPendingFlowEvent(List<FlowLog> flowLogs) {
         LOGGER.debug("Checking if there is a pending flowEvent based on these flowLogs {}", Joiner.on(",")
-                .join(flowLogs.stream().map(flowLog -> flowLog.minimizedString()).collect(Collectors.toList())));
+                .join(flowLogs.stream().map(FlowLog::minimizedString).collect(Collectors.toList())));
         return flowLogs.stream().anyMatch(pendingFlowLogPredicate());
-    }
-
-    public <T extends AbstractFlowConfiguration> List<FlowLog> getFlowLogsByCrnAndType(String resourceCrn, ClassValue classValue) {
-        Long resourceId = getResourceIdByCrnOrName(resourceCrn);
-        return flowLogRepository.findAllFlowByType(resourceId, classValue);
     }
 
     public <T extends AbstractFlowConfiguration> List<FlowLog> getLatestFlowLogsByCrnAndType(String resourceCrn, ClassValue classValue) {
