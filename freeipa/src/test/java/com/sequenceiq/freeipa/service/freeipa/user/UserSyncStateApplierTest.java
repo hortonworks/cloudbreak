@@ -59,26 +59,35 @@ class UserSyncStateApplierTest {
     @Mock
     private WorkloadCredentialService workloadCredentialService;
 
+    @Mock
+    private UserSyncGroupAddMemberOperations groupAddMemberOperations;
+
     @InjectMocks
     private UserSyncStateApplier underTest;
 
     @Test
     void testApplyStateDifferenceToIpa() throws FreeIpaClientException, TimeoutException {
+        UmsUsersState umsUsersState = UmsUsersState.newBuilder()
+                .setUsersState(mock(UsersState.class))
+                .setGroupsExceedingThreshold(ImmutableSet.of("largeGroup"))
+                .build();
 
         Multimap<String, String> warnings = ArrayListMultimap.create();
 
-        UsersStateDifference usersStateDifference = createStateDiff();
+        UsersStateDifference usersStateDifference = createStateDiff(umsUsersState);
 
-        underTest.applyStateDifferenceToIpa(ENV_CRN, freeIpaClient, usersStateDifference, warnings::put, true);
+        underTest.applyStateDifferenceToIpa(umsUsersState, ENV_CRN, freeIpaClient, usersStateDifference, warnings::put, true);
 
-        verifyOperationsCalled(usersStateDifference);
+        verifyOperationsCalled(umsUsersState, usersStateDifference);
     }
 
     @Test
     public void testApplyDifferenceNoPasswordHashSupport() throws FreeIpaClientException, TimeoutException {
-        UmsUsersState umsUsersState = mock(UmsUsersState.class);
+        UmsUsersState umsUsersState = UmsUsersState.newBuilder()
+                .setUsersState(mock(UsersState.class))
+                .build();
         UserSyncOptions userSyncOptions = mock(UserSyncOptions.class);
-        UsersStateDifference usersStateDifference = createStateDiff();
+        UsersStateDifference usersStateDifference = createStateDiff(umsUsersState);
         Multimap<String, String> warnings = ArrayListMultimap.create();
         when(userSyncOptions.isFmsToFreeIpaBatchCallEnabled()).thenReturn(Boolean.TRUE);
         when(freeIpaClient.getConfig()).thenReturn(new Config());
@@ -102,7 +111,7 @@ class UserSyncStateApplierTest {
                 .addWorkloadCredentials("userToUpdate2", workloadCredential2)
                 .build();
         UserSyncOptions userSyncOptions = mock(UserSyncOptions.class);
-        UsersStateDifference usersStateDifference = createStateDiff();
+        UsersStateDifference usersStateDifference = createStateDiff(umsUsersState);
         Multimap<String, String> warnings = ArrayListMultimap.create();
         when(userSyncOptions.isFmsToFreeIpaBatchCallEnabled()).thenReturn(Boolean.TRUE);
         Config config = new Config();
@@ -128,21 +137,30 @@ class UserSyncStateApplierTest {
         ));
     }
 
-    private void verifyOperationsCalled(UsersStateDifference usersStateDifference) throws FreeIpaClientException, TimeoutException {
+    private void verifyOperationsCalled(UmsUsersState umsUsersState, UsersStateDifference usersStateDifference) throws FreeIpaClientException, TimeoutException {
         verify(operations).addGroups(eq(true), eq(freeIpaClient), eq(usersStateDifference.getGroupsToAdd()), any());
         verify(operations).addUsers(eq(true), eq(freeIpaClient), eq(usersStateDifference.getUsersToAdd()), any());
         verify(operations).disableUsers(eq(true), eq(freeIpaClient), eq(usersStateDifference.getUsersToDisable()), any());
         verify(operations).enableUsers(eq(true), eq(freeIpaClient), eq(usersStateDifference.getUsersToEnable()), any());
-        verify(operations).addUsersToGroups(eq(true), eq(freeIpaClient), eq(usersStateDifference.getGroupMembershipToAdd()), any());
+        verify(groupAddMemberOperations).addMembersToSmallGroups(eq(true), eq(freeIpaClient), eq(usersStateDifference.getGroupMembershipToAdd()),
+                eq(umsUsersState.getGroupsExceedingThreshold()), any());
+        verify(groupAddMemberOperations).addMembersToLargeGroups(eq(freeIpaClient), eq(usersStateDifference.getGroupMembershipToAdd()),
+                eq(umsUsersState.getGroupsExceedingThreshold()), any());
         verify(operations).removeUsersFromGroups(eq(true), eq(freeIpaClient), eq(usersStateDifference.getGroupMembershipToRemove()), any());
         verify(operations).removeUsers(eq(true), eq(freeIpaClient), eq(usersStateDifference.getUsersToRemove()), any());
         verify(operations).removeGroups(eq(true), eq(freeIpaClient), eq(usersStateDifference.getGroupsToRemove()), any());
         verifyNoMoreInteractions(operations);
+        verifyNoMoreInteractions(groupAddMemberOperations);
     }
 
-    private UsersStateDifference createStateDiff() {
+    private UsersStateDifference createStateDiff(UmsUsersState umsUsersState) {
+        ImmutableSet.Builder<FmsGroup> groupsToAdd = ImmutableSet.builder();
         FmsGroup groupToAdd1 = new FmsGroup().withName("groupToAdd1");
+        groupsToAdd.add(groupToAdd1);
         FmsGroup groupToAdd2 = new FmsGroup().withName("groupToAdd2");
+        groupsToAdd.add(groupToAdd2);
+        umsUsersState.getGroupsExceedingThreshold()
+                .forEach(groupName -> groupsToAdd.add(new FmsGroup().withName(groupName)));
         FmsGroup groupToRemove1 = new FmsGroup().withName("groupToRemove1");
         FmsGroup groupToRemove2 = new FmsGroup().withName("groupToRemove2");
         FmsUser userToAdd1 = new FmsUser().withName("userToAdd1").withFirstName("clark").withLastName("kent");
@@ -153,16 +171,20 @@ class UserSyncStateApplierTest {
         String userToDisable2 = "userToDisable2";
         String userToEnable1 = "userToEnable1";
         String userToEnable2 = "userToEnable2";
+        ImmutableMultimap.Builder groupMembershipsToAdd = ImmutableMultimap.<String, String>builder();
+        groupMembershipsToAdd
+                .put(groupToAdd1.getName(), userToAdd1.getName())
+                .put(groupToAdd2.getName(), userToAdd2.getName());
+        umsUsersState.getGroupsExceedingThreshold()
+                .forEach(groupName -> groupMembershipsToAdd.put(groupName, userToAdd1.getName()));
+
         return new UsersStateDifference(
-                ImmutableSet.of(groupToAdd1, groupToAdd2),
+                groupsToAdd.build(),
                 ImmutableSet.of(groupToRemove1, groupToRemove2),
                 ImmutableSet.of(userToAdd1, userToAdd2),
                 ImmutableSet.of("userToUpdate1", "userToUpdate2"),
                 ImmutableSet.of(userToRemove1, userToRemove2),
-                ImmutableMultimap.<String, String>builder()
-                        .put(groupToAdd1.getName(), userToAdd1.getName())
-                        .put(groupToAdd2.getName(), userToAdd2.getName())
-                        .build(),
+                groupMembershipsToAdd.build(),
                 ImmutableMultimap.<String, String>builder()
                         .put(groupToRemove1.getName(), userToRemove1)
                         .put(groupToRemove2.getName(), userToRemove2)

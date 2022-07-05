@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -145,10 +144,8 @@ public class UserSyncForStackService {
                     ipaUserState.getGroups().size());
 
             if (!ipaUserState.getUsers().isEmpty()) {
-                ImmutableCollection<String> groupMembershipsToRemove = ipaUserState.getGroupMembership().get(deletedWorkloadUser);
-                UsersStateDifference usersStateDifference = userStateDifferenceCalculator.forDeletedUser(deletedWorkloadUser, groupMembershipsToRemove);
                 LOGGER.debug("Starting {} ...", APPLY_DIFFERENCE_TO_IPA);
-                stateApplier.applyStateDifferenceToIpa(stack.getEnvironmentCrn(), freeIpaClient, usersStateDifference, warnings::put, false);
+                stateApplier.applyUserDeleteToIpa(stack.getEnvironmentCrn(), freeIpaClient, deletedWorkloadUser, warnings::put, false);
                 LOGGER.debug("Finished {}.", APPLY_DIFFERENCE_TO_IPA);
             }
 

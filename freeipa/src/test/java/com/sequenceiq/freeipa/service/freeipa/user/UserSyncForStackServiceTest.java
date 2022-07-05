@@ -17,19 +17,16 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -299,17 +296,11 @@ class UserSyncForStackServiceTest {
         UsersState usersState = mock(UsersState.class);
         when(usersState.getUsers()).thenReturn(ImmutableSet.of(new FmsUser().withName("deleteMe")));
         when(usersState.getGroups()).thenReturn(ImmutableSet.of());
-        when(usersState.getGroupMembership()).thenReturn(ImmutableMultimap.of("deleteMe", "group"));
         when(freeIpaUsersStateProvider.getFilteredFreeIpaState(FREE_IPA_CLIENT, Set.of("deleteMe"))).thenReturn(usersState);
-        UsersStateDifference usersStateDifference = mock(UsersStateDifference.class);
-        ArgumentCaptor<Collection<String>> captor = ArgumentCaptor.forClass(Collection.class);
-        when(userStateDifferenceCalculator.forDeletedUser(eq("deleteMe"), captor.capture())).thenReturn(usersStateDifference);
 
         SyncStatusDetail result = underTest.synchronizeStackForDeleteUser(STACK, "deleteMe");
 
-        verify(stateApplier).applyStateDifferenceToIpa(eq(ENV_CRN), eq(FREE_IPA_CLIENT), eq(usersStateDifference), any(), eq(false));
-        assertTrue(captor.getValue().contains("group"));
-        assertEquals(1, captor.getValue().size());
+        verify(stateApplier).applyUserDeleteToIpa(eq(ENV_CRN), eq(FREE_IPA_CLIENT), eq("deleteMe"), any(), eq(false));
         assertEquals(ENV_CRN, result.getEnvironmentCrn());
         assertEquals(COMPLETED, result.getStatus());
         assertTrue(result.getWarnings().isEmpty());

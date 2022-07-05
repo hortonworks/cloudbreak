@@ -12,6 +12,7 @@ import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.REMOV
 import static com.sequenceiq.freeipa.service.freeipa.user.UserSyncLogEvent.SET_WORKLOAD_CREDENTIALS;
 import static java.util.Objects.requireNonNull;
 
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
 
@@ -45,10 +46,13 @@ public class UserSyncStateApplier {
     @Inject
     private UserSyncOperations operations;
 
+    @Inject
+    private UserSyncGroupAddMemberOperations groupAddMemberOperations;
+
     public void applyDifference(UmsUsersState umsUsersState, String environmentCrn, Multimap<String, String> warnings,
             UsersStateDifference usersStateDifference, UserSyncOptions options, FreeIpaClient freeIpaClient) throws FreeIpaClientException, TimeoutException {
         LOGGER.debug("Starting {} ...", APPLY_DIFFERENCE_TO_IPA);
-        applyStateDifferenceToIpa(environmentCrn, freeIpaClient, usersStateDifference, warnings::put, options.isFmsToFreeIpaBatchCallEnabled());
+        applyStateDifferenceToIpa(umsUsersState, environmentCrn, freeIpaClient, usersStateDifference, warnings::put, options.isFmsToFreeIpaBatchCallEnabled());
         LOGGER.debug("Finished {}.", APPLY_DIFFERENCE_TO_IPA);
 
         if (!FreeIpaCapabilities.hasSetPasswordHashSupport(freeIpaClient.getConfig())) {
@@ -63,7 +67,7 @@ public class UserSyncStateApplier {
         }
     }
 
-    public void applyStateDifferenceToIpa(String environmentCrn, FreeIpaClient freeIpaClient, UsersStateDifference stateDifference,
+    public void applyStateDifferenceToIpa(UmsUsersState umsUsersState, String environmentCrn, FreeIpaClient freeIpaClient, UsersStateDifference stateDifference,
             BiConsumer<String, String> warnings, boolean fmsToFreeipaBatchCallEnabled) throws FreeIpaClientException, TimeoutException {
         LOGGER.info("Applying state difference {} to environment {}.", stateDifference, environmentCrn);
 
@@ -89,7 +93,8 @@ public class UserSyncStateApplier {
 
         LOGGER.debug("Starting {} for {} group memberships ...", ADD_USERS_TO_GROUPS,
                 stateDifference.getGroupMembershipToAdd().size());
-        operations.addUsersToGroups(fmsToFreeipaBatchCallEnabled, freeIpaClient, stateDifference.getGroupMembershipToAdd(), warnings);
+        addGroupMemberships(fmsToFreeipaBatchCallEnabled, freeIpaClient, stateDifference.getGroupMembershipToAdd(),
+                umsUsersState.getGroupsExceedingThreshold(), warnings);
         LOGGER.debug("Finished {}.", ADD_USERS_TO_GROUPS);
 
         LOGGER.debug("Starting {} for {} group memberships ...", REMOVE_USERS_FROM_GROUPS,
@@ -106,6 +111,21 @@ public class UserSyncStateApplier {
                 stateDifference.getGroupsToRemove().size());
         operations.removeGroups(fmsToFreeipaBatchCallEnabled, freeIpaClient, stateDifference.getGroupsToRemove(), warnings);
         LOGGER.debug("Finished {}.", REMOVE_GROUPS);
+    }
+
+    private void addGroupMemberships(boolean fmsToFreeipaBatchCallEnabled, FreeIpaClient freeIpaClient, Multimap<String, String> groupMembershipToAdd,
+            Set<String> largeGroupNames, BiConsumer<String, String> warnings) throws FreeIpaClientException, TimeoutException {
+        groupAddMemberOperations.addMembersToSmallGroups(fmsToFreeipaBatchCallEnabled, freeIpaClient, groupMembershipToAdd, largeGroupNames, warnings);
+        groupAddMemberOperations.addMembersToLargeGroups(freeIpaClient, groupMembershipToAdd, largeGroupNames, warnings);
+    }
+
+    public void applyUserDeleteToIpa(String environmentCrn, FreeIpaClient freeIpaClient, String userToDelete,
+            BiConsumer<String, String> warnings, boolean fmsToFreeipaBatchCallEnabled) throws FreeIpaClientException, TimeoutException {
+        LOGGER.info("Applying user delete {} to environment {}.", userToDelete, environmentCrn);
+
+        LOGGER.debug("Starting {} for {} users ...", REMOVE_USERS, 1);
+        operations.removeUsers(fmsToFreeipaBatchCallEnabled, freeIpaClient, ImmutableSet.of(userToDelete), warnings);
+        LOGGER.debug("Finished {}.", REMOVE_USERS);
     }
 
     private WorkloadCredentialUpdate getCredentialUpdate(String username, UmsUsersState umsUsersState) {

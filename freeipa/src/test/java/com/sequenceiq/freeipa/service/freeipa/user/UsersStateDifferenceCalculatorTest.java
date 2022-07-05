@@ -249,6 +249,7 @@ class UsersStateDifferenceCalculatorTest {
         String group = "group";
         String unmanagedGroup = FreeIpaChecks.IPA_UNMANAGED_GROUPS.get(0);
         String largeGroup = "largeGroup";
+        String allowedLargeGroup = UserSyncConstants.ENV_ASSIGNEES_GROUP_PREFIX + UUID.randomUUID().toString();
 
         String userUms = "userUms";
         String userBoth = "userBoth";
@@ -263,6 +264,7 @@ class UsersStateDifferenceCalculatorTest {
 
         for (int i = 0; i <= groupSizeLimit; ++i) {
             usersStateBuilder.addMemberToGroup(largeGroup, userLargeGroupBase + i);
+            usersStateBuilder.addMemberToGroup(allowedLargeGroup, userLargeGroupBase + i);
         }
 
         UmsUsersState umsUsersState = new UmsUsersState.Builder()
@@ -295,6 +297,8 @@ class UsersStateDifferenceCalculatorTest {
         // no members added to large group
         assertFalse(groupMembershipsToAdd.containsKey(largeGroup));
         assertEquals(1, warnings.size());
+        // allowed large group should be in the difference
+        assertTrue(groupMembershipsToAdd.containsKey(allowedLargeGroup));
     }
 
     @Test
