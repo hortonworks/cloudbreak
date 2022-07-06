@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.TELEMETRY;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.substringBefore;
@@ -93,6 +94,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.monitoring.MonitoringEnablementService;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
@@ -126,7 +128,7 @@ import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
 @Service
-public class StackService implements ResourceIdProvider, AuthorizationResourceNamesProvider, PayloadContextProvider {
+public class StackService implements ResourceIdProvider, AuthorizationResourceNamesProvider, PayloadContextProvider, MonitoringEnablementService<Stack> {
 
     public static final Set<String> REATTACH_COMPATIBLE_PLATFORMS = Set.of(
             CloudConstants.AWS,
@@ -1035,5 +1037,20 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     public int getNotUpgradedStackCount(String envCrn, Tunnel latestTunnel) {
         return stackRepository.getNotUpgradedStackCount(envCrn, latestTunnel);
+    }
+
+    @Override
+    public Optional<Boolean> computeMonitoringEnabled(Stack entity) {
+        try {
+            Set<Component> components = componentConfigProviderService.getComponentsByStackId(entity.getId());
+            Telemetry telemetry = ComponentConfigProviderService.getComponent(components, Telemetry.class, TELEMETRY);
+            if (telemetry != null) {
+                return Optional.of(telemetry.isComputeMonitoringEnabled());
+            } else {
+                return Optional.empty();
+            }
+        } catch (Exception e) {
+            return Optional.empty();
+        }
     }
 }

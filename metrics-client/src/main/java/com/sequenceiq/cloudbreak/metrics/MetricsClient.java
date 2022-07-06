@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.metrics;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -28,6 +30,8 @@ public class MetricsClient {
 
     private static final String CLUSTER_TYPE_LABEL_NAME = "cluster_type";
 
+    private static final String COMPUTE_MONITORING_ENABLED_LABEL_NAME = "compute_monitoring_enabled";
+
     private static final String METRIC_NAME_VALUE = "cb_cluster_state";
 
     private final MetricsRecordProcessor metricsRecordProcessor;
@@ -42,7 +46,8 @@ public class MetricsClient {
         this.configuration = metricsRecordProcessor.getConfiguration();
     }
 
-    public void processStackStatus(String resourceCrn, String platform, String status, Integer statusOrdinal) {
+    public void processStackStatus(String resourceCrn, String platform, String status, Integer statusOrdinal,
+            Optional<Boolean> computeMonitoringEnabled) {
         if (!configuration.isEnabled()) {
             LOGGER.debug("Processing stack status (compute monitoring) is disabled.");
             return;
@@ -53,43 +58,50 @@ public class MetricsClient {
         }
         Crn crn = Crn.safeFromString(resourceCrn);
         if (configuration.isPaasSupported() || entitlementService.isCdpSaasEnabled(crn.getAccountId())) {
-            processRequest(resourceCrn, platform, status, statusOrdinal, crn);
+            processRequest(resourceCrn, platform, status, statusOrdinal, crn, computeMonitoringEnabled);
         } else {
             LOGGER.debug("Compute metrics processing is skipped (no paas or entitlement support )");
         }
     }
 
-    private void processRequest(String resourceCrn, String platform, String status, Integer statusOrdinal, Crn crn) {
+    private void processRequest(String resourceCrn, String platform, String status, Integer statusOrdinal, Crn crn,
+            Optional<Boolean> computeMonitoringEnabled) {
+        Types.TimeSeries.Builder timeSeriesBuilder = Types.TimeSeries.newBuilder()
+                .addLabels(Types.Label.newBuilder()
+                        .setName(METRIC_LABEL_NAME)
+                        .setValue(METRIC_NAME_VALUE)
+                        .build())
+                .addLabels(Types.Label.newBuilder()
+                        .setName(RESOURCE_CRN_LABEL_NAME)
+                        .setValue(resourceCrn)
+                        .build())
+                .addLabels(Types.Label.newBuilder()
+                        .setName(PLATFORM_LABEL_NAME)
+                        .setValue(platform)
+                        .build())
+                .addLabels(Types.Label.newBuilder()
+                        .setName(CLUSTER_STATUS_LABEL_NAME)
+                        .setValue(status)
+                        .build())
+                .addLabels(Types.Label.newBuilder()
+                        .setName(CLUSTER_TYPE_LABEL_NAME)
+                        .setValue(crn.getService().getName())
+                        .build())
+                .addSamples(Types.Sample.newBuilder()
+                        .setValue(statusOrdinal.doubleValue())
+                        .setTimestamp(System.currentTimeMillis())
+                        .build());
+        computeMonitoringEnabled.ifPresent(aBoolean ->
+                timeSeriesBuilder.addLabels(Types.Label.newBuilder()
+                        .setName(COMPUTE_MONITORING_ENABLED_LABEL_NAME)
+                        .setValue(String.valueOf(aBoolean))
+                        .build()));
         Remote.WriteRequest writeRequest = Remote.WriteRequest.newBuilder()
                 .addMetadata(Types.MetricMetadata.newBuilder()
                         .setType(Types.MetricMetadata.MetricType.INFO)
                         .build())
-                .addTimeseries(Types.TimeSeries.newBuilder()
-                        .addLabels(Types.Label.newBuilder()
-                                .setName(METRIC_LABEL_NAME)
-                                .setValue(METRIC_NAME_VALUE)
-                                .build())
-                        .addLabels(Types.Label.newBuilder()
-                                .setName(RESOURCE_CRN_LABEL_NAME)
-                                .setValue(resourceCrn)
-                                .build())
-                        .addLabels(Types.Label.newBuilder()
-                                .setName(PLATFORM_LABEL_NAME)
-                                .setValue(platform)
-                                .build())
-                        .addLabels(Types.Label.newBuilder()
-                                .setName(CLUSTER_STATUS_LABEL_NAME)
-                                .setValue(status)
-                                .build())
-                        .addLabels(Types.Label.newBuilder()
-                                .setName(CLUSTER_TYPE_LABEL_NAME)
-                                .setValue(crn.getService().getName())
-                                .build())
-                        .addSamples(Types.Sample.newBuilder()
-                                .setValue(statusOrdinal.doubleValue())
-                                .setTimestamp(System.currentTimeMillis())
-                                .build())
-                ).build();
+                .addTimeseries(timeSeriesBuilder)
+                .build();
         MetricsRecordRequest request = new MetricsRecordRequest(writeRequest, Crn.safeFromString(resourceCrn).getAccountId());
         metricsRecordProcessor.processRecord(request);
     }

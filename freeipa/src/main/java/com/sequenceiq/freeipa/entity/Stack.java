@@ -33,6 +33,7 @@ import javax.persistence.Version;
 
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmConnectivityParameters;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
+import com.sequenceiq.cloudbreak.common.domain.IdAware;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -48,7 +49,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environmentcrn", "terminated"}))
-public class Stack implements AccountAwareResource, OrchestratorAware {
+public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
     @SequenceGenerator(name = "stack_generator", sequenceName = "stack_id_seq", allocationSize = 1)
