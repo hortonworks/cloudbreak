@@ -936,7 +936,7 @@ public class ClusterHostServiceRunner {
                         : instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroupId);
                 instanceMetaDataSet.stream()
                         .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
-                        .sorted(Comparator.comparing(InstanceMetaData::getStartDate))
+                        .sorted(Comparator.comparing(InstanceMetaData::getStartDate).reversed())
                         .limit(adjustment.longValue())
                         .forEach(im -> hostNames.put(im.getDiscoveryFQDN(), im.getPrivateIp()));
             }
