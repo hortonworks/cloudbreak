@@ -1,11 +1,16 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class DatalakeVmReplaceWaitRequest extends SdxEvent {
 
-    public DatalakeVmReplaceWaitRequest(Long sdxId, String userId) {
+    @JsonCreator
+    public DatalakeVmReplaceWaitRequest(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId) {
         super(sdxId, userId);
     }
 

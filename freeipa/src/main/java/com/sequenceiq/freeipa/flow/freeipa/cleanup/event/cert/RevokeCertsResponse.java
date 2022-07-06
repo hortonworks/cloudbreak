@@ -3,17 +3,21 @@ package com.sequenceiq.freeipa.flow.freeipa.cleanup.event.cert;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class RevokeCertsResponse extends AbstractCleanupEvent {
 
-    private Set<String> certCleanupSuccess;
+    private final Set<String> certCleanupSuccess;
 
-    private Map<String, String> certCleanupFailed;
+    private final Map<String, String> certCleanupFailed;
 
     protected RevokeCertsResponse(Long stackId) {
         super(stackId);
+        certCleanupSuccess = null;
+        certCleanupFailed = null;
     }
 
     public RevokeCertsResponse(CleanupEvent cleanupEvent, Set<String> certCleanupSuccess, Map<String, String> certCleanupFailed) {
@@ -22,8 +26,12 @@ public class RevokeCertsResponse extends AbstractCleanupEvent {
         this.certCleanupFailed = certCleanupFailed;
     }
 
-    public RevokeCertsResponse(String selector, CleanupEvent cleanupEvent, Set<String> certCleanupSuccess,
-            Map<String, String> certCleanupFailed) {
+    @JsonCreator
+    public RevokeCertsResponse(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("cleanupEvent") CleanupEvent cleanupEvent,
+            @JsonProperty("certCleanupSuccess") Set<String> certCleanupSuccess,
+            @JsonProperty("certCleanupFailed") Map<String, String> certCleanupFailed) {
         super(selector, cleanupEvent);
         this.certCleanupSuccess = certCleanupSuccess;
         this.certCleanupFailed = certCleanupFailed;

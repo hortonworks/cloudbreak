@@ -65,7 +65,7 @@ public class DiagnosticsCollectionActions {
                 InMemoryStateStore.putStack(resourceId, PollGroup.POLLABLE);
                 String excludedHosts = CollectionUtils.isEmpty(payload.getParameters().getExcludeHosts())
                         ? "[NONE]" : String.format("[%s]", String.join(",", payload.getParameters().getExcludeHosts()));
-                if (payload.getParameters().getSkipUnresponsiveHosts()) {
+                if (payload.getParameters().isSkipUnresponsiveHosts()) {
                     cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(),
                             ResourceEvent.STACK_DIAGNOSTICS_SALT_VALIDATION_RUNNING_SKIP_UNRESPONSIVE, List.of(excludedHosts));
                 } else {

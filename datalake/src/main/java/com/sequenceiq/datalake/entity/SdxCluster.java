@@ -438,6 +438,10 @@ public class SdxCluster implements AccountAwareResource {
         this.name = name;
     }
 
+    public String getRepairFlowChainId() {
+        return repairFlowChainId;
+    }
+
     public void setRepairFlowChainId(String repairFlowChainId) {
         this.repairFlowChainId = repairFlowChainId;
     }

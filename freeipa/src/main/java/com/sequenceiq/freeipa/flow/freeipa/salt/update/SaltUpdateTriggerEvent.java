@@ -2,7 +2,10 @@ package com.sequenceiq.freeipa.flow.freeipa.salt.update;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 import reactor.rx.Promise;
@@ -21,7 +24,13 @@ public class SaltUpdateTriggerEvent extends StackEvent {
         finalChain = false;
     }
 
-    public SaltUpdateTriggerEvent(String selector, Long stackId, Promise<AcceptResult> accepted, boolean chained, boolean finalChain) {
+    @JsonCreator
+    public SaltUpdateTriggerEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonProperty("chained") boolean chained,
+            @JsonProperty("finalChain") boolean finalChain) {
         super(selector, stackId, accepted);
         this.chained = chained;
         this.finalChain = finalChain;
@@ -34,6 +43,10 @@ public class SaltUpdateTriggerEvent extends StackEvent {
 
     public String getOperationId() {
         return operationId;
+    }
+
+    public void setOperationId(String operationId) {
+        this.operationId = operationId;
     }
 
     public boolean isChained() {

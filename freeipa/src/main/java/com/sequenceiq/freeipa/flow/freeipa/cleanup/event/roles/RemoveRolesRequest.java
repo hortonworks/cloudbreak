@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.cleanup.event.roles;
 
-import com.sequenceiq.freeipa.entity.Stack;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
@@ -10,11 +11,14 @@ public class RemoveRolesRequest extends AbstractCleanupEvent {
         super(stackId);
     }
 
-    public RemoveRolesRequest(CleanupEvent cleanupEvent, Stack stack) {
+    public RemoveRolesRequest(CleanupEvent cleanupEvent) {
         super(cleanupEvent);
     }
 
-    public RemoveRolesRequest(String selector, CleanupEvent cleanupEvent, Stack stack) {
+    @JsonCreator
+    public RemoveRolesRequest(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("cleanupEvent") CleanupEvent cleanupEvent) {
         super(selector, cleanupEvent);
     }
 }

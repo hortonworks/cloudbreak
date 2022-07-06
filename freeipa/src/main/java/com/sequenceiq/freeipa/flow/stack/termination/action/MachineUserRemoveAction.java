@@ -17,7 +17,7 @@ public class MachineUserRemoveAction extends AbstractStackTerminationAction<Term
 
     @Override
     protected void doExecute(StackTerminationContext context, TerminationEvent payload, Map<Object, Object> variables) throws Exception {
-        RemoveMachineUserRequest request = new RemoveMachineUserRequest(payload.getResourceId(), payload.getForced());
+        RemoveMachineUserRequest request = new RemoveMachineUserRequest(payload.getResourceId(), payload.isForced());
         sendEvent(context, request);
     }
 }

@@ -1,10 +1,15 @@
 package com.sequenceiq.datalake.flow.stop.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class RdsStopSuccessEvent extends SdxEvent {
 
-    public RdsStopSuccessEvent(Long sdxId, String userId) {
+    @JsonCreator
+    public RdsStopSuccessEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId) {
         super(sdxId, userId);
     }
 

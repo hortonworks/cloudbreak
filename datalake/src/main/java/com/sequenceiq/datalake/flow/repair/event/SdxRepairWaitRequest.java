@@ -1,11 +1,16 @@
 package com.sequenceiq.datalake.flow.repair.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class SdxRepairWaitRequest extends SdxEvent {
 
-    public SdxRepairWaitRequest(Long sdxId, String userId) {
+    @JsonCreator
+    public SdxRepairWaitRequest(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId) {
         super(sdxId, userId);
     }
 

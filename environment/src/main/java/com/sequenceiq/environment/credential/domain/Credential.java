@@ -12,10 +12,10 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.auth.security.AuthResource;
+import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
-import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
 import com.sequenceiq.common.model.CredentialType;
 import com.sequenceiq.environment.parameters.dao.converter.CredentialTypeConverter;
 
@@ -69,6 +69,14 @@ public class Credential implements Serializable, AuthResource, AccountAwareResou
 
     public Long getCreated() {
         return created;
+    }
+
+    /**
+     * Need this for Jackson deserialization
+     * @param created timestamp
+     */
+    private void setCreated(Long created) {
+        this.created = created;
     }
 
     public Long getId() {
@@ -127,7 +135,7 @@ public class Credential implements Serializable, AuthResource, AccountAwareResou
         this.attributes = attributes;
     }
 
-    public Boolean getGovCloud() {
+    public Boolean isGovCloud() {
         return govCloud;
     }
 

@@ -1,16 +1,22 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.backup;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.BackupRestoreEvent;
 
 public class DatabaseBackupFailedEvent extends BackupRestoreEvent {
 
-    private Exception exception;
+    private final Exception exception;
 
-    private DetailedStackStatus detailedStatus;
+    private final DetailedStackStatus detailedStatus;
 
-    public DatabaseBackupFailedEvent(Long stackId, Exception exception, DetailedStackStatus detailedStatus) {
+    @JsonCreator
+    public DatabaseBackupFailedEvent(
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("exception") Exception exception,
+            @JsonProperty("detailedStatus") DetailedStackStatus detailedStatus) {
         super(stackId, null, null);
         this.exception = exception;
         this.detailedStatus = detailedStatus;

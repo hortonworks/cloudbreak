@@ -5,6 +5,8 @@ import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -38,7 +40,12 @@ public class SdxEvent implements IdempotentEvent<SdxEvent> {
         sdxName = null;
     }
 
-    public SdxEvent(String selector, Long sdxId, String sdxName, String userId) {
+    @JsonCreator
+    public SdxEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("sdxName") String sdxName,
+            @JsonProperty("userId") String userId) {
         this.selector = selector;
         this.sdxId = sdxId;
         this.sdxName = sdxName;

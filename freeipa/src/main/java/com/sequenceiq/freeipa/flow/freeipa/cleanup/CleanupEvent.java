@@ -3,30 +3,41 @@ package com.sequenceiq.freeipa.flow.freeipa.cleanup;
 import java.util.Objects;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class CleanupEvent extends StackEvent {
 
-    private Set<String> users;
+    private final Set<String> users;
 
-    private Set<String> hosts;
+    private final Set<String> hosts;
 
-    private Set<String> roles;
+    private final Set<String> roles;
 
-    private Set<String> ips;
+    private final Set<String> ips;
 
-    private Set<String> statesToSkip;
+    private final Set<String> statesToSkip;
 
-    private String accountId;
+    private final String accountId;
 
-    private String operationId;
+    private final String operationId;
 
-    private String clusterName;
+    private final String clusterName;
 
-    private String environmentCrn;
+    private final String environmentCrn;
 
     protected CleanupEvent(Long stackId) {
         super(stackId);
+        users = null;
+        hosts = null;
+        roles = null;
+        ips = null;
+        statesToSkip = null;
+        accountId = null;
+        operationId = null;
+        clusterName = null;
+        environmentCrn = null;
     }
 
     @SuppressWarnings("ExecutableStatementCount")
@@ -45,8 +56,19 @@ public class CleanupEvent extends StackEvent {
     }
 
     @SuppressWarnings("ExecutableStatementCount")
-    public CleanupEvent(String selector, Long stackId, Set<String> users, Set<String> hosts, Set<String> roles,
-            Set<String> ips, Set<String> statesToSkip, String accountId, String operationId, String clusterName, String environmentCrn) {
+    @JsonCreator
+    public CleanupEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("users") Set<String> users,
+            @JsonProperty("hosts") Set<String> hosts,
+            @JsonProperty("roles") Set<String> roles,
+            @JsonProperty("ips") Set<String> ips,
+            @JsonProperty("statesToSkip") Set<String> statesToSkip,
+            @JsonProperty("accountId") String accountId,
+            @JsonProperty("operationId") String operationId,
+            @JsonProperty("clusterName") String clusterName,
+            @JsonProperty("environmentCrn") String environmentCrn) {
         super(selector, stackId);
         this.users = users;
         this.hosts = hosts;

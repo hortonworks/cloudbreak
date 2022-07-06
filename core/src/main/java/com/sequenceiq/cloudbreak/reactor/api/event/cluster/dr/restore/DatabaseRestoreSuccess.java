@@ -1,10 +1,14 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.restore;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.BackupRestoreEvent;
 
 public class DatabaseRestoreSuccess extends BackupRestoreEvent {
 
-    public DatabaseRestoreSuccess(Long stackId) {
+    @JsonCreator
+    public DatabaseRestoreSuccess(
+            @JsonProperty("resourceId") Long stackId) {
         super(stackId, null, null);
     }
 }

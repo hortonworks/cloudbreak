@@ -3,8 +3,11 @@ package com.sequenceiq.flow.component.sleep.event;
 import java.util.ArrayList;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 
 import reactor.rx.Promise;
 
@@ -18,9 +21,11 @@ public class NestedSleepChainTriggerEvent implements IdempotentEvent<NestedSleep
 
     private final Promise<AcceptResult> accepted;
 
-    public NestedSleepChainTriggerEvent(Long resourceId,
-            ArrayList<SleepChainTriggerEvent> sleepChainTriggerEvents,
-            Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public NestedSleepChainTriggerEvent(
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("sleepChainTriggerEvents") ArrayList<SleepChainTriggerEvent> sleepChainTriggerEvents,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
         this.resourceId = resourceId;
         this.sleepChainTriggerEvents = sleepChainTriggerEvents;
         this.accepted = accepted;

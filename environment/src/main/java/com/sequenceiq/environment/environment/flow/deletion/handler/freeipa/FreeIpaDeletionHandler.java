@@ -83,7 +83,7 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
         } catch (Exception e) {
             LOGGER.error("FreeIPA deletion failed", e);
             EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
-                    .withEnvironmentID(environmentDto.getId())
+                    .withEnvironmentId(environmentDto.getId())
                     .withException(e)
                     .withResourceCrn(environmentDto.getResourceCrn())
                     .withResourceName(environmentDto.getName())

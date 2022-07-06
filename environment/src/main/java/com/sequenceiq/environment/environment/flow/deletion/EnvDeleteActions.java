@@ -324,7 +324,7 @@ public class EnvDeleteActions {
         protected Object getFailurePayload(P payload, Optional<CommonContext> flowContext, Exception ex) {
             return EnvDeleteFailedEvent.builder()
                     .withException(ex)
-                    .withEnvironmentID(NullUtil.getIfNotNullOtherwise(payload, ResourceCrnPayload::getResourceId, -1L))
+                    .withEnvironmentId(NullUtil.getIfNotNullOtherwise(payload, ResourceCrnPayload::getResourceId, -1L))
                     .withResourceCrn(NullUtil.getIfNotNullOtherwise(payload, ResourceCrnPayload::getResourceCrn, "null CRN"))
                     .build();
         }

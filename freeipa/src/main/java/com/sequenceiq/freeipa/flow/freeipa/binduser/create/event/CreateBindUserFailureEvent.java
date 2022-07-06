@@ -1,13 +1,24 @@
 package com.sequenceiq.freeipa.flow.freeipa.binduser.create.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CreateBindUserFailureEvent extends CreateBindUserEvent {
 
     private final String failureMessage;
 
     private final Exception exception;
 
-    public CreateBindUserFailureEvent(String selector, Long stackId, String accountId, String operationId, String suffix, String environmentCrn,
-            String failureMessage, Exception exception) {
+    @JsonCreator
+    public CreateBindUserFailureEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("accountId") String accountId,
+            @JsonProperty("operationId") String operationId,
+            @JsonProperty("suffix") String suffix,
+            @JsonProperty("environmentCrn") String environmentCrn,
+            @JsonProperty("failureMessage") String failureMessage,
+            @JsonProperty("exception") Exception exception) {
         super(selector, stackId, accountId, operationId, suffix, environmentCrn);
         this.failureMessage = failureMessage;
         this.exception = exception;

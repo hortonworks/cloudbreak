@@ -4,7 +4,10 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 
 import reactor.rx.Promise;
@@ -36,9 +39,16 @@ public class ClusterAndStackDownscaleTriggerEvent extends ClusterDownscaleTrigge
         this.scalingType = scalingType;
     }
 
-    public ClusterAndStackDownscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment,
-            Map<String, Set<Long>> hostGroupWithPrivateIds, Map<String, Set<String>> hostGroupWithHostNames, ScalingType scalingType,
-            Promise<AcceptResult> accepted, ClusterDownscaleDetails details) {
+    @JsonCreator
+    public ClusterAndStackDownscaleTriggerEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("hostGroupsWithAdjustment") Map<String, Integer> hostGroupWithAdjustment,
+            @JsonProperty("hostGroupsWithPrivateIds") Map<String, Set<Long>> hostGroupWithPrivateIds,
+            @JsonProperty("hostGroupsWithHostNames") Map<String, Set<String>> hostGroupWithHostNames,
+            @JsonProperty("scalingType") ScalingType scalingType,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonProperty("details") ClusterDownscaleDetails details) {
         super(selector, stackId, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostGroupWithHostNames, accepted, details);
         this.scalingType = scalingType;
     }

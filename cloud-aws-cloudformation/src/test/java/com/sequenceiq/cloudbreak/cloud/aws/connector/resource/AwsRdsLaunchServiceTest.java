@@ -231,9 +231,9 @@ class AwsRdsLaunchServiceTest {
 
         Security security = new Security(Collections.emptyList(), List.of(SECURITY_GROUP_ID));
         DatabaseServer databaseServer = DatabaseServer.builder()
-                .useSslEnforcement(useSslEnforcement)
-                .params(sslCertificateIdentifierDefined ? Map.of(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER, SSL_CERTIFICATE_IDENTIFIER) : Map.of())
-                .security(security)
+                .withUseSslEnforcement(useSslEnforcement)
+                .withParams(sslCertificateIdentifierDefined ? Map.of(DatabaseServer.SSL_CERTIFICATE_IDENTIFIER, SSL_CERTIFICATE_IDENTIFIER) : Map.of())
+                .withSecurity(security)
                 .build();
 
         return new DatabaseStack(network, databaseServer, Collections.emptyMap(), null);

@@ -2,13 +2,20 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Location {
 
     private final Region region;
 
     private final AvailabilityZone availabilityZone;
 
-    private Location(Region region, AvailabilityZone availabilityZone) {
+    @JsonCreator
+    private Location(
+            @JsonProperty("region") Region region,
+            @JsonProperty("availabilityZone") AvailabilityZone availabilityZone) {
+
         this.region = region;
         this.availabilityZone = availabilityZone;
     }

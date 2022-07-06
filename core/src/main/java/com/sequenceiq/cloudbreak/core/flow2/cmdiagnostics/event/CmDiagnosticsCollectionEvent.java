@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.common.model.diagnostics.CmDiagnosticsParameters;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
@@ -15,8 +18,13 @@ public class CmDiagnosticsCollectionEvent extends BaseFlowEvent {
         this.parameters = parameters;
     }
 
-    public CmDiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted,
-            CmDiagnosticsParameters parameters) {
+    @JsonCreator
+    public CmDiagnosticsCollectionEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("resourceCrn") String resourceCrn,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonProperty("parameters") CmDiagnosticsParameters parameters) {
         super(selector, resourceId, resourceCrn, accepted);
         this.parameters = parameters;
     }

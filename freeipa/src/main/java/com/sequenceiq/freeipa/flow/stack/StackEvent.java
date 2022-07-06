@@ -5,8 +5,11 @@ import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 import reactor.rx.Promise;
@@ -29,7 +32,11 @@ public class StackEvent implements IdempotentEvent<StackEvent> {
         accepted = new Promise<>();
     }
 
-    public StackEvent(String selector, Long stackId, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public StackEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
         this.selector = selector;
         this.stackId = stackId;
         this.accepted = accepted;

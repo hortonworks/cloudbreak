@@ -4,8 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import reactor.bus.Event;
-
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
@@ -16,6 +14,8 @@ import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalanc
 import com.sequenceiq.environment.environment.service.LoadBalancerPollerService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
+
+import reactor.bus.Event;
 
 @Component
 public class LoadBalancerStackUpdateHandler extends EventSenderAwareHandler<EnvironmentLoadBalancerDto> {
@@ -50,7 +50,7 @@ public class LoadBalancerStackUpdateHandler extends EventSenderAwareHandler<Envi
                 .withResourceName(environmentDto.getName())
                 .withResourceCrn(environmentDto.getResourceCrn())
                 .withEnvironmentDto(environmentDto)
-                .withPublicEndpointAccessGateway(environmentLoadBalancerDto.getEndpointAccessGateway())
+                .withEndpointAccessGateway(environmentLoadBalancerDto.getEndpointAccessGateway())
                 .withSubnetIds(environmentLoadBalancerDto.getEndpointGatewaySubnetIds())
                 .build();
             eventSender().sendEvent(loadBalancerUpdateEvent, envLoadBalancerDtoEvent.getHeaders());

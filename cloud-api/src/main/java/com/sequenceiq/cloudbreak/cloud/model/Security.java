@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.Nonnull;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 
 public class Security {
@@ -19,7 +21,12 @@ public class Security {
         this(rules, cloudSecurityIds, false);
     }
 
-    public Security(@Nonnull Collection<SecurityRule> rules, @Nonnull Collection<String> cloudSecurityIds, boolean useNetworkCidrAsSourceForDefaultRules) {
+    @JsonCreator
+    public Security(
+            @JsonProperty("rules") @Nonnull Collection<SecurityRule> rules,
+            @JsonProperty("cloudSecurityIds") @Nonnull Collection<String> cloudSecurityIds,
+            @JsonProperty("useNetworkCidrAsSourceForDefaultRules") boolean useNetworkCidrAsSourceForDefaultRules) {
+
         this.rules = ImmutableList.copyOf(rules);
         this.cloudSecurityIds = ImmutableList.copyOf(cloudSecurityIds);
         this.useNetworkCidrAsSourceForDefaultRules = useNetworkCidrAsSourceForDefaultRules;

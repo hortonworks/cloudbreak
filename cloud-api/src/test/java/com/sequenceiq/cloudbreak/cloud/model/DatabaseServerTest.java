@@ -21,7 +21,7 @@ class DatabaseServerTest {
 
     @Test
     void isUseSslEnforcementTestWhenFalse() {
-        DatabaseServer databaseServer = DatabaseServer.builder().useSslEnforcement(false).build();
+        DatabaseServer databaseServer = DatabaseServer.builder().withUseSslEnforcement(false).build();
 
         assertThat(databaseServer).isNotNull();
         assertThat(databaseServer.isUseSslEnforcement()).isFalse();
@@ -29,7 +29,7 @@ class DatabaseServerTest {
 
     @Test
     void isUseSslEnforcementTestWhenTrue() {
-        DatabaseServer databaseServer = DatabaseServer.builder().useSslEnforcement(true).build();
+        DatabaseServer databaseServer = DatabaseServer.builder().withUseSslEnforcement(true).build();
 
         assertThat(databaseServer).isNotNull();
         assertThat(databaseServer.isUseSslEnforcement()).isTrue();
@@ -37,7 +37,7 @@ class DatabaseServerTest {
 
     @Test
     void toStringTestWhenSslEnforcement() {
-        DatabaseServer databaseServer = DatabaseServer.builder().useSslEnforcement(true).build();
+        DatabaseServer databaseServer = DatabaseServer.builder().withUseSslEnforcement(true).build();
 
         assertThat(databaseServer).isNotNull();
         assertThat(databaseServer.toString()).contains("useSslEnforcement='true'");

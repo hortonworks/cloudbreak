@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.cleanup.event.cert;
 
-import java.util.Set;
-
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
@@ -16,7 +16,10 @@ public class RevokeCertsRequest extends AbstractCleanupEvent {
         super(cleanupEvent);
     }
 
-    public RevokeCertsRequest(String selector, CleanupEvent cleanupEvent, Stack stack, Set<String> hosts) {
+    @JsonCreator
+    public RevokeCertsRequest(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("cleanupEvent") CleanupEvent cleanupEvent) {
         super(selector, cleanupEvent);
     }
 }

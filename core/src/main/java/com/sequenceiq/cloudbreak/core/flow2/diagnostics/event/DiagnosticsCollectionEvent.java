@@ -2,7 +2,10 @@ package com.sequenceiq.cloudbreak.core.flow2.diagnostics.event;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
@@ -27,8 +30,16 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
         this.excludeHosts = excludeHosts;
     }
 
-    public DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted,
-            DiagnosticParameters parameters, Set<String> hosts, Set<String> hostGroups, Set<String> excludeHosts) {
+    @JsonCreator
+    public DiagnosticsCollectionEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("resourceCrn") String resourceCrn,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonProperty("parameters") DiagnosticParameters parameters,
+            @JsonProperty("hosts") Set<String> hosts,
+            @JsonProperty("hostGroups") Set<String> hostGroups,
+            @JsonProperty("excludeHosts") Set<String> excludeHosts) {
         super(selector, resourceId, resourceCrn, accepted);
         this.parameters = parameters;
         this.hosts = hosts;

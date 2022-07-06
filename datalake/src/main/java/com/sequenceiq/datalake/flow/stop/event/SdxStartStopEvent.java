@@ -1,13 +1,17 @@
 package com.sequenceiq.datalake.flow.stop.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.stop.SdxStopEvent;
+
 import reactor.rx.Promise;
 
 public class SdxStartStopEvent extends SdxEvent {
 
-    private boolean stopDataHubs;
+    private final boolean stopDataHubs;
 
     public SdxStartStopEvent(String selector, Long sdxId, String userId) {
         super(selector, sdxId, userId);
@@ -19,7 +23,13 @@ public class SdxStartStopEvent extends SdxEvent {
         stopDataHubs = true;
     }
 
-    public SdxStartStopEvent(String selector, Long sdxId, String userId, boolean stopDataHubs, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public SdxStartStopEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("stopDataHubs") boolean stopDataHubs,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, accepted);
         this.stopDataHubs = stopDataHubs;
     }
@@ -29,7 +39,7 @@ public class SdxStartStopEvent extends SdxEvent {
         this.stopDataHubs = stopDataHubs;
     }
 
-    public boolean stopDataHubs() {
+    public boolean isStopDataHubs() {
         return stopDataHubs;
     }
 

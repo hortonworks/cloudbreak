@@ -64,7 +64,7 @@ public class StackSyncActions {
         return new AbstractStackSyncAction<>(StackSyncTriggerEvent.class) {
             @Override
             protected void prepareExecution(StackSyncTriggerEvent payload, Map<Object, Object> variables) {
-                variables.put(STATUS_UPDATE_ENABLED, payload.getStatusUpdateEnabled());
+                variables.put(STATUS_UPDATE_ENABLED, payload.isStatusUpdateEnabled());
             }
 
             @Override

@@ -1,21 +1,29 @@
 package com.sequenceiq.flow.core.chain.finalize.flowevents;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeEvent;
 
 import reactor.rx.Promise;
 
 public class FlowChainFinalizePayload implements Selectable, Acceptable {
 
-    private Long resourceId;
+    private final Long resourceId;
 
-    private String flowChainName;
+    private final String flowChainName;
 
     private final Promise<AcceptResult> accepted;
 
-    public FlowChainFinalizePayload(String flowChainName, Long resourceId, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public FlowChainFinalizePayload(
+            @JsonProperty("flowChainName") String flowChainName,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+
         this.flowChainName = flowChainName;
         this.resourceId = resourceId;
         this.accepted = accepted;

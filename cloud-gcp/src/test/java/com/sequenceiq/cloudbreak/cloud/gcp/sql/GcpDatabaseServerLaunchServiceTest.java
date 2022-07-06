@@ -165,18 +165,18 @@ public class GcpDatabaseServerLaunchServiceTest {
         Map<String, Object> map = new HashMap<>();
         map.put("engineVersion", "1");
         DatabaseServer databaseServer = DatabaseServer.builder()
-                .connectionDriver("driver")
-                .serverId("driver")
-                .connectorJarUrl("driver")
-                .engine(DatabaseEngine.POSTGRESQL)
-                .location("location")
-                .port(99)
-                .storageSize(50L)
-                .rootUserName("rootUserName")
-                .rootPassword("rootPassword")
-                .flavor("flavor")
-                .useSslEnforcement(true)
-                .params(map)
+                .withConnectionDriver("driver")
+                .withServerId("driver")
+                .withConnectorJarUrl("driver")
+                .withEngine(DatabaseEngine.POSTGRESQL)
+                .withLocation("location")
+                .withPort(99)
+                .withStorageSize(50L)
+                .withRootUserName("rootUserName")
+                .withRootPassword("rootPassword")
+                .withFlavor("flavor")
+                .withUseSslEnforcement(true)
+                .withParams(map)
                 .build();
 
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
@@ -248,18 +248,18 @@ public class GcpDatabaseServerLaunchServiceTest {
         map.put("engineVersion", "1");
         map.put("key", "value");
         DatabaseServer databaseServer = DatabaseServer.builder()
-                .connectionDriver("driver")
-                .serverId("driver")
-                .connectorJarUrl("driver")
-                .engine(DatabaseEngine.POSTGRESQL)
-                .location("location")
-                .port(99)
-                .storageSize(50L)
-                .rootUserName("rootUserName")
-                .rootPassword("rootPassword")
-                .flavor("flavor")
-                .useSslEnforcement(true)
-                .params(map)
+                .withConnectionDriver("driver")
+                .withServerId("driver")
+                .withConnectorJarUrl("driver")
+                .withEngine(DatabaseEngine.POSTGRESQL)
+                .withLocation("location")
+                .withPort(99)
+                .withStorageSize(50L)
+                .withRootUserName("rootUserName")
+                .withRootPassword("rootPassword")
+                .withFlavor("flavor")
+                .withUseSslEnforcement(true)
+                .withParams(map)
                 .build();
 
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
@@ -324,18 +324,18 @@ public class GcpDatabaseServerLaunchServiceTest {
         Map<String, Object> map = new HashMap<>();
         map.put("engineVersion", "1");
         DatabaseServer databaseServer = DatabaseServer.builder()
-                .connectionDriver("driver")
-                .serverId("driver")
-                .connectorJarUrl("driver")
-                .engine(DatabaseEngine.POSTGRESQL)
-                .location("location")
-                .port(99)
-                .storageSize(50L)
-                .rootUserName("rootUserName")
-                .rootPassword("rootPassword")
-                .flavor("flavor")
-                .useSslEnforcement(true)
-                .params(map)
+                .withConnectionDriver("driver")
+                .withServerId("driver")
+                .withConnectorJarUrl("driver")
+                .withEngine(DatabaseEngine.POSTGRESQL)
+                .withLocation("location")
+                .withPort(99)
+                .withStorageSize(50L)
+                .withRootUserName("rootUserName")
+                .withRootPassword("rootPassword")
+                .withFlavor("flavor")
+                .withUseSslEnforcement(true)
+                .withParams(map)
                 .build();
 
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
@@ -383,18 +383,18 @@ public class GcpDatabaseServerLaunchServiceTest {
         Map<String, Object> map = new HashMap<>();
         map.put("engineVersion", "1");
         DatabaseServer databaseServer = DatabaseServer.builder()
-                .connectionDriver("driver")
-                .serverId("driver")
-                .connectorJarUrl("driver")
-                .engine(DatabaseEngine.POSTGRESQL)
-                .location("location")
-                .port(99)
-                .storageSize(50L)
-                .rootUserName("rootUserName")
-                .rootPassword("rootPassword")
-                .flavor("flavor")
-                .useSslEnforcement(true)
-                .params(map)
+                .withConnectionDriver("driver")
+                .withServerId("driver")
+                .withConnectorJarUrl("driver")
+                .withEngine(DatabaseEngine.POSTGRESQL)
+                .withLocation("location")
+                .withPort(99)
+                .withStorageSize(50L)
+                .withRootUserName("rootUserName")
+                .withRootPassword("rootPassword")
+                .withFlavor("flavor")
+                .withUseSslEnforcement(true)
+                .withParams(map)
                 .build();
 
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);

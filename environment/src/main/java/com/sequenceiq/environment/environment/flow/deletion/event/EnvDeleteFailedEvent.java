@@ -2,10 +2,12 @@ package com.sequenceiq.environment.environment.flow.deletion.event;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FAILED_ENV_DELETE_EVENT;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.flow.reactor.api.event.BaseFailedFlowEvent;
 
-public class EnvDeleteFailedEvent extends BaseFailedFlowEvent implements Selectable {
+@JsonDeserialize(builder = EnvDeleteFailedEvent.EnvDeleteFailedEventBuilder.class)
+public class EnvDeleteFailedEvent extends BaseFailedFlowEvent {
 
     public EnvDeleteFailedEvent(Long environmentId, String resourceName, Exception exception, String resourceCrn) {
         super(FAILED_ENV_DELETE_EVENT.name(), environmentId, resourceName, resourceCrn, exception);
@@ -20,6 +22,7 @@ public class EnvDeleteFailedEvent extends BaseFailedFlowEvent implements Selecta
         return new EnvDeleteFailedEventBuilder();
     }
 
+    @JsonPOJOBuilder
     public static final class EnvDeleteFailedEventBuilder {
         private Long environmentId;
 
@@ -32,7 +35,7 @@ public class EnvDeleteFailedEvent extends BaseFailedFlowEvent implements Selecta
         private EnvDeleteFailedEventBuilder() {
         }
 
-        public EnvDeleteFailedEventBuilder withEnvironmentID(Long environmentId) {
+        public EnvDeleteFailedEventBuilder withEnvironmentId(Long environmentId) {
             this.environmentId = environmentId;
             return this;
         }

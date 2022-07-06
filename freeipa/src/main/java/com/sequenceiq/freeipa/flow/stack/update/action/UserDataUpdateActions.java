@@ -53,7 +53,7 @@ public class UserDataUpdateActions {
                 LOGGER.info("Recreate userdata for new freeipa instances");
                 setOperationId(variables, payload.getOperationId());
                 setChainedAction(variables, payload.isChained());
-                setFinalChain(variables, payload.isFinal());
+                setFinalChain(variables, payload.isFinalFlow());
                 sendEvent(context, new UserDataUpdateRequest(context.getStack().getId(), payload.getOldTunnel()));
             }
 

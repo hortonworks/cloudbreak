@@ -1,9 +1,14 @@
 package com.sequenceiq.datalake.flow.salt.rotatepassword.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class RotateSaltPasswordSuccessResponse extends SdxEvent {
-    public RotateSaltPasswordSuccessResponse(Long sdxId, String userId) {
+    @JsonCreator
+    public RotateSaltPasswordSuccessResponse(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId) {
         super(sdxId, userId);
     }
 }

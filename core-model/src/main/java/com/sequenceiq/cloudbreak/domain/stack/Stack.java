@@ -395,7 +395,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.gatewayPort = gatewayPort;
     }
 
-    public boolean getUseCcm() {
+    public boolean isUseCcm() {
         return Boolean.TRUE.equals(useCcm);
     }
 

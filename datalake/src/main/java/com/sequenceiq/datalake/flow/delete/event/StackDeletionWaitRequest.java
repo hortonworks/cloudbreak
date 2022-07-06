@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.delete.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
@@ -7,7 +9,11 @@ public class StackDeletionWaitRequest extends SdxEvent {
 
     private final boolean forced;
 
-    public StackDeletionWaitRequest(Long sdxId, String userId, boolean forced) {
+    @JsonCreator
+    public StackDeletionWaitRequest(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("forced") boolean forced) {
         super(sdxId, userId);
         this.forced = forced;
     }

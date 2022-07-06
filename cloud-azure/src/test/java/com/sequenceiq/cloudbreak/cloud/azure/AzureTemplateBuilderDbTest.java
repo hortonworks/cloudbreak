@@ -143,11 +143,11 @@ public class AzureTemplateBuilderDbTest {
         params.put(KEY_URL, "https://dummyVault.vault.azure.net/keys/dummyKey/dummyVersion");
         params.put(KEY_VAULT_RESOURCE_GROUP_NAME, "dummyResourceGroup");
         DatabaseServer databaseServer = DatabaseServer.builder()
-                .serverId(SERVER_ID)
-                .rootUserName(ROOT_USER_NAME)
-                .rootPassword(ROOT_PASSWORD)
-                .location(REGION)
-                .params(params)
+                .withServerId(SERVER_ID)
+                .withRootUserName(ROOT_USER_NAME)
+                .withRootPassword(ROOT_PASSWORD)
+                .withLocation(REGION)
+                .withParams(params)
                 .build();
 
         DatabaseStack databaseStack = new DatabaseStack(network, databaseServer, Collections.emptyMap(), template.toString());
@@ -206,11 +206,11 @@ public class AzureTemplateBuilderDbTest {
         params.put(KEY_URL, "https://dummyVault.vault.azure.net/keys/dummyKey");
         params.put(KEY_VAULT_RESOURCE_GROUP_NAME, "dummyResourceGroup");
         DatabaseServer databaseServer = DatabaseServer.builder()
-                .serverId(SERVER_ID)
-                .rootUserName(ROOT_USER_NAME)
-                .rootPassword(ROOT_PASSWORD)
-                .location(REGION)
-                .params(params)
+                .withServerId(SERVER_ID)
+                .withRootUserName(ROOT_USER_NAME)
+                .withRootPassword(ROOT_PASSWORD)
+                .withLocation(REGION)
+                .withParams(params)
                 .build();
 
         DatabaseStack databaseStack = new DatabaseStack(network, databaseServer, Collections.emptyMap(), template.toString());
@@ -251,12 +251,12 @@ public class AzureTemplateBuilderDbTest {
         network.putParameter("subnets", FULL_SUBNET_ID);
 
         DatabaseServer databaseServer = DatabaseServer.builder()
-                .useSslEnforcement(useSslEnforcement)
-                .serverId(SERVER_ID)
-                .rootUserName(ROOT_USER_NAME)
-                .rootPassword(ROOT_PASSWORD)
-                .location(REGION)
-                .params(Map.of("dbVersion", "10"))
+                .withUseSslEnforcement(useSslEnforcement)
+                .withServerId(SERVER_ID)
+                .withRootUserName(ROOT_USER_NAME)
+                .withRootPassword(ROOT_PASSWORD)
+                .withLocation(REGION)
+                .withParams(Map.of("dbVersion", "10"))
                 .build();
 
         return new DatabaseStack(network, databaseServer, Collections.emptyMap(), template);

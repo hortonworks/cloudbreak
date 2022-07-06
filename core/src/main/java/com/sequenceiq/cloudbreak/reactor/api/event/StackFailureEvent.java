@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.reactor.api.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class StackFailureEvent extends StackEvent {
 
     private final Exception exception;
@@ -9,7 +12,11 @@ public class StackFailureEvent extends StackEvent {
         this.exception = exception;
     }
 
-    public StackFailureEvent(String selector, Long stackId, Exception exception) {
+    @JsonCreator
+    public StackFailureEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("exception") Exception exception) {
         super(selector, stackId);
         this.exception = exception;
     }

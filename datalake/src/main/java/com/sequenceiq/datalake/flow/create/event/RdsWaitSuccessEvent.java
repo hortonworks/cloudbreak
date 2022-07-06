@@ -1,16 +1,15 @@
 package com.sequenceiq.datalake.flow.create.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerStatusV4Response;
 
 public class RdsWaitSuccessEvent extends SdxEvent {
 
-    private DetailedEnvironmentResponse detailedEnvironmentResponse;
-
-    private DatabaseServerStatusV4Response databaseServerResponse;
-
-    public RdsWaitSuccessEvent(Long sdxId, String userId) {
+    @JsonCreator
+    public RdsWaitSuccessEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId) {
         super(sdxId, userId);
     }
 

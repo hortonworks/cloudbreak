@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.stack.termination.event.ccm;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.flow.stack.termination.event.TerminationEvent;
@@ -21,8 +23,16 @@ public class CcmKeyDeregistrationRequest extends TerminationEvent {
     private final String ccmV2AgentCrn;
 
     @SuppressWarnings("ExecutableStatementCount")
-    public CcmKeyDeregistrationRequest(Long stackId, Boolean forced, String actorCrn, String accountId, String keyId, Tunnel tunnel,
-            String minaSshdServiceId, String ccmV2AgentCrn) {
+    @JsonCreator
+    public CcmKeyDeregistrationRequest(
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("forced") Boolean forced,
+            @JsonProperty("actorCrn") String actorCrn,
+            @JsonProperty("accountId") String accountId,
+            @JsonProperty("keyId") String keyId,
+            @JsonProperty("tunnel") Tunnel tunnel,
+            @JsonProperty("minaSshdServiceId") String minaSshdServiceId,
+            @JsonProperty("ccmV2AgentCrn") String ccmV2AgentCrn) {
         super(EventSelectorUtil.selector(CcmKeyDeregistrationRequest.class), stackId, forced);
         this.actorCrn = Objects.requireNonNull(actorCrn, "actorCrn is null");
         this.accountId = Objects.requireNonNull(accountId, "accountId is null");

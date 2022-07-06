@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_IMAGE_EVENT;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -18,8 +20,14 @@ public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidation
 
     private final Image targetImage;
 
-    public ClusterUpgradeImageValidationEvent(Long resourceId, String imageId, CloudStack cloudStack, CloudCredential cloudCredential,
-            CloudContext cloudContext, Image targetImage) {
+    @JsonCreator
+    public ClusterUpgradeImageValidationEvent(
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("imageId") String imageId,
+            @JsonProperty("cloudStack") CloudStack cloudStack,
+            @JsonProperty("cloudCredential") CloudCredential cloudCredential,
+            @JsonProperty("cloudContext") CloudContext cloudContext,
+            @JsonProperty("targetImage") Image targetImage) {
         super(VALIDATE_IMAGE_EVENT.selector(), resourceId, imageId);
         this.cloudStack = cloudStack;
         this.cloudCredential = cloudCredential;

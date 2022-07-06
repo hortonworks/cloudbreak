@@ -119,7 +119,7 @@ public class KerberosConfigValidationActions {
             protected void doExecute(StackCreationContext context, ValidateKerberosConfigEvent payload, Map<Object, Object> variables) {
                 decorateStackWithCustomDomainIfAdOrIpaJoinable(context.getStack());
                 Cluster cluster = context.getStack().getCluster();
-                if ((cluster != null && Boolean.TRUE.equals(cluster.getAutoTlsEnabled())) || payload.doesFreeipaExistsForEnv()) {
+                if ((cluster != null && Boolean.TRUE.equals(cluster.isAutoTlsEnabled())) || payload.isFreeipaExistsForEnv()) {
                     boolean hasFreeIpaKerberosConfig = clusterCreationEnvironmentValidator.hasFreeIpaKerberosConfig(context.getStack());
                     if (!hasFreeIpaKerberosConfig) {
                         throw new IllegalStateException("AutoTLS works only with FreeIPA. No FreeIPA Kerberos configuration is found.");

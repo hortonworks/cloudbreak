@@ -4,6 +4,8 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATAL
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -24,8 +26,15 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
         this.backupLocation = backupLocation;
     }
 
-    public DatalakeDatabaseRestoreStartEvent(String selector, Long sdxId, SdxOperation drStatus, String userId,
-            String backupId, String restoreId, String backupLocation) {
+    @JsonCreator
+    public DatalakeDatabaseRestoreStartEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("drStatus") SdxOperation drStatus,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("backupId") String backupId,
+            @JsonProperty("restoreId") String restoreId,
+            @JsonProperty("backupLocation") String backupLocation) {
         super(selector, sdxId, userId, drStatus);
         this.backupId = backupId;
         this.restoreId = restoreId;

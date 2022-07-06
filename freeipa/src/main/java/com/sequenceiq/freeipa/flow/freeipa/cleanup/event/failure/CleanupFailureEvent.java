@@ -3,23 +3,32 @@ package com.sequenceiq.freeipa.flow.freeipa.cleanup.event.failure;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class CleanupFailureEvent extends AbstractCleanupEvent {
 
-    private String failedPhase;
+    private final String failedPhase;
 
-    private Map<String, String> failureDetails;
+    private final Map<String, String> failureDetails;
 
-    private Set<String> success;
+    private final Set<String> success;
 
     protected CleanupFailureEvent(Long stackId) {
         super(stackId);
+        failedPhase = null;
+        failureDetails = null;
+        success = null;
     }
 
-    public CleanupFailureEvent(CleanupEvent cleanupEvent, String failedPhase, Map<String, String> failureDetails,
-            Set<String> success) {
+    @JsonCreator
+    public CleanupFailureEvent(
+            @JsonProperty("cleanupEvent") CleanupEvent cleanupEvent,
+            @JsonProperty("failedPhase") String failedPhase,
+            @JsonProperty("failureDetails") Map<String, String> failureDetails,
+            @JsonProperty("success") Set<String> success) {
         super(cleanupEvent);
         this.failedPhase = failedPhase;
         this.failureDetails = failureDetails;

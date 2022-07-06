@@ -3,6 +3,8 @@ package com.sequenceiq.environment.environment.flow.loadbalancer.event;
 import java.util.Objects;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -12,6 +14,7 @@ import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 import reactor.rx.Promise;
 
+@JsonDeserialize(builder = LoadBalancerUpdateEvent.LoadBalancerUpdateEventBuilder.class)
 public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {
 
     private final Environment environment;
@@ -63,6 +66,7 @@ public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {
                         && Objects.equals(endpointAccessGateway, event.endpointAccessGateway));
     }
 
+    @JsonPOJOBuilder
     public static final class LoadBalancerUpdateEventBuilder {
 
         private Environment environment;
@@ -125,7 +129,7 @@ public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {
             return this;
         }
 
-        public LoadBalancerUpdateEventBuilder withPublicEndpointAccessGateway(PublicEndpointAccessGateway endpointAccessGateway) {
+        public LoadBalancerUpdateEventBuilder withEndpointAccessGateway(PublicEndpointAccessGateway endpointAccessGateway) {
             this.endpointAccessGateway = endpointAccessGateway;
             return this;
         }

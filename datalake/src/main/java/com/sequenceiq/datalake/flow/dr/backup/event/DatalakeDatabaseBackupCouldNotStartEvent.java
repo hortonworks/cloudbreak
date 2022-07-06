@@ -1,11 +1,17 @@
 package com.sequenceiq.datalake.flow.dr.backup.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class DatalakeDatabaseBackupCouldNotStartEvent extends SdxEvent {
     private final Exception exception;
 
-    public DatalakeDatabaseBackupCouldNotStartEvent(Long sdxId, String userId, Exception exception) {
+    @JsonCreator
+    public DatalakeDatabaseBackupCouldNotStartEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("exception") Exception exception) {
         super(sdxId, userId);
         this.exception = exception;
     }

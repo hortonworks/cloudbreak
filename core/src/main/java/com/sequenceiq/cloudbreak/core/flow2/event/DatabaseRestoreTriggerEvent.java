@@ -2,7 +2,10 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.BackupRestoreEvent;
 
@@ -14,8 +17,13 @@ public class DatabaseRestoreTriggerEvent extends BackupRestoreEvent {
         super(selector, stackId, backupLocation, backupId);
     }
 
-    public DatabaseRestoreTriggerEvent(String event, Long resourceId, Promise<AcceptResult> accepted,
-            String backupLocation, String backupId) {
+    @JsonCreator
+    public DatabaseRestoreTriggerEvent(
+            @JsonProperty("selector") String event,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonProperty("backupLocation") String backupLocation,
+            @JsonProperty("backupId") String backupId) {
         super(event, resourceId, accepted, backupLocation, backupId);
     }
 
@@ -24,6 +32,6 @@ public class DatabaseRestoreTriggerEvent extends BackupRestoreEvent {
         return isClassAndEqualsEvent(DatabaseRestoreTriggerEvent.class, other,
                 event -> Objects.equals(getBackupId(), event.getBackupId())
                         && Objects.equals(getBackupLocation(), event.getBackupLocation())
-                        && getCloseConnections() == event.getCloseConnections());
+                        && isCloseConnections() == event.isCloseConnections());
     }
 }

@@ -5,8 +5,11 @@ import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 import reactor.rx.Promise;
@@ -37,7 +40,13 @@ public class RedbeamsEvent implements IdempotentEvent<RedbeamsEvent> {
         this(selector, resourceId, new Promise<>(), forced);
     }
 
-    public RedbeamsEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, boolean forced) {
+    @JsonCreator
+    public RedbeamsEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonProperty("forced") boolean forced) {
+
         this.selector = selector;
         this.resourceId = resourceId;
         this.accepted = accepted;

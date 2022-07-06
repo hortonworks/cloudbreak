@@ -107,6 +107,14 @@ public abstract class BaseNetwork implements EnvironmentAwareResource {
         subnetMetas = new Json(new HashMap<String, CloudSubnet>());
     }
 
+    public EnvironmentView getEnvironment() {
+        return environment;
+    }
+
+    public void setEnvironment(EnvironmentView environment) {
+        this.environment = environment;
+    }
+
     @Override
     @JsonIgnore
     public Set<EnvironmentView> getEnvironments() {

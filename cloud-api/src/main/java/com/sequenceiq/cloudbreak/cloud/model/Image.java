@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
@@ -32,6 +33,7 @@ public class Image {
 
     private final Map<String, String> packageVersions;
 
+    @JsonCreator
     public Image(@JsonProperty("imageName") String imageName,
             @JsonProperty("userdata") Map<InstanceGroupType, String> userdata,
             @JsonProperty("os") String os,

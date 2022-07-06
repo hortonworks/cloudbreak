@@ -2,11 +2,18 @@ package com.sequenceiq.cloudbreak.core.flow2.externaldatabase;
 
 import org.springframework.util.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 public class ExternalDatabaseSelectableEvent extends BaseNamedFlowEvent {
 
-    public ExternalDatabaseSelectableEvent(Long resourceId, String selector, String resourceName, String resourceCrn) {
+    @JsonCreator
+    public ExternalDatabaseSelectableEvent(
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceName") String resourceName,
+            @JsonProperty("resourceCrn") String resourceCrn) {
         super(selector, resourceId, resourceName, resourceCrn);
     }
 

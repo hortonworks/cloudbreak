@@ -3,7 +3,10 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
@@ -16,8 +19,14 @@ public class MultiHostgroupClusterAndStackDownscaleTriggerEvent extends StackEve
 
     private final ClusterDownscaleDetails details;
 
-    public MultiHostgroupClusterAndStackDownscaleTriggerEvent(String selector, Long stackId, Map<String, Set<Long>> privateIdsByHostgroupMap,
-            ClusterDownscaleDetails details, ScalingType scalingType, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public MultiHostgroupClusterAndStackDownscaleTriggerEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("privateIdsByHostgroupMap") Map<String, Set<Long>> privateIdsByHostgroupMap,
+            @JsonProperty("details") ClusterDownscaleDetails details,
+            @JsonProperty("scalingType") ScalingType scalingType,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.privateIdsByHostgroupMap = privateIdsByHostgroupMap;
         this.details = details;

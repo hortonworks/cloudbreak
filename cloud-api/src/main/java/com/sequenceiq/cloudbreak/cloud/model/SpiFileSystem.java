@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.common.model.FileSystemType;
@@ -21,16 +24,18 @@ public class SpiFileSystem extends DynamicModel {
         this(name, type, cloudFileSystems, new HashMap<>());
     }
 
-    public SpiFileSystem(String name, FileSystemType type, List<CloudFileSystemView> cloudFileSystems, Map<String, Object> parameters) {
+    @JsonCreator
+    public SpiFileSystem(
+            @JsonProperty("name") String name,
+            @JsonProperty("type") FileSystemType type,
+            @JsonProperty("cloudFileSystems") List<CloudFileSystemView> cloudFileSystems,
+            @JsonProperty("parameters") Map<String, Object> parameters) {
+
         super(parameters);
 
         this.name = name;
         this.type = type;
-        if (cloudFileSystems != null) {
-            this.cloudFileSystems = cloudFileSystems;
-        } else {
-            this.cloudFileSystems = new ArrayList<>();
-        }
+        this.cloudFileSystems = Objects.requireNonNullElseGet(cloudFileSystems, ArrayList::new);
     }
 
     public String getName() {

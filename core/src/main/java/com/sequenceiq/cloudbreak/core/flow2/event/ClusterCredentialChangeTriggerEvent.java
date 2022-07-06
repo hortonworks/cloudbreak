@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class ClusterCredentialChangeTriggerEvent extends StackEvent {
@@ -9,7 +11,13 @@ public class ClusterCredentialChangeTriggerEvent extends StackEvent {
 
     private final Type type;
 
-    public ClusterCredentialChangeTriggerEvent(String selector, Long stackId, String user, String password, Type type) {
+    @JsonCreator
+    public ClusterCredentialChangeTriggerEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("user") String user,
+            @JsonProperty("password") String password,
+            @JsonProperty("type") Type type) {
         super(selector, stackId);
         this.user = user;
         this.password = password;

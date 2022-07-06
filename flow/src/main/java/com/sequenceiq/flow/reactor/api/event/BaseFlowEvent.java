@@ -3,9 +3,12 @@ package com.sequenceiq.flow.reactor.api.event;
 import java.util.Objects;
 import java.util.function.Predicate;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 
 import reactor.rx.Promise;
 
@@ -23,7 +26,13 @@ public class BaseFlowEvent implements IdempotentEvent<BaseFlowEvent>, ResourceCr
         this(selector, resourceId, resourceCrn, new Promise<>());
     }
 
-    public BaseFlowEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public BaseFlowEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("resourceCrn") String resourceCrn,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+
         this.selector = selector;
         this.resourceId = resourceId;
         this.resourceCrn = resourceCrn;

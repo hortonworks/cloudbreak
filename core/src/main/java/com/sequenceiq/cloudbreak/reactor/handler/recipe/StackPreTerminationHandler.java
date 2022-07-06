@@ -57,7 +57,7 @@ public class StackPreTerminationHandler implements EventHandler<StackPreTerminat
             if (cluster != null) {
                 Set<HostGroup> hostGroupsWithRecipes = hostGroupService.getByClusterWithRecipes(cluster.getId());
                 telemetryAgentService.stopTelemetryAgent(stack);
-                recipeEngine.executePreTerminationRecipes(stack, hostGroupsWithRecipes, request.getForced());
+                recipeEngine.executePreTerminationRecipes(stack, hostGroupsWithRecipes, request.isForced());
                 preTerminationStateExecutor.runPreTerminationTasks(stack);
             }
         } catch (Exception ex) {

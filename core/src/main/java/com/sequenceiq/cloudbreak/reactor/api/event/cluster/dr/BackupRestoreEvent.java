@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 import reactor.rx.Promise;
@@ -42,7 +45,14 @@ public class BackupRestoreEvent extends StackEvent {
         this.closeConnections = true;
     }
 
-    public BackupRestoreEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String backupLocation, String backupId, boolean closeConnections) {
+    @JsonCreator
+    public BackupRestoreEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonProperty("backupLocation") String backupLocation,
+            @JsonProperty("backupId") String backupId,
+            @JsonProperty("closeConnections") boolean closeConnections) {
         super(selector, stackId, accepted);
         this.backupLocation = backupLocation;
         this.backupId = backupId;
@@ -57,7 +67,7 @@ public class BackupRestoreEvent extends StackEvent {
         return backupId;
     }
 
-    public boolean getCloseConnections() {
+    public boolean isCloseConnections() {
         return closeConnections;
     }
 }

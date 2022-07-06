@@ -115,8 +115,8 @@ class UpgradeFlowEventChainFactoryTest {
         assertEquals(STACK_ID, changePrimaryGatewayEvent.getResourceId());
         assertFalse(changePrimaryGatewayEvent.isFinalChain());
         assertEquals(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), changePrimaryGatewayEvent.selector());
-        assertEquals(3, changePrimaryGatewayEvent.getRepairInstaceIds().size());
-        assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstaceIds()));
+        assertEquals(3, changePrimaryGatewayEvent.getRepairInstanceIds().size());
+        assertTrue(List.of("repl1", "repl2", "pgw").containsAll(changePrimaryGatewayEvent.getRepairInstanceIds()));
 
         DownscaleEvent downscaleEvent3 = (DownscaleEvent) queue.poll();
         assertEquals(OPERATION_ID, downscaleEvent3.getOperationId());

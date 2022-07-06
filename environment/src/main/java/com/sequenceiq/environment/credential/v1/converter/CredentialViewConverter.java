@@ -18,7 +18,7 @@ public class CredentialViewConverter {
         response.setDescription(credentialView.getDescription());
         response.setVerificationStatusText(credentialView.getVerificationStatusText());
         response.setType(credentialView.getType());
-        response.setGovCloud(credentialView.getGovCloud());
+        response.setGovCloud(credentialView.isGovCloud());
         return response;
     }
 
@@ -31,7 +31,7 @@ public class CredentialViewConverter {
         response.setDescription(credential.getDescription());
         response.setVerificationStatusText(credential.getVerificationStatusText());
         response.setType(credential.getType());
-        response.setGovCloud(credential.getGovCloud());
+        response.setGovCloud(credential.isGovCloud());
         return response;
     }
 
@@ -42,7 +42,7 @@ public class CredentialViewConverter {
         credentialView.setCloudPlatform(credential.getCloudPlatform());
         credentialView.setCreator(credential.getCreator());
         credentialView.setDescription(credential.getDescription());
-        credentialView.setGovCloud(credential.getGovCloud());
+        credentialView.setGovCloud(credential.isGovCloud());
         credentialView.setName(credential.getName());
         credentialView.setResourceCrn(credential.getResourceCrn());
         credentialView.setVerificationStatusText(credential.getVerificationStatusText());

@@ -2,6 +2,8 @@ package com.sequenceiq.redbeams.flow.redbeams.provision.event.register;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -22,8 +24,13 @@ public class UpdateDatabaseServerRegistrationRequest extends RedbeamsEvent {
 
     private final List<CloudResource> dbResources;
 
-    public UpdateDatabaseServerRegistrationRequest(CloudContext cloudContext, CloudCredential cloudCredential,
-            DatabaseStack databaseStack, List<CloudResource> dbResources) {
+    @JsonCreator
+    public UpdateDatabaseServerRegistrationRequest(
+            @JsonProperty("cloudContext") CloudContext cloudContext,
+            @JsonProperty("cloudCredential") CloudCredential cloudCredential,
+            @JsonProperty("databaseStack") DatabaseStack databaseStack,
+            @JsonProperty("dbResources") List<CloudResource> dbResources) {
+
         super(cloudContext != null ? cloudContext.getId() : null);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;

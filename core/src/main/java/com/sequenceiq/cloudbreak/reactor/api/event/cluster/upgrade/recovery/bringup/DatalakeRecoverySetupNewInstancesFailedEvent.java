@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.recovery.bringup;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
@@ -9,7 +11,11 @@ public class DatalakeRecoverySetupNewInstancesFailedEvent extends StackEvent {
 
     private final DetailedStackStatus detailedStatus;
 
-    public DatalakeRecoverySetupNewInstancesFailedEvent(Long stackId, Exception exception, DetailedStackStatus detailedStatus) {
+    @JsonCreator
+    public DatalakeRecoverySetupNewInstancesFailedEvent(
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("exception") Exception exception,
+            @JsonProperty("detailedStatus") DetailedStackStatus detailedStatus) {
         super(stackId);
         this.exception = exception;
         this.detailedStatus = detailedStatus;

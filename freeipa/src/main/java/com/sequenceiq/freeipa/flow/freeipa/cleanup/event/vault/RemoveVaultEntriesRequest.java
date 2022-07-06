@@ -1,8 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.cleanup.event.vault;
 
-import java.util.Set;
-
-import com.sequenceiq.freeipa.entity.Stack;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
@@ -12,11 +11,14 @@ public class RemoveVaultEntriesRequest extends AbstractCleanupEvent {
         super(stackId);
     }
 
-    public RemoveVaultEntriesRequest(CleanupEvent cleanupEvent, Stack stack) {
+    public RemoveVaultEntriesRequest(CleanupEvent cleanupEvent) {
         super(cleanupEvent);
     }
 
-    public RemoveVaultEntriesRequest(String selector, CleanupEvent cleanupEvent, Stack stack, Set<String> hosts) {
+    @JsonCreator
+    public RemoveVaultEntriesRequest(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("cleanupEvent") CleanupEvent cleanupEvent) {
         super(selector, cleanupEvent);
     }
 }

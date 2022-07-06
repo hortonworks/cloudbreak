@@ -2,23 +2,30 @@ package com.sequenceiq.freeipa.flow.stack;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class HealthCheckRequest extends StackEvent {
 
-    private boolean waitForFreeIpaAvailability;
+    private final boolean waitForFreeIpaAvailability;
 
-    private List<String> instanceIds;
+    private final List<String> instanceIds;
 
     public HealthCheckRequest(Long stackId, boolean waitForFreeIpaAvailability) {
         this(stackId, waitForFreeIpaAvailability, null);
     }
 
-    public HealthCheckRequest(Long stackId, boolean waitForFreeIpaAvailability, List<String> instanceIds) {
+    @JsonCreator
+    public HealthCheckRequest(
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("waitForFreeIpaAvailability") boolean waitForFreeIpaAvailability,
+            @JsonProperty("instanceIds") List<String> instanceIds) {
         super(stackId);
         this.waitForFreeIpaAvailability = waitForFreeIpaAvailability;
         this.instanceIds = instanceIds;
     }
 
-    public boolean getWaitForFreeIpaAvailability() {
+    public boolean isWaitForFreeIpaAvailability() {
         return waitForFreeIpaAvailability;
     }
 

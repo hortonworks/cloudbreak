@@ -1,17 +1,26 @@
 package com.sequenceiq.datalake.flow.dr.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxEvent;
+
 import reactor.rx.Promise;
 
 public class DatalakeDatabaseDrStartBaseEvent extends SdxEvent  {
 
-    private SdxOperation drStatus;
+    private final SdxOperation drStatus;
 
-    public DatalakeDatabaseDrStartBaseEvent(String selector, Long sdxId, String userId,
-            SdxOperationType operationType, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public DatalakeDatabaseDrStartBaseEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("operationType") SdxOperationType operationType,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, accepted);
         drStatus = new SdxOperation(operationType, sdxId);
     }
@@ -36,5 +45,9 @@ public class DatalakeDatabaseDrStartBaseEvent extends SdxEvent  {
 
     public SdxOperation getDrStatus() {
         return drStatus;
+    }
+
+    public SdxOperationType getOperationType() {
+        return drStatus.getOperationType();
     }
 }

@@ -4,8 +4,11 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 
 import reactor.rx.Promise;
 
@@ -30,11 +33,17 @@ public class SleepStartEvent implements IdempotentEvent<SleepStartEvent> {
         accepted = new Promise<>();
     }
 
-    public SleepStartEvent(Long resourceId, Duration sleepDuration, LocalDateTime failUntil, Promise<AcceptResult> accept) {
+    @JsonCreator
+    public SleepStartEvent(
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("sleepDuration") Duration sleepDuration,
+            @JsonProperty("failUntil") LocalDateTime failUntil,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
+
         this.resourceId = resourceId;
         this.sleepDuration = sleepDuration;
         this.failUntil = failUntil;
-        accepted = accept;
+        this.accepted = accepted;
     }
 
     public static SleepStartEvent neverFail(Long resourceId, Duration sleepDuration) {

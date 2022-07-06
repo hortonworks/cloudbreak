@@ -51,6 +51,14 @@ public class Json implements Serializable {
         return value;
     }
 
+    /**
+     * Need this for Jackson deserialization
+     * @param value JSON string
+     */
+    private void setValue(String value) {
+        this.value = value;
+    }
+
     public <T> T get(Class<T> valueType) throws IOException {
         return JsonUtil.readValue(value, valueType);
     }

@@ -1,13 +1,19 @@
 package com.sequenceiq.datalake.flow.create.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 public class EnvWaitSuccessEvent extends SdxEvent {
 
-    private DetailedEnvironmentResponse detailedEnvironmentResponse;
+    private final DetailedEnvironmentResponse detailedEnvironmentResponse;
 
-    public EnvWaitSuccessEvent(Long sdxId, String userId, DetailedEnvironmentResponse detailedEnvironmentResponse) {
+    @JsonCreator
+    public EnvWaitSuccessEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("detailedEnvironmentResponse") DetailedEnvironmentResponse detailedEnvironmentResponse) {
         super(sdxId, userId);
         this.detailedEnvironmentResponse = detailedEnvironmentResponse;
     }

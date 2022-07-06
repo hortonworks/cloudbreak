@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.chain;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -30,7 +31,7 @@ public class RepairFlowEventChainFactory implements FlowEventChainFactory<Repair
     public FlowTriggerEventQueue createFlowTriggerEventQueue(RepairEvent event) {
         Set<String> terminatedOrRemovedInstanceIdsSet = new HashSet<>(event.getRepairInstanceIds());
         terminatedOrRemovedInstanceIdsSet.addAll(event.getAdditionalTerminatedInstanceIds());
-        ArrayList<String> terminatedOrRemovedInstanceIds = new ArrayList<>(terminatedOrRemovedInstanceIdsSet);
+        List<String> terminatedOrRemovedInstanceIds = new ArrayList<>(terminatedOrRemovedInstanceIdsSet);
 
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new ChangePrimaryGatewayEvent(ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event(), event.getResourceId(),

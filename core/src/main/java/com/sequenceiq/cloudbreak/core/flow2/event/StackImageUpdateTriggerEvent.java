@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
@@ -12,16 +14,24 @@ public class StackImageUpdateTriggerEvent extends StackEvent {
 
     private final String newImageId;
 
-    private String imageCatalogName;
+    private final String imageCatalogName;
 
-    private String imageCatalogUrl;
+    private final String imageCatalogUrl;
 
     public StackImageUpdateTriggerEvent(String selector, Long stackId, String newImageId) {
         super(selector, stackId);
         this.newImageId = newImageId;
+        imageCatalogName = null;
+        imageCatalogUrl = null;
     }
 
-    public StackImageUpdateTriggerEvent(String selector, Long stackId, String newImageId, String imageCatalogName, String imageCatalogUrl) {
+    @JsonCreator
+    public StackImageUpdateTriggerEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("newImageId") String newImageId,
+            @JsonProperty("imageCatalogName") String imageCatalogName,
+            @JsonProperty("imageCatalogUrl") String imageCatalogUrl) {
         super(selector, stackId);
         this.newImageId = newImageId;
         this.imageCatalogName = imageCatalogName;
@@ -38,6 +48,8 @@ public class StackImageUpdateTriggerEvent extends StackEvent {
     public StackImageUpdateTriggerEvent(String selector, Long stackId, Promise<AcceptResult> accepted, String newImageId) {
         super(selector, stackId, accepted);
         this.newImageId = newImageId;
+        imageCatalogName = null;
+        imageCatalogUrl = null;
     }
 
     public String getNewImageId() {

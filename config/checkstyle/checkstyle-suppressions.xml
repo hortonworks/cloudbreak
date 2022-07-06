@@ -39,6 +39,7 @@
     <suppress checks="ParameterNumber" files="ClusterSetupService.java|AmbariClusterSetupService.java|ClouderaManagerSetupService.java|ClouderaManagerMgmtSetupService.java|ClouderaManagerMgmtTelemetryService.java"/>
     <suppress checks="IllegalCatch|CyclomaticComplexity" files="SecretAspects.java|SecretAspectService.java"/>
     <suppress files="com[\\/]sequenceiq[\\/]cloudbreak[\\/]" checks="ExecutableStatementCount"/>
+    <suppress files="com[\\/]sequenceiq[\\/]freeipa[\\/]" checks="ExecutableStatementCount"/>
     <suppress files="com[\\/]sequenceiq[\\/]periscope[\\/]monitor[\\/]" checks="ExecutableStatementCount"/>
     <suppress files="com[\\/]sequenceiq[\\/]environment[\\/]" checks="ExecutableStatementCount"/>
     <suppress files="com[\\/]sequenceiq[\\/]flow[\\/]" checks="ExecutableStatementCount"/>

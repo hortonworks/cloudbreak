@@ -77,7 +77,7 @@ public class SdxStopActions {
             protected void doExecute(SdxContext context, SdxStartStopEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Execute stop flow for SDX: {}", payload.getResourceId());
                 stopService.stop(payload.getResourceId());
-                if (payload.stopDataHubs()) {
+                if (payload.isStopDataHubs()) {
                     sendEvent(context, SDX_STOP_ALL_DATAHUB_EVENT.event(), payload);
                 } else {
                     sendEvent(context, SDX_STOP_IN_PROGRESS_EVENT.event(), payload);

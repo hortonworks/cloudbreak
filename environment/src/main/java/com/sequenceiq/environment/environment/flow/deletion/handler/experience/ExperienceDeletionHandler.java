@@ -68,7 +68,7 @@ public class ExperienceDeletionHandler extends EventSenderAwareHandler<Environme
         } catch (Exception e) {
             LOGGER.debug("Experience deletion failed with exception", e);
             EnvClusterDeleteFailedEvent failedEvent = EnvClusterDeleteFailedEvent.builder()
-                    .withEnvironmentID(envDto.getId())
+                    .withEnvironmentId(envDto.getId())
                     .withException(e)
                     .withResourceCrn(envDto.getResourceCrn())
                     .withResourceName(envDto.getName())

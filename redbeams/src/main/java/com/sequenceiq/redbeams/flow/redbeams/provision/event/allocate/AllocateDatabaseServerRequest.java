@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -16,7 +18,12 @@ public class AllocateDatabaseServerRequest extends RedbeamsEvent {
 
     private final DatabaseStack databaseStack;
 
-    public AllocateDatabaseServerRequest(CloudContext cloudContext, CloudCredential cloudCredential, DatabaseStack databaseStack) {
+    @JsonCreator
+    public AllocateDatabaseServerRequest(
+            @JsonProperty("cloudContext") CloudContext cloudContext,
+            @JsonProperty("cloudCredential") CloudCredential cloudCredential,
+            @JsonProperty("databaseStack") DatabaseStack databaseStack) {
+
         super(cloudContext != null ? cloudContext.getId() : null);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;

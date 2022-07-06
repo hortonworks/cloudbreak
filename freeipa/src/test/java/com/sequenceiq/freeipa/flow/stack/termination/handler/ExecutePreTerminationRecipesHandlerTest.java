@@ -85,7 +85,7 @@ class ExecutePreTerminationRecipesHandlerTest {
         ExitCriteriaModel exitCriteriaModel = exitCriteriaModelArgumentCaptor.getValue();
         assertTrue(((StackBasedExitCriteriaModel) exitCriteriaModel).getStackId().isEmpty());
         assertEquals(ExecutePreTerminationRecipesFinished.class, selectable.getClass());
-        assertTrue(((ExecutePreTerminationRecipesFinished) selectable).getForced());
+        assertTrue(((ExecutePreTerminationRecipesFinished) selectable).isForced());
         assertEquals(1L, selectable.getResourceId());
     }
 
@@ -146,7 +146,7 @@ class ExecutePreTerminationRecipesHandlerTest {
         Selectable selectable = executePreTerminationRecipesHandler.doAccept(new HandlerEvent<>(new Event<>(executePreTerminationRecipesRequest)));
         verify(hostOrchestrator, times(0)).preTerminationRecipes(any(), any(), any(), anyBoolean());
         assertEquals(ExecutePreTerminationRecipesFinished.class, selectable.getClass());
-        assertTrue(((ExecutePreTerminationRecipesFinished) selectable).getForced());
+        assertTrue(((ExecutePreTerminationRecipesFinished) selectable).isForced());
         assertEquals(1L, selectable.getResourceId());
     }
 
@@ -167,7 +167,7 @@ class ExecutePreTerminationRecipesHandlerTest {
         Selectable selectable = executePreTerminationRecipesHandler.doAccept(new HandlerEvent<>(new Event<>(executePreTerminationRecipesRequest)));
         verify(hostOrchestrator, times(0)).preTerminationRecipes(any(), any(), any(), anyBoolean());
         assertEquals(ExecutePreTerminationRecipesFinished.class, selectable.getClass());
-        assertTrue(((ExecutePreTerminationRecipesFinished) selectable).getForced());
+        assertTrue(((ExecutePreTerminationRecipesFinished) selectable).isForced());
         assertEquals(1L, selectable.getResourceId());
     }
 
@@ -196,7 +196,7 @@ class ExecutePreTerminationRecipesHandlerTest {
         ExitCriteriaModel exitCriteriaModel = exitCriteriaModelArgumentCaptor.getValue();
         assertTrue(((StackBasedExitCriteriaModel) exitCriteriaModel).getStackId().isEmpty());
         assertEquals(ExecutePreTerminationRecipesFinished.class, selectable.getClass());
-        assertTrue(((ExecutePreTerminationRecipesFinished) selectable).getForced());
+        assertTrue(((ExecutePreTerminationRecipesFinished) selectable).isForced());
         assertEquals(1L, selectable.getResourceId());
     }
 
@@ -207,7 +207,7 @@ class ExecutePreTerminationRecipesHandlerTest {
         Selectable selectable = executePreTerminationRecipesHandler.doAccept(new HandlerEvent<>(new Event<>(executePreTerminationRecipesRequest)));
         verify(hostOrchestrator, times(0)).preTerminationRecipes(any(), any(), any(), anyBoolean());
         assertEquals(ExecutePreTerminationRecipesFinished.class, selectable.getClass());
-        assertTrue(((ExecutePreTerminationRecipesFinished) selectable).getForced());
+        assertTrue(((ExecutePreTerminationRecipesFinished) selectable).isForced());
         assertEquals(1L, selectable.getResourceId());
     }
 

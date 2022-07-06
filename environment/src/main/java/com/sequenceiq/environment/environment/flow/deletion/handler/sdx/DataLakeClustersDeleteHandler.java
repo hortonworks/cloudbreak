@@ -67,7 +67,7 @@ public class DataLakeClustersDeleteHandler extends EventSenderAwareHandler<Envir
                 message = null;
             }
             EnvClusterDeleteFailedEvent failedEvent = EnvClusterDeleteFailedEvent.builder()
-                    .withEnvironmentID(environmentDto.getId())
+                    .withEnvironmentId(environmentDto.getId())
                     .withException(new BadRequestException(message))
                     .withResourceCrn(environmentDto.getResourceCrn())
                     .withResourceName(environmentDto.getName())
@@ -76,7 +76,7 @@ public class DataLakeClustersDeleteHandler extends EventSenderAwareHandler<Envir
             eventSender().sendEvent(failedEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
             EnvClusterDeleteFailedEvent failedEvent = EnvClusterDeleteFailedEvent.builder()
-                    .withEnvironmentID(environmentDto.getId())
+                    .withEnvironmentId(environmentDto.getId())
                     .withException(e)
                     .withResourceCrn(environmentDto.getResourceCrn())
                     .withResourceName(environmentDto.getName())

@@ -246,7 +246,7 @@ public class EnvironmentView extends CompactView implements AuthResource {
         return credential;
     }
 
-    public void setCredentialView(CredentialView credential) {
+    public void setCredential(CredentialView credential) {
         this.credential = credential;
     }
 

@@ -3,6 +3,8 @@ package com.sequenceiq.freeipa.flow.freeipa.repair.event;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class RepairEvent extends StackEvent {
@@ -15,8 +17,14 @@ public class RepairEvent extends StackEvent {
 
     private final List<String> additionalTerminatedInstanceIds;
 
-    public RepairEvent(String selector, Long stackId, String operationId, int instanceCountByGroup, List<String> repairInstanceIds,
-            List<String> additionalTerminatedInstanceIds) {
+    @JsonCreator
+    public RepairEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("operationId") String operationId,
+            @JsonProperty("instanceCountByGroup") int instanceCountByGroup,
+            @JsonProperty("repairInstanceIds") List<String> repairInstanceIds,
+            @JsonProperty("additionalTerminatedInstanceIds") List<String> additionalTerminatedInstanceIds) {
         super(selector, stackId);
         this.operationId = operationId;
         this.instanceCountByGroup = instanceCountByGroup;

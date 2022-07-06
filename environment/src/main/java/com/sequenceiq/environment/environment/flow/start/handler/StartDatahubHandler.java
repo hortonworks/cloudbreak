@@ -43,7 +43,7 @@ public class StartDatahubHandler extends EventSenderAwareHandler<EnvironmentStar
                     .withSelector(EnvStartStateSelectors.ENV_START_SYNCHRONIZE_USERS_EVENT.selector())
                     .withResourceId(environmentDto.getId())
                     .withResourceName(environmentDto.getName())
-                    .withDataHubStart(environmentStartDtoEvent.getData().getDataHubStart())
+                    .withDataHubStartAction(environmentStartDtoEvent.getData().getDataHubStart())
                     .build();
             eventSender().sendEvent(envStartEvent, environmentStartDtoEvent.getHeaders());
         } catch (Exception e) {

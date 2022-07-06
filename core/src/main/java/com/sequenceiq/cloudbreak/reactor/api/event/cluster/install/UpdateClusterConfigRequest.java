@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.install;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class UpdateClusterConfigRequest extends StackEvent {
-    public UpdateClusterConfigRequest(Long stackId) {
+    @JsonCreator
+    public UpdateClusterConfigRequest(
+            @JsonProperty("resourceId") Long stackId) {
         super(stackId);
     }
 }

@@ -4,6 +4,8 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
@@ -20,8 +22,15 @@ public class UpgradeEvent extends StackEvent {
 
     private final boolean backupSet;
 
-    public UpgradeEvent(String selector, Long stackId, HashSet<String> instanceIds, String primareGwInstanceId, String operationId,
-            ImageSettingsRequest imageSettingsRequest, boolean backupSet) {
+    @JsonCreator
+    public UpgradeEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("instanceIds") HashSet<String> instanceIds,
+            @JsonProperty("primareGwInstanceId") String primareGwInstanceId,
+            @JsonProperty("operationId") String operationId,
+            @JsonProperty("imageSettingsRequest") ImageSettingsRequest imageSettingsRequest,
+            @JsonProperty("backupSet") boolean backupSet) {
         super(selector, stackId);
         this.instanceIds = instanceIds;
         this.primareGwInstanceId = primareGwInstanceId;

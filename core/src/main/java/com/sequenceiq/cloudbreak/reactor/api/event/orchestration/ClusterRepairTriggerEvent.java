@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class ClusterRepairTriggerEvent extends StackEvent {
@@ -42,8 +44,13 @@ public class ClusterRepairTriggerEvent extends StackEvent {
         this.triggeredStackVariant = null;
     }
 
-    public ClusterRepairTriggerEvent(String event, Long stackId, Map<String, List<String>> failedNodesMap, boolean restartServices,
-            String triggeredStackVariant) {
+    @JsonCreator
+    public ClusterRepairTriggerEvent(
+            @JsonProperty("selector") String event,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("failedNodesMap") Map<String, List<String>> failedNodesMap,
+            @JsonProperty("restartServices") boolean restartServices,
+            @JsonProperty("triggeredStackVariant") String triggeredStackVariant) {
         super(event, stackId);
         this.failedNodesMap = copyToSerializableMap(failedNodesMap);
         this.stackId = stackId;

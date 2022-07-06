@@ -1,6 +1,9 @@
 package com.sequenceiq.datalake.flow.cert.rotation.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
@@ -23,7 +26,12 @@ public class SdxCertRotationWaitEvent extends SdxEvent {
         super(selector, context);
     }
 
-    public SdxCertRotationWaitEvent(String selector, Long sdxId, String userId, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public SdxCertRotationWaitEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, accepted);
     }
 }

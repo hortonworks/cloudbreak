@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.event.allocate;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
 /**
@@ -7,7 +9,8 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
  */
 public class AllocateDatabaseServerSuccess extends RedbeamsEvent {
 
-    public AllocateDatabaseServerSuccess(Long resourceId) {
+    @JsonCreator
+    public AllocateDatabaseServerSuccess(@JsonProperty("resourceId") Long resourceId) {
         super(resourceId);
     }
 

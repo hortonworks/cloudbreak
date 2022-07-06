@@ -4,6 +4,8 @@ import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAK
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -14,7 +16,13 @@ public class DatalakeDatabaseBackupStartEvent extends DatalakeDatabaseDrStartBas
 
     private final SdxDatabaseBackupRequest backupRequest;
 
-    public DatalakeDatabaseBackupStartEvent(String selector, Long sdxId, String userId, SdxDatabaseBackupRequest backupRequest) {
+    @JsonCreator
+    public DatalakeDatabaseBackupStartEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("backupRequest") SdxDatabaseBackupRequest backupRequest) {
+
         super(selector, sdxId, userId, SdxOperationType.BACKUP);
         this.backupRequest = backupRequest;
     }
@@ -22,7 +30,7 @@ public class DatalakeDatabaseBackupStartEvent extends DatalakeDatabaseDrStartBas
     public DatalakeDatabaseBackupStartEvent(String selector, SdxOperation drStatus, String userId,
                                             String backupId, String backupLocation) {
         super(selector, drStatus.getSdxClusterId(), userId, drStatus);
-        this.backupRequest = new SdxDatabaseBackupRequest();
+        backupRequest = new SdxDatabaseBackupRequest();
         backupRequest.setBackupId(backupId);
         backupRequest.setBackupLocation(backupLocation);
         backupRequest.setCloseConnections(true);

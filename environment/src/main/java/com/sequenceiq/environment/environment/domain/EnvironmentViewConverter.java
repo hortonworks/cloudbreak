@@ -18,7 +18,7 @@ public class EnvironmentViewConverter {
         environmentView.setAccountId(environment.getAccountId());
         environmentView.setArchived(environment.isArchived());
         environmentView.setCloudPlatform(environment.getCloudPlatform());
-        environmentView.setCredentialView(credentialViewConverter.convert(environment.getCredential()));
+        environmentView.setCredential(credentialViewConverter.convert(environment.getCredential()));
         environmentView.setDescription(environment.getDescription());
         environmentView.setId(environment.getId());
         environmentView.setLatitude(environment.getLatitude());

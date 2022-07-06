@@ -73,7 +73,7 @@ class PollBindUserCreationHandlerTest {
 
         assertEquals(VALIDATE_KERBEROS_CONFIG_EXISTS_EVENT.event(), result.selector());
         assertEquals(1L, result.getResourceId());
-        assertTrue(result.doesFreeipaExistsForEnv());
+        assertTrue(result.isFreeipaExistsForEnv());
         FreeIpaOperationPollerObject pollerObject = captor.getValue();
         assertEquals(BIND_USER_CREATE.name(), pollerObject.getOperationType());
         assertEquals("opId", pollerObject.getOperationId());

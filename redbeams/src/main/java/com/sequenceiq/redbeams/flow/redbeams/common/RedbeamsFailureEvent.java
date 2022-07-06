@@ -1,5 +1,8 @@
 package com.sequenceiq.redbeams.flow.redbeams.common;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class RedbeamsFailureEvent extends RedbeamsEvent {
 
     private final Exception exception;
@@ -14,8 +17,14 @@ public class RedbeamsFailureEvent extends RedbeamsEvent {
         this.exception = exception;
     }
 
-    public RedbeamsFailureEvent(String selector, Long resourceId, Exception exception) {
-        super(selector, resourceId);
+    @JsonCreator
+    public RedbeamsFailureEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("exception") Exception exception,
+            @JsonProperty("forced") boolean forced) {
+
+        super(selector, resourceId, forced);
         this.exception = exception;
     }
 
