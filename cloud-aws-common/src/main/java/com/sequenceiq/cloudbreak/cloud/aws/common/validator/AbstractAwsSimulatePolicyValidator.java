@@ -6,6 +6,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
 
 import com.amazonaws.services.identitymanagement.model.EvaluationResult;
@@ -14,9 +16,12 @@ import com.amazonaws.services.identitymanagement.model.Role;
 
 public abstract class AbstractAwsSimulatePolicyValidator {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAwsSimulatePolicyValidator.class);
+
     SortedSet<String> getFailedActions(Role role, List<EvaluationResult> evaluationResults) {
         return evaluationResults.stream()
                 .filter(this::isEvaluationFailed)
+                .peek(evaluationResult -> LOGGER.debug("Aws EvaluationResult for the failed policy simulation: {}", evaluationResult))
                 .map(evaluationResult -> {
                     OrganizationsDecisionDetail organizationsDecisionDetail = evaluationResult.getOrganizationsDecisionDetail();
                     if (organizationsDecisionDetail != null && !organizationsDecisionDetail.getAllowedByOrganizations()) {
