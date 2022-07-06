@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event;
 
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
@@ -24,8 +26,14 @@ public class UpgradeCcmFailureEvent extends StackFailureEvent {
         this.transitionStatusAfterFailure = Optional.empty();
     }
 
-    public UpgradeCcmFailureEvent(String selector, Long stackId, Tunnel oldTunnel,
-            Class<? extends AbstractUpgradeCcmEventHandler> failureOrigin, Exception exception, Optional<DetailedStackStatus> transitionStatus) {
+    @JsonCreator
+    public UpgradeCcmFailureEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("oldTunnel") Tunnel oldTunnel,
+            @JsonProperty("failureOrigin") Class<? extends AbstractUpgradeCcmEventHandler> failureOrigin,
+            @JsonProperty("exception") Exception exception,
+            @JsonProperty("transitionStatusAfterFailure") Optional<DetailedStackStatus> transitionStatus) {
 
         super(selector, stackId, exception);
         this.oldTunnel = oldTunnel;

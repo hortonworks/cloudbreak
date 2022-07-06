@@ -1,11 +1,14 @@
 package com.sequenceiq.environment.environment.flow.deletion.event;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 import reactor.rx.Promise;
 
+@JsonDeserialize(builder = EnvDeleteEvent.EnvDeleteEventBuilder.class)
 public class EnvDeleteEvent extends BaseNamedFlowEvent {
 
     private final boolean forceDelete;
@@ -34,6 +37,7 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
         return new EnvDeleteEventBuilder();
     }
 
+    @JsonPOJOBuilder
     public static final class EnvDeleteEventBuilder {
         private String resourceName;
 

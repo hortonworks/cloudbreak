@@ -1,10 +1,14 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class SetupRecoverySuccess extends StackEvent {
 
-    public SetupRecoverySuccess(Long stackId) {
+    @JsonCreator
+    public SetupRecoverySuccess(
+            @JsonProperty("resourceId") Long stackId) {
         super(stackId);
     }
 }

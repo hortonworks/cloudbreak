@@ -1,10 +1,16 @@
 package com.sequenceiq.datalake.flow.detach.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.SdxFailedEvent;
 
 public class SdxDetachRecoveryFailedEvent extends SdxFailedEvent {
-    public SdxDetachRecoveryFailedEvent(Long sdxId, String userId, Exception exception) {
+    @JsonCreator
+    public SdxDetachRecoveryFailedEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("exception") Exception exception) {
         super(sdxId, userId, exception);
     }
 

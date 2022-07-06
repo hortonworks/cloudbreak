@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.termination.event.deregister;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
@@ -13,7 +15,11 @@ public class DeregisterDatabaseServerRequest extends RedbeamsEvent {
 
     private final DatabaseStack databaseStack;
 
-    public DeregisterDatabaseServerRequest(CloudContext cloudContext, DatabaseStack databaseStack) {
+    @JsonCreator
+    public DeregisterDatabaseServerRequest(
+            @JsonProperty("cloudContext") CloudContext cloudContext,
+            @JsonProperty("databaseStack") DatabaseStack databaseStack) {
+
         super(cloudContext != null ? cloudContext.getId() : null);
         this.cloudContext = cloudContext;
         this.databaseStack = databaseStack;

@@ -2,7 +2,10 @@ package com.sequenceiq.datalake.flow.dr.backup.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFailureReason;
@@ -18,8 +21,15 @@ public class DatalakeTriggerBackupEvent extends DatalakeDatabaseDrStartBaseEvent
 
     private final DatalakeBackupFailureReason reason;
 
-    public DatalakeTriggerBackupEvent(String selector, Long sdxId, String userId, String backupLocation,
-            String backupName, DatalakeBackupFailureReason reason, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public DatalakeTriggerBackupEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("backupLocation") String backupLocation,
+            @JsonProperty("backupName") String backupName,
+            @JsonProperty("reason") DatalakeBackupFailureReason reason,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, SdxOperationType.BACKUP, accepted);
         this.backupLocation = backupLocation;
         this.backupName = backupName;

@@ -2,11 +2,15 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Subnet {
 
     private final String cidr;
 
-    public Subnet(String cidr) {
+    @JsonCreator
+    public Subnet(@JsonProperty("cidr") String cidr) {
         this.cidr = cidr;
     }
 

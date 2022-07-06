@@ -3,6 +3,8 @@ package com.sequenceiq.freeipa.flow.freeipa.upscale.event;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class UpscaleFailureEvent extends StackEvent {
@@ -15,8 +17,13 @@ public class UpscaleFailureEvent extends StackEvent {
 
     private final Map<String, String> failureDetails;
 
-    public UpscaleFailureEvent(Long stackId, String failedPhase, Set<String> success, Map<String, String> failureDetails,
-            Exception exception) {
+    @JsonCreator
+    public UpscaleFailureEvent(
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("failedPhase") String failedPhase,
+            @JsonProperty("success") Set<String> success,
+            @JsonProperty("failureDetails") Map<String, String> failureDetails,
+            @JsonProperty("exception") Exception exception) {
         super(stackId);
         this.exception = exception;
         this.failedPhase = failedPhase;

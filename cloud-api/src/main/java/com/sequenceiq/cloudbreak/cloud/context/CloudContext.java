@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.context;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -10,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
  * with the flow to all methods and also sent back in the Response objects.
  *
  */
+@JsonDeserialize(builder = CloudContext.Builder.class)
 public class CloudContext {
 
     private final Long id;
@@ -39,13 +42,13 @@ public class CloudContext {
     /**
      * Specifically used for cases in which the original stack has been detached during a resize operation.
      */
-    private String originalName;
+    private final String originalName;
 
     /*
      * We need this constructor because flow request objects use this class and it can not be serialized back to object
      */
     private CloudContext(Long id, String name, Platform platform, boolean govCloud, Variant variant, Location location, String userName, String accountId,
-            Long tenantId, String crn) {
+            Long tenantId, String crn, String originalName) {
         this.id = id;
         this.name = name;
         this.platform = platform;
@@ -56,6 +59,7 @@ public class CloudContext {
         this.accountId = accountId;
         this.tenantId = tenantId;
         this.crn = crn;
+        this.originalName = originalName;
     }
 
     private CloudContext(Builder builder) {
@@ -136,6 +140,7 @@ public class CloudContext {
                 '}';
     }
 
+    @JsonPOJOBuilder
     public static class Builder {
         private Long id;
 

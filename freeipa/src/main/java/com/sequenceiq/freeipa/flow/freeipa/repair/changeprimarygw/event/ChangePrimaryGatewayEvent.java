@@ -1,10 +1,12 @@
 package com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 import reactor.rx.Promise;
@@ -15,24 +17,30 @@ public class ChangePrimaryGatewayEvent extends StackEvent {
 
     private final Boolean finalChain;
 
-    private final ArrayList<String> repairInstanceIds;
+    private final List<String> repairInstanceIds;
 
-    public ChangePrimaryGatewayEvent(String selector, Long stackId, ArrayList<String> repairInstanceIds, Boolean finalChain, String operationId) {
+    public ChangePrimaryGatewayEvent(String selector, Long stackId, List<String> repairInstanceIds, Boolean finalChain, String operationId) {
         super(selector, stackId);
         this.repairInstanceIds = repairInstanceIds;
         this.finalChain = finalChain;
         this.operationId = operationId;
     }
 
-    public ChangePrimaryGatewayEvent(String selector, Long stackId, ArrayList<String> repairInstanceIds, Boolean finalChain, String operationId,
-            Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public ChangePrimaryGatewayEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("repairInstanceIds") List<String> repairInstanceIds,
+            @JsonProperty("finalChain") Boolean finalChain,
+            @JsonProperty("operationId") String operationId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.repairInstanceIds = repairInstanceIds;
         this.finalChain = finalChain;
         this.operationId = operationId;
     }
 
-    public List<String> getRepairInstaceIds() {
+    public List<String> getRepairInstanceIds() {
         return repairInstanceIds;
     }
 

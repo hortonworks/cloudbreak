@@ -33,7 +33,7 @@ public class EmbeddedDatabaseService {
     }
 
     public boolean isAttachedDiskForEmbeddedDatabaseCreated(Stack stack) {
-        return stack.getCluster().getEmbeddedDatabaseOnAttachedDisk() && calculateVolumeCountOnGatewayGroup(stack) > 0;
+        return stack.getCluster().isEmbeddedDatabaseOnAttachedDisk() && calculateVolumeCountOnGatewayGroup(stack) > 0;
     }
 
     private int calculateVolumeCountOnGatewayGroup(Stack stack) {

@@ -80,21 +80,21 @@ public class DBStackToDatabaseStackConverter {
         SecurityGroup securityGroup = dbStackDatabaseServer.getSecurityGroup();
 
         DatabaseServer.Builder builder = DatabaseServer.builder()
-                .serverId(dbStackDatabaseServer.getName())
-                .flavor(dbStackDatabaseServer.getInstanceType())
-                .engine(getDatabaseEngine(dbStackDatabaseServer))
-                .connectionDriver(dbStackDatabaseServer.getConnectionDriver())
-                .rootUserName(dbStackDatabaseServer.getRootUserName())
-                .rootPassword(dbStackDatabaseServer.getRootPassword())
-                .port(dbStackDatabaseServer.getPort())
-                .useSslEnforcement(determineSslEnforcement(dbStack))
-                .storageSize(dbStackDatabaseServer.getStorageSize())
-                .security(securityGroup == null ? null : new Security(Collections.emptyList(), securityGroup.getSecurityGroupIds()))
+                .withServerId(dbStackDatabaseServer.getName())
+                .withFlavor(dbStackDatabaseServer.getInstanceType())
+                .withEngine(getDatabaseEngine(dbStackDatabaseServer))
+                .withConnectionDriver(dbStackDatabaseServer.getConnectionDriver())
+                .withRootUserName(dbStackDatabaseServer.getRootUserName())
+                .withRootPassword(dbStackDatabaseServer.getRootPassword())
+                .withPort(dbStackDatabaseServer.getPort())
+                .withUseSslEnforcement(determineSslEnforcement(dbStack))
+                .withStorageSize(dbStackDatabaseServer.getStorageSize())
+                .withSecurity(securityGroup == null ? null : new Security(Collections.emptyList(), securityGroup.getSecurityGroupIds()))
                 // TODO / FIXME converter caller decides this?
-                .status(CREATE_REQUESTED)
-                .location(dbStack.getRegion())
-                .highAvailability(dbStack.isHa())
-                .params(params);
+                .withStatus(CREATE_REQUESTED)
+                .withLocation(dbStack.getRegion())
+                .withHighAvailability(dbStack.isHa())
+                .withParams(params);
 
         return builder.build();
     }

@@ -2,8 +2,11 @@ package com.sequenceiq.datalake.flow.cert.rotation.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
@@ -33,7 +36,13 @@ public class SdxStartCertRotationEvent extends SdxEvent {
         this.request = request;
     }
 
-    public SdxStartCertRotationEvent(String selector, Long sdxId, String userId, Promise<AcceptResult> accepted, CertificatesRotationV4Request request) {
+    @JsonCreator
+    public SdxStartCertRotationEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonProperty("request") CertificatesRotationV4Request request) {
         super(selector, sdxId, userId, accepted);
         this.request = request;
     }

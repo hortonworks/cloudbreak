@@ -44,7 +44,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setNodeCount(stack.getFullNodeCount());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
         generalClusterConfigs.setVariant(cluster.getVariant());
-        generalClusterConfigs.setAutoTlsEnabled(cluster.getAutoTlsEnabled());
+        generalClusterConfigs.setAutoTlsEnabled(cluster.isAutoTlsEnabled());
         boolean userFacingCertHasBeenGenerated = StringUtils.isNotEmpty(stack.getSecurityConfig().getUserFacingKey())
                 && StringUtils.isNotEmpty(stack.getSecurityConfig().getUserFacingCert());
         generalClusterConfigs.setKnoxUserFacingCertConfigured(userFacingCertHasBeenGenerated);

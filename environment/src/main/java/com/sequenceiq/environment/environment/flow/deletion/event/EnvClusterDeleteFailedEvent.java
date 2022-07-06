@@ -2,9 +2,12 @@ package com.sequenceiq.environment.environment.flow.deletion.event;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvClustersDeleteStateSelectors.FAILED_ENV_CLUSTERS_DELETE_EVENT;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
+@JsonDeserialize(builder = EnvClusterDeleteFailedEvent.EnvClusterDeleteFailedEventBuilder.class)
 public class EnvClusterDeleteFailedEvent extends BaseNamedFlowEvent implements Selectable {
 
     private final Exception exception;
@@ -34,6 +37,7 @@ public class EnvClusterDeleteFailedEvent extends BaseNamedFlowEvent implements S
         return new EnvClusterDeleteFailedEventBuilder();
     }
 
+    @JsonPOJOBuilder
     public static final class EnvClusterDeleteFailedEventBuilder {
         private Long environmentId;
 
@@ -48,7 +52,7 @@ public class EnvClusterDeleteFailedEvent extends BaseNamedFlowEvent implements S
         private EnvClusterDeleteFailedEventBuilder() {
         }
 
-        public EnvClusterDeleteFailedEventBuilder withEnvironmentID(Long environmentId) {
+        public EnvClusterDeleteFailedEventBuilder withEnvironmentId(Long environmentId) {
             this.environmentId = environmentId;
             return this;
         }

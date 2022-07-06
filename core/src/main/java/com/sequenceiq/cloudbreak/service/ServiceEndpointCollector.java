@@ -147,7 +147,7 @@ public class ServiceEndpointCollector {
                 .collect(Collectors.toSet());
         List<ClusterExposedServiceV4Response> uiServices = new ArrayList<>();
         List<ClusterExposedServiceV4Response> apiServices = new ArrayList<>();
-        boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
+        boolean autoTlsEnabled = cluster.isAutoTlsEnabled();
         LOGGER.debug("AutoTls enabled '{}' for the cluster", autoTlsEnabled);
         SecurityConfig securityConfig = cluster.getStack().getSecurityConfig();
         String managerServerUrl = getManagerServerUrl(cluster, managerIp);

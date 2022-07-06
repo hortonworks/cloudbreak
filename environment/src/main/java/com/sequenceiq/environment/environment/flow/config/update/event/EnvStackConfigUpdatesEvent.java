@@ -1,11 +1,14 @@
 package com.sequenceiq.environment.environment.flow.config.update.event;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 import reactor.rx.Promise;
 
+@JsonDeserialize(builder = EnvStackConfigUpdatesEvent.EnvStackConfigUpdatesEventBuilder.class)
 public class EnvStackConfigUpdatesEvent extends BaseNamedFlowEvent {
 
     public EnvStackConfigUpdatesEvent(String selector, Long resourceId, String resourceName,
@@ -23,6 +26,7 @@ public class EnvStackConfigUpdatesEvent extends BaseNamedFlowEvent {
         return isClassAndEqualsEvent(EnvStackConfigUpdatesEvent.class, other);
     }
 
+    @JsonPOJOBuilder
     public static final class EnvStackConfigUpdatesEventBuilder {
 
         private String resourceName;

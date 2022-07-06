@@ -1,10 +1,14 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class CollectAdditionalHostnamesRequest extends StackEvent {
 
-    public CollectAdditionalHostnamesRequest(Long stackId) {
+    @JsonCreator
+    public CollectAdditionalHostnamesRequest(
+            @JsonProperty("resourceId") Long stackId) {
         super(stackId);
     }
 }

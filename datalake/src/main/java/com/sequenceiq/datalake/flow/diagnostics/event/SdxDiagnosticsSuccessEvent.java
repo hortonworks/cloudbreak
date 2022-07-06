@@ -4,9 +4,16 @@ import static com.sequenceiq.datalake.flow.diagnostics.SdxDiagnosticsEvent.SDX_D
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class SdxDiagnosticsSuccessEvent extends BaseSdxDiagnosticsEvent {
 
-    public SdxDiagnosticsSuccessEvent(Long sdxId, String userId, Map<String, Object> properties) {
+    @JsonCreator
+    public SdxDiagnosticsSuccessEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("properties") Map<String, Object> properties) {
         super(sdxId, userId, properties);
     }
 

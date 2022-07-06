@@ -47,7 +47,7 @@ public class HealthCheckHandler extends ExceptionCatcherEventHandler<HealthCheck
         Selectable result;
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            if (request.getWaitForFreeIpaAvailability()) {
+            if (request.isWaitForFreeIpaAvailability()) {
                 try {
                     freeIpaServiceStartService.pollFreeIpaHealth(stack);
                 } catch (Exception e) {

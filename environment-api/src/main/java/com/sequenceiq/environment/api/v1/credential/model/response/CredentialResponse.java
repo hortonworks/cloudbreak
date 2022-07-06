@@ -103,7 +103,7 @@ public class CredentialResponse extends CredentialBase {
         this.type = type;
     }
 
-    public Boolean getGovCloud() {
+    public Boolean isGovCloud() {
         return govCloud;
     }
 

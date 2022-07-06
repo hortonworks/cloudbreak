@@ -10,8 +10,9 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.service.secret.SecretValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
+import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
@@ -62,6 +63,7 @@ public class SecurityConfig implements AccountIdAwareResource {
         this.usePrivateIpToTls = usePrivateIpToTls;
     }
 
+    @JsonProperty("clientKeyVault")
     public String getClientKeyVaultSecret() {
         return clientKeyVault.getSecret();
     }
@@ -78,6 +80,7 @@ public class SecurityConfig implements AccountIdAwareResource {
         this.clientKeyVault = new Secret(clientKeyVault);
     }
 
+    @JsonProperty("clientCertVault")
     public String getClientCertVaultSecret() {
         return clientCertVault.getSecret();
     }

@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 
 public class Platform extends StringType {
 
-    private Platform(String platform) {
+    @JsonCreator
+    private Platform(@JsonProperty("value") String platform) {
         super(platform);
     }
 

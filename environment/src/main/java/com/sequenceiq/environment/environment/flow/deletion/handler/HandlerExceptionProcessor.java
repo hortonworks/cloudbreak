@@ -16,7 +16,7 @@ public class HandlerExceptionProcessor {
             eventSender.sendEvent(conjoiner.getEnvDeleteEvent(), conjoiner.getEnvironmentDtoEvent().getHeaders());
         } else {
             EnvDeleteFailedEvent failedEvent = EnvDeleteFailedEvent.builder()
-                    .withEnvironmentID(conjoiner.getEnvironmentDto().getId())
+                    .withEnvironmentId(conjoiner.getEnvironmentDto().getId())
                     .withException(conjoiner.getException())
                     .withResourceCrn(conjoiner.getEnvironmentDto().getResourceCrn())
                     .withResourceName(conjoiner.getEnvironmentDto().getName())

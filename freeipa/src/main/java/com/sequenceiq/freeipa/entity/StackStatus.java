@@ -113,6 +113,10 @@ public class StackStatus {
         return detailedStackStatusString;
     }
 
+    public void setDetailedStackStatusString(String detailedStackStatusString) {
+        this.detailedStackStatusString = detailedStackStatusString;
+    }
+
     public void setCreated(Long created) {
         this.created = created;
     }

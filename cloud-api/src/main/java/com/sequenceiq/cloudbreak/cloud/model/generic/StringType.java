@@ -14,6 +14,10 @@ public abstract class StringType {
         return value;
     }
 
+    public String getValue() {
+        return value();
+    }
+
     @Override
     public String toString() {
         return "StringType{value='" + value + "\'}";

@@ -50,6 +50,14 @@ public class CredentialView implements Serializable, AuthResource, AccountIdAwar
     @Convert(converter = CredentialTypeConverter.class)
     private CredentialType type;
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public String getName() {
         return name;
     }
@@ -82,7 +90,7 @@ public class CredentialView implements Serializable, AuthResource, AccountIdAwar
         this.cloudPlatform = cloudPlatform;
     }
 
-    public Boolean getGovCloud() {
+    public Boolean isGovCloud() {
         return govCloud;
     }
 

@@ -60,7 +60,7 @@ public class UpgradeCcmActions {
             @Override
             protected void doExecute(UpgradeCcmContext context, UpgradeCcmTriggerEvent payload, Map<Object, Object> variables) {
                 setOperationId(variables, payload.getOperationId());
-                setFinalChain(variables, payload.isFinal());
+                setFinalChain(variables, payload.isFinalFlow());
                 setChainedAction(variables, payload.isChained());
                 LOGGER.info("Starting checking prerequisites for FreeIPA CCM upgrade {}", payload);
                 upgradeCcmService.checkPrerequisitesState(context.getStack().getId());

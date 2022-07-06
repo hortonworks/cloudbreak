@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -15,8 +17,13 @@ public class ClusterUpgradeUpdateCheckFailed extends StackEvent {
 
     private final Throwable error;
 
-    public ClusterUpgradeUpdateCheckFailed(Long stackId, CloudStack cloudStack, CloudCredential cloudCredential, CloudContext cloudContext,
-            Throwable error) {
+    @JsonCreator
+    public ClusterUpgradeUpdateCheckFailed(
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("cloudStack") CloudStack cloudStack,
+            @JsonProperty("cloudCredential") CloudCredential cloudCredential,
+            @JsonProperty("cloudContext") CloudContext cloudContext,
+            @JsonProperty("error") Throwable error) {
         super(ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.name(), stackId);
         this.cloudStack = cloudStack;
         this.cloudCredential = cloudCredential;

@@ -2,6 +2,8 @@ package com.sequenceiq.environment.environment.flow.start.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
@@ -9,9 +11,10 @@ import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 import reactor.rx.Promise;
 
+@JsonDeserialize(builder = EnvStartEvent.EnvStartEventBuilder.class)
 public class EnvStartEvent extends BaseNamedFlowEvent {
 
-    private DataHubStartAction dataHubStartAction;
+    private final DataHubStartAction dataHubStartAction;
 
     public EnvStartEvent(String selector, Long resourceId, String resourceName, String resourceCrn, DataHubStartAction dataHubStartAction) {
         super(selector, resourceId, resourceName, resourceCrn);
@@ -34,6 +37,7 @@ public class EnvStartEvent extends BaseNamedFlowEvent {
         return dataHubStartAction;
     }
 
+    @JsonPOJOBuilder
     public static final class EnvStartEventBuilder {
         private String resourceName;
 
@@ -79,7 +83,7 @@ public class EnvStartEvent extends BaseNamedFlowEvent {
             return this;
         }
 
-        public EnvStartEventBuilder withDataHubStart(DataHubStartAction dataHubStartAction) {
+        public EnvStartEventBuilder withDataHubStartAction(DataHubStartAction dataHubStartAction) {
             this.dataHubStartAction = dataHubStartAction;
             return this;
         }

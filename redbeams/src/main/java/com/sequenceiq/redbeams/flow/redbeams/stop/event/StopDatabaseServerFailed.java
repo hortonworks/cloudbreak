@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.stop.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
 
 /**
@@ -7,7 +9,11 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsFailureEvent;
  */
 public class StopDatabaseServerFailed extends RedbeamsFailureEvent {
 
-    public StopDatabaseServerFailed(Long resourceId, Exception e) {
+    @JsonCreator
+    public StopDatabaseServerFailed(
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("exception") Exception e) {
+
         super(resourceId, e);
     }
 

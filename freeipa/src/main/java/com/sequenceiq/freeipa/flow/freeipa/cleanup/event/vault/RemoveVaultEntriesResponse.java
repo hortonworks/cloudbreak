@@ -3,17 +3,21 @@ package com.sequenceiq.freeipa.flow.freeipa.cleanup.event.vault;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
 public class RemoveVaultEntriesResponse extends AbstractCleanupEvent {
 
-    private Set<String> vaultCleanupSuccess;
+    private final Set<String> vaultCleanupSuccess;
 
-    private Map<String, String> vaultCleanupFailed;
+    private final Map<String, String> vaultCleanupFailed;
 
     protected RemoveVaultEntriesResponse(Long stackId) {
         super(stackId);
+        vaultCleanupSuccess = null;
+        vaultCleanupFailed = null;
     }
 
     public RemoveVaultEntriesResponse(CleanupEvent cleanupEvent, Set<String> vaultCleanupSuccess,
@@ -23,8 +27,12 @@ public class RemoveVaultEntriesResponse extends AbstractCleanupEvent {
         this.vaultCleanupFailed = vaultCleanupFailed;
     }
 
-    public RemoveVaultEntriesResponse(String selector, CleanupEvent cleanupEvent, Set<String> vaultCleanupSuccess,
-            Map<String, String> vaultCleanupFailed) {
+    @JsonCreator
+    public RemoveVaultEntriesResponse(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("cleanupEvent") CleanupEvent cleanupEvent,
+            @JsonProperty("vaultCleanupSuccess") Set<String> vaultCleanupSuccess,
+            @JsonProperty("vaultCleanupFailed") Map<String, String> vaultCleanupFailed) {
         super(selector, cleanupEvent);
         this.vaultCleanupSuccess = vaultCleanupSuccess;
         this.vaultCleanupFailed = vaultCleanupFailed;

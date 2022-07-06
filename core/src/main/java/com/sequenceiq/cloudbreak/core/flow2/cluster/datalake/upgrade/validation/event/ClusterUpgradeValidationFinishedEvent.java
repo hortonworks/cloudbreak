@@ -2,17 +2,23 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class ClusterUpgradeValidationFinishedEvent extends StackEvent {
 
-    private Exception exception;
+    private final Exception exception;
 
     public ClusterUpgradeValidationFinishedEvent(Long resourceId) {
         super(FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT.name(), resourceId);
+        exception = null;
     }
 
-    public ClusterUpgradeValidationFinishedEvent(Long resourceId, Exception exception) {
+    @JsonCreator
+    public ClusterUpgradeValidationFinishedEvent(
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("exception") Exception exception) {
         super(FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT.name(), resourceId);
         this.exception = exception;
     }

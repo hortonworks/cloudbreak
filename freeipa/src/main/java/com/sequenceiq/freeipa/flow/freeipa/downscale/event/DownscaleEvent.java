@@ -1,17 +1,19 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale.event;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 import reactor.rx.Promise;
 
 public class DownscaleEvent extends StackEvent {
 
-    private final ArrayList<String> instanceIds;
+    private final List<String> instanceIds;
 
     private final boolean repair;
 
@@ -23,14 +25,23 @@ public class DownscaleEvent extends StackEvent {
 
     private final int instanceCountByGroup;
 
-    public DownscaleEvent(String selector, Long stackId, ArrayList<String> instanceIds, int instanceCountByGroup, boolean repair, boolean chained,
+    public DownscaleEvent(String selector, Long stackId, List<String> instanceIds, int instanceCountByGroup, boolean repair, boolean chained,
             boolean finalChain, String operationId) {
         this(selector, stackId, instanceIds, instanceCountByGroup, repair, chained, finalChain, operationId, new Promise<>());
     }
 
     @SuppressWarnings("ExecutableStatementCount")
-    public DownscaleEvent(String selector, Long stackId, ArrayList<String> instanceIds, int instanceCountByGroup, boolean repair, boolean chained,
-            boolean finalChain, String operationId, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public DownscaleEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("instanceIds") List<String> instanceIds,
+            @JsonProperty("instanceCountByGroup") int instanceCountByGroup,
+            @JsonProperty("repair") boolean repair,
+            @JsonProperty("chained") boolean chained,
+            @JsonProperty("finalChain") boolean finalChain,
+            @JsonProperty("operationId") String operationId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.instanceIds = instanceIds;
         this.instanceCountByGroup = instanceCountByGroup;

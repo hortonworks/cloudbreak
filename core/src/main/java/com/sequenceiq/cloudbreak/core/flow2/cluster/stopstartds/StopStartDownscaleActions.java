@@ -81,14 +81,14 @@ public class StopStartDownscaleActions {
 
             @Override
             protected void prepareExecution(StopStartDownscaleTriggerEvent payload, Map<Object, Object> variables) {
-                variables.put(HOSTGROUPNAME, payload.getHostGroupName());
+                variables.put(HOSTGROUPNAME, payload.getHostGroup());
                 variables.put(HOSTS_TO_REMOVE, payload.getHostIds());
             }
 
             @Override
             protected void doExecute(
                     StopStartDownscaleContext context, StopStartDownscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
-                stopStartDownscaleFlowService.clusterDownscaleStarted(context.getStack().getId(), payload.getHostGroupName(), payload.getHostIds());
+                stopStartDownscaleFlowService.clusterDownscaleStarted(context.getStack().getId(), payload.getHostGroup(), payload.getHostIds());
                 sendEvent(context);
             }
 

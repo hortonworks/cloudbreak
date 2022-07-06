@@ -19,4 +19,8 @@ public abstract class AbstractCleanupEvent extends CleanupEvent {
                 cleanupEvent.getStatesToSkip(), cleanupEvent.getAccountId(), cleanupEvent.getOperationId(), cleanupEvent.getClusterName(),
                 cleanupEvent.getEnvironmentCrn());
     }
+
+    private CleanupEvent getCleanupEvent() {
+        return this;
+    }
 }

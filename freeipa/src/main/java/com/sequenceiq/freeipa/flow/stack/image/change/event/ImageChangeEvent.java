@@ -2,7 +2,10 @@ package com.sequenceiq.freeipa.flow.stack.image.change.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
@@ -24,7 +27,12 @@ public class ImageChangeEvent extends StackEvent {
         this.request = request;
     }
 
-    public ImageChangeEvent(String selector, Long stackId, Promise<AcceptResult> accepted, ImageSettingsRequest request) {
+    @JsonCreator
+    public ImageChangeEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonProperty("request") ImageSettingsRequest request) {
         super(selector, stackId, accepted);
         this.request = request;
     }
@@ -40,6 +48,10 @@ public class ImageChangeEvent extends StackEvent {
 
     public String getOperationId() {
         return operationId;
+    }
+
+    public void setOperationId(String operationId) {
+        this.operationId = operationId;
     }
 
     @Override

@@ -222,7 +222,7 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
         this.gatewayport = gatewayport;
     }
 
-    public boolean getUseCcm() {
+    public boolean isUseCcm() {
         return Boolean.TRUE.equals(useCcm);
     }
 

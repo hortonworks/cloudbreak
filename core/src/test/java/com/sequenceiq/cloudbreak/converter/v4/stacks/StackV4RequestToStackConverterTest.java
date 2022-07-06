@@ -242,7 +242,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         verify(environmentClientService, times(1)).getByCrn(anyString());
         verify(gatewaySecurityGroupDecorator, times(1))
                 .extendGatewaySecurityGroupWithDefaultGatewayCidrs(any(Stack.class), any(Tunnel.class));
-        assertTrue(stack.getCluster().getAutoTlsEnabled());
+        assertTrue(stack.getCluster().isAutoTlsEnabled());
     }
 
     @Test
@@ -270,7 +270,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
-        assertTrue(stack.getCluster().getAutoTlsEnabled());
+        assertTrue(stack.getCluster().isAutoTlsEnabled());
     }
 
     private Mappable getMappable() {
@@ -341,7 +341,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
         Stack result = underTest.convert(request);
 
         assertEquals(TEST_REGIONS.get(MOCK), result.getRegion());
-        assertTrue(result.getCluster().getAutoTlsEnabled());
+        assertTrue(result.getCluster().isAutoTlsEnabled());
     }
 
     @Test

@@ -72,7 +72,7 @@ public class CredentialToCredentialV1ResponseConverter {
         if (source.getAttributes() != null) {
             convertAttributes(source, response);
             if (response.getAws() != null) {
-                response.getAws().setGovCloud(source.getGovCloud());
+                response.getAws().setGovCloud(source.isGovCloud());
             }
             response.setAttributes(secretConverter.convert(source.getAttributesSecret()));
         }
@@ -81,7 +81,7 @@ public class CredentialToCredentialV1ResponseConverter {
         response.setCreated(source.getCreated());
         response.setDescription(source.getDescription() == null ? "" : source.getDescription());
         response.setType(source.getType());
-        response.setGovCloud(source.getGovCloud());
+        response.setGovCloud(source.isGovCloud());
         response.setAccountId(source.getAccountId());
         return response;
     }

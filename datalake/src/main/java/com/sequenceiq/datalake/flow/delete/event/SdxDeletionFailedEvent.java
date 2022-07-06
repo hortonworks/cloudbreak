@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.delete.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.SdxFailedEvent;
 
@@ -7,7 +9,12 @@ public class SdxDeletionFailedEvent extends SdxFailedEvent {
 
     private final boolean forced;
 
-    public SdxDeletionFailedEvent(Long sdxId, String userId, Exception exception, boolean forced) {
+    @JsonCreator
+    public SdxDeletionFailedEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("exception") Exception exception,
+            @JsonProperty("forced") boolean forced) {
         super(sdxId, userId, exception);
         this.forced = forced;
     }

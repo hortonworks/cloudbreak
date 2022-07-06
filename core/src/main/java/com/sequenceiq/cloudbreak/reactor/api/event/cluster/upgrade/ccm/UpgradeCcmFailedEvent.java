@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -10,8 +12,12 @@ public class UpgradeCcmFailedEvent extends StackFailureEvent {
 
     private final Class<? extends ExceptionCatcherEventHandler<? extends AbstractUpgradeCcmEvent>> failureOrigin;
 
-    public UpgradeCcmFailedEvent(Long stackId, Tunnel oldTunnel,
-            Class<? extends ExceptionCatcherEventHandler<? extends AbstractUpgradeCcmEvent>> failureOrigin, Exception ex) {
+    @JsonCreator
+    public UpgradeCcmFailedEvent(
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("oldTunnel") Tunnel oldTunnel,
+            @JsonProperty("failureOrigin") Class<? extends ExceptionCatcherEventHandler<? extends AbstractUpgradeCcmEvent>> failureOrigin,
+            @JsonProperty("exception") Exception ex) {
 
         super(stackId, ex);
         this.oldTunnel = oldTunnel;

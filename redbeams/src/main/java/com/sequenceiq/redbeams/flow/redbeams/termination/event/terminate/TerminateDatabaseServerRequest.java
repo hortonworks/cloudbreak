@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.termination.event.terminate;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
@@ -16,7 +18,13 @@ public class TerminateDatabaseServerRequest extends RedbeamsEvent {
 
     private final DatabaseStack databaseStack;
 
-    public TerminateDatabaseServerRequest(CloudContext cloudContext, CloudCredential cloudCredential, DatabaseStack databaseStack, boolean forced) {
+    @JsonCreator
+    public TerminateDatabaseServerRequest(
+            @JsonProperty("cloudContext") CloudContext cloudContext,
+            @JsonProperty("cloudCredential") CloudCredential cloudCredential,
+            @JsonProperty("databaseStack") DatabaseStack databaseStack,
+            @JsonProperty("forced") boolean forced) {
+
         super(cloudContext != null ? cloudContext.getId() : null, forced);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;

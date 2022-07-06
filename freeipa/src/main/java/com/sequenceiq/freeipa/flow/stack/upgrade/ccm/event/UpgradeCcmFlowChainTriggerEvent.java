@@ -2,7 +2,10 @@ package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
@@ -20,7 +23,13 @@ public class UpgradeCcmFlowChainTriggerEvent extends StackEvent {
         this.oldTunnel = oldTunnel;
     }
 
-    public UpgradeCcmFlowChainTriggerEvent(String selector, String operationId, Long stackId, Tunnel oldTunnel, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public UpgradeCcmFlowChainTriggerEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("operationId") String operationId,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("oldTunnel") Tunnel oldTunnel,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
         this.operationId = operationId;
         this.oldTunnel = oldTunnel;

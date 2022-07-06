@@ -1,10 +1,15 @@
 package com.sequenceiq.datalake.flow.create.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class StorageValidationSuccessEvent extends SdxEvent {
 
-    public StorageValidationSuccessEvent(Long sdxId, String userId) {
+    @JsonCreator
+    public StorageValidationSuccessEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId) {
         super(sdxId, userId);
     }
 

@@ -40,7 +40,7 @@ public class ClusterProxyDeregistrationHandler implements EventHandler<ClusterPr
         } catch (Exception ex) {
             LOGGER.error("Cluster proxy de-registration failed", ex);
         }
-        Selectable result = new ClusterProxyDeregistrationFinished(request.getResourceId(), request.getForced());
+        Selectable result = new ClusterProxyDeregistrationFinished(request.getResourceId(), request.isForced());
         eventBus.notify(result.selector(), new Event<>(requestEvent.getHeaders(), result));
     }
 

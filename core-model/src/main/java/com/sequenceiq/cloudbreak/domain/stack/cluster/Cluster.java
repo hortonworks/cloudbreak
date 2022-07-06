@@ -622,7 +622,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.trustStorePwd = new Secret(trustStorePwd);
     }
 
-    public Boolean getTopologyValidation() {
+    public Boolean isTopologyValidation() {
         return topologyValidation;
     }
 
@@ -648,6 +648,14 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public ExecutorType getExecutorType() {
         return executorType;
+    }
+
+    /**
+     * Need this for Jackson deserialization
+     * @param executorType executorType
+     */
+    public void setExecutorType(ExecutorType executorType) {
+        this.executorType = executorType;
     }
 
     public String getUptime() {
@@ -703,7 +711,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.databaseServerCrn = databaseServerCrn;
     }
 
-    public Boolean getAutoTlsEnabled() {
+    public Boolean isAutoTlsEnabled() {
         return autoTlsEnabled;
     }
 
@@ -745,7 +753,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.certExpirationState = certExpirationState;
     }
 
-    public Boolean getEmbeddedDatabaseOnAttachedDisk() {
+    public Boolean isEmbeddedDatabaseOnAttachedDisk() {
         return embeddedDatabaseOnAttachedDisk;
     }
 

@@ -2,6 +2,8 @@ package com.sequenceiq.common.api.adjustment;
 
 import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.api.type.AdjustmentType;
 
 public class AdjustmentTypeWithThreshold {
@@ -10,7 +12,11 @@ public class AdjustmentTypeWithThreshold {
 
     private Long threshold;
 
-    public AdjustmentTypeWithThreshold(AdjustmentType adjustmentType, Long threshold) {
+    @JsonCreator
+    public AdjustmentTypeWithThreshold(
+            @JsonProperty("adjustmentType") AdjustmentType adjustmentType,
+            @JsonProperty("threshold") Long threshold) {
+
         this.adjustmentType = adjustmentType;
         this.threshold = threshold;
     }

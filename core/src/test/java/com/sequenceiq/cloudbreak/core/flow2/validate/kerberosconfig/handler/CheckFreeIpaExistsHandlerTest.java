@@ -103,6 +103,6 @@ class CheckFreeIpaExistsHandlerTest {
 
         assertEquals(KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_EXISTS_EVENT.event(), result.selector());
         assertEquals(1L, result.getResourceId());
-        assertFalse(result.doesFreeipaExistsForEnv());
+        assertFalse(result.isFreeipaExistsForEnv());
     }
 }

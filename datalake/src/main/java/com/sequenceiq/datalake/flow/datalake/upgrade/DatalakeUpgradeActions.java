@@ -70,7 +70,7 @@ public class DatalakeUpgradeActions {
             protected void prepareExecution(DatalakeUpgradeStartEvent payload, Map<Object, Object> variables) {
                 super.prepareExecution(payload, variables);
                 variables.put(TARGET_IMAGE, payload.getImageId());
-                variables.put(REPLACE_VMS_AFTER_UPGRADE, payload.getReplaceVms());
+                variables.put(REPLACE_VMS_AFTER_UPGRADE, payload.isReplaceVms());
             }
 
             @Override

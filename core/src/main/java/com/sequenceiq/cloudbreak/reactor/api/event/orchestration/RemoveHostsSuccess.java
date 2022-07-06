@@ -2,17 +2,15 @@ package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class RemoveHostsSuccess extends StackEvent {
 
-    // @deprecated haven't removed for compatibility reasons, we should remove it in 2.54
-    @Deprecated
-    private String hostGroupName;
+    private final Set<String> hostGroups;
 
-    private Set<String> hostGroups;
-
-    private Set<String> hostNames;
+    private final Set<String> hostNames;
 
     public RemoveHostsSuccess(Long stackId, Set<String> hostGroups, Set<String> hostNames) {
         super(stackId);
@@ -20,16 +18,18 @@ public class RemoveHostsSuccess extends StackEvent {
         this.hostNames = hostNames;
     }
 
-    public RemoveHostsSuccess(String selector, Long stackId, Set<String> hostGroups, Set<String> hostNames) {
+    @JsonCreator
+    public RemoveHostsSuccess(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("hostGroups") Set<String> hostGroups,
+            @JsonProperty("hostNames") Set<String> hostNames) {
         super(selector, stackId);
         this.hostGroups = hostGroups;
         this.hostNames = hostNames;
     }
 
     public Set<String> getHostGroups() {
-        if (hostGroups == null && hostGroupName != null) {
-            hostGroups = Set.of(hostGroupName);
-        }
         return hostGroups;
     }
 

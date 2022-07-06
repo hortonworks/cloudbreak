@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
@@ -7,7 +9,11 @@ public class DatalakeUpgradeWaitRequest extends SdxEvent {
 
     private final String imageId;
 
-    public DatalakeUpgradeWaitRequest(Long sdxId, String userId, String imageId) {
+    @JsonCreator
+    public DatalakeUpgradeWaitRequest(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("imageId") String imageId) {
         super(sdxId, userId);
         this.imageId = imageId;
     }

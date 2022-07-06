@@ -1,17 +1,23 @@
 package com.sequenceiq.datalake.flow.cert.renew.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class SdxStartCertRenewalEvent extends SdxEvent {
 
-    private boolean internal;
+    private final boolean internal;
 
     public SdxStartCertRenewalEvent(Long sdxId, String userId) {
         super(sdxId, userId);
-        this.internal = false;
+        internal = false;
     }
 
-    public SdxStartCertRenewalEvent(Long sdxId, String userId, boolean internal) {
+    @JsonCreator
+    public SdxStartCertRenewalEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("internal") boolean internal) {
         super(sdxId, userId);
         this.internal = internal;
     }

@@ -2,6 +2,8 @@ package com.sequenceiq.datalake.flow.datalake.upgrade.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
@@ -14,7 +16,14 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
 
     private final String backupLocation;
 
-    public DatalakeUpgradeFlowChainStartEvent(String selector, Long sdxId, String userId, String imageId, boolean replaceVms, String backupLocation) {
+    @JsonCreator
+    public DatalakeUpgradeFlowChainStartEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("imageId") String imageId,
+            @JsonProperty("replaceVms") boolean replaceVms,
+            @JsonProperty("backupLocation") String backupLocation) {
         super(selector, sdxId, userId);
         this.imageId = imageId;
         this.replaceVms = replaceVms;
@@ -25,7 +34,7 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
         return imageId;
     }
 
-    public boolean getReplaceVms() {
+    public boolean isReplaceVms() {
         return replaceVms;
     }
 

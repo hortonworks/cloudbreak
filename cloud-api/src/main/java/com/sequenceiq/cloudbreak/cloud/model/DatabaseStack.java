@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableMap;
 
 public class DatabaseStack {
@@ -14,7 +16,13 @@ public class DatabaseStack {
 
     private final Map<String, String> tags;
 
-    public DatabaseStack(Network network, DatabaseServer databaseServer, Map<String, String> tags, String template) {
+    @JsonCreator
+    public DatabaseStack(
+            @JsonProperty("network") Network network,
+            @JsonProperty("databaseServer") DatabaseServer databaseServer,
+            @JsonProperty("tags") Map<String, String> tags,
+            @JsonProperty("template") String template) {
+
         this.network = network;
         this.databaseServer = databaseServer;
         this.tags = ImmutableMap.copyOf(tags);

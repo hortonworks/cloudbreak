@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
@@ -27,7 +29,13 @@ public class Network extends DynamicModel {
         this(subnet, List.of(), OutboundInternetTraffic.ENABLED, parameters);
     }
 
-    public Network(Subnet subnet, List<String> networkCidrs, OutboundInternetTraffic outboundInternetTraffic, Map<String, Object> parameters) {
+    @JsonCreator
+    public Network(
+            @JsonProperty("subnet") Subnet subnet,
+            @JsonProperty("networkCidrs") List<String> networkCidrs,
+            @JsonProperty("outboundInternetTraffic") OutboundInternetTraffic outboundInternetTraffic,
+            @JsonProperty("parameters") Map<String, Object> parameters) {
+
         super(parameters);
         this.subnet = subnet;
         this.networkCidrs = networkCidrs;

@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class StopStartDownscaleTriggerEvent extends StackEvent {
@@ -10,13 +12,18 @@ public class StopStartDownscaleTriggerEvent extends StackEvent {
 
     private final Set<Long> hostIds;
 
-    public StopStartDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Set<Long> hostIds) {
+    @JsonCreator
+    public StopStartDownscaleTriggerEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("hostGroup") String hostGroup,
+            @JsonProperty("hostIds") Set<Long> hostIds) {
         super(selector, stackId);
         this.hostGroup = hostGroup;
         this.hostIds = hostIds;
     }
 
-    public String getHostGroupName() {
+    public String getHostGroup() {
         return hostGroup;
     }
 

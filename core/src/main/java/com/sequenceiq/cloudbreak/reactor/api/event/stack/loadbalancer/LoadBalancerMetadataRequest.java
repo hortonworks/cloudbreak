@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -24,8 +26,14 @@ public class LoadBalancerMetadataRequest extends StackEvent {
 
     private final List<CloudResource> cloudResources;
 
-    public LoadBalancerMetadataRequest(Stack stack, CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack,
-            List<LoadBalancerType> typesPresentInStack, List<CloudResource> cloudResources) {
+    @JsonCreator
+    public LoadBalancerMetadataRequest(
+            @JsonProperty("stack") Stack stack,
+            @JsonProperty("cloudContext") CloudContext cloudContext,
+            @JsonProperty("cloudCredential") CloudCredential cloudCredential,
+            @JsonProperty("cloudStack") CloudStack cloudStack,
+            @JsonProperty("typesPresentInStack") List<LoadBalancerType> typesPresentInStack,
+            @JsonProperty("cloudResources") List<CloudResource> cloudResources) {
         super(stack.getId());
         this.stack = stack;
         this.cloudContext = cloudContext;

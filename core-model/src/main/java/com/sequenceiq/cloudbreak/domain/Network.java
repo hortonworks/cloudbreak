@@ -124,7 +124,7 @@ public class Network implements ProvisionEntity, WorkspaceAwareResource, Archiva
         this.status = status;
     }
 
-    public String cloudPlatform() {
+    public String getCloudPlatform() {
         return cloudPlatform;
     }
 

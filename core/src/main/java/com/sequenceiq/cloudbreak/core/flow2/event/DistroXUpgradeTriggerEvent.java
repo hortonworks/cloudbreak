@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 
@@ -15,8 +17,14 @@ public class DistroXUpgradeTriggerEvent extends StackEvent {
 
     private final String triggeredStackVariant;
 
-    public DistroXUpgradeTriggerEvent(String selector, Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms, boolean lockComponents,
-            String triggeredStackVariant) {
+    @JsonCreator
+    public DistroXUpgradeTriggerEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("imageChangeDto") ImageChangeDto imageChangeDto,
+            @JsonProperty("replaceVms") boolean replaceVms,
+            @JsonProperty("lockComponents") boolean lockComponents,
+            @JsonProperty("triggeredStackVariant") String triggeredStackVariant) {
         super(selector, stackId);
         this.imageChangeDto = imageChangeDto;
         this.replaceVms = replaceVms;

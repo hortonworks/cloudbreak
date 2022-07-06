@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 
@@ -50,9 +52,21 @@ public class CloudStack {
                 null);
     }
 
-    public CloudStack(Collection<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags,
-            String template, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey, SpiFileSystem fileSystem,
-            List<CloudLoadBalancer> loadBalancers, SpiFileSystem additionalFileSystem) {
+    @JsonCreator
+    public CloudStack(
+            @JsonProperty("groups") Collection<Group> groups,
+            @JsonProperty("network") Network network,
+            @JsonProperty("image") Image image,
+            @JsonProperty("parameters") Map<String, String> parameters,
+            @JsonProperty("tags") Map<String, String> tags,
+            @JsonProperty("template") String template,
+            @JsonProperty("instanceAuthentication") InstanceAuthentication instanceAuthentication,
+            @JsonProperty("loginUserName") String loginUserName,
+            @JsonProperty("publicKey") String publicKey,
+            @JsonProperty("fileSystem") SpiFileSystem fileSystem,
+            @JsonProperty("loadBalancers") List<CloudLoadBalancer> loadBalancers,
+            @JsonProperty("additionalFileSystem") SpiFileSystem additionalFileSystem) {
+
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;

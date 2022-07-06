@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.core;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 
 import io.opentracing.SpanContext;
@@ -20,7 +22,13 @@ public class FlowParameters {
         this.spanContext = spanContext;
     }
 
-    public FlowParameters(String flowId, String flowTriggerUserCrn, String flowOperationType, SpanContext spanContext) {
+    @JsonCreator
+    public FlowParameters(
+            @JsonProperty("flowId") String flowId,
+            @JsonProperty("flowTriggerUserCrn") String flowTriggerUserCrn,
+            @JsonProperty("flowOperationType")  String flowOperationType,
+            @JsonProperty("spanContext") SpanContext spanContext) {
+
         this.flowId = flowId;
         this.flowTriggerUserCrn = flowTriggerUserCrn;
         this.flowOperationType = flowOperationType;

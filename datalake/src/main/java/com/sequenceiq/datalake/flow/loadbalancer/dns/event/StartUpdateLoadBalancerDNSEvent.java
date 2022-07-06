@@ -2,13 +2,21 @@ package com.sequenceiq.datalake.flow.loadbalancer.dns.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 import reactor.rx.Promise;
 
 public class StartUpdateLoadBalancerDNSEvent extends SdxEvent {
-    public StartUpdateLoadBalancerDNSEvent(String selector, Long sdxId, String userId, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public StartUpdateLoadBalancerDNSEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, accepted);
     }
 

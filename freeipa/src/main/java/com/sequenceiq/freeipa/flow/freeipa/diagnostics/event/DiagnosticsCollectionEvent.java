@@ -1,6 +1,9 @@
 package com.sequenceiq.freeipa.flow.freeipa.diagnostics.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
@@ -15,7 +18,13 @@ public class DiagnosticsCollectionEvent extends BaseFlowEvent {
         this.parameters = parameters;
     }
 
-    public DiagnosticsCollectionEvent(String selector, Long resourceId, String resourceCrn, Promise<AcceptResult> accepted, DiagnosticParameters parameters) {
+    @JsonCreator
+    public DiagnosticsCollectionEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("resourceCrn") String resourceCrn,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted,
+            @JsonProperty("parameters") DiagnosticParameters parameters) {
         super(selector, resourceId, resourceCrn, accepted);
         this.parameters = parameters;
     }

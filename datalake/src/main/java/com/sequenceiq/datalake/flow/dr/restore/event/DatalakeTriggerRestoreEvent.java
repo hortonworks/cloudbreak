@@ -2,6 +2,8 @@ package com.sequenceiq.datalake.flow.dr.restore.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.dr.event.DatalakeDatabaseDrStartBaseEvent;
@@ -17,8 +19,16 @@ public class DatalakeTriggerRestoreEvent extends DatalakeDatabaseDrStartBaseEven
 
     private final String backupLocationOverride;
 
-    public DatalakeTriggerRestoreEvent(String selector, Long sdxId, String sdxName, String userId,
-            String backupId, String backupLocation, String backupLocationOverride, DatalakeRestoreFailureReason reason) {
+    @JsonCreator
+    public DatalakeTriggerRestoreEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("sdxName") String sdxName,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("backupId") String backupId,
+            @JsonProperty("backupLocation") String backupLocation,
+            @JsonProperty("backupLocationOverride") String backupLocationOverride,
+            @JsonProperty("reason") DatalakeRestoreFailureReason reason) {
         super(selector, sdxId, sdxName, userId, SdxOperationType.RESTORE);
         this.backupId = backupId;
         this.backupLocation = backupLocation;
@@ -36,6 +46,10 @@ public class DatalakeTriggerRestoreEvent extends DatalakeDatabaseDrStartBaseEven
 
     public String getBackupLocationOverride() {
         return backupLocationOverride;
+    }
+
+    public DatalakeRestoreFailureReason getReason() {
+        return reason;
     }
 
     @Override

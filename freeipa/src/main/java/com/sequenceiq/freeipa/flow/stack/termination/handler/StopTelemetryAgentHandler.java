@@ -40,7 +40,7 @@ public class StopTelemetryAgentHandler implements EventHandler<StopTelemetryAgen
         StopTelemetryAgentRequest request = event.getData();
         LOGGER.info("Stop telemetry agents gracefully (if needed)...");
         telemetryAgentService.stopTelemetryAgent(request.getResourceId());
-        StopTelemetryAgentFinished response = new StopTelemetryAgentFinished(request.getResourceId(), request.getForced());
+        StopTelemetryAgentFinished response = new StopTelemetryAgentFinished(request.getResourceId(), request.isForced());
         eventBus.notify(EventSelectorUtil.selector(StopTelemetryAgentFinished.class),
                 new Event<>(event.getHeaders(), response));
     }

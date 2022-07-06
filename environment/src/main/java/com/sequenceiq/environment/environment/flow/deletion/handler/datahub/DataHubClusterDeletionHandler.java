@@ -55,7 +55,7 @@ public class DataHubClusterDeletionHandler extends EventSenderAwareHandler<Envir
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (Exception e) {
             EnvClusterDeleteFailedEvent failedEvent = EnvClusterDeleteFailedEvent.builder()
-                    .withEnvironmentID(environmentDto.getId())
+                    .withEnvironmentId(environmentDto.getId())
                     .withException(e)
                     .withResourceCrn(environmentDto.getResourceCrn())
                     .withResourceName(environmentDto.getName())

@@ -19,7 +19,7 @@ public class ClusterDBValidationService {
     private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
     public boolean isGatewayRepairEnabled(Cluster cluster) {
-        return cluster.getEmbeddedDatabaseOnAttachedDisk() || isGatewayDatabaseAvailable(cluster);
+        return cluster.isEmbeddedDatabaseOnAttachedDisk() || isGatewayDatabaseAvailable(cluster);
     }
 
     private Boolean isGatewayDatabaseAvailable(Cluster cluster) {

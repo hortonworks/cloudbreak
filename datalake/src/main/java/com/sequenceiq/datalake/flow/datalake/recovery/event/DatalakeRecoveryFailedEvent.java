@@ -1,11 +1,17 @@
 package com.sequenceiq.datalake.flow.datalake.recovery.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.SdxFailedEvent;
 
 public class DatalakeRecoveryFailedEvent extends SdxFailedEvent {
 
-    public DatalakeRecoveryFailedEvent(Long sdxId, String userId, Exception exception) {
+    @JsonCreator
+    public DatalakeRecoveryFailedEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("exception") Exception exception) {
         super(sdxId, userId, exception);
     }
 

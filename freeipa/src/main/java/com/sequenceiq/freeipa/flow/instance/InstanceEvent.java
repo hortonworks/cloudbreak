@@ -6,6 +6,8 @@ import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -30,7 +32,11 @@ public class InstanceEvent implements IdempotentEvent<InstanceEvent> {
         this(null, resourceId, instanceIds);
     }
 
-    public InstanceEvent(String selector, Long resourceId, List<String> instanceIds) {
+    @JsonCreator
+    public InstanceEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("instanceIds") List<String> instanceIds) {
         this.selector = selector;
         this.resourceId = resourceId;
         this.instanceIds = instanceIds;

@@ -624,7 +624,7 @@ public class ClusterHostServiceRunner {
     }
 
     private void decoratePillarWithClouderaManagerCommunicationSettings(Stack stack, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
-        Boolean autoTls = cluster.getAutoTlsEnabled();
+        Boolean autoTls = cluster.isAutoTlsEnabled();
         Map<String, Object> communication = new HashMap<>();
         Optional<String> san = loadBalancerSANProvider.getLoadBalancerSAN(stack);
         if (san.isPresent()) {
@@ -639,7 +639,7 @@ public class ClusterHostServiceRunner {
     }
 
     private void decoratePillarWithClouderaManagerAutoTls(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
-        if (cluster.getAutoTlsEnabled()) {
+        if (cluster.isAutoTlsEnabled()) {
             Map<String, Object> autoTls = new HashMap<>();
             autoTls.put("keystore_password", cluster.getKeyStorePwd());
             autoTls.put("truststore_password", cluster.getTrustStorePwd());
@@ -793,7 +793,7 @@ public class ClusterHostServiceRunner {
             List<Map<String, Object>> topologies = getTopologies(clusterGateway, cluster.getBlueprint().getStackVersion());
             gateway.put("topologies", topologies);
             if (cluster.getBlueprint() != null) {
-                Boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
+                Boolean autoTlsEnabled = cluster.isAutoTlsEnabled();
                 Map<String, Integer> servicePorts = connector.getServicePorts(cluster.getBlueprint(), autoTlsEnabled);
                 gateway.put("ports", servicePorts);
                 gateway.put("protocol", autoTlsEnabled ? "https" : "http");

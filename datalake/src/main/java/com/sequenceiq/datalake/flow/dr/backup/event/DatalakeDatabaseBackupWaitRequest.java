@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.dr.backup.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
@@ -7,7 +9,11 @@ public class DatalakeDatabaseBackupWaitRequest extends SdxEvent {
 
     private final String operationId;
 
-    public DatalakeDatabaseBackupWaitRequest(Long sdxId, String userId, String operationId) {
+    @JsonCreator
+    public DatalakeDatabaseBackupWaitRequest(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("operationId") String operationId) {
         super(sdxId, userId);
         this.operationId = operationId;
     }

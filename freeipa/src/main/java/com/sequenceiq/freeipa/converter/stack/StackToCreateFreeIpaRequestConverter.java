@@ -1,5 +1,22 @@
 package com.sequenceiq.freeipa.converter.stack;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.stereotype.Component;
+
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
@@ -46,22 +63,6 @@ import com.sequenceiq.freeipa.entity.StackAuthentication;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 @Component
 public class StackToCreateFreeIpaRequestConverter implements Converter<Stack, CreateFreeIpaRequest> {
 
@@ -103,7 +104,7 @@ public class StackToCreateFreeIpaRequestConverter implements Converter<Stack, Cr
         request.setTelemetry(getTelemetry(source));
         request.setBackup(getBackup(source));
         request.setTags(getTags(source.getTags()));
-        request.setUseCcm(source.getUseCcm());
+        request.setUseCcm(source.isUseCcm());
         request.setTunnel(source.getTunnel());
         request.setVariant(source.getPlatformvariant());
 

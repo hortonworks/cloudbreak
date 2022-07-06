@@ -36,7 +36,7 @@ class AwsRdsDbParameterGroupViewTest {
 
     @Test
     void getDBParameterGroupNameTestWhenHasServerId() {
-        DatabaseServer databaseServer = DatabaseServer.builder().serverId("myserver").build();
+        DatabaseServer databaseServer = DatabaseServer.builder().withServerId("myserver").build();
 
         AwsRdsDbParameterGroupView underTest = new AwsRdsDbParameterGroupView(databaseServer);
 
@@ -56,7 +56,7 @@ class AwsRdsDbParameterGroupViewTest {
 
     @Test
     void getDBParameterGroupFamilyTestWhenPgSqlAndBadVersionFormat() {
-        DatabaseServer databaseServer = DatabaseServer.builder().engine(DatabaseEngine.POSTGRESQL).build();
+        DatabaseServer databaseServer = DatabaseServer.builder().withEngine(DatabaseEngine.POSTGRESQL).build();
         databaseServer.putParameter(ENGINE_VERSION, "latest");
 
         AwsRdsDbParameterGroupView underTest = new AwsRdsDbParameterGroupView(databaseServer);
@@ -66,7 +66,7 @@ class AwsRdsDbParameterGroupViewTest {
 
     @Test
     void getDBParameterGroupFamilyTestWhenPgSqlAndMissingMinorVersion() {
-        DatabaseServer databaseServer = DatabaseServer.builder().engine(DatabaseEngine.POSTGRESQL).build();
+        DatabaseServer databaseServer = DatabaseServer.builder().withEngine(DatabaseEngine.POSTGRESQL).build();
         databaseServer.putParameter(ENGINE_VERSION, "10");
 
         AwsRdsDbParameterGroupView underTest = new AwsRdsDbParameterGroupView(databaseServer);
@@ -76,7 +76,7 @@ class AwsRdsDbParameterGroupViewTest {
 
     @Test
     void getDBParameterGroupFamilyTestWhenPgSqlAndMajorVersionNumericOverflow() {
-        DatabaseServer databaseServer = DatabaseServer.builder().engine(DatabaseEngine.POSTGRESQL).build();
+        DatabaseServer databaseServer = DatabaseServer.builder().withEngine(DatabaseEngine.POSTGRESQL).build();
         databaseServer.putParameter(ENGINE_VERSION, "12345678901234567890.1");
 
         AwsRdsDbParameterGroupView underTest = new AwsRdsDbParameterGroupView(databaseServer);
@@ -103,7 +103,7 @@ class AwsRdsDbParameterGroupViewTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("unsupportedMajorVersionDataProvider")
     void getDBParameterGroupFamilyTestWhenPgSqlAndUnsupportedMajorVersion(String testCaseName, String version) {
-        DatabaseServer databaseServer = DatabaseServer.builder().engine(DatabaseEngine.POSTGRESQL).build();
+        DatabaseServer databaseServer = DatabaseServer.builder().withEngine(DatabaseEngine.POSTGRESQL).build();
         databaseServer.putParameter(ENGINE_VERSION, version);
 
         AwsRdsDbParameterGroupView underTest = new AwsRdsDbParameterGroupView(databaseServer);
@@ -126,7 +126,7 @@ class AwsRdsDbParameterGroupViewTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("validVersionDataProvider")
     void getDBParameterGroupFamilyTestWhenPgSqlAndValidVersion(String testCaseName, String version, String familyExpected) {
-        DatabaseServer databaseServer = DatabaseServer.builder().engine(DatabaseEngine.POSTGRESQL).build();
+        DatabaseServer databaseServer = DatabaseServer.builder().withEngine(DatabaseEngine.POSTGRESQL).build();
         databaseServer.putParameter(ENGINE_VERSION, version);
 
         AwsRdsDbParameterGroupView underTest = new AwsRdsDbParameterGroupView(databaseServer);

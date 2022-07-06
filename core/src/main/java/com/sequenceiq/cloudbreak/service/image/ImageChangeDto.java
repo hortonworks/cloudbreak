@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class ImageChangeDto {
 
     private final Long stackId;
@@ -12,7 +15,12 @@ public class ImageChangeDto {
 
     private final String imageCatalogUrl;
 
-    public ImageChangeDto(Long stackId, String imageId, String imageCatalogName, String imageCatalogUrl) {
+    @JsonCreator
+    public ImageChangeDto(
+            @JsonProperty("stackId") Long stackId,
+            @JsonProperty("imageId") String imageId,
+            @JsonProperty("imageCatalogName") String imageCatalogName,
+            @JsonProperty("imageCatalogUrl") String imageCatalogUrl) {
         this.stackId = stackId;
         this.imageId = imageId;
         this.imageCatalogName = imageCatalogName;

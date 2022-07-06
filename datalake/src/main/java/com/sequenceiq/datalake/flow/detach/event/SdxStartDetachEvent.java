@@ -2,7 +2,10 @@ package com.sequenceiq.datalake.flow.detach.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
@@ -19,9 +22,15 @@ public class SdxStartDetachEvent extends SdxEvent {
         sdxCluster = newSdxCluster;
     }
 
-    public SdxStartDetachEvent(String selector, Long sdxId, SdxCluster newSdxCluster, String userId, Promise<AcceptResult> accepted) {
+    @JsonCreator
+    public SdxStartDetachEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("sdxCluster") SdxCluster sdxCluster,
+            @JsonProperty("userId") String userId,
+            @JsonIgnoreDeserialization Promise<AcceptResult> accepted) {
         super(selector, sdxId, userId, accepted);
-        sdxCluster = newSdxCluster;
+        this.sdxCluster = sdxCluster;
     }
 
     public SdxCluster getSdxCluster() {

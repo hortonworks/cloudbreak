@@ -17,13 +17,13 @@ public class ExecutePreTerminationRecipesAction extends AbstractStackTermination
 
     @Override
     protected void prepareExecution(TerminationEvent payload, Map<Object, Object> variables) {
-        variables.put("FORCEDTERMINATION", payload.getForced());
+        variables.put("FORCEDTERMINATION", payload.isForced());
         super.prepareExecution(payload, variables);
     }
 
     @Override
     protected void doExecute(StackTerminationContext context, TerminationEvent payload, Map<Object, Object> variables) throws Exception {
-        ExecutePreTerminationRecipesRequest request = new ExecutePreTerminationRecipesRequest(payload.getResourceId(), payload.getForced());
+        ExecutePreTerminationRecipesRequest request = new ExecutePreTerminationRecipesRequest(payload.getResourceId(), payload.isForced());
         sendEvent(context, request);
     }
 }

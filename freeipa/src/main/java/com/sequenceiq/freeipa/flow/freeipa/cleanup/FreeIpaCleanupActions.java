@@ -71,7 +71,7 @@ public class FreeIpaCleanupActions {
                             new RemoveHostsResponse(payload, Collections.emptySet(), Collections.emptyMap());
                     sendEvent(context, response);
                 } else {
-                    RemoveHostsRequest request = new RemoveHostsRequest(payload, context.getStack());
+                    RemoveHostsRequest request = new RemoveHostsRequest(payload);
                     sendEvent(context, request);
                 }
             }
@@ -108,7 +108,7 @@ public class FreeIpaCleanupActions {
                             new RemoveVaultEntriesResponse(payload, Collections.emptySet(), Collections.emptyMap());
                     sendEvent(context, response);
                 } else {
-                    RemoveVaultEntriesRequest request = new RemoveVaultEntriesRequest(payload, context.getStack());
+                    RemoveVaultEntriesRequest request = new RemoveVaultEntriesRequest(payload);
                     sendEvent(context, request);
                 }
             }
@@ -126,7 +126,7 @@ public class FreeIpaCleanupActions {
                             new RemoveUsersResponse(payload, Collections.emptySet(), Collections.emptyMap());
                     sendEvent(context, response);
                 } else {
-                    RemoveUsersRequest request = new RemoveUsersRequest(payload, context.getStack());
+                    RemoveUsersRequest request = new RemoveUsersRequest(payload);
                     sendEvent(context, request);
                 }
             }
@@ -144,7 +144,7 @@ public class FreeIpaCleanupActions {
                             new RemoveRolesResponse(payload, Collections.emptySet(), Collections.emptyMap());
                     sendEvent(context, response);
                 } else {
-                    RemoveRolesRequest request = new RemoveRolesRequest(payload, context.getStack());
+                    RemoveRolesRequest request = new RemoveRolesRequest(payload);
                     sendEvent(context, request);
                 }
             }

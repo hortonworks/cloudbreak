@@ -1,9 +1,14 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster.install;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 
 public class ExecutePostInstallRecipesFailed extends StackFailureEvent {
-    public ExecutePostInstallRecipesFailed(Long stackId, Exception ex) {
+    @JsonCreator
+    public ExecutePostInstallRecipesFailed(
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("exception") Exception ex) {
         super(stackId, ex);
     }
 }

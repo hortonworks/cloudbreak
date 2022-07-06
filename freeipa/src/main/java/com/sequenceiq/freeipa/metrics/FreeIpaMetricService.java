@@ -13,14 +13,14 @@ public class FreeIpaMetricService extends AbstractMetricService {
 
     public void incrementMetricCounter(MetricType metricType, Stack stack) {
         incrementMetricCounter(metricType,
-                FreeIpaMetricTag.CCM_ENABLED.name(), Boolean.toString(stack.getUseCcm()),
+                FreeIpaMetricTag.CCM_ENABLED.name(), Boolean.toString(stack.isUseCcm()),
                 MetricTag.TUNNEL_TYPE.name(), stack.getTunnel().name(),
                 MetricTag.CLOUD_PROVIDER.name(), stack.getCloudPlatform());
     }
 
     public void incrementMetricCounter(MetricType metricType, Stack stack, Exception exception) {
         incrementMetricCounter(metricType,
-                FreeIpaMetricTag.CCM_ENABLED.name(), Boolean.toString(stack.getUseCcm()),
+                FreeIpaMetricTag.CCM_ENABLED.name(), Boolean.toString(stack.isUseCcm()),
                 MetricTag.TUNNEL_TYPE.name(), stack.getTunnel().name(),
                 MetricTag.EXCEPTION_TYPE.name(), exception.getClass().getName(),
                 MetricTag.CLOUD_PROVIDER.name(), stack.getCloudPlatform());

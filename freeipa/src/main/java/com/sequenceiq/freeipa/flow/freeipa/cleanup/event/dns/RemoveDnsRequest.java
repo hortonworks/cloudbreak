@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.cleanup.event.dns;
 
-import com.sequenceiq.freeipa.entity.FreeIpa;
-import com.sequenceiq.freeipa.entity.Stack;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.AbstractCleanupEvent;
 
@@ -14,7 +14,10 @@ public class RemoveDnsRequest extends AbstractCleanupEvent {
     public RemoveDnsRequest(CleanupEvent cleanupEvent) {
         super(cleanupEvent);    }
 
-    public RemoveDnsRequest(String selector, CleanupEvent cleanupEvent, Stack stack, FreeIpa freeIpa) {
+    @JsonCreator
+    public RemoveDnsRequest(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("cleanupEvent") CleanupEvent cleanupEvent) {
         super(selector, cleanupEvent);
     }
 }

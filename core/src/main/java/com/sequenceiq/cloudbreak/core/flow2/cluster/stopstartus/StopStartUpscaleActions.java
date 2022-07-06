@@ -79,13 +79,13 @@ public class StopStartUpscaleActions {
 
             @Override
             protected void prepareExecution(StopStartUpscaleTriggerEvent payload, Map<Object, Object> variables) {
-                variables.put(HOSTGROUPNAME, payload.getHostGroupName());
+                variables.put(HOSTGROUPNAME, payload.getHostGroup());
                 variables.put(ADJUSTMENT, payload.getAdjustment());
             }
 
             @Override
             protected void doExecute(StopStartUpscaleContext context, StopStartUpscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterUpscaleFlowService.startingInstances(context.getStack().getId(), payload.getHostGroupName(), payload.getAdjustment());
+                clusterUpscaleFlowService.startingInstances(context.getStack().getId(), payload.getHostGroup(), payload.getAdjustment());
                 sendEvent(context);
             }
 

@@ -27,7 +27,7 @@ public class DeregisterClusterProxyAction extends AbstractStackTerminationAction
         stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DEREGISTERING_WITH_CLUSTERPROXY,
                 "Deregistering FreeIPA from Cluster Proxy.");
         ClusterProxyDeregistrationRequest clusterProxyDeregistrationRequest =
-                new ClusterProxyDeregistrationRequest(payload.getResourceId(), payload.getForced());
+                new ClusterProxyDeregistrationRequest(payload.getResourceId(), payload.isForced());
         sendEvent(context, clusterProxyDeregistrationRequest.selector(), clusterProxyDeregistrationRequest);
     }
 }

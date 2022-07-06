@@ -1,11 +1,14 @@
 package com.sequenceiq.environment.environment.flow.stop.event;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 import reactor.rx.Promise;
 
+@JsonDeserialize(builder = EnvStopEvent.EnvStopEventBuilder.class)
 public class EnvStopEvent extends BaseNamedFlowEvent {
 
     public EnvStopEvent(String selector, Long resourceId, String resourceName, String resourceCrn) {
@@ -21,6 +24,7 @@ public class EnvStopEvent extends BaseNamedFlowEvent {
         return isClassAndEqualsEvent(EnvStopEvent.class, other);
     }
 
+    @JsonPOJOBuilder
     public static final class EnvStopEventBuilder {
         private String resourceName;
 

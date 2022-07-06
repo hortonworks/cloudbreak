@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class PostInstallFreeIpaRequest extends StackEvent {
@@ -10,7 +12,10 @@ public class PostInstallFreeIpaRequest extends StackEvent {
         this(stackId, true);
     }
 
-    public PostInstallFreeIpaRequest(Long stackId, boolean fullPostInstall) {
+    @JsonCreator
+    public PostInstallFreeIpaRequest(
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("fullPostInstall") boolean fullPostInstall) {
         super(stackId);
         this.fullPostInstall = fullPostInstall;
     }

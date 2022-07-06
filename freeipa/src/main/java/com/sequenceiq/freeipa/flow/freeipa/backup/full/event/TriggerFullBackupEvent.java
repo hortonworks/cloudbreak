@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.freeipa.backup.full.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class TriggerFullBackupEvent extends StackEvent {
@@ -12,7 +14,13 @@ public class TriggerFullBackupEvent extends StackEvent {
 
     private final boolean finalChain;
 
-    public TriggerFullBackupEvent(String selector, Long stackId, String operationId, boolean chained, boolean finalChain) {
+    @JsonCreator
+    public TriggerFullBackupEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("operationId") String operationId,
+            @JsonProperty("chained") boolean chained,
+            @JsonProperty("finalChain") boolean finalChain) {
         super(selector, stackId);
         this.operationId = operationId;
         this.chained = chained;

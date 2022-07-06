@@ -1,11 +1,14 @@
 package com.sequenceiq.environment.environment.flow.creation.event;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 import reactor.rx.Promise;
 
+@JsonDeserialize(builder = EnvCreationEvent.EnvCreationEventBuilder.class)
 public class EnvCreationEvent extends BaseNamedFlowEvent {
 
     public EnvCreationEvent(String selector, Long resourceId, String resourceName, String resourceCrn) {
@@ -25,6 +28,7 @@ public class EnvCreationEvent extends BaseNamedFlowEvent {
         return new EnvCreationEventBuilder();
     }
 
+    @JsonPOJOBuilder
     public static final class EnvCreationEventBuilder {
         private String resourceName;
 

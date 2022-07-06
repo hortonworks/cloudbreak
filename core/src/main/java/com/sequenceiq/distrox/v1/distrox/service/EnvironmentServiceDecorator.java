@@ -59,7 +59,7 @@ public class EnvironmentServiceDecorator {
         for (StackViewV4Response stackViewResponse : stackViewResponses) {
             if (detailedEnvironmentResponse != null) {
                 CredentialResponse credential = detailedEnvironmentResponse.getCredential();
-                stackViewResponse.setGovCloud(credential.getGovCloud() == null ? false : credential.getGovCloud());
+                stackViewResponse.setGovCloud(credential.isGovCloud() == null ? false : credential.isGovCloud());
                 stackViewResponse.setCredentialName(credential.getName());
                 stackViewResponse.setEnvironmentName(detailedEnvironmentResponse.getName());
             }
@@ -71,7 +71,7 @@ public class EnvironmentServiceDecorator {
             DetailedEnvironmentResponse byCrn = environmentClientService.getByCrn(stackResponse.getEnvironmentCrn());
             stackResponse.setEnvironmentName(byCrn.getName());
             CredentialResponse credential = byCrn.getCredential();
-            stackResponse.setGovCloud(credential.getGovCloud() == null ? false : credential.getGovCloud());
+            stackResponse.setGovCloud(credential.isGovCloud() == null ? false : credential.isGovCloud());
             stackResponse.setCredentialName(credential.getName());
             stackResponse.setCredentialCrn(credential.getCrn());
         } catch (Exception e) {

@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.flow.freeipa.upscale.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class UpscaleEvent extends StackEvent {
@@ -16,7 +18,15 @@ public class UpscaleEvent extends StackEvent {
 
     private final boolean finalChain;
 
-    public UpscaleEvent(String selector, Long stackId, Integer instanceCountByGroup, Boolean repair, boolean chained, boolean finalChain, String operationId) {
+    @JsonCreator
+    public UpscaleEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("instanceCountByGroup") Integer instanceCountByGroup,
+            @JsonProperty("repair") Boolean repair,
+            @JsonProperty("chained") boolean chained,
+            @JsonProperty("finalChain") boolean finalChain,
+            @JsonProperty("operationId") String operationId) {
         super(selector, stackId);
         this.instanceCountByGroup = instanceCountByGroup;
         this.repair = repair;

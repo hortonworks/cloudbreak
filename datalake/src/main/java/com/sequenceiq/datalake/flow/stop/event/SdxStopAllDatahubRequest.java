@@ -1,11 +1,16 @@
 package com.sequenceiq.datalake.flow.stop.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class SdxStopAllDatahubRequest extends SdxEvent {
 
-    public SdxStopAllDatahubRequest(Long sdxId, String userId) {
+    @JsonCreator
+    public SdxStopAllDatahubRequest(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId) {
         super(sdxId, userId);
     }
 

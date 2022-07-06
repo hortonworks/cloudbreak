@@ -1,12 +1,14 @@
 package com.sequenceiq.freeipa.flow.stack.update.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class UserDataUpdateRequest extends StackEvent {
     private String operationId;
 
-    private Tunnel oldTunnel;
+    private final Tunnel oldTunnel;
 
     private boolean chained;
 
@@ -14,11 +16,17 @@ public class UserDataUpdateRequest extends StackEvent {
 
     public UserDataUpdateRequest(Long stackId, Tunnel oldTunnel) {
         super(stackId);
+        this.operationId = null;
         this.oldTunnel = oldTunnel;
     }
 
-    public UserDataUpdateRequest(String selector, Long stackId, Tunnel oldTunnel) {
+    @JsonCreator
+    public UserDataUpdateRequest(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("oldTunnel") Tunnel oldTunnel) {
         super(selector, stackId);
+        this.operationId = null;
         this.oldTunnel = oldTunnel;
     }
 
@@ -49,8 +57,20 @@ public class UserDataUpdateRequest extends StackEvent {
         return chained;
     }
 
-    public boolean isFinal() {
+    public boolean isFinalFlow() {
         return finalFlow;
+    }
+
+    public void setChained(boolean chained) {
+        this.chained = chained;
+    }
+
+    public void setFinalFlow(boolean finalFlow) {
+        this.finalFlow = finalFlow;
+    }
+
+    public void setOperationId(String operationId) {
+        this.operationId = operationId;
     }
 
     @Override

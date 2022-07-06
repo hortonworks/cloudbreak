@@ -1,11 +1,17 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.SdxFailedEvent;
 
 public class DatalakeUpgradeFailedEvent extends SdxFailedEvent {
 
-    public DatalakeUpgradeFailedEvent(Long sdxId, String userId, Exception exception) {
+    @JsonCreator
+    public DatalakeUpgradeFailedEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("exception") Exception exception) {
         super(sdxId, userId, exception);
     }
 

@@ -2,11 +2,14 @@ package com.sequenceiq.environment.environment.dto;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
+@JsonDeserialize(builder = EnvironmentDto.EnvironmentDtoBuilder.class)
 public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDetails {
 
     private Credential credential;
@@ -48,6 +51,7 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
         return super.toString();
     }
 
+    @JsonPOJOBuilder
     public static final class EnvironmentDtoBuilder extends EnvironmentDtoBase.EnvironmentDtoBaseBuilder<EnvironmentDto, EnvironmentDtoBuilder> {
 
         private Credential credential;

@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.flow.redbeams.provision.event.register;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 
 /**
@@ -7,7 +9,8 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
  */
 public class UpdateDatabaseServerRegistrationSuccess extends RedbeamsEvent {
 
-    public UpdateDatabaseServerRegistrationSuccess(Long resourceId) {
+    @JsonCreator
+    public UpdateDatabaseServerRegistrationSuccess(@JsonProperty("resourceId") Long resourceId) {
         super(resourceId);
     }
 

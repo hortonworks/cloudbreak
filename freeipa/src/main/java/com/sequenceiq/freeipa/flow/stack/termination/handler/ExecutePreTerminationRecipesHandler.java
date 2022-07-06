@@ -76,7 +76,7 @@ public class ExecutePreTerminationRecipesHandler extends ExceptionCatcherEventHa
                     Set<Node> allNodes = freeIpaNodeUtilService.mapInstancesToNodes(availableInstances);
                     LOGGER.info("Executing pre-termination recipes on nodes: {}", allNodes);
                     hostOrchestrator.preTerminationRecipes(primaryGatewayConfig, allNodes,
-                            StackBasedExitCriteriaModel.nonCancellableModel(), request.getForced());
+                            StackBasedExitCriteriaModel.nonCancellableModel(), request.isForced());
                 } else {
                     LOGGER.info("Every instances in deleted or stopped state");
                 }
@@ -90,7 +90,7 @@ public class ExecutePreTerminationRecipesHandler extends ExceptionCatcherEventHa
             LOGGER.error("Pre-termination recipe execution timed out", e);
             return new StackFailureEvent(EventSelectorUtil.failureSelector(TerminateStackResult.class), stackId, e);
         }
-        return new ExecutePreTerminationRecipesFinished(stackId, request.getForced());
+        return new ExecutePreTerminationRecipesFinished(stackId, request.isForced());
     }
 
     private boolean runPreTerminationRecipesIfAnyNodeAvailable(Set<InstanceMetaData> instanceMetaDatas) {

@@ -1,11 +1,17 @@
 package com.sequenceiq.datalake.flow.dr.restore.event;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class DatalakeDatabaseRestoreCouldNotStartEvent extends SdxEvent {
     private final Exception exception;
 
-    public DatalakeDatabaseRestoreCouldNotStartEvent(Long sdxId, String userId, Exception exception) {
+    @JsonCreator
+    public DatalakeDatabaseRestoreCouldNotStartEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("exception") Exception exception) {
         super(sdxId, userId);
         this.exception = exception;
     }

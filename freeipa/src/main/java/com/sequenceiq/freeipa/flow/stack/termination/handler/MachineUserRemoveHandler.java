@@ -48,7 +48,7 @@ public class MachineUserRemoveHandler implements EventHandler<RemoveMachineUserR
         RemoveMachineUserRequest request = event.getData();
         LOGGER.info("Cleanup machine user for logging from UMS (if it is needed)...");
         cleanupMachineUser(request.getResourceId());
-        RemoveMachineUserFinished response = new RemoveMachineUserFinished(request.getResourceId(), request.getForced());
+        RemoveMachineUserFinished response = new RemoveMachineUserFinished(request.getResourceId(), request.isForced());
         eventBus.notify(EventSelectorUtil.selector(RemoveMachineUserFinished.class),
                 new Event<>(event.getHeaders(), response));
     }

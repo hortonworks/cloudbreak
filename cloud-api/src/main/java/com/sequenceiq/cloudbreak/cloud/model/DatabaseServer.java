@@ -3,8 +3,11 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
+@JsonDeserialize(builder = DatabaseServer.Builder.class)
 public class DatabaseServer extends DynamicModel {
 
     /**
@@ -168,6 +171,7 @@ public class DatabaseServer extends DynamicModel {
         return new Builder();
     }
 
+    @JsonPOJOBuilder
     public static class Builder {
 
         private String serverId;
@@ -200,77 +204,77 @@ public class DatabaseServer extends DynamicModel {
 
         private Map<String, Object> params = new HashMap<>();
 
-        public Builder serverId(String serverId) {
+        public Builder withServerId(String serverId) {
             this.serverId = serverId;
             return this;
         }
 
-        public Builder flavor(String flavor) {
+        public Builder withFlavor(String flavor) {
             this.flavor = flavor;
             return this;
         }
 
-        public Builder engine(DatabaseEngine engine) {
+        public Builder withEngine(DatabaseEngine engine) {
             this.engine = engine;
             return this;
         }
 
-        public Builder connectionDriver(String connectionDriver) {
+        public Builder withConnectionDriver(String connectionDriver) {
             this.connectionDriver = connectionDriver;
             return this;
         }
 
-        public Builder connectorJarUrl(String connectorJarUrl) {
+        public Builder withConnectorJarUrl(String connectorJarUrl) {
             this.connectorJarUrl = connectorJarUrl;
             return this;
         }
 
-        public Builder rootUserName(String rootUserName) {
+        public Builder withRootUserName(String rootUserName) {
             this.rootUserName = rootUserName;
             return this;
         }
 
-        public Builder rootPassword(String rootPassword) {
+        public Builder withRootPassword(String rootPassword) {
             this.rootPassword = rootPassword;
             return this;
         }
 
-        public Builder port(Integer port) {
+        public Builder withPort(Integer port) {
             this.port = port;
             return this;
         }
 
-        public Builder highAvailability(boolean highAvailability) {
+        public Builder withHighAvailability(boolean highAvailability) {
             this.highAvailability = highAvailability;
             return this;
         }
 
-        public Builder useSslEnforcement(boolean useSslEnforcement) {
+        public Builder withUseSslEnforcement(boolean useSslEnforcement) {
             this.useSslEnforcement = useSslEnforcement;
             return this;
         }
 
-        public Builder storageSize(Long storageSize) {
+        public Builder withStorageSize(Long storageSize) {
             this.storageSize = storageSize;
             return this;
         }
 
-        public Builder security(Security security) {
+        public Builder withSecurity(Security security) {
             this.security = security;
             return this;
         }
 
-        public Builder status(InstanceStatus status) {
+        public Builder withStatus(InstanceStatus status) {
             this.status = status;
             return this;
         }
 
-        public Builder location(String location) {
+        public Builder withLocation(String location) {
             this.location = location;
             return this;
         }
 
-        public Builder params(Map<String, Object> params) {
+        public Builder withParams(Map<String, Object> params) {
             this.params = params;
             return this;
         }

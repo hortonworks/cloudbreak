@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -9,7 +11,11 @@ public class SdxContext extends CommonContext {
 
     private String userId;
 
-    public SdxContext(FlowParameters flowParameters, Long sdxId, String userId) {
+    @JsonCreator
+    public SdxContext(
+            @JsonProperty("flowParameters") FlowParameters flowParameters,
+            @JsonProperty("sdxId") Long sdxId,
+            @JsonProperty("userId") String userId) {
         super(flowParameters);
         this.sdxId = sdxId;
         this.userId = userId;

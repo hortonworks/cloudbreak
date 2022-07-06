@@ -78,7 +78,7 @@ public class DiagnosticsOperationsService {
         Set<String> unresponsiveHosts = collectUnresponsiveHosts(stackId, parameters);
         LOGGER.debug("Diagnostics collection salt validation operation has been started. parameters: '{}' stack id: {} ", parameters.toMap(), stackId);
         if (CollectionUtils.isNotEmpty(unresponsiveHosts)) {
-            if (parameters.getSkipUnresponsiveHosts()) {
+            if (parameters.isSkipUnresponsiveHosts()) {
                 parameters.getExcludeHosts().addAll(unresponsiveHosts);
                 LOGGER.debug("Diagnostics parameters has been updated with excluded hosts. parameters: '{}', stack id: {}", parameters.toMap(), stackId);
                 return parameters;
@@ -185,7 +185,7 @@ public class DiagnosticsOperationsService {
 
     private Map<String, Object> getPropertiesForUpgrade(DiagnosticParameters parameters) {
         Map<String, Object> result = parameters.toMap();
-        if (parameters.getUpdatePackage() && telemetryUpgradeConfiguration.getCdpTelemetry() != null
+        if (parameters.isUpdatePackage() && telemetryUpgradeConfiguration.getCdpTelemetry() != null
                 && StringUtils.isNotBlank(telemetryUpgradeConfiguration.getCdpTelemetry().getDesiredVersion())) {
             result.put(TELEMETRY_SALT_COMPONENT, Map.of(DESIRED_CDP_TELEMETRY_VERSION, telemetryUpgradeConfiguration.getCdpTelemetry().getDesiredVersion()));
         }

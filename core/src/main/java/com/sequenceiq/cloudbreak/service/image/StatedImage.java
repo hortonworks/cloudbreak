@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 
 public class StatedImage {
@@ -10,7 +12,11 @@ public class StatedImage {
 
     private final String imageCatalogName;
 
-    private StatedImage(Image image, String imageCatalogUrl, String imageCatalogName) {
+    @JsonCreator
+    private StatedImage(
+            @JsonProperty("image") Image image,
+            @JsonProperty("imageCatalogUrl") String imageCatalogUrl,
+            @JsonProperty("imageCatalogName") String imageCatalogName) {
         this.image = image;
         this.imageCatalogUrl = imageCatalogUrl;
         this.imageCatalogName = imageCatalogName;

@@ -119,7 +119,7 @@ public class EnvironmentReactorFlowManager {
                 .withSelector(EnvStartStateSelectors.ENV_START_FREEIPA_EVENT.selector())
                 .withResourceId(envId)
                 .withResourceName(envName)
-                .withDataHubStart(dataHubStartAction)
+                .withDataHubStartAction(dataHubStartAction)
                 .build();
 
         return eventSender.sendEvent(envSrartEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
@@ -160,7 +160,7 @@ public class EnvironmentReactorFlowManager {
                 .withResourceName(envName)
                 .withResourceCrn(envCrn)
                 .withEnvironmentDto(environmentDto)
-                .withPublicEndpointAccessGateway(endpointAccessGateway)
+                .withEndpointAccessGateway(endpointAccessGateway)
                 .withSubnetIds(subnetIds)
                 .build();
 

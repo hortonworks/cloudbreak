@@ -4,19 +4,30 @@ import static com.sequenceiq.datalake.flow.diagnostics.SdxCmDiagnosticsEvent.SDX
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxFailedEvent;
 
 public class SdxCmDiagnosticsFailedEvent extends SdxFailedEvent {
 
     private final Map<String, Object> properties;
 
-    public SdxCmDiagnosticsFailedEvent(Long sdxId, String userId, Map<String, Object> properties, Exception exception) {
+    @JsonCreator
+    public SdxCmDiagnosticsFailedEvent(
+            @JsonProperty("resourceId") Long sdxId,
+            @JsonProperty("userId") String userId,
+            @JsonProperty("properties") Map<String, Object> properties,
+            @JsonProperty("exception") Exception exception) {
         super(sdxId, userId, exception);
         this.properties = properties;
     }
 
     public static SdxDiagnosticsFailedEvent from(BaseSdxCmDiagnosticsEvent event, Exception exception) {
         return new SdxDiagnosticsFailedEvent(event.getResourceId(), event.getUserId(), event.getProperties(), exception);
+    }
+
+    public Map<String, Object> getProperties() {
+        return properties;
     }
 
     @Override

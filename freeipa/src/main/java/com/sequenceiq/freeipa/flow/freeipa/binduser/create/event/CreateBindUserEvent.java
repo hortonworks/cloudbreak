@@ -2,27 +2,44 @@ package com.sequenceiq.freeipa.flow.freeipa.binduser.create.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class CreateBindUserEvent extends StackEvent {
 
-    private String accountId;
+    private final String accountId;
 
-    private String operationId;
+    private final String operationId;
 
-    private String suffix;
+    private final String suffix;
 
-    private String environmentCrn;
+    private final String environmentCrn;
 
     public CreateBindUserEvent(Long stackId) {
         super(stackId);
+        accountId = null;
+        operationId = null;
+        suffix = null;
+        environmentCrn = null;
     }
 
     public CreateBindUserEvent(String selector, Long stackId) {
         super(selector, stackId);
+        accountId = null;
+        operationId = null;
+        suffix = null;
+        environmentCrn = null;
     }
 
-    public CreateBindUserEvent(String selector, Long stackId, String accountId, String operationId, String suffix, String environmentCrn) {
+    @JsonCreator
+    public CreateBindUserEvent(
+            @JsonProperty("selector") String selector,
+            @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("accountId") String accountId,
+            @JsonProperty("operationId") String operationId,
+            @JsonProperty("suffix") String suffix,
+            @JsonProperty("environmentCrn") String environmentCrn) {
         super(selector, stackId);
         this.accountId = accountId;
         this.operationId = operationId;
@@ -52,6 +69,10 @@ public class CreateBindUserEvent extends StackEvent {
 
     public String getEnvironmentCrn() {
         return environmentCrn;
+    }
+
+    private CreateBindUserEvent getEvent() {
+        return this;
     }
 
     @Override

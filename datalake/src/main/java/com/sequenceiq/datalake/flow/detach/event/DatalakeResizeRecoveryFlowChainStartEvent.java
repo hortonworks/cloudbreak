@@ -2,6 +2,8 @@ package com.sequenceiq.datalake.flow.detach.event;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
@@ -12,7 +14,11 @@ public class DatalakeResizeRecoveryFlowChainStartEvent extends SdxEvent {
 
     private final SdxCluster newCluster;
 
-    public DatalakeResizeRecoveryFlowChainStartEvent(SdxCluster oldCluster, SdxCluster newCluster, String userId) {
+    @JsonCreator
+    public DatalakeResizeRecoveryFlowChainStartEvent(
+            @JsonProperty("oldCluster") SdxCluster oldCluster,
+            @JsonProperty("newCluster") SdxCluster newCluster,
+            @JsonProperty("userId") String userId) {
         super(oldCluster.getId(), userId);
         this.oldCluster = oldCluster;
         this.newCluster = newCluster;
