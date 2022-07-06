@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.freeipa.service.freeipa.user.model.UserMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -36,8 +37,9 @@ public class FreeIpaUsersStateProvider {
         freeIpaClient.userFindAll().stream()
                 .filter(user -> !IPA_PROTECTED_USERS.contains(user.getUid()))
                 .forEach(user -> {
-                    builder.addUser(fromIpaUser(user));
-                    userMetadataConverter.toUserMetadata(user).ifPresent(meta -> builder.addUserMetadata(user.getUid(), meta));
+                    Optional<UserMetadata> userMetadata = userMetadataConverter.toUserMetadata(user);
+                    builder.addUser(fromIpaUser(user, userMetadata));
+                    userMetadata.ifPresent(meta -> builder.addUserMetadata(user.getUid(), meta));
                     if (null != user.getMemberOfGroup()) {
                         user.getMemberOfGroup().stream()
                                 .filter(group -> !IPA_UNMANAGED_GROUPS.contains(group))
@@ -69,10 +71,10 @@ public class FreeIpaUsersStateProvider {
             }
             Optional<User> userOptional = FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue(
                     () -> freeIpaClient.userShow(userName), null);
-            if (userOptional.isPresent()) {
-                User ipaUser = userOptional.get();
-                builder.addUser(fromIpaUser(ipaUser));
-                userMetadataConverter.toUserMetadata(ipaUser).ifPresent(meta -> builder.addUserMetadata(ipaUser.getUid(), meta));
+            userOptional.ifPresent(ipaUser -> {
+                Optional<UserMetadata> userMetadata = userMetadataConverter.toUserMetadata(ipaUser);
+                builder.addUser(fromIpaUser(ipaUser, userMetadata));
+                userMetadata.ifPresent(meta -> builder.addUserMetadata(ipaUser.getUid(), meta));
                 if (ipaUser.getMemberOfGroup() != null) {
                     ipaUser.getMemberOfGroup().stream()
                             .filter(group -> !IPA_UNMANAGED_GROUPS.contains(group))
@@ -80,19 +82,23 @@ public class FreeIpaUsersStateProvider {
                                 builder.addMemberToGroup(groupname, userName);
                             });
                 }
-            }
+            });
         }
 
         return builder.build();
     }
 
     @VisibleForTesting
-    FmsUser fromIpaUser(com.sequenceiq.freeipa.client.model.User ipaUser) {
-        return new FmsUser()
+    FmsUser fromIpaUser(com.sequenceiq.freeipa.client.model.User ipaUser, Optional<UserMetadata> userMetadata) {
+        FmsUser fmsUser = new FmsUser()
                 .withName(ipaUser.getUid())
                 .withFirstName(ipaUser.getGivenname())
                 .withLastName(ipaUser.getSn())
                 .withState(ipaUser.getNsAccountLock() ? FmsUser.State.DISABLED : FmsUser.State.ENABLED);
+        if (userMetadata.isPresent()) {
+            fmsUser.withCrn(userMetadata.get().getCrn());
+        }
+        return fmsUser;
     }
 
     @VisibleForTesting

@@ -17,6 +17,8 @@ public class FmsUser {
 
     private State state;
 
+    private String crn;
+
     public String getName() {
         return name;
     }
@@ -53,6 +55,15 @@ public class FmsUser {
         return this;
     }
 
+    public String getCrn() {
+        return crn;
+    }
+
+    public FmsUser withCrn(String crn) {
+        this.crn = crn;
+        return this;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -66,12 +77,13 @@ public class FmsUser {
         return Objects.equals(this.name, other.name)
                 && Objects.equals(this.firstName, other.firstName)
                 && Objects.equals(this.lastName, other.lastName)
-                && Objects.equals(this.state, other.state);
+                && Objects.equals(this.state, other.state)
+                && Objects.equals(this.crn, other.crn);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, firstName, lastName, state);
+        return Objects.hash(name, firstName, lastName, state, crn);
     }
 
     @Override
@@ -81,6 +93,7 @@ public class FmsUser {
                 + ", firstName='" + firstName + '\''
                 + ", lastName='" + lastName + '\''
                 + ", state=" + state
+                + ", crn='" + crn + '\''
                 + '}';
     }
 }
