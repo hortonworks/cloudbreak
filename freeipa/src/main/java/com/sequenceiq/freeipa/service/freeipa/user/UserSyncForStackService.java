@@ -190,7 +190,7 @@ public class UserSyncForStackService {
             BiConsumer<String, String> warnings) throws FreeIpaClientException {
         UserSyncLogEvent logEvent = options.isFullSync() ? RETRIEVE_FULL_IPA_STATE : RETRIEVE_PARTIAL_IPA_STATE;
         LOGGER.debug("Starting {} ...", logEvent);
-        UsersState ipaUsersState = getIpaUserState(freeIpaClient, umsUsersState, options.isFullSync());
+        UsersState ipaUsersState = getIpaUserState(freeIpaClient, umsUsersState, options);
         LOGGER.debug("Finished {}, found {} users and {} groups.", logEvent,
                 ipaUsersState.getUsers().size(), ipaUsersState.getGroups().size());
 
@@ -201,9 +201,9 @@ public class UserSyncForStackService {
         return usersStateDifference;
     }
 
-    private UsersState getIpaUserState(FreeIpaClient freeIpaClient, UmsUsersState umsUsersState, boolean fullSync)
+    private UsersState getIpaUserState(FreeIpaClient freeIpaClient, UmsUsersState umsUsersState, UserSyncOptions options)
             throws FreeIpaClientException {
-        return fullSync ? freeIpaUsersStateProvider.getUsersState(freeIpaClient) :
+        return options.isFullSync() ? freeIpaUsersStateProvider.getUsersState(freeIpaClient, options.isSplitFreeIPAUserRetrievalEnabled()) :
                 freeIpaUsersStateProvider.getFilteredFreeIpaState(
                         freeIpaClient, umsUsersState.getRequestedWorkloadUsernames());
     }

@@ -39,7 +39,6 @@ import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.client.model.Role;
-import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -291,7 +290,7 @@ public class CleanupService {
         FreeIpaClient client = getFreeIpaClient(stackId);
         Set<String> userCleanupSuccess = new HashSet<>();
         Map<String, String> userCleanupFailed = new HashMap<>();
-        Set<String> usersUid = client.userFindAll().stream().map(User::getUid).collect(Collectors.toSet());
+        Set<String> usersUid = client.userListAllUids();
         users.stream().filter(usersUid::contains).forEach(userUid -> {
             try {
                 client.deleteUser(userUid);
