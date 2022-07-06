@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -47,7 +48,8 @@ public class BatchOperationTest {
 
         when(freeIpaClient.invoke(any(), anyList(), any(), any())).thenReturn(rpcResponse);
 
-        operations.add(UserAddOperation.create("user", "first", "last", false).getOperationParamsForBatchCall());
+        operations.add(UserAddOperation.create("user", "first", "last", false, Optional.empty())
+                .getOperationParamsForBatchCall());
         BatchOperation.create(operations, warnings::put, Set.of()).invoke(freeIpaClient);
 
         verify(freeIpaClient).invoke(eq("batch"), anyList(), any(), any());
@@ -61,7 +63,8 @@ public class BatchOperationTest {
         when(freeIpaClient.invoke(any(), anyList(), any(), any())).thenThrow(
                 new FreeIpaClientException("error", new JsonRpcClientException(4002, "", null)));
 
-        operations.add(UserAddOperation.create("user", "first", "last", false).getOperationParamsForBatchCall());
+        operations.add(UserAddOperation.create("user", "first", "last", false, Optional.empty())
+                .getOperationParamsForBatchCall());
         BatchOperation.create(operations, warnings::put, Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)).invoke(freeIpaClient);
 
         verify(freeIpaClient).invoke(eq("batch"), anyList(), any(), any());
@@ -76,7 +79,8 @@ public class BatchOperationTest {
         when(freeIpaClient.invoke(any(), anyList(), any(), any())).thenThrow(
                 new FreeIpaClientException("error", new JsonRpcClientException(5000, "", null)));
 
-        operations.add(UserAddOperation.create("user", "first", "last", false).getOperationParamsForBatchCall());
+        operations.add(UserAddOperation.create("user", "first", "last", false, Optional.empty())
+                .getOperationParamsForBatchCall());
         BatchOperation.create(operations, warnings::put, Set.of(FreeIpaErrorCodes.NOT_FOUND)).invoke(freeIpaClient);
 
         verify(freeIpaClient).invoke(eq("batch"), anyList(), any(), any());

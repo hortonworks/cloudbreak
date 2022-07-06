@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.function.BiConsumer;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,6 +51,9 @@ public class UserSyncOperations {
     @Inject
     private ThreadInterruptChecker threadInterruptChecker;
 
+    @Inject
+    private UserMetadataConverter userMetadataConverter;
+
     public void addGroups(boolean fmsToFreeipaBatchCallEnabled, FreeIpaClient freeIpaClient, Set<FmsGroup> fmsGroups,
             BiConsumer<String, String> warnings) throws FreeIpaClientException, TimeoutException {
         List<GroupAddOperation> posixOperations = Lists.newArrayList();
@@ -75,8 +80,9 @@ public class UserSyncOperations {
         List<UserAddOperation> operations = Lists.newArrayList();
         for (FmsUser fmsUser : fmsUsers) {
             threadInterruptChecker.throwTimeoutExIfInterrupted();
+            String userMetadataJson = userMetadataConverter.toUserMetadataJson(fmsUser.getCrn(), -1L);
             operations.add(UserAddOperation.create(fmsUser.getName(), fmsUser.getFirstName(), fmsUser.getLastName(),
-                    fmsUser.getState() == FmsUser.State.DISABLED));
+                    fmsUser.getState() == FmsUser.State.DISABLED, Optional.of(userMetadataJson)));
         }
         invokeOperation(operations, fmsToFreeipaBatchCallEnabled, freeIpaClient, warnings, Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY), true);
     }

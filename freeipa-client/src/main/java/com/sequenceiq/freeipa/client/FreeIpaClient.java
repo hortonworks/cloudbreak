@@ -229,7 +229,7 @@ public class FreeIpaClient {
     }
 
     public User userAdd(String user, String firstName, String lastName) throws FreeIpaClientException {
-        return userAdd(user, firstName, lastName, USER_ENABLED);
+        return userAdd(user, firstName, lastName, USER_ENABLED, Optional.empty());
     }
 
     /**
@@ -239,10 +239,12 @@ public class FreeIpaClient {
      * @param firstName the user's first name
      * @param lastName  the user's last name
      * @param disabled  whether the user is disabled
+     * @param title     Optional title
      * @return the user model
      */
-    public User userAdd(String user, String firstName, String lastName, boolean disabled) throws FreeIpaClientException {
-        return UserAddOperation.create(user, firstName, lastName, disabled).invoke(this).orElseThrow(() ->
+    public User userAdd(String user, String firstName, String lastName, boolean disabled, Optional<String> title)
+            throws FreeIpaClientException {
+        return UserAddOperation.create(user, firstName, lastName, disabled, title).invoke(this).orElseThrow(() ->
                 new FreeIpaClientException(String.format("User addition failed for user %s", user)));
     }
 

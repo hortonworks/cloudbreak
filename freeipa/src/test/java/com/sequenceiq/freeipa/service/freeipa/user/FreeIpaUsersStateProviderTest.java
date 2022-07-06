@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
 import org.apache.commons.lang3.tuple.Pair;
@@ -39,6 +40,14 @@ import com.sequenceiq.freeipa.service.freeipa.user.model.UsersState;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaUsersStateProviderTest {
+
+    private static final String ACCOUNT_ID = UUID.randomUUID().toString();
+
+    private static final String USER_CRN = CrnTestUtil.getUserCrnBuilder()
+            .setAccountId(ACCOUNT_ID)
+            .setResource(UUID.randomUUID().toString())
+            .build()
+            .toString();
 
     private static final boolean USER_ENABLED = false;
 
@@ -194,12 +203,13 @@ class FreeIpaUsersStateProviderTest {
         com.sequenceiq.freeipa.client.model.User ipaUser =
                 createIpaUser("uid", List.of("group1", "group2"), USER_ENABLED);
 
-        FmsUser fmsUser = underTest.fromIpaUser(ipaUser);
+        FmsUser fmsUser = underTest.fromIpaUser(ipaUser, Optional.empty());
 
         assertEquals(fmsUser.getName(), ipaUser.getUid());
         assertEquals(fmsUser.getLastName(), ipaUser.getSn());
         assertEquals(fmsUser.getFirstName(), ipaUser.getGivenname());
         assertEquals(fmsUser.getState(), FmsUser.State.ENABLED);
+        assertEquals(null, fmsUser.getCrn());
     }
 
     @Test
@@ -207,12 +217,28 @@ class FreeIpaUsersStateProviderTest {
         com.sequenceiq.freeipa.client.model.User ipaUser =
                 createIpaUser("uid", List.of("group1", "group2"), USER_DISABLED);
 
-        FmsUser fmsUser = underTest.fromIpaUser(ipaUser);
+        FmsUser fmsUser = underTest.fromIpaUser(ipaUser, Optional.empty());
 
         assertEquals(fmsUser.getName(), ipaUser.getUid());
         assertEquals(fmsUser.getLastName(), ipaUser.getSn());
         assertEquals(fmsUser.getFirstName(), ipaUser.getGivenname());
         assertEquals(fmsUser.getState(), FmsUser.State.DISABLED);
+        assertEquals(null, fmsUser.getCrn());
+    }
+
+    @Test
+    void testFromIpaUserWithCrn() {
+        com.sequenceiq.freeipa.client.model.User ipaUser =
+                createIpaUser("uid", List.of("group1", "group2"), USER_ENABLED);
+        UserMetadata userMetadata = new UserMetadata(USER_CRN, 1L);
+
+        FmsUser fmsUser = underTest.fromIpaUser(ipaUser, Optional.of(userMetadata));
+
+        assertEquals(fmsUser.getName(), ipaUser.getUid());
+        assertEquals(fmsUser.getLastName(), ipaUser.getSn());
+        assertEquals(fmsUser.getFirstName(), ipaUser.getGivenname());
+        assertEquals(fmsUser.getState(), FmsUser.State.ENABLED);
+        assertEquals(USER_CRN, fmsUser.getCrn());
     }
 
     @Test

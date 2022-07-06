@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,15 +27,18 @@ public class UserAddOperation extends AbstractFreeipaOperation<User> {
 
     private boolean disabled;
 
-    private UserAddOperation(String user, String firstName, String lastName, boolean disabled) {
+    private Optional<String> title;
+
+    private UserAddOperation(String user, String firstName, String lastName, boolean disabled, Optional<String> title) {
         this.user = user;
         this.firstName = firstName;
         this.lastName = lastName;
         this.disabled = disabled;
+        this.title = title;
     }
 
-    public static UserAddOperation create(String user, String firstName, String lastName, boolean disabled) {
-        return new UserAddOperation(user, firstName, lastName, disabled);
+    public static UserAddOperation create(String user, String firstName, String lastName, boolean disabled, Optional<String> title) {
+        return new UserAddOperation(user, firstName, lastName, disabled, title);
     }
 
     @Override
@@ -49,14 +53,15 @@ public class UserAddOperation extends AbstractFreeipaOperation<User> {
 
     @Override
     protected Map<String, Object> getParams() {
-        return Map.of(
-                "givenname", firstName,
-                "sn", lastName,
-                "loginshell", "/bin/bash",
-                "random", true,
-                "setattr", List.of("krbPasswordExpiration=" + MAX_PASSWORD_EXPIRATION_DATETIME,
-                        "nsAccountLock=" + disabled)
-        );
+        ImmutableMap.Builder<String, Object> params = ImmutableMap.builder();
+        params.put("givenname", firstName);
+        params.put("sn", lastName);
+        params.put("loginshell", "/bin/bash");
+        params.put("random", true);
+        params.put("setattr", List.of("krbPasswordExpiration=" + MAX_PASSWORD_EXPIRATION_DATETIME,
+                "nsAccountLock=" + disabled));
+        title.ifPresent(value -> params.put("title", value));
+        return params.build();
     }
 
     @Override

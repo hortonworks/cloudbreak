@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
@@ -23,10 +25,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.freeipa.service.freeipa.user.conversion.UserMetadataConverter;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,6 +62,8 @@ import com.sequenceiq.freeipa.util.ThreadInterruptChecker;
 @ExtendWith(MockitoExtension.class)
 class UserSyncOperationsTest {
 
+    private static final String ACCOUNT_ID = UUID.randomUUID().toString();
+
     private static final int MAX_SUBJECTS_PER_REQUEST = 10;
 
     @Mock
@@ -65,6 +74,9 @@ class UserSyncOperationsTest {
 
     @Mock
     private ThreadInterruptChecker interruptChecker;
+
+    @Mock
+    private UserMetadataConverter userMetadataConverter;
 
     @InjectMocks
     private UserSyncOperations underTest;
@@ -191,8 +203,11 @@ class UserSyncOperationsTest {
     @Test
     public void testAddUsersBatch() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
-        FmsUser user1 = new FmsUser().withName("user_1").withFirstName("User_1").withLastName("Test1").withState(FmsUser.State.ENABLED);
-        FmsUser user2 = new FmsUser().withName("user_2").withFirstName("User_2").withLastName("Test2").withState(FmsUser.State.DISABLED);
+        when(userMetadataConverter.toUserMetadataJson(anyString(), anyLong())).thenCallRealMethod();
+        FmsUser user1 = new FmsUser().withName("user_1").withFirstName("User_1").withLastName("Test1")
+                .withState(FmsUser.State.ENABLED).withCrn(createUserCrn());
+        FmsUser user2 = new FmsUser().withName("user_2").withFirstName("User_2").withLastName("Test2")
+                .withState(FmsUser.State.DISABLED).withCrn(createUserCrn());
         Set<FmsUser> users = Set.of(user1, user2);
         when(batchPartitionSizeProperties.getByOperation("user_add")).thenReturn(3);
 
@@ -213,6 +228,7 @@ class UserSyncOperationsTest {
         Map<String, Object> attribs1 = (Map<String, Object>) params1.get(1);
         assertEquals("User_1", attribs1.get("givenname"));
         assertEquals("Test1", attribs1.get("sn"));
+        assertTrue(((String) attribs1.get("title")).contains(user1.getCrn()));
         assertTrue(((List<String>) attribs1.get("setattr")).contains("nsAccountLock=false"));
 
         Object user2oper = operations.stream().filter(op -> {
@@ -225,6 +241,7 @@ class UserSyncOperationsTest {
         Map<String, Object> attribs2 = (Map<String, Object>) params2.get(1);
         assertEquals("User_2", attribs2.get("givenname"));
         assertEquals("Test2", attribs2.get("sn"));
+        assertTrue(((String) attribs2.get("title")).contains(user2.getCrn()));
         assertTrue(((List<String>) attribs2.get("setattr")).contains("nsAccountLock=true"));
         verify(interruptChecker, times(2)).throwTimeoutExIfInterrupted();
     }
@@ -436,8 +453,11 @@ class UserSyncOperationsTest {
     @Test
     public void testAddUsersSingle() throws FreeIpaClientException, TimeoutException {
         Multimap<String, String> warnings = ArrayListMultimap.create();
-        FmsUser user1 = new FmsUser().withName("user1").withFirstName("User_1").withLastName("Test1").withState(FmsUser.State.ENABLED);
-        FmsUser user2 = new FmsUser().withName("user2").withFirstName("User_2").withLastName("Test2").withState(FmsUser.State.DISABLED);
+        when(userMetadataConverter.toUserMetadataJson(anyString(), anyLong())).thenCallRealMethod();
+        FmsUser user1 = new FmsUser().withName("user1").withFirstName("User_1").withLastName("Test1")
+                .withState(FmsUser.State.ENABLED).withCrn(createUserCrn());
+        FmsUser user2 = new FmsUser().withName("user2").withFirstName("User_2").withLastName("Test2")
+                .withState(FmsUser.State.DISABLED).withCrn(createUserCrn());
         Set<FmsUser> users = Set.of(user1, user2);
         ArgumentCaptor<List<Object>> flagsCaptor = ArgumentCaptor.forClass(List.class);
         ArgumentCaptor<Map<String, Object>> paramsCaptor = ArgumentCaptor.forClass(Map.class);
@@ -459,15 +479,17 @@ class UserSyncOperationsTest {
                 hasItem(hasItem("user2"))
         ));
         List<Map<String, Object>> paramsList = paramsCaptor.getAllValues();
-        assertThat(paramsList, everyItem(aMapWithSize(5)));
+        assertThat(paramsList, everyItem(aMapWithSize(6)));
         assertThat(paramsList, allOf(
                 Matchers.<Map<String, Object>>hasItem(allOf(
                         hasEntry("givenname", "User_1"),
-                        hasEntry("sn", "Test1")
+                        hasEntry("sn", "Test1"),
+                        hasEntry(Matchers.equalTo("title"), new ObjectSubstringMatcher(user1.getCrn()))
                 )),
                 Matchers.<Map<String, Object>>hasItem(allOf(
                         hasEntry("givenname", "User_2"),
-                        hasEntry("sn", "Test2")
+                        hasEntry("sn", "Test2"),
+                        hasEntry(Matchers.equalTo("title"), new ObjectSubstringMatcher(user2.getCrn()))
                 ))
         ));
         verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
@@ -639,6 +661,11 @@ class UserSyncOperationsTest {
         verify(interruptChecker, times(4)).throwTimeoutExIfInterrupted();
     }
 
+    private String createUserCrn() {
+        return CrnTestUtil.getUserCrnBuilder().setAccountId(ACCOUNT_ID).setResource(UUID.randomUUID().toString())
+                .build().toString();
+    }
+
     private Multimap<String, String> setupGroupMapping(int numGroups, int numPerGroup) {
         Multimap<String, String> groupMapping = HashMultimap.create();
         for (int i = 0; i < numGroups; ++i) {
@@ -649,4 +676,24 @@ class UserSyncOperationsTest {
         }
         return groupMapping;
     }
+
+    private static class ObjectSubstringMatcher extends BaseMatcher<Object> {
+        private final String stringToMatch;
+
+        ObjectSubstringMatcher(String stringToMatch) {
+            this.stringToMatch = stringToMatch;
+        }
+
+        @Override
+        public boolean matches(Object actual) {
+            assertTrue(actual instanceof String);
+            return ((String) actual).contains(stringToMatch);
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("contains '" + stringToMatch + "'");
+        }
+    }
+
 }

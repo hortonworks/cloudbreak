@@ -2,6 +2,8 @@ package com.sequenceiq.freeipa.service.freeipa.user.conversion;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +20,8 @@ public class FmsUserConverter {
         return createFmsUser(umsUser.getWorkloadUsername(),
                 umsUser.getFirstName(),
                 umsUser.getLastName(),
-                umsUser.getState());
+                umsUser.getState(),
+                umsUser.getCrn());
     }
 
     public FmsUser toFmsUser(UserManagementProto.MachineUser umsMachineUser) {
@@ -27,7 +30,8 @@ public class FmsUserConverter {
         return createFmsUser(umsMachineUser.getWorkloadUsername(),
                 umsMachineUser.getMachineUserName(),
                 umsMachineUser.getMachineUserId(),
-                umsMachineUser.getState());
+                umsMachineUser.getState(),
+                umsMachineUser.getCrn());
     }
 
     public FmsUser toFmsUser(
@@ -35,18 +39,27 @@ public class FmsUserConverter {
         return createFmsUser(actorDetails.getWorkloadUsername(),
                 actorDetails.getFirstName(),
                 actorDetails.getLastName(),
-                actorDetails.getState());
+                actorDetails.getState(),
+                actorDetails.getCrn());
     }
 
     private FmsUser createFmsUser(
             String workloadUsername, String firstName, String lastName,
-            UserManagementProto.ActorState.Value actorState) {
+            UserManagementProto.ActorState.Value actorState,
+            String crn) {
         checkArgument(StringUtils.isNotBlank(workloadUsername));
+        checkArgument(StringUtils.isNotBlank(crn));
+        try {
+            Crn.safeFromString(crn);
+        } catch (CrnParseException e) {
+            throw new IllegalArgumentException(String.format("Crn '%s' is not in the correct format", crn), e);
+        }
         FmsUser fmsUser = new FmsUser();
         fmsUser.withName(workloadUsername);
         fmsUser.withFirstName(StringUtils.defaultIfBlank(StringUtils.strip(firstName), NONE_STRING));
         fmsUser.withLastName(StringUtils.defaultIfBlank(StringUtils.strip(lastName), NONE_STRING));
         fmsUser.withState(toFmsUserState(actorState));
+        fmsUser.withCrn(crn);
         return fmsUser;
     }
 
