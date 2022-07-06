@@ -1,7 +1,9 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +22,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.common.api.telemetry.model.Monitoring;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
@@ -221,5 +225,37 @@ class StackServiceTest {
         List<Stack> results = underTest.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID);
 
         assertEquals(List.of(stack), results);
+    }
+
+    @Test
+    void testGetComputeMonitoringFlagWhenEnabled() {
+        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(stackWithTelemetry(true));
+        assertTrue(computeMonitoringEnabled.isPresent());
+        assertTrue(computeMonitoringEnabled.get());
+    }
+
+    @Test
+    void testGetComputeMonitoringFlagWhenDisabled() {
+        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(stackWithTelemetry(false));
+        assertTrue(computeMonitoringEnabled.isPresent());
+        assertFalse(computeMonitoringEnabled.get());
+    }
+
+    @Test
+    void testGetComputeMonitoringFlagWhenTelemetryNull() {
+        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(new Stack());
+        assertFalse(computeMonitoringEnabled.isPresent());
+    }
+
+    private Stack stackWithTelemetry(boolean monitoringEnabled) {
+        Telemetry telemetry = new Telemetry();
+        if (monitoringEnabled) {
+            Monitoring monitoring = new Monitoring();
+            monitoring.setRemoteWriteUrl("something");
+            telemetry.setMonitoring(monitoring);
+        }
+        Stack stack = new Stack();
+        stack.setTelemetry(telemetry);
+        return stack;
     }
 }

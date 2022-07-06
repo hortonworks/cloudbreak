@@ -158,7 +158,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                     LOGGER.warn("Unhandled stack status, {}", stackStatus);
                 }
                 if (stackStatus != null) {
-                    metricsClient.processStackStatus(stack.getResourceCrn(), stack.cloudPlatform(), stackStatus.name(), stackStatus.ordinal());
+                    metricsClient.processStackStatus(stack.getResourceCrn(), stack.cloudPlatform(), stackStatus.name(), stackStatus.ordinal(),
+                            stackService.computeMonitoringEnabled(stack));
                 }
             }, LOGGER, "Check status took {} ms for stack {}.", getStackId());
         } catch (Exception e) {

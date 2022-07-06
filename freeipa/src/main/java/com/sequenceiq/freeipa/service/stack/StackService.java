@@ -27,7 +27,9 @@ import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.monitoring.MonitoringEnablementService;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
+import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -38,7 +40,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
 @Service
-public class StackService implements EnvironmentPropertyProvider, PayloadContextProvider {
+public class StackService implements EnvironmentPropertyProvider, PayloadContextProvider, MonitoringEnablementService<Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
@@ -245,4 +247,13 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         return stackRepository.setTunnelByStackId(stackId, tunnel);
     }
 
+    @Override
+    public Optional<Boolean> computeMonitoringEnabled(Stack entity) {
+        Telemetry telemetry = entity.getTelemetry();
+        if (telemetry != null) {
+            return Optional.of(telemetry.isComputeMonitoringEnabled());
+        } else {
+            return Optional.empty();
+        }
+    }
 }

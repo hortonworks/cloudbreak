@@ -27,9 +27,9 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 import io.opentracing.Tracer;
 
@@ -94,7 +94,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             }
             if (stack.getStackStatus() != null && stack.getStackStatus().getStatus() != null) {
                 metricsClient.processStackStatus(stack.getResourceCrn(), stack.getCloudPlatform(), stack.getStackStatus().getStatus().name(),
-                        stack.getStackStatus().getStatus().ordinal());
+                        stack.getStackStatus().getStatus().ordinal(), stackService.computeMonitoringEnabled(stack));
             }
         } catch (InterruptSyncingException e) {
             LOGGER.info("Syncing was interrupted", e);

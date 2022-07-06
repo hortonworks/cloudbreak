@@ -6,6 +6,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -55,7 +57,7 @@ public class MetricsClientTest {
         given(configuration.isComputeMonitoringSupported()).willReturn(true);
         given(configuration.isPaasSupported()).willReturn(true);
         // WHEN
-        underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL);
+        underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
         // THEN
         verify(metricsRecordProcessor, times(1)).processRecord(any());
     }
@@ -68,7 +70,7 @@ public class MetricsClientTest {
         given(configuration.isPaasSupported()).willReturn(false);
         given(entitlementService.isCdpSaasEnabled(anyString())).willReturn(true);
         // WHEN
-        underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL);
+        underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
         // THEN
         verify(metricsRecordProcessor, times(1)).processRecord(any());
     }
@@ -79,7 +81,7 @@ public class MetricsClientTest {
         given(configuration.isEnabled()).willReturn(true);
         given(configuration.isComputeMonitoringSupported()).willReturn(true);
         // WHEN
-        underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL);
+        underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
         // THEN
         verify(metricsRecordProcessor, times(0)).processRecord(any());
     }
@@ -90,7 +92,7 @@ public class MetricsClientTest {
         given(configuration.isEnabled()).willReturn(true);
         given(configuration.isComputeMonitoringSupported()).willReturn(false);
         // WHEN
-        underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL);
+        underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
         // THEN
         verify(metricsRecordProcessor, times(0)).processRecord(any());
     }
@@ -100,7 +102,7 @@ public class MetricsClientTest {
         // GIVEN
         given(configuration.isEnabled()).willReturn(false);
         // WHEN
-        underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL);
+        underTest.processStackStatus(CRN, CLOUD_PLATFORM, STATUS, STATUS_ORDINAL, Optional.of(true));
         // THEN
         verify(metricsRecordProcessor, times(0)).processRecord(any());
     }
