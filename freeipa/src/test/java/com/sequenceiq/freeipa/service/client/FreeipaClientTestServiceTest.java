@@ -52,7 +52,7 @@ public class FreeipaClientTestServiceTest {
 
     @Test
     public void testCheckUsers() throws FreeIpaClientException {
-        when(freeIpaClient.userFindAll()).thenReturn(Sets.newHashSet(createUser(ADMIN_USER)));
+        when(freeIpaClient.userListAllUids()).thenReturn(Sets.newHashSet(ADMIN_USER));
         assertTrue(ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.checkUsers(ENV_CRN, Sets.newHashSet(ADMIN_USER))));
         assertFalse(ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->

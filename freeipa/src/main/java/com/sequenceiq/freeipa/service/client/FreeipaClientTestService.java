@@ -52,7 +52,7 @@ public class FreeipaClientTestService {
         FreeIpaClient freeIpaClient = getClientByEnvironmentCrn(environmentCrn);
         try {
             LOGGER.info("Checking for users [{}] in environment {}", Joiner.on(",").join(requestedUsers), environmentCrn);
-            Set<String> freeipaUsers = freeIpaClient.userFindAll().stream().map(User::getUid).collect(Collectors.toSet());
+            Set<String> freeipaUsers = freeIpaClient.userListAllUids();
             LOGGER.debug("Users in freeipa: [{}]", Joiner.on(",").join(freeipaUsers));
             return freeipaUsers.containsAll(requestedUsers);
         } catch (FreeIpaClientException e) {

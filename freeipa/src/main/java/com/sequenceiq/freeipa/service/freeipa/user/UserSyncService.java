@@ -127,9 +127,14 @@ public class UserSyncService {
                 .enforceGroupMembershipLimitEnabled(entitlementService.isUserSyncEnforceGroupMembershipLimitEnabled(accountId))
                 .largeGroupThreshold(largeGroupThreshold)
                 .largeGroupLimit(largeGroupLimit)
+                .splitFreeIPAUserRetrievalEnabled(entitlementService.isUserSyncSplitFreeIPAUserRetrievalEnabled(accountId))
                 .build();
         LOGGER.info("Credentials update optimization is{} enabled for this sync request",
                 userSyncOptions.isCredentialsUpdateOptimizationEnabled() ? "" : " not");
+        LOGGER.info("Large group limit enforcement is{} enabled for this sync request",
+                userSyncOptions.isEnforceGroupMembershipLimitEnabled() ? "" : " not");
+        LOGGER.info("Split FreeIPA user retrieval is{} enabled for this sync request",
+                userSyncOptions.isSplitFreeIPAUserRetrievalEnabled() ? "" : " not");
         return userSyncOptions;
     }
 
