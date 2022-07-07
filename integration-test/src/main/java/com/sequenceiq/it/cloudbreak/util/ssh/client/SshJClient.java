@@ -24,6 +24,7 @@ import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.ConnectionException;
 import net.schmizz.sshj.connection.channel.direct.Session;
+import net.schmizz.sshj.connection.channel.direct.Session.Command;
 import net.schmizz.sshj.transport.TransportException;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 
@@ -74,7 +75,7 @@ public class SshJClient {
         } else {
             LOGGER.error("Creating SSH client is not possible, because of host: '{}', user: '{}', password: '{}' and privateKey: '{}' are missing!",
                     host, user, password, privateKeyFilePath);
-            throw new TestFailException(String.format("Creating SSH client is not possible, because of host: '%s', user: '%s', password: '%s'" +
+            throw new TestFailException(format("Creating SSH client is not possible, because of host: '%s', user: '%s', password: '%s'" +
                             " and privateKey: '%s' are missing!", host, user, password, privateKeyFilePath));
         }
         return client;
@@ -83,10 +84,10 @@ public class SshJClient {
     protected Pair<Integer, String> execute(SSHClient ssh, String command) throws IOException {
         LOGGER.info("Waiting to SSH command to be executed...");
         try (Session session = startSshSession(ssh);
-            Session.Command cmd = session.exec(command);
+            Command cmd = session.exec(command);
             OutputStream os = IOUtils.readFully(cmd.getInputStream())) {
-            Log.log(LOGGER, format("The following SSH command [%s] is going to be executed on host [%s]", ssh.getConnection().getTransport().getRemoteHost(),
-                    command));
+            Log.log(LOGGER, format("The following SSH command [%s] is going to be executed on host [%s]", command,
+                    ssh.getConnection().getTransport().getRemoteHost()));
             cmd.join(10L, TimeUnit.SECONDS);
             return Pair.of(cmd.getExitStatus(), os.toString());
         }

@@ -324,6 +324,9 @@ integrationtest:
   authdistributor:
     host: thunderhead-mock
 
+  telemetry:
+    remoteWriteUrl:
+
 altus:
   audit:
     endpoint: localhost:8982
