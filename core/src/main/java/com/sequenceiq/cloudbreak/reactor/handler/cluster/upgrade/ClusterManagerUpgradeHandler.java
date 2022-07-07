@@ -39,12 +39,14 @@ public class ClusterManagerUpgradeHandler extends ExceptionCatcherEventHandler<C
     protected Selectable doAccept(HandlerEvent<ClusterManagerUpgradeRequest> event) {
         LOGGER.debug("Accepting Cluster Manager upgrade event..");
         ClusterManagerUpgradeRequest request = event.getData();
+        Selectable result;
         try {
             clusterManagerUpgradeService.upgradeClusterManager(request.getResourceId(), request.isRuntimeServicesStartNeeded());
-            return new ClusterManagerUpgradeSuccess(request.getResourceId());
+            result = new ClusterManagerUpgradeSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.info("Cluster Manager upgrade event failed", e);
-            return new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED);
+            result = new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED);
         }
+        return result;
     }
 }

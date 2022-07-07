@@ -1298,8 +1298,7 @@ class ClouderaManagerModificationServiceTest {
         List<ApiService> services = List.of(
                 new ApiService().type("RANGER_RAZ").serviceState(ApiServiceState.STOPPED),
                 new ApiService().type("ATLAS").serviceState(ApiServiceState.STOPPED),
-                new ApiService().type("TEZ").serviceState(ApiServiceState.NA),
-                new ApiService().type("HDFS").serviceState(ApiServiceState.STOPPING));
+                new ApiService().type("HDFS").serviceState(ApiServiceState.STOPPED));
         when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
         when(servicesResourceApi.readServices(anyString(), anyString())).thenReturn(new ApiServiceList().items(services));
         underTest.stopCluster(disableKnoxAutorestart);

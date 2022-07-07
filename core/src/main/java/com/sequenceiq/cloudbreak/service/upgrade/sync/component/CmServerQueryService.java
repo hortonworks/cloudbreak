@@ -38,7 +38,7 @@ public class CmServerQueryService {
      * @param stack The stack, to get the coordinates of the CM to query
      * @return List of parcels found in the CM
      */
-    public Set<ParcelInfo> queryActiveParcels(Stack stack) {
+    Set<ParcelInfo> queryActiveParcels(Stack stack) {
         Map<String, String> activeParcels = apiConnectors.getConnector(stack).gatherInstalledParcels(stack.getName());
         LOGGER.debug("Reading parcel info from CM server, found parcels: " + activeParcels);
         return activeParcels.entrySet().stream()
@@ -51,7 +51,7 @@ public class CmServerQueryService {
      * @param stack The stack, with metadata to be able to build the client to query package versions
      * @return The actual CM version, in format version-build number e.g. 7.2.2-13072522
      */
-    public Optional<String> queryCmVersion(Stack stack) {
+    Optional<String> queryCmVersion(Stack stack) {
         try {
             Map<String, List<PackageInfo>> packageVersions = cmVersionQueryService.queryCmPackageInfo(stack);
             PackageInfo cmPackageInfo = cmVersionQueryService.checkCmPackageInfoConsistency(packageVersions);

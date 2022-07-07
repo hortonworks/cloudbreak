@@ -9,12 +9,9 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.auth.crn.TestCrnGenerator;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.it.cloudbreak.SdxClient;
-import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.datalake.SdxUpgradeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
@@ -42,8 +39,6 @@ import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
-import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
-import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
 public class MockSdxUpgradeTests extends AbstractMockTest {
 
@@ -108,7 +103,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .then(SdxUpgradeTestAssertion.validateUpgradeCandidateWithLockedComponentIsAvailable())
+                .then(SdxUpgradeTestAssertion.validateSuccessfulUpgrade())
                 .validate();
     }
 
@@ -160,30 +155,17 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
+                .then(SdxUpgradeTestAssertion.validateSuccessfulUpgrade())
                 .given(SdxUpgradeTestDto.class)
                 .withRuntime(null)
                 .withLockComponents(true)
                 .withReplaceVms(SdxUpgradeReplaceVms.ENABLED)
                 .given(sdxInternal, SdxInternalTestDto.class)
-                .then(setCmVersionInMockToUpgradedVersion())
                 .when(sdxTestClient.upgradeInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdxInternal).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal).withPollingInterval(Duration.ofSeconds(5L)))
                 .awaitForHealthyInstances()
                 .validate();
-    }
-
-    private Assertion<SdxInternalTestDto, SdxClient> setCmVersionInMockToUpgradedVersion() {
-        return (tc, entity, sdxClient) -> {
-            SdxUpgradeRequest request = new SdxUpgradeRequest();
-            request.setLockComponents(true);
-            request.setDryRun(true);
-            SdxUpgradeResponse upgradeResponse =
-                    sdxClient.getDefaultClient().sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request);
-            ImageComponentVersions componentVersions = upgradeResponse.getUpgradeCandidates().get(0).getComponentVersions();
-            entity.mockCm().setCmVersion(componentVersions.getCm() + "-" + componentVersions.getCmGBN());
-            return entity;
-        };
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -225,7 +207,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .withStackRequest(key(cluster), key(stack))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
-                .then(SdxUpgradeTestAssertion.validateUpgradeCandidateWithLockedComponentIsAvailable())
+                .then(SdxUpgradeTestAssertion.validateSuccessfulUpgrade())
                 .validate();
     }
 
@@ -279,7 +261,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, key(sdxInternal).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal).withWaitForFlow(Boolean.FALSE))
                 .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
-                .then(SdxUpgradeTestAssertion.validateUpgradeCandidateWithLockedComponentIsAvailable())
+                .then(SdxUpgradeTestAssertion.validateSuccessfulUpgrade())
                 .validate();
     }
 

@@ -8,9 +8,7 @@ import javax.inject.Inject;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.sequenceiq.mock.clouderamanager.ClouderaManagerStoreService;
@@ -55,10 +53,5 @@ public class ConfigureController {
         } else {
             activeProfiles.add(new CmProfile(profile, times));
         }
-    }
-
-    @PutMapping("/{mockUuid}/cmversion")
-    public void setCmVersion(@PathVariable("mockUuid") String mockUuid, @RequestParam("version") String version) {
-        clouderaManagerStoreService.read(mockUuid).getClusterTemplate().setCmVersion(version);
     }
 }

@@ -1,12 +1,5 @@
 package com.sequenceiq.it.cloudbreak.dto.mock.endpoint;
 
-import java.util.Map;
-import java.util.Objects;
-
-import javax.ws.rs.client.Entity;
-
-import org.springframework.http.HttpMethod;
-
 import com.cloudera.api.swagger.model.ApiAuthRoleMetadataList;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
@@ -23,7 +16,6 @@ import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiUser2;
 import com.cloudera.api.swagger.model.ApiUser2List;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.MockUri;
@@ -88,19 +80,11 @@ public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
         return testDto;
     }
 
-    public T setCmVersion(String cmVersion) {
-        Objects.requireNonNull(cmVersion);
-        mockedTestContext.getExecuteQueryToMockInfrastructure()
-                .executeMethod(HttpMethod.PUT, testDto.getCrn() + "/cmversion", Map.of("version", cmVersion),
-                        Entity.json(JsonUtil.createJsonTree(Map.of("version", cmVersion))), r -> r, w -> w);
-        return testDto;
-    }
-
     public interface CmActiveCommandsApi {
         interface Cm {
 
             @MockUri(url = ACTIVE_COMMANDS)
-            interface ActiveCommandTable<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+            interface ActiveCommandTable<T extends  CloudbreakTestDto> extends VerificationEndpoint<T> {
                 DefaultResponseConfigure<T, String> get();
             }
         }
@@ -110,7 +94,7 @@ public final class ClouderaManagerEndpoints<T extends CloudbreakTestDto> {
         interface Cm {
 
             @MockUri(url = RECENT_COMMANDS)
-            interface RecentCommandTable<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+            interface RecentCommandTable<T extends  CloudbreakTestDto> extends VerificationEndpoint<T> {
                 DefaultResponseConfigure<T, String> get();
             }
         }
