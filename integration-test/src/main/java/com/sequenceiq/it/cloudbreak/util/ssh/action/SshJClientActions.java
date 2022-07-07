@@ -2,6 +2,8 @@ package com.sequenceiq.it.cloudbreak.util.ssh.action;
 
 import static java.lang.String.format;
 
+import java.io.IOException;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -14,18 +16,22 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
@@ -293,10 +299,9 @@ public class SshJClientActions extends SshJClient {
                         .stream()
                         .map(countObject -> (Integer) countObject)
                         .collect(Collectors.toList());
-            LOGGER.info(format("heartbeatEventCounts: %s", heartbeatEventCounts));
             Log.log(LOGGER, format(" Found '%s' Metering Heartbeat Events at '%s' instance. ", heartbeatEventCounts, meteringStatusReport.getKey()));
             if (CollectionUtils.isEmpty(heartbeatEventCounts) || heartbeatEventCounts.contains(0)) {
-                LOGGER.error("Metering Heartbeat Events does NOT generated on '{}' instance!", meteringStatusReport.getKey());
+                Log.error(LOGGER, format(" Metering Heartbeat Events does NOT generated on '%s' instance! ", meteringStatusReport.getKey()));
                 throw new TestFailException(format("Metering Heartbeat Events does NOT generated on '%s' instance!", meteringStatusReport.getKey()));
             }
         }
@@ -310,17 +315,164 @@ public class SshJClientActions extends SshJClient {
                     if (StringUtils.containsIgnoreCase(event, "databusReachable")) {
                         Log.log(LOGGER, format(" Found 'databusReachable' status is not OK at '%s' instance. However this is acceptable!",
                                 meteringStatusReport.getKey()));
-                        LOGGER.warn("Found 'databusReachable' status is not OK at '{}' instance. However this is acceptable!", meteringStatusReport.getKey());
                     } else {
-                        Log.log(LOGGER, format(" Found '%s' not OK at '%s' instance. ", event, meteringStatusReport.getKey()));
-                        LOGGER.error("There is 'Not OK' Metering Heartbeat status {} is present on '{}' instance!", event, meteringStatusReport.getKey());
+                        Log.error(LOGGER, format(" There is 'Not OK' Metering Heartbeat status %s is present on '%s' instance! ", event,
+                                meteringStatusReport.getKey()));
                         throw new TestFailException(format("There is 'Not OK' Metering Heartbeat status %s is present on '%s' instance!", event,
                                 meteringStatusReport.getKey()));
                     }
                 });
             }
         }
+        return testDto;
+    }
 
+    public <T extends CloudbreakTestDto> T checkMonitoringStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
+            List<String> verifyMetricNames, List<String> acceptableNokNames) {
+        List<String> instanceIps = getInstanceGroupIps(instanceGroups, hostGroupNames, false);
+        return checkMonitoringStatus(testDto, instanceIps, verifyMetricNames, acceptableNokNames);
+    }
+
+    public FreeIpaTestDto checkMonitoringStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient,
+            List<String> verifyMetricNames, List<String> acceptableNokNames) {
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(environmentCrn, freeipaClient, false);
+        return checkMonitoringStatus(testDto, instanceIps, verifyMetricNames, acceptableNokNames);
+    }
+
+    public <T extends CloudbreakTestDto> T checkMonitoringStatus(T testDto, List<String> instanceIps, List<String> verifyMetricNames,
+            List<String> acceptableNokNames) {
+        String monitoringStatusCommand = format("sudo cdp-doctor monitoring status -m %s --format json", StringUtils.join(verifyMetricNames, ","));
+        Map<String, Pair<Integer, String>> monitoringStatusReportByIp = instanceIps.stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, monitoringStatusCommand)));
+        for (Entry<String, Pair<Integer, String>> monitoringStatusReport : monitoringStatusReportByIp.entrySet()) {
+            try {
+                List<String> statusCategories = List.of("services", "scrapping", "metrics");
+                Map<String, Map<String, String>> fetchedMonitoringStatus = JsonUtil.readValue(monitoringStatusReport.getValue().getValue(),
+                        new TypeReference<Map<String, Map<String, String>>>() { });
+                statusCategories.forEach(statusCategory -> {
+                    Map<String, String> statusesNotOkInCategory = fetchedMonitoringStatus.entrySet().stream()
+                            .filter(categories -> statusCategory.equalsIgnoreCase(categories.getKey()))
+                            .flatMap(selectedCategory -> selectedCategory.getValue().entrySet().stream()
+                                            .filter(servicesInCategory -> "NOK".equalsIgnoreCase(servicesInCategory.getValue())))
+                            .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+                    if (MapUtils.isNotEmpty(statusesNotOkInCategory)) {
+                        Log.log(LOGGER, format(" Found 'Not OK' Monitoring statuses '%s' at '%s' instance. " +
+                                "However this is acceptable! ", statusesNotOkInCategory, monitoringStatusReport.getKey()));
+                        statusesNotOkInCategory.forEach((service, status) -> {
+                            if (acceptableNokNames.stream()
+                                    .anyMatch(nokAccepted -> nokAccepted.equalsIgnoreCase(service))) {
+                                Log.log(LOGGER, format(" Found Monitoring '%s' where %s' is 'Not OK' at '%s' instance. " +
+                                        "However this is acceptable! ", statusCategory.toUpperCase(), service, monitoringStatusReport.getKey()));
+                            } else {
+                                Log.error(LOGGER, format(" Found Monitoring '%s' where '%s' is 'Not OK' at '%s' instance! ", statusCategory.toUpperCase(),
+                                        service, monitoringStatusReport.getKey()));
+                                throw new TestFailException(format("Found Monitoring '%s' where '%s' is 'Not OK' at '%s' instance!",
+                                        statusCategory.toUpperCase(), service, monitoringStatusReport.getKey()));
+                            }
+                        });
+                    }
+                });
+            } catch (IOException | IllegalStateException e) {
+                Log.error(LOGGER, " Cannot parse Common Monitoring Status Report JSON! ");
+                throw new TestFailException("Cannot parse Common Monitoring Status Report JSON: ", e);
+            }
+        }
+        return testDto;
+    }
+
+    private void createHugheFilesForFilesystemFreeBytesMetric(List<String> instanceIps) {
+        String listDisk = "sudo df -h /";
+        String allocateBigFiles = "sudo seq -f '%04.0f' 4 | xargs -I '{}' fallocate -l 5G test_file'{}'.txt";
+
+        instanceIps.stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip,
+                        StringUtils.join(List.of(allocateBigFiles, listDisk), " && "))));
+
+        waitingFor(Duration.ofMinutes(1), "Waiting for Monitoring 'node_filesystem_free_bytes' metric to be generated has been interrupted");
+    }
+
+    private void removeHugheFilesForFilesystemFreeBytesMetric(List<String> instanceIps) {
+        String removeAllocatedFiles = "sudo rm -rf test_file{0001..0004}.txt";
+
+        instanceIps.stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, removeAllocatedFiles)));
+
+        waitingFor(Duration.ofMinutes(1), "Waiting for Monitoring 'node_filesystem_free_bytes' metric to be generated has been interrupted");
+    }
+
+    private void waitingFor(Duration duration, String interruptedMessage) {
+        Duration waitDuration = duration == null ? Duration.ofMinutes(0) : duration;
+        String intrMessage = interruptedMessage == null ? "Waiting has been interrupted:" : interruptedMessage;
+        try {
+            Thread.sleep(waitDuration.toMillis());
+            LOGGER.info("Wait '{}' duration has been done.", duration.toString());
+        } catch (InterruptedException e) {
+            LOGGER.warn(StringUtils.join(intrMessage, e));
+        }
+    }
+
+    public <T extends CloudbreakTestDto> T checkFilesystemFreeBytesGeneratedMetric(T testDto, List<InstanceGroupV4Response> instanceGroups,
+            List<String> hostGroupNames) {
+        List<String> instanceIps = getInstanceGroupIps(instanceGroups, hostGroupNames, false);
+        return checkFilesystemFreeBytesGeneratedMetric(testDto, instanceIps);
+    }
+
+    public FreeIpaTestDto checkFilesystemFreeBytesGeneratedMetric(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(environmentCrn, freeipaClient, false);
+        return checkFilesystemFreeBytesGeneratedMetric(testDto, instanceIps);
+    }
+
+    /**
+     * Right now we cannot add this verification to the Monitoring tests yet. So this has been prepared
+     * but not finished. In the future we can extend and improve the verification based on the finalized
+     * monitoring feature with the latest images.
+     *
+     * @param testDto       Service client entity for tests
+     * @param instanceIps   Stack VMs private IPs
+     * @param <T>           Generalised test DTO
+     * @return the given test DTO for final verify
+     */
+    public <T extends CloudbreakTestDto> T checkFilesystemFreeBytesGeneratedMetric(T testDto, List<String> instanceIps) {
+        createHugheFilesForFilesystemFreeBytesMetric(instanceIps);
+
+        String monitoringStatusCommand = "sudo cdp-doctor monitoring status -m node_filesystem_free_bytes --format json";
+        Map<String, Pair<Integer, String>> monitoringStatusReportByIp = instanceIps.stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, monitoringStatusCommand)));
+        for (Entry<String, Pair<Integer, String>> monitoringStatusReport : monitoringStatusReportByIp.entrySet()) {
+            try {
+                String requestSignerCategory = "request-signer";
+                Map<String, Map<String, String>> fetchedMonitoringStatus = JsonUtil.readValue(monitoringStatusReport.getValue().getValue(),
+                        new TypeReference<Map<String, Map<String, String>>>() { });
+                List<String> successCount = fetchedMonitoringStatus.entrySet().stream()
+                        .filter(categories -> requestSignerCategory.equalsIgnoreCase(categories.getKey()))
+                        .flatMap(selectedCategory -> selectedCategory.getValue().entrySet().stream()
+                                .filter(servicesInCategory -> "success_count".equalsIgnoreCase(servicesInCategory.getKey())))
+                        .map(Entry::getValue)
+                        .collect(Collectors.toList());
+                if (!successCount.isEmpty()) {
+                    Log.log(LOGGER, format(" Monitoring Request Signer success count is '%s' at '%s' instance. ", successCount,
+                            monitoringStatusReport.getKey()));
+                    successCount.forEach(count -> {
+                        if (Integer.getInteger(count) > 0) {
+                            Log.log(LOGGER, format(" Found Monitoring Request Signer success count is '%s' at '%s' instance! ", count,
+                                    monitoringStatusReport.getKey()));
+                        } else {
+                            Log.error(LOGGER, format(" Monitoring Request Signer success count has not been generated at '%s' instance! ",
+                                    monitoringStatusReport.getKey()));
+                            throw new TestFailException(format("Monitoring Request Signer success count has not been generated at '%s' instance!",
+                                    monitoringStatusReport.getKey()));
+                        }
+                    });
+                } else {
+                    Log.error(LOGGER, format(" Cannot find Monitoring Request Signer success count at '%s' instance! ", monitoringStatusReport.getKey()));
+                    throw new TestFailException(format("Cannot find Monitoring Request Signer success count at '%s' instance!",
+                            monitoringStatusReport.getKey()));
+                }
+            } catch (IOException | IllegalStateException e) {
+                Log.error(LOGGER, " Cannot parse Common Monitoring Status Report JSON! ");
+                throw new TestFailException("Cannot parse Common Monitoring Status Report JSON: ", e);
+            }
+        }
         return testDto;
     }
 }

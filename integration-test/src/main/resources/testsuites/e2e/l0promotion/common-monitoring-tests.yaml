@@ -1,0 +1,5 @@
+name: "common-monitoring-tests"
+tests:
+  - name: "common_monitoring_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.MonitoringTests

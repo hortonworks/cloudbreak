@@ -31,6 +31,8 @@ public class CommonCloudProperties {
 
     private User user = new User();
 
+    private Telemetry telemetry = new Telemetry();
+
     public String getCloudProvider() {
         return cloudProvider;
     }
@@ -121,6 +123,14 @@ public class CommonCloudProperties {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Telemetry getTelemetry() {
+        return telemetry;
+    }
+
+    public void setTelemetry(Telemetry telemetry) {
+        this.telemetry = telemetry;
     }
 
     public static class ImageValidation {
@@ -247,6 +257,18 @@ public class CommonCloudProperties {
 
         public void setWorkloadPassword(String workloadPassword) {
             this.workloadPassword = workloadPassword;
+        }
+    }
+
+    public static class Telemetry {
+        private String remoteWriteUrl;
+
+        public String getRemoteWriteUrl() {
+            return remoteWriteUrl;
+        }
+
+        public void setRemoteWriteUrl(String remoteWriteUrl) {
+            this.remoteWriteUrl = remoteWriteUrl;
         }
     }
 }
