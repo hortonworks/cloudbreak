@@ -29,7 +29,7 @@ public class SdxUpgradeTestAssertion {
         };
     }
 
-    public static Assertion<SdxInternalTestDto, SdxClient> validateUpgradeCandidateWithLockedComponentIsAvailable() {
+    public static Assertion<SdxInternalTestDto, SdxClient> validateSuccessfulUpgrade() {
         return (testContext, entity, sdxClient) -> {
             SdxUpgradeRequest request = new SdxUpgradeRequest();
             request.setLockComponents(true);

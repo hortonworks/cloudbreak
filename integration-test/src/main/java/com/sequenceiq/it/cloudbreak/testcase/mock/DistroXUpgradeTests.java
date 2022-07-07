@@ -50,10 +50,6 @@ public class DistroXUpgradeTests extends AbstractMockTest {
                 .given(DistroXUpgradeTestDto.class)
                 .withRuntime(targetRuntimeVersion)
                 .given(distroXName, DistroXTestDto.class)
-                .then((tc, entity, client) ->  {
-                    entity.mockCm().setCmVersion(targetRuntimeVersion);
-                    return entity;
-                })
                 .when(distroXTestClient.upgrade(), key(distroXName))
                 .await(STACK_AVAILABLE, key(distroXName))
                 .awaitForHealthyInstances()
