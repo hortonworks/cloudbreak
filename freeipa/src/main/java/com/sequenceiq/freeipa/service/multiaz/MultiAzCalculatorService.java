@@ -21,7 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -41,14 +40,10 @@ public class MultiAzCalculatorService {
         Map<String, String> subnetAzPairs = new HashMap<>();
         if (environment != null && environment.getNetwork() != null && environment.getNetwork().getSubnetMetas() != null) {
             for (Map.Entry<String, CloudSubnet> entry : environment.getNetwork().getSubnetMetas().entrySet()) {
+                String subnetId = entry.getKey();
                 CloudSubnet value = entry.getValue();
                 if (value != null && value.getAvailabilityZone() != null) {
-                    if (!Strings.isNullOrEmpty(value.getName())) {
-                        subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
-                    }
-                    if (!Strings.isNullOrEmpty(value.getId())) {
-                        subnetAzPairs.put(value.getId(), value.getAvailabilityZone());
-                    }
+                    subnetAzPairs.put(subnetId, value.getAvailabilityZone());
                 }
             }
         }
@@ -78,7 +73,8 @@ public class MultiAzCalculatorService {
     }
 
     public Map<String, String> filterSubnetByLeastUsedAz(InstanceGroup instanceGroup, Map<String, String> subnetAzPairs) {
-        Map<String, List<String>> azSubnetPairs = createAzSubnetPairsFromSubnetAzPairs(subnetAzPairs);
+        Set<String> subnetIdsConfiguredOnInstanceGroup = collectSubnetIds(instanceGroup);
+        Map<String, List<String>> azSubnetPairs = createAzSubnetPairsFromSubnetAzPairs(subnetAzPairs, subnetIdsConfiguredOnInstanceGroup);
         Map<String, Integer> azUsage = new HashMap<>();
         Set<String> azs = azSubnetPairs.keySet();
         azs.forEach(az -> azUsage.computeIfAbsent(az, k -> 0));
@@ -89,11 +85,15 @@ public class MultiAzCalculatorService {
         return subnetsForLeastUsedAz.stream().collect(Collectors.toMap(Function.identity(), v -> leastUsedAz));
     }
 
-    private Map<String, List<String>> createAzSubnetPairsFromSubnetAzPairs(Map<String, String> subnetAzPairs) {
+    private Map<String, List<String>> createAzSubnetPairsFromSubnetAzPairs(Map<String, String> subnetAzPairs, Set<String> subnetIdsConfiguredOnInstanceGroup) {
         Map<String, List<String>> ret = new HashMap<>();
         subnetAzPairs.forEach((subnet, az) -> {
-            List<String> subnetIds = ret.computeIfAbsent(az, key -> new ArrayList<>());
-            subnetIds.add(subnet);
+            if (subnetIdsConfiguredOnInstanceGroup.contains(subnet)) {
+                List<String> subnetIds = ret.computeIfAbsent(az, key -> new ArrayList<>());
+                subnetIds.add(subnet);
+            } else {
+                LOGGER.debug("The subnet '{}' is part of the environment response but not configured for the instance group", subnet);
+            }
         });
         return ret;
     }
@@ -114,8 +114,11 @@ public class MultiAzCalculatorService {
                 } else {
                     LOGGER.debug("There is no availability zone data for subnet id: '{}', It is normal on Azure for now", subnetId);
                 }
+            } else {
+                LOGGER.debug("Subnet id is null or empty for instance metadata: {}", instanceMetaData);
             }
         }
+        LOGGER.debug("Current availability zone usage of instance group '{}': '{}'", instanceGroup.getGroupName(), azUsage);
     }
 
     private void updateSubnetIdForInstanceIfEmpty(Map<String, String> subnetAzPairs, Map<String, Integer> subnetUsage, InstanceMetaData instanceMetaData) {
@@ -153,14 +156,14 @@ public class MultiAzCalculatorService {
     }
 
     private Map<String, Integer> initializeSubnetUsage(Map<String, String> subnetAzPairs, Collection<String> subnetIds) {
-        Map<String, Integer> emptySubentUsage = subnetAzPairs.keySet().stream()
+        Map<String, Integer> emptySubnetUsage = subnetAzPairs.keySet().stream()
                 .filter(subnetIds::contains)
                 .collect(Collectors.toMap(
                         subnetId -> subnetId,
                         subnetId -> 0
                 ));
-        LOGGER.debug("Empty subnet usage based on instancegroups and subnet-availabilityzone pairs: {}", emptySubentUsage);
-        return emptySubentUsage;
+        LOGGER.debug("Empty subnet usage based on instancegroups and subnet-availabilityzone pairs: {}", emptySubnetUsage);
+        return emptySubnetUsage;
     }
 
     private Map<String, Integer> collectCurrentSubnetUsage(InstanceGroup instanceGroup, Map<String, Integer> subnetUsage) {

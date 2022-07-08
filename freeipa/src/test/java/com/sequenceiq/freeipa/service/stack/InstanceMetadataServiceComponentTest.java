@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -13,9 +15,12 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
@@ -55,6 +60,12 @@ public class InstanceMetadataServiceComponentTest {
     @Inject
     private FreeIpaService freeIpaService;
 
+    @Inject
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+
+    @Captor
+    private ArgumentCaptor<InstanceMetaData> instanceMetaDataArgumentCaptor;
+
     @Test
     public void saveInstanceAndGetUpdatedStack() {
 
@@ -84,7 +95,7 @@ public class InstanceMetadataServiceComponentTest {
         freeIpa.setDomain("domain");
         when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
 
-        instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, cloudInstances(42));
+        instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, cloudInstances(42, "worker"));
         Map<String, List<InstanceMetaData>> groupBySub = workerInstanceGroup.getInstanceMetaDataSet().stream()
                 .collect(Collectors.groupingBy(
                         InstanceMetaData::getSubnetId,
@@ -102,13 +113,68 @@ public class InstanceMetadataServiceComponentTest {
         Assertions.assertEquals(7, groupBySub.get("sub2").size());
         Assertions.assertEquals(7, groupBySub.get("sub3").size());
         Assertions.assertEquals(21, groupBySub.get("sub4").size());
-
+        verify(instanceMetaDataRepository, times(42)).save(instanceMetaDataArgumentCaptor.capture());
+        Assertions.assertTrue(instanceMetaDataArgumentCaptor.getAllValues()
+                .stream()
+                .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId())));
     }
 
-    private List<CloudInstance> cloudInstances(int count) {
+    @Test
+    public void saveInstanceAndGetUpdatedStackForMasterRepairOfOneNodeFromTheTwo() {
+
+        DetailedEnvironmentResponse detailedEnvResponse = DetailedEnvironmentResponse.builder()
+                .withCrn(ENV_CRN)
+                .withNetwork(EnvironmentNetworkResponse.builder()
+                        .withSubnetMetas(Map.of(
+                                "subnet-06f0", cloudSubnet("us-gov-west-1b", "subnet-06f0"),
+                                "subnet-0c49", cloudSubnet("us-gov-west-1c", "subnet-0c49"),
+                                "subnet-0a48", cloudSubnet("us-gov-west-1a", "subnet-0a48")
+                        ))
+                        .build())
+                .build();
+        Stack stack = new Stack();
+        stack.setEnvironmentCrn(ENV_CRN);
+        InstanceGroup masterInstanceGroup = new InstanceGroup();
+        masterInstanceGroup.setGroupName("master");
+        InstanceGroupNetwork instanceGroupNetwork = new InstanceGroupNetwork();
+        instanceGroupNetwork.setCloudPlatform("AWS");
+        instanceGroupNetwork.setAttributes(new Json(Map.of(SUBNET_IDS, List.of("subnet-0c49", "subnet-06f0"))));
+        masterInstanceGroup.setInstanceGroupNetwork(instanceGroupNetwork);
+        InstanceMetaData masterInstance = new InstanceMetaData();
+        masterInstance.setPrivateId(3000L);
+        masterInstance.setInstanceId("i-masterinstance");
+        masterInstance.setAvailabilityZone("us-gov-west-1c");
+        masterInstance.setSubnetId("subnet-0c49");
+        masterInstanceGroup.getInstanceMetaData().add(masterInstance);
+        stack.setInstanceGroups(Set.of(masterInstanceGroup));
+        when(cachedEnvironmentClientService.getByCrn(ENV_CRN)).thenReturn(detailedEnvResponse);
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setHostname("hostname");
+        freeIpa.setDomain("domain");
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+
+        instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, cloudInstances(1, "master"));
+        Map<String, List<InstanceMetaData>> groupBySub = masterInstanceGroup.getInstanceMetaDataSet().stream()
+                .collect(Collectors.groupingBy(
+                        InstanceMetaData::getSubnetId,
+                        Collectors.mapping(Function.identity(), Collectors.toList())));
+        Map<String, List<InstanceMetaData>> groupByAz = masterInstanceGroup.getInstanceMetaDataSet().stream()
+                .collect(Collectors.groupingBy(
+                        InstanceMetaData::getAvailabilityZone,
+                        Collectors.mapping(Function.identity(), Collectors.toList())));
+
+        Assertions.assertEquals(2, groupByAz.size());
+        Assertions.assertEquals(2, groupBySub.size());
+        verify(instanceMetaDataRepository, times(1)).save(instanceMetaDataArgumentCaptor.capture());
+        Assertions.assertTrue(instanceMetaDataArgumentCaptor.getAllValues()
+                .stream()
+                .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId())));
+    }
+
+    private List<CloudInstance> cloudInstances(int count, String groupName) {
         List<CloudInstance> instances = new ArrayList<>();
         for (long i = 0; i < count; i++) {
-            InstanceTemplate instanceTemplate = new InstanceTemplate("flavor", "worker", i, Collections.emptyList(), InstanceStatus.CREATED,
+            InstanceTemplate instanceTemplate = new InstanceTemplate("flavor", groupName, i, Collections.emptyList(), InstanceStatus.CREATED,
                     Collections.emptyMap(), i, "iid", null, 0L);
             instances.add(new CloudInstance("i-" + i, instanceTemplate, null, null, null));
         }

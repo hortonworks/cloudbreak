@@ -135,7 +135,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                     .withKeyName(cloudStack.getInstanceAuthentication().getPublicKeyId());
             RunInstancesResult instanceResult = amazonEc2Client.createInstance(request);
             instance = instanceResult.getReservation().getInstances().get(0);
-            LOGGER.info("Instance creation inited with name: {} and instance id: {}", cloudResource.getName(), instance.getInstanceId());
+            LOGGER.info("Instance creation initiated for resource: {} and instance id: {}", cloudResource, instance.getInstanceId());
         }
         cloudResource.setInstanceId(instance.getInstanceId());
         return buildableResource;
@@ -150,13 +150,16 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                     .findFirst()
                     .map(CloudResource::getReference)
                     .orElse(null);
+            LOGGER.debug("Selected security group id from CloudResource: {}", securityGroupId);
         }
-        if (securityGroupId == null) {
+        if (StringUtils.isEmpty(securityGroupId)) {
             securityGroupId = group.getSecurity().getCloudSecurityId();
+            LOGGER.debug("Selected security group id from group's security domain: {}", securityGroupId);
         }
-        if (securityGroupId == null) {
+        if (StringUtils.isEmpty(securityGroupId)) {
             LOGGER.debug("Cannot determine the security group, so it will be created in the default sec group");
         }
+        LOGGER.info("Security group id: {}", securityGroupId);
         return securityGroupId;
     }
 
