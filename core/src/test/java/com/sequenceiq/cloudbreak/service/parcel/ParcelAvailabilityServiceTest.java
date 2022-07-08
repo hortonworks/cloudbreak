@@ -40,7 +40,7 @@ public class ParcelAvailabilityServiceTest {
 
     private static final String ARCHIVE_PARCEL = "https://archive.cloudera.com/parcel";
 
-    private static final String CM_RPM = "cm-rpm";
+    private static final String CM_RPM = "https://archive.cloudera.com/cm-rpm";
 
     private static final long STACK_ID = 1L;
 
@@ -128,6 +128,23 @@ public class ParcelAvailabilityServiceTest {
         createMockResponse(200, PARCEL_1);
         createMockResponse(200, PARCEL_2);
         createMockResponse(200, CM_RPM);
+
+        assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateAvailability(image, STACK_ID));
+    }
+
+    @Test
+    public void testValidateParcelAvailabilityShouldThrowExceptionWhenCmRpmIsNotAvailable() {
+        Set<String> requiredParcelsFromImage = createRequiredParcelsSet();
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(parcelUrlProvider.getRequiredParcelsFromImage(image, stack)).thenReturn(requiredParcelsFromImage);
+        when(cmUrlProvider.getCmRpmUrl(image)).thenReturn(CM_RPM);
+
+        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
+
+        createMockResponse(200, ARCHIVE_PARCEL);
+        createMockResponse(200, PARCEL_1);
+        createMockResponse(200, PARCEL_2);
+        createMockResponse(404, CM_RPM);
 
         assertThrows(UpgradeValidationFailedException.class, () -> underTest.validateAvailability(image, STACK_ID));
     }
