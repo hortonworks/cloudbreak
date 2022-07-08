@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -19,6 +20,9 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecipeToRecipeV4ResponseConverterTest extends AbstractEntityConverterTest<Recipe> {
+
+    @Spy
+    private RecipeTypeToRecipeV4TypeConverter recipeTypeToRecipeV4TypeConverter;
 
     @Mock
     private WorkspaceToWorkspaceResourceV4ResponseConverter workspaceToWorkspaceResourceV4ResponseConverter;

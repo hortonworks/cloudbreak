@@ -2,11 +2,14 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_CLUSTER_INSTALL;
+import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.POST_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_CLOUDERA_MANAGER_START;
+import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.common.model.recipe.RecipeType.PRE_TERMINATION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +76,7 @@ public class RecipeEngine {
 
     public void executePreClusterManagerRecipes(Stack stack, Map<String, String> candidateAddresses, Set<HostGroup> hostGroups) throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
-        if (shouldExecuteRecipeOnStack(recipes, PRE_CLOUDERA_MANAGER_START)) {
+        if (shouldExecuteRecipeOnStack(recipes, PRE_CLOUDERA_MANAGER_START, PRE_SERVICE_DEPLOYMENT)) {
             uploadRecipesIfNeeded(stack, hostGroups);
             if (MapUtils.isEmpty(candidateAddresses)) {
                 orchestratorRecipeExecutor.preClusterManagerStartRecipes(stack);
@@ -102,7 +105,7 @@ public class RecipeEngine {
 
     public void executePostInstallRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
-        if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL)) {
+        if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL, POST_SERVICE_DEPLOYMENT)) {
             uploadRecipesIfNeeded(stack, hostGroups);
             orchestratorRecipeExecutor.postClusterInstall(stack);
         }
@@ -110,7 +113,7 @@ public class RecipeEngine {
 
     public void executePostInstallRecipesOnTargets(Stack stack, Set<HostGroup> hostGroups, Map<String, String> candidateAddresses) throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
-        if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL)) {
+        if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL, POST_SERVICE_DEPLOYMENT)) {
             uploadRecipesIfNeeded(stack, hostGroups);
             orchestratorRecipeExecutor.postClusterInstallOnTargets(stack, candidateAddresses);
         }
@@ -173,8 +176,8 @@ public class RecipeEngine {
         }
     }
 
-    private boolean shouldExecuteRecipeOnStack(Collection<Recipe> recipes, RecipeType recipeType) {
-        return recipesFound(recipes, recipeType);
+    private boolean shouldExecuteRecipeOnStack(Collection<Recipe> recipes, RecipeType... recipeTypes) {
+        return recipesFound(recipes, recipeTypes);
     }
 
     private boolean recipesOrGeneratedRecipesFound(Iterable<HostGroup> hostGroups) {
@@ -188,8 +191,8 @@ public class RecipeEngine {
         return false;
     }
 
-    private boolean recipesFound(Collection<Recipe> recipes, RecipeType recipeType) {
-        return recipes.stream().anyMatch(recipe -> recipeType.equals(recipe.getRecipeType()));
+    private boolean recipesFound(Collection<Recipe> recipes, RecipeType... recipeTypes) {
+        return recipes.stream().anyMatch(recipe -> Arrays.stream(recipeTypes).anyMatch(recipeType -> recipeType.equals(recipe.getRecipeType())));
     }
 
     private Map<String, Recipe> getRecipeNameMap(Set<HostGroup> hostGroups) {

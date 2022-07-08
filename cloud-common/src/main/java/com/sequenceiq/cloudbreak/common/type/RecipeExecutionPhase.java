@@ -5,9 +5,11 @@ import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 public enum RecipeExecutionPhase {
 
     PRE_CLOUDERA_MANAGER_START("pre-cloudera-manager-start"),
+    PRE_SERVICE_DEPLOYMENT("pre-service-deployment"),
     PRE_TERMINATION("pre-termination"),
     POST_CLOUDERA_MANAGER_START("post-cloudera-manager-start"),
-    POST_CLUSTER_INSTALL("post-cluster-install");
+    POST_CLUSTER_INSTALL("post-cluster-install"),
+    POST_SERVICE_DEPLOYMENT("post-service-deployment");
 
     private final String value;
 
@@ -18,12 +20,14 @@ public enum RecipeExecutionPhase {
     public static RecipeExecutionPhase convert(RecipeType recipeType) {
         switch (recipeType) {
             case PRE_CLOUDERA_MANAGER_START:
+            case PRE_SERVICE_DEPLOYMENT:
                 return PRE_CLOUDERA_MANAGER_START;
             case PRE_TERMINATION:
                 return PRE_TERMINATION;
             case POST_CLOUDERA_MANAGER_START:
                 return POST_CLOUDERA_MANAGER_START;
             case POST_CLUSTER_INSTALL:
+            case POST_SERVICE_DEPLOYMENT:
                 return POST_CLUSTER_INSTALL;
             default:
                 throw new UnsupportedOperationException("Unsupported Execution Phase: " + recipeType);
@@ -31,7 +35,7 @@ public enum RecipeExecutionPhase {
     }
 
     public boolean isPreRecipe() {
-        return this != POST_CLUSTER_INSTALL;
+        return this != POST_SERVICE_DEPLOYMENT && this != POST_CLUSTER_INSTALL;
     }
 
     public boolean isPostRecipe() {
