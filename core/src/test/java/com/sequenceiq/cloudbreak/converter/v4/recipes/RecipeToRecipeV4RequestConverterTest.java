@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
@@ -14,6 +15,9 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 
 @ExtendWith(MockitoExtension.class)
 class RecipeToRecipeV4RequestConverterTest {
+
+    @Spy
+    private RecipeTypeToRecipeV4TypeConverter recipeTypeToRecipeV4TypeConverter;
 
     @InjectMocks
     private RecipeToRecipeV4RequestConverter recipeToRecipeV4RequestConverter;

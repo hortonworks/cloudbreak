@@ -56,19 +56,23 @@ public class PillarSave implements OrchestratorBootstrap {
         this.sc = sc;
         Map<String, Map<String, List<String>>> scripts = new HashMap<>(recipes.size());
         for (Entry<String, List<RecipeModel>> entry : recipes.entrySet()) {
-            List<String> preAmbariStart = entry.getValue().stream().
-                    filter(h -> h.getRecipeType() == RecipeType.PRE_CLOUDERA_MANAGER_START).map(RecipeModel::getName).collect(Collectors.toList());
+            List<String> preServiceDeployment = entry.getValue().stream().
+                    filter(h -> h.getRecipeType() == RecipeType.PRE_CLOUDERA_MANAGER_START || h.getRecipeType() == RecipeType.PRE_SERVICE_DEPLOYMENT)
+                    .map(RecipeModel::getName).collect(Collectors.toList());
             List<String> preTermination = entry.getValue().stream().
                     filter(h -> h.getRecipeType() == RecipeType.PRE_TERMINATION).map(RecipeModel::getName).collect(Collectors.toList());
-            List<String> postAmbariStart = entry.getValue().stream().
+            List<String> postClouderaManagerStart = entry.getValue().stream().
                 filter(h -> h.getRecipeType() == RecipeType.POST_CLOUDERA_MANAGER_START).map(RecipeModel::getName).collect(Collectors.toList());
-            List<String> postClusterInstall = entry.getValue().stream().
-                    filter(h -> h.getRecipeType() == RecipeType.POST_CLUSTER_INSTALL).map(RecipeModel::getName).collect(Collectors.toList());
+            List<String> postServiceDeployment = entry.getValue().stream().
+                    filter(h -> h.getRecipeType() == RecipeType.POST_CLUSTER_INSTALL || h.getRecipeType() == RecipeType.POST_SERVICE_DEPLOYMENT)
+                    .map(RecipeModel::getName).collect(Collectors.toList());
             Map<String, List<String>> prePostScripts = new HashMap<>();
-            prePostScripts.put(RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START.value(), preAmbariStart);
+            prePostScripts.put(RecipeExecutionPhase.PRE_CLOUDERA_MANAGER_START.value(), preServiceDeployment);
+            prePostScripts.put(RecipeExecutionPhase.PRE_SERVICE_DEPLOYMENT.value(), preServiceDeployment);
             prePostScripts.put(RecipeExecutionPhase.PRE_TERMINATION.value(), preTermination);
-            prePostScripts.put(RecipeExecutionPhase.POST_CLOUDERA_MANAGER_START.value(), postAmbariStart);
-            prePostScripts.put(RecipeExecutionPhase.POST_CLUSTER_INSTALL.value(), postClusterInstall);
+            prePostScripts.put(RecipeExecutionPhase.POST_CLOUDERA_MANAGER_START.value(), postClouderaManagerStart);
+            prePostScripts.put(RecipeExecutionPhase.POST_CLUSTER_INSTALL.value(), postServiceDeployment);
+            prePostScripts.put(RecipeExecutionPhase.POST_SERVICE_DEPLOYMENT.value(), postServiceDeployment);
             scripts.put(entry.getKey(), prePostScripts);
         }
         Map<String, Object> pillarConfig = new HashMap<>(scripts);
