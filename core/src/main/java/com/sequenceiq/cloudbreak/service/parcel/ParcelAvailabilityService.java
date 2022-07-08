@@ -63,10 +63,23 @@ public class ParcelAvailabilityService {
                     .map(entry -> entry.getValue().get())
                     .collect(Collectors.toSet());
         } else {
-            String errorMessage = String.format("Failed to access the following parcels: %s imageId: %s", unavailableParcels, image.getUuid());
+            String errorMessage = buildErrorMessage(image, cmRpmUrl, unavailableParcels);
             LOGGER.error(errorMessage);
             throw new UpgradeValidationFailedException(errorMessage);
         }
+    }
+
+    private String buildErrorMessage(Image image, String cmRpmUrl, Set<String> unavailableParcels) {
+        StringBuilder errorMessageBuilder = new StringBuilder();
+        if (unavailableParcels.contains(cmRpmUrl)) {
+            errorMessageBuilder.append("Failed to access Clouder Manager RPM: ").append(cmRpmUrl);
+            unavailableParcels.remove(cmRpmUrl);
+        }
+        if (!unavailableParcels.isEmpty()) {
+            errorMessageBuilder.append(" Failed to access the following parcels: ").append(unavailableParcels);
+        }
+        errorMessageBuilder.append(" Image ID: ").append(image.getUuid());
+        return errorMessageBuilder.toString();
     }
 
     private Predicate<Map.Entry<String, Optional<Response>>> filterCmRpmFile(String cmRpmUrl) {
