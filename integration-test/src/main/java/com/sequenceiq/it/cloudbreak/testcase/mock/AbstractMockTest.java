@@ -66,6 +66,7 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
         String latestBaseImageID = testContext.getCloudProvider().getLatestBaseImageID();
         testContext.given(EnvironmentTestDto.class)
                 .withFreeIpaImage(freeIpaImageCatalogUrl, latestBaseImageID)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())

@@ -49,6 +49,7 @@ public class EnvironmentExperienceTest extends AbstractMockTest {
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .enableVerification(LIFTIE_API_ROOT)
                 .enableVerification()

@@ -61,6 +61,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractMockTest {
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
                 .withLocation(VALID_LOCATION)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
@@ -94,6 +95,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractMockTest {
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
                 .withLocation(VALID_LOCATION)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .given(ClusterTestDto.class).valid()
                 .withRdsConfigNames(rdsList)
@@ -122,6 +124,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractMockTest {
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .validate();
         createDatalake(testContext, rdsList);
@@ -140,6 +143,7 @@ public class EnvironmentDatalakeClusterTest extends AbstractMockTest {
         String rangerdb = resourcePropertyProvider().getName();
         Set<String> rdsList = createDatalakeResources(testContext, hivedb, rangerdb);
         testContext.given(EnvironmentTestDto.class)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .given("placement", PlacementSettingsTestDto.class)
                 .given(StackTestDto.class)

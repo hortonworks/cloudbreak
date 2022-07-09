@@ -31,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.idbmms.IdbmmsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.recipe.RecipeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
@@ -119,6 +120,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                     .withFreeIpaRecipe(Set.of(recipeName))
                     .addTags(ENV_TAGS)
                 .when(environmentTestClient.create())
+                .init(IdbmmsTestDto.class)
                 .given(SdxInternalTestDto.class)
                     .addTags(SDX_TAGS)
                     .withCloudStorage(getCloudStorageRequest(testContext))

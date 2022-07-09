@@ -21,6 +21,7 @@ import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.IdbmmsTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
@@ -32,6 +33,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGroupsBuilder;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
+import com.sequenceiq.it.cloudbreak.dto.idbmms.IdbmmsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.ActiveDirectoryKerberosDescriptorTestDto;
 import com.sequenceiq.it.cloudbreak.dto.kerberos.KerberosTestDto;
@@ -54,6 +56,9 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
+
+    @Inject
+    private IdbmmsTestClient idbmmsTestClient;
 
     @Inject
     private ImageCatalogTestClient imageCatalogTestClient;
@@ -136,6 +141,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
+                .init(IdbmmsTestDto.class)
                 .validate();
     }
 
@@ -298,6 +304,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         testContext.given(EnvironmentTestDto.class)
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
+                .init(IdbmmsTestDto.class)
                 .validate();
     }
 
@@ -311,6 +318,10 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     protected void createDefaultUser(TestContext testContext) {
         testContext.as();
+    }
+
+    protected void createDefaultIdbmms(TestContext testContext) {
+        testContext.init(IdbmmsTestDto.class);
     }
 
     protected void useRealUmsUser(TestContext testContext, String key) {

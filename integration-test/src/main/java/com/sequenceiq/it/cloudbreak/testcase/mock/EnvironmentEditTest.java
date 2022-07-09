@@ -66,6 +66,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
 
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
 
@@ -102,6 +103,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .withPublicKey(null)
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
 
@@ -142,6 +144,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
 
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
 
@@ -170,6 +173,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .withPublicKey(PUBLIC_KEY)
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
 
@@ -197,6 +201,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
         testContext
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
 

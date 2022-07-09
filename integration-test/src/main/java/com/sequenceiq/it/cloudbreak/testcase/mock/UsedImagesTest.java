@@ -86,10 +86,10 @@ public class UsedImagesTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                     .withNetwork()
                     .withCreateFreeIpa(Boolean.FALSE)
+                    .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(environmentTestClient.describe())
-
                 .given(FreeIpaTestDto.class)
                     .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrlWitdDefaultImageUuid(freeipaImageUuid))
                 .when(freeIpaTestClient.create())

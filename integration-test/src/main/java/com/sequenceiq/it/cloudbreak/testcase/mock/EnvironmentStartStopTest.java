@@ -83,7 +83,10 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
     public void testCreateEnvironment(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentNetworkTestDto.class)
-                .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
+                .given(EnvironmentTestDto.class)
+                .withNetwork()
+                .withCreateFreeIpa(false)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
@@ -111,7 +114,10 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
     public void testCreateStopStartEnvironment(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentNetworkTestDto.class)
-                .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
+                .given(EnvironmentTestDto.class)
+                .withNetwork()
+                .withCreateFreeIpa(false)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
@@ -180,7 +186,10 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
     public void testStopStartEnvironmentWithStopFailed(MockedTestContext testContext) {
         testContext
                 .given(EnvironmentNetworkTestDto.class)
-                .given(EnvironmentTestDto.class).withNetwork().withCreateFreeIpa(false)
+                .given(EnvironmentTestDto.class)
+                .withNetwork()
+                .withCreateFreeIpa(false)
+                .withMockIDBMMS()
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)

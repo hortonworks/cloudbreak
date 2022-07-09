@@ -38,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.CloudbreakTest;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.IdbmmsClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
@@ -127,6 +128,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Value("${integrationtest.cloudbreak.server}")
     private String defaultServer;
+
+    @Value("${integrationtest.idbmms.host:localhost}")
+    private String idbmmsHost;
 
     @Inject
     private CloudProviderProxy cloudProvider;
@@ -461,6 +465,7 @@ public abstract class TestContext implements ApplicationContextAware {
             AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(tracer,
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, cloudbreakUser);
+            IdbmmsClient idbmmsClient = IdbmmsClient.createProxyIdbmmsClient(tracer, idbmmsHost);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(
                     CloudbreakClient.class, cloudbreakClient,
                     FreeIpaClient.class, freeIpaClient,
@@ -469,7 +474,8 @@ public abstract class TestContext implements ApplicationContextAware {
                     RedbeamsClient.class, redbeamsClient,
                     UmsClient.class, umsClient,
                     SdxSaasItClient.class, sdxSaasItClient,
-                    AuthDistributorClient.class, authDistributorClient);
+                    AuthDistributorClient.class, authDistributorClient,
+                    IdbmmsClient.class, idbmmsClient);
             clients.put(cloudbreakUser.getAccessKey(), clientMap);
             cloudbreakClient.setWorkspaceId(0L);
         }
@@ -490,6 +496,7 @@ public abstract class TestContext implements ApplicationContextAware {
             AuthDistributorClient authDistributorClient = AuthDistributorClient.createProxyAuthDistributorClient(tracer,
                     regionAwareInternalCrnGeneratorFactory, authDistributorHost);
             RedbeamsClient redbeamsClient = RedbeamsClient.createProxyRedbeamsClient(testParameter, accountAdmin);
+            IdbmmsClient idbmmsClient = IdbmmsClient.createProxyIdbmmsClient(tracer, idbmmsHost);
             Map<Class<? extends MicroserviceClient>, MicroserviceClient> clientMap = Map.of(
                     CloudbreakClient.class, cloudbreakClient,
                     FreeIpaClient.class, freeIpaClient,
@@ -498,7 +505,8 @@ public abstract class TestContext implements ApplicationContextAware {
                     RedbeamsClient.class, redbeamsClient,
                     UmsClient.class, umsClient,
                     SdxSaasItClient.class, sdxSaasItClient,
-                    AuthDistributorClient.class, authDistributorClient);
+                    AuthDistributorClient.class, authDistributorClient,
+                    IdbmmsClient.class, idbmmsClient);
             clients.put(accountAdmin.getAccessKey(), clientMap);
         }
         LOGGER.info(" Microservice clients have been initialized successfully for UMS account admin:: \nDisplay name: {} \nAccess key: {} \nSecret key: {} " +
