@@ -37,6 +37,11 @@ integrationtest:
     server: http://localhost
   redbeams:
     server: http://localhost
+
+  idbmms:
+    host: localhost
+    port: 8990
+
   ums:
     host: ums.thunderhead-dev.cloudera.com
     port: 8982
@@ -158,6 +163,9 @@ integrationtest:
         instanceProfile:
       baseLocation:
       fileSystemType: S3
+      dataAccessRole:
+      rangerAuditRole:
+      rangerAccessAuthorizerRole:
     hybridCloudSecurityGroupID: sg-0c73a7f815c452e9d
     freeipa:
       upgrade:
@@ -220,6 +228,9 @@ integrationtest:
         assumerIdentity:
         loggerIdentity:
       secure: false
+      dataAccessRole:
+      rangerAuditRole:
+      rangerAccessAuthorizerRole:
     resourcegroup:
       usage: SINGLE_WITH_DEDICATED_STORAGE_ACCOUNT
       name: cb-e2e-westus2-tmp
@@ -285,6 +296,9 @@ integrationtest:
       fileSystemType: GCS
       gcs:
         serviceAccountEmail:
+      dataAccessRole:
+      rangerAuditRole:
+      rangerAccessAuthorizerRole:
     freeipa:
       upgrade:
         imageId: bbc059cd-d7c7-4938-bb34-5c7fc09f1204
@@ -351,6 +365,9 @@ integrationtest:
         instanceProfile: "arn:aws:iam::1234567890:instance-profile/mock.testing.instance.profile"
       baseLocation: "s3a://mock-test"
       fileSystemType: S3
+      dataAccessRole:
+      rangerAuditRole:
+      rangerAccessAuthorizerRole:
     diskEncryption:
       environmentKey:
       datahubKey:

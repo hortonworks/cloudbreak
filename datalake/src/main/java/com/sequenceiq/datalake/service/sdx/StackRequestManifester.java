@@ -339,9 +339,8 @@ public class StackRequestManifester {
                 MappingsConfig mappingsConfig;
                 try {
                     // Must pass the internal actor here as this operation is internal-use only; requests with other actors will be always rejected.
-                    mappingsConfig = idbmmsClient.getMappingsConfig(
-                            regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
-                            environmentCrn, Optional.empty());
+                    mappingsConfig = idbmmsClient.getMappingsConfig(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                            environmentCrn);
                     validateMappingsConfig(mappingsConfig, stackRequest);
                 } catch (IdbmmsOperationException e) {
                     throw new BadRequestException(String.format("Unable to get mappings: %s", e.getMessage()), e);

@@ -30,6 +30,14 @@ public class PreconditionSdxE2ETest extends AbstractE2ETest {
         createEnvironmentWithFreeIpa(testContext);
     }
 
+    protected void createEnvironmentForRAZEnabledSdx(TestContext testContext) {
+        createResourceGroup(testContext);
+        initiateEnvironmentCreation(testContext);
+        waitForEnvironmentCreation(testContext);
+        waitForUserSync(testContext);
+        createIDBrokerMappingsWithRAZ(testContext);
+    }
+
     protected SdxTestClient sdxTestClient() {
         return sdxTestClient;
     }

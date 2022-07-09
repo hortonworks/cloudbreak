@@ -9,10 +9,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
-class IdbmmsConfigTest {
+class IdbmmsChannelConfigTest {
 
     @InjectMocks
-    private IdbmmsConfig underTest;
+    private IdbmmsChannelConfig underTest;
 
     @Test
     void isConfiguredTestNullEndpoint() {

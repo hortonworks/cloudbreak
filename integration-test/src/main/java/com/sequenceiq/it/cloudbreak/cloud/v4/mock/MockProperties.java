@@ -311,6 +311,12 @@ public class MockProperties {
 
         private String fileSystemType;
 
+        private String dataAccessRole;
+
+        private String rangerAuditRole;
+
+        private String rangerAccessAuthorizerRole;
+
         public S3 getS3() {
             return s3;
         }
@@ -329,6 +335,30 @@ public class MockProperties {
 
         public void setFileSystemType(String fileSystemType) {
             this.fileSystemType = fileSystemType;
+        }
+
+        public String getDataAccessRole() {
+            return dataAccessRole;
+        }
+
+        public void setDataAccessRole(String dataAccessRole) {
+            this.dataAccessRole = dataAccessRole;
+        }
+
+        public String getRangerAuditRole() {
+            return rangerAuditRole;
+        }
+
+        public void setRangerAuditRole(String rangerAuditRole) {
+            this.rangerAuditRole = rangerAuditRole;
+        }
+
+        public String getRangerAccessAuthorizerRole() {
+            return rangerAccessAuthorizerRole;
+        }
+
+        public void setRangerAccessAuthorizerRole(String rangerAccessAuthorizerRole) {
+            this.rangerAccessAuthorizerRole = rangerAccessAuthorizerRole;
         }
 
         public static class S3 {

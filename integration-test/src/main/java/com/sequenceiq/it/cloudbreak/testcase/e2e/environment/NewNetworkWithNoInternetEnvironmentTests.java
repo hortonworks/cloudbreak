@@ -85,11 +85,14 @@ public class NewNetworkWithNoInternetEnvironmentTests extends AbstractE2ETest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))
                 .then(EnvironmentNetworkTestAssertion.environmentContainsNeccessaryConfigs())
-
                 .init(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .then((tc, testDto, client) -> sshJClientActions.checkNoOutboundInternetTraffic(testDto, client))
+                .validate();
 
+        createIDBrokerMappings(testContext);
+
+        testContext
                 .given(sdx, SdxTestDto.class)
                 .withExternalDatabase(database)
                 .withCloudStorage()
