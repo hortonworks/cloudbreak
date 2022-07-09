@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
@@ -17,6 +19,7 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.IdbmmsTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -26,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
+import com.sequenceiq.it.cloudbreak.dto.idbmms.IdbmmsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
@@ -48,8 +52,13 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
  */
 public class MonitoringTests extends AbstractE2ETest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MonitoringTests.class);
+
     @Inject
     private EnvironmentTestClient environmentTestClient;
+
+    @Inject
+    private IdbmmsTestClient idbmmsTestClient;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -97,6 +106,15 @@ public class MonitoringTests extends AbstractE2ETest {
                         commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .init(IdbmmsTestDto.class)
+                .when(idbmmsTestClient.get())
+                .then((tc, testDto, client) -> {
+                    LOGGER.info("IDBMMS version: {}", testDto.getMappingsDetails().getMappingsVersion());
+                    LOGGER.info("IDBMMS actor and group mappings: {}", testDto.getMappingsDetails().getMappingsMap());
+                    LOGGER.info("IDBMMS Data Access role: {}", testDto.getMappingsDetails().getDataAccessRole());
+                    LOGGER.info("IDBMMS Data Access role: {}", testDto.getMappingsDetails().getBaselineRole());
+                    return testDto;
+                })
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)
@@ -111,7 +129,7 @@ public class MonitoringTests extends AbstractE2ETest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT, enabled = false)
     @UseSpotInstances
     @Description(
             given = "creating sequentally and separatelly environment, FreeIpa then SDX with metering pre-warmed images and no database",
@@ -138,6 +156,7 @@ public class MonitoringTests extends AbstractE2ETest {
                     .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .init(IdbmmsTestDto.class)
                 .given(FreeIpaTestDto.class)
                     .withEnvironment()
                     .withTelemetry("telemetry")

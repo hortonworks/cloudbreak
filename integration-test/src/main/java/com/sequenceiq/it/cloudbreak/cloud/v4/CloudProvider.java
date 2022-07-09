@@ -121,6 +121,10 @@ public interface CloudProvider {
 
     SdxCloudStorageTestDto cloudStorage(SdxCloudStorageTestDto cloudStorage);
 
+    String getDataAccessRole();
+
+    String getRangerAuditRole();
+
     FileSystemType getFileSystemType();
 
     String getBaseLocation();

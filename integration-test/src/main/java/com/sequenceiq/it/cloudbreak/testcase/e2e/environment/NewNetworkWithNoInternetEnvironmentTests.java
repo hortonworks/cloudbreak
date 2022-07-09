@@ -20,6 +20,7 @@ import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.idbmms.IdbmmsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
@@ -84,7 +85,7 @@ public class NewNetworkWithNoInternetEnvironmentTests extends AbstractE2ETest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))
                 .then(EnvironmentNetworkTestAssertion.environmentContainsNeccessaryConfigs())
-
+                .init(IdbmmsTestDto.class)
                 .init(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .then((tc, testDto, client) -> sshJClientActions.checkNoOutboundInternetTraffic(testDto, client))

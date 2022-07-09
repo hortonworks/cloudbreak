@@ -217,7 +217,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withNetwork(networkKey)
                 .withTelemetry(telemetry())
                 .withCreateFreeIpa(Boolean.FALSE)
-                .withMockIDBMS()
+                .withMockIDBMMS()
                 .when(getEnvironmentTestClient().create(), key(storageEnvKey))
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(getEnvironmentTestClient().describe(), key(storageEnvKey))
