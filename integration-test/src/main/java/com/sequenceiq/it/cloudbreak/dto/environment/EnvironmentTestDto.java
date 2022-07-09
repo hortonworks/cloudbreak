@@ -96,13 +96,15 @@ public class EnvironmentTestDto
 
     @Override
     public EnvironmentTestDto valid() {
+        IdBrokerMappingSource idBrokerMappingSource =
+                getCloudPlatform().equalsIgnoreCase("MOCK") ? IdBrokerMappingSource.MOCK : IdBrokerMappingSource.IDBMMS;
         return getCloudProvider()
                 .environment(withName(getResourcePropertyProvider().getEnvironmentName(getCloudPlatform()))
                         .withDescription(getResourcePropertyProvider().getDescription("environment")))
                 .withCredentialName(getTestContext().get(CredentialTestDto.class).getName())
                 .withAuthentication(getTestContext().given(EnvironmentAuthenticationTestDto.class))
                 .withCloudplatform(getCloudPlatform().toString())
-                .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
+                .withIdBrokerMappingSource(idBrokerMappingSource)
                 .withResourceGroup(getResourceGroupUsage(), getResourceGroupName())
                 .withNetwork()
                 .withCloudStorageValidation(CloudStorageValidation.ENABLED)
@@ -153,8 +155,13 @@ public class EnvironmentTestDto
         return this;
     }
 
-    public EnvironmentTestDto withMockIDBMS() {
+    public EnvironmentTestDto withMockIdBrokerMappingSource() {
         getRequest().setIdBrokerMappingSource(IdBrokerMappingSource.MOCK);
+        return this;
+    }
+
+    public EnvironmentTestDto withIdBrokerMappingSource() {
+        getRequest().setIdBrokerMappingSource(IdBrokerMappingSource.IDBMMS);
         return this;
     }
 

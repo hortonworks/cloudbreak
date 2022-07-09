@@ -22,6 +22,14 @@ public class SdxRangerRazEnabledTests extends PreconditionSdxE2ETest {
     @Inject
     private SdxTestClient sdxTestClient;
 
+    @Override
+    protected void setupTest(TestContext testContext) {
+        testContext.getCloudProvider().getCloudFunctionality().cloudStorageInitialize();
+        createDefaultUser(testContext);
+        initializeDefaultBlueprints(testContext);
+        createDefaultCredential(testContext);
+    }
+
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak",
@@ -32,6 +40,8 @@ public class SdxRangerRazEnabledTests extends PreconditionSdxE2ETest {
         String sdx = resourcePropertyProvider().getName();
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+
+        createEnvironmentWithFreeIpa(testContext);
 
         testContext
                 .given(SdxTestDto.class)
@@ -54,6 +64,8 @@ public class SdxRangerRazEnabledTests extends PreconditionSdxE2ETest {
         String sdx = resourcePropertyProvider().getName();
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+
+        createEnvironmentForRAZEnabledSdx(testContext);
 
         testContext
                 .given(SdxTestDto.class)

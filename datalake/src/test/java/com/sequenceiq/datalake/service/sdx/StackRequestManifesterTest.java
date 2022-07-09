@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Assertions;
@@ -293,7 +292,7 @@ public class StackRequestManifesterTest {
         when(stackV4Request.getName()).thenReturn(STACK_NAME);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(idbmmsClient.getMappingsConfig("crn", ENVIRONMENT_CRN, Optional.empty())).thenReturn(mappingsConfig);
+        when(idbmmsClient.getMappingsConfig("crn", ENVIRONMENT_CRN)).thenReturn(mappingsConfig);
         when(mappingsConfig.getGroupMappings()).thenReturn(Map.ofEntries(Map.entry(GROUP_2, GROUP_ROLE_2)));
         when(mappingsConfig.getActorMappings()).thenReturn(Map.ofEntries(Map.entry(USER_2, USER_ROLE_2)));
 
@@ -314,7 +313,7 @@ public class StackRequestManifesterTest {
         when(stackV4Request.getName()).thenReturn(STACK_NAME);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        when(idbmmsClient.getMappingsConfig("crn", BAD_ENVIRONMENT_CRN, Optional.empty()))
+        when(idbmmsClient.getMappingsConfig("crn", BAD_ENVIRONMENT_CRN))
                 .thenThrow(new IdbmmsOperationException("Houston, we have a problem."));
 
         clusterV4Request.setCloudStorage(cloudStorage);
@@ -367,7 +366,7 @@ public class StackRequestManifesterTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         clusterV4Request.setCloudStorage(cloudStorage);
-        when(idbmmsClient.getMappingsConfig("crn", ENVIRONMENT_CRN, Optional.empty())).thenReturn(mappingsConfig);
+        when(idbmmsClient.getMappingsConfig("crn", ENVIRONMENT_CRN)).thenReturn(mappingsConfig);
 
         // Enable RAZ for this test and make sure role is checked for.
         clusterV4Request.setRangerRazEnabled(true);
@@ -384,7 +383,7 @@ public class StackRequestManifesterTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         clusterV4Request.setCloudStorage(cloudStorage);
-        when(idbmmsClient.getMappingsConfig("crn", ENVIRONMENT_CRN, Optional.empty())).thenReturn(mappingsConfig);
+        when(idbmmsClient.getMappingsConfig("crn", ENVIRONMENT_CRN)).thenReturn(mappingsConfig);
 
         // Enable RAZ without mapping which should throw an error.
         clusterV4Request.setRangerRazEnabled(true);

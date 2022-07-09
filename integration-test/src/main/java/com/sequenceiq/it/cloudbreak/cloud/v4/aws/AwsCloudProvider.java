@@ -395,6 +395,21 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getRangerAuditRole() {
+        return awsProperties.getCloudStorage().getRangerAuditRole();
+    }
+
+    @Override
+    public String getDataAccessRole() {
+        return awsProperties.getCloudStorage().getDataAccessRole();
+    }
+
+    @Override
+    public String rangerAccessAuthorizerRole() {
+        return awsProperties.getCloudStorage().getRangerAccessAuthorizerRole();
+    }
+
+    @Override
     public ImageSettingsTestDto imageSettings(ImageSettingsTestDto imageSettings) {
         return imageSettings
                 .withImageId(awsProperties.getBaseimage().getImageId())

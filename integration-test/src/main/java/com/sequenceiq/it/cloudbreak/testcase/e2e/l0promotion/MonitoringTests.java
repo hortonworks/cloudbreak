@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
@@ -17,6 +19,7 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.IdbmmsTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -25,6 +28,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
+import com.sequenceiq.it.cloudbreak.dto.idbmms.IdbmmsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
@@ -36,8 +40,13 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class MonitoringTests extends AbstractE2ETest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MonitoringTests.class);
+
     @Inject
     private EnvironmentTestClient environmentTestClient;
+
+    @Inject
+    private IdbmmsTestClient idbmmsTestClient;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -99,6 +108,19 @@ public class MonitoringTests extends AbstractE2ETest {
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
                 .validate();
+
+        testContext
+                .given("idbmms-mapping", IdbmmsTestDto.class)
+                .when(idbmmsTestClient.set(testContext.getCloudProvider().getDataAccessRole(), testContext.getCloudProvider().getRangerAuditRole(), null))
+                .when(idbmmsTestClient.get())
+                .then((tc, testDto, client) -> {
+                    LOGGER.info("IDBMMS version: {}", testDto.getMappingsDetails().getMappingsVersion());
+                    LOGGER.info("IDBMMS actor and group mappings: {}", testDto.getMappingsDetails().getMappingsMap());
+                    LOGGER.info("IDBMMS Data Access role: {}", testDto.getMappingsDetails().getDataAccessRole());
+                    LOGGER.info("IDBMMS Data Access role: {}", testDto.getMappingsDetails().getBaselineRole());
+                    return testDto;
+                })
+                .validate();
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -147,6 +169,11 @@ public class MonitoringTests extends AbstractE2ETest {
                 })
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
+                .validate();
+
+        createIDBrokerMappings(testContext);
+
+        testContext
                 .given(SdxInternalTestDto.class)
                     .withEnvironment()
                     .withDatabase(sdxDatabaseRequest)

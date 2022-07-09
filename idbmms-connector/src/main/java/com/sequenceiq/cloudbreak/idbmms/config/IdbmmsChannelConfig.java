@@ -15,7 +15,7 @@ import io.netty.util.internal.StringUtil;
  * Configuration settings for the IDBroker Mapping Management Service endpoint.
  */
 @Configuration
-public class IdbmmsConfig {
+public class IdbmmsChannelConfig {
 
     @Value("${altus.idbmms.host:}")
     private String host;
@@ -25,6 +25,10 @@ public class IdbmmsConfig {
 
     @Bean
     public ManagedChannelWrapper idbmmsManagedChannelWrapper() {
+        return newManagedChannelWrapper(host, port);
+    }
+
+    public static ManagedChannelWrapper newManagedChannelWrapper(String host, int port) {
         return new ManagedChannelWrapper(
                 ManagedChannelBuilder.forAddress(host, port)
                         .usePlaintext()
@@ -43,5 +47,4 @@ public class IdbmmsConfig {
     public boolean isConfigured() {
         return !StringUtil.isNullOrEmpty(host);
     }
-
 }

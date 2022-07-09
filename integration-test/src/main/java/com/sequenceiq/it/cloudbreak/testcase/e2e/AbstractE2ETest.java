@@ -21,8 +21,10 @@ import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
+import com.sequenceiq.it.cloudbreak.client.IdbmmsTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.idbmms.IdbmmsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
@@ -47,6 +49,9 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
     @Inject
     private AzureCloudFunctionality azureCloudFunctionality;
+
+    @Inject
+    private IdbmmsTestClient idbmmsTestClient;
 
     @Override
     protected void setupTest(ITestResult testResult) {
@@ -91,30 +96,40 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .when(getEnvironmentTestClient().describe())
                 .validate();
+        createIDBrokerMappings(testContext);
     }
 
     @Override
     protected void createEnvironmentWithFreeIpa(TestContext testContext) {
         createResourceGroup(testContext);
         super.createEnvironmentWithFreeIpa(testContext);
+        createIDBrokerMappings(testContext);
     }
 
     @Override
     protected void createDefaultDatalake(TestContext testContext) {
         createResourceGroup(testContext);
-        super.createDefaultDatalake(testContext);
+        initiateEnvironmentCreation(testContext);
+        waitForEnvironmentCreation(testContext);
+        waitForUserSync(testContext);
+        createIDBrokerMappings(testContext);
+        initiateDatalakeCreation(testContext);
+        waitForDatalakeCreation(testContext);
     }
 
     @Override
     protected void createDefaultDatahub(TestContext testContext) {
         createResourceGroup(testContext);
-        super.createDefaultDatahub(testContext);
+        createDefaultDatalake(testContext);
+        createDefaultDatahubForExistingDatalake(testContext);
     }
 
     @Override
     protected void createStorageOptimizedDatahub(TestContext testContext) {
         createResourceGroup(testContext);
-        super.createStorageOptimizedDatahub(testContext);
+        createDefaultDatalake(testContext);
+        initiateStorageOptimizedDatahubCreation(testContext);
+        waitForDefaultDatahubCreation(testContext);
     }
 
     /**
@@ -161,7 +176,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
         createResourceGroup(testContext);
     }
 
-    private void createResourceGroup(TestContext testContext) {
+    protected void createResourceGroup(TestContext testContext) {
         String cloudProvider = commonCloudProperties().getCloudProvider();
 
         if (CloudPlatform.AZURE.name().equalsIgnoreCase(cloudProvider)) {
@@ -174,5 +189,37 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
         } else {
             LOGGER.info("Cloud provider is '{}' for E2E tests. So do not need to check then create E2E test resource group for Azure.", cloudProvider);
         }
+    }
+
+    protected void createIDBrokerMappings(TestContext testContext) {
+        setIdbmmsMapping(testContext);
+        getIdbmmsMapping(testContext);
+    }
+
+    protected void createIDBrokerMappingsWithRAZ(TestContext testContext) {
+        setIdbmmsMappingWithRAZ(testContext);
+        getIdbmmsMapping(testContext);
+    }
+
+    protected void setIdbmmsMapping(TestContext testContext) {
+        testContext
+                .given("idbmms-mapping", IdbmmsTestDto.class)
+                .when(idbmmsTestClient.set(testContext.getCloudProvider().getDataAccessRole(), testContext.getCloudProvider().getRangerAuditRole(), null))
+                .validate();
+    }
+
+    protected void setIdbmmsMappingWithRAZ(TestContext testContext) {
+        testContext
+                .given("idbmms-mapping", IdbmmsTestDto.class)
+                .when(idbmmsTestClient.set(testContext.getCloudProvider().getDataAccessRole(), testContext.getCloudProvider().getRangerAuditRole(),
+                        testContext.getCloudProvider().rangerAccessAuthorizerRole()))
+                .validate();
+    }
+
+    protected void getIdbmmsMapping(TestContext testContext) {
+        testContext
+                .given("idbmms-mapping", IdbmmsTestDto.class)
+                .when(idbmmsTestClient.get())
+                .validate();
     }
 }
