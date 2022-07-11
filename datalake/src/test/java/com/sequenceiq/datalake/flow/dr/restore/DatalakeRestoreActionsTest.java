@@ -2,9 +2,11 @@ package com.sequenceiq.datalake.flow.dr.restore;
 
 
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,8 +14,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Optional;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -39,7 +39,7 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.domain.FlowChainLog;
-import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -105,7 +105,7 @@ public class DatalakeRestoreActionsTest {
 
         verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
         DatalakeDatabaseRestoreStartEvent captorValue = captor.getValue();
-        Assertions.assertEquals(OLD_SDX_ID, captorValue.getResourceId());
+        assertEquals(OLD_SDX_ID, captorValue.getResourceId());
     }
 
     @Test
@@ -114,7 +114,7 @@ public class DatalakeRestoreActionsTest {
         SdxCluster sdxCluster = genCluster();
         FlowParameters flowParameters = new FlowParameters(FLOW_ID, null, null);
         when(sdxService.getByNameInAccount(eq(USER_CRN), eq(DATALAKE_NAME))).thenReturn(sdxCluster);
-        when(flowLogService.getLastFlowLog(anyString())).thenReturn(Optional.of(new FlowLog()));
+        when(flowLogService.getLastFlowLog(anyString())).thenReturn(Optional.of(mock(FlowLogWithoutPayload.class)));
         FlowChainLog flowChainLog = new FlowChainLog();
         flowChainLog.setFlowChainType(DatalakeResizeFlowEventChainFactory.class.getSimpleName());
         when(flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(any())).thenReturn(Optional.of(flowChainLog));
@@ -126,14 +126,14 @@ public class DatalakeRestoreActionsTest {
         AbstractActionTestSupport testSupport = new AbstractActionTestSupport(action);
         SdxContext context = (SdxContext) testSupport.createFlowContext(flowParameters, null, event);
 
-        Assert.assertEquals(NEW_SDX_ID, context.getSdxId());
-        Assert.assertEquals(USER_CRN, context.getUserId());
-        Assert.assertEquals(FLOW_ID, context.getFlowId());
-        Assert.assertEquals(NEW_SDX_ID, event.getDrStatus().getSdxClusterId());
+        assertEquals(NEW_SDX_ID, context.getSdxId());
+        assertEquals(USER_CRN, context.getUserId());
+        assertEquals(FLOW_ID, context.getFlowId());
+        assertEquals(NEW_SDX_ID, event.getDrStatus().getSdxClusterId());
 
         flowChainLog.setFlowChainType(DatalakeUpgradeFlowEventChainFactory.class.getSimpleName());
         context = (SdxContext) testSupport.createFlowContext(flowParameters, null, event);
-        Assert.assertEquals(OLD_SDX_ID, context.getSdxId());
+        assertEquals(OLD_SDX_ID, context.getSdxId());
     }
 
     @Test
@@ -152,7 +152,7 @@ public class DatalakeRestoreActionsTest {
 
         verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
         DatalakeDatabaseRestoreStartEvent captorValue = captor.getValue();
-        Assertions.assertEquals(NEW_SDX_ID, captorValue.getResourceId());
+        assertEquals(NEW_SDX_ID, captorValue.getResourceId());
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

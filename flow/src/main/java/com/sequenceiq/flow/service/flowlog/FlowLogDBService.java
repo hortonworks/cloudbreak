@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Primary;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonWriter;
@@ -41,6 +42,7 @@ import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.repository.FlowLogRepository;
@@ -129,7 +131,7 @@ public class FlowLogDBService implements FlowLogService {
         return transactionService.required(() -> {
             LOGGER.info("Finalize flow [{}] with state [{}] and failed [{}] for resource [{}]", flowId, state, failed, resourceId);
             flowLogRepository.finalizeByFlowId(flowId);
-            Optional<FlowLog> lastFlowLogOpt = getLastFlowLog(flowId);
+            Optional<FlowLog> lastFlowLogOpt = findFirstByFlowIdOrderByCreatedDesc(flowId);
             OperationType operationType = OperationType.UNKNOWN;
             if (lastFlowLogOpt.isPresent()) {
                 FlowLog lastFlowLog = lastFlowLogOpt.get();
@@ -236,8 +238,8 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
-    public Optional<FlowLog> getLastFlowLog(String flowId) {
-        return flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
+    public Optional<FlowLogWithoutPayload> getLastFlowLog(String flowId) {
+        return flowLogRepository.findByFlowIdOrderByCreatedDesc(flowId, Pageable.ofSize(1)).get().findFirst();
     }
 
     @Override
@@ -378,5 +380,19 @@ public class FlowLogDBService implements FlowLogService {
 
     public Predicate<FlowLog> pendingFlowLogPredicate() {
         return flowLog -> flowLog.getStateStatus().equals(StateStatus.PENDING) || !flowLog.getFinalized();
+    }
+
+    public List<FlowLogWithoutPayload> getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(Set<String> flowIds) {
+        LOGGER.info("Getting flow logs by these flow ids: {}", Joiner.on(",").join(flowIds));
+        if (!flowIds.isEmpty()) {
+            return flowLogRepository.findAllWithoutPayloadByFlowIdsCreatedDesc(flowIds);
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    @Override
+    public List<FlowLogWithoutPayload> findAllWithoutPayloadByFlowIdOrderByCreatedDesc(String flowId) {
+        return flowLogRepository.findAllWithoutPayloadByFlowIdOrderByCreatedDesc(flowId);
     }
 }

@@ -1,21 +1,24 @@
 package com.sequenceiq.environment.environment.poller;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.ws.rs.BadRequestException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.dyngr.core.AttemptState;
 import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.flow.core.FlowConstants;
-import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import javax.ws.rs.BadRequestException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
 
 @Component
 public class StackPollerProvider {
@@ -37,7 +40,7 @@ public class StackPollerProvider {
         return () -> {
             LOGGER.info("Attempting to update pillar information for {} clusters for environment id {}",
                 mutableCrnsList.size(), envId);
-            Optional<FlowLog> flowLog = flowLogDBService.getLastFlowLog(flowId);
+            Optional<FlowLogWithoutPayload> flowLog = flowLogDBService.getLastFlowLog(flowId);
             if (flowLog.isPresent() && flowLog.get().getCurrentState().equals(FlowConstants.CANCELLED_STATE)) {
                 return AttemptResults.finishWith(null);
             }

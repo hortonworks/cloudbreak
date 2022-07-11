@@ -33,6 +33,9 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
@@ -51,6 +54,7 @@ import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.ha.NodeConfig;
 import com.sequenceiq.flow.repository.FlowLogRepository;
@@ -109,14 +113,13 @@ public class FlowLogDBServiceTest {
 
     @Test
     public void getLastFlowLog() {
-        FlowLog flowLog = new FlowLog();
-        flowLog.setId(ID);
-        Optional<FlowLog> flowLogOptional = Optional.of(flowLog);
+        FlowLogWithoutPayload flowLog = mock(FlowLogWithoutPayload.class);
+        Page<FlowLogWithoutPayload> flowLogOptional = new PageImpl(List.of(flowLog));
 
-        when(flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(flowLogOptional);
+        when(flowLogRepository.findByFlowIdOrderByCreatedDesc(FLOW_ID, Pageable.ofSize(1))).thenReturn(flowLogOptional);
 
-        Optional<FlowLog> lastFlowLog = underTest.getLastFlowLog(FLOW_ID);
-        assertEquals(flowLogOptional, lastFlowLog);
+        Optional<FlowLogWithoutPayload> lastFlowLog = underTest.getLastFlowLog(FLOW_ID);
+        assertEquals(flowLogOptional.stream().findFirst(), lastFlowLog);
     }
 
     @Test

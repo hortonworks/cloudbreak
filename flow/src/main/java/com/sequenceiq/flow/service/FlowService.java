@@ -34,6 +34,7 @@ import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
@@ -65,7 +66,7 @@ public class FlowService {
 
     public FlowLogResponse getLastFlowById(String flowId) {
         LOGGER.info("Getting last flow log by flow id {}", flowId);
-        Optional<FlowLog> lastFlowLog = flowLogDBService.getLastFlowLog(flowId);
+        Optional<FlowLog> lastFlowLog = flowLogDBService.findFirstByFlowIdOrderByCreatedDesc(flowId);
         if (lastFlowLog.isPresent()) {
             return flowLogConverter.convert(lastFlowLog.get());
         }
@@ -131,7 +132,7 @@ public class FlowService {
             List<FlowChainLog> relatedChains = getRelatedFlowChainLogs(flowChains);
             Set<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
             Set<String> relatedFlowIds = flowLogDBService.getFlowIdsByChainIds(relatedChainIds);
-            List<FlowLog> relatedFlowLogs = flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(relatedFlowIds);
+            List<FlowLogWithoutPayload> relatedFlowLogs = flowLogDBService.getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(relatedFlowIds);
             flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
             flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(relatedFlowLogs, failHandledEvents));
             return flowCheckResponse;
@@ -150,7 +151,7 @@ public class FlowService {
             List<FlowChainLog> relatedChains = getRelatedFlowChainLogs(flowChains);
             Set<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
             Set<String> relatedFlowIds = flowLogDBService.getFlowIdsByChainIds(relatedChainIds);
-            List<FlowLog> relatedFlowLogs = flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(relatedFlowIds);
+            List<FlowLogWithoutPayload> relatedFlowLogs = flowLogDBService.getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(relatedFlowIds);
             validateResourceId(relatedFlowLogs, resourceIdList);
             flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
             flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowInFailedState(relatedFlowLogs, failHandledEvents));
@@ -161,7 +162,7 @@ public class FlowService {
         }
     }
 
-    private void validateResourceId(List<FlowLog> flowLogs, List<Long> resourceIdList) {
+    private void validateResourceId(List<FlowLogWithoutPayload> flowLogs, List<Long> resourceIdList) {
         if (flowLogs.stream().anyMatch(flowLog -> !resourceIdList.contains(flowLog.getResourceId()))) {
             throw new BadRequestException(String.format("The requested chain id %s does not belong to that " +
                     "resources %s", flowLogs.get(0).getFlowChainId(), resourceIdList));
@@ -169,7 +170,7 @@ public class FlowService {
     }
 
     public FlowCheckResponse getFlowState(String flowId) {
-        List<FlowLog> allByFlowIdOrderByCreatedDesc = flowLogDBService.findAllByFlowIdOrderByCreatedDesc(flowId);
+        List<FlowLogWithoutPayload> allByFlowIdOrderByCreatedDesc = flowLogDBService.findAllWithoutPayloadByFlowIdOrderByCreatedDesc(flowId);
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setFlowId(flowId);
         flowCheckResponse.setHasActiveFlow(!completed("Flow", flowId, List.of(), allByFlowIdOrderByCreatedDesc));
@@ -185,7 +186,7 @@ public class FlowService {
         return flowChainLogService.collectRelatedFlowChains(inputFlowChain);
     }
 
-    private boolean completed(String marker, String flowChainId, List<FlowChainLog> flowChainLogs, List<FlowLog> flowLogs) {
+    private boolean completed(String marker, String flowChainId, List<FlowChainLog> flowChainLogs, List<FlowLogWithoutPayload> flowLogs) {
         if (firstIsPending(flowLogs)) {
             return false;
         }
@@ -195,9 +196,9 @@ public class FlowService {
         return hasFinishedFlow(marker, flowChainId, flowChainLogs, flowLogs);
     }
 
-    private boolean hasFinishedFlow(String marker, String flowChainId, List<FlowChainLog> flowChainLogs, List<FlowLog> flowLogs) {
+    private boolean hasFinishedFlow(String marker, String flowChainId, List<FlowChainLog> flowChainLogs, List<FlowLogWithoutPayload> flowLogs) {
         boolean hasFinishedFlowLog = false;
-        for (FlowLog flowLog : flowLogs) {
+        for (FlowLogWithoutPayload flowLog : flowLogs) {
             String currentState = flowLog.getCurrentState();
             if (failHandledEvents.contains(flowLog.getNextEvent())
                     || (currentState != null && CANCELLED_TERMINATED_STATES.contains(currentState))) {
@@ -217,11 +218,11 @@ public class FlowService {
         return false;
     }
 
-    private boolean firstIsPending(List<FlowLog> flowLogs) {
+    private boolean firstIsPending(List<FlowLogWithoutPayload> flowLogs) {
         return !flowLogs.isEmpty() && isPending(flowLogs.get(0));
     }
 
-    private boolean isPending(FlowLog flowLog) {
+    private boolean isPending(FlowLogWithoutPayload flowLog) {
         return !Boolean.TRUE.equals(flowLog.getFinalized()) || StateStatus.PENDING.equals(flowLog.getStateStatus());
     }
 

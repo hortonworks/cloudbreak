@@ -63,7 +63,7 @@ public class EventBusConfig {
                 }
                 if (flowId != null) {
                     LOGGER.error("Unhandled exception happened in flow {}, lets cancel it", flowId, throwable);
-                    flowLogDBService.getLastFlowLog(flowId).ifPresent(flowLog -> {
+                    flowLogDBService.findFirstByFlowIdOrderByCreatedDesc(flowId).ifPresent(flowLog -> {
                         applicationFlowInformation.handleFlowFail(flowLog);
                         flowLogDBService.updateLastFlowLogStatus(flowLog, true);
                         flowLogDBService.finalize(flowLog.getFlowId());

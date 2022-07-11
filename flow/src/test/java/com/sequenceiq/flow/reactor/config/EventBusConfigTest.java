@@ -46,11 +46,11 @@ class EventBusConfigTest {
     public void unknownMessageButFlowFound() {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowId("123");
-        when(flowLogDBService.getLastFlowLog("123")).thenReturn(Optional.of(flowLog));
+        when(flowLogDBService.findFirstByFlowIdOrderByCreatedDesc("123")).thenReturn(Optional.of(flowLog));
         Event.Headers headers = new Event.Headers();
         headers.set("FLOW_ID", "123");
         eventBus.notify("notexist", new Event<>(headers, null));
-        verify(flowLogDBService, timeout(2000).times(1)).getLastFlowLog("123");
+        verify(flowLogDBService, timeout(2000).times(1)).findFirstByFlowIdOrderByCreatedDesc("123");
         verify(applicationFlowInformation, timeout(1000).times(1)).handleFlowFail(flowLog);
         verify(flowLogDBService, timeout(1000).times(1)).updateLastFlowLogStatus(flowLog, true);
         verify(flowLogDBService, timeout(1000).times(1)).finalize(flowLog.getFlowId());
@@ -59,11 +59,11 @@ class EventBusConfigTest {
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     public void unknownMessageFlowNotFound() {
-        when(flowLogDBService.getLastFlowLog("123")).thenReturn(Optional.empty());
+        when(flowLogDBService.findFirstByFlowIdOrderByCreatedDesc("123")).thenReturn(Optional.empty());
         Event.Headers headers = new Event.Headers();
         headers.set("FLOW_ID", "123");
         eventBus.notify("notexist", new Event<>(headers, null));
-        verify(flowLogDBService, timeout(2000).times(1)).getLastFlowLog("123");
+        verify(flowLogDBService, timeout(2000).times(1)).findFirstByFlowIdOrderByCreatedDesc("123");
         verify(applicationFlowInformation, times(0)).handleFlowFail(any());
         verify(flowLogDBService, times(0)).updateLastFlowLogStatus(any(), anyBoolean());
         verify(flowLogDBService, times(0)).finalize(any());
@@ -74,14 +74,14 @@ class EventBusConfigTest {
     public void uncaughtErrorButFlowFound() {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowId("123");
-        when(flowLogDBService.getLastFlowLog("123")).thenReturn(Optional.of(flowLog));
+        when(flowLogDBService.findFirstByFlowIdOrderByCreatedDesc("123")).thenReturn(Optional.of(flowLog));
         Event.Headers headers = new Event.Headers();
         headers.set("FLOW_ID", "123");
         eventBus.on(Selectors.regex("exampleselector"), (Consumer<Event<? extends Payload>>) event -> {
             throw new RuntimeException("uncaught exception");
         });
         eventBus.notify("exampleselector", new Event<>(headers, null));
-        verify(flowLogDBService, timeout(2000).times(1)).getLastFlowLog("123");
+        verify(flowLogDBService, timeout(2000).times(1)).findFirstByFlowIdOrderByCreatedDesc("123");
         verify(applicationFlowInformation, timeout(1000).times(1)).handleFlowFail(flowLog);
         verify(flowLogDBService, timeout(1000).times(1)).updateLastFlowLogStatus(flowLog, true);
         verify(flowLogDBService, timeout(1000).times(1)).finalize(flowLog.getFlowId());
@@ -92,14 +92,14 @@ class EventBusConfigTest {
     public void uncaughtErrorButFlowNotFound() {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowId("123");
-        when(flowLogDBService.getLastFlowLog("123")).thenReturn(Optional.empty());
+        when(flowLogDBService.findFirstByFlowIdOrderByCreatedDesc("123")).thenReturn(Optional.empty());
         Event.Headers headers = new Event.Headers();
         headers.set("FLOW_ID", "123");
         eventBus.on(Selectors.regex("exampleselector"), (Consumer<Event<? extends Payload>>) event -> {
             throw new RuntimeException("uncaught exception");
         });
         eventBus.notify("exampleselector", new Event<>(headers, null));
-        verify(flowLogDBService, timeout(2000).times(1)).getLastFlowLog("123");
+        verify(flowLogDBService, timeout(2000).times(1)).findFirstByFlowIdOrderByCreatedDesc("123");
         verify(applicationFlowInformation, times(0)).handleFlowFail(any());
         verify(flowLogDBService, times(0)).updateLastFlowLogStatus(any(), anyBoolean());
         verify(flowLogDBService, times(0)).finalize(any());

@@ -11,6 +11,7 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 
 public interface FlowLogService {
     FlowLog save(FlowParameters flowParameters, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
@@ -38,7 +39,7 @@ public interface FlowLogService {
 
     void updateLastFlowLogPayload(FlowLog lastFlowLog, Payload payload, Map<Object, Object> variables);
 
-    Optional<FlowLog> getLastFlowLog(String flowId);
+    Optional<FlowLogWithoutPayload> getLastFlowLog(String flowId);
 
     List<FlowLog> findAllByFlowIdOrderByCreatedDesc(String flowId);
 
@@ -65,4 +66,8 @@ public interface FlowLogService {
     List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long id);
 
     int purgeFinalizedFlowLogs();
+
+    List<FlowLogWithoutPayload> findAllWithoutPayloadByFlowIdOrderByCreatedDesc(String flowId);
+
+    List<FlowLogWithoutPayload> getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(Set<String> relatedFlowIds);
 }

@@ -13,6 +13,7 @@ import com.cedarsoftware.util.io.JsonReader;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.domain.StateStatus;
 
 public class FlowLogUtil {
@@ -64,10 +65,10 @@ public class FlowLogUtil {
         return false;
     }
 
-    public static boolean isFlowInFailedState(List<FlowLog> flowLogs, Set<String> failHandledEvents) {
+    public static boolean isFlowInFailedState(List<FlowLogWithoutPayload> flowLogs, Set<String> failHandledEvents) {
         if (flowLogs.size() > 2) {
-            FlowLog lastFlowLog = flowLogs.get(0);
-            FlowLog secondLastFlowLog = flowLogs.get(1);
+            FlowLogWithoutPayload lastFlowLog = flowLogs.get(0);
+            FlowLogWithoutPayload secondLastFlowLog = flowLogs.get(1);
             LOGGER.debug("Last two log items: {}, {}", lastFlowLog, secondLastFlowLog);
             return lastFlowLog.getFinalized()
                     && (failHandledEvents.contains(secondLastFlowLog.getNextEvent())

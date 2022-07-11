@@ -308,14 +308,14 @@ public class Flow2HandlerTest {
 
     @Test
     public void testExistingFlow() {
-        FlowLog lastFlowLog = new FlowLog();
-        lastFlowLog.setNextEvent("KEY");
+        FlowLog lastFlowLog = mock(FlowLog.class);
         Optional<FlowLog> flowLogOptional = Optional.of(lastFlowLog);
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        given(lastFlowLog.getNextEvent()).willReturn("KEY");
         given(runningFlows.get(anyString())).willReturn(flow);
         given(flow.getCurrentState()).willReturn(flowState);
         given(flow.getFlowId()).willReturn(FLOW_ID);
-        given(flowLogService.getLastFlowLog(FLOW_ID)).willReturn(flowLogOptional);
+        given(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).willReturn(flowLogOptional);
 
         dummyEvent.setKey("KEY");
         ArgumentCaptor<FlowParameters> flowParamsCaptor = ArgumentCaptor.forClass(FlowParameters.class);
@@ -330,14 +330,14 @@ public class Flow2HandlerTest {
 
     @Test
     public void testFinalizedFlow() {
-        FlowLog lastFlowLog = new FlowLog();
-        lastFlowLog.setFinalized(true);
+        FlowLog lastFlowLog = mock(FlowLog.class);
         Optional<FlowLog> flowLogOptional = Optional.of(lastFlowLog);
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        given(lastFlowLog.getFinalized()).willReturn(true);
         given(runningFlows.get(anyString())).willReturn(flow);
         given(flow.getCurrentState()).willReturn(flowState);
         given(flow.getFlowId()).willReturn(FLOW_ID);
-        given(flowLogService.getLastFlowLog(FLOW_ID)).willReturn(flowLogOptional);
+        given(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).willReturn(flowLogOptional);
 
         dummyEvent.setKey("KEY");
         ArgumentCaptor<FlowParameters> flowParamsCaptor = ArgumentCaptor.forClass(FlowParameters.class);
@@ -352,16 +352,16 @@ public class Flow2HandlerTest {
 
     @Test
     public void testChangedNodeId() {
-        FlowLog lastFlowLog = new FlowLog();
-        lastFlowLog.setNextEvent("KEY");
-        lastFlowLog.setCloudbreakNodeId("OtherNode");
+        FlowLog lastFlowLog = mock(FlowLog.class);
         Optional<FlowLog> flowLogOptional = Optional.of(lastFlowLog);
         BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        given(lastFlowLog.getNextEvent()).willReturn("KEY");
+        given(lastFlowLog.getCloudbreakNodeId()).willReturn("OtherNode");
         given(nodeConfig.getId()).willReturn("CurrentNode");
         given(runningFlows.get(anyString())).willReturn(flow);
         given(flow.getCurrentState()).willReturn(flowState);
         given(flow.getFlowId()).willReturn(FLOW_ID);
-        given(flowLogService.getLastFlowLog(FLOW_ID)).willReturn(flowLogOptional);
+        given(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).willReturn(flowLogOptional);
 
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
@@ -383,7 +383,7 @@ public class Flow2HandlerTest {
         FlowLog lastFlowLog = new FlowLog();
         lastFlowLog.setNextEvent("KEY");
         Optional<FlowLog> flowLogOptional = Optional.of(lastFlowLog);
-        given(flowLogService.getLastFlowLog(FLOW_ID)).willReturn(flowLogOptional);
+        given(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).willReturn(flowLogOptional);
         given(flowLogService.repeatedFlowState(lastFlowLog, "KEY")).willReturn(true);
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
