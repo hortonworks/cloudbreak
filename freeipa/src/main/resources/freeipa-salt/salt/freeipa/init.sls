@@ -62,6 +62,18 @@ net.ipv6.conf.lo.disable_ipv6:
     - mode: 700
     - source: salt://freeipa/scripts/repair.sh
 
+{%- if salt['pillar.get']('freeipa:hosts') %}
+/root/.config/checkipaconsistency:
+  file.managed:
+    - makedirs: True
+    - user: root
+    - group: root
+    - mode: 600
+    - show_changes: False
+    - source: salt://freeipa/templates/checkipaconsistency.j2
+    - template: jinja
+{%- endif %}
+
 disable_old_tls_for_ldap_server:
   file.append:
     - name: /usr/share/ipa/updates/20-sslciphers.update
