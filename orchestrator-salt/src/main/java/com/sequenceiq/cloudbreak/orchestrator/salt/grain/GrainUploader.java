@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GrainProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltCommandRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
@@ -28,6 +29,9 @@ public class GrainUploader {
 
     @Inject
     private SaltCommandRunner saltCommandRunner;
+
+    @Inject
+    private SaltStateService saltStateService;
 
     public void uploadGrains(Set<Node> allNodes, List<GrainProperties> grainPropertiesList, ExitCriteriaModel exitModel, SaltConnector sc,
             ExitCriteria exitCriteria) throws Exception {
@@ -49,7 +53,8 @@ public class GrainUploader {
 
     private void addGrainToHosts(Set<Node> allNodes, ExitCriteriaModel exitModel, SaltConnector sc, ExitCriteria exitCriteria,
             Entry<Entry<String, String>, Collection<String>> grainForHosts) throws Exception {
-        saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(new HashSet<>(grainForHosts.getValue()), allNodes, grainForHosts.getKey().getKey(),
+        saltCommandRunner.runModifyGrainCommand(sc,
+                new GrainAddRunner(saltStateService, new HashSet<>(grainForHosts.getValue()), allNodes, grainForHosts.getKey().getKey(),
                         grainForHosts.getKey().getValue()), exitModel, exitCriteria);
     }
 }

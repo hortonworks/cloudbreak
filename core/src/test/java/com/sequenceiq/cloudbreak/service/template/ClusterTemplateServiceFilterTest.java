@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.template;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
@@ -23,7 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -88,8 +88,8 @@ class ClusterTemplateServiceFilterTest {
     private ClusterTemplateService underTest;
 
     @BeforeEach
-    public void initTests() throws CloudbreakImageCatalogException {
-        Whitebox.setInternalState(supportedRuntimes, "imageCatalogService", imageCatalogService);
+    void initTests() {
+        ReflectionTestUtils.setField(supportedRuntimes, "imageCatalogService", imageCatalogService);
     }
 
     // @formatter:off

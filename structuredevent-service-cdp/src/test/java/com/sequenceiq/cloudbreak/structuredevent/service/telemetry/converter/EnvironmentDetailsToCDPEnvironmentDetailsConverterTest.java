@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -7,13 +11,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -33,7 +36,7 @@ import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameter.dto.ResourceGroupUsagePattern;
 
 @ExtendWith(MockitoExtension.class)
-public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
+class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
     private EnvironmentDetailsToCDPEnvironmentDetailsConverter underTest;
 
@@ -41,41 +44,41 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
     private EnvironmentDetails environmentDetails;
 
     @BeforeEach()
-    public void setUp() {
+    void setUp() {
         underTest = new EnvironmentDetailsToCDPEnvironmentDetailsConverter();
-        Whitebox.setInternalState(underTest, "networkDetailsConverter", new EnvironmentDetailsToCDPNetworkDetailsConverter());
+        ReflectionTestUtils.setField(underTest, "networkDetailsConverter", new EnvironmentDetailsToCDPNetworkDetailsConverter());
     }
 
     @Test
-    public void testNull() {
+    void testNull() {
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(null);
 
-        Assertions.assertEquals("", cdpEnvironmentDetails.getRegion());
-        Assertions.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, cdpEnvironmentDetails.getEnvironmentType());
-        Assertions.assertEquals(-1, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
-        Assertions.assertEquals("", cdpEnvironmentDetails.getAvailabilityZones());
-        Assertions.assertNotNull(cdpEnvironmentDetails.getNetworkDetails());
-        Assertions.assertNotNull(cdpEnvironmentDetails.getAwsDetails());
-        Assertions.assertNotNull(cdpEnvironmentDetails.getAzureDetails());
-        Assertions.assertEquals("", cdpEnvironmentDetails.getUserTags());
+        assertEquals("", cdpEnvironmentDetails.getRegion());
+        assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, cdpEnvironmentDetails.getEnvironmentType());
+        assertEquals(-1, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
+        assertEquals("", cdpEnvironmentDetails.getAvailabilityZones());
+        assertNotNull(cdpEnvironmentDetails.getNetworkDetails());
+        assertNotNull(cdpEnvironmentDetails.getAwsDetails());
+        assertNotNull(cdpEnvironmentDetails.getAzureDetails());
+        assertEquals("", cdpEnvironmentDetails.getUserTags());
     }
 
     @Test
-    public void testConvertingEmptyEnvironmentDetails() {
+    void testConvertingEmptyEnvironmentDetails() {
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals("", cdpEnvironmentDetails.getRegion());
-        Assertions.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, cdpEnvironmentDetails.getEnvironmentType());
-        Assertions.assertEquals(-1, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
-        Assertions.assertEquals("", cdpEnvironmentDetails.getAvailabilityZones());
-        Assertions.assertNotNull(cdpEnvironmentDetails.getNetworkDetails());
-        Assertions.assertNotNull(cdpEnvironmentDetails.getAwsDetails());
-        Assertions.assertNotNull(cdpEnvironmentDetails.getAzureDetails());
-        Assertions.assertEquals("", cdpEnvironmentDetails.getUserTags());
+        assertEquals("", cdpEnvironmentDetails.getRegion());
+        assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, cdpEnvironmentDetails.getEnvironmentType());
+        assertEquals(-1, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
+        assertEquals("", cdpEnvironmentDetails.getAvailabilityZones());
+        assertNotNull(cdpEnvironmentDetails.getNetworkDetails());
+        assertNotNull(cdpEnvironmentDetails.getAwsDetails());
+        assertNotNull(cdpEnvironmentDetails.getAzureDetails());
+        assertEquals("", cdpEnvironmentDetails.getUserTags());
     }
 
     @Test
-    public void testConversionSingleResourceGroupWhenAzureUsingSingleResourceGroupShouldReturnSingleResourceGroupTrue() {
+    void testConversionSingleResourceGroupWhenAzureUsingSingleResourceGroupShouldReturnSingleResourceGroupTrue() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
@@ -88,11 +91,11 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertTrue(cdpEnvironmentDetails.getAzureDetails().getSingleResourceGroup());
+        assertTrue(cdpEnvironmentDetails.getAzureDetails().getSingleResourceGroup());
     }
 
     @Test
-    public void testConversionSingleResourceGroupWhenAzureNOTUsingSingleResourceGroupShouldReturnSingleResourceGroupFalse() {
+    void testConversionSingleResourceGroupWhenAzureNOTUsingSingleResourceGroupShouldReturnSingleResourceGroupFalse() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
@@ -105,11 +108,11 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertFalse(cdpEnvironmentDetails.getAzureDetails().getSingleResourceGroup());
+        assertFalse(cdpEnvironmentDetails.getAzureDetails().getSingleResourceGroup());
     }
 
     @Test
-    public void testConversionResourceEncryptionEnabledWhenAzureUsingResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledTrue() {
+    void testConversionResourceEncryptionEnabledWhenAzureUsingResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledTrue() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
@@ -125,11 +128,11 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertTrue(cdpEnvironmentDetails.getAzureDetails().getResourceEncryptionEnabled());
+        assertTrue(cdpEnvironmentDetails.getAzureDetails().getResourceEncryptionEnabled());
     }
 
     @Test
-    public void testConversionResourceEncryptionEnabledWhenAzureNOTResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledFalse() {
+    void testConversionResourceEncryptionEnabledWhenAzureNOTResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledFalse() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAzureParameters(AzureParametersDto.builder()
                         .withResourceGroup(AzureResourceGroupDto.builder()
@@ -142,11 +145,11 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertFalse(cdpEnvironmentDetails.getAzureDetails().getResourceEncryptionEnabled());
+        assertFalse(cdpEnvironmentDetails.getAzureDetails().getResourceEncryptionEnabled());
     }
 
     @Test
-    public void testConversionResourceEncryptionEnabledWhenAWSUsingResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledTrue() {
+    void testConversionResourceEncryptionEnabledWhenAWSUsingResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledTrue() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAwsParameters(AwsParametersDto.builder()
                         .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
@@ -159,22 +162,22 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertTrue(cdpEnvironmentDetails.getAwsDetails().getResourceEncryptionEnabled());
+        assertTrue(cdpEnvironmentDetails.getAwsDetails().getResourceEncryptionEnabled());
     }
 
     @Test
-    public void testConversionResourceEncryptionEnabledWhenAWSNOTResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledFalse() {
+    void testConversionResourceEncryptionEnabledWhenAWSNOTResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledFalse() {
         ParametersDto parametersDto = ParametersDto.builder().build();
 
         when(environmentDetails.getParameters()).thenReturn(parametersDto);
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertFalse(cdpEnvironmentDetails.getAwsDetails().getResourceEncryptionEnabled());
+        assertFalse(cdpEnvironmentDetails.getAwsDetails().getResourceEncryptionEnabled());
     }
 
     @Test
-    public void testConversionResourceEncryptionEnabledWhenGcpUsingResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledTrue() {
+    void testConversionResourceEncryptionEnabledWhenGcpUsingResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledTrue() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withGcpParameters(GcpParametersDto.builder()
                         .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
@@ -187,22 +190,22 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertTrue(cdpEnvironmentDetails.getGcpDetails().getResourceEncryptionEnabled());
+        assertTrue(cdpEnvironmentDetails.getGcpDetails().getResourceEncryptionEnabled());
     }
 
     @Test
-    public void testConversionResourceEncryptionEnabledWhenGcpNOTResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledFalse() {
+    void testConversionResourceEncryptionEnabledWhenGcpNOTResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledFalse() {
         ParametersDto parametersDto = ParametersDto.builder().build();
 
         when(environmentDetails.getParameters()).thenReturn(parametersDto);
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertFalse(cdpEnvironmentDetails.getGcpDetails().getResourceEncryptionEnabled());
+        assertFalse(cdpEnvironmentDetails.getGcpDetails().getResourceEncryptionEnabled());
     }
 
     @Test
-    public void testConversionSingleResourceGroupWhenAwsShouldReturnSingleResourceGroupFalse() {
+    void testConversionSingleResourceGroupWhenAwsShouldReturnSingleResourceGroupFalse() {
         ParametersDto parametersDto = ParametersDto.builder()
                 .withAwsParameters(AwsParametersDto.builder()
                         .build())
@@ -212,11 +215,11 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertFalse(cdpEnvironmentDetails.getAzureDetails().getSingleResourceGroup());
+        assertFalse(cdpEnvironmentDetails.getAzureDetails().getSingleResourceGroup());
     }
 
     @Test
-    public void testRegionNameConversion() {
+    void testRegionNameConversion() {
         Region region1 = new Region();
         region1.setName("westus2");
         Region region2 = new Region();
@@ -233,21 +236,21 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals("invalidregion,uksouth,westus2", cdpEnvironmentDetails.getRegion());
+        assertEquals("invalidregion,uksouth,westus2", cdpEnvironmentDetails.getRegion());
     }
 
     @Test
-    public void testSettingAvailabilityZonesWhenNetworkIsNull() {
+    void testSettingAvailabilityZonesWhenNetworkIsNull() {
         when(environmentDetails.getNetwork()).thenReturn(null);
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals(-1, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
-        Assertions.assertEquals("", cdpEnvironmentDetails.getAvailabilityZones());
+        assertEquals(-1, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
+        assertEquals("", cdpEnvironmentDetails.getAvailabilityZones());
     }
 
     @Test
-    public void testSettingAvailabilityZonesWhenSubnetMetasIsNull() {
+    void testSettingAvailabilityZonesWhenSubnetMetasIsNull() {
         NetworkDto networkDto = NetworkDto.builder()
                 .withRegistrationType(RegistrationType.EXISTING)
                 .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
@@ -257,12 +260,12 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals(-1, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
-        Assertions.assertEquals("", cdpEnvironmentDetails.getAvailabilityZones());
+        assertEquals(-1, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
+        assertEquals("", cdpEnvironmentDetails.getAvailabilityZones());
     }
 
     @Test
-    public void testSettingAvailabilityZonesWhenSubnetMetasIsEmpty() {
+    void testSettingAvailabilityZonesWhenSubnetMetasIsEmpty() {
         NetworkDto networkDto = NetworkDto.builder()
                 .withRegistrationType(RegistrationType.EXISTING)
                 .withServiceEndpointCreation(ServiceEndpointCreation.ENABLED)
@@ -272,12 +275,12 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals(0, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
-        Assertions.assertEquals("", cdpEnvironmentDetails.getAvailabilityZones());
+        assertEquals(0, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
+        assertEquals("", cdpEnvironmentDetails.getAvailabilityZones());
     }
 
     @Test
-    public void testSettingAvailabilityZonesWhenSubnetAvailabilityZoneIsEmpty() {
+    void testSettingAvailabilityZonesWhenSubnetAvailabilityZoneIsEmpty() {
         CloudSubnet publicSubnet = new CloudSubnet();
         NetworkDto networkDto = NetworkDto.builder()
                 .withRegistrationType(RegistrationType.EXISTING)
@@ -288,12 +291,12 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals(-1, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
-        Assertions.assertEquals("", cdpEnvironmentDetails.getAvailabilityZones());
+        assertEquals(-1, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
+        assertEquals("", cdpEnvironmentDetails.getAvailabilityZones());
     }
 
     @Test
-    public void testSettingAvailabilityZonesWhenSubnetAvailabilityZoneIsNotEmpty() {
+    void testSettingAvailabilityZonesWhenSubnetAvailabilityZoneIsNotEmpty() {
         CloudSubnet publicSubnet = new CloudSubnet();
         publicSubnet.setAvailabilityZone("availibilityzone");
         NetworkDto networkDto = NetworkDto.builder()
@@ -305,22 +308,22 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
 
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals(1, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
-        Assertions.assertEquals("availibilityzone", cdpEnvironmentDetails.getAvailabilityZones());
+        assertEquals(1, cdpEnvironmentDetails.getNumberOfAvailabilityZones());
+        assertEquals("availibilityzone", cdpEnvironmentDetails.getAvailabilityZones());
     }
 
     @Test
-    public void testUserTags() {
+    void testUserTags() {
         when(environmentDetails.getUserDefinedTags()).thenReturn(null);
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals("", cdpEnvironmentDetails.getUserTags());
+        assertEquals("", cdpEnvironmentDetails.getUserTags());
 
         Map<String, String> userTags = new HashMap<>();
         when(environmentDetails.getUserDefinedTags()).thenReturn(userTags);
         cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals("", cdpEnvironmentDetails.getUserTags());
+        assertEquals("", cdpEnvironmentDetails.getUserTags());
 
         userTags = new HashMap<>();
         userTags.put("key1", "value1");
@@ -328,6 +331,6 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         when(environmentDetails.getUserDefinedTags()).thenReturn(userTags);
         cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
-        Assertions.assertEquals("{\"key1\":\"value1\",\"key2\":\"value2\"}", cdpEnvironmentDetails.getUserTags());
+        assertEquals("{\"key1\":\"value1\",\"key2\":\"value2\"}", cdpEnvironmentDetails.getUserTags());
     }
 }

@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.component.CmServerQuerySer
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @ExtendWith(MockitoExtension.class)
-public class ClusterManagerUpgradeServiceTest {
+class ClusterManagerUpgradeServiceTest {
 
     private static final Long STACK_ID = 1L;
 
@@ -86,7 +86,7 @@ public class ClusterManagerUpgradeServiceTest {
     private Stack stack;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         stack = TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential());
         Cluster cluster = TestUtil.cluster();
         stack.setCluster(cluster);
@@ -106,7 +106,7 @@ public class ClusterManagerUpgradeServiceTest {
 
     @ParameterizedTest
     @MethodSource("cmVersions")
-    public void testUpgradeClusterManager(String versionOnHost, String versionInRepo) throws CloudbreakOrchestratorException, CloudbreakException {
+    void testUpgradeClusterManager(String versionOnHost, String versionInRepo) throws CloudbreakOrchestratorException, CloudbreakException {
         Cluster cluster = stack.getCluster();
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clouderaManagerRepo.getFullVersion()).thenReturn(versionInRepo);
@@ -124,7 +124,7 @@ public class ClusterManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testUpgradeClusterManagerVersionIsDifferent() throws CloudbreakOrchestratorException, CloudbreakException {
+    void testUpgradeClusterManagerVersionIsDifferent() throws CloudbreakOrchestratorException, CloudbreakException {
         Cluster cluster = stack.getCluster();
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clouderaManagerRepo.getFullVersion()).thenReturn(CM_VERSION);
@@ -142,7 +142,7 @@ public class ClusterManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testUpgradeClusterManagerWithoutStartServices() throws CloudbreakOrchestratorException, CloudbreakException {
+    void testUpgradeClusterManagerWithoutStartServices() throws CloudbreakOrchestratorException, CloudbreakException {
         Cluster cluster = stack.getCluster();
 
         underTest.upgradeClusterManager(STACK_ID, false);
@@ -157,7 +157,7 @@ public class ClusterManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testUpgradeClusterManagerShouldNotAddCsdToPillarWhenTheClusterTypeIsDataLake() throws CloudbreakOrchestratorException, CloudbreakException {
+    void testUpgradeClusterManagerShouldNotAddCsdToPillarWhenTheClusterTypeIsDataLake() throws CloudbreakOrchestratorException, CloudbreakException {
         Cluster cluster = stack.getCluster();
         stack.setType(StackType.DATALAKE);
 
@@ -174,7 +174,7 @@ public class ClusterManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testUpgradeClusterManagerShouldAddCsdToPillarWhenTheClusterTypeIsWorkload() throws CloudbreakOrchestratorException, CloudbreakException {
+    void testUpgradeClusterManagerShouldAddCsdToPillarWhenTheClusterTypeIsWorkload() throws CloudbreakOrchestratorException, CloudbreakException {
         Cluster cluster = stack.getCluster();
         stack.setType(StackType.WORKLOAD);
 

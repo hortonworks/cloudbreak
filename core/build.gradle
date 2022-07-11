@@ -142,13 +142,6 @@ dependencyManagement {
       entry 'json-path'
     }
 
-    dependencySet(group: 'org.powermock', version: powermockVersion) {
-      entry 'powermock-module-junit4'
-      entry('powermock-api-mockito2') {
-        exclude group: 'org.hamcrest', name: '*'
-      }
-    }
-
     dependency group: 'com.fasterxml.jackson.core',         name: 'jackson-databind',            version: jacksonVersion
     dependency group: 'activation',                         name: 'activation',                  version: '1.0.2'
     dependency group: 'net.jcip',                           name: 'jcip-annotations',            version: '1.0'
@@ -318,8 +311,6 @@ dependencies {
   testImplementation project(path: ':flow', configuration: 'tests')
   testImplementation project(path: ':cloud-reactor', configuration: 'tests')
 
-  testImplementation group: 'org.powermock',            name: 'powermock-module-junit4'
-  testImplementation group: 'org.powermock',            name: 'powermock-api-mockito2'
   testImplementation (group: 'org.mockito',             name: 'mockito-core') {
     exclude group: 'org.hamcrest'
   }

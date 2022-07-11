@@ -1,40 +1,41 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 
 @ExtendWith(MockitoExtension.class)
-public class StackDetailsToCDPFreeIPAExtendedDetailsConverterTest {
+class StackDetailsToCDPFreeIPAExtendedDetailsConverterTest {
 
     private StackDetailsToCDPFreeIPAExtendedDetailsConverter underTest;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         underTest = new StackDetailsToCDPFreeIPAExtendedDetailsConverter();
-        Whitebox.setInternalState(underTest, "freeIPAShapeConverter", new StackDetailsToCDPFreeIPAShapeConverter());
-        Whitebox.setInternalState(underTest, "imageDetailsConverter", new StackDetailsToCDPImageDetailsConverter());
+        ReflectionTestUtils.setField(underTest, "freeIPAShapeConverter", new StackDetailsToCDPFreeIPAShapeConverter());
+        ReflectionTestUtils.setField(underTest, "imageDetailsConverter", new StackDetailsToCDPImageDetailsConverter());
     }
 
     @Test
-    public void testConvertWithNull() {
+    void testConvertWithNull() {
         UsageProto.CDPFreeIPAExtendedDetails freeIPAExtendedDetails = underTest.convert(null);
 
-        Assertions.assertNotNull(freeIPAExtendedDetails.getFreeIPAShape());
-        Assertions.assertNotNull(freeIPAExtendedDetails.getImageDetails());
+        assertNotNull(freeIPAExtendedDetails.getFreeIPAShape());
+        assertNotNull(freeIPAExtendedDetails.getImageDetails());
     }
 
     @Test
-    public void testConvertWithEmpty() {
+    void testConvertWithEmpty() {
         UsageProto.CDPFreeIPAExtendedDetails freeIPAExtendedDetails = underTest.convert(new StackDetails());
 
-        Assertions.assertNotNull(freeIPAExtendedDetails.getFreeIPAShape());
-        Assertions.assertNotNull(freeIPAExtendedDetails.getImageDetails());
+        assertNotNull(freeIPAExtendedDetails.getFreeIPAShape());
+        assertNotNull(freeIPAExtendedDetails.getImageDetails());
     }
 }

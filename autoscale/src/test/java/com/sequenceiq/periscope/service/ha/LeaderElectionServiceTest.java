@@ -1,9 +1,12 @@
 package com.sequenceiq.periscope.service.ha;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,14 +20,12 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.function.Supplier;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.reflect.internal.WhiteboxImpl;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -40,8 +41,8 @@ import com.sequenceiq.periscope.repository.PeriscopeNodeRepository;
 import com.sequenceiq.periscope.service.DateTimeService;
 import com.sequenceiq.periscope.service.PeriscopeMetricService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class LeaderElectionServiceTest {
+@ExtendWith(MockitoExtension.class)
+class LeaderElectionServiceTest {
 
     @InjectMocks
     private LeaderElectionService underTest;
@@ -79,18 +80,18 @@ public class LeaderElectionServiceTest {
     @Mock
     private PeriscopeMetricService metricService;
 
-    @Before
-    public void init() {
-        when(periscopeNodeConfig.isNodeIdSpecified()).thenReturn(true);
-        when(periscopeNodeConfig.getId()).thenReturn("nodeid");
-        when(timerFactory.get()).thenReturn(timer);
+    @BeforeEach
+    void setup() {
+        lenient().when(periscopeNodeConfig.isNodeIdSpecified()).thenReturn(true);
+        lenient().when(periscopeNodeConfig.getId()).thenReturn("nodeid");
+        lenient().when(timerFactory.get()).thenReturn(timer);
         when(clock.getCurrentTimeMillis()).thenReturn(5000L);
-        when(applicationContext.getBean(eq("CronTimeEvaluator"), eq(CronTimeEvaluator.class))).thenReturn(cronTimeEvaluator);
+        lenient().when(applicationContext.getBean(eq("CronTimeEvaluator"), eq(CronTimeEvaluator.class))).thenReturn(cronTimeEvaluator);
         ReflectionTestUtils.setField(underTest, "heartbeatThresholdRate", 70000);
     }
 
     @Test
-    public void testElectionNotNeeded() throws TransactionExecutionException {
+    void testElectionNotNeeded() throws TransactionExecutionException {
         when(periscopeNodeRepository.countByLeaderIsTrueAndLastUpdatedIsGreaterThan(anyLong())).thenReturn(1L);
 
         underTest.leaderElection();
@@ -100,7 +101,7 @@ public class LeaderElectionServiceTest {
     }
 
     @Test
-    public void testElectionNeededAndSuccess() throws TransactionExecutionException {
+    void testElectionNeededAndSuccess() throws TransactionExecutionException {
         when(periscopeNodeRepository.countByLeaderIsTrueAndLastUpdatedIsGreaterThan(anyLong())).thenReturn(0L);
 
         underTest.leaderElection();
@@ -113,7 +114,7 @@ public class LeaderElectionServiceTest {
     }
 
     @Test
-    public void testElectionNeededAndFails() throws TransactionExecutionException {
+    void testElectionNeededAndFails() throws TransactionExecutionException {
         when(periscopeNodeRepository.countByLeaderIsTrueAndLastUpdatedIsGreaterThan(anyLong())).thenReturn(0L);
         when(transactionService.required(any(Supplier.class))).thenThrow(new TransactionExecutionException("Persisting went wrong", new RuntimeException()));
 
@@ -127,7 +128,7 @@ public class LeaderElectionServiceTest {
     }
 
     @Test
-    public void testReallocateOrphanClustersIsNotLeader() throws TransactionExecutionException {
+    void testReallocateOrphanClustersIsNotLeader() throws TransactionExecutionException {
         when(periscopeNodeRepository.countByLeaderIsTrueAndLastUpdatedIsGreaterThan(anyLong())).thenReturn(0L);
         SpyTimer spyTimer = new SpyTimer();
         when(timerFactory.get()).thenReturn(spyTimer);
@@ -142,7 +143,7 @@ public class LeaderElectionServiceTest {
     }
 
     @Test
-    public void testReallocateOrphanClustersIsLeader() throws TransactionExecutionException {
+    void testReallocateOrphanClustersIsLeader() throws TransactionExecutionException {
         when(periscopeNodeRepository.countByLeaderIsTrueAndLastUpdatedIsGreaterThan(anyLong())).thenReturn(0L);
         SpyTimer spyTimer = new SpyTimer();
         when(timerFactory.get()).thenReturn(spyTimer);
@@ -161,82 +162,82 @@ public class LeaderElectionServiceTest {
     }
 
     @Test
-    public void testIsExecutionOfMissedTimeBasedAlertsNeededNoPeriscopeNodeId() throws Exception {
+    void testIsExecutionOfMissedTimeBasedAlertsNeededNoPeriscopeNodeId() {
         Cluster cluster = getValidIsMissedNeeded();
         cluster.setPeriscopeNodeId(null);
 
-        boolean needed = WhiteboxImpl.invokeMethod(underTest, "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
+        boolean needed = ReflectionTestUtils.invokeMethod(underTest, "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
 
-        Assert.assertFalse(needed);
+        assertFalse(needed);
     }
 
     @Test
-    public void testIsExecutionOfMissedTimeBasedAlertsNeededNoAutoscaling() throws Exception {
+    void testIsExecutionOfMissedTimeBasedAlertsNeededNoAutoscaling() {
         Cluster cluster = getValidIsMissedNeeded();
         cluster.setAutoscalingEnabled(false);
 
-        boolean needed = WhiteboxImpl.invokeMethod(underTest, "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
+        boolean needed = ReflectionTestUtils.invokeMethod(underTest,  "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
 
-        Assert.assertFalse(needed);
+        assertFalse(needed);
     }
 
     @Test
-    public void testIsExecutionOfMissedTimeBasedAlertsNeededLastScalingHappend() throws Exception {
+    void testIsExecutionOfMissedTimeBasedAlertsNeededLastScalingHappend() {
         Cluster cluster = getValidIsMissedNeeded();
         cluster.setCoolDown(1);
 
-        boolean needed = WhiteboxImpl.invokeMethod(underTest, "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
+        boolean needed = ReflectionTestUtils.invokeMethod(underTest,  "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
 
-        Assert.assertFalse(needed);
+        assertFalse(needed);
     }
 
     @Test
-    public void testIsExecutionOfMissedTimeBasedAlertsNeededNoAlerts() throws Exception {
+    void testIsExecutionOfMissedTimeBasedAlertsNeededNoAlerts() {
         Cluster cluster = getValidIsMissedNeeded();
         cluster.setTimeAlerts(null);
 
-        boolean needed = WhiteboxImpl.invokeMethod(underTest, "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
+        boolean needed = ReflectionTestUtils.invokeMethod(underTest, "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
 
-        Assert.assertFalse(needed);
+        assertFalse(needed);
     }
 
     @Test
-    public void testIsExecutionOfMissedTimeBasedAlertsNeededTrue() throws Exception {
+    void testIsExecutionOfMissedTimeBasedAlertsNeededTrue() {
         Cluster cluster = getValidIsMissedNeeded();
 
-        boolean needed = WhiteboxImpl.invokeMethod(underTest, "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
+        boolean needed = ReflectionTestUtils.invokeMethod(underTest, "isExecutionOfMissedTimeBasedAlertsNeeded", cluster);
 
-        Assert.assertTrue(needed);
+        assertTrue(needed);
     }
 
     @Test
-    public void testExecuteMissedTimeBasedAlertsNotNeedLastEvalLessThanRewind() throws Exception {
+    void testExecuteMissedTimeBasedAlertsNotNeedLastEvalLessThanRewind() {
         Cluster cluster = new Cluster();
         cluster.setCoolDown(2);
         cluster.setLastEvaluated(4900L);
         cluster.setTimeAlerts(Collections.singleton(new TimeAlert()));
 
-        WhiteboxImpl.invokeMethod(underTest, "executeMissedTimeBasedAlerts", cluster);
+        ReflectionTestUtils.invokeMethod(underTest, "executeMissedTimeBasedAlerts", cluster);
 
         verify(applicationContext, times(0)).getBean(anyString(), eq(CronTimeEvaluator.class));
         verify(cronTimeEvaluator, times(0)).publishIfNeeded(any(Map.class));
     }
 
     @Test
-    public void testExecuteMissedTimeBasedAlertsNotNeedCooldownLessThanRewind() throws Exception {
+    void testExecuteMissedTimeBasedAlertsNotNeedCooldownLessThanRewind() {
         Cluster cluster = new Cluster();
         cluster.setCoolDown(0);
         cluster.setLastEvaluated(1L);
         cluster.setTimeAlerts(Collections.singleton(new TimeAlert()));
 
-        WhiteboxImpl.invokeMethod(underTest, "executeMissedTimeBasedAlerts", cluster);
+        ReflectionTestUtils.invokeMethod(underTest, "executeMissedTimeBasedAlerts", cluster);
 
         verify(applicationContext, times(0)).getBean(anyString(), eq(CronTimeEvaluator.class));
         verify(cronTimeEvaluator, times(0)).publishIfNeeded(any(Map.class));
     }
 
     @Test
-    public void testExecuteMissedTimeBasedAlertsNeed() throws Exception {
+    void testExecuteMissedTimeBasedAlertsNeed() {
         ZonedDateTime now = ZonedDateTime.now();
         when(dateTimeService.getDefaultZonedDateTime()).thenReturn(now);
         when(dateTimeService.getNextSecound(any())).thenReturn(now);
@@ -246,12 +247,11 @@ public class LeaderElectionServiceTest {
         TimeAlert timeAlert = new TimeAlert();
         cluster.setTimeAlerts(Collections.singleton(timeAlert));
 
-        WhiteboxImpl.invokeMethod(underTest, "executeMissedTimeBasedAlerts", cluster);
+        ReflectionTestUtils.invokeMethod(underTest, "executeMissedTimeBasedAlerts", cluster);
 
         verify(applicationContext, times(1)).getBean(anyString(), eq(CronTimeEvaluator.class));
 
         Map<TimeAlert, ZonedDateTime> expectedAlerts = new LinkedHashMap<>();
-        expectedAlerts.put(timeAlert, now);
         expectedAlerts.put(timeAlert, now);
         verify(cronTimeEvaluator, times(1)).publishIfNeeded(eq(expectedAlerts));
     }

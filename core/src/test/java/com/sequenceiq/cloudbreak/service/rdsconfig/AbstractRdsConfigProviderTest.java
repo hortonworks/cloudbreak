@@ -1,21 +1,21 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.reflect.Whitebox;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -29,8 +29,8 @@ import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AbstractRdsConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class AbstractRdsConfigProviderTest {
 
     private static final String DB_HOST = "dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com";
 
@@ -58,13 +58,13 @@ public class AbstractRdsConfigProviderTest {
     @InjectMocks
     private ClouderaManagerRdsConfigProvider underTest;
 
-    @Before
-    public void setUp() throws Exception {
-        Whitebox.setInternalState(underTest, "db", "clouderamanager");
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(underTest, "db", "clouderamanager");
     }
 
     @Test
-    public void createServicePillarForLocalRdsConfig() {
+    void createServicePillarForLocalRdsConfig() {
         when(rdsConfigService.createIfNotExists(any(), any(), any())).thenAnswer(i -> i.getArguments()[1]);
         Stack testStack = TestUtil.stack();
         InstanceMetaData metaData = testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next();
@@ -82,7 +82,7 @@ public class AbstractRdsConfigProviderTest {
     }
 
     @Test
-    public void createServicePillarForRemoteRdsConfig() {
+    void createServicePillarForRemoteRdsConfig() {
         when(rdsConfigService.createIfNotExists(any(), any(), any())).thenAnswer(i -> i.getArguments()[1]);
         RDSConfig config = TestUtil.rdsConfig(DatabaseType.CLOUDERA_MANAGER);
         when(dbServerConfigurer.createNewRdsConfig(any(), any(), any(), any(), any())).thenReturn(config);

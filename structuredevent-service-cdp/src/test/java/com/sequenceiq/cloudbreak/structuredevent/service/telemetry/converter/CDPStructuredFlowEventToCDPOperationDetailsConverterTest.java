@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
@@ -16,62 +18,62 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
     private CDPStructuredFlowEventToCDPOperationDetailsConverter underTest;
 
     @BeforeEach()
-    public void setUp() {
+    void setUp() {
         underTest = new CDPStructuredFlowEventToCDPOperationDetailsConverter();
-        Whitebox.setInternalState(underTest, "appVersion", "version-1234");
-        Whitebox.setInternalState(underTest, "cdpRequestProcessingStepMapper", new CDPRequestProcessingStepMapper());
+        ReflectionTestUtils.setField(underTest, "appVersion", "version-1234");
+        ReflectionTestUtils.setField(underTest, "cdpRequestProcessingStepMapper", new CDPRequestProcessingStepMapper());
     }
 
     @Test
-    public void testConvertWithNull() {
+    void testConvertWithNull() {
         UsageProto.CDPOperationDetails details = underTest.convert(null, null);
 
-        Assertions.assertEquals("", details.getAccountId());
-        Assertions.assertEquals("", details.getResourceCrn());
-        Assertions.assertEquals("", details.getResourceName());
-        Assertions.assertEquals("", details.getInitiatorCrn());
-        Assertions.assertEquals("", details.getCorrelationId());
-        Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, details.getCdpRequestProcessingStep());
-        Assertions.assertEquals("", details.getFlowId());
-        Assertions.assertEquals("", details.getFlowChainId());
-        Assertions.assertEquals("", details.getFlowState());
-        Assertions.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, details.getEnvironmentType());
+        assertEquals("", details.getAccountId());
+        assertEquals("", details.getResourceCrn());
+        assertEquals("", details.getResourceName());
+        assertEquals("", details.getInitiatorCrn());
+        assertEquals("", details.getCorrelationId());
+        assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, details.getCdpRequestProcessingStep());
+        assertEquals("", details.getFlowId());
+        assertEquals("", details.getFlowChainId());
+        assertEquals("", details.getFlowState());
+        assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, details.getEnvironmentType());
 
-        Assertions.assertEquals("version-1234", details.getApplicationVersion());
+        assertEquals("version-1234", details.getApplicationVersion());
     }
 
     @Test
-    public void testConversionWithNullOperation() {
+    void testConversionWithNullOperation() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
 
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent, null);
 
-        Assertions.assertEquals("", details.getAccountId());
-        Assertions.assertEquals("", details.getResourceCrn());
-        Assertions.assertEquals("", details.getResourceName());
-        Assertions.assertEquals("", details.getInitiatorCrn());
-        Assertions.assertEquals("", details.getCorrelationId());
-        Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, details.getCdpRequestProcessingStep());
-        Assertions.assertEquals("", details.getFlowId());
-        Assertions.assertEquals("", details.getFlowChainId());
-        Assertions.assertEquals("", details.getFlowState());
-        Assertions.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, details.getEnvironmentType());
+        assertEquals("", details.getAccountId());
+        assertEquals("", details.getResourceCrn());
+        assertEquals("", details.getResourceName());
+        assertEquals("", details.getInitiatorCrn());
+        assertEquals("", details.getCorrelationId());
+        assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, details.getCdpRequestProcessingStep());
+        assertEquals("", details.getFlowId());
+        assertEquals("", details.getFlowChainId());
+        assertEquals("", details.getFlowState());
+        assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.UNSET, details.getEnvironmentType());
 
-        Assertions.assertEquals("version-1234", details.getApplicationVersion());
+        assertEquals("version-1234", details.getApplicationVersion());
     }
 
     @Test
-    public void testEnvironmentTypeConversion() {
+    void testEnvironmentTypeConversion() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
 
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent, "AWS");
-        Assertions.assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.AWS, details.getEnvironmentType());
+        assertEquals(UsageProto.CDPEnvironmentsEnvironmentType.Value.AWS, details.getEnvironmentType());
 
-        Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.convert(cdpStructuredFlowEvent, "SOMETHING"));
+        assertThrows(IllegalArgumentException.class, () -> underTest.convert(cdpStructuredFlowEvent, "SOMETHING"));
     }
 
     @Test
-    public void testInitProcessingType() {
+    void testInitProcessingType() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
         flowDetails.setFlowState("unknown");
@@ -80,12 +82,12 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
 
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent, null);
 
-        Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.INIT, details.getCdpRequestProcessingStep());
-        Assertions.assertEquals("", details.getFlowState());
+        assertEquals(UsageProto.CDPRequestProcessingStep.Value.INIT, details.getCdpRequestProcessingStep());
+        assertEquals("", details.getFlowState());
     }
 
     @Test
-    public void testFinalProcessingType() {
+    void testFinalProcessingType() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
         flowDetails.setFlowState("unknown");
@@ -94,19 +96,19 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
 
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent, null);
 
-        Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
-        Assertions.assertEquals("", details.getFlowState());
+        assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
+        assertEquals("", details.getFlowState());
 
         flowDetails.setNextFlowState("ENV_CREATION_FINISHED_STATE");
 
         details = underTest.convert(cdpStructuredFlowEvent, null);
 
-        Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
-        Assertions.assertEquals("", details.getFlowState());
+        assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
+        assertEquals("", details.getFlowState());
     }
 
     @Test
-    public void testSomethingElseProcessingType() {
+    void testSomethingElseProcessingType() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
         flowDetails.setNextFlowState("SOMETHING_ELSE");
@@ -114,11 +116,11 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
 
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent, null);
 
-        Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, details.getCdpRequestProcessingStep());
+        assertEquals(UsageProto.CDPRequestProcessingStep.Value.UNSET, details.getCdpRequestProcessingStep());
     }
 
     @Test
-    public void testFlowAndFlowChainType() {
+    void testFlowAndFlowChainType() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
         flowDetails.setFlowId("flowId");
@@ -132,14 +134,14 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
 
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent, null);
 
-        Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
-        Assertions.assertEquals("flowId", details.getFlowId());
-        Assertions.assertEquals("flowChainId", details.getFlowChainId());
-        Assertions.assertEquals("correlationId", details.getCorrelationId());
+        assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
+        assertEquals("flowId", details.getFlowId());
+        assertEquals("flowChainId", details.getFlowChainId());
+        assertEquals("correlationId", details.getCorrelationId());
     }
 
     @Test
-    public void testNoFlowChain() {
+    void testNoFlowChain() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
         flowDetails.setFlowId("flowId");
@@ -149,14 +151,14 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
 
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent, null);
 
-        Assertions.assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
-        Assertions.assertEquals("flowId", details.getFlowId());
-        Assertions.assertEquals("flowId", details.getFlowChainId());
-        Assertions.assertEquals("", details.getFlowState());
+        assertEquals(UsageProto.CDPRequestProcessingStep.Value.FINAL, details.getCdpRequestProcessingStep());
+        assertEquals("flowId", details.getFlowId());
+        assertEquals("flowId", details.getFlowChainId());
+        assertEquals("", details.getFlowState());
     }
 
     @Test
-    public void testFlowStateOnlyFilledOutInCaseOfFailure() {
+    void testFlowStateOnlyFilledOutInCaseOfFailure() {
         CDPEnvironmentStructuredFlowEvent cdpStructuredFlowEvent = new CDPEnvironmentStructuredFlowEvent();
         FlowDetails flowDetails = new FlowDetails();
         cdpStructuredFlowEvent.setFlow(flowDetails);
@@ -164,46 +166,46 @@ class CDPStructuredFlowEventToCDPOperationDetailsConverterTest {
         flowDetails.setFlowState("FLOW_STATE");
         flowDetails.setNextFlowState("ENV_CREATION_FAILED_STATE");
         UsageProto.CDPOperationDetails details = underTest.convert(cdpStructuredFlowEvent, null);
-        Assertions.assertEquals("FLOW_STATE", details.getFlowState());
+        assertEquals("FLOW_STATE", details.getFlowState());
 
         flowDetails.setFlowState("FLOW_STATE");
         flowDetails.setNextFlowState("DOWNSCALE_FAIL_STATE");
         details = underTest.convert(cdpStructuredFlowEvent, null);
-        Assertions.assertEquals("FLOW_STATE", details.getFlowState());
+        assertEquals("FLOW_STATE", details.getFlowState());
 
         flowDetails.setFlowState("FLOW_STATE");
         flowDetails.setNextFlowState("ENV_CREATION_FINISHED_STATE");
         details = underTest.convert(cdpStructuredFlowEvent, null);
-        Assertions.assertEquals("", details.getFlowState());
+        assertEquals("", details.getFlowState());
 
         flowDetails.setFlowState("FLOW_STATE");
         flowDetails.setNextFlowState("INIT_STATE");
         details = underTest.convert(cdpStructuredFlowEvent, null);
-        Assertions.assertEquals("", details.getFlowState());
+        assertEquals("", details.getFlowState());
 
         flowDetails.setFlowState(null);
         flowDetails.setNextFlowState("ENV_CREATION_FAILED_STATE");
         details = underTest.convert(cdpStructuredFlowEvent, null);
-        Assertions.assertEquals("", details.getFlowState());
+        assertEquals("", details.getFlowState());
 
         flowDetails.setFlowState(null);
         flowDetails.setNextFlowState("DOWNSCALE_FAIL_STATE");
         details = underTest.convert(cdpStructuredFlowEvent, null);
-        Assertions.assertEquals("", details.getFlowState());
+        assertEquals("", details.getFlowState());
 
         flowDetails.setFlowState("unknown");
         flowDetails.setNextFlowState("ENV_CREATION_FAILED_STATE");
         details = underTest.convert(cdpStructuredFlowEvent, null);
-        Assertions.assertEquals("", details.getFlowState());
+        assertEquals("", details.getFlowState());
 
         flowDetails.setFlowState("unknown");
         flowDetails.setNextFlowState("DOWNSCALE_FAIL_STATE");
         details = underTest.convert(cdpStructuredFlowEvent, null);
-        Assertions.assertEquals("", details.getFlowState());
+        assertEquals("", details.getFlowState());
 
         flowDetails.setFlowState("FLOW_STATE");
         flowDetails.setNextFlowState(null);
         details = underTest.convert(cdpStructuredFlowEvent, null);
-        Assertions.assertEquals("", details.getFlowState());
+        assertEquals("", details.getFlowState());
     }
 }

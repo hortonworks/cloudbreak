@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.join.DummyFingerprintC
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.join.EqualMinionFpMatcher;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.join.FingerprintFromSbCollector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.join.MinionAcceptor;
-import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
 public class SaltBootstrap implements OrchestratorBootstrap {
 
@@ -48,16 +48,24 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private final BootstrapParams params;
 
+    private final SaltStateService saltStateService;
+
     private Set<Node> targets;
 
-    public SaltBootstrap(SaltConnector sc, Collection<SaltConnector> saltConnectors, List<GatewayConfig> allGatewayConfigs, Set<Node> targets,
-            BootstrapParams params) {
+    /*
+        Intentionally Package-private to be able to verify construction later.
+        PowerMockito checked for the creation of the SaltBootsrap class. On regular Mockito, verifying of constructor call is not possible.
+        To work around this, a Factory class is introduced that instantiates SaltBootstrap and now the factory method can be verified.
+     */
+    SaltBootstrap(SaltStateService saltStateService, SaltConnector sc, Collection<SaltConnector> saltConnectors, List<GatewayConfig> allGatewayConfigs,
+            Set<Node> targets, BootstrapParams params) {
         this.sc = sc;
         this.saltConnectors = saltConnectors;
         this.allGatewayConfigs = allGatewayConfigs;
         originalTargets = Collections.unmodifiableSet(targets);
         this.targets = targets;
         this.params = params;
+        this.saltStateService = saltStateService;
     }
 
     @Override
@@ -94,7 +102,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             createMinionAcceptor().acceptMinions();
         }
 
-        MinionIpAddressesResponse minionIpAddressesResponse = SaltStates.collectMinionIpAddresses(sc);
+        MinionIpAddressesResponse minionIpAddressesResponse = saltStateService.collectMinionIpAddresses(sc);
         if (minionIpAddressesResponse != null) {
             originalTargets.forEach(node -> {
                 if (!minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {

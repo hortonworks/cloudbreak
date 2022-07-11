@@ -17,7 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
@@ -54,7 +54,7 @@ class StackCreationServiceTest {
 
     @BeforeEach
     void setUp() {
-        Whitebox.setInternalState(underTest, "ephemeralVolumeChecker", new InstanceGroupEphemeralVolumeChecker());
+        ReflectionTestUtils.setField(underTest, "ephemeralVolumeChecker", new InstanceGroupEphemeralVolumeChecker());
         CloudConnector<Object> cloudConnector = Mockito.mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         MetadataCollector metadataCollector = Mockito.mock(MetadataCollector.class);

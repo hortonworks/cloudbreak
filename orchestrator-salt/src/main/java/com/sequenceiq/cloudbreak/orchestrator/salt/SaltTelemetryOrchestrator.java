@@ -49,7 +49,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConcurrentPara
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -133,12 +133,17 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
     @Inject
     private TelemetrySaltRetryConfig telemetrySaltRetryConfig;
 
+    @Inject
+    private SaltStateService saltStateService;
+
     @Override
     public void validateCloudStorage(List<GatewayConfig> allGateways, Set<Node> allNodes, Set<String> targetHostNames,
             Map<String, Object> parameters, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateways);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            runValidation(sc, new ParameterizedStateRunner(targetHostNames, allNodes, TELEMETRY_CLOUD_STORAGE_TEST, parameters), exitCriteriaModel);
+            runValidation(sc,
+                    new ParameterizedStateRunner(saltStateService, targetHostNames, allNodes, TELEMETRY_CLOUD_STORAGE_TEST, parameters),
+                    exitCriteriaModel);
             LOGGER.debug("Completed validating cloud storage");
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.warn("CloudbreakOrchestratorException occurred during cloud storage validation", e);
@@ -156,7 +161,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
     }
 
     private void runValidation(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws Exception {
-        OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner, true);
+        OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, baseSaltJobRunner, true);
         Callable<Boolean> saltJobRunBootstrapRunner =
                 saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, telemetrySaltRetryConfig.getCloudStorageValidation(), false);
         saltJobRunBootstrapRunner.call();
@@ -232,7 +237,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
             throws CloudbreakOrchestratorFailedException  {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(gatewayConfigs);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            List<String> missingNodeNames = SaltStates.ping(sc)
+            List<String> missingNodeNames = saltStateService.ping(sc)
                     .getResultByMinionId().entrySet().stream()
                     .filter(entry -> !entry.getValue())
                     .map(Map.Entry::getKey)
@@ -285,9 +290,8 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateways);
         Set<String> targetHostnames = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            ParameterizedStateRunner stateRunner = new ParameterizedStateRunner(targetHostnames, nodes,
-                    METERING_UPGRADE, upgradeParameters);
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateRunner, false);
+            ParameterizedStateRunner stateRunner = new ParameterizedStateRunner(saltStateService, targetHostnames, nodes, METERING_UPGRADE, upgradeParameters);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner, false);
             Callable<Boolean> saltJobRunBootstrapRunner =
                     saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, telemetrySaltRetryConfig.getMeteringUpgrade(), false);
             saltJobRunBootstrapRunner.call();
@@ -320,8 +324,8 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateways);
         Set<String> targetHostnames = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            StateRunner stateRunner = new StateRunner(targetHostnames, nodes, saltState);
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateRunner, retryOnFail);
+            StateRunner stateRunner = new StateRunner(saltStateService, targetHostnames, nodes, saltState);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner, retryOnFail);
             Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, retryCount, false);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
@@ -338,8 +342,9 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateways);
         Set<String> targetHostnames = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            ConcurrentParameterizedStateRunner stateRunner = new ConcurrentParameterizedStateRunner(targetHostnames, nodes, saltState, parameters);
-            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateRunner, retryOnFail);
+            ConcurrentParameterizedStateRunner stateRunner =
+                    new ConcurrentParameterizedStateRunner(saltStateService, targetHostnames, nodes, saltState, parameters);
+            OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(saltStateService, sc, stateRunner, retryOnFail);
             Callable<Boolean> saltJobRunBootstrapRunner = saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, retryCount, false);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
@@ -463,7 +468,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         if (anyHostsFilter && CollectionUtils.isNotEmpty(nodes)) {
             command += " -h " + nodes.stream().map(Node::getHostname).collect(Collectors.joining(","));
         }
-        Map<String, String> preFlightResponses = SaltStates.runCommandOnHosts(retry, sc, targets, command);
+        Map<String, String> preFlightResponses = saltStateService.runCommandOnHosts(retry, sc, targets, command);
         logMemoryWarnings(preFlightResponses);
         boolean successful = isSuccessful(preFlightResponses);
         if (successful) {
@@ -482,7 +487,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
     private void updateSaltStateComponentDefinition(SaltConnector sc, Target<String> targets, String zipFileName, String component) {
         String command = String.format("%s/%s -f %s%s -s %s",
                 REMOTE_SCRIPTS_LOCATION, SALT_STATE_UPDATER_SCRIPT, REMOTE_TMP_FOLDER, zipFileName, component);
-        Map<String, String> result = SaltStates.runCommandOnHosts(retry, sc, targets, command);
+        Map<String, String> result = saltStateService.runCommandOnHosts(retry, sc, targets, command);
         LOGGER.debug("Result of partial salt state ({}) upgrade: {}", component, result);
     }
 

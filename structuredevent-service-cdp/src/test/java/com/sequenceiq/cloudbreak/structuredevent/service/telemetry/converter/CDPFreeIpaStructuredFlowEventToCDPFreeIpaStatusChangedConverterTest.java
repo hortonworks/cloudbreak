@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
@@ -13,51 +15,51 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.freeipa.CDPFreeIpaStr
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.CDPRequestProcessingStepMapper;
 
 @ExtendWith(MockitoExtension.class)
-public class CDPFreeIpaStructuredFlowEventToCDPFreeIpaStatusChangedConverterTest {
+class CDPFreeIpaStructuredFlowEventToCDPFreeIpaStatusChangedConverterTest {
 
     private CDPFreeIpaStructuredFlowEventToCDPFreeIpaStatusChangedConverter underTest;
 
     @BeforeEach()
-    public void setUp() {
+    void setUp() {
         underTest = new CDPFreeIpaStructuredFlowEventToCDPFreeIpaStatusChangedConverter();
         CDPStructuredFlowEventToCDPOperationDetailsConverter operationDetailsConverter = new CDPStructuredFlowEventToCDPOperationDetailsConverter();
-        Whitebox.setInternalState(operationDetailsConverter, "appVersion", "version-1234");
-        Whitebox.setInternalState(operationDetailsConverter, "cdpRequestProcessingStepMapper", new CDPRequestProcessingStepMapper());
-        Whitebox.setInternalState(underTest, "operationDetailsConverter", operationDetailsConverter);
+        ReflectionTestUtils.setField(operationDetailsConverter, "appVersion", "version-1234");
+        ReflectionTestUtils.setField(operationDetailsConverter, "cdpRequestProcessingStepMapper", new CDPRequestProcessingStepMapper());
+        ReflectionTestUtils.setField(underTest, "operationDetailsConverter", operationDetailsConverter);
         StackDetailsToCDPFreeIPAExtendedDetailsConverter freeIPAExtendedDetailsConverter = new StackDetailsToCDPFreeIPAExtendedDetailsConverter();
-        Whitebox.setInternalState(freeIPAExtendedDetailsConverter, "freeIPAShapeConverter", new StackDetailsToCDPFreeIPAShapeConverter());
-        Whitebox.setInternalState(freeIPAExtendedDetailsConverter, "imageDetailsConverter", new StackDetailsToCDPImageDetailsConverter());
-        Whitebox.setInternalState(underTest, "freeIPAExtendedDetailsConverter", freeIPAExtendedDetailsConverter);
-        Whitebox.setInternalState(underTest, "freeIPAStatusDetailsConverter", new StackDetailsToCDPFreeIPAStatusDetailsConverter());
+        ReflectionTestUtils.setField(freeIPAExtendedDetailsConverter, "freeIPAShapeConverter", new StackDetailsToCDPFreeIPAShapeConverter());
+        ReflectionTestUtils.setField(freeIPAExtendedDetailsConverter, "imageDetailsConverter", new StackDetailsToCDPImageDetailsConverter());
+        ReflectionTestUtils.setField(underTest, "freeIPAExtendedDetailsConverter", freeIPAExtendedDetailsConverter);
+        ReflectionTestUtils.setField(underTest, "freeIPAStatusDetailsConverter", new StackDetailsToCDPFreeIPAStatusDetailsConverter());
     }
 
     @Test
-    public void testNullStructuredFlowEvent() {
+    void testNullStructuredFlowEvent() {
         UsageProto.CDPFreeIPAStatusChanged cdpFreeIPAStatusChanged = underTest.convert(null,
                 UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED);
 
-        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED, cdpFreeIPAStatusChanged.getNewStatus());
-        Assertions.assertNotNull(cdpFreeIPAStatusChanged.getOperationDetails());
-        Assertions.assertNotNull(cdpFreeIPAStatusChanged.getFreeIPADetails());
-        Assertions.assertNotNull(cdpFreeIPAStatusChanged.getStatusDetails());
-        Assertions.assertEquals("", cdpFreeIPAStatusChanged.getEnvironmentCrn());
+        assertEquals(UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED, cdpFreeIPAStatusChanged.getNewStatus());
+        assertNotNull(cdpFreeIPAStatusChanged.getOperationDetails());
+        assertNotNull(cdpFreeIPAStatusChanged.getFreeIPADetails());
+        assertNotNull(cdpFreeIPAStatusChanged.getStatusDetails());
+        assertEquals("", cdpFreeIPAStatusChanged.getEnvironmentCrn());
     }
 
     @Test
-    public void testConvertingEmptyStructuredFlowEvent() {
+    void testConvertingEmptyStructuredFlowEvent() {
         CDPFreeIpaStructuredFlowEvent cdpStructuredFlowEvent = new CDPFreeIpaStructuredFlowEvent();
         UsageProto.CDPFreeIPAStatusChanged cdpFreeIPAStatusChanged = underTest.convert(cdpStructuredFlowEvent,
                 UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED);
 
-        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED, cdpFreeIPAStatusChanged.getNewStatus());
-        Assertions.assertNotNull(cdpFreeIPAStatusChanged.getOperationDetails());
-        Assertions.assertNotNull(cdpFreeIPAStatusChanged.getFreeIPADetails());
-        Assertions.assertNotNull(cdpFreeIPAStatusChanged.getStatusDetails());
-        Assertions.assertEquals("", cdpFreeIPAStatusChanged.getEnvironmentCrn());
+        assertEquals(UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED, cdpFreeIPAStatusChanged.getNewStatus());
+        assertNotNull(cdpFreeIPAStatusChanged.getOperationDetails());
+        assertNotNull(cdpFreeIPAStatusChanged.getFreeIPADetails());
+        assertNotNull(cdpFreeIPAStatusChanged.getStatusDetails());
+        assertEquals("", cdpFreeIPAStatusChanged.getEnvironmentCrn());
     }
 
     @Test
-    public void testConvertingNotEmptyStructuredFlowEvent() {
+    void testConvertingNotEmptyStructuredFlowEvent() {
         CDPFreeIpaStructuredFlowEvent cdpStructuredFlowEvent = new CDPFreeIpaStructuredFlowEvent();
         CDPOperationDetails operationDetails = new CDPOperationDetails();
         operationDetails.setEnvironmentCrn("testcrn");
@@ -65,10 +67,10 @@ public class CDPFreeIpaStructuredFlowEventToCDPFreeIpaStatusChangedConverterTest
         UsageProto.CDPFreeIPAStatusChanged cdpFreeIPAStatusChanged = underTest.convert(cdpStructuredFlowEvent,
                 UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED);
 
-        Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED, cdpFreeIPAStatusChanged.getNewStatus());
-        Assertions.assertNotNull(cdpFreeIPAStatusChanged.getOperationDetails());
-        Assertions.assertNotNull(cdpFreeIPAStatusChanged.getFreeIPADetails());
-        Assertions.assertNotNull(cdpFreeIPAStatusChanged.getStatusDetails());
-        Assertions.assertEquals("testcrn", cdpFreeIPAStatusChanged.getEnvironmentCrn());
+        assertEquals(UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED, cdpFreeIPAStatusChanged.getNewStatus());
+        assertNotNull(cdpFreeIPAStatusChanged.getOperationDetails());
+        assertNotNull(cdpFreeIPAStatusChanged.getFreeIPADetails());
+        assertNotNull(cdpFreeIPAStatusChanged.getStatusDetails());
+        assertEquals("testcrn", cdpFreeIPAStatusChanged.getEnvironmentCrn());
     }
 }

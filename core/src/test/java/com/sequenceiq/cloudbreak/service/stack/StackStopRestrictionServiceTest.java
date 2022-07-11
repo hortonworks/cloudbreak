@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -10,15 +11,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -41,7 +40,7 @@ import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.common.model.AwsDiskType;
 
 @ExtendWith(MockitoExtension.class)
-public class StackStopRestrictionServiceTest {
+class StackStopRestrictionServiceTest {
 
     private final TemporaryStorage temporaryStorage = TemporaryStorage.ATTACHED_VOLUMES;
 
@@ -61,7 +60,7 @@ public class StackStopRestrictionServiceTest {
     private StackStopRestrictionService underTest;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         StackStopRestrictionConfiguration config = new StackStopRestrictionConfiguration();
         config.setRestrictedCloudPlatform("AWS");
         config.setEphemeralCachingMinVersion("2.48.0");
@@ -85,13 +84,12 @@ public class StackStopRestrictionServiceTest {
         srgList.add(serviceRoleGroup);
         config.setPermittedServiceRoleGroups(srgList);
 
-        Whitebox.setInternalState(underTest, "config", config);
-        Whitebox.setInternalState(underTest, "ephemeralVolumeChecker", new InstanceGroupEphemeralVolumeChecker());
-        MockitoAnnotations.openMocks(this);
+        ReflectionTestUtils.setField(underTest, "config", config);
+        ReflectionTestUtils.setField(underTest, "ephemeralVolumeChecker", new InstanceGroupEphemeralVolumeChecker());
     }
 
     @Test
-    public void infrastructureShouldNotBeStoppableForEphemeralOnlyBefore253CbVersionAndSaltCbVersion() {
+    void infrastructureShouldNotBeStoppableForEphemeralOnlyBefore253CbVersionAndSaltCbVersion() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage, "master"));
         groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value()), temporaryStorage, "worker"));
@@ -101,11 +99,11 @@ public class StackStopRestrictionServiceTest {
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable(createStack("AWS", groups));
 
-        Assertions.assertEquals(StopRestrictionReason.EPHEMERAL_VOLUMES, actual);
+        assertEquals(StopRestrictionReason.EPHEMERAL_VOLUMES, actual);
     }
 
     @Test
-    public void stoppableWhenEphemeralOnlyAndAfter253CbVersion() {
+    void stoppableWhenEphemeralOnlyAndAfter253CbVersion() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage, "master"));
         groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value()), temporaryStorage, "worker"));
@@ -119,11 +117,11 @@ public class StackStopRestrictionServiceTest {
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable(createStack("AWS", groups));
 
-        Assertions.assertEquals(StopRestrictionReason.NONE, actual);
+        assertEquals(StopRestrictionReason.NONE, actual);
     }
 
     @Test
-    public void stoppableWhenEphemeralOnlyAndBefore253CbVersionAndAfter253SaltCbVersion() {
+    void stoppableWhenEphemeralOnlyAndBefore253CbVersionAndAfter253SaltCbVersion() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage, "master"));
         groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value()), temporaryStorage, "worker"));
@@ -138,11 +136,11 @@ public class StackStopRestrictionServiceTest {
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable(createStack("AWS", groups));
 
-        Assertions.assertEquals(StopRestrictionReason.NONE, actual);
+        assertEquals(StopRestrictionReason.NONE, actual);
     }
 
     @Test
-    public void stoppableWhenEphemeralOnlyAndAfter253CbVersionAndNodemanagerOnly() {
+    void stoppableWhenEphemeralOnlyAndAfter253CbVersionAndNodemanagerOnly() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage, "master"));
         groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value()), temporaryStorage, "worker"));
@@ -154,11 +152,11 @@ public class StackStopRestrictionServiceTest {
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable(createStack("AWS", groups));
 
-        Assertions.assertEquals(StopRestrictionReason.NONE, actual);
+        assertEquals(StopRestrictionReason.NONE, actual);
     }
 
     @Test
-    public void stoppableWhenEphemeralOnlyAndAfter253CbVersionAndGatewayOnly() {
+    void stoppableWhenEphemeralOnlyAndAfter253CbVersionAndGatewayOnly() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage, "master"));
         groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value()), temporaryStorage, "worker"));
@@ -171,11 +169,11 @@ public class StackStopRestrictionServiceTest {
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable(createStack("AWS", groups));
 
-        Assertions.assertEquals(StopRestrictionReason.NONE, actual);
+        assertEquals(StopRestrictionReason.NONE, actual);
     }
 
     @Test
-    public void notStoppableWhenEphemeralOnlyAndServiceNotPermitted() {
+    void notStoppableWhenEphemeralOnlyAndServiceNotPermitted() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage, "master"));
         groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value()), temporaryStorage, "worker"));
@@ -189,11 +187,11 @@ public class StackStopRestrictionServiceTest {
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable(createStack("AWS", groups));
 
-        Assertions.assertEquals(StopRestrictionReason.EPHEMERAL_VOLUMES, actual);
+        assertEquals(StopRestrictionReason.EPHEMERAL_VOLUMES, actual);
     }
 
     @Test
-    public void notStoppableWhenEphemeralOnlyAndRequiredServiceNotPresent() {
+    void notStoppableWhenEphemeralOnlyAndRequiredServiceNotPresent() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage, "master"));
         groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value()), temporaryStorage, "worker"));
@@ -206,11 +204,11 @@ public class StackStopRestrictionServiceTest {
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable(createStack("AWS", groups));
 
-        Assertions.assertEquals(StopRestrictionReason.EPHEMERAL_VOLUMES, actual);
+        assertEquals(StopRestrictionReason.EPHEMERAL_VOLUMES, actual);
     }
 
     @Test
-    public void infrastructureShouldBeStoppableForEBSVolumesOnly() {
+    void infrastructureShouldBeStoppableForEBSVolumesOnly() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage, "master"));
 
@@ -218,11 +216,11 @@ public class StackStopRestrictionServiceTest {
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable(createStack("AWS", groups));
 
-        Assertions.assertEquals(StopRestrictionReason.NONE, actual);
+        assertEquals(StopRestrictionReason.NONE, actual);
     }
 
     @Test
-    public void infrastructureShouldNotBeStoppableIfTemporaryStorageIsEphemeralVolumesBefore248CbVersion() {
+    void infrastructureShouldNotBeStoppableIfTemporaryStorageIsEphemeralVolumesBefore248CbVersion() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage, "master"));
         groups.add(createGroup(List.of("ebs"), TemporaryStorage.EPHEMERAL_VOLUMES, "worker"));
@@ -231,11 +229,11 @@ public class StackStopRestrictionServiceTest {
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable(createStack("AWS", groups));
 
-        Assertions.assertEquals(StopRestrictionReason.EPHEMERAL_VOLUME_CACHING, actual);
+        assertEquals(StopRestrictionReason.EPHEMERAL_VOLUME_CACHING, actual);
     }
 
     @Test
-    public void infrastructureShouldBeStoppableIfTemporaryStorageIsEphemeralVolumesAfter248CbVersion() {
+    void infrastructureShouldBeStoppableIfTemporaryStorageIsEphemeralVolumesAfter248CbVersion() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage, "master"));
         groups.add(createGroup(List.of("ebs"), TemporaryStorage.EPHEMERAL_VOLUMES, "worker"));
@@ -244,32 +242,32 @@ public class StackStopRestrictionServiceTest {
 
         StopRestrictionReason actual = underTest.isInfrastructureStoppable(createStack("AWS", groups));
 
-        Assertions.assertEquals(StopRestrictionReason.NONE, actual);
+        assertEquals(StopRestrictionReason.NONE, actual);
     }
 
     @Test
-    public void infrastructureShouldBeStoppableForMixedStorage() {
+    void infrastructureShouldBeStoppableForMixedStorage() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage, "master"));
         groups.add(createGroup(List.of(AwsDiskType.Ephemeral.value(), AwsDiskType.Gp2.value()), temporaryStorage, "worker"));
 
         when(componentConfigProviderService.getCloudbreakDetails(any())).thenReturn(new CloudbreakDetails("2.47.0-bXX"));
 
-        Assertions.assertEquals(StopRestrictionReason.EPHEMERAL_VOLUMES, underTest.isInfrastructureStoppable(createStack("AWS", groups)));
+        assertEquals(StopRestrictionReason.EPHEMERAL_VOLUMES, underTest.isInfrastructureStoppable(createStack("AWS", groups)));
 
         when(componentConfigProviderService.getCloudbreakDetails(any())).thenReturn(new CloudbreakDetails("2.48.0-bXX"));
 
-        Assertions.assertEquals(StopRestrictionReason.NONE, underTest.isInfrastructureStoppable(createStack("AWS", groups)));
+        assertEquals(StopRestrictionReason.NONE, underTest.isInfrastructureStoppable(createStack("AWS", groups)));
     }
 
     @Test
-    public void infrastructureShouldBeStoppableForNonAWSClusters() {
+    void infrastructureShouldBeStoppableForNonAWSClusters() {
         StopRestrictionReason actual = underTest.isInfrastructureStoppable(createStack("GCP", null));
-        Assertions.assertEquals(StopRestrictionReason.NONE, actual);
+        assertEquals(StopRestrictionReason.NONE, actual);
     }
 
     @Test
-    public void infrastructureShouldBeStoppableForValidInstanceGroups() {
+    void infrastructureShouldBeStoppableForValidInstanceGroups() {
         Set<InstanceGroup> groups = new HashSet<>();
         groups.add(createGroup(List.of("ebs"), temporaryStorage, "worker"));
         InstanceGroup master = createGroup(List.of("ebs"), temporaryStorage, "master");
@@ -280,11 +278,11 @@ public class StackStopRestrictionServiceTest {
 
         when(componentConfigProviderService.getCloudbreakDetails(any())).thenReturn(new CloudbreakDetails("2.47.0-bXX"));
 
-        Assertions.assertEquals(StopRestrictionReason.NONE, underTest.isInfrastructureStoppable(createStack("AWS", groups)));
+        assertEquals(StopRestrictionReason.NONE, underTest.isInfrastructureStoppable(createStack("AWS", groups)));
 
         when(componentConfigProviderService.getCloudbreakDetails(any())).thenReturn(new CloudbreakDetails("2.48.0-bXX"));
 
-        Assertions.assertEquals(StopRestrictionReason.NONE, underTest.isInfrastructureStoppable(createStack("AWS", groups)));
+        assertEquals(StopRestrictionReason.NONE, underTest.isInfrastructureStoppable(createStack("AWS", groups)));
     }
 
     private InstanceGroup createGroup(List<String> volumeTypes, TemporaryStorage temporaryStorage, String groupName) {

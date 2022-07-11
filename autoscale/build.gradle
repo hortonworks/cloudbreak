@@ -121,12 +121,6 @@ dependencyManagement {
             entry 'springfox-boot-starter'
         }
 
-        dependencySet (group: 'org.powermock', version: powermockVersion) {
-            entry 'powermock-module-junit4'
-            entry('powermock-api-mockito2') {
-                exclude group: 'org.hamcrest', name: '*'
-            }
-        }
         dependency group: 'xerces',              name: 'xercesImpl',            version: xerces
 
         dependency (group: 'io.swagger',                    name: 'swagger-jersey2-jaxrs',          version: swaggerVersion) {
@@ -194,8 +188,6 @@ dependencies {
 
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test'
     testImplementation group: 'org.mockito',               name: 'mockito-core'
-    testImplementation group: 'org.powermock',             name: 'powermock-module-junit4'
-    testImplementation group: 'org.powermock',             name: 'powermock-api-mockito2'
     testImplementation group: 'com.openpojo',              name: 'openpojo'
     testImplementation group: "com.h2database",            name: "h2",     version: h2databaseVersion
     testImplementation project(path: ':common', configuration: 'tests')

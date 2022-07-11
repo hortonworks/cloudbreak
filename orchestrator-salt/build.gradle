@@ -26,13 +26,10 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core',    name: 'jackson-databind',               version: jacksonVersion
     implementation group: 'net.jcip',                      name: 'jcip-annotations',               version: '1.0'
 
-    testImplementation group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion
+    testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 
-    testImplementation (group: 'org.powermock',             name: 'powermock-module-junit4',        version: powermockVersion)
-    testImplementation (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
-      exclude group: 'org.hamcrest'
-    }
-    testImplementation (group: 'org.mockito',               name: 'mockito-core',                    version: mockitoVersion) {
+    testImplementation group: 'org.hamcrest',              name: 'hamcrest',                       version: hamcrestVersion
+    testImplementation (group: 'org.mockito',              name: 'mockito-core',                   version: mockitoVersion) {
       exclude group: 'org.hamcrest'
     }
 

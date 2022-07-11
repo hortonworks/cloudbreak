@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStr
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetSelectorService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFailureMessageDecoder;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsLifeCycleMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeLbMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -176,6 +177,7 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
             SubnetSelectorService.class,
             AwsEncodedAuthorizationFailureMessageDecoder.class,
             AwsConfig.class,
+            AwsPageCollector.class
     })
     static class AwsNativeMetadataCollectorTestConfig {
 

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobState;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
 public abstract class BaseSaltJobRunner implements SaltJobRunner {
 
@@ -22,15 +23,18 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
 
     private final Set<Node> allNode;
 
+    private final SaltStateService saltStateService;
+
     private JobId jid;
 
     private JobState jobState = JobState.NOT_STARTED;
 
     private Multimap<String, String> nodesWithError;
 
-    protected BaseSaltJobRunner(Set<String> targetHostnames, Set<Node> allNode) {
+    protected BaseSaltJobRunner(SaltStateService saltStateService, Set<String> targetHostnames, Set<Node> allNode) {
         this.targetHostnames = targetHostnames;
         this.allNode = allNode;
+        this.saltStateService = saltStateService;
     }
 
     @Override
@@ -76,6 +80,11 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
     @Override
     public StateType stateType() {
         return StateType.SIMPLE;
+    }
+
+    @Override
+    public SaltStateService saltStateService() {
+        return saltStateService;
     }
 
     public Set<String> collectSucceededNodes(ApplyResponse applyResponse) {

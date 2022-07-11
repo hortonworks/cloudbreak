@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTe
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobState;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
-import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
 public class SaltJobIdTracker implements OrchestratorBootstrap {
 
@@ -30,14 +30,17 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
 
     private final boolean retryOnFail;
 
-    public SaltJobIdTracker(SaltConnector saltConnector, SaltJobRunner saltJobRunner) {
-        this(saltConnector, saltJobRunner, true);
+    private final SaltStateService saltStateService;
+
+    public SaltJobIdTracker(SaltStateService saltStateService, SaltConnector saltConnector, SaltJobRunner saltJobRunner) {
+        this(saltStateService, saltConnector, saltJobRunner, true);
     }
 
-    public SaltJobIdTracker(SaltConnector saltConnector, SaltJobRunner saltJobRunner, boolean retryOnFail) {
+    public SaltJobIdTracker(SaltStateService saltStateService, SaltConnector saltConnector, SaltJobRunner saltJobRunner, boolean retryOnFail) {
         this.saltConnector = saltConnector;
         this.saltJobRunner = saltJobRunner;
         this.retryOnFail = retryOnFail;
+        this.saltStateService = saltStateService;
     }
 
     @Override
@@ -75,7 +78,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
     }
 
     private void checkIsOtherJobRunning() throws CloudbreakOrchestratorFailedException, CloudbreakOrchestratorInProgressException {
-        RunningJobsResponse runningJobs = SaltStates.getRunningJobs(saltConnector);
+        RunningJobsResponse runningJobs = saltStateService.getRunningJobs(saltConnector);
         List<String> runningJobIds = mapToRunningJobIds(runningJobs);
         if (!runningJobIds.isEmpty()) {
             LOGGER.warn("There are running job(s) with id: {}. Postpone starting the new job until these are finished.", runningJobIds);
@@ -91,7 +94,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
     }
 
     private void checkIsFinished(String jobId) throws CloudbreakOrchestratorFailedException {
-        boolean jobRunning = SaltStates.jobIsRunning(saltConnector, jobId);
+        boolean jobRunning = saltStateService.jobIsRunning(saltConnector, jobId);
         if (jobRunning) {
             LOGGER.debug("Job: {} is running currently, waiting for next polling attempt.", jobId);
             saltJobRunner.setJobState(JobState.IN_PROGRESS);
@@ -118,7 +121,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
     private void checkJobFinishedWithSuccess() throws CloudbreakOrchestratorFailedException {
         String jobId = saltJobRunner.getJid().getJobId();
         try {
-            Multimap<String, Map<String, String>> missingNodesWithReason = SaltStates.jidInfo(saltConnector, jobId, saltJobRunner.stateType());
+            Multimap<String, Map<String, String>> missingNodesWithReason = saltStateService.jidInfo(saltConnector, jobId, saltJobRunner.stateType());
             Multimap<String, String> missingNodesWithReplacedReasons =
                     saltConnector.getSaltErrorResolver().resolveErrorMessages(missingNodesWithReason);
             if (!missingNodesWithReplacedReasons.isEmpty()) {

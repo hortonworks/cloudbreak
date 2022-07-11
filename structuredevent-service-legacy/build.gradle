@@ -14,8 +14,8 @@ jar {
 }
 
 dependencies {
-    implementation group: 'org.springframework.kafka',          name: 'spring-kafka',                version: '2.6.4'
-    implementation group: 'org.skyscreamer',          name: 'jsonassert',                version: '1.5.0'
+    implementation group: 'org.springframework.kafka',          name: 'spring-kafka',                    version: '2.6.4'
+    implementation group: 'org.skyscreamer',                    name: 'jsonassert',                      version: '1.5.0'
 
     implementation project(':structuredevent-model')
     implementation project(':workspace')
@@ -25,7 +25,6 @@ dependencies {
     implementation project(':auth-connector')
     implementation project(':flow')
 
-    testImplementation (group: 'org.powermock',             name: 'powermock-api-mockito2',          version: powermockVersion) {
-      exclude group: 'org.hamcrest'
-    }
+    testImplementation group: 'org.springframework.boot',        name: 'spring-boot-starter-test',       version: springBootVersion
+
 }

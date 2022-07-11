@@ -81,6 +81,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonIdentityManagementClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -153,6 +154,9 @@ public class AwsPlatformResourcesTest {
 
     @Mock
     private AmazonDynamoDBClient amazonDynamoDB;
+
+    @Mock
+    private AwsPageCollector awsPageCollector;
 
     private ExtendedCloudCredential cloudCredential;
 

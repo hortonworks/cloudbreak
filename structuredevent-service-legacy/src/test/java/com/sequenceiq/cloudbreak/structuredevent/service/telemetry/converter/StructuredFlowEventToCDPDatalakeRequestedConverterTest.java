@@ -1,51 +1,53 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterRequestProcessingStepMapper;
 
-public class StructuredFlowEventToCDPDatalakeRequestedConverterTest {
+class StructuredFlowEventToCDPDatalakeRequestedConverterTest {
 
     private StructuredFlowEventToCDPDatalakeRequestedConverter underTest;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         underTest = new StructuredFlowEventToCDPDatalakeRequestedConverter();
         StructuredEventToCDPOperationDetailsConverter operationDetailsConverter = new StructuredEventToCDPOperationDetailsConverter();
-        Whitebox.setInternalState(operationDetailsConverter, "appVersion", "version-1234");
-        Whitebox.setInternalState(operationDetailsConverter, "clusterRequestProcessingStepMapper", new ClusterRequestProcessingStepMapper());
-        Whitebox.setInternalState(underTest, "operationDetailsConverter", operationDetailsConverter);
+        ReflectionTestUtils.setField(operationDetailsConverter, "appVersion", "version-1234");
+        ReflectionTestUtils.setField(operationDetailsConverter, "clusterRequestProcessingStepMapper", new ClusterRequestProcessingStepMapper());
+        ReflectionTestUtils.setField(underTest, "operationDetailsConverter", operationDetailsConverter);
         StructuredEventToCDPClusterDetailsConverter clusterDetailsConverter = new StructuredEventToCDPClusterDetailsConverter();
-        Whitebox.setInternalState(clusterDetailsConverter, "clusterShapeConverter", new StructuredEventToCDPClusterShapeConverter());
-        Whitebox.setInternalState(clusterDetailsConverter, "imageDetailsConverter", new StructuredEventToCDPImageDetailsConverter());
-        Whitebox.setInternalState(clusterDetailsConverter, "versionDetailsConverter", new StructuredEventToCDPVersionDetailsConverter());
-        Whitebox.setInternalState(underTest, "clusterDetailsConverter", clusterDetailsConverter);
-        Whitebox.setInternalState(underTest, "featuresConverter", new StructuredEventToCDPDatalakeFeaturesConverter());
+        ReflectionTestUtils.setField(clusterDetailsConverter, "clusterShapeConverter", new StructuredEventToCDPClusterShapeConverter());
+        ReflectionTestUtils.setField(clusterDetailsConverter, "imageDetailsConverter", new StructuredEventToCDPImageDetailsConverter());
+        ReflectionTestUtils.setField(clusterDetailsConverter, "versionDetailsConverter", new StructuredEventToCDPVersionDetailsConverter());
+        ReflectionTestUtils.setField(underTest, "clusterDetailsConverter", clusterDetailsConverter);
+        ReflectionTestUtils.setField(underTest, "featuresConverter", new StructuredEventToCDPDatalakeFeaturesConverter());
     }
 
     @Test
-    public void testConvertWithNull() {
+    void testConvertWithNull() {
         UsageProto.CDPDatalakeRequested datalakeRequested = underTest.convert(null);
 
-        Assertions.assertNotNull(datalakeRequested.getOperationDetails());
-        Assertions.assertNotNull(datalakeRequested.getClusterDetails());
-        Assertions.assertNotNull(datalakeRequested.getFeatures());
-        Assertions.assertEquals("", datalakeRequested.getEnvironmentCrn());
+        assertNotNull(datalakeRequested.getOperationDetails());
+        assertNotNull(datalakeRequested.getClusterDetails());
+        assertNotNull(datalakeRequested.getFeatures());
+        assertEquals("", datalakeRequested.getEnvironmentCrn());
     }
 
     @Test
-    public void testConvertWithEmptyStructuredFlowEvent() {
+    void testConvertWithEmptyStructuredFlowEvent() {
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         UsageProto.CDPDatalakeRequested datalakeRequested = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertNotNull(datalakeRequested.getOperationDetails());
-        Assertions.assertNotNull(datalakeRequested.getClusterDetails());
-        Assertions.assertNotNull(datalakeRequested.getFeatures());
-        Assertions.assertEquals("", datalakeRequested.getEnvironmentCrn());
+        assertNotNull(datalakeRequested.getOperationDetails());
+        assertNotNull(datalakeRequested.getClusterDetails());
+        assertNotNull(datalakeRequested.getFeatures());
+        assertEquals("", datalakeRequested.getEnvironmentCrn());
     }
 }
