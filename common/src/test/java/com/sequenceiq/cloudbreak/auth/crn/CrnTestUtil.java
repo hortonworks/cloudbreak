@@ -106,7 +106,7 @@ public class CrnTestUtil {
         return Crn.builder()
                 .setPartition(Crn.Partition.CDP)
                 .setRegion(Crn.Region.US_WEST_1)
-                .setService(Crn.Service.RECIPE)
+                .setService(Crn.Service.DATAHUB)
                 .setResourceType(Crn.ResourceType.RECIPE);
     }
 
