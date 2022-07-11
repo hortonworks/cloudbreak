@@ -1,0 +1,5 @@
+[IPA]
+domain = {{ salt['pillar.get']('freeipa:domain') }}
+hosts = {{ salt['pillar.get']('freeipa:hosts')|map(attribute='fqdn')|join(', ')}}
+binddn = cn=Directory Manager
+bindpw = {{ salt['pillar.get']('freeipa:password') }}
