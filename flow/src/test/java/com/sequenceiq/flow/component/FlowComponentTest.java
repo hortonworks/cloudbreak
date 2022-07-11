@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
@@ -48,12 +48,20 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.flow.component.ComponentTestConfig.TestEnvironmentInitializer;
+import com.sequenceiq.flow.component.sleep.SleepChainEventFactory;
 import com.sequenceiq.flow.component.sleep.SleepTriggerCondition;
+import com.sequenceiq.flow.component.sleep.event.NestedSleepChainTriggerEvent;
+import com.sequenceiq.flow.component.sleep.event.SleepChainTriggerEvent;
+import com.sequenceiq.flow.component.sleep.event.SleepConfig;
+import com.sequenceiq.flow.component.sleep.event.SleepEvent;
+import com.sequenceiq.flow.component.sleep.event.SleepStartEvent;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -64,13 +72,6 @@ import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.core.model.ResultType;
 import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
-import com.sequenceiq.flow.component.ComponentTestConfig.TestEnvironmentInitializer;
-import com.sequenceiq.flow.component.sleep.SleepChainEventFactory;
-import com.sequenceiq.flow.component.sleep.event.NestedSleepChainTriggerEvent;
-import com.sequenceiq.flow.component.sleep.event.SleepChainTriggerEvent;
-import com.sequenceiq.flow.component.sleep.event.SleepConfig;
-import com.sequenceiq.flow.component.sleep.event.SleepEvent;
-import com.sequenceiq.flow.component.sleep.event.SleepStartEvent;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowService;
 
@@ -133,7 +134,7 @@ public class FlowComponentTest {
 
     @BeforeEach
     public void setUp() {
-        when(sleepTriggerCondition.isFlowTriggerable(anyLong())).thenReturn(FlowTriggerConditionResult.OK);
+        when(sleepTriggerCondition.isFlowTriggerable(any(Payload.class))).thenReturn(FlowTriggerConditionResult.ok());
     }
 
     @AfterAll
@@ -280,9 +281,9 @@ public class FlowComponentTest {
     public void startFlowChainWhenSecondFlowTriggerConditionFailsItShouldFail() throws InterruptedException {
         reset(sleepTriggerCondition);
 
-        when(sleepTriggerCondition.isFlowTriggerable(anyLong()))
-                .thenReturn(FlowTriggerConditionResult.OK)
-                .thenReturn(new FlowTriggerConditionResult("Error"));
+        when(sleepTriggerCondition.isFlowTriggerable(any(Payload.class)))
+                .thenReturn(FlowTriggerConditionResult.ok())
+                .thenReturn(FlowTriggerConditionResult.fail("Error"));
 
         long resourceId = RESOURCE_ID_SEC.incrementAndGet();
         SleepChainTriggerEvent sleepChainTriggerEvent = new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
@@ -293,6 +294,25 @@ public class FlowComponentTest {
 
         assertRunningInFlowChain(acceptResult);
         waitFlowChainToFail(SLEEP_TIME.multipliedBy(WAIT_FACTOR), acceptResult);
+    }
+
+    @Test
+    public void startFlowChainWhenSecondFlowTriggerConditionSkipItShouldFinish() throws InterruptedException {
+        reset(sleepTriggerCondition);
+
+        when(sleepTriggerCondition.isFlowTriggerable(any(Payload.class)))
+                .thenReturn(FlowTriggerConditionResult.ok())
+                .thenReturn(FlowTriggerConditionResult.skip("Skip"));
+
+        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        SleepChainTriggerEvent sleepChainTriggerEvent = new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
+                new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
+                new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL)
+        ));
+        FlowAcceptResult acceptResult = startSleepFlowChain(sleepChainTriggerEvent);
+
+        assertRunningInFlowChain(acceptResult);
+        waitFlowChainToComplete(SLEEP_TIME.multipliedBy(WAIT_FACTOR), acceptResult);
     }
 
     @Test

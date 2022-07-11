@@ -1,6 +1,7 @@
 package com.sequenceiq.mock.clouderamanager;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -115,6 +116,7 @@ public class DataProviderService {
         return new ApiHost()
                 .hostId(cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())
                 .hostname(hostname)
+                .roleRefs(Collections.emptyList())
                 .ipAddress(privateIp)
                 .lastHeartbeat(Instant.now().plusSeconds(SECONDS_TO_ADD).toString())
                 .healthSummary(healthSummary)

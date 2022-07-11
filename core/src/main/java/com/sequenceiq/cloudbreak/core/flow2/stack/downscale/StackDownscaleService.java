@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -72,8 +73,10 @@ public class StackDownscaleService {
         LOGGER.debug("Downscaling of stack {}", context.getStack().getId());
         stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
         Set<Long> privateIds = null;
-        if (stackDownscaleTriggerEvent.getHostGroupsWithPrivateIds() != null) {
+        if (MapUtils.isNotEmpty(stackDownscaleTriggerEvent.getHostGroupsWithPrivateIds())) {
             privateIds = stackDownscaleTriggerEvent.getHostGroupsWithPrivateIds().values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+        } else if (MapUtils.isNotEmpty(context.getHostGroupWithPrivateIds())) {
+            privateIds = context.getHostGroupWithPrivateIds().values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
         }
         String msgParam;
         if (CollectionUtils.isNotEmpty(privateIds)) {

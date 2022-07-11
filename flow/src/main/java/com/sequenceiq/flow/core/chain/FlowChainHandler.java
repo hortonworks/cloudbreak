@@ -2,6 +2,7 @@ package com.sequenceiq.flow.core.chain;
 
 import static com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil.tryDeserializeTriggerEvent;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
@@ -55,7 +56,7 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
         flowChains.putFlowChain(flowChainId, parentFlowChainId, flowEventChainFactory.createFlowTriggerEventQueue(event.getData()));
         flowChains.addNotSavedFlowChainLog(flowChainId);
         flowStatCache.putByFlowChainId(flowChainId, event.getData().getResourceId(), flowOperationType, false);
-        flowChains.triggerNextFlow(flowChainId, flowTriggerUserCrn, Map.of(), flowOperationType, Optional.empty());
+        flowChains.triggerNextFlow(flowChainId, flowTriggerUserCrn, new HashMap<>(), flowOperationType, Optional.empty());
     }
 
     public void restoreFlowChain(String flowChainId) {

@@ -1,20 +1,30 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.DECOMMISSION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_UPSCALE_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleEvent.ADD_INSTANCES_EVENT;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Queue;
+import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.nimbusds.oauth2.sdk.util.MapUtils;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
@@ -25,8 +35,12 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<StackAndClusterUpscaleTriggerEvent> {
+
     @Inject
     private StackService stackService;
+
+    @Value("${cb.upscale.zombie.auto.cleanup.enabled}")
+    private boolean zombieAutoCleanupEnabled;
 
     @Override
     public String initEvent() {
@@ -41,6 +55,10 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
         addStackSyncTriggerEvent(event, flowEventChain);
         addStackScaleTriggerEvent(event, flowEventChain);
         addClusterScaleTriggerEventIfNeeded(event, stackView, clusterView, flowEventChain);
+        if (zombieAutoCleanupEnabled) {
+            addClusterDownscaleTriggerEventForZombieNodes(event, flowEventChain);
+            addStackDownscaleTriggerEventForZombieNodes(event, flowEventChain, stackView);
+        }
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
@@ -84,5 +102,33 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
                 event.getTriggeredStackVariant());
         stackScaleTriggerEvent = event.isRepair() ? stackScaleTriggerEvent.setRepair() : stackScaleTriggerEvent;
         flowEventChain.add(stackScaleTriggerEvent);
+    }
+
+    private void addClusterDownscaleTriggerEventForZombieNodes(StackAndClusterUpscaleTriggerEvent event, Queue<Selectable> flowEventChain) {
+        Set<String> hostGroups = getHostGroups(event);
+        if (!event.isRepair() && !hostGroups.isEmpty()) {
+            flowEventChain.add(new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getResourceId(), hostGroups,
+                    event.accepted(), new ClusterDownscaleDetails(false, false, true)));
+        }
+    }
+
+    private void addStackDownscaleTriggerEventForZombieNodes(StackAndClusterUpscaleTriggerEvent event, Queue<Selectable> flowEventChain, StackView stackView) {
+        Set<String> hostGroups = getHostGroups(event);
+        if (!event.isRepair() && !hostGroups.isEmpty()) {
+            flowEventChain.add(new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), Collections.emptyMap(),
+                    Collections.emptyMap(), Collections.emptyMap(), stackView.getPlatformVariant()));
+        }
+    }
+
+    private Set<String> getHostGroups(StackAndClusterUpscaleTriggerEvent event) {
+        Set<String> hostGroups = new HashSet<>();
+        if (MapUtils.isNotEmpty(event.getHostGroupsWithHostNames())) {
+            hostGroups.addAll(event.getHostGroupsWithHostNames().keySet());
+        } else if (MapUtils.isNotEmpty(event.getHostGroupsWithPrivateIds())) {
+            hostGroups.addAll(event.getHostGroupsWithPrivateIds().keySet());
+        } else if (MapUtils.isNotEmpty(event.getHostGroupsWithAdjustment())) {
+            hostGroups.addAll(event.getHostGroupsWithAdjustment().keySet());
+        }
+        return hostGroups;
     }
 }

@@ -8,6 +8,7 @@ import static com.sequenceiq.flow.core.FlowConstants.FLOW_ID;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_OPERATION_TYPE;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -153,7 +154,10 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             }
         } catch (FlowNotTriggerableException e) {
             LOGGER.error("Failed to handle flow event.", e);
-            if (isAcceptablePayload(payload)) {
+            if (e.isSkipException()) {
+                LOGGER.info("Skip throwing exception, return.");
+                return;
+            } else if (isAcceptablePayload(payload)) {
                 ((Acceptable) payload).accepted().onError(e);
             } else {
                 throw e;
@@ -193,7 +197,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             throws TransactionExecutionException {
         String flowId = flowParameters.getFlowId();
         LOGGER.debug("flow finalizing arrived: id: {}", flowId);
-        flowLogService.close(resourceId, flowId, false);
+        flowLogService.close(resourceId, flowId, false, contextParams);
         Flow flow = runningFlows.remove(flowId);
         Optional<FlowFinalizerCallback> finalizerCallback = createFinalizerCallback(flow);
         flowStatCache.remove(flowId, flowChainId == null && !flow.isFlowFailed());
@@ -221,14 +225,21 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             Map<Object, Object> contextParams) throws TransactionExecutionException {
         LOGGER.debug("Flow trigger arrived: key: {}, payload: {}", key, payload);
         FlowConfiguration<?> flowConfig = getFlowConfiguration(key);
-        FlowTriggerConditionResult flowTriggerConditionResult = flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getResourceId());
-        if (!flowTriggerConditionResult.isTriggerable()) {
+        FlowTriggerConditionResult flowTriggerConditionResult = flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload);
+        if (flowTriggerConditionResult.isFail()) {
             if (flowChainId != null) {
                 LOGGER.info("Creating failed init flow log for '{}' flow chain because trigger condition failed. Reason: {}",
                         flowChainId, flowTriggerConditionResult.getErrorMessage());
-                createNewFailedFlow(key, payload, flowParameters, flowChainId, flowConfig);
+                createNewFinishedFlow(key, payload, flowParameters, flowChainId, flowConfig, contextParams, false);
             }
             throw new FlowNotTriggerableException(flowTriggerConditionResult.getErrorMessage());
+        } else if (flowTriggerConditionResult.isSkip()) {
+            if (flowChainId != null) {
+                LOGGER.info("Creating failed init flow log for '{}' flow chain because trigger condition result was: skip. Reason: {}",
+                        flowChainId, flowTriggerConditionResult.getErrorMessage());
+                createNewFinishedFlow(key, payload, flowParameters, flowChainId, flowConfig, contextParams, true);
+            }
+            throw new FlowNotTriggerableException("Trigger condition failed, skip flow.", true);
         } else {
             Set<FlowLogIdWithTypeAndTimestamp> flowLogItems = flowLogService.findAllRunningNonTerminationFlowsByResourceId(payload.getResourceId());
             if (hasRunningAndParallelNotAllowed(key, flowLogItems)) {
@@ -239,15 +250,16 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private void createNewFailedFlow(String key, Payload payload, FlowParameters flowParameters, String flowChainId, FlowConfiguration<?> flowConfig)
-            throws TransactionExecutionException {
+    private void createNewFinishedFlow(String key, Payload payload, FlowParameters flowParameters, String flowChainId, FlowConfiguration<?> flowConfig,
+            Map<Object, Object> contextParams, boolean success) throws TransactionExecutionException {
         transactionService.required(() -> {
             try {
                 String flowId = UUID.randomUUID().toString();
                 addFlowParameters(flowParameters, flowId, flowChainId, flowConfig);
-                flowLogService.save(flowParameters, flowChainId, key, payload, null, flowConfig.getClass(), FlowStateConstants.INIT_STATE);
-                flowLogService.close(payload.getResourceId(), flowId, true);
-                flowChains.removeFullFlowChain(flowChainId, false);
+                flowLogService.save(flowParameters, flowChainId, key, payload, contextParams, flowConfig.getClass(), FlowStateConstants.INIT_STATE);
+                flowLogService.close(payload.getResourceId(), flowId, !success, contextParams);
+                flowChains.cleanFlowChain(flowChainId, flowParameters.getFlowTriggerUserCrn());
+                flowChains.removeFullFlowChain(flowChainId, success);
             } catch (TransactionExecutionException e) {
                 throw new TransactionRuntimeExecutionException(e);
             }
@@ -333,7 +345,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             Benchmark.measure(() -> flowStatCache.put(flowId, flowChainId, payload.getResourceId(),
                     flowConfig.getFlowOperationType().name(), flow.getFlowConfigClass(), false), LOGGER, "Creating flow stat took {}ms");
             transactionService.required(() -> {
-                flowLogService.save(flowParameters, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
+                flowLogService.save(flowParameters, flowChainId, key, payload, contextParams, flowConfig.getClass(), flow.getCurrentState());
                 if (flowChainId != null) {
                     flowChains.saveAllUnsavedFlowChains(flowChainId, flowParameters.getFlowTriggerUserCrn());
                     flowChains.removeLastTriggerEvent(flowChainId, flowParameters.getFlowTriggerUserCrn());
@@ -559,7 +571,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     private Map<Object, Object> getContextParams(Event<?> event) {
         Map<Object, Object> contextParams = event.getHeaders().get(FlowConstants.FLOW_CONTEXTPARAMS_ID);
-        return contextParams == null ? Map.of() : contextParams;
+        return contextParams == null ? new HashMap<>() : contextParams;
     }
 
     private void logFlowId(String flowId) {

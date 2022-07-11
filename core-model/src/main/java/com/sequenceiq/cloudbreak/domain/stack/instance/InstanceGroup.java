@@ -186,7 +186,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     public Set<InstanceMetaData> getUnattachedInstanceMetaDataSet() {
         return instanceMetaData.stream()
-                .filter(metaData -> metaData.getInstanceStatus() == InstanceStatus.CREATED)
+                .filter(metaData -> metaData.getInstanceStatus() == InstanceStatus.CREATED || metaData.getInstanceStatus() == InstanceStatus.DECOMMISSIONED)
                 .collect(Collectors.toSet());
     }
 

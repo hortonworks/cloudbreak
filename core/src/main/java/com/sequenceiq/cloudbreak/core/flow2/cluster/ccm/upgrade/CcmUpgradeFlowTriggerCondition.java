@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
@@ -19,14 +20,14 @@ public class CcmUpgradeFlowTriggerCondition implements FlowTriggerCondition {
     private StackService stackService;
 
     @Override
-    public FlowTriggerConditionResult isFlowTriggerable(Long stackId) {
-        FlowTriggerConditionResult result = FlowTriggerConditionResult.OK;
-        Stack stack = stackService.getByIdWithTransaction(stackId);
+    public FlowTriggerConditionResult isFlowTriggerable(Payload payload) {
+        FlowTriggerConditionResult result = FlowTriggerConditionResult.ok();
+        Stack stack = stackService.getByIdWithTransaction(payload.getResourceId());
         boolean resourcesIsInTriggerableState = stack.isAvailable() && stack.getCluster() != null;
         if (!resourcesIsInTriggerableState) {
             String msg = "Cluster Connectivity Manager upgrade could not be triggered, because the cluster's state is not available.";
             LOGGER.info(msg);
-            result = new FlowTriggerConditionResult(msg);
+            result = FlowTriggerConditionResult.fail(msg);
         }
         return result;
     }

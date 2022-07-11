@@ -167,7 +167,7 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId, boolean forced) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
-        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
+        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false, false);
         ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, Collections.singletonMap(hostGroup, 1),
                 Collections.singletonMap(hostGroup, Collections.singleton(privateId)), ScalingType.DOWNSCALE_TOGETHER,
                 new Promise<>(), details);
@@ -188,7 +188,7 @@ public class ReactorFlowManager {
 
         String selector = FlowChainTriggers.STOPSTART_DOWNSCALE_CHAIN_TRIGGER_EVENT;
 
-        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
+        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false, false);
         ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
                 Collections.singletonMap(hostGroup, privateIds), ScalingType.DOWNSCALE_TOGETHER, new Promise<>(), details);
         return reactorNotifier.notify(stackId, selector, event);
@@ -196,7 +196,7 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerStackRemoveInstances(Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap, boolean forced) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_MULTIHOSTGROUP_TRIGGER_EVENT;
-        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
+        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false, false);
         MultiHostgroupClusterAndStackDownscaleTriggerEvent event = new MultiHostgroupClusterAndStackDownscaleTriggerEvent(selector, stackId,
                 instanceIdsByHostgroupMap, details, ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
         return reactorNotifier.notify(stackId, selector, event);

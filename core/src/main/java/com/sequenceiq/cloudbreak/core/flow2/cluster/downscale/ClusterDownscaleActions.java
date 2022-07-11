@@ -63,10 +63,7 @@ public class ClusterDownscaleActions {
             protected void doExecute(ClusterViewContext context, ClusterDownscaleTriggerEvent payload, Map<Object, Object> variables) {
                 ClusterDownscaleDetails clusterDownscaleDetails = payload.getDetails();
                 variables.put(REPAIR, clusterDownscaleDetails == null ? Boolean.FALSE : Boolean.valueOf(payload.getDetails().isRepair()));
-                clusterDownscaleService.clusterDownscaleStarted(context.getStackId(), payload.getHostGroupsWithAdjustment(),
-                        payload.getHostGroupsWithPrivateIds(), payload.getDetails());
-                CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(context.getStackId(), payload.getHostGroupsWithAdjustment(),
-                        payload.getHostGroupsWithPrivateIds(), payload.getDetails());
+                CollectDownscaleCandidatesRequest request = clusterDownscaleService.clusterDownscaleStarted(context.getStackId(), payload);
                 sendEvent(context, request.selector(), request);
             }
         };
