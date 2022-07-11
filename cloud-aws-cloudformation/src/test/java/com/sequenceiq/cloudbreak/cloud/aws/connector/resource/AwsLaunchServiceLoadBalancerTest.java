@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,14 +29,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.model.ListStackResourcesResult;
@@ -75,9 +73,8 @@ import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 
-@PrepareForTest(AwsPageCollector.class)
-@RunWith(PowerMockRunner.class)
-public class AwsLaunchServiceLoadBalancerTest {
+@ExtendWith(MockitoExtension.class)
+class AwsLaunchServiceLoadBalancerTest {
 
     private static final String PRIVATE_ID_1 = "private-id-1";
 
@@ -151,15 +148,14 @@ public class AwsLaunchServiceLoadBalancerTest {
     @Mock
     private AwsLoadBalancerCommonService awsLoadBalancerCommonService;
 
+    @Mock
+    private AwsPageCollector awsPageCollector;
+
     @InjectMocks
     private AwsLoadBalancerLaunchService underTest;
 
-    @Before
-    public void setup() {
-    }
-
     @Test
-    public void testUpdateCloudformationWithPrivateLoadBalancer() {
+    void testUpdateCloudformationWithPrivateLoadBalancer() {
         List<CloudResource> instances = createInstances();
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
@@ -184,7 +180,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testUpdateCloudformationWithPublicLoadBalancerNoEndpointGateway() {
+    void testUpdateCloudformationWithPublicLoadBalancerNoEndpointGateway() {
         List<CloudResource> instances = createInstances();
         AwsNetworkView awsNetworkView = createNetworkView(PUBLIC_ID_1, null);
         Network network = createNetwork(PUBLIC_ID_1, null);
@@ -209,7 +205,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testUpdateCloudformationWithEndpointGatewayAndPrivateSubnet() {
+    void testUpdateCloudformationWithEndpointGatewayAndPrivateSubnet() {
         List<CloudResource> instances = createInstances();
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, PUBLIC_ID_1);
         Network network = createNetwork(PRIVATE_ID_1, PUBLIC_ID_1);
@@ -234,7 +230,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testUpdateCloudformationWithLoadBalancerMissingTargetGroup() {
+    void testUpdateCloudformationWithLoadBalancerMissingTargetGroup() {
         List<CloudResource> instances = createInstances();
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
@@ -262,7 +258,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testUpdateCloudformationWithLoadBalancerMissingTargetGroupArn() {
+    void testUpdateCloudformationWithLoadBalancerMissingTargetGroupArn() {
         List<CloudResource> instances = createInstances();
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
@@ -291,7 +287,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testUpdateCloudformationWithLoadBalancerMissingLoadBalancer() {
+    void testUpdateCloudformationWithLoadBalancerMissingLoadBalancer() {
         List<CloudResource> instances = createInstances();
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
@@ -319,7 +315,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testUpdateCloudformationWithLoadBalancerMissingLoadBalancerArn() {
+    void testUpdateCloudformationWithLoadBalancerMissingLoadBalancerArn() {
         List<CloudResource> instances = createInstances();
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
@@ -348,7 +344,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testSetLoadBalancerMetadata() {
+    void testSetLoadBalancerMetadata() {
         AwsLoadBalancer loadBalancer = new AwsLoadBalancer(AwsLoadBalancerScheme.INTERNAL);
         loadBalancer.getOrCreateListener(PORT, PORT);
 
@@ -364,7 +360,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testUpdateCloudformationSuccess() {
+    void testUpdateCloudformationSuccess() {
         List<CloudResource> instances = createInstances();
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
@@ -391,7 +387,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testUpdateCloudformationLoadBalancerCreateFailure() {
+    void testUpdateCloudformationLoadBalancerCreateFailure() {
         List<CloudResource> instances = createInstances();
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
@@ -419,7 +415,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testUpdateCloudformationListenerCreateFailure() {
+    void testUpdateCloudformationListenerCreateFailure() {
         List<CloudResource> instances = createInstances();
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
@@ -447,7 +443,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testUpdateCloudformationTargetGroupCreateFailure() {
+    void testUpdateCloudformationTargetGroupCreateFailure() {
         List<CloudResource> instances = createInstances();
         AwsNetworkView awsNetworkView = createNetworkView(PRIVATE_ID_1, null);
         Network network = createNetwork(PRIVATE_ID_1, null);
@@ -475,7 +471,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testCheckForLoadBalancerAndTargetGroupResourcesExistingResources() {
+    void testCheckForLoadBalancerAndTargetGroupResourcesExistingResources() {
         List<AwsLoadBalancer> loadBalancers = setupAwsLoadBalancers();
 
         when(result.getStackResourceSummaries()).thenReturn(createFirstUpdateSummaries(Set.of(LoadBalancerType.PUBLIC, LoadBalancerType.PRIVATE)));
@@ -487,7 +483,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testCheckForLoadBalancerAndTargetGroupResourcesMissingLoadBalancer() {
+    void testCheckForLoadBalancerAndTargetGroupResourcesMissingLoadBalancer() {
         List<AwsLoadBalancer> loadBalancers = setupAwsLoadBalancers();
         List<StackResourceSummary> summaries = createFirstUpdateSummaries(Set.of(LoadBalancerType.PUBLIC, LoadBalancerType.PRIVATE));
         summaries.get(LB_INDEX).setLogicalResourceId(null);
@@ -501,7 +497,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testCheckForLoadBalancerAndTargetGroupResourcesMissingTargetGrup() {
+    void testCheckForLoadBalancerAndTargetGroupResourcesMissingTargetGrup() {
         List<AwsLoadBalancer> loadBalancers = setupAwsLoadBalancers();
         List<StackResourceSummary> summaries = createFirstUpdateSummaries(Set.of(LoadBalancerType.PUBLIC, LoadBalancerType.PRIVATE));
         summaries.get(TG_INDEX).setLogicalResourceId(null);
@@ -515,7 +511,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testCheckForListenerResourcesExistingResources() {
+    void testCheckForListenerResourcesExistingResources() {
         List<AwsLoadBalancer> loadBalancers = setupAwsLoadBalancers();
 
         when(result.getStackResourceSummaries()).thenReturn(createFullSummaries(Set.of(LoadBalancerType.PUBLIC, LoadBalancerType.PRIVATE)));
@@ -527,7 +523,7 @@ public class AwsLaunchServiceLoadBalancerTest {
     }
 
     @Test
-    public void testCheckForListenerResourcesMissingListener() {
+    void testCheckForListenerResourcesMissingListener() {
         List<AwsLoadBalancer> loadBalancers = setupAwsLoadBalancers();
         List<StackResourceSummary> summaries = createFullSummaries(Set.of(LoadBalancerType.PUBLIC, LoadBalancerType.PRIVATE));
         summaries.get(LIS_INDEX).setLogicalResourceId(null);
@@ -638,8 +634,7 @@ public class AwsLaunchServiceLoadBalancerTest {
         when(cloudStack.getNetwork()).thenReturn(network);
         when(awsModelService.buildDefaultModelContext(any(), any(), any())).thenReturn(new ModelContext());
         when(awsLoadBalancerCommonService.getAwsLoadBalancers(eq(loadBalancers), any(), any())).thenReturn(awsLoadBalancers);
-        PowerMockito.mockStatic(AwsPageCollector.class);
-        PowerMockito.when(AwsPageCollector.getAllRouteTables(any(), any())).thenReturn(List.of());
+        lenient().when(awsPageCollector.getAllRouteTables(any(), any())).thenReturn(List.of());
     }
 
     private List<AwsLoadBalancer> setupAwsLoadBalancers() {

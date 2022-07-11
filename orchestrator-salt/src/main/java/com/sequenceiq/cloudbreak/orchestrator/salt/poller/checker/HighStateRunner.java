@@ -7,18 +7,18 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
 public class HighStateRunner extends BaseSaltJobRunner {
 
-    public HighStateRunner(Set<String> target, Set<Node> allNode) {
-        super(target, allNode);
+    public HighStateRunner(SaltStateService saltStateService, Set<String> target, Set<Node> allNode) {
+        super(saltStateService, target, allNode);
     }
 
     @Override
     public String submit(SaltConnector saltConnector) {
         HostList targets = new HostList(getTargetHostnames());
-        return SaltStates.highstate(saltConnector, targets);
+        return saltStateService().highstate(saltConnector, targets);
     }
 
     @Override

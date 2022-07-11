@@ -19,6 +19,7 @@ plugins {
   id "org.ajoberstar.grgit" version "4.1.1"
   id "com.github.spotbugs" version "4.7.8"
   id "com.adarshr.test-logger" version "2.1.1"
+  id "nebula.blacklist" version "3.1.0"
 //  id 'nebula.lint' version '17.2.3'
 }
 
@@ -61,6 +62,13 @@ allprojects {
 
   // override AWS SDK Depenendencies
   ext['netty.version'] = nettyVersion
+
+  // forbid depenedencies
+  blacklist {
+    flag {
+      block group: 'org.powermock'
+    }
+  }
 
   configurations {
     all {

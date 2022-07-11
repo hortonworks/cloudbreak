@@ -1,26 +1,24 @@
 package com.sequenceiq.periscope.service;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.reflect.Whitebox;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class EntitlementValidationServiceTest {
+@ExtendWith(MockitoExtension.class)
+class EntitlementValidationServiceTest {
 
     private static final String TEST_ACCOUNT_ID = "accid";
-
-    private static final String TEST_USER_CRN = String.format("crn:cdp:iam:us-west-1:%s:user:mockuser@cloudera.com", TEST_ACCOUNT_ID);
 
     @InjectMocks
     private EntitlementValidationService underTest;
@@ -28,85 +26,85 @@ public class EntitlementValidationServiceTest {
     @Mock
     private EntitlementService entitlementService;
 
-    @Before
-    public void setUp() {
-        Whitebox.setInternalState(underTest, "entitlementCheckEnabled", true);
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(underTest, "entitlementCheckEnabled", true);
     }
 
     @Test
-    public void testWhenEntitlementCheckDisabledThenEntitled() {
-        Whitebox.setInternalState(underTest, "entitlementCheckEnabled", false);
+    void testWhenEntitlementCheckDisabledThenEntitled() {
+        ReflectionTestUtils.setField(underTest, "entitlementCheckEnabled", false);
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
-        assertTrue("entitled should be true when entitlementCheckDisabled", entitled);
+        assertTrue(entitled, "entitled should be true when entitlementCheckDisabled");
     }
 
     @Test
-    public void testWhenAWSAndEntitled() {
+    void testWhenAWSAndEntitled() {
         when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(true);
 
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
-        assertTrue("isEntitled should be true when entitlement found", entitled);
+        assertTrue(entitled, "isEntitled should be true when entitlement found");
     }
 
     @Test
-    public void testWhenAWSAndNotEntitled() {
+    void testWhenAWSAndNotEntitled() {
         when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(false);
 
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
-        assertFalse("isEntitled should be false when entitlement is not found", entitled);
+        assertFalse(entitled, "isEntitled should be false when entitlement is not found");
     }
 
     @Test
-    public void testWhenAWSStopStartAndEntitled() {
+    void testWhenAWSStopStartAndEntitled() {
         when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(true);
         when(entitlementService.awsStopStartScalingEnabled(anyString())).thenReturn(true);
 
         boolean entitled = underTest.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
-        assertTrue("isEntitled should be true when entitlement found", entitled);
+        assertTrue(entitled, "isEntitled should be true when entitlement found");
     }
 
     @Test
-    public void testWhenAWSStopStartAndNotEntitled() {
+    void testWhenAWSStopStartAndNotEntitled() {
         when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(false);
 
         boolean entitled = underTest.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
-        assertFalse("isEntitled should be false when entitlement is not found", entitled);
+        assertFalse(entitled, "isEntitled should be false when entitlement is not found");
     }
 
     @Test
-    public void testWhenAWSEntitledAndNotStopStart() {
+    void testWhenAWSEntitledAndNotStopStart() {
         when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(true);
         when(entitlementService.awsStopStartScalingEnabled(anyString())).thenReturn(false);
 
         boolean entitled = underTest.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
-        assertFalse("isEntitled should be false when entitlement is not found", entitled);
+        assertFalse(entitled, "isEntitled should be false when entitlement is not found");
     }
 
     @Test
-    public void testWhenAzureAndEntitled() {
+    void testWhenAzureAndEntitled() {
         when(entitlementService.azureAutoScalingEnabled(anyString())).thenReturn(true);
 
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AZURE");
-        assertTrue("isEntitled should be true when entitlement found", entitled);
+        assertTrue(entitled, "isEntitled should be true when entitlement found");
     }
 
     @Test
-    public void testWhenAzureAndNotEntitled() {
+    void testWhenAzureAndNotEntitled() {
         when(entitlementService.azureAutoScalingEnabled(anyString())).thenReturn(false);
 
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AZURE");
-        assertFalse("isEntitled should be false when entitlement is not found", entitled);
+        assertFalse(entitled, "isEntitled should be false when entitlement is not found");
     }
 
     @Test
-    public void testWhenYarnAndAlwaysAllowed() {
+    void testWhenYarnAndAlwaysAllowed() {
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "YARN");
-        assertTrue("isEntitled should be true when entitlement always allowed", entitled);
+        assertTrue(entitled, "isEntitled should be true when entitlement always allowed");
     }
 
     @Test
-    public void testWhenGCPAndNotEntitled() {
+    void testWhenGCPAndNotEntitled() {
         boolean entitled = underTest.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "GCP");
-        assertFalse("isEntitled should be false when entitlement is not defined", entitled);
+        assertFalse(entitled, "isEntitled should be false when entitlement is not defined");
     }
 }

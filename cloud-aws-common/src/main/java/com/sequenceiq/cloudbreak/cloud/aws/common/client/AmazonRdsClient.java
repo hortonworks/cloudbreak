@@ -19,8 +19,11 @@ public class AmazonRdsClient extends AmazonClient {
 
     private final AmazonRDS client;
 
-    public AmazonRdsClient(AmazonRDS client) {
+    private final AwsPageCollector awsPageCollector;
+
+    public AmazonRdsClient(AmazonRDS client, AwsPageCollector awsPageCollector) {
         this.client = client;
+        this.awsPageCollector = awsPageCollector;
     }
 
     public DBInstance modifyDBInstance(ModifyDBInstanceRequest modifyDBInstanceRequest) {
@@ -49,7 +52,7 @@ public class AmazonRdsClient extends AmazonClient {
     }
 
     public List<Certificate> describeCertificates(DescribeCertificatesRequest request) {
-        return AwsPageCollector.collectPages(this::describeCertificatesInternal,
+        return awsPageCollector.collectPages(this::describeCertificatesInternal,
                 request,
                 DescribeCertificatesResult::getCertificates,
                 DescribeCertificatesResult::getMarker,

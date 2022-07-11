@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStr
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategyMultiplePreferPublic;
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetSelectorService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFailureMessageDecoder;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -255,6 +256,7 @@ public class AwsStorageValidatorsTest {
             SubnetFilterStrategyMultiplePreferPublic.class,
             SubnetFilterStrategyMultiplePreferPrivate.class,
             SubnetSelectorService.class,
+            AwsPageCollector.class
     })
     static class Config {
 

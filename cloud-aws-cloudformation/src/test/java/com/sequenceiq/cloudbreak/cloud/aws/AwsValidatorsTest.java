@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStr
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategyMultiplePreferPublic;
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetSelectorService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFailureMessageDecoder;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -80,7 +81,7 @@ import io.opentracing.Tracer;
 @ExtendWith(SpringExtension.class)
     @TestPropertySource(properties = "cb.max.aws.resource.name.length=5")
 @Import(SdkClientExceptionMapper.class)
-public class AwsValidatorsTest {
+class AwsValidatorsTest {
 
     public static final String EMPTY = "";
 
@@ -116,10 +117,13 @@ public class AwsValidatorsTest {
     @MockBean
     private AwsPlatformResources awsPlatformResources;
 
+    @MockBean
+    private AwsPageCollector awsPageCollector;
+
     private AuthenticatedContext authenticatedContext;
 
     @BeforeEach
-    public void prepare() {
+    void prepare() {
         CloudContext context = CloudContext.Builder.builder()
                 .withId(1L)
                 .withName("stackName")
@@ -136,13 +140,13 @@ public class AwsValidatorsTest {
     }
 
     @Test
-    public void testStackValidatorStackAlreadyExist() {
+    void testStackValidatorStackAlreadyExist() {
         doReturn(amazonCloudFormationClient).when(awsClient).createCloudFormationClient(any(), anyString());
         Assertions.assertThrows(CloudConnectorException.class, () -> awsStackValidatorUnderTest.validate(authenticatedContext, null));
     }
 
     @Test
-    public void testStackValidatorStackUnexistent() {
+    void testStackValidatorStackUnexistent() {
         doReturn(amazonCloudFormationClient).when(awsClient).createCloudFormationClient(any(), anyString());
         when(amazonCloudFormationClient.describeStacks(any())).thenThrow(new AmazonServiceException("stackName does not exist"));
         InstanceTemplate template =
@@ -155,21 +159,19 @@ public class AwsValidatorsTest {
     }
 
     @Test
-    public void testStackValidatorStackUseRetryClient() {
+    void testStackValidatorStackUseRetryClient() {
         AmazonCloudFormation client = mock(AmazonCloudFormation.class);
         doReturn(client).when(awsClient).createCloudFormation(any(), anyString());
         when(client.describeStacks(any()))
                 .thenThrow(new SdkClientException("repeat1 Rate exceeded"))
                 .thenThrow(new SdkClientException("repeat2Request limit exceeded"))
                 .thenReturn(null);
-//        doReturn(new AmazonCloudFormationClient(client, mock(AwsCredentialView.class), retry))
-//                .when(awsClient).createCloudFormationRetryClient(any(), anyString());
         Assertions.assertThrows(CloudConnectorException.class, () -> awsStackValidatorUnderTest.validate(authenticatedContext, null));
         verify(client, times(3)).describeStacks(any());
     }
 
     @TestFactory
-    public Collection<DynamicTest> testCheckStatuses() {
+    Collection<DynamicTest> testCheckStatuses() {
         ArrayList<DynamicTest> tests = new ArrayList<>();
         tests.add(DynamicTest.dynamicTest("tag is too short", () -> testTagsWithExpectedException(EMPTY, VALID)));
         tests.add(DynamicTest.dynamicTest("tag has leading white space", () -> testTagsWithExpectedException(' ' + VALID, VALID)));

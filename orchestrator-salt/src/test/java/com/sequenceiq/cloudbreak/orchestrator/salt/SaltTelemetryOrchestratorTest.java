@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -31,7 +32,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUploadWithPermissi
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConcurrentParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.StateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltRetryConfig;
@@ -93,13 +93,14 @@ class SaltTelemetryOrchestratorTest {
     @Mock
     private PingResponse pingResponse;
 
+    @Mock
+    private SaltStateService saltStateService;
+
     @InjectMocks
     private SaltTelemetryOrchestrator underTest;
 
     @BeforeEach
     void setupTest() throws CloudbreakOrchestratorFailedException {
-        underTest = new SaltTelemetryOrchestrator();
-        MockitoAnnotations.openMocks(this);
         lenient().when(telemetrySaltRetryConfig.getDiagnosticsCollect()).thenReturn(MAX_DIAGNOSTICS_COLLECTION_RETRY);
         when(saltService.getPrimaryGatewayConfig(gatewayConfigs)).thenReturn(gatewayConfig);
         when(saltService.createSaltConnector(gatewayConfig)).thenReturn(saltConnector);
@@ -240,7 +241,7 @@ class SaltTelemetryOrchestratorTest {
         when(pingResponse.getResultByMinionId()).thenReturn(new HashMap<>() {{
             put("Test_Unresponsive_Node", false);
         }});
-        when(SaltStates.ping(saltConnector)).thenReturn(pingResponse);
+        when(saltStateService.ping(saltConnector)).thenReturn(pingResponse);
 
         Set<Node> result = underTest.collectUnresponsiveNodes(gatewayConfigs, nodes, exitCriteriaModel);
 
@@ -319,7 +320,7 @@ class SaltTelemetryOrchestratorTest {
     @Test
     void testPreFlightDiagnosticsCheck() throws CloudbreakOrchestratorFailedException {
         Map<String, Object> parameters = getParametersMap();
-        when(SaltStates.runCommandOnHosts(retry, saltConnector, any(), "")).thenReturn(new HashMap<>() {{
+        when(saltStateService.runCommandOnHosts(eq(retry), eq(saltConnector), any(), eq(""))).thenReturn(new HashMap<>() {{
             put("", "");
         }});
 

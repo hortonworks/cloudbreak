@@ -11,9 +11,9 @@ public class HostAndRoleTarget implements Target<String> {
 
     private static final String HOST_PREFIX = "L@";
 
-    private String role;
+    private final String role;
 
-    private Collection<String> hosts;
+    private final Collection<String> hosts;
 
     public HostAndRoleTarget(String role, Collection<String> hosts) {
         this.role = role;

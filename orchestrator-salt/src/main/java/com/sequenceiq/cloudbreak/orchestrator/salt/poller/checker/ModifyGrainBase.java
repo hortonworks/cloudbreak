@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.HostList;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
 public abstract class ModifyGrainBase extends BaseSaltJobRunner {
 
@@ -31,8 +31,8 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
 
     private final boolean addGrain;
 
-    protected ModifyGrainBase(Set<String> target, Set<Node> allNode, String key, String value, boolean addGrain) {
-        super(target, allNode);
+    protected ModifyGrainBase(SaltStateService saltStateService, Set<String> target, Set<Node> allNode, String key, String value, boolean addGrain) {
+        super(saltStateService, target, allNode);
         this.key = key;
         this.value = value;
         this.addGrain = addGrain;
@@ -43,7 +43,7 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
         Target<String> target = new HostList(getTargetHostnames());
         LOGGER.info("Starting salt modify grain process. {}", this);
         ApplyResponse response = modifyGrain(saltConnector, target);
-        Map<String, JsonNode> grains = SaltStates.getGrains(saltConnector, target, key);
+        Map<String, JsonNode> grains = saltStateService().getGrains(saltConnector, target, key);
         if (isModificationFailed(grains)) {
             LOGGER.info("Modify grain process failed. Starting to retry. {}", this);
             response = retryModification(saltConnector, target, response);
@@ -60,9 +60,9 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
         for (retryCounter = 0; retryCounter < RETRY_LIMIT && modificationFailed; retryCounter++) {
             backoff();
             LOGGER.info("Retry #{} for salt modify grain process. {}", retryCounter, this);
-            SaltStates.syncAll(saltConnector);
+            saltStateService().syncAll(saltConnector);
             response = modifyGrain(saltConnector, target);
-            grains = SaltStates.getGrains(saltConnector, target, key);
+            grains = saltStateService().getGrains(saltConnector, target, key);
             modificationFailed = isModificationFailed(grains);
         }
         if (modificationFailed) {
@@ -75,8 +75,8 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
     }
 
     private ApplyResponse modifyGrain(SaltConnector saltConnector, Target<String> target) {
-        return addGrain ? SaltStates.addGrain(saltConnector, target, key, value)
-                : SaltStates.removeGrain(saltConnector, target, key, value);
+        return addGrain ? saltStateService().addGrain(saltConnector, target, key, value)
+                : saltStateService().removeGrain(saltConnector, target, key, value);
     }
 
     private boolean isModificationFailed(Map<String, JsonNode> grains) throws SaltJobFailedException {
@@ -116,7 +116,7 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
     }
 
     private void checkFinalModification(Map<String, JsonNode> grains) throws SaltJobFailedException {
-        final Map<String, JsonNode> finalGrains = new HashMap<>(grains);
+        Map<String, JsonNode> finalGrains = new HashMap<>(grains);
         for (Node node : getAllNode()) {
             if (getTargetHostnames().contains(node.getHostname())) {
                 if (!finalGrains.containsKey(node.getHostname())) {

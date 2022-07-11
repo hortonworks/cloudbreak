@@ -1,66 +1,66 @@
 package com.sequenceiq.periscope.subscription;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.periscope.domain.Subscription;
 import com.sequenceiq.periscope.repository.SubscriptionRepository;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SubscriptionServiceTest {
+@ExtendWith(MockitoExtension.class)
+class SubscriptionServiceTest {
+
+    private static final String DEFAULT_CLIENT_ID = "default";
+
+    private static final String DEFAULT_NOTIFICATION_ENDPOINT = "http://localhost:3000/notifications";
 
     @InjectMocks
-    SubscriptionService underTest;
+    private SubscriptionService underTest;
 
     @Mock
-    SubscriptionRepository subscriptionRepository;
-
-    String defaultClientId = "default";
-
-    String defaultNotificationEndpoint = "http://localhost:3000/notifications";
+    private SubscriptionRepository subscriptionRepository;
 
     @Test
-    public void testCreateDefaultSubscription() {
+    void testCreateDefaultSubscription() {
         Subscription aSubscription = getASubscription();
 
-        when(subscriptionRepository.findByClientId(defaultClientId)).thenReturn(Optional.empty());
+        when(subscriptionRepository.findByClientId(DEFAULT_CLIENT_ID)).thenReturn(Optional.empty());
         underTest.subscribe(aSubscription);
 
         verify(subscriptionRepository, times(1)).save(aSubscription);
     }
 
     @Test
-    public void testUpdateSubscriptionWhenEndpointIsDifferent() {
+    void testUpdateSubscriptionWhenEndpointIsDifferent() {
         Subscription aSubscription = getASubscription();
         Subscription dbSubscription = getASubscription();
         dbSubscription.setEndpoint("http://differenturl");
 
-        when(subscriptionRepository.findByClientId(defaultClientId))
+        when(subscriptionRepository.findByClientId(DEFAULT_CLIENT_ID))
                 .thenReturn(Optional.of(dbSubscription));
         underTest.subscribe(aSubscription);
 
-        assertEquals("Updated endpoint address should match",
-                defaultNotificationEndpoint, dbSubscription.getEndpoint());
+        assertEquals(DEFAULT_NOTIFICATION_ENDPOINT,
+                dbSubscription.getEndpoint(), "Updated endpoint address should match");
         verify(subscriptionRepository, times(1)).save(dbSubscription);
     }
 
     @Test
-    public void testUpdateSubscriptionWhenEndpointIsSame() {
+    void testUpdateSubscriptionWhenEndpointIsSame() {
         Subscription aSubscription = getASubscription();
         Subscription dbSubscription = getASubscription();
 
-        when(subscriptionRepository.findByClientId(defaultClientId))
+        when(subscriptionRepository.findByClientId(DEFAULT_CLIENT_ID))
                 .thenReturn(Optional.of(dbSubscription));
         underTest.subscribe(aSubscription);
 
@@ -69,8 +69,8 @@ public class SubscriptionServiceTest {
 
     private Subscription getASubscription() {
         Subscription subscription = new Subscription();
-        subscription.setClientId(defaultClientId);
-        subscription.setEndpoint(defaultNotificationEndpoint);
+        subscription.setClientId(DEFAULT_CLIENT_ID);
+        subscription.setEndpoint(DEFAULT_NOTIFICATION_ENDPOINT);
         return subscription;
     }
 }

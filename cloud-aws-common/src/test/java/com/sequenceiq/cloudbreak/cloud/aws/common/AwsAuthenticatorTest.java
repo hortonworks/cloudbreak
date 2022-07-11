@@ -28,6 +28,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.amazonaws.auth.InstanceProfileCredentialsProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -40,7 +41,7 @@ import com.sequenceiq.cloudbreak.service.RetryService;
 import io.opentracing.Tracer;
 
 @ExtendWith(SpringExtension.class)
-public class AwsAuthenticatorTest {
+class AwsAuthenticatorTest {
 
     @Inject
     private AwsAuthenticator underTest;
@@ -63,26 +64,29 @@ public class AwsAuthenticatorTest {
     @MockBean
     private SdkClientExceptionMapper sdkClientExceptionMapper;
 
+    @MockBean
+    private AwsPageCollector awsPageCollector;
+
     @BeforeEach
-    public void awsClientSetup() {
+    void awsClientSetup() {
         doReturn(amazonEC2Client).when(awsClient).createEc2Client(any(AwsCredentialView.class));
         doReturn(amazonEC2Client).when(awsClient).createEc2Client(any(AwsCredentialView.class), anyString());
     }
 
     @Test
-    public void testAuthenticateWithAccessPairMissing() {
+    void testAuthenticateWithAccessPairMissing() {
         doCallRealMethod().when(awsClient).createEc2Client(any(), anyString());
         Assertions.assertThrows(CredentialVerificationException.class, () -> testAuthenticate(Map.of("accessKey", "ac")));
     }
 
     @Test
-    public void testAuthenticateWithAccessPairMissingSecret() {
+    void testAuthenticateWithAccessPairMissingSecret() {
         doCallRealMethod().when(awsClient).createEc2Client(any(), anyString());
         Assertions.assertThrows(CredentialVerificationException.class, () -> testAuthenticate(Map.of("secretKey", "ac")));
     }
 
     @Test
-    public void testAuthenticateSucceedWithRole() {
+    void testAuthenticateSucceedWithRole() {
         when(awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(true);
         when(awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(true);
         testAuthenticate(Map.of("roleArn", "role"));
@@ -91,14 +95,14 @@ public class AwsAuthenticatorTest {
     }
 
     @Test
-    public void testAuthenticateWithRoleWithoutAccessKeyEnv() {
+    void testAuthenticateWithRoleWithoutAccessKeyEnv() {
         when(awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
         when(awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(true);
         Assertions.assertThrows(CredentialVerificationException.class, () -> testAuthenticate(Map.of("roleArn", "role")));
     }
 
     @Test
-    public void testAuthenticateWithRoleWithoutSecretKeyEnv() {
+    void testAuthenticateWithRoleWithoutSecretKeyEnv() {
         when(awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(true);
         when(awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
         Assertions.assertThrows(CredentialVerificationException.class, () -> testAuthenticate(Map.of("roleArn", "role")));

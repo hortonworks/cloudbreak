@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonS3Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecurityTokenServiceClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.mapper.SdkClientExceptionMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.tracing.AwsTracingRequestHandler;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -71,6 +72,9 @@ public abstract class AwsClient {
 
     @Inject
     private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
+
+    @Inject
+    private AwsPageCollector awsPageCollector;
 
     @Inject
     private Retry retry;
@@ -221,7 +225,7 @@ public abstract class AwsClient {
                 .withClientConfiguration(getDefaultClientConfiguration())
                 .withRegion(region)
                 .build(), awsCredentialView, region);
-        return new AmazonRdsClient(client);
+        return new AmazonRdsClient(client, awsPageCollector);
     }
 
     protected ClientConfiguration getDefaultClientConfiguration() {

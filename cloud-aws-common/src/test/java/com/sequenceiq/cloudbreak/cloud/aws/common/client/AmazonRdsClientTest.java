@@ -10,12 +10,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.amazonaws.services.rds.AmazonRDS;
 import com.amazonaws.services.rds.model.Certificate;
 import com.amazonaws.services.rds.model.DescribeCertificatesRequest;
 import com.amazonaws.services.rds.model.DescribeCertificatesResult;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 
 @ExtendWith(MockitoExtension.class)
 class AmazonRdsClientTest {
@@ -24,6 +26,9 @@ class AmazonRdsClientTest {
 
     @Mock
     private AmazonRDS client;
+
+    @Spy
+    private AwsPageCollector awsPageCollector;
 
     @InjectMocks
     private AmazonRdsClient underTest;

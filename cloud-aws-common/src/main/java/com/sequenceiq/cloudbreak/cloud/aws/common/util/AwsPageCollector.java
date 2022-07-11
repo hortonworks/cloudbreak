@@ -7,16 +7,17 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import org.springframework.stereotype.Component;
+
 import com.amazonaws.services.ec2.model.DescribeRouteTablesRequest;
 import com.amazonaws.services.ec2.model.DescribeRouteTablesResult;
 import com.amazonaws.services.ec2.model.RouteTable;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 
+@Component
 public class AwsPageCollector {
-    private AwsPageCollector() {
-    }
 
-    public static List<RouteTable> getAllRouteTables(AmazonEc2Client ec2Client, DescribeRouteTablesRequest request) {
+    public List<RouteTable> getAllRouteTables(AmazonEc2Client ec2Client, DescribeRouteTablesRequest request) {
         List<RouteTable> routeTableList = collectPages(ec2Client::describeRouteTables, request,
                 DescribeRouteTablesResult::getRouteTables,
                 DescribeRouteTablesResult::getNextToken,
@@ -24,7 +25,7 @@ public class AwsPageCollector {
         return routeTableList;
     }
 
-    public static <S, P, R> List<S> collectPages(Function<P, R> resultProvider, P request, Function<R, List<S>> listFromResultGetter,
+    public <S, P, R> List<S> collectPages(Function<P, R> resultProvider, P request, Function<R, List<S>> listFromResultGetter,
             Function<R, String> tokenFromResultGetter, BiConsumer<P, String> tokenToRequestSetter) {
         String nextToken;
         List<S> list = new ArrayList<>();

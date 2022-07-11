@@ -2,19 +2,21 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultCDHInfo;
 import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -27,12 +29,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -58,7 +60,8 @@ import com.sequenceiq.cloudbreak.service.parcel.ParcelFilterService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-public class ClouderaManagerClusterCreationSetupServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ClouderaManagerClusterCreationSetupServiceTest {
 
     private static final String NEWER_CDH_VERSION = "1.9.0";
 
@@ -110,9 +113,8 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
 
     private Component imageComponent;
 
-    @Before
-    public void init() throws CloudbreakImageCatalogException {
-        MockitoAnnotations.initMocks(this);
+    @BeforeEach
+    void init() throws CloudbreakImageCatalogException {
         Workspace workspace = new Workspace();
         workspace.setId(WORKSPACE_ID);
 
@@ -121,6 +123,8 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         stack.setId(STACK_ID);
         stack.setName("test-stack");
         stack.setWorkspace(workspace);
+        stack.setCloudPlatform("AWS");
+        stack.setPlatformVariant("AWS");
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{}");
         Map<InstanceGroupType, String> userData = new HashMap<>();
@@ -143,15 +147,17 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
                         mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class)),
                 NEWER_CDH_VERSION, new ImageBasedDefaultCDHInfo(getDefaultCDHInfo(NEWER_CDH_VERSION),
                         mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class)));
-        when(imageBasedDefaultCDHEntries.getEntries(workspace.getId(), null, IMAGE_CATALOG_NAME)).thenReturn(defaultCDHInfoMap);
+        lenient().when(imageBasedDefaultCDHEntries.getEntries(workspace.getId(), imageCatalogPlatform("AWS"), IMAGE_CATALOG_NAME))
+                .thenReturn(defaultCDHInfoMap);
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         stackMatrixV4Response.setCdh(Collections.singletonMap(OLDER_CDH_VERSION, null));
-        when(stackMatrixService.getStackMatrix(Mockito.eq(workspace.getId()), Mockito.eq(null), Mockito.anyString())).thenReturn(stackMatrixV4Response);
+        lenient().when(stackMatrixService.getStackMatrix(eq(workspace.getId()), eq(imageCatalogPlatform("AWS")), anyString()))
+                .thenReturn(stackMatrixV4Response);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform("AWS"));
     }
 
     @Test
-    public void specificVersionUsedIfAvailable() throws IOException, CloudbreakImageCatalogException {
+    void specificVersionUsedIfAvailable() throws IOException, CloudbreakImageCatalogException {
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(OLDER_CDH_VERSION);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
@@ -161,7 +167,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
     }
 
     @Test
-    public void latestUsedIfVersionUnspecified() throws IOException, CloudbreakImageCatalogException {
+    void latestUsedIfVersionUnspecified() throws IOException, CloudbreakImageCatalogException {
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(null);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
@@ -170,16 +176,17 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         assertVersionsMatch(clusterComponents, DEFAULT_CM_VERSION, NEWER_CDH_VERSION);
     }
 
-    @Test(expected = BadRequestException.class)
-    public void throwsForNonExistentVersion() throws IOException, CloudbreakImageCatalogException {
+    @Test
+    void throwsForNonExistentVersion() throws IOException, CloudbreakImageCatalogException {
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn("5.6.7");
 
-        underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
-                Optional.empty(), List.of(), Optional.of(imageComponent));
+        assertThrows(BadRequestException.class, () ->
+                underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
+                        Optional.empty(), List.of(), Optional.of(imageComponent)));
     }
 
     @Test
-    public void testPrewarmedClouderaManagerClusterComponents() throws IOException, CloudbreakImageCatalogException {
+    void testPrewarmedClouderaManagerClusterComponents() throws IOException, CloudbreakImageCatalogException {
         Component cmRepoComponent = spy(new Component(ComponentType.CM_REPO_DETAILS,
                 ComponentType.CM_REPO_DETAILS.name(), new Json(getClouderaManagerRepo(false)), stack));
         Component productComponent = spy(new Component(ComponentType.CDH_PRODUCT_DETAILS,
@@ -199,7 +206,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
     }
 
     @Test
-    public void testPrewarmedClouderaManagerClusterComponentsWhenTheStackTypeIsDataLake() throws IOException, CloudbreakImageCatalogException {
+    void testPrewarmedClouderaManagerClusterComponentsWhenTheStackTypeIsDataLake() throws IOException, CloudbreakImageCatalogException {
         Component cmRepoComponent = spy(new Component(ComponentType.CM_REPO_DETAILS,
                 ComponentType.CM_REPO_DETAILS.name(), new Json(getClouderaManagerRepo(false)), stack));
         Component productComponent = spy(new Component(ComponentType.CDH_PRODUCT_DETAILS,
@@ -228,8 +235,8 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
 
     private void assertContainsVersion(String expectedVersion, ClusterComponent component) {
         String versionStr = String.format("\"version\":\"%s\"", expectedVersion);
-        assertTrue(String.format("Expected '%s' to contain '%s'", component.getAttributes().getValue(), versionStr),
-                component.getAttributes().getValue().contains(versionStr));
+        assertTrue(component.getAttributes().getValue().contains(versionStr),
+                String.format("Expected '%s' to contain '%s'", component.getAttributes().getValue(), versionStr));
     }
 
     private ClusterComponent findComponentByType(Collection<ClusterComponent> clusterComponents, ComponentType type) {
@@ -254,10 +261,14 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
 
     private void setupDefaultClouderaManagerEntries() throws CloudbreakImageCatalogException {
         ClouderaManagerRepo clouderaManagerRepo = getClouderaManagerRepo(true);
-        Mockito.when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, "CDH", SOME_CDH_VERSION, null)).thenReturn(clouderaManagerRepo);
-        Mockito.when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, "CDH", NEWER_CDH_VERSION, null)).thenReturn(clouderaManagerRepo);
-        Mockito.when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, "CDH", OLDER_CDH_VERSION, null)).thenReturn(clouderaManagerRepo);
-        Mockito.when(defaultClouderaManagerRepoService.getDefault(REDHAT_7, "CDH", null, null)).thenReturn(clouderaManagerRepo);
+        lenient().when(defaultClouderaManagerRepoService.getDefault(eq(REDHAT_7), eq("CDH"), eq(SOME_CDH_VERSION), eq(imageCatalogPlatform("AWS"))))
+                .thenReturn(clouderaManagerRepo);
+        lenient().when(defaultClouderaManagerRepoService.getDefault(eq(REDHAT_7), eq("CDH"), eq(NEWER_CDH_VERSION), eq(imageCatalogPlatform("AWS"))))
+                .thenReturn(clouderaManagerRepo);
+        lenient().when(defaultClouderaManagerRepoService.getDefault(eq(REDHAT_7), eq("CDH"), eq(OLDER_CDH_VERSION), eq(imageCatalogPlatform("AWS"))))
+                .thenReturn(clouderaManagerRepo);
+        lenient().when(defaultClouderaManagerRepoService.getDefault(eq(REDHAT_7), eq("CDH"), eq(null), eq(imageCatalogPlatform("AWS"))))
+                .thenReturn(clouderaManagerRepo);
     }
 
     private ClouderaManagerProduct clouderaManagerProduct(String name, String version) {
