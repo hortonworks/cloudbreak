@@ -8,7 +8,6 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -22,20 +21,17 @@ public class LoadBalancerMetadataRequest extends StackEvent {
 
     private final List<LoadBalancerType> typesPresentInStack;
 
-    private final Stack stack;
-
     private final List<CloudResource> cloudResources;
 
     @JsonCreator
     public LoadBalancerMetadataRequest(
-            @JsonProperty("stack") Stack stack,
+            @JsonProperty("resourceId") Long stackId,
             @JsonProperty("cloudContext") CloudContext cloudContext,
             @JsonProperty("cloudCredential") CloudCredential cloudCredential,
             @JsonProperty("cloudStack") CloudStack cloudStack,
             @JsonProperty("typesPresentInStack") List<LoadBalancerType> typesPresentInStack,
             @JsonProperty("cloudResources") List<CloudResource> cloudResources) {
-        super(stack.getId());
-        this.stack = stack;
+        super(stackId);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
         this.cloudStack = cloudStack;
@@ -57,10 +53,6 @@ public class LoadBalancerMetadataRequest extends StackEvent {
 
     public List<LoadBalancerType> getTypesPresentInStack() {
         return typesPresentInStack;
-    }
-
-    public Stack getStack() {
-        return stack;
     }
 
     public List<CloudResource> getCloudResources() {

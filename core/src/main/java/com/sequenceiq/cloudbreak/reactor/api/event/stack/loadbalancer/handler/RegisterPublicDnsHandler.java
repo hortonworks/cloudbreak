@@ -9,23 +9,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import reactor.bus.Event;
-
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.RegisterPublicDnsFailure;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.RegisterPublicDnsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.RegisterPublicDnsSuccess;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+
+import reactor.bus.Event;
 
 @Component
 public class RegisterPublicDnsHandler extends ExceptionCatcherEventHandler<RegisterPublicDnsRequest> {
@@ -44,6 +45,9 @@ public class RegisterPublicDnsHandler extends ExceptionCatcherEventHandler<Regis
     @Inject
     private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
 
+    @Inject
+    private StackService stackService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(RegisterPublicDnsRequest.class);
@@ -57,7 +61,7 @@ public class RegisterPublicDnsHandler extends ExceptionCatcherEventHandler<Regis
     @Override
     protected Selectable doAccept(HandlerEvent<RegisterPublicDnsRequest> event) {
         RegisterPublicDnsRequest request = event.getData();
-        Stack stack = request.getStack();
+        Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
         if (gatewayPublicEndpointManagementService.isCertRenewalTriggerable(stack)) {
             try {
                 LOGGER.debug("Fetching instance group and instance metadata for stack.");
@@ -73,7 +77,7 @@ public class RegisterPublicDnsHandler extends ExceptionCatcherEventHandler<Regis
                         throw new CloudbreakException("Public DNS registration resulted in failed state. Please consult DNS registration logs.");
                     }
                     LOGGER.debug("Load balancer public DNS registration was successful");
-                    return new RegisterPublicDnsSuccess(stack);
+                    return new RegisterPublicDnsSuccess(stack.getId());
                 } else {
                     throw new CloudbreakException("Unable to find instance metadata for primary instance group. Certificates cannot " +
                         "be updated.");
@@ -84,7 +88,7 @@ public class RegisterPublicDnsHandler extends ExceptionCatcherEventHandler<Regis
             }
         } else {
             LOGGER.info("Certificates and DNS are not managed by PEM for stack {}. Skipping public DNS registration.", stack.getName());
-            return new RegisterPublicDnsSuccess(stack);
+            return new RegisterPublicDnsSuccess(stack.getId());
         }
     }
 }

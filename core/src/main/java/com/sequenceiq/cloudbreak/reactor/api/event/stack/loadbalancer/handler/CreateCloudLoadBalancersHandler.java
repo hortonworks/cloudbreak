@@ -26,8 +26,6 @@ import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateCloudLoadBalancersFailure;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateCloudLoadBalancersRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateCloudLoadBalancersSuccess;
@@ -49,9 +47,6 @@ public class CreateCloudLoadBalancersHandler extends ExceptionCatcherEventHandle
 
     @Inject
     private PersistenceNotifier persistenceNotifier;
-
-    @Inject
-    private StackToCloudStackConverter cloudStackConverter;
 
     @Inject
     private PollTaskFactory statusCheckFactory;
@@ -76,25 +71,11 @@ public class CreateCloudLoadBalancersHandler extends ExceptionCatcherEventHandle
         try {
             LOGGER.info("Updating cloud stack with load balancer network information");
             CloudStack origCloudStack = request.getCloudStack();
-            Stack stack = request.getStack();
-            CloudStack updatedCloudStack = new CloudStack(
-                origCloudStack.getGroups(),
-                cloudStackConverter.buildNetwork(stack),
-                origCloudStack.getImage(),
-                origCloudStack.getParameters(),
-                origCloudStack.getTags(),
-                origCloudStack.getTemplate(),
-                origCloudStack.getInstanceAuthentication(),
-                origCloudStack.getLoginUserName(),
-                origCloudStack.getPublicKey(),
-                origCloudStack.getFileSystem().orElse(null),
-                origCloudStack.getLoadBalancers()
-            );
 
             CloudConnector<Object> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             LOGGER.debug("Initiating cloud load balancer creation");
-            List<CloudResourceStatus> resourceStatus = connector.resources().launchLoadBalancers(ac, updatedCloudStack, persistenceNotifier);
+            List<CloudResourceStatus> resourceStatus = connector.resources().launchLoadBalancers(ac, origCloudStack, persistenceNotifier);
 
             LOGGER.debug("Waiting for cloud load balancers to be fully created");
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
@@ -112,12 +93,12 @@ public class CreateCloudLoadBalancersHandler extends ExceptionCatcherEventHandle
                 throw new CloudbreakException("Creation failed for load balancers: " + names);
             }
 
-            Set<String> types = updatedCloudStack.getLoadBalancers().stream()
+            Set<String> types = origCloudStack.getLoadBalancers().stream()
                 .map(CloudLoadBalancer::getType)
                 .map(LoadBalancerType::toString)
                 .collect(Collectors.toSet());
             LOGGER.info("Cloud load balancer creation for load balancer types {} successful", types);
-            return new CreateCloudLoadBalancersSuccess(stack);
+            return new CreateCloudLoadBalancersSuccess(cloudContext.getId());
         } catch (Exception e) {
             LOGGER.warn("Failed to created cloud load balance resources.", e);
             return new CreateCloudLoadBalancersFailure(request.getResourceId(), e);

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class CreateCloudLoadBalancersRequest extends StackEvent {
@@ -16,16 +15,13 @@ public class CreateCloudLoadBalancersRequest extends StackEvent {
 
     private final CloudStack cloudStack;
 
-    private final Stack stack;
-
     @JsonCreator
     public CreateCloudLoadBalancersRequest(
-            @JsonProperty("stack") Stack stack,
+            @JsonProperty("resourceId") Long stackId,
             @JsonProperty("cloudContext") CloudContext cloudContext,
             @JsonProperty("cloudCredential") CloudCredential cloudCredential,
             @JsonProperty("cloudStack") CloudStack cloudStack) {
-        super(stack.getId());
-        this.stack = stack;
+        super(stackId);
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
         this.cloudStack = cloudStack;
@@ -41,9 +37,5 @@ public class CreateCloudLoadBalancersRequest extends StackEvent {
 
     public CloudStack getCloudStack() {
         return cloudStack;
-    }
-
-    public Stack getStack() {
-        return stack;
     }
 }
