@@ -2,8 +2,6 @@ package com.sequenceiq.environment.environment.v1;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -82,16 +80,6 @@ class EnvironmentControllerTest {
     void testUpgradeCcmByCrnCallsService() {
         underTest.upgradeCcmByCrn("crn123");
         verify(upgradeCcmService).upgradeCcmByCrn("crn123");
-    }
-
-    @Test
-    void testRotateSaltPasswordByName() {
-        EnvironmentDto environmentDto = new EnvironmentDto();
-        when(environmentService.getByCrnAndAccountId(eq("crn"), anyString())).thenReturn(environmentDto);
-
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.rotateSaltPasswordByCrn("crn"));
-
-        verify(freeIpaService).rotateSaltPassword(environmentDto);
     }
 
     private EnvironmentNetworkRequest setupNetworkRequestWithEndpointGatway() {
