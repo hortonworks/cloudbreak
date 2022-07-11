@@ -161,7 +161,7 @@ public class RecipeServiceTest {
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.createForLoggedInUser(recipe, 1L, "account_id", userCrn));
 
         assertThat(recipe.getCreator(), is(userCrn));
-        assertTrue(recipe.getResourceCrn().matches("crn:cdp:recipe:us-west-1:account_id:recipe:.*"));
+        assertTrue(recipe.getResourceCrn().matches("crn:cdp:datahub:us-west-1:account_id:recipe:.*"));
     }
 
     @Test
@@ -177,7 +177,7 @@ public class RecipeServiceTest {
         Recipe savedRecipe = underTest.createWithInternalUser(recipe, 1L, "account_id");
 
         assertThat(recipe.getCreator(), nullValue());
-        assertTrue(recipe.getResourceCrn().matches("crn:cdp:recipe:us-west-1:account_id:recipe:.*"));
+        assertTrue(recipe.getResourceCrn().matches("crn:cdp:datahub:us-west-1:account_id:recipe:.*"));
         assertEquals(workspace, savedRecipe.getWorkspace());
         assertEquals(CreationType.SERVICE, savedRecipe.getCreationType());
     }
