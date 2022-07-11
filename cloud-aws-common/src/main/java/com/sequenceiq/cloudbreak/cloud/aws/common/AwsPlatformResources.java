@@ -661,6 +661,7 @@ public class AwsPlatformResources implements PlatformResources {
             Set<VmType> awsInstances = new HashSet<>();
             for (int actualSegment = 0; actualSegment < instanceTypes.size(); actualSegment += SEGMENT) {
                 DescribeInstanceTypesRequest request = new DescribeInstanceTypesRequest();
+                request.withFilters(new Filter().withName("processor-info.supported-architecture").withValues("x86_64"));
                 request.setInstanceTypes(getInstanceTypes(instanceTypes, actualSegment));
                 getVmTypesWithAwsCall(awsInstances, ec2Client.describeInstanceTypes(request));
             }
