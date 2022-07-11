@@ -799,6 +799,8 @@ cb:
   loadBalancer:
     supportedPlatforms: AWS,YARN,AZURE,GCP
 
+  upscale:
+    zombie.auto.cleanup.enabled: true
   upgrade:
     failure.sync:
       sdx.enabled: false

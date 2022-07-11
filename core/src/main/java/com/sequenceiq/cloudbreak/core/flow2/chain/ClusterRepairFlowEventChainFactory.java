@@ -252,7 +252,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             LOGGER.info("Full downscale for the following: {}", groupsWithHostNames);
             return new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(), groupsWithAdjustment,
                     groupsWithPrivateIds, groupsWithHostNames, ScalingType.DOWNSCALE_TOGETHER, event.accepted(),
-                    new ClusterDownscaleDetails(true, true));
+                    new ClusterDownscaleDetails(true, true, false));
         } else {
             LOGGER.info("Stack downscale for the following: {}", groupsWithHostNames);
             return new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), groupsWithAdjustment, groupsWithPrivateIds,

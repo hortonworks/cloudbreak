@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
@@ -19,14 +20,14 @@ public class ClusterCreationFlowTriggerCondition implements FlowTriggerCondition
     private StackService stackService;
 
     @Override
-    public FlowTriggerConditionResult isFlowTriggerable(Long stackId) {
-        FlowTriggerConditionResult result = FlowTriggerConditionResult.OK;
-        StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
+    public FlowTriggerConditionResult isFlowTriggerable(Payload payload) {
+        FlowTriggerConditionResult result = FlowTriggerConditionResult.ok();
+        StackView stackView = stackService.getViewByIdWithoutAuth(payload.getResourceId());
         boolean triggerable = stackView.isCreateInProgress();
         if (!triggerable) {
             String msg = "Cluster creation cannot be triggered, because stack is not in create in progress status.";
             LOGGER.warn(msg);
-            result = new FlowTriggerConditionResult(msg);
+            result = FlowTriggerConditionResult.fail(msg);
         }
         return result;
     }

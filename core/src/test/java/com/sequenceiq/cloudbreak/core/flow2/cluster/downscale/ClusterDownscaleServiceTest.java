@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Set;
@@ -19,10 +20,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
+import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -68,7 +74,8 @@ public class ClusterDownscaleServiceTest {
     public void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsPositiveThenInstanceGroupEventWillBeCalledThisNumber() {
         doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SCALING_DOWN);
 
-        underTest.clusterDownscaleStarted(STACK_ID, Map.of(HOST_GROUP_NAME, 1), Map.of(HOST_GROUP_NAME, PRIVATE_IDS), details);
+        underTest.clusterDownscaleStarted(STACK_ID, new ClusterDownscaleTriggerEvent(null, STACK_ID, Map.of(HOST_GROUP_NAME, 1),
+                Map.of(HOST_GROUP_NAME, PRIVATE_IDS), Map.of(), null, details));
 
         verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID,
                 Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_REMOVING_NODES, "1");
@@ -86,7 +93,8 @@ public class ClusterDownscaleServiceTest {
     public void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsNegativeThenInstanceGroupEventWillBeCalledWithTheAbsoluteValueOfThisNumber() {
         doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SCALING_DOWN);
 
-        underTest.clusterDownscaleStarted(STACK_ID, Map.of(HOST_GROUP_NAME, -1), Map.of(HOST_GROUP_NAME, PRIVATE_IDS), details);
+        underTest.clusterDownscaleStarted(STACK_ID, new ClusterDownscaleTriggerEvent(null, STACK_ID, Map.of(HOST_GROUP_NAME, -1),
+                Map.of(HOST_GROUP_NAME, PRIVATE_IDS), Map.of(), null, details));
 
         verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID,
                 Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_REMOVING_NODES, "1");
@@ -95,6 +103,30 @@ public class ClusterDownscaleServiceTest {
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
         verify(stackService, times(0)).getByIdWithListsInTransaction(anyLong());
         verify(stackService, times(0)).getByIdWithListsInTransaction(STACK_ID);
+        verify(stackService, times(0)).getHostNamesForPrivateIds(anyListOf(InstanceMetaData.class), anySet());
+        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(),
+                any(ResourceEvent.class), anyString());
+    }
+
+    @Test
+    public void testClusterDownscaleStartedWhenZombieHostgroupsIsGivenThenInstanceGroupEventWillBeCalledWith() {
+        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SCALING_DOWN_ZOMBIE_NODES);
+        when(details.isPurgeZombies()).thenReturn(Boolean.TRUE);
+        Stack stack = TestUtil.stack();
+        stack.setId(STACK_ID);
+        InstanceGroup instanceGroup = stack.getInstanceGroups().iterator().next();
+        instanceGroup.setGroupName(HOST_GROUP_NAME);
+        instanceGroup.getInstanceMetaDataSet().iterator().next().setInstanceStatus(InstanceStatus.ZOMBIE);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+
+        underTest.clusterDownscaleStarted(STACK_ID, new ClusterDownscaleTriggerEvent(null, STACK_ID, Set.of(HOST_GROUP_NAME), null, details));
+
+        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID,
+                Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_REMOVING_ZOMBIE_NODES, "1");
+        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(),
+                ResourceEvent.CLUSTER_SCALING_DOWN_ZOMBIE_NODES, "worker");
+        verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
+        verify(stackService, times(1)).getByIdWithListsInTransaction(STACK_ID);
         verify(stackService, times(0)).getHostNamesForPrivateIds(anyListOf(InstanceMetaData.class), anySet());
         verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(),
                 any(ResourceEvent.class), anyString());

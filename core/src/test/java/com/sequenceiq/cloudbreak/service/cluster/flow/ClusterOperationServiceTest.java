@@ -272,8 +272,6 @@ public class ClusterOperationServiceTest {
         when(stackService.getById(STACK_ID)).thenReturn(stack);
         when(updateHostsValidator.validateRequest(stack, downscaleHostGroupAdjustment)).thenReturn(true);
         underTest.updateHosts(STACK_ID, downscaleHostGroupAdjustment);
-        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DOWNSCALE_REQUESTED,
-                "Requested node count for downscaling: " + 5);
         verify(flowManager, times(1)).triggerClusterDownscale(STACK_ID, downscaleHostGroupAdjustment);
 
         HostGroupAdjustmentV4Request upscaleHostGroupAdjustment = new HostGroupAdjustmentV4Request();

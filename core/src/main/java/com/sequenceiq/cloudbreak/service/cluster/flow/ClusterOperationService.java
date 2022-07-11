@@ -16,7 +16,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NO
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
-import static java.lang.Math.abs;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -245,8 +244,6 @@ public class ClusterOperationService {
         }
         boolean downscaleRequest = updateHostsValidator.validateRequest(stack, hostGroupAdjustment);
         if (downscaleRequest) {
-            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_REQUESTED,
-                    "Requested node count for downscaling: " + abs(hostGroupAdjustment.getScalingAdjustment()));
             return flowManager.triggerClusterDownscale(stackId, hostGroupAdjustment);
         } else {
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_REQUESTED,

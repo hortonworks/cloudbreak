@@ -25,6 +25,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
+import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
@@ -109,5 +110,10 @@ public class ClusterDownscaleFlowConfig extends StackStatusFinalizerAbstractFlow
     @Override
     public String getDisplayName() {
         return "Downscale cluster";
+    }
+
+    @Override
+    public FlowTriggerCondition getFlowTriggerCondition() {
+        return getApplicationContext().getBean(ClusterDownscaleFlowTriggerCondition.class);
     }
 }

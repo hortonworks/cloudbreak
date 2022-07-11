@@ -88,7 +88,8 @@ public class CollectDownscaleCandidatesHandlerTest {
     public void downScaleForcedForced() {
         //given
         Stack stack = generateStackData();
-        Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(PRIVATE_ID), new ClusterDownscaleDetails(true, false));
+        Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(PRIVATE_ID),
+                new ClusterDownscaleDetails(true, false, false));
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         //when
         testedClass.accept(event);
