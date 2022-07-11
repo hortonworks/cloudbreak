@@ -1,8 +1,9 @@
 package com.sequenceiq.freeipa.service.cloud;
 
-import static com.sequenceiq.cloudbreak.util.ThrowableUtil.notFound;
-
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.converter.cloud.CloudResourceToResourceConverter;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -37,16 +39,20 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     public ResourceNotification persist(ResourceNotification notification) {
         LOGGER.debug("Resource allocation notification received: {}", notification);
         Long stackId = notification.getCloudContext().getId();
-        CloudResource cloudResource = notification.getCloudResource();
-        Resource resource = cloudResourceToResourceConverter.convert(cloudResource);
-        Optional<Resource> persistedResource = getPersistedResource(stackId, cloudResource);
-        if (persistedResource.isPresent()) {
-            LOGGER.debug("Trying to persist a resource (name: {}, type: {}, stackId: {}) that is already persisted, skipping..",
-                    cloudResource.getName(), cloudResource.getType().name(), stackId);
-            return notification;
+        Stack stack = findStackById(stackId);
+        List<CloudResource> cloudResources = notification.getCloudResources();
+        List<Resource> resources = cloudResources.stream()
+                .filter(cr -> !resourceExists(stackId, cr))
+                .map(cloudResource -> {
+                    Resource resource = cloudResourceToResourceConverter.convert(cloudResource);
+                    setStack(stack, cloudResource, resource);
+                    resourceService.save(resource);
+                    return resource;
+                })
+                .collect(Collectors.toList());
+        if (cloudResources.size() != resources.size()) {
+            LOGGER.debug("There are {} resource(s), these will not be save", cloudResources.size() - resources.size());
         }
-        setStack(stackId, cloudResource, resource);
-        resourceService.save(resource);
         return notification;
     }
 
@@ -54,13 +60,16 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     public ResourceNotification update(ResourceNotification notification) {
         LOGGER.debug("Resource update notification received: {}", notification);
         Long stackId = notification.getCloudContext().getId();
-        CloudResource cloudResource = notification.getCloudResource();
-        Resource persistedResource = getPersistedResource(stackId, cloudResource)
-                .orElseThrow(notFound("resource", cloudResource.getName()));
-        Resource resource = cloudResourceToResourceConverter.convert(cloudResource);
-        updateWithPersistedFields(resource, persistedResource);
-        setStack(stackId, cloudResource, resource);
-        resourceService.save(resource);
+        Stack stack = findStackById(stackId);
+        List<CloudResource> cloudResources = notification.getCloudResources();
+        cloudResources.forEach(cloudResource -> {
+            Resource persistedResource = getPersistedResource(stackId, cloudResource)
+                    .orElseThrow(NotFoundException.notFound("resource", cloudResource.getName()));
+            Resource resource = cloudResourceToResourceConverter.convert(cloudResource);
+            updateWithPersistedFields(resource, persistedResource);
+            setStack(stack, cloudResource, resource);
+            resourceService.save(resource);
+        });
         return notification;
     }
 
@@ -68,9 +77,15 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     public ResourceNotification delete(ResourceNotification notification) {
         LOGGER.debug("Resource deletion notification received: {}", notification);
         Long stackId = notification.getCloudContext().getId();
-        CloudResource cloudResource = notification.getCloudResource();
-        Optional<Resource> persistedResource = getPersistedResource(stackId, cloudResource);
-        persistedResource.ifPresent(value -> resourceService.delete(value));
+        List<CloudResource> cloudResources = notification.getCloudResources();
+        AtomicInteger deleted = new AtomicInteger(0);
+        cloudResources.stream()
+                .filter(cr -> resourceExists(stackId, cr))
+                .forEach(cloudResource -> {
+                    resourceService.deleteByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
+                    deleted.incrementAndGet();
+                });
+        LOGGER.debug("There are {} deleted resource(s)", deleted.get());
         return notification;
     }
 
@@ -93,11 +108,26 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         }
     }
 
-    private void setStack(Long stackId, CloudResource cloudResource, Resource resource) {
+    private void setStack(Stack stack, CloudResource cloudResource, Resource resource) {
         if (cloudResource.isStackAware()) {
-            LOGGER.debug("Setting stack {} for cloud resource {} and type {}", stackId, cloudResource.getName(), cloudResource.getType());
-            resource.setStack(findStackById(stackId));
+            LOGGER.debug("Setting stack {} for cloud resource {} and type {}", stack.getId(), cloudResource.getName(), cloudResource.getType());
+            resource.setStack(stack);
         }
     }
 
+    private boolean resourceExists(Long stackId, CloudResource cloudResource) {
+        boolean exists;
+        String id;
+        if (cloudResource.isStackAware()) {
+            exists = resourceService.existsByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
+            id = cloudResource.getName();
+        } else {
+            exists = resourceService.existsByResourceReferenceAndType(cloudResource.getReference(), cloudResource.getType());
+            id = cloudResource.getReference();
+        }
+        if (exists) {
+            LOGGER.debug("{} and {} already exists in DB for stack.", id, cloudResource.getType());
+        }
+        return exists;
+    }
 }

@@ -2,7 +2,8 @@ package com.sequenceiq.redbeams.service.cloud;
 
 import static com.sequenceiq.redbeams.exception.NotFoundException.notFound;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.service.Persister;
 import com.sequenceiq.redbeams.converter.stack.CloudResourceToDbResourceConverter;
 import com.sequenceiq.redbeams.domain.stack.DBResource;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
@@ -36,16 +38,26 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     public ResourceNotification persist(ResourceNotification notification) {
         LOGGER.debug("DBResource allocation notification received: {}", notification);
         Long dbStackId = notification.getCloudContext().getId();
-        CloudResource cloudResource = notification.getCloudResource();
-        DBResource resource = cloudResourceToDbResourceConverter.convert(cloudResource);
-        Optional<DBResource> persistedResource = dbResourceService.findByStackAndNameAndType(dbStackId, cloudResource.getName(), cloudResource.getType());
-        if (persistedResource.isPresent()) {
-            LOGGER.debug("Trying to persist a resource (name: {}, type: {}, stackId: {}) that is already persisted, skipping..",
-                    cloudResource.getName(), cloudResource.getType().name(), dbStackId);
-            return notification;
+        DBStack dbStack = dbStackService.getById(dbStackId);
+        List<CloudResource> cloudResources = notification.getCloudResources();
+        List<DBResource> resources = cloudResources.stream()
+                .filter(cr -> {
+                    boolean exist = dbResourceService.existsByStackAndNameAndType(dbStackId, cr.getName(), cr.getType());
+                    if (exist) {
+                        LOGGER.debug("{} and {} already exists in DB for stack.", cr.getName(), cr.getType());
+                    }
+                    return !exist;
+                })
+                .map(cloudResource -> {
+                    DBResource resource = cloudResourceToDbResourceConverter.convert(cloudResource);
+                    resource.setDbStack(dbStack);
+                    dbResourceService.save(resource);
+                    return resource;
+                })
+                .collect(Collectors.toList());
+        if (cloudResources.size() != resources.size()) {
+            LOGGER.debug("There are {} resource(s), these will not be save", cloudResources.size() - resources.size());
         }
-        resource.setDbStack(dbStackService.getById(dbStackId));
-        dbResourceService.save(resource);
         return notification;
     }
 
@@ -53,13 +65,16 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
     public ResourceNotification update(ResourceNotification notification) {
         LOGGER.debug("DBResource update notification received: {}", notification);
         Long dbStackId = notification.getCloudContext().getId();
-        CloudResource cloudResource = notification.getCloudResource();
-        DBResource persistedResource = dbResourceService.findByStackAndNameAndType(dbStackId, cloudResource.getName(), cloudResource.getType())
-                .orElseThrow(notFound("dbResource", cloudResource.getName()));
-        DBResource resource = cloudResourceToDbResourceConverter.convert(cloudResource);
-        updateWithPersistedFields(resource, persistedResource);
-        resource.setDbStack(dbStackService.getById(dbStackId));
-        dbResourceService.save(resource);
+        DBStack dbStack = dbStackService.getById(dbStackId);
+        List<CloudResource> cloudResources = notification.getCloudResources();
+        cloudResources.forEach(cloudResource -> {
+            DBResource resource = cloudResourceToDbResourceConverter.convert(cloudResource);
+            DBResource persistedResource = dbResourceService.findByStackAndNameAndType(dbStackId, cloudResource.getName(), cloudResource.getType())
+                    .orElseThrow(notFound("dbResource", cloudResource.getName()));
+            updateWithPersistedFields(resource, persistedResource);
+            resource.setDbStack(dbStack);
+            dbResourceService.save(resource);
+        });
         return notification;
     }
 

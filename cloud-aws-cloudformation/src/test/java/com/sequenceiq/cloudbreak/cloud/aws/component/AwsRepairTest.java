@@ -21,6 +21,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -371,15 +372,16 @@ public class AwsRepairTest {
                 .suspendProcesses(argThat(argument -> AUTOSCALING_GROUP_NAME.equals(argument.getAutoScalingGroupName())
                         && SUSPENDED_PROCESSES.equals(argument.getScalingProcesses())));
 
-        ArgumentCaptor<CloudResource> updatedCloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
-        verify(resourceNotifier, times(2)).notifyUpdate(updatedCloudResourceArgumentCaptor.capture(), any());
+        ArgumentCaptor<List<CloudResource>> updatedCloudResourceArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(resourceNotifier, times(2)).notifyUpdates(updatedCloudResourceArgumentCaptor.capture(), any());
 
         assertVolumeResource(updatedCloudResourceArgumentCaptor.getAllValues(), INSTANCE_ID_1, SIZE_DISK_1, FSTAB_1);
         assertVolumeResource(updatedCloudResourceArgumentCaptor.getAllValues(), INSTANCE_ID_2, SIZE_DISK_2, FSTAB_2);
     }
 
-    private void assertVolumeResource(List<CloudResource> updatedCloudResources, String instanceId, int sizeDisk, String fstab) {
+    private void assertVolumeResource(List<List<CloudResource>> updatedCloudResources, String instanceId, int sizeDisk, String fstab) {
         updatedCloudResources.stream()
+                .flatMap(Collection::stream)
                 .filter(cloudResource -> instanceId.equals(cloudResource.getInstanceId()))
                 .findFirst()
                 .ifPresentOrElse(cloudResource -> {

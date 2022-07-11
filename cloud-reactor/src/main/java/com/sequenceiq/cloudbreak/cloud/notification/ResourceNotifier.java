@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.notification;
 
+import static java.util.Collections.singletonList;
+
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -28,15 +32,31 @@ public class ResourceNotifier implements PersistenceNotifier {
 
     @Override
     public ResourcePersisted notifyAllocation(CloudResource cloudResource, CloudContext cloudContext) {
-        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.CREATE);
+        ResourceNotification notification = new ResourceNotification(singletonList(cloudResource), cloudContext, ResourceNotificationType.CREATE);
         LOGGER.debug("Sending resource allocation notification: {}, context: {}", notification, cloudContext);
         eventBus.notify("resource-persisted", eventFactory.createEvent(notification));
         return notification.getResult();
     }
 
     @Override
+    public ResourcePersisted notifyAllocations(List<CloudResource> cloudResources, CloudContext cloudContext) {
+        ResourceNotification notification = new ResourceNotification(cloudResources, cloudContext, ResourceNotificationType.CREATE);
+        LOGGER.debug("Sending resources allocation notification: {}, context: {}", notification, cloudContext);
+        eventBus.notify("resource-persisted", eventFactory.createEvent(notification));
+        return notification.getResult();
+    }
+
+    @Override
     public ResourcePersisted notifyUpdate(CloudResource cloudResource, CloudContext cloudContext) {
-        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.UPDATE);
+        ResourceNotification notification = new ResourceNotification(singletonList(cloudResource), cloudContext, ResourceNotificationType.UPDATE);
+        LOGGER.debug("Sending resource update notification: {}, context: {}", notification, cloudContext);
+        eventBus.notify("resource-persisted", eventFactory.createEvent(notification));
+        return notification.getResult();
+    }
+
+    @Override
+    public ResourcePersisted notifyUpdates(List<CloudResource> cloudResources, CloudContext cloudContext) {
+        ResourceNotification notification = new ResourceNotification(cloudResources, cloudContext, ResourceNotificationType.UPDATE);
         LOGGER.debug("Sending resource update notification: {}, context: {}", notification, cloudContext);
         eventBus.notify("resource-persisted", eventFactory.createEvent(notification));
         return notification.getResult();
@@ -44,7 +64,15 @@ public class ResourceNotifier implements PersistenceNotifier {
 
     @Override
     public ResourcePersisted notifyDeletion(CloudResource cloudResource, CloudContext cloudContext) {
-        ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.DELETE);
+        ResourceNotification notification = new ResourceNotification(singletonList(cloudResource), cloudContext, ResourceNotificationType.DELETE);
+        LOGGER.debug("Sending resource deletion notification: {}, context: {}", notification, cloudContext);
+        eventBus.notify("resource-persisted", eventFactory.createEvent(notification));
+        return notification.getResult();
+    }
+
+    @Override
+    public ResourcePersisted notifyDeletions(List<CloudResource> cloudResources, CloudContext cloudContext) {
+        ResourceNotification notification = new ResourceNotification(cloudResources, cloudContext, ResourceNotificationType.DELETE);
         LOGGER.debug("Sending resource deletion notification: {}, context: {}", notification, cloudContext);
         eventBus.notify("resource-persisted", eventFactory.createEvent(notification));
         return notification.getResult();

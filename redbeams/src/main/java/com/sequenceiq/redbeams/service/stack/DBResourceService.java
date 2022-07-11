@@ -47,4 +47,8 @@ public class DBResourceService {
     public Optional<DBResource> findByStackAndNameAndType(Long id, String name, ResourceType resourceType) {
         return dbResourceRepository.findByStackIdAndNameAndType(id, name, resourceType);
     }
+
+    public boolean existsByStackAndNameAndType(Long dbStackId, String name, ResourceType type) {
+        return dbResourceRepository.existsByStackAndNameAndType(dbStackId, name, type);
+    }
 }

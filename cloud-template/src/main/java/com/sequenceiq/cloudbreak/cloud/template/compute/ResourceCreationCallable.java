@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,23 +146,23 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
         }
     }
 
-    private void persistResources(AuthenticatedContext auth, Iterable<CloudResource> cloudResources) {
-        for (CloudResource cloudResource : cloudResources) {
-            if (cloudResource.isPersistent()) {
-                persistenceNotifier.notifyAllocation(cloudResource, auth.getCloudContext());
-            }
-        }
+    private void persistResources(AuthenticatedContext auth, List<CloudResource> cloudResources) {
+        List<CloudResource> resourcesToPersist = cloudResources.stream()
+                .filter(CloudResource::isPersistent)
+                .collect(Collectors.toList());
+        persistenceNotifier.notifyAllocations(resourcesToPersist, auth.getCloudContext());
     }
 
     private boolean isCancelled(PollGroup pollGroup) {
         return pollGroup == null || CANCELLED.equals(pollGroup);
     }
 
-    private void updateResource(AuthenticatedContext auth, Iterable<CloudResource> cloudResources) {
-        for (CloudResource cloudResource : cloudResources) {
-            if (cloudResource.isPersistent()) {
-                persistenceNotifier.notifyUpdate(cloudResource, auth.getCloudContext());
-            }
+    private void updateResource(AuthenticatedContext auth, List<CloudResource> cloudResources) {
+        List<CloudResource> resourcesToUpdate = cloudResources.stream()
+                .filter(CloudResource::isPersistent)
+                .collect(Collectors.toList());
+        if (!resourcesToUpdate.isEmpty()) {
+            persistenceNotifier.notifyUpdates(resourcesToUpdate, auth.getCloudContext());
         }
     }
 }

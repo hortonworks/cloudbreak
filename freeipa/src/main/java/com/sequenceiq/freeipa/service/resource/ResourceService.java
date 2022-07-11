@@ -73,4 +73,17 @@ public class ResourceService {
     public List<Resource> findAllByResourceStatusAndResourceTypeAndStackId(CommonStatus status, ResourceType resourceType, Long stackId) {
         return repository.findAllByResourceStatusAndResourceTypeAndStackId(status, resourceType, stackId);
     }
+
+    public boolean existsByStackIdAndNameAndType(Long stackId, String name, ResourceType type) {
+        return repository.existsByStackIdAndNameAndType(stackId, name, type);
+    }
+
+    public boolean existsByResourceReferenceAndType(String resourceReference, ResourceType resourceType) {
+        return repository.existsByResourceReferenceAndType(resourceReference, resourceType);
+    }
+
+    public void deleteByStackIdAndNameAndType(Long stackId, String name, ResourceType type) {
+        repository.deleteByStackIdAndNameAndType(stackId, name, type);
+    }
+
 }
