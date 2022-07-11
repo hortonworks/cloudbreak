@@ -8,7 +8,9 @@ include:
   - monitoring.dev-stack
   {%- endif %}
   - monitoring.exporters
-  - monitoring.textfiles
+  {%- if monitoring.nodeExporterExists %}
+  - monitoring.textfiles.*
+  {%- endif %}
   - monitoring.request-signer
   {%- if cdp_prometheus_installed %}
   - monitoring.cdp-prometheus
