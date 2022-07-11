@@ -16,8 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import reactor.bus.Event;
-
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -41,6 +39,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+
+import reactor.bus.Event;
 
 @Component
 public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandler<CreateLoadBalancerEntityRequest> {
@@ -100,15 +100,13 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
             stack.setInstanceGroups(instanceGroups);
             Set<LoadBalancer> newLoadBalancers = loadBalancerConfigService.createLoadBalancers(stack, environment, null);
 
-            Stack savedStack;
             if (doLoadBalancersAlreadyExist(existingLoadBalancers, newLoadBalancers)) {
                 LOGGER.debug("Load balancer entities already exist. Continuing flow.");
-                savedStack = stack;
             } else {
                 LOGGER.debug("Persisting stack and load balancer objects to database.");
                 stack.setLoadBalancers(newLoadBalancers);
                 String stackName = stack.getName();
-                savedStack = measure(() -> stackService.save(stack),
+                measure(() -> stackService.save(stack),
                     LOGGER, "Stackrepository save took {} ms for stack {}", stackName);
                 measure(() -> loadBalancerPersistenceService.saveAll(newLoadBalancers),
                     LOGGER, "Load balancers saved in {} ms for stack {}", stackName);
@@ -125,9 +123,7 @@ public class CreateLoadBalancerEntityHandler extends ExceptionCatcherEventHandle
             }
 
             LOGGER.debug("Load balancer entities successfully persisted.");
-            savedStack.setInstanceGroups(newLoadBalancers.stream().flatMap(lb -> lb.getAllInstanceGroups().stream()).collect(Collectors.toSet()));
-            savedStack.setNetwork(stack.getNetwork());
-            return new CreateLoadBalancerEntitySuccess(request.getResourceId(), savedStack);
+            return new CreateLoadBalancerEntitySuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.warn("Failed create load balancer entities and persist them to the database.", e);
             return new CreateLoadBalancerEntityFailure(request.getResourceId(), e);

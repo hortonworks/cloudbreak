@@ -38,11 +38,11 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateCloudLoadBalancersSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateCloudLoadBalancersRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateCloudLoadBalancersSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateLoadBalancerEntityRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.CreateLoadBalancerEntitySuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.RegisterFreeIpaDnsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.RegisterFreeIpaDnsSuccess;
@@ -73,6 +73,9 @@ public class StackLoadBalancerUpdateActions {
     @Inject
     private ResourceToCloudResourceConverter cloudResourceConverter;
 
+    @Inject
+    private ResourceService resourceService;
+
     @Bean(name = "CREATING_LOAD_BALANCER_ENTITY_STATE")
     public Action<?, ?> createLoadBalancerEntityAction() {
         return new AbstractStackLoadBalancerUpdateAction<>(StackEvent.class) {
@@ -84,7 +87,7 @@ public class StackLoadBalancerUpdateActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new CreateLoadBalancerEntityRequest(context.getStack());
+                return new CreateLoadBalancerEntityRequest(context.getStack().getId());
             }
         };
     }
@@ -95,14 +98,12 @@ public class StackLoadBalancerUpdateActions {
             @Override
             protected void doExecute(StackContext context, CreateLoadBalancerEntitySuccess payload, Map<Object, Object> variables) {
                 stackLoadBalancerUpdateService.creatingCloudResources(context.getStack());
-                StackContext newContext = new StackContext(context.getFlowParameters(), payload.getSavedStack(), context.getCloudContext(),
-                    context.getCloudCredential(), context.getCloudStack());
-                sendEvent(newContext);
+                sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new CreateCloudLoadBalancersRequest(context.getStack(), context.getCloudContext(), context.getCloudCredential(),
+                return new CreateCloudLoadBalancersRequest(context.getStack().getId(), context.getCloudContext(), context.getCloudCredential(),
                     context.getCloudStack());
             }
         };
@@ -119,13 +120,14 @@ public class StackLoadBalancerUpdateActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(context.getStack().getId()).stream()
+                Stack stack = context.getStack();
+                List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(stack.getId()).stream()
                     .map(LoadBalancer::getType)
                     .collect(Collectors.toList());
-                List<CloudResource> cloudResources = context.getStack().getResources().stream()
+                List<CloudResource> cloudResources = resourceService.getAllByStackId(stack.getId()).stream()
                         .map(r -> cloudResourceConverter.convert(r))
                         .collect(Collectors.toList());
-                return new LoadBalancerMetadataRequest(context.getStack(), context.getCloudContext(), context.getCloudCredential(),
+                return new LoadBalancerMetadataRequest(stack.getId(), context.getCloudContext(), context.getCloudCredential(),
                     context.getCloudStack(), loadBalancerTypes, cloudResources);
             }
         };
@@ -142,7 +144,7 @@ public class StackLoadBalancerUpdateActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new RegisterPublicDnsRequest(context.getStack());
+                return new RegisterPublicDnsRequest(context.getStack().getId());
             }
         };
     }
@@ -153,9 +155,7 @@ public class StackLoadBalancerUpdateActions {
             @Override
             protected void doExecute(StackContext context, RegisterPublicDnsSuccess payload, Map<Object, Object> variables) {
                 stackLoadBalancerUpdateService.registeringFreeIpaDns(context.getStack());
-                StackContext newContext = new StackContext(context.getFlowParameters(), payload.getStack(), context.getCloudContext(),
-                    context.getCloudCredential(), context.getCloudStack());
-                sendEvent(newContext);
+                sendEvent(context);
             }
 
             @Override
@@ -171,9 +171,7 @@ public class StackLoadBalancerUpdateActions {
             @Override
             protected void doExecute(StackContext context, RegisterFreeIpaDnsSuccess payload, Map<Object, Object> variables) {
                 stackLoadBalancerUpdateService.updatingCmConfig(context.getStack());
-                StackContext newContext = new StackContext(context.getFlowParameters(), payload.getStack(), context.getCloudContext(),
-                    context.getCloudCredential(), context.getCloudStack());
-                sendEvent(newContext);
+                sendEvent(context);
             }
 
             @Override
@@ -189,9 +187,7 @@ public class StackLoadBalancerUpdateActions {
             @Override
             protected void doExecute(StackContext context, UpdateServiceConfigSuccess payload, Map<Object, Object> variables) {
                 stackLoadBalancerUpdateService.restartingCm(context.getStack());
-                StackContext newContext = new StackContext(context.getFlowParameters(), payload.getStack(), context.getCloudContext(),
-                    context.getCloudCredential(), context.getCloudStack());
-                sendEvent(newContext);
+                sendEvent(context);
             }
 
             @Override
