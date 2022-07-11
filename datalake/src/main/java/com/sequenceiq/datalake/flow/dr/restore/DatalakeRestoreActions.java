@@ -50,7 +50,7 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.domain.FlowChainLog;
-import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
@@ -94,7 +94,7 @@ public class DatalakeRestoreActions {
                     DatalakeTriggerRestoreEvent payload) {
 
                 // When SDX is created as part of re-size flow chain, SDX in payload will not have the correct ID.
-                Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(flowParameters.getFlowId());
+                Optional<FlowLogWithoutPayload> lastFlowLog = flowLogService.getLastFlowLog(flowParameters.getFlowId());
                 if (lastFlowLog.isPresent()) {
                     SdxContext sdxContext;
                     Optional<FlowChainLog> flowChainLog = flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.get().getFlowChainId());

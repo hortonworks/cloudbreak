@@ -397,7 +397,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private void updateFlowLogStatusInTransaction(String key, Payload payload, FlowParameters flowParameters, String flowChainId, Flow flow,
             MutableBoolean flowCancelled) throws TransactionExecutionException {
         transactionService.required(() -> {
-            Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(flow.getFlowId());
+            Optional<FlowLog> lastFlowLog = flowLogService.findFirstByFlowIdOrderByCreatedDesc(flow.getFlowId());
             if (lastFlowLog.isPresent()) {
                 String nodeId = nodeConfig.getId();
                 FlowLog flowLog = lastFlowLog.get();

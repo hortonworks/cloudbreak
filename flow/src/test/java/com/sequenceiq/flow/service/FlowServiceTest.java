@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ import com.sequenceiq.flow.converter.FlowProgressResponseConverter;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
@@ -84,24 +86,24 @@ public class FlowServiceTest {
 
     @Test
     public void testGetLastFlowById() {
-        when(flowLogDBService.getLastFlowLog(anyString())).thenReturn(Optional.of(new FlowLog()));
+        when(flowLogDBService.findFirstByFlowIdOrderByCreatedDesc(anyString())).thenReturn(Optional.of(mock(FlowLog.class)));
 
         underTest.getLastFlowById(FLOW_ID);
 
-        verify(flowLogDBService).getLastFlowLog(anyString());
+        verify(flowLogDBService).findFirstByFlowIdOrderByCreatedDesc(anyString());
         verify(flowLogConverter).convert(any());
     }
 
     @Test
     public void testGetLastFlowByIdException() {
-        when(flowLogDBService.getLastFlowLog(anyString())).thenReturn(Optional.empty());
+        when(flowLogDBService.findFirstByFlowIdOrderByCreatedDesc(anyString())).thenReturn(Optional.empty());
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Not found flow for this flow id!");
 
         underTest.getLastFlowById(FLOW_ID);
 
-        verify(flowLogDBService).getLastFlowLog(anyString());
+        verify(flowLogDBService).findFirstByFlowIdOrderByCreatedDesc(anyString());
     }
 
     @Test
@@ -198,7 +200,7 @@ public class FlowServiceTest {
         assertTrue(flowCheckResponse.getHasActiveFlow());
         assertNotNull(flowCheckResponse.getFlowId());
 
-        verify(flowLogDBService).findAllByFlowIdOrderByCreatedDesc(anyString());
+        verify(flowLogDBService).findAllWithoutPayloadByFlowIdOrderByCreatedDesc(anyString());
         verifyZeroInteractions(flowChainLogService);
     }
 
@@ -213,7 +215,7 @@ public class FlowServiceTest {
         assertFalse(flowCheckResponse.getHasActiveFlow());
         assertNotNull(flowCheckResponse.getFlowId());
 
-        verify(flowLogDBService).findAllByFlowIdOrderByCreatedDesc(anyString());
+        verify(flowLogDBService).findAllWithoutPayloadByFlowIdOrderByCreatedDesc(anyString());
         verify(flowChainLogService).hasEventInFlowChainQueue(List.of());
     }
 
@@ -323,19 +325,19 @@ public class FlowServiceTest {
         assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
     }
 
-    private void setUpFlow(String flowId, List<FlowLog> flowLogs) {
-        when(flowLogDBService.findAllByFlowIdOrderByCreatedDesc(flowId)).thenReturn(flowLogs);
+    private void setUpFlow(String flowId, List<FlowLogWithoutPayload> flowLogs) {
+        when(flowLogDBService.findAllWithoutPayloadByFlowIdOrderByCreatedDesc(flowId)).thenReturn(flowLogs);
         when(flowChainLogService.hasEventInFlowChainQueue(List.of())).thenReturn(false);
     }
 
-    private void setUpFlowChain(FlowChainLog flowChainLog, boolean hasEventInQueue, List<FlowLog> flowLogs) {
+    private void setUpFlowChain(FlowChainLog flowChainLog, boolean hasEventInQueue, List<FlowLogWithoutPayload> flowLogs) {
         List<FlowChainLog> chainLogs = List.of(flowChainLog);
         when(flowChainLogService.findByFlowChainIdOrderByCreatedDesc(FLOW_CHAIN_ID))
                 .thenReturn(chainLogs);
         when(flowLogDBService.getFlowIdsByChainIds(Set.of(FLOW_CHAIN_ID))).thenReturn(Set.of(FLOW_ID));
         when(flowChainLogService.collectRelatedFlowChains(flowChainLog)).thenReturn(chainLogs);
         when(flowChainLogService.hasEventInFlowChainQueue(chainLogs)).thenReturn(hasEventInQueue);
-        when(flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(Set.of(FLOW_ID)))
+        when(flowLogDBService.getFlowLogsWithoutPayloadByFlowIdsCreatedDesc(Set.of(FLOW_ID)))
                 .thenReturn(flowLogs);
     }
 
@@ -345,23 +347,23 @@ public class FlowServiceTest {
         return flowChainLog;
     }
 
-    private FlowLog flowLog(String currentState, String nextEvent, long created) {
-        FlowLog flowLog = new FlowLog();
-        flowLog.setCurrentState(currentState);
-        flowLog.setNextEvent(nextEvent);
-        flowLog.setCreated(created);
-        flowLog.setStateStatus(StateStatus.SUCCESSFUL);
-        flowLog.setFinalized(true);
+    private FlowLogWithoutPayload flowLog(String currentState, String nextEvent, long created) {
+        FlowLogWithoutPayload flowLog = mock(FlowLogWithoutPayload.class);
+        lenient().when(flowLog.getCurrentState()).thenReturn(currentState);
+        lenient().when(flowLog.getNextEvent()).thenReturn(nextEvent);
+        lenient().when(flowLog.getCreated()).thenReturn(created);
+        lenient().when(flowLog.getStateStatus()).thenReturn(StateStatus.SUCCESSFUL);
+        lenient().when(flowLog.getFinalized()).thenReturn(true);
         return flowLog;
     }
 
-    private FlowLog pendingFlowLog(String currentState, String nextEvent, long created) {
-        FlowLog flowLog = new FlowLog();
-        flowLog.setCurrentState(currentState);
-        flowLog.setNextEvent(nextEvent);
-        flowLog.setCreated(created);
-        flowLog.setStateStatus(StateStatus.PENDING);
-        flowLog.setFinalized(false);
+    private FlowLogWithoutPayload pendingFlowLog(String currentState, String nextEvent, long created) {
+        FlowLogWithoutPayload flowLog = mock(FlowLogWithoutPayload.class);
+        lenient().when(flowLog.getCurrentState()).thenReturn(currentState);
+        lenient().when(flowLog.getNextEvent()).thenReturn(nextEvent);
+        lenient().when(flowLog.getCreated()).thenReturn(created);
+        lenient().when(flowLog.getStateStatus()).thenReturn(StateStatus.PENDING);
+        lenient().when(flowLog.getFinalized()).thenReturn(false);
         return flowLog;
     }
 }

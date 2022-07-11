@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -16,12 +17,33 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.domain.StateStatus;
 
 @Transactional(TxType.REQUIRED)
 public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
 
     Optional<FlowLog> findFirstByFlowIdOrderByCreatedDesc(String flowId);
+
+    @Query("SELECT fl.flowId as flowId, " +
+            "fl.resourceId as resourceId, " +
+            "fl.created as created, " +
+            "fl.flowChainId as flowChainId, " +
+            "fl.nextEvent as nextEvent, " +
+            "fl.payloadType as payloadType, " +
+            "fl.flowType as flowType, " +
+            "fl.currentState as currentState, " +
+            "fl.finalized as finalized, " +
+            "fl.cloudbreakNodeId as cloudbreakNodeId, " +
+            "fl.stateStatus as stateStatus, " +
+            "fl.version as version, " +
+            "fl.resourceType as resourceType, " +
+            "fl.flowTriggerUserCrn as flowTriggerUserCrn, " +
+            "fl.operationType as operationType " +
+            "FROM FlowLog fl " +
+            "WHERE fl.flowId = :flowId " +
+            "ORDER BY fl.created desc")
+    Page<FlowLogWithoutPayload> findByFlowIdOrderByCreatedDesc(@Param("flowId") String flowId, Pageable page);
 
     @Query("SELECT fl.flowId as flowId, fl.flowType as flowType, fl.created as created FROM FlowLog fl "
             + "WHERE fl.stateStatus = 'PENDING' AND fl.resourceId = :resourceId")
@@ -77,4 +99,44 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
 
     @Query("SELECT COUNT(fl.id) > 0 FROM FlowLog fl WHERE fl.resourceId = :resourceId AND fl.stateStatus = :status")
     Boolean findAnyByStackIdAndStateStatus(@Param("resourceId") Long resourceId, @Param("status") StateStatus status);
+
+    @Query("SELECT fl.flowId as flowId, " +
+            "fl.resourceId as resourceId, " +
+            "fl.created as created, " +
+            "fl.flowChainId as flowChainId, " +
+            "fl.nextEvent as nextEvent, " +
+            "fl.payloadType as payloadType, " +
+            "fl.flowType as flowType, " +
+            "fl.currentState as currentState, " +
+            "fl.finalized as finalized, " +
+            "fl.cloudbreakNodeId as cloudbreakNodeId, " +
+            "fl.stateStatus as stateStatus, " +
+            "fl.version as version, " +
+            "fl.resourceType as resourceType, " +
+            "fl.flowTriggerUserCrn as flowTriggerUserCrn, " +
+            "fl.operationType as operationType " +
+            "FROM FlowLog fl " +
+            "WHERE fl.flowId IN (:flowIds) " +
+            "ORDER BY fl.created DESC")
+    List<FlowLogWithoutPayload> findAllWithoutPayloadByFlowIdsCreatedDesc(@Param("flowIds") Set<String> flowIds);
+
+    @Query("SELECT fl.flowId as flowId, " +
+            "fl.resourceId as resourceId, " +
+            "fl.created as created, " +
+            "fl.flowChainId as flowChainId, " +
+            "fl.nextEvent as nextEvent, " +
+            "fl.payloadType as payloadType, " +
+            "fl.flowType as flowType, " +
+            "fl.currentState as currentState, " +
+            "fl.finalized as finalized, " +
+            "fl.cloudbreakNodeId as cloudbreakNodeId, " +
+            "fl.stateStatus as stateStatus, " +
+            "fl.version as version, " +
+            "fl.resourceType as resourceType, " +
+            "fl.flowTriggerUserCrn as flowTriggerUserCrn, " +
+            "fl.operationType as operationType " +
+            "FROM FlowLog fl " +
+            "WHERE fl.flowId = :flowId " +
+            "ORDER BY fl.created desc")
+    List<FlowLogWithoutPayload> findAllWithoutPayloadByFlowIdOrderByCreatedDesc(@Param("flowId") String flowId);
 }
