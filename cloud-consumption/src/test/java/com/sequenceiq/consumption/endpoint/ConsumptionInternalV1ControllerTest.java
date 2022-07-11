@@ -1,8 +1,6 @@
 package com.sequenceiq.consumption.endpoint;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -19,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
 import com.sequenceiq.consumption.api.v1.consumption.model.response.ConsumptionExistenceResponse;
 import com.sequenceiq.consumption.domain.Consumption;
@@ -95,22 +92,6 @@ public class ConsumptionInternalV1ControllerTest {
         underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, request);
 
         verify(jobService).schedule(CONSUMPTION_ID);
-    }
-
-    @Test
-    void scheduleStorageConsumptionCollectionTestWhenInvalidLocation() {
-        StorageConsumptionRequest request = new StorageConsumptionRequest();
-
-        when(consumptionApiConverter.initCreationDtoForStorage(request)).thenReturn(consumptionCreationDto("invalid_location"));
-
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, request));
-
-        assertThat(badRequestException).hasMessage("Storage location validation failed, error: " +
-                "Storage location must start with 's3a' if required file system type is 'S3'!");
-
-        verify(consumptionService, never()).create(any(ConsumptionCreationDto.class));
-        verify(jobService, never()).schedule(anyLong());
     }
 
     @Test
