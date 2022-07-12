@@ -32,11 +32,11 @@ import com.amazonaws.services.ec2.model.Reservation;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
 import com.amazonaws.services.ec2.model.TagSpecification;
-import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.VolumeBuilderUtil;
+import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -235,12 +235,7 @@ public class AwsNativeInstanceResourceBuilderTest {
 
     @Test
     public void testIsFinishedWhenCreationAllMatchRunning() {
-        CloudResource cloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .params(emptyMap())
-                .build();
+        CloudResource cloudResource = createInstanceResource();
         Instance instance1 = new Instance().withInstanceId("instanceId1")
                 .withState(new InstanceState().withCode(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE));
         Instance instance2 = new Instance().withInstanceId("instanceId2")
@@ -256,12 +251,7 @@ public class AwsNativeInstanceResourceBuilderTest {
 
     @Test
     public void testIsFinishedWhenCreationOneRunningAndOneOther() {
-        CloudResource cloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .params(emptyMap())
-                .build();
+        CloudResource cloudResource = createInstanceResource();
         Instance instance1 = new Instance().withInstanceId("instanceId1")
                 .withState(new InstanceState().withCode(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_RUNNING_CODE));
         Instance instance2 = new Instance().withInstanceId("instanceId2")
@@ -277,13 +267,7 @@ public class AwsNativeInstanceResourceBuilderTest {
 
     @Test
     public void testIsFinishedWhenCreationAndNotFoundException() {
-        CloudResource cloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .params(emptyMap())
-                .build();
-
+        CloudResource cloudResource = createInstanceResource();
         when(awsContext.isBuild()).thenReturn(true);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         AmazonEC2Exception amazonEC2Exception = new AmazonEC2Exception("message");
@@ -295,12 +279,7 @@ public class AwsNativeInstanceResourceBuilderTest {
 
     @Test
     public void testIsFinishedWhenTerminationAllMatchTerminated() {
-        CloudResource cloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .params(emptyMap())
-                .build();
+        CloudResource cloudResource = createInstanceResource();
         Instance instance1 = new Instance().withInstanceId("instanceId1")
                 .withState(new InstanceState().withCode(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_TERMINATED_CODE));
         Instance instance2 = new Instance().withInstanceId("instanceId2")
@@ -316,12 +295,7 @@ public class AwsNativeInstanceResourceBuilderTest {
 
     @Test
     public void testIsFinishedWhenTerminationAndOneTerminatedAndOneOther() {
-        CloudResource cloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .params(emptyMap())
-                .build();
+        CloudResource cloudResource = createInstanceResource();
         Instance instance1 = new Instance().withInstanceId("instanceId1")
                 .withState(new InstanceState().withCode(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_TERMINATED_CODE));
         Instance instance2 = new Instance().withInstanceId("instanceId2")
@@ -337,13 +311,7 @@ public class AwsNativeInstanceResourceBuilderTest {
 
     @Test
     public void testIsFinishedWhenTerminationAndNotFoundException() {
-        CloudResource cloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .params(emptyMap())
-                .build();
-
+        CloudResource cloudResource = createInstanceResource();
         when(awsContext.isBuild()).thenReturn(false);
         when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
         AmazonEC2Exception amazonEC2Exception = new AmazonEC2Exception("message");
@@ -355,6 +323,18 @@ public class AwsNativeInstanceResourceBuilderTest {
 
     @Test
     public void testIsFinishedWhenTerminationAndOtherException() {
+        CloudResource cloudResource = createInstanceResource();
+        when(awsContext.isBuild()).thenReturn(false);
+        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
+        AmazonEC2Exception amazonEC2Exception = new AmazonEC2Exception("message");
+        amazonEC2Exception.setErrorCode("AnyOther");
+        when(amazonEc2Client.describeInstances(any())).thenThrow(amazonEC2Exception);
+        AmazonEC2Exception actual = Assertions.assertThrows(AmazonEC2Exception.class, () -> underTest.isFinished(awsContext, ac, cloudResource));
+        Assertions.assertEquals("AnyOther", actual.getErrorCode());
+    }
+
+    @Test
+    public void testIsFinishedWhenTheInstanceIdIsEmptyOnTheResourceShouldReturnAsFinished() {
         CloudResource cloudResource = CloudResource.builder()
                 .name("name")
                 .type(ResourceType.AWS_INSTANCE)
@@ -363,12 +343,9 @@ public class AwsNativeInstanceResourceBuilderTest {
                 .build();
 
         when(awsContext.isBuild()).thenReturn(false);
-        when(awsContext.getAmazonEc2Client()).thenReturn(amazonEc2Client);
-        AmazonEC2Exception amazonEC2Exception = new AmazonEC2Exception("message");
-        amazonEC2Exception.setErrorCode("AnyOther");
-        when(amazonEc2Client.describeInstances(any())).thenThrow(amazonEC2Exception);
-        AmazonEC2Exception actual = Assertions.assertThrows(AmazonEC2Exception.class, () -> underTest.isFinished(awsContext, ac, cloudResource));
-        Assertions.assertEquals("AnyOther", actual.getErrorCode());
+        boolean actual = underTest.isFinished(awsContext, ac, cloudResource);
+        verify(amazonEc2Client, times(0)).describeInstances(any());
+        Assertions.assertTrue(actual);
     }
 
     @Test
@@ -427,5 +404,15 @@ public class AwsNativeInstanceResourceBuilderTest {
                 .reference("sg-id")
                 .group("groupName")
                 .params(emptyMap());
+    }
+
+    private CloudResource createInstanceResource() {
+        return CloudResource.builder()
+                .name("name")
+                .type(ResourceType.AWS_INSTANCE)
+                .status(CommonStatus.CREATED)
+                .params(emptyMap())
+                .instanceId("i-aninstanceid")
+                .build();
     }
 }

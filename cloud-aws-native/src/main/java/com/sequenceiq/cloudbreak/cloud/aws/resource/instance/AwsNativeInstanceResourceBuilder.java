@@ -187,27 +187,33 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         boolean creation = context.isBuild();
         String operation = creation ? "creation" : "termination";
         boolean finished;
-        try {
-            LOGGER.debug("Check instance {} for {}.", operation, resource.getInstanceId());
-            DescribeInstancesResult describeInstancesResult = context.getAmazonEc2Client().describeInstances(new DescribeInstancesRequest()
-                    .withInstanceIds(resource.getInstanceId()));
-            if (creation) {
-                finished = describeInstancesResult.getReservations().stream()
-                        .flatMap(s -> s.getInstances().stream())
-                        .allMatch(this::instanceRunningOrTerminated);
-            } else {
-                finished = describeInstancesResult.getReservations().stream()
-                        .flatMap(s -> s.getInstances().stream())
-                        .allMatch(this::instanceTerminated);
+        if (StringUtils.isNotEmpty(resource.getInstanceId())) {
+            try {
+                LOGGER.debug("Check instance {} for {}.", operation, resource.getInstanceId());
+                DescribeInstancesResult describeInstancesResult = context.getAmazonEc2Client().describeInstances(new DescribeInstancesRequest()
+                        .withInstanceIds(resource.getInstanceId()));
+                if (creation) {
+                    finished = describeInstancesResult.getReservations().stream()
+                            .flatMap(s -> s.getInstances().stream())
+                            .allMatch(this::instanceRunningOrTerminated);
+                } else {
+                    finished = describeInstancesResult.getReservations().stream()
+                            .flatMap(s -> s.getInstances().stream())
+                            .allMatch(this::instanceTerminated);
+                }
+            } catch (AmazonEC2Exception e) {
+                if (e.getErrorCode().contains("NotFound") && !creation) {
+                    LOGGER.info("Aws resource does not found: {}", e.getMessage());
+                    finished = true;
+                } else {
+                    LOGGER.error("Cannot finished instance {}: {}", operation, e.getMessage(), e);
+                    throw e;
+                }
             }
-        } catch (AmazonEC2Exception e) {
-            if (e.getErrorCode().contains("NotFound") && !creation) {
-                LOGGER.info("Aws resource does not found: {}", e.getMessage());
-                finished = true;
-            } else {
-                LOGGER.error("Cannot finished instance {}: {}", operation, e.getMessage(), e);
-                throw e;
-            }
+        } else {
+            LOGGER.warn("The resource with name: '{}' doesn't have instance identifier for operation: '{}'. There is no need to poll the state of the resource",
+                    resource.getName(), operation);
+            finished = true;
         }
         return finished;
     }
