@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
+import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -48,6 +50,9 @@ class StackV4ControllerTest {
 
     @Mock
     private StackCcmUpgradeService stackCcmUpgradeService;
+
+    @Mock
+    private StackUpgradeOperations stackUpgradeOperations;
 
     @InjectMocks
     private StackV4Controller underTest;
@@ -101,5 +106,17 @@ class StackV4ControllerTest {
         underTest.rotateSaltPasswordInternal(WORKSPACE_ID, stackCrn, USER_CRN);
 
         verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(stackCrn), ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
+    }
+
+    @Test
+    public void testPrepareClusterUpgradeByCrnInternal() {
+        String imageId = "imageId";
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
+        when(stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(STACK_CRN), WORKSPACE_ID, imageId))
+                .thenReturn(flowIdentifier);
+
+        FlowIdentifier result = underTest.prepareClusterUpgradeByCrnInternal(WORKSPACE_ID, STACK_CRN, imageId, USER_CRN);
+
+        assertEquals(flowIdentifier, result);
     }
 }

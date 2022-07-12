@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade.event;
 
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_FAILED_EVENT;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -21,14 +23,11 @@ public class DatalakeUpgradeFailedEvent extends SdxFailedEvent {
 
     @Override
     public String selector() {
-        return "DatalakeUpgradeFailedEvent";
+        return DATALAKE_UPGRADE_FAILED_EVENT.event();
     }
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("DatalakeUpgradeFailedEvent{");
-        sb.append("exception=").append(getException());
-        sb.append('}');
-        return sb.toString();
+        return "DatalakeUpgradeFailedEvent{} " + super.toString();
     }
 }

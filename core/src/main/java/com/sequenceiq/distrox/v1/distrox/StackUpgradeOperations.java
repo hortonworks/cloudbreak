@@ -83,6 +83,11 @@ public class StackUpgradeOperations {
         return upgradeService.upgradeCluster(workspaceId, nameOrCrn, imageId);
     }
 
+    public FlowIdentifier prepareClusterUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String imageId) {
+        LOGGER.debug("Starting to prepare upgrade for cluster: " + nameOrCrn);
+        return upgradeService.prepareClusterUpgrade(workspaceId, nameOrCrn, imageId);
+    }
+
     public UpgradeOptionV4Response checkForOsUpgrade(@NotNull NameOrCrn nameOrCrn, CloudbreakUser cloudbreakUser, Long workspaceId) {
         User user = userService.getOrCreate(cloudbreakUser);
         if (nameOrCrn.hasName()) {

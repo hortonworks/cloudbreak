@@ -37,9 +37,9 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     public SdxUpgradeResponse upgradeClusterByName(@ResourceName String clusterName, SdxUpgradeRequest request) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
-            return sdxRuntimeUpgradeService.checkForUpgradeByName(userCrn, clusterName, request, ThreadBasedUserCrnProvider.getAccountId());
+            return sdxRuntimeUpgradeService.checkForUpgradeByName(clusterName, request, ThreadBasedUserCrnProvider.getAccountId());
         } else {
-            return sdxRuntimeUpgradeService.triggerUpgradeByName(userCrn, clusterName, request, ThreadBasedUserCrnProvider.getAccountId());
+            return sdxRuntimeUpgradeService.triggerUpgradeByName(userCrn, clusterName, request, ThreadBasedUserCrnProvider.getAccountId(), false);
         }
     }
 
@@ -50,7 +50,29 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
         if (request.isDryRun() || request.isShowAvailableImagesSet()) {
             return sdxRuntimeUpgradeService.checkForUpgradeByCrn(userCrn, clusterCrn, request, ThreadBasedUserCrnProvider.getAccountId());
         } else {
-            return sdxRuntimeUpgradeService.triggerUpgradeByCrn(userCrn, clusterCrn, request, ThreadBasedUserCrnProvider.getAccountId());
+            return sdxRuntimeUpgradeService.triggerUpgradeByCrn(userCrn, clusterCrn, request, ThreadBasedUserCrnProvider.getAccountId(), false);
+        }
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
+    public SdxUpgradeResponse prepareClusterUpgradeByName(@TenantAwareParam @ResourceName String name, SdxUpgradeRequest request) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        if (request.isDryRun() || request.isShowAvailableImagesSet()) {
+            return sdxRuntimeUpgradeService.checkForUpgradeByName(name, request, ThreadBasedUserCrnProvider.getAccountId());
+        } else {
+            return sdxRuntimeUpgradeService.triggerUpgradeByName(userCrn, name, request, ThreadBasedUserCrnProvider.getAccountId(), true);
+        }
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
+    public SdxUpgradeResponse prepareClusterUpgradeByCrn(@TenantAwareParam @ResourceCrn String crn, SdxUpgradeRequest request) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        if (request.isDryRun() || request.isShowAvailableImagesSet()) {
+            return sdxRuntimeUpgradeService.checkForUpgradeByCrn(userCrn, crn, request, ThreadBasedUserCrnProvider.getAccountId());
+        } else {
+            return sdxRuntimeUpgradeService.triggerUpgradeByCrn(userCrn, crn, request, ThreadBasedUserCrnProvider.getAccountId(), true);
         }
     }
 

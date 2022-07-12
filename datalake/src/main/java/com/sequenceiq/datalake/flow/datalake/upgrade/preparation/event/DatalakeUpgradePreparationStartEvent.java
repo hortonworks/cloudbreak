@@ -1,25 +1,23 @@
-package com.sequenceiq.datalake.flow.datalake.upgrade.event;
+package com.sequenceiq.datalake.flow.datalake.upgrade.preparation.event;
+
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
-public class DatalakeUpgradeWaitRequest extends SdxEvent {
+public class DatalakeUpgradePreparationStartEvent extends SdxEvent {
 
     private final String imageId;
 
     @JsonCreator
-    public DatalakeUpgradeWaitRequest(
+    public DatalakeUpgradePreparationStartEvent(
+            @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long sdxId,
             @JsonProperty("userId") String userId,
             @JsonProperty("imageId") String imageId) {
-        super(sdxId, userId);
+        super(selector, sdxId, userId);
         this.imageId = imageId;
-    }
-
-    public static DatalakeUpgradeWaitRequest from(SdxContext context, String imageId) {
-        return new DatalakeUpgradeWaitRequest(context.getSdxId(), context.getUserId(), imageId);
     }
 
     public String getImageId() {
@@ -27,13 +25,14 @@ public class DatalakeUpgradeWaitRequest extends SdxEvent {
     }
 
     @Override
-    public String selector() {
-        return "DatalakeUpgradeWaitRequest";
+    public boolean equalsEvent(SdxEvent other) {
+        return isClassAndEqualsEvent(DatalakeUpgradePreparationStartEvent.class, other,
+                event -> Objects.equals(imageId, event.imageId));
     }
 
     @Override
     public String toString() {
-        return "DatalakeUpgradeWaitRequest{" +
+        return "DatalakeUpgradePreparationStartEvent{" +
                 "imageId='" + imageId + '\'' +
                 "} " + super.toString();
     }

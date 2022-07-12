@@ -354,6 +354,12 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
+    public FlowIdentifier prepareClusterUpgradeByCrnInternal(Long workspaceId, String crn, String imageId, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackUpgradeOperations.prepareClusterUpgrade(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId(), imageId);
+    }
+
+    @Override
+    @InternalOnly
     public StackCcmUpgradeV4Response upgradeCcmByNameInternal(Long workspaceId, @NotEmpty @ResourceName String name,
             @InitiatorUserCrn @NotEmpty @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER }) String initiatorUserCrn) {
         return stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofName(name));

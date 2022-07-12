@@ -51,7 +51,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradePreparationChainTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
@@ -236,9 +236,9 @@ public class ReactorFlowManager {
                 variant));
     }
 
-    public FlowIdentifier triggerDistroXUpgradePreparation(Long stackId, ImageChangeDto imageChangeDto, boolean lockComponents) {
-        String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_PREPARATION_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new DistroXUpgradePreparationChainTriggerEvent(selector, stackId, imageChangeDto, lockComponents));
+    public FlowIdentifier triggerClusterUpgradePreparation(Long stackId, ImageChangeDto imageChangeDto, boolean lockComponents) {
+        String selector = FlowChainTriggers.CLUSTER_UPGRADE_PREPARATION_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, new UpgradePreparationChainTriggerEvent(selector, stackId, imageChangeDto, lockComponents));
     }
 
     public FlowIdentifier triggerDatalakeClusterRecovery(Long stackId) {

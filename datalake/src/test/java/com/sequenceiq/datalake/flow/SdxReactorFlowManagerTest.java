@@ -1,7 +1,10 @@
 package com.sequenceiq.datalake.flow;
 
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.preparation.DatalakeUpgradePreparationEvent.DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT;
 import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
+import static com.sequenceiq.flow.api.model.FlowType.FLOW;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -28,6 +31,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
@@ -145,6 +149,15 @@ class SdxReactorFlowManagerTest {
         sdxCluster = getValidSdxCluster("7.2.10");
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerCcmUpgradeFlow(sdxCluster));
         verify(reactor, times(1)).notify(eq(UPGRADE_CCM_UPGRADE_STACK_EVENT.event()), any(Event.class));
+    }
+
+    @Test
+    public void testTriggerDatalakeRuntimeUpgradePreparationFlow() {
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerDatalakeRuntimeUpgradePreparationFlow(sdxCluster, IMAGE_ID));
+
+        verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_PREPARATION_TRIGGER_EVENT.event()), any(Event.class));
+        assertEquals(FLOW, result.getType());
+        assertEquals("flowId", result.getPollableId());
     }
 
     private SdxCluster getValidSdxCluster() {

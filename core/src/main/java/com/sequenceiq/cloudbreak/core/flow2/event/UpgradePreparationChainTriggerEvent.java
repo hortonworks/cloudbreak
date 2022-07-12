@@ -7,14 +7,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 
-public class DistroXUpgradePreparationChainTriggerEvent extends StackEvent {
+public class UpgradePreparationChainTriggerEvent extends StackEvent {
 
     private final ImageChangeDto imageChangeDto;
 
     private final boolean lockComponents;
 
     @JsonCreator
-    public DistroXUpgradePreparationChainTriggerEvent(
+    public UpgradePreparationChainTriggerEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("imageChangeDto") ImageChangeDto imageChangeDto,
@@ -34,7 +34,7 @@ public class DistroXUpgradePreparationChainTriggerEvent extends StackEvent {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", DistroXUpgradePreparationChainTriggerEvent.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", UpgradePreparationChainTriggerEvent.class.getSimpleName() + "[", "]")
                 .add("imageChangeDto=" + imageChangeDto)
                 .add("lockComponents=" + lockComponents)
                 .add(super.toString())

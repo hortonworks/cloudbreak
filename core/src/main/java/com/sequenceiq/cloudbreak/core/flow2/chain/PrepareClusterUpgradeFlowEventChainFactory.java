@@ -10,35 +10,35 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradePreparationChainTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
-public class PrepareDistroxUpgradeFlowEventChainFactory implements FlowEventChainFactory<DistroXUpgradePreparationChainTriggerEvent> {
+public class PrepareClusterUpgradeFlowEventChainFactory implements FlowEventChainFactory<UpgradePreparationChainTriggerEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(PrepareDistroxUpgradeFlowEventChainFactory.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PrepareClusterUpgradeFlowEventChainFactory.class);
 
     @Override
     public String initEvent() {
-        return FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_PREPARATION_CHAIN_TRIGGER_EVENT;
+        return FlowChainTriggers.CLUSTER_UPGRADE_PREPARATION_CHAIN_TRIGGER_EVENT;
     }
 
     @Override
-    public FlowTriggerEventQueue createFlowTriggerEventQueue(DistroXUpgradePreparationChainTriggerEvent event) {
-        LOGGER.debug("Creating flow trigger event queue for distrox upgrade preparation with event {}", event);
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(UpgradePreparationChainTriggerEvent event) {
+        LOGGER.debug("Creating flow trigger event queue for upgrade preparation with event {}", event);
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(createUpgradeValidationTriggerEvent(event));
         flowEventChain.add(createClusterUpgradePreparationTriggerEvent(event));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
-    private ClusterUpgradeValidationTriggerEvent createUpgradeValidationTriggerEvent(DistroXUpgradePreparationChainTriggerEvent event) {
+    private ClusterUpgradeValidationTriggerEvent createUpgradeValidationTriggerEvent(UpgradePreparationChainTriggerEvent event) {
         return new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(),
                 event.isLockComponents());
     }
 
-    private ClusterUpgradePreparationTriggerEvent createClusterUpgradePreparationTriggerEvent(DistroXUpgradePreparationChainTriggerEvent event) {
+    private ClusterUpgradePreparationTriggerEvent createClusterUpgradePreparationTriggerEvent(UpgradePreparationChainTriggerEvent event) {
         return new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto());
     }
 }
