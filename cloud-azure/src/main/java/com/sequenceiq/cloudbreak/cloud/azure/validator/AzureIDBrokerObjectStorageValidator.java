@@ -89,8 +89,13 @@ public class AzureIDBrokerObjectStorageValidator {
                         }
 
                         validateIDBroker(client, roleAssignments, identity, cloudFileSystem, singleResourceGroup, resultBuilder);
+                        Set<Identity> allMappedExistingIdentity = validateAllMappedIdentities(client, cloudFileSystem, resultBuilder);
+                        validateLocation(client, allMappedExistingIdentity,
+                                (StringUtils.isNotEmpty(backupLocationBase)) ? backupLocationBase : logsLocationBase,
+                                resultBuilder);
                     } else if (LOG.equals(cloudIdentityType)) {
-                        validateLog(client, identity, logsLocationBase, resultBuilder);
+                        validateLocation(client, identity, logsLocationBase, resultBuilder);
+                        validateLocation(client, identity, backupLocationBase, resultBuilder);
                     }
                 } else {
                     addError(resultBuilder, String.format("%s Identity with id %s does not exist in the given Azure subscription. %s",
@@ -140,7 +145,7 @@ public class AzureIDBrokerObjectStorageValidator {
 
     private void validateIDBroker(AzureClient client, List<RoleAssignmentInner> roleAssignments, Identity identity,
             CloudAdlsGen2View cloudFileSystem, Optional<ResourceGroup> singleResourceGroup, ValidationResultBuilder resultBuilder) {
-        LOGGER.debug(String.format("Validating IDBroker identity %s", identity.principalId()));
+        LOGGER.debug(String.format("Validating IDBroker identity %s", identity.name()));
 
         Set<Identity> allMappedExistingIdentity = validateAllMappedIdentities(client, cloudFileSystem, resultBuilder);
 
@@ -166,18 +171,26 @@ public class AzureIDBrokerObjectStorageValidator {
         return result;
     }
 
-    private void validateLog(AzureClient client, Identity identity, String logsLocationBase, ValidationResultBuilder resultBuilder) {
-        LOGGER.debug(String.format("Validating logger identity %s", identity.principalId()));
-        if (StringUtils.isNotEmpty(logsLocationBase)) {
-            validateStorageAccount(client, Set.of(identity), logsLocationBase, LOG, resultBuilder);
+    private void validateLocation(AzureClient client, Set<Identity> identities, String locationBase, ValidationResultBuilder resultBuilder) {
+        identities.stream().forEach( identity -> {
+            validateLocation(client, identity, locationBase, resultBuilder);
+        });
+    }
+
+    private void validateLocation(AzureClient client, Identity identity, String locationBase, ValidationResultBuilder resultBuilder) {
+        if (StringUtils.isNotEmpty(locationBase)) {
+            validateStorageAccount(client, Set.of(identity), locationBase, LOG, resultBuilder);
         } else {
             LOGGER.debug("There is no storage location set for logger identity, this should not happen!");
         }
-        LOGGER.info("Validating logger identity is finished");
+        LOGGER.info("Validating identity {} is finished", identity.name());
     }
 
     private void validateStorageAccount(AzureClient client, Set<Identity> identities, String location, CloudIdentityType cloudIdentityType,
             ValidationResultBuilder resultBuilder) {
+        identities.stream().forEach( identity -> {
+            LOGGER.debug(String.format("Validating identity on %s Location: %s", identity.name(), location));
+        });
         AdlsGen2Config adlsGen2Config = adlsGen2ConfigGenerator.generateStorageConfig(location);
         String storageAccountName = adlsGen2Config.getAccount();
         Optional<String> storageAccountIdOptional = azureStorage.findStorageAccountIdInVisibleSubscriptions(client, storageAccountName);
