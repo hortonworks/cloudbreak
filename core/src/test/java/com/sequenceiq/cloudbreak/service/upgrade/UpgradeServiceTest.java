@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -9,6 +11,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -35,8 +38,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Respo
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -47,13 +53,17 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 public class UpgradeServiceTest {
@@ -64,9 +74,11 @@ public class UpgradeServiceTest {
 
     private static final long WORKSPACE_ID = 0L;
 
-    private final NameOrCrn ofName = NameOrCrn.ofName(CLUSTER_NAME);
+    private static final NameOrCrn OF_NAME = NameOrCrn.ofName(CLUSTER_NAME);
 
-    private final NameOrCrn ofCrn = NameOrCrn.ofName(CLUSTER_CRN);
+    private static final NameOrCrn OF_CRN = NameOrCrn.ofName(CLUSTER_CRN);
+
+    private static final String IMAGE_ID = "imageId";
 
     @Mock
     private StackService stackService;
@@ -92,6 +104,12 @@ public class UpgradeServiceTest {
     @Mock
     private ComponentVersionProvider componentVersionProvider;
 
+    @Mock
+    private LockedComponentService lockedComponentService;
+
+    @Mock
+    private ReactorFlowManager flowManager;
+
     @InjectMocks
     private UpgradeService underTest;
 
@@ -105,16 +123,16 @@ public class UpgradeServiceTest {
     public void shouldReturnNewImageName() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Stack stack = getStack();
         Image image = getImage("id-1");
-        setUpMocks(stack, image, true, "id-1", "id-2");
+        setUpMocks(image, true, "id-1", "id-2");
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
                 Result.success(new HashMap<>());
         when(clusterRepairService.repairWithDryRun(1L)).thenReturn(repairStartResult);
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setBaseUrl("cm-base-url");
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(1L)).thenReturn(clouderaManagerRepo);
-        when(stackService.getByNameOrCrnInWorkspace(eq(ofName), eq(WORKSPACE_ID))).thenReturn(stack);
+        when(stackService.getByNameOrCrnInWorkspace(eq(OF_NAME), eq(WORKSPACE_ID))).thenReturn(stack);
 
-        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
+        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, OF_NAME, user);
 
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
@@ -132,14 +150,14 @@ public class UpgradeServiceTest {
         Stack stack = getStack();
         Image image = getImage("id-1");
 
-        setUpMocksWithOutAttachedClusters(stack, image, true, "id-1", "id-1");
+        setUpMocksWithOutAttachedClusters(image, true, "id-1", "id-1");
 
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
                 Result.success(new HashMap<>());
         when(clusterRepairService.repairWithDryRun(1L)).thenReturn(repairStartResult);
-        when(stackService.getByNameOrCrnInWorkspace(eq(ofName), eq(WORKSPACE_ID))).thenReturn(stack);
+        when(stackService.getByNameOrCrnInWorkspace(eq(OF_NAME), eq(WORKSPACE_ID))).thenReturn(stack);
 
-        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
+        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, OF_NAME, user);
 
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
         verifyNoMoreInteractions(distroXV1Endpoint);
@@ -154,7 +172,7 @@ public class UpgradeServiceTest {
         Stack stack = getStack();
         Image image = getImage("id-1");
 
-        when(stackService.getByNameOrCrnInWorkspace(eq(ofName), eq(WORKSPACE_ID))).thenReturn(stack);
+        when(stackService.getByNameOrCrnInWorkspace(eq(OF_NAME), eq(WORKSPACE_ID))).thenReturn(stack);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         StatedImage currentImageFromCatalog = imageFromCatalog(true, image.getImageId());
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(currentImageFromCatalog);
@@ -164,7 +182,7 @@ public class UpgradeServiceTest {
                         "No external Database")));
         when(clusterRepairService.repairWithDryRun(1L)).thenReturn(repairStartResult);
 
-        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
+        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, OF_NAME, user);
 
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
         verifyNoMoreInteractions(distroXV1Endpoint);
@@ -178,7 +196,7 @@ public class UpgradeServiceTest {
     public void upgradeNotAllowedWhenConnectedDataHubStackIsAvailable() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Stack stack = getStack();
         Image image = getImage("id-1");
-        setUpMocks(stack, image, true, "id-1", "id-2");
+        setUpMocks(image, true, "id-1", "id-2");
 
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
                 Result.success(new HashMap<>());
@@ -187,9 +205,9 @@ public class UpgradeServiceTest {
         StackViewV4Response stackViewV4Response = new StackViewV4Response();
         stackViewV4Response.setStatus(Status.AVAILABLE);
         when(distroXV1Endpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses(Set.of(stackViewV4Response)));
-        when(stackService.getByNameOrCrnInWorkspace(eq(ofName), eq(WORKSPACE_ID))).thenReturn(stack);
+        when(stackService.getByNameOrCrnInWorkspace(eq(OF_NAME), eq(WORKSPACE_ID))).thenReturn(stack);
 
-        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
+        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, OF_NAME, user);
 
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
@@ -205,7 +223,7 @@ public class UpgradeServiceTest {
     public void upgradeNotAllowedWhenConnectedDataHubClusterIsAvailable() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Stack stack = getStack();
         Image image = getImage("id-1");
-        setUpMocks(stack, image, true, "id-1", "id-2");
+        setUpMocks(image, true, "id-1", "id-2");
 
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
                 Result.success(new HashMap<>());
@@ -217,9 +235,9 @@ public class UpgradeServiceTest {
         clusterViewV4Response.setStatus(Status.AVAILABLE);
         stackViewV4Response.setCluster(clusterViewV4Response);
         when(distroXV1Endpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses(Set.of(stackViewV4Response)));
-        when(stackService.getByNameOrCrnInWorkspace(eq(ofName), eq(WORKSPACE_ID))).thenReturn(stack);
+        when(stackService.getByNameOrCrnInWorkspace(eq(OF_NAME), eq(WORKSPACE_ID))).thenReturn(stack);
 
-        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
+        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, OF_NAME, user);
 
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
@@ -235,7 +253,7 @@ public class UpgradeServiceTest {
     public void upgradeAllowedWhenConnectedDataHubStackAndClusterStoppedOrDeleted() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Stack stack = getStack();
         Image image = getImage("id-1");
-        setUpMocks(stack, image, true, "id-1", "id-2");
+        setUpMocks(image, true, "id-1", "id-2");
 
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult =
                 Result.success(new HashMap<>());
@@ -254,9 +272,9 @@ public class UpgradeServiceTest {
         StackViewV4Response datahubStack3 = new StackViewV4Response();
         datahubStack3.setStatus(Status.STOPPED);
         when(distroXV1Endpoint.list(any(), anyString())).thenReturn(new StackViewV4Responses(Set.of(datahubStack1, datahubStack2, datahubStack3)));
-        when(stackService.getByNameOrCrnInWorkspace(eq(ofName), eq(WORKSPACE_ID))).thenReturn(stack);
+        when(stackService.getByNameOrCrnInWorkspace(eq(OF_NAME), eq(WORKSPACE_ID))).thenReturn(stack);
 
-        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, ofName, user);
+        UpgradeOptionV4Response result = underTest.getOsUpgradeOptionByStackNameOrCrn(WORKSPACE_ID, OF_NAME, user);
 
         verify(clusterRepairService).repairWithDryRun(eq(stack.getId()));
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
@@ -268,20 +286,67 @@ public class UpgradeServiceTest {
         assertThat(result.getReason()).isEqualTo(null);
     }
 
+    @Test
+    public void testPrepareUpgradeLockedComponents() {
+        Stack stack = getStack();
+        when(stackService.getByNameOrCrnInWorkspace(OF_CRN, WORKSPACE_ID)).thenReturn(stack);
+        when(lockedComponentService.isComponentsLocked(stack, IMAGE_ID)).thenReturn(Boolean.TRUE);
+
+        assertThrows(BadRequestException.class, () -> underTest.prepareClusterUpgrade(WORKSPACE_ID, OF_CRN, IMAGE_ID));
+        verifyNoInteractions(flowManager);
+    }
+
+    @Test
+    public void testPrepareUpgradeImageNotFound() throws CloudbreakImageNotFoundException {
+        Stack stack = getStack();
+        when(stackService.getByNameOrCrnInWorkspace(OF_CRN, WORKSPACE_ID)).thenReturn(stack);
+        when(lockedComponentService.isComponentsLocked(stack, IMAGE_ID)).thenReturn(Boolean.FALSE);
+        when(componentConfigProviderService.getImage(stack.getId())).thenThrow(new CloudbreakImageNotFoundException("nope"));
+
+        assertThrows(NotFoundException.class, () -> underTest.prepareClusterUpgrade(WORKSPACE_ID, OF_CRN, IMAGE_ID));
+        verifyNoInteractions(flowManager);
+    }
+
+    @Test
+    public void testPrepareUpgradeTriggersFlow() throws CloudbreakImageNotFoundException {
+        Stack stack = getStack();
+        when(stackService.getByNameOrCrnInWorkspace(OF_CRN, WORKSPACE_ID)).thenReturn(stack);
+        when(lockedComponentService.isComponentsLocked(stack, IMAGE_ID)).thenReturn(Boolean.FALSE);
+        Image image = mock(Image.class);
+        String imgCatName = "imgCatName";
+        when(image.getImageCatalogName()).thenReturn(imgCatName);
+        String imgCatUrl = "imgCatUrl";
+        when(image.getImageCatalogUrl()).thenReturn(imgCatUrl);
+        when(componentConfigProviderService.getImage(stack.getId())).thenReturn(image);
+        ArgumentCaptor<ImageChangeDto> imageChangeDtoArgumentCaptor = ArgumentCaptor.forClass(ImageChangeDto.class);
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollId");
+        when(flowManager.triggerClusterUpgradePreparation(eq(stack.getId()), imageChangeDtoArgumentCaptor.capture(), eq(false)))
+                .thenReturn(flowIdentifier);
+
+        FlowIdentifier result = underTest.prepareClusterUpgrade(WORKSPACE_ID, OF_CRN, IMAGE_ID);
+
+        assertEquals(flowIdentifier, result);
+        ImageChangeDto imageChangeDto = imageChangeDtoArgumentCaptor.getValue();
+        assertEquals(imgCatName, imageChangeDto.getImageCatalogName());
+        assertEquals(imgCatUrl, imageChangeDto.getImageCatalogUrl());
+        assertEquals(IMAGE_ID, imageChangeDto.getImageId());
+        assertEquals(stack.getId(), imageChangeDto.getStackId());
+    }
+
     private void mockClouderaManagerRepoDetails() {
         ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setBaseUrl("cm-base-url");
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(1L)).thenReturn(clouderaManagerRepo);
     }
 
-    private void setUpMocks(Stack stack, Image image, boolean prewarmedImage, String oldImage, String newImage)
+    private void setUpMocks(Image image, boolean prewarmedImage, String oldImage, String newImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         setupAttachedClusterMocks();
         mockClouderaManagerRepoDetails();
         setupImageCatalogMocks(image, prewarmedImage, oldImage, newImage);
     }
 
-    private void setUpMocksWithOutAttachedClusters(Stack stack, Image image, boolean prewarmedImage, String oldImage, String newImage)
+    private void setUpMocksWithOutAttachedClusters(Image image, boolean prewarmedImage, String oldImage, String newImage)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         mockClouderaManagerRepoDetails();
         setupImageCatalogMocks(image, prewarmedImage, oldImage, newImage);

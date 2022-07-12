@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade.event;
 
 import static com.fasterxml.jackson.annotation.JsonTypeInfo.Id.CLASS;
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_COULD_NOT_START_EVENT;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,10 +28,17 @@ public class DatalakeUpgradeCouldNotStartEvent extends SdxEvent {
 
     @Override
     public String selector() {
-        return "DatalakeUpgradeCouldNotStartEvent";
+        return DATALAKE_UPGRADE_COULD_NOT_START_EVENT.event();
     }
 
     public Exception getException() {
         return exception;
+    }
+
+    @Override
+    public String toString() {
+        return "DatalakeUpgradeCouldNotStartEvent{" +
+                "exception=" + exception +
+                "} " + super.toString();
     }
 }

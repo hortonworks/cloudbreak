@@ -30,6 +30,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
@@ -37,7 +39,6 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
@@ -45,9 +46,11 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -87,6 +90,9 @@ public class UpgradeService {
     @Inject
     private ClusterBootstrapper clusterBootstrapper;
 
+    @Inject
+    private LockedComponentService lockedComponentService;
+
     public UpgradeOptionV4Response getOsUpgradeOptionByStackNameOrCrn(Long workspaceId, NameOrCrn nameOrCrn, User user) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
@@ -124,6 +130,21 @@ public class UpgradeService {
         Stack stack = stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
         return flowManager.triggerDatalakeClusterUpgrade(stack.getId(), imageId);
+    }
+
+    public FlowIdentifier prepareClusterUpgrade(Long workspaceId, NameOrCrn stackNameOrCrn, String imageId) {
+        Stack stack = stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, workspaceId);
+        MDCBuilder.buildMdcContext(stack);
+        if (lockedComponentService.isComponentsLocked(stack, imageId)) {
+            throw new BadRequestException("Upgrade preparation is not necessary in case of OS upgrade.");
+        }
+        try {
+            Image image = componentConfigProviderService.getImage(stack.getId());
+            ImageChangeDto imageChangeDto = new ImageChangeDto(stack.getId(), imageId, image.getImageCatalogName(), image.getImageCatalogUrl());
+            return flowManager.triggerClusterUpgradePreparation(stack.getId(), imageChangeDto, false);
+        } catch (CloudbreakImageNotFoundException e) {
+            throw new NotFoundException(String.format("Image with ID [%s] not found", imageId), e);
+        }
     }
 
     public boolean isOsUpgrade(UpgradeV4Request request) {

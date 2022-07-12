@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade.event;
 
+import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_IMAGE_CHANGE_EVENT;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -23,6 +25,13 @@ public class DatalakeImageChangeEvent extends SdxEvent {
 
     @Override
     public String selector() {
-        return "DatalakeImageChangeEvent";
+        return DATALAKE_IMAGE_CHANGE_EVENT.event();
+    }
+
+    @Override
+    public String toString() {
+        return "DatalakeImageChangeEvent{" +
+                "imageId='" + imageId + '\'' +
+                "} " + super.toString();
     }
 }

@@ -54,4 +54,13 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
                         && replaceVms == event.replaceVms
                         && Objects.equals(backupLocation, event.backupLocation));
     }
+
+    @Override
+    public String toString() {
+        return "DatalakeUpgradeFlowChainStartEvent{" +
+                "imageId='" + imageId + '\'' +
+                ", replaceVms=" + replaceVms +
+                ", backupLocation='" + backupLocation + '\'' +
+                "} " + super.toString();
+    }
 }

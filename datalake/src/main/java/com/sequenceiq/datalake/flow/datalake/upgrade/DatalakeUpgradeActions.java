@@ -309,6 +309,7 @@ public class DatalakeUpgradeActions {
 
             @Override
             protected Object getFailurePayload(DatalakeUpgradeFailedEvent payload, Optional<SdxContext> flowContext, Exception ex) {
+                LOGGER.error("Upgrade flow failure handling failed unexpectedly!", ex);
                 return null;
             }
         };

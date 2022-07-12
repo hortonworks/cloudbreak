@@ -17,4 +17,11 @@ public abstract class SdxFailedEvent extends SdxEvent {
     public Exception getException() {
         return exception;
     }
+
+    @Override
+    public String toString() {
+        return "SdxFailedEvent{" +
+                "exception=" + exception +
+                "} " + super.toString();
+    }
 }
