@@ -12,7 +12,6 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.GrainOperation;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -20,6 +19,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorGrainRunnerParams
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class RdsRecoverySetupService {
@@ -63,7 +63,7 @@ public class RdsRecoverySetupService {
 
     private OrchestratorGrainRunnerParams createOrchestratorGrainRunnerParams(Stack stack, Cluster cluster, Set<Node> nodes, GrainOperation grainOperation) {
         OrchestratorGrainRunnerParams grainRunnerParams = new OrchestratorGrainRunnerParams();
-        InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView gatewayInstance = stack.getPrimaryGatewayInstance();
         grainRunnerParams.setPrimaryGatewayConfig(gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().hasGateway()));
         Set<String> targetHostNames = gatewayInstance.getDiscoveryFQDN() != null ? Set.of(gatewayInstance.getDiscoveryFQDN()) : Set.of();
         grainRunnerParams.setTargetHostNames(targetHostNames);

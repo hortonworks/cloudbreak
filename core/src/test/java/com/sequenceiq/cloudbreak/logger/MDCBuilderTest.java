@@ -12,6 +12,7 @@ public class MDCBuilderTest {
 
     @Test
     public void buildSimpleContext() {
+        MDCBuilder.cleanupMdc();
         MDCBuilder.buildMdcContextFromCrn(null);
         assertNull(MDC.get(LoggerContextKey.TENANT.toString()));
         assertNull(MDC.get(LoggerContextKey.USER_CRN.toString()));
@@ -19,6 +20,7 @@ public class MDCBuilderTest {
 
     @Test
     public void buildSimpleContextWithNull() {
+        MDCBuilder.cleanupMdc();
         MDCBuilder.buildMdcContext();
         assertNull(MDC.get(LoggerContextKey.USER_CRN.toString()));
         assertNull(MDC.get(LoggerContextKey.RESOURCE_ID.toString()));
@@ -28,15 +30,17 @@ public class MDCBuilderTest {
 
     @Test
     public void buildContextWithStack() {
+        MDCBuilder.cleanupMdc();
         MDCBuilder.buildMdcContext(TestUtil.stack());
         assertEquals("STACK", MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
         assertEquals("simplestack", MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
         assertEquals("envCrn", MDC.get(LoggerContextKey.ENVIRONMENT_CRN.toString()));
-        assertNull(MDC.get(LoggerContextKey.TENANT.toString()));
+        assertEquals("testtenant", MDC.get(LoggerContextKey.TENANT.toString()));
     }
 
     @Test
     public void buildContextWithCredential() {
+        MDCBuilder.cleanupMdc();
         MDCBuilder.buildMdcContext(TestUtil.awsCredential());
         assertEquals("CREDENTIAL", MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
         assertEquals("dummyName", MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
@@ -44,6 +48,7 @@ public class MDCBuilderTest {
         assertNull(MDC.get(LoggerContextKey.TENANT.toString()));
     }
 
+    @Test
     public void buildMDCContext() {
         MDCBuilder.buildMdc(MdcContext.builder()
                 .tenant("tenant")
@@ -56,7 +61,7 @@ public class MDCBuilderTest {
                 .flowId("flowId")
                 .build());
 
-        assertEquals("RESTYPE", MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
+        assertEquals("resType", MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
         assertEquals("resName", MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
         assertEquals("resCrn", MDC.get(LoggerContextKey.RESOURCE_CRN.toString()));
         assertEquals("tenant", MDC.get(LoggerContextKey.TENANT.toString()));

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.domain.stack.instance;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -36,6 +38,8 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 import com.sequenceiq.common.model.CloudIdentityType;
@@ -45,7 +49,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @NamedEntityGraph(name = "InstanceGroup.instanceMetaData",
         attributeNodes = @NamedAttributeNode("instanceMetaData"))
 @Entity
-public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup> {
+public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>, InstanceGroupView {
 
     public static final String IDENTITY_TYPE_ATTRIBUTE = "identityType";
 
@@ -312,5 +316,9 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
                 ", instanceGroupType=" + instanceGroupType +
                 ", stack=" + stack.getName() +
                 '}';
+    }
+
+    public List<InstanceMetadataView> getAllAvailableInstanceMetadata() {
+        return new ArrayList<>(getNotTerminatedAndNotZombieInstanceMetaDataSet());
     }
 }

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @ExtendWith(MockitoExtension.class)
 class AllHostPublicDnsEntryServiceTest {
@@ -28,7 +29,7 @@ class AllHostPublicDnsEntryServiceTest {
 
         Map<String, List<String>> result = underTest.getComponentLocation(stack);
 
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         Assertions.assertFalse(result.containsKey(primaryGatewayInstance.getInstanceGroupName()), "Result should not contain primary gateway's group name");
         Assertions.assertFalse(resultContainsInstanceMetadata(primaryGatewayInstance, result), "Result should not contain primary gateway's instance metadata");
         Assertions.assertEquals(2, result.size(), "Result should contain all non primary gateway instance group");
@@ -37,7 +38,7 @@ class AllHostPublicDnsEntryServiceTest {
     @Test
     void getComponentLocationWhenPrimaryGatewayIsNotTheOnlyNodeWithinGatewayHostGroup() {
         Stack stack = TestUtil.stack();
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetaData primaryGatewayInstance = (InstanceMetaData) stack.getPrimaryGatewayInstance();
         InstanceGroup gatewayInstanceGroup = primaryGatewayInstance.getInstanceGroup();
         InstanceMetaData otherGatewayInstanceMetadata = new InstanceMetaData();
         otherGatewayInstanceMetadata.setDiscoveryFQDN("something.new");
@@ -79,7 +80,7 @@ class AllHostPublicDnsEntryServiceTest {
     @Test
     void getComponentLocationWhenTheGatewayNodeHaveOnlyDiscoveryFQDN() {
         Stack stack = TestUtil.stack();
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         stack.getNotTerminatedAndNotZombieInstanceMetaDataList().stream()
                 .filter(im -> !primaryGatewayInstance.getId().equals(im.getId()))
                 .forEach(im -> im.setDiscoveryFQDN(null));
@@ -89,7 +90,7 @@ class AllHostPublicDnsEntryServiceTest {
         Assertions.assertTrue(result.isEmpty(), "Result couldn't contain any hostname as nodes do not have discovery FQDN except gateway");
     }
 
-    private boolean resultContainsInstanceMetadata(InstanceMetaData primaryGatewayInstance, Map<String, List<String>> result) {
+    private boolean resultContainsInstanceMetadata(InstanceMetadataView primaryGatewayInstance, Map<String, List<String>> result) {
         return result
                 .values()
                 .stream()

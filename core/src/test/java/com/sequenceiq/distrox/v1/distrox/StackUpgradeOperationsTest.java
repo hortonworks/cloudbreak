@@ -42,7 +42,9 @@ import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityServi
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @ExtendWith(MockitoExtension.class)
 class StackUpgradeOperationsTest {
@@ -147,8 +149,12 @@ class StackUpgradeOperationsTest {
         when(limitConfiguration.getUpgradeNodeCountLimit()).thenReturn(200);
         when(instanceMetaDataService.countByStackId(any())).thenReturn(stackInstanceCount);
 
+        Stack stack = new Stack();
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
-                () -> underTest.checkForClusterUpgrade("accId", new Stack(), WORKSPACE_ID, request));
+                () -> underTest.checkForClusterUpgrade("accId", stack, WORKSPACE_ID, request));
 
         assertEquals("There are 201 nodes in the cluster. Upgrade has a limit of 200 nodes, above the limit it is unstable. " +
                 "Please downscale the cluster below the limit and retry the upgrade.", exception.getMessage());
@@ -334,6 +340,9 @@ class StackUpgradeOperationsTest {
         stack.setId(STACK_ID);
         stack.setType(stackType);
         stack.setEnvironmentCrn(ENVIRONMENT_CRN);
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         return stack;
     }
 

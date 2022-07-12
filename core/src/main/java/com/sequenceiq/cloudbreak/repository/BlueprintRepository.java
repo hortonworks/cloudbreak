@@ -52,4 +52,9 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
 
     @Query("SELECT s.cluster.blueprint FROM Stack s WHERE s.resourceCrn = :datahubCrn AND s.type = 'WORKLOAD'")
     Optional<Blueprint> findByDatahubCrn(@Param("datahubCrn") String datahubCrn);
+
+    @Query("SELECT b FROM Cluster c " +
+            "JOIN c.blueprint b " +
+            "WHERE c.id = :clusterId")
+    Optional<Blueprint> findByClusterId(@Param("clusterId") Long clusterId);
 }

@@ -95,8 +95,11 @@ public class Json implements Serializable {
 
     @JsonIgnore
     public <T> T getValue(String path) {
-        String[] split = path.split("\\.");
         JSONObject jsonObject = JSONObject.fromObject(value);
+        if (jsonObject.isEmpty()) {
+            return null;
+        }
+        String[] split = path.split("\\.");
         if (split.length == 1) {
             return (T) jsonObject.get(split[0]);
         }

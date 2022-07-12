@@ -12,8 +12,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.publicendpoint.dns.BaseDnsEntryService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class ClusterPublicEndpointManagementService {
@@ -97,7 +97,7 @@ public class ClusterPublicEndpointManagementService {
     }
 
     private void changeGatewayAddress(Stack stack, Map<String, String> newAddressesByFqdn) {
-        InstanceMetaData gatewayInstanceMetadata = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView gatewayInstanceMetadata = stack.getPrimaryGatewayInstance();
         String ipWrapper = gatewayInstanceMetadata.getPublicIpWrapper();
 
         if (newAddressesByFqdn.containsValue(ipWrapper)) {

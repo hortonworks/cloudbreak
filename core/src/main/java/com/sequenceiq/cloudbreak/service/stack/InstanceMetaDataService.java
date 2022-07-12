@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.ATTRIBUTES;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
@@ -25,6 +26,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -46,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -304,9 +307,9 @@ public class InstanceMetaDataService {
         return null;
     }
 
-    public Optional<InstanceMetaData> getPrimaryGatewayInstanceMetadata(long stackId) {
+    public Optional<InstanceMetadataView> getPrimaryGatewayInstanceMetadata(long stackId) {
         try {
-            return repository.getPrimaryGatewayInstanceMetadata(stackId);
+            return Optional.ofNullable(repository.getPrimaryGatewayInstanceMetadata(stackId).orElse(null));
         } catch (AccessDeniedException ignore) {
             LOGGER.debug("No primary gateway for stack [{}]", stackId);
             return Optional.empty();
@@ -430,4 +433,22 @@ public class InstanceMetaDataService {
     public Page<InstanceMetaData> getTerminatedInstanceMetaDataBefore(Long stackId, Long thresholdTerminationDate, PageRequest pageRequest) {
         return repository.findTerminatedInstanceMetadataByStackIdAndTerminatedBefore(stackId, thresholdTerminationDate, pageRequest);
     }
+
+    public List<InstanceMetadataView> getAllAvailableInstanceMetadataViewsByStackId(Long stackId) {
+        return new ArrayList<>(repository.findAllViewsStatusNotInForStack(stackId,
+                Set.of(InstanceStatus.TERMINATED, InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.DELETED_BY_PROVIDER, InstanceStatus.ZOMBIE)));
+    }
+
+    public List<InstanceMetadataView> getInstanceMetadataViewsByStackIdAndPrivateIds(Long stackId, Collection<Long> privateIds) {
+        return new ArrayList<>(repository.findInstanceMetadataViewsByStackIdAndPrivateIds(stackId, privateIds));
+    }
+
+    public List<InstanceMetadataView> getAllNotTerminatedInstanceMetadataViewsByStackId(Long stackId) {
+        return new ArrayList<>(repository.findAllViewsStatusNotInForStack(stackId, Set.of(InstanceStatus.TERMINATED)));
+    }
+
+    public List<InstanceMetadataView> getAllStatusInForStack(Long stackId, Collection<InstanceStatus> statuses) {
+        return new ArrayList<>(repository.findAllStatusInForStack(stackId, statuses));
+    }
+
 }

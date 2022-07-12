@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
@@ -27,6 +26,7 @@ import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.RangerVirtualGroupSe
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -74,7 +74,7 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
         try {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             Cluster cluster = stack.getCluster();
-            InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
+            InstanceMetadataView gatewayInstance = stack.getPrimaryGatewayInstance();
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.hasGateway());
             Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
             ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, cluster.getId());

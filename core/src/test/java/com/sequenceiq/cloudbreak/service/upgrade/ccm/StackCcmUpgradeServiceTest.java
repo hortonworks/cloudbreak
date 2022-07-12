@@ -39,6 +39,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCc
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -189,6 +191,9 @@ class StackCcmUpgradeServiceTest {
         Cluster cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
         stack.setCluster(cluster);
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         return stack;
     }
 }

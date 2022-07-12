@@ -147,6 +147,10 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
         return cloudPlatform;
     }
 
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
     }

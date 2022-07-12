@@ -42,6 +42,10 @@ import com.sequenceiq.common.api.type.Tunnel;
 @Transactional(TxType.REQUIRED)
 public interface StackRepository extends WorkspaceResourceRepository<Stack, Long>, JobResourceRepository<Stack, Long> {
 
+    @Override
+    @Query("SELECT s FROM Stack s WHERE s.workspace.id = :workspaceId")
+    Set<Stack> findAllByWorkspaceId(@Param("workspaceId") Long workspaceId);
+
     @Query("SELECT s.id as id, s.name as name, s.resourceCrn as crn from Stack s "
             + "WHERE s.cluster.clusterManagerIp= :clusterManagerIp AND s.terminated = null "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")

@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.dto;
 
 import com.google.common.xml.XmlEscapers;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.ldaps.DirectoryType;
+import com.sequenceiq.cloudbreak.view.VersionConstant;
 
+@Deprecated(since = VersionConstant.NEW_VIEW_VERSION)
 public class LdapView {
 
     private String bindDn;

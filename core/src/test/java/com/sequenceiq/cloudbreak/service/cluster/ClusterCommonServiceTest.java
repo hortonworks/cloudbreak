@@ -41,6 +41,8 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -72,6 +74,9 @@ public class ClusterCommonServiceTest {
         NameOrCrn cluster = NameOrCrn.ofName("cluster");
         Stack stack = new Stack();
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         when(instanceMetaDataService.anyInstanceStopped(any())).thenReturn(true);
         when(stackService.getByNameOrCrnInWorkspace(cluster, 1L)).thenReturn(stack);
         CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
@@ -87,6 +92,9 @@ public class ClusterCommonServiceTest {
         Stack stack = new Stack();
         stack.setName("cluster");
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
         when(clusterOperationService.rotateAutoTlsCertificates(stack, certificatesRotationV4Request)).thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
         when(stackService.getByNameOrCrnInWorkspace(cluster, 1L)).thenReturn(stack);
@@ -100,6 +108,9 @@ public class ClusterCommonServiceTest {
         Stack stack = new Stack();
         stack.setName("cluster");
         stack.setStackStatus(new StackStatus(stack, NODE_FAILURE));
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         when(stackService.getByNameOrCrnInWorkspace(cluster, 1L)).thenReturn(stack);
         CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -205,6 +216,9 @@ public class ClusterCommonServiceTest {
         Stack stack = new Stack();
         stack.setId(9876L);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
 
         when(stackService.getByCrnWithLists("crn")).thenReturn(stack);
         doThrow(RuntimeException.class).when(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());

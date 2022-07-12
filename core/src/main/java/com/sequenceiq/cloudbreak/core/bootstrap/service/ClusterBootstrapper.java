@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -166,7 +167,7 @@ public class ClusterBootstrapper {
             BootstrapParams params = createBootstrapParams(stack);
             hostOrchestrator.bootstrap(allGatewayConfig, nodes, params, clusterDeletionBasedModel(stack.getId(), null));
 
-            InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
+            InstanceMetadataView primaryGateway = stack.getPrimaryGatewayInstance();
             saveOrchestrator(stack, primaryGateway);
             checkIfAllNodesAvailable(stack, nodes, primaryGateway);
         } catch (TransactionExecutionException e) {
@@ -199,7 +200,7 @@ public class ClusterBootstrapper {
         bootstrapOnHostInternal(stack, this::updateSaltComponent);
     }
 
-    private void checkIfAllNodesAvailable(Stack stack, Set<Node> nodes, InstanceMetaData primaryGateway) throws CloudbreakOrchestratorFailedException {
+    private void checkIfAllNodesAvailable(Stack stack, Set<Node> nodes, InstanceMetadataView primaryGateway) throws CloudbreakOrchestratorFailedException {
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, isKnoxEnabled(stack));
         ExtendedPollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(
                 hostClusterAvailabilityCheckerTask, new HostOrchestratorClusterContext(stack, hostOrchestrator, gatewayConfig, nodes),
@@ -254,7 +255,7 @@ public class ClusterBootstrapper {
         return clusterComponentProvider.store(saltComponent);
     }
 
-    private void saveOrchestrator(Stack stack, InstanceMetaData primaryGateway) {
+    private void saveOrchestrator(Stack stack, InstanceMetadataView primaryGateway) {
         String gatewayIp = gatewayConfigService.getGatewayIp(stack, primaryGateway);
         Orchestrator orchestrator = stack.getOrchestrator();
         orchestrator.setApiEndpoint(gatewayIp + ':' + stack.getGatewayPort());
@@ -295,7 +296,7 @@ public class ClusterBootstrapper {
     private List<GatewayConfig> collectAndCheckGateways(Stack stack) {
         LOGGER.info("Collect and check gateways for {}", stack.getName());
         List<GatewayConfig> allGatewayConfig = new ArrayList<>();
-        for (InstanceMetaData gateway : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
+        for (InstanceMetadataView gateway : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, isKnoxEnabled(stack));
             LOGGER.info("Add gateway config: {}", gatewayConfig);
             allGatewayConfig.add(gatewayConfig);
@@ -410,7 +411,7 @@ public class ClusterBootstrapper {
         LOGGER.info("Bootstrap new nodes: {}", nodes);
         Cluster cluster = stack.getCluster();
         Boolean enableKnox = cluster.getGateway() != null;
-        for (InstanceMetaData gateway : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
+        for (InstanceMetadataView gateway : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
             ExtendedPollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithAbsoluteTimeout(
                     hostBootstrapApiCheckerTask, new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
@@ -429,7 +430,7 @@ public class ClusterBootstrapper {
 
         hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, stateZip, params, clusterDeletionBasedModel(stack.getId(), null));
 
-        InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGateway = stack.getPrimaryGatewayInstance();
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, enableKnox);
         ExtendedPollingResult allNodesAvailabilityPolling = hostClusterAvailabilityPollingService
                 .pollWithAbsoluteTimeout(hostClusterAvailabilityCheckerTask,

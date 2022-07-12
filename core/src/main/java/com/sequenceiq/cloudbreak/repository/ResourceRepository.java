@@ -31,12 +31,6 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
     @Query("SELECT r FROM Resource r WHERE r.stack.id = :stackId")
     List<Resource> findAllByStackId(@Param("stackId") long stackId);
 
-    @Query("SELECT r FROM Resource r " +
-            "LEFT JOIN r.stack s " +
-            "WHERE s.id = :stackId " +
-            "AND r.resourceStatus in :statuses")
-    List<Resource> findAllByStackIdAndStatusIn(@Param("stackId") long stackId, @Param("statuses") Collection<CommonStatus> statuses);
-
     @Query("SELECT r FROM Resource r WHERE r.stack.id = :stackId AND (r.resourceType NOT LIKE '%INSTANCE%' OR r.resourceType NOT LIKE '%DISK%')")
     Set<Resource> findAllByStackIdNotInstanceOrDisk(@Param("stackId") Long stackId);
 
@@ -88,4 +82,11 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
     boolean deleteByResourceReferenceAndType(@Param("resourceReference") String resourceReference, @Param("type") ResourceType type);
 
     List<Resource> findAllByStackIdAndResourceTypeIn(Long stackId, Collection<ResourceType> resourceTypes);
+
+    @Query("SELECT r FROM Resource r " +
+            "LEFT JOIN r.stack s " +
+            "WHERE s.id = :stackId " +
+            "AND r.resourceStatus in :statuses")
+    List<Resource> findAllByStackIdAndStatusIn(@Param("stackId") long stackId, @Param("statuses") Collection<CommonStatus> statuses);
+
 }

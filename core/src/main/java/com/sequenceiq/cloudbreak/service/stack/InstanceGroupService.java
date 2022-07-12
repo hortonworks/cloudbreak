@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -147,5 +148,9 @@ public class InstanceGroupService {
 
     public Set<InstanceGroup> getByStackAndFetchTemplates(Long stackId) {
         return repository.getByStackAndFetchTemplates(stackId);
+    }
+
+    public List<com.sequenceiq.cloudbreak.view.InstanceGroupView> getInstanceGroupViewByStackId(Long stackId) {
+        return new ArrayList<>(repository.findInstanceGroupViewByStackId(stackId));
     }
 }

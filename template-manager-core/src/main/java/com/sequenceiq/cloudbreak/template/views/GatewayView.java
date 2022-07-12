@@ -63,7 +63,7 @@ public class GatewayView {
         signPub = gateway.getSignPub();
         signCert = gateway.getSignCert();
         tokenCert = gateway.getTokenCert();
-        this.masterSecret = gateway.getKnoxMasterSecret();
+        this.masterSecret = gateway.getKnoxMaster();
         this.signKey = signKey;
     }
 

@@ -524,4 +524,8 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     public EnumSet<Crn.ResourceType> getSupportedCrnResourceTypes() {
         return EnumSet.of(Crn.ResourceType.CLUSTER_TEMPLATE);
     }
+
+    public Optional<Blueprint> getByClusterId(Long stackId) {
+        return blueprintRepository.findByClusterId(stackId);
+    }
 }

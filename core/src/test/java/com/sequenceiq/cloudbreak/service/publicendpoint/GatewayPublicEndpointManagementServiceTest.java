@@ -33,13 +33,13 @@ import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -276,7 +276,7 @@ class GatewayPublicEndpointManagementServiceTest {
         Stack stack = cluster.getStack();
         stack.setSecurityConfig(securityConfig);
         stack.setCluster(cluster);
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
         String environmentDomain = "anenvname.xcu2-8y8x.dev.cldr.work";
@@ -310,7 +310,7 @@ class GatewayPublicEndpointManagementServiceTest {
         stack.setSecurityConfig(securityConfig);
         stack.setCluster(cluster);
 
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String environmentDomain = "anenvname.xcu2-8y8x.dev.cldr.work";
         String commonName = "hashofshorthostname." + environmentDomain;
@@ -360,7 +360,7 @@ class GatewayPublicEndpointManagementServiceTest {
                 .build();
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
 
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String commonName = "hashofshorthostname." + environmentDomain;
         String fqdn = endpointName + "." + environmentDomain;
@@ -390,7 +390,7 @@ class GatewayPublicEndpointManagementServiceTest {
         Cluster cluster = TestUtil.cluster();
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
@@ -410,7 +410,7 @@ class GatewayPublicEndpointManagementServiceTest {
         Cluster cluster = TestUtil.cluster();
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
         DetailedEnvironmentResponse environment = DetailedEnvironmentResponse.builder()
@@ -430,7 +430,7 @@ class GatewayPublicEndpointManagementServiceTest {
         Cluster cluster = TestUtil.cluster();
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
         String environmentDomain = "anenvname.xcu2-8y8x.dev.cldr.work";
@@ -453,7 +453,7 @@ class GatewayPublicEndpointManagementServiceTest {
         Cluster cluster = TestUtil.cluster();
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
         String environmentDomain = "anenvname.xcu2-8y8x.dev.cldr.work";
@@ -482,7 +482,7 @@ class GatewayPublicEndpointManagementServiceTest {
         Cluster cluster = TestUtil.cluster();
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
         String environmentDomain = "anenvname.xcu2-8y8x.dev.cldr.work";
@@ -511,7 +511,7 @@ class GatewayPublicEndpointManagementServiceTest {
         Cluster cluster = TestUtil.cluster();
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String envName = "anEnvName";
         String environmentDomain = "anenvname.xcu2-8y8x.dev.cldr.work";
@@ -539,7 +539,7 @@ class GatewayPublicEndpointManagementServiceTest {
         Cluster cluster = TestUtil.cluster();
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String gatewayIp = primaryGatewayInstance.getPublicIpWrapper();
         String envName = "anEnvName";
@@ -560,7 +560,7 @@ class GatewayPublicEndpointManagementServiceTest {
         Cluster cluster = TestUtil.cluster();
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String gatewayIp = primaryGatewayInstance.getPublicIpWrapper();
         String envName = "anEnvName";
@@ -594,7 +594,7 @@ class GatewayPublicEndpointManagementServiceTest {
         stack.setCluster(cluster);
         stack.setLoadBalancers(Set.of(loadBalancer));
 
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String lbEndpointName = loadBalancer.getEndpoint();
         String environmentDomain = "anenvname.xcu2-8y8x.dev.cldr.work";
@@ -652,7 +652,7 @@ class GatewayPublicEndpointManagementServiceTest {
         stack.setCluster(cluster);
         stack.setLoadBalancers(Set.of(loadBalancer));
 
-        InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
         String endpointName = primaryGatewayInstance.getShortHostname();
         String lbEndpointName = loadBalancer.getEndpoint();
         String environmentDomain = "anenvname.xcu2-8y8x.dev.cldr.work";

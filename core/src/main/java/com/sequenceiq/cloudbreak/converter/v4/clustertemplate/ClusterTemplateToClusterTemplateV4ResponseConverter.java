@@ -52,7 +52,7 @@ public class ClusterTemplateToClusterTemplateV4ResponseConverter {
                     stackV4Request = null;
                 }
                 clusterTemplateV4Response.setDistroXTemplate(getIfNotNull(stackV4Request, stackV4RequestConverter::convert));
-                clusterTemplateV4Response.setNodeCount(stack.get().getFullNodeCount());
+                clusterTemplateV4Response.setNodeCount(stack.get().getFullNodeCount().intValue());
             }
         } else {
             try {

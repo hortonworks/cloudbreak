@@ -124,6 +124,30 @@ public class MDCBuilder {
         getOrGenerateRequestId();
     }
 
+    public static void buildMdcContextFromInfoProvider(MdcContextInfoProvider object) {
+        if (object == null) {
+            MDC.put(LoggerContextKey.USER_CRN.toString(), null);
+            MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), null);
+            MDC.put(LoggerContextKey.RESOURCE_ID.toString(), null);
+            MDC.put(LoggerContextKey.RESOURCE_CRN.toString(), null);
+            MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), null);
+        } else {
+            MDC.put(LoggerContextKey.WORKSPACE.toString(), object.getWorkspaceName());
+            MdcContext.builder()
+                    .resourceCrn(object.getResourceCrn())
+                    .resourceType(object.getResourceType())
+                    .resourceName(object.getResourceName())
+                    .environmentCrn(object.getEnvironmentCrn())
+                    .tenant(object.getTenantName())
+                    .buildMdc();
+        }
+        getOrGenerateRequestId();
+    }
+
+    public static void buildMdcContext(MdcContextInfoProvider object) {
+        buildMdcContextFromInfoProvider(object);
+    }
+
     public static void buildMdc(MdcContext mdcContext) {
         doIfNotNull(mdcContext.getTenant(), v -> MDC.put(LoggerContextKey.TENANT.toString(), v));
         doIfNotNull(mdcContext.getUserCrn(), v -> MDC.put(LoggerContextKey.USER_CRN.toString(), v));

@@ -122,6 +122,7 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -274,7 +275,7 @@ public class ClusterHostServiceRunner {
     public NodeReachabilityResult runTargetedClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, Map<String, String> candidateAddresses) {
         try {
             NodeReachabilityResult nodeReachabilityResult = stackUtil.collectReachableAndUnreachableCandidateNodes(stack, candidateAddresses.keySet());
-            addGatewaysToCandidatesIfNeeded(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata(), nodeReachabilityResult);
+            addGatewaysToCandidatesIfNeeded(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadataSet(), nodeReachabilityResult);
             Set<Node> reachableCandidates = nodeReachabilityResult.getReachableNodes();
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             List<GrainProperties> grainsProperties = grainPropertiesService
@@ -348,7 +349,7 @@ public class ClusterHostServiceRunner {
     public NodeReachabilityResult addClusterServices(Stack stack, Cluster cluster, Map<String, Integer> hostGroupWithAdjustment, boolean repair) {
         Map<String, String> candidates = collectUpscaleCandidates(cluster.getId(), hostGroupWithAdjustment);
         Set<String> gatewayHosts = stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
-                .map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+                .map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
         boolean candidatesContainGatewayNode = candidates.keySet().stream().anyMatch(gatewayHosts::contains);
         NodeReachabilityResult nodeReachabilityResult;
         if (!repair && !candidatesContainGatewayNode && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack)) {
@@ -734,7 +735,7 @@ public class ClusterHostServiceRunner {
         if (datalakeStackOptional.isPresent()) {
             Stack dataLakeStack = datalakeStackOptional.get();
             String datalakeDomain = dataLakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().get(0).getDomain();
-            List<String> ipList = dataLakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp)
+            List<String> ipList = dataLakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream().map(InstanceMetadataView::getPrivateIp)
                     .collect(Collectors.toList());
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
                     singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
@@ -983,7 +984,7 @@ public class ClusterHostServiceRunner {
     private OrchestratorGrainRunnerParams createOrchestratorGrainRunnerParams(Stack stack, Cluster cluster, Set<Node> nodes, GrainOperation grainOperation) {
         Set<String> reachableHostnames = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         OrchestratorGrainRunnerParams grainRunnerParams = new OrchestratorGrainRunnerParams();
-        InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView gatewayInstance = stack.getPrimaryGatewayInstance();
         grainRunnerParams.setPrimaryGatewayConfig(gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().hasGateway()));
         grainRunnerParams.setTargetHostNames(reachableHostnames);
         grainRunnerParams.setAllNodes(nodes);

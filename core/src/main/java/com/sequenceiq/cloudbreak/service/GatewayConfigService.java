@@ -15,9 +15,9 @@ import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class GatewayConfigService {
@@ -30,7 +30,7 @@ public class GatewayConfigService {
 
     public List<GatewayConfig> getAllGatewayConfigs(Stack stack) {
         boolean knoxGatewayEnabled = stack.getCluster().hasGateway();
-        List<InstanceMetaData> reachableGatewayInstanceMetadata = stack.getReachableGatewayInstanceMetadata();
+        List<InstanceMetadataView> reachableGatewayInstanceMetadata = stack.getReachableGatewayInstanceMetadata();
         if (reachableGatewayInstanceMetadata.isEmpty()) {
             throw new NotFoundException("No reachable gateway found");
         } else {
@@ -41,7 +41,7 @@ public class GatewayConfigService {
     }
 
     public GatewayConfig getPrimaryGatewayConfigWithoutLists(Stack stack) {
-        Optional<InstanceMetaData> gatewayInstance = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stack.getId());
+        Optional<InstanceMetadataView> gatewayInstance = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stack.getId());
         if (gatewayInstance.isEmpty()) {
             throw new NotFoundException("Gateway instance does not found");
         }
@@ -49,19 +49,19 @@ public class GatewayConfigService {
     }
 
     public GatewayConfig getPrimaryGatewayConfig(Stack stack) {
-        InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView gatewayInstance = stack.getPrimaryGatewayInstance();
         if (gatewayInstance == null) {
             throw new NotFoundException("Gateway instance does not found");
         }
         return getGatewayConfig(stack, gatewayInstance, stack.getCluster().hasGateway());
     }
 
-    public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance, Boolean knoxGatewayEnabled) {
+    public GatewayConfig getGatewayConfig(Stack stack, InstanceMetadataView gatewayInstance, Boolean knoxGatewayEnabled) {
         return tlsSecurityService.buildGatewayConfig(stack, gatewayInstance, stack.getGatewayPort(), getSaltClientConfig(stack), knoxGatewayEnabled);
     }
 
     public String getPrimaryGatewayIp(Stack stack) {
-        InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView gatewayInstance = stack.getPrimaryGatewayInstance();
         return gatewayInstance == null ? null : getGatewayIp(stack, gatewayInstance);
     }
 
@@ -73,7 +73,7 @@ public class GatewayConfigService {
         return gatewayIP;
     }
 
-    public String getGatewayIp(Stack stack, InstanceMetaData gatewayInstance) {
+    public String getGatewayIp(Stack stack, InstanceMetadataView gatewayInstance) {
         String gatewayIP = gatewayInstance.getPublicIpWrapper();
         if (stack.getSecurityConfig().isUsePrivateIpToTls()) {
             gatewayIP = gatewayInstance.getPrivateIp();

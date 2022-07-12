@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -397,7 +398,7 @@ class ClusterHostServiceRunnerTest {
         when(gatewayConfig.getPrivateAddress()).thenReturn("1.2.3.4");
         when(gatewayConfig.getHostname()).thenReturn("hostname");
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(any())).thenReturn(clouderaManagerRepo);
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         when(exposedServiceCollector.getRangerService()).thenReturn(mock(ExposedService.class));
         ExposedService cmExposedService = mock(ExposedService.class);
         when(cmExposedService.getServiceName()).thenReturn("CM");
@@ -411,7 +412,7 @@ class ClusterHostServiceRunnerTest {
         createInstanceGroup(template, instanceGroups, "fqdn2", null, "1.1.2.1", "1.1.2.2");
         InstanceGroup gwIg = createInstanceGroup(template, instanceGroups, "gateway1", "gateway2", "1.1.3.1", "1.1.3.2");
 
-        lenient().when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(Lists.newArrayList(gwIg.getAllInstanceMetaData()));
+        lenient().when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadataSet()).thenReturn(Lists.newArrayList(gwIg.getAllInstanceMetaData()));
 
         when(stack.getInstanceGroups()).thenReturn(instanceGroups);
         RdsConfigWithoutCluster rdsConfigWithoutCluster = mock(RdsConfigWithoutCluster.class);

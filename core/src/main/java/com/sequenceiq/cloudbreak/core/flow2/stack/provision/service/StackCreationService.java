@@ -61,7 +61,6 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
@@ -79,6 +78,7 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -248,7 +248,7 @@ public class StackCreationService {
 
     public void setupTls(StackContext context) throws CloudbreakException {
         Stack stack = context.getStack();
-        for (InstanceMetaData gwInstance : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
+        for (InstanceMetadataView gwInstance : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
             tlsSetupService.setupTls(stack, gwInstance);
         }
     }

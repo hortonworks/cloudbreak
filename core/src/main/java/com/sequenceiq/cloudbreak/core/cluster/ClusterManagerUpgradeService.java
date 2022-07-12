@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceR
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -39,6 +38,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.CmServerQueryService;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class ClusterManagerUpgradeService {
@@ -106,7 +106,7 @@ public class ClusterManagerUpgradeService {
 
     private void upgradeClusterManager(Stack stack, ClouderaManagerRepo clouderaManagerRepo) throws CloudbreakOrchestratorException {
         Cluster cluster = stack.getCluster();
-        InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
+        InstanceMetadataView gatewayInstance = stack.getPrimaryGatewayInstance();
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.getGateway() != null);
         Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
         ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());

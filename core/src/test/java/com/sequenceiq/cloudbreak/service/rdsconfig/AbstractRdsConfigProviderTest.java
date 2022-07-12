@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 @ExtendWith(MockitoExtension.class)
@@ -83,8 +84,7 @@ class AbstractRdsConfigProviderTest {
         when(rdsConfigWithoutCluster.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
         when(rdsConfigWithoutCluster.getConnectionPassword()).thenReturn("pwd");
         Stack testStack = TestUtil.stack();
-        InstanceMetaData metaData = testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next();
-        metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+        InstanceMetadataView metaData = testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next();
         testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().add(metaData);
         Cluster testCluster = TestUtil.cluster();
         testCluster.setId(1L);
@@ -130,7 +130,7 @@ class AbstractRdsConfigProviderTest {
         when(secretService.getByResponse(username)).thenReturn(REMOTE_ADMIN);
         when(secretService.getByResponse(password)).thenReturn(REMOTE_ADMIN_PASSWORD);
         Stack testStack = TestUtil.stack();
-        InstanceMetaData metaData = testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next();
+        InstanceMetaData metaData = (InstanceMetaData) testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().add(metaData);
         Cluster testCluster = TestUtil.cluster();

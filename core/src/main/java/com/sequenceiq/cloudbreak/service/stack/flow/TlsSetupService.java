@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.polling.nginx.NginxPollerObject;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class TlsSetupService {
@@ -52,7 +53,7 @@ public class TlsSetupService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    public void setupTls(Stack stack, InstanceMetaData gwInstance) throws CloudbreakException {
+    public void setupTls(Stack stack, InstanceMetadataView gwInstance) throws CloudbreakException {
         try {
             SavingX509TrustManager x509TrustManager = new SavingX509TrustManager();
             TrustManager[] trustManagers = {x509TrustManager};
@@ -81,7 +82,7 @@ public class TlsSetupService {
         }
     }
 
-    private InstanceMetaData getInstanceMetaData(InstanceMetaData gwInstance) {
+    private InstanceMetaData getInstanceMetaData(InstanceMetadataView gwInstance) {
         return instanceMetaDataService.findById(gwInstance.getId())
                 .orElseThrow(notFound("Instance metadata", gwInstance.getId()));
     }

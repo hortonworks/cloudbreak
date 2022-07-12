@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
@@ -336,9 +337,9 @@ public class UpgradeServiceTest {
         cluster.setId(1L);
         cluster.setBlueprint(blueprint);
         stack.setCluster(cluster);
-
         Workspace workspace = new Workspace();
         workspace.setId(WORKSPACE_ID);
+        workspace.setTenant(new Tenant());
         stack.setWorkspace(workspace);
         return stack;
     }

@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.BasePublicEndpointManagementService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 public abstract class BaseDnsEntryService extends BasePublicEndpointManagementService {
@@ -72,7 +73,7 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
     private Map<String, String> getCandidateIpsByFqdn(Stack stack) {
         Map<String, List<String>> componentLocation = getComponentLocation(stack);
         final Set<InstanceMetaData> runningInstanceMetaData = stack.getNotDeletedAndNotZombieInstanceMetaDataSet();
-        final InstanceMetaData primaryGatewayInstanceMetadata = stack.getPrimaryGatewayInstance();
+        final InstanceMetadataView primaryGatewayInstanceMetadata = stack.getPrimaryGatewayInstance();
         return componentLocation
                 .values()
                 .stream()

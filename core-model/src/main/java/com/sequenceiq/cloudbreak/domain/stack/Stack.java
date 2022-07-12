@@ -47,18 +47,22 @@ import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.OnFailureActionConverter;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.domain.IdAware;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -74,6 +78,14 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.view.GatewayView;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
@@ -83,7 +95,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
-public class Stack implements ProvisionEntity, WorkspaceAwareResource, OrchestratorAware, IdAware {
+public class Stack implements ProvisionEntity, WorkspaceAwareResource, OrchestratorAware, StackView, StackDtoDelegate, IdAware {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
@@ -286,8 +298,18 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.displayName = displayName;
     }
 
+    @Override
+    public StackView getStack() {
+        return this;
+    }
+
     public Cluster getCluster() {
         return cluster;
+    }
+
+    @Override
+    public Blueprint getBlueprint() {
+        return cluster.getBlueprint();
     }
 
     public void setCluster(Cluster cluster) {
@@ -304,6 +326,11 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     public Status getStatus() {
         return stackStatus != null ? stackStatus.getStatus() : null;
+    }
+
+    @Override
+    public DetailedStackStatus getDetailedStatus() {
+        return stackStatus == null ? null : stackStatus.getDetailedStackStatus();
     }
 
     public String getStatusReason() {
@@ -521,12 +548,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return null;
     }
 
-    public Integer getFullNodeCount() {
-        int nodeCount = 0;
+    public Long getFullNodeCount() {
+        Integer nodeCount = 0;
         for (InstanceGroup instanceGroup : instanceGroups) {
             nodeCount += instanceGroup.getNodeCount();
         }
-        return nodeCount;
+        return nodeCount.longValue();
     }
 
     public Set<InstanceMetaData> getNotTerminatedAndNotZombieInstanceMetaDataSet() {
@@ -617,7 +644,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.parameters = parameters;
     }
 
-    public List<InstanceMetaData> getNotTerminatedAndNotZombieGatewayInstanceMetadata() {
+    public List<InstanceMetadataView> getNotTerminatedAndNotZombieGatewayInstanceMetadata() {
+        return instanceGroups.stream()
+                .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType()))
+                .flatMap(ig -> ig.getNotTerminatedAndNotZombieInstanceMetaDataSet().stream())
+                .collect(Collectors.toList());
+    }
+
+    public List<InstanceMetaData> getNotTerminatedAndNotZombieGatewayInstanceMetadataSet() {
         return instanceGroups.stream()
                 .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType()))
                 .flatMap(ig -> ig.getNotTerminatedAndNotZombieInstanceMetaDataSet().stream())
@@ -631,15 +665,22 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 .collect(Collectors.toList());
     }
 
-    public List<InstanceMetaData> getReachableGatewayInstanceMetadata() {
+    public List<InstanceMetadataView> getReachableGatewayInstanceMetadata() {
         return instanceGroups.stream()
                 .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType()))
                 .flatMap(ig -> ig.getReachableInstanceMetaDataSet().stream())
                 .collect(Collectors.toList());
     }
 
-    public InstanceMetaData getPrimaryGatewayInstance() {
-        Optional<InstanceMetaData> metaData = getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
+    public InstanceMetadataView getPrimaryGatewayInstance() {
+        Optional<InstanceMetadataView> metaData = getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
+                .filter(im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceMetadataType())).findFirst();
+        return metaData.orElse(null);
+    }
+
+    @Deprecated
+    public InstanceMetaData getPrimaryGatewayInstanceData() {
+        Optional<InstanceMetaData> metaData = getNotTerminatedAndNotZombieGatewayInstanceMetadataSet().stream()
                 .filter(im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceMetadataType())).findFirst();
         return metaData.orElse(null);
     }
@@ -658,6 +699,40 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     public Network getNetwork() {
         return network;
+    }
+
+    @Override
+    public List<InstanceGroupDto> getInstanceGroupDtos() {
+        return instanceGroups.stream().map(ig -> new InstanceGroupDto(ig, ig.getAllAvailableInstanceMetadata())).collect(Collectors.toList());
+    }
+
+    @Override
+    public Set<String> getAvailabilityZonesByInstanceGroup(Long instanceGroupId) {
+        return instanceGroups.stream()
+                .filter(ig -> ig.getId().equals(instanceGroupId))
+                .findFirst()
+                .orElseThrow(NotFoundException.notFound("InstanceGroup", instanceGroupId))
+                .getAvailabilityZones();
+    }
+
+    @Override
+    public GatewayView getGateway() {
+        return cluster.getGateway();
+    }
+
+    @Override
+    public Set<ClusterComponentView> getClusterComponents() {
+        return cluster.getComponents().stream()
+                .map(c -> {
+                    ClusterComponentView cc = new ClusterComponentView();
+                    cc.setClusterId(c.getCluster().getId());
+                    cc.setComponentType(c.getComponentType());
+                    cc.setName(c.getName());
+                    cc.setAttributes(c.getAttributes());
+                    cc.setId(c.getId());
+                    return cc;
+                })
+                .collect(Collectors.toSet());
     }
 
     public void setNetwork(Network network) {
@@ -778,6 +853,11 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return tags;
     }
 
+    @Override
+    public Long getClusterId() {
+        return cluster == null ? null : cluster.getId();
+    }
+
     public void setTags(Json tags) {
         this.tags = tags;
     }
@@ -846,8 +926,20 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.workspace = workspace;
     }
 
+    @Override
+    public Tenant getTenant() {
+        return WorkspaceAwareResource.super.getTenant();
+    }
+
     public StackType getType() {
         return type;
+    }
+
+    @Override
+    public List<InstanceMetadataView> getAllAvailableInstances() {
+        return instanceGroups.stream()
+                .flatMap(ig -> ig.getNotDeletedAndNotZombieInstanceMetaDataSet().stream())
+                .collect(Collectors.toList());
     }
 
     public void setType(StackType type) {
@@ -908,8 +1000,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     public List<TargetGroup> getTargetGroupAsList() {
         return loadBalancers.stream()
-            .flatMap(loadBalancer -> loadBalancer.getTargetGroupSet().stream())
-            .collect(Collectors.toList());
+                .flatMap(loadBalancer -> loadBalancer.getTargetGroupSet().stream())
+                .collect(Collectors.toList());
     }
 
     public String getCcmV2AgentCrn() {
@@ -936,6 +1028,31 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return externalDatabaseEngineVersion;
     }
 
+    @Override
+    public Long getWorkspaceId() {
+        return workspace.getId();
+    }
+
+    @Override
+    public String getWorkspaceName() {
+        return workspace.getName();
+    }
+
+    @Override
+    public String getTenantName() {
+        return getTenant().getName();
+    }
+
+    @Override
+    public Long getTenantId() {
+        return getTenant().getId();
+    }
+
+    @Override
+    public String getResourceName() {
+        return StackView.super.getResourceName();
+    }
+
     public DnsResolverType getDomainDnsResolver() {
         return domainDnsResolver;
     }
@@ -950,6 +1067,11 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     public void setOriginalName(String originalName) {
         this.originalName = originalName;
+    }
+
+    @Override
+    public List<InstanceGroupView> getInstanceGroupViews() {
+        return new ArrayList<>(instanceGroups);
     }
 
     @Override
@@ -1004,10 +1126,15 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     }
 
     @Override
-    public Set<InstanceMetaData> getAllNodesForOrchestration() {
+    public Set<OrchestrationNode> getAllNodesForOrchestration() {
         return instanceGroups.stream()
                 .flatMap(ig -> ig.getNotDeletedAndNotZombieInstanceMetaDataSet().stream())
                 .filter(im -> StringUtils.isNotBlank(im.getDiscoveryFQDN()))
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<InstanceMetadataView> getAllAvailableGatewayInstances() {
+        return new ArrayList<>(getNotTerminatedAndNotZombieGatewayInstanceMetadata());
     }
 }

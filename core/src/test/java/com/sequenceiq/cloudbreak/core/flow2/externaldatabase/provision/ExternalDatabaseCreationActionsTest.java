@@ -74,8 +74,6 @@ class ExternalDatabaseCreationActionsTest {
 
     private static final String STACK_CRN = "stackCrn";
 
-    private static final Stack STACK = new Stack();
-
     @Mock
     private StackUpdaterService stackUpdaterService;
 
@@ -148,20 +146,23 @@ class ExternalDatabaseCreationActionsTest {
     @Mock
     private FlowEvent flowEvent;
 
+    @Mock
+    private Stack stack;
+
     @InjectMocks
     private ExternalDatabaseCreationActions underTest;
 
     @BeforeEach
     void setup() {
-        STACK.setId(STACK_ID);
         FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
+        when(stack.getId()).thenReturn(STACK_ID);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
         when(stateContext.getExtendedState()).thenReturn(extendedState);
         when(extendedState.getVariables()).thenReturn(new HashMap<>());
         when(stateContext.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
-        when(stackService.getByIdWithClusterInTransaction(any())).thenReturn(STACK);
+        when(stackService.getByIdWithClusterInTransaction(any())).thenReturn(stack);
 
         when(stateContext.getEvent()).thenReturn(flowEvent);
         when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
@@ -195,7 +196,7 @@ class ExternalDatabaseCreationActionsTest {
         verifyNoMoreInteractions(stackUpdaterService);
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
-        verify(metricService).incrementMetricCounter(MetricType.EXTERNAL_DATABASE_CREATION_SUCCESSFUL, STACK);
+        verify(metricService).incrementMetricCounter(MetricType.EXTERNAL_DATABASE_CREATION_SUCCESSFUL, stack);
         assertThat(selectorArgumentCaptor.getValue()).isEqualTo("EXTERNAL_DATABASE_CREATION_FINISHED_EVENT");
         Object capturedPayload = payloadArgumentCaptor.getValue();
         assertThat(capturedPayload).isInstanceOf(StackEvent.class);
@@ -210,7 +211,7 @@ class ExternalDatabaseCreationActionsTest {
                 new CreateExternalDatabaseFailed(STACK_ID,  EXTERNAL_DATABASE_CREATION_FAILED_EVENT.event(),
                         STACK_NAME, null, expectedException);
 
-        when(stackService.getByIdWithClusterInTransaction(any())).thenReturn(STACK);
+        when(stackService.getByIdWithClusterInTransaction(any())).thenReturn(stack);
 
         when(runningFlows.get(anyString())).thenReturn(flow);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(createExternalDatabaseFailedPayload);
@@ -221,7 +222,7 @@ class ExternalDatabaseCreationActionsTest {
                 ResourceEvent.CLUSTER_EXTERNAL_DATABASE_CREATION_FAILED, MESSAGE);
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
-        verify(metricService).incrementMetricCounter(MetricType.EXTERNAL_DATABASE_CREATION_FAILED, STACK);
+        verify(metricService).incrementMetricCounter(MetricType.EXTERNAL_DATABASE_CREATION_FAILED, stack);
         verify(flow).setFlowFailed(exceptionCaptor.capture());
         assertThat(selectorArgumentCaptor.getValue()).isEqualTo("EXTERNAL_DATABASE_CREATION_FAILURE_HANDLED_EVENT");
         Object capturedPayload = payloadArgumentCaptor.getValue();

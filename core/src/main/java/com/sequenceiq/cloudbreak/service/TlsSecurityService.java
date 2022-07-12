@@ -25,18 +25,18 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.FixedSizePreloadCache;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
@@ -116,7 +116,7 @@ public class TlsSecurityService {
         saltSecurityConfig.setSaltSignPrivateKey(BaseEncoding.base64().encode(keyPair.getKey().getBytes()));
     }
 
-    public GatewayConfig buildGatewayConfig(Stack stack, InstanceMetaData gatewayInstance, Integer gatewayPort,
+    public GatewayConfig buildGatewayConfig(Stack stack, InstanceMetadataView gatewayInstance, Integer gatewayPort,
             SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) {
         Long stackId = stack.getId();
         LOGGER.info("Build gateway config for stack with id: {}, gatewayInstance: {}, gatewayPort: {}, knoxGatewayEnabled: {}",
@@ -141,7 +141,7 @@ public class TlsSecurityService {
         return gatewayConfig;
     }
 
-    public String getGatewayIp(SecurityConfig securityConfig, InstanceMetaData gatewayInstance, Stack stack) {
+    public String getGatewayIp(SecurityConfig securityConfig, InstanceMetadataView gatewayInstance, Stack stack) {
         String gatewayIP = gatewayInstance.getPublicIpWrapper();
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             gatewayIP = clusterProxyConfiguration.getClusterProxyHost();
@@ -160,11 +160,11 @@ public class TlsSecurityService {
     }
 
     public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Long stackId, String apiAddress, String cloudPlatform) {
-        InstanceMetaData primaryGateway = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stackId).orElse(null);
+        InstanceMetadataView primaryGateway = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stackId).orElse(null);
         return buildTLSClientConfig(stackId, cloudPlatform, apiAddress, primaryGateway);
     }
 
-    public HttpClientConfig buildTLSClientConfig(Long stackId, String cloudPlatform, String apiAddress, InstanceMetaData gateway) {
+    public HttpClientConfig buildTLSClientConfig(Long stackId, String cloudPlatform, String apiAddress, InstanceMetadataView gateway) {
         Optional<SecurityConfig> securityConfig = securityConfigService.findOneByStackId(stackId);
         if (securityConfig.isEmpty()) {
             return decorateWithClusterProxyConfig(stackId, cloudPlatform, new HttpClientConfig(apiAddress));

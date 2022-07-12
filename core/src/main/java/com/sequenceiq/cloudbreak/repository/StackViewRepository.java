@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.inject.Named;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 
 @EntityType(entityClass = StackView.class)
 @Transactional(TxType.REQUIRED)
+@Named("deprecatedStackViewRepository")
 public interface StackViewRepository extends WorkspaceResourceRepository<StackView, Long> {
 
     @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.name LIKE :name")

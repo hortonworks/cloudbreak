@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonResourceType;
 
@@ -145,7 +146,7 @@ public class StackUpscaleService {
 
     public void setupTls(StackContext context) throws CloudbreakException {
         Stack stack = context.getStack();
-        for (InstanceMetaData gwInstance : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
+        for (InstanceMetadataView gwInstance : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
             if (!stack.getTunnel().useCcm() && CREATED.equals(gwInstance.getInstanceStatus())) {
                 tlsSetupService.setupTls(stack, gwInstance);
             }

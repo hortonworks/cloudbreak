@@ -266,7 +266,7 @@ public class StackUpscaleActions {
                 if (gatewayWasUpscaled) {
                     LOGGER.info("Gateway type instance group");
                     Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
-                    InstanceMetaData gatewayMetaData = stack.getPrimaryGatewayInstance();
+                    InstanceMetaData gatewayMetaData = stack.getPrimaryGatewayInstanceData();
                     if (null == gatewayMetaData) {
                         throw new CloudbreakServiceException("Could not get gateway instance metadata from the cloud provider.");
                     }

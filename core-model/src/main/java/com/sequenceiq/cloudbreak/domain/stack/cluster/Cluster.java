@@ -44,13 +44,14 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.common.api.type.CertExpirationState;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
+public class Cluster implements ProvisionEntity, WorkspaceAwareResource, ClusterView {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "cluster_generator")
@@ -464,7 +465,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         return getIfNotNull(cloudbreakClusterManagerUser, Secret::getRaw);
     }
 
-    public String getCloudbreakAmbariUserSecret() {
+    public String getCloudbreakAmbariUserSecretPath() {
         return isNotEmpty(getCloudbreakClusterManagerUserSecret()) ? getCloudbreakClusterManagerUserSecret() : cloudbreakAmbariUser.getSecret();
     }
 
@@ -509,8 +510,58 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         return getIfNotNull(cloudbreakClusterManagerPassword, Secret::getRaw);
     }
 
-    public String getCloudbreakAmbariPasswordSecret() {
+    public String getCloudbreakAmbariPasswordSecretPath() {
         return isNotEmpty(getCloudbreakClusterManagerPasswordSecret()) ? getCloudbreakClusterManagerPasswordSecret() : cloudbreakAmbariPassword.getSecret();
+    }
+
+    @Override
+    public Secret getCloudbreakClusterManagerMonitoringUserSecret() {
+        return cloudbreakClusterManagerMonitoringUser;
+    }
+
+    @Override
+    public Secret getCloudbreakClusterManagerMonitoringPasswordSecret() {
+        return cloudbreakClusterManagerMonitoringPassword;
+    }
+
+    @Override
+    public Secret getCdpNodeStatusMonitorUserSecret() {
+        return cdpNodeStatusMonitorUser;
+    }
+
+    @Override
+    public Secret getCdpNodeStatusMonitorPasswordSecret() {
+        return cdpNodeStatusMonitorPassword;
+    }
+
+    @Override
+    public Secret getDatabusCredentialSecret() {
+        return databusCredential;
+    }
+
+    @Override
+    public Secret getKeyStorePwdSecret() {
+        return keyStorePwd;
+    }
+
+    @Override
+    public Secret getTrustStorePwdSecret() {
+        return trustStorePwd;
+    }
+
+    @Override
+    public Secret getPasswordSecret() {
+        return password;
+    }
+
+    @Override
+    public Secret getUserNameSecret() {
+        return userName;
+    }
+
+    @Override
+    public String getResourceName() {
+        return ClusterView.super.getResourceName();
     }
 
     public String getCloudbreakClusterManagerPasswordSecret() {
@@ -554,8 +605,13 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         return getIfNotNull(dpClusterManagerUser, Secret::getRaw);
     }
 
-    public String getDpAmbariUserSecret() {
+    public String getDpAmbariUserSecretPath() {
         return isNotEmpty(getDpClusterManagerUserSecret()) ? getDpClusterManagerUserSecret() : dpAmbariUser.getSecret();
+    }
+
+    @Override
+    public Secret getDpAmbariPasswordSecret() {
+        return dpAmbariPassword;
     }
 
     public String getDpClusterManagerUserSecret() {
@@ -583,8 +639,18 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         return getIfNotNull(dpClusterManagerPassword, Secret::getRaw);
     }
 
-    public String getDpAmbariPasswordSecret() {
+    public String getDpAmbariPasswordSecretPath() {
         return isNotEmpty(getDpClusterManagerPasswordSecret()) ? getDpClusterManagerPasswordSecret() : dpAmbariPassword.getSecret();
+    }
+
+    @Override
+    public Secret getCloudbreakAmbariUserSecret() {
+        return cloudbreakAmbariUser;
+    }
+
+    @Override
+    public Secret getCloudbreakAmbariPasswordSecret() {
+        return cloudbreakAmbariPassword;
     }
 
     public String getDpClusterManagerPasswordSecret() {
@@ -634,6 +700,11 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         return customContainerDefinition;
     }
 
+    @Override
+    public Secret getDpAmbariUserSecret() {
+        return dpAmbariUser;
+    }
+
     public void setCustomContainerDefinition(Json customContainerDefinition) {
         this.customContainerDefinition = customContainerDefinition;
     }
@@ -656,6 +727,16 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
      */
     public void setExecutorType(ExecutorType executorType) {
         this.executorType = executorType;
+    }
+
+    @Override
+    public Secret getExtendedBlueprintTextSecret() {
+        return extendedBlueprintText;
+    }
+
+    @Override
+    public Secret getAttributesSecret() {
+        return attributes;
     }
 
     public String getUptime() {
@@ -765,6 +846,16 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         return customConfigurations;
     }
 
+    @Override
+    public Boolean getEmbeddedDatabaseOnAttachedDisk() {
+        return embeddedDatabaseOnAttachedDisk;
+    }
+
+    @Override
+    public Boolean getAutoTlsEnabled() {
+        return autoTlsEnabled;
+    }
+
     public void setCustomConfigurations(CustomConfigurations customConfigurations) {
         this.customConfigurations = customConfigurations;
     }
@@ -788,17 +879,22 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     @Override
     public String toString() {
-        String resourceCrn = "Stack not set yet";
-        if (stack != null) {
-            resourceCrn = stack.getResourceCrn();
-        }
         return "Cluster{" +
                 "id=" + id +
-                ", stackResourceCrn='" + resourceCrn + '\'' +
+                ", stackResourceCrn='" + getResourceCrn() + '\'' +
                 ", name='" + name + '\'' +
                 ", status=" + status +
                 ", statusReason='" + statusReason + '\'' +
                 ", environmentCrn='" + environmentCrn + '\'' +
                 '}';
+    }
+
+    @Override
+    public String getResourceCrn() {
+        String resourceCrn = "Stack not set yet";
+        if (stack != null) {
+            resourceCrn = stack.getResourceCrn();
+        }
+        return resourceCrn;
     }
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.domain.stack.instance;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import javax.persistence.Column;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceStatusConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.converter.InstanceLifeCycleConverter;
 import com.sequenceiq.cloudbreak.domain.converter.InstanceMetadataTypeConverter;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @NamedEntityGraphs({
@@ -35,12 +37,12 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
                         @NamedAttributeNode(value = "instanceGroup", subgraph = "instanceGroup")
                 },
                 subgraphs = {
-                    @NamedSubgraph(name = "instanceGroup", attributeNodes = @NamedAttributeNode("template"))
+                        @NamedSubgraph(name = "instanceGroup", attributeNodes = @NamedAttributeNode("template"))
                 }
         ),
 })
 @Entity
-public class InstanceMetaData implements ProvisionEntity, OrchestrationNode {
+public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, InstanceMetadataView {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "instancemetadata_generator")
     @SequenceGenerator(name = "instancemetadata_generator", sequenceName = "instancemetadata_id_seq", allocationSize = 50)
@@ -420,5 +422,26 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode {
     public Node getNode() {
         return new Node(getPrivateIp(), getPublicIp(), getInstanceId(), getInstanceGroup().getTemplate().getInstanceType(),
                 getDiscoveryFQDN(), getInstanceGroupName());
+    }
+
+    @Override
+    public Long getInstanceGroupId() {
+        return instanceGroup.getId();
+    }
+
+    public void setInstanceGroupId(Long instanceGroupId) {
+        if (instanceGroup == null || !Objects.equals(instanceGroupId, instanceGroup.getId())) {
+            InstanceGroup ig = new InstanceGroup();
+            ig.setId(instanceGroupId);
+            this.instanceGroup = ig;
+        }
+    }
+
+    @Override
+    public InstanceGroupType getInstanceGroupType() {
+        if (instanceGroup == null) {
+            throw new NullPointerException("InstanceMetadata cannot exist without InstanceGroup");
+        }
+        return instanceGroup.getInstanceGroupType();
     }
 }

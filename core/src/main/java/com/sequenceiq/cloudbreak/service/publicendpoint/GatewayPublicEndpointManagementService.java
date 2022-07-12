@@ -4,9 +4,9 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,13 +24,13 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -81,7 +81,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         Set<String> hueHostGroups = getHueHostGroups(stack);
 
         if (StringUtils.isEmpty(gatewayIp)) {
-            Optional<InstanceMetaData> gateway = Optional.ofNullable(stack.getPrimaryGatewayInstance());
+            Optional<InstanceMetadataView> gateway = Optional.ofNullable(stack.getPrimaryGatewayInstance());
             if (gateway.isEmpty()) {
                 LOGGER.info("No running gateway or all node is terminated, we skip the dns entry deletion.");
                 return null;
@@ -172,7 +172,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
             environmentName = environment.getName();
         }
-        Optional<InstanceMetaData> gateway = Optional.ofNullable(stack.getPrimaryGatewayInstance());
+        Optional<InstanceMetadataView> gateway = Optional.ofNullable(stack.getPrimaryGatewayInstance());
         if (!gateway.isPresent()) {
             LOGGER.info("No running gateway or all node is terminated, we skip the dns entry deletion.");
             return null;

@@ -7,6 +7,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 public class StackViewService {
 
     @Inject
+    @Qualifier("deprecatedStackViewRepository")
     private StackViewRepository stackViewRepository;
 
     public StackView getById(Long id) {

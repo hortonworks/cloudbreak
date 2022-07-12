@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -146,6 +147,7 @@ public class RecipeEngineTest {
         Workspace workspace = new Workspace();
         workspace.setId(DUMMY_STACK_ID);
         stack.setWorkspace(workspace);
+        workspace.setTenant(new Tenant());
         return stack;
     }
 

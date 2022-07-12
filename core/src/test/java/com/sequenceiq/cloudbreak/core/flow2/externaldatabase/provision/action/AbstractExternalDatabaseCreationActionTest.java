@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.config.Ex
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.config.ExternalDatabaseCreationState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @ExtendWith(MockitoExtension.class)
@@ -40,6 +42,9 @@ class AbstractExternalDatabaseCreationActionTest {
     @Test
     void createFlowContext() {
         Stack stack = new Stack();
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         when(stackService.getByIdWithClusterInTransaction(1L)).thenReturn(stack);
 
         semaphore = false;

@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -148,6 +149,7 @@ class UpdateUserDataFlowIntegrationTest {
         Workspace workspace = new Workspace();
         workspace.setId(1L);
         stack.setWorkspace(workspace);
+        workspace.setTenant(new Tenant());
 
         return stack;
     }

@@ -41,6 +41,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternal
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -153,6 +155,9 @@ class ExternalDatabaseStopActionsTest {
 
     @BeforeEach
     void setup() {
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        STACK.setWorkspace(workspace);
         STACK.setId(STACK_ID);
         FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);

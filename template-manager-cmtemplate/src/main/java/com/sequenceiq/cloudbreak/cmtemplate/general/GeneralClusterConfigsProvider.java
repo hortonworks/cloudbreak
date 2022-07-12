@@ -11,8 +11,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class GeneralClusterConfigsProvider {
@@ -25,7 +25,7 @@ public class GeneralClusterConfigsProvider {
         boolean gatewayInstanceMetadataPresented = false;
         boolean instanceMetadataPresented = false;
         if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
-            List<InstanceMetaData> gatewayInstanceMetadata = stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata();
+            List<InstanceMetadataView> gatewayInstanceMetadata = stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata();
             gatewayInstanceMetadataPresented = !gatewayInstanceMetadata.isEmpty()
                     && stack.getCluster().getGateway() != null;
             instanceMetadataPresented = true;
@@ -41,7 +41,7 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setPassword(cluster.getPassword());
         generalClusterConfigs.setCloudbreakAmbariUser(cluster.getCloudbreakAmbariUser());
         generalClusterConfigs.setCloudbreakAmbariPassword(cluster.getCloudbreakAmbariPassword());
-        generalClusterConfigs.setNodeCount(stack.getFullNodeCount());
+        generalClusterConfigs.setNodeCount(stack.getFullNodeCount().intValue());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
         generalClusterConfigs.setVariant(cluster.getVariant());
         generalClusterConfigs.setAutoTlsEnabled(cluster.isAutoTlsEnabled());

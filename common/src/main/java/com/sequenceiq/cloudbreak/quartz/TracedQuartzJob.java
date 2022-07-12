@@ -6,6 +6,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 
 import io.opentracing.Scope;
@@ -37,12 +38,28 @@ public abstract class TracedQuartzJob extends QuartzJobBean {
     }
 
     protected void fillMdcContext(JobExecutionContext context) {
-        MDCBuilder.buildMdcContext(getMdcContextObject());
+        MdcContextInfoProvider mdcContextConfigProvider = getMdcContextConfigProvider();
+        if (mdcContextConfigProvider == null) {
+            Object mdcContextObject = getMdcContextObject();
+            if (mdcContextObject == null) {
+                throw new IllegalArgumentException("Please implement one of them: getMdcContextObject() or getMdcContextConfigProvider()");
+            } else {
+                MDCBuilder.buildMdcContext(mdcContextObject);
+            }
+        } else {
+            MDCBuilder.buildMdcContextFromInfoProvider(mdcContextConfigProvider);
+        }
         String requestId = MDCBuilder.getOrGenerateRequestId();
         context.put(LoggerContextKey.REQUEST_ID.toString(), requestId);
     }
 
-    protected abstract Object getMdcContextObject();
+    protected Object getMdcContextObject() {
+        return null;
+    }
+
+    protected MdcContextInfoProvider getMdcContextConfigProvider() {
+        return null;
+    }
 
     protected abstract void executeTracedJob(JobExecutionContext context) throws JobExecutionException;
 }

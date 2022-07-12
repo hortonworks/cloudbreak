@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -61,6 +62,20 @@ public class ClusterComponentConfigProvider {
 
     public Set<ClusterComponent> getComponentsByClusterId(Long clusterId) {
         return componentRepository.findComponentByClusterId(clusterId);
+    }
+
+    public Set<ClusterComponentView> getComponentViewsByClusterId(Long clusterId) {
+        return componentViewRepository.findComponentViewByClusterId(clusterId);
+    }
+
+    public Set<ClusterComponentView> getComponentsByClusterIdAndInComponentType(Long clusterId, Collection<ComponentType> types) {
+        return componentViewRepository.findComponentsByClusterIdAndInComponentType(clusterId, types);
+    }
+
+    public ClouderaManagerRepo getClouderaManagerRepoDetails(Collection<ClusterComponent> clusterComponents) {
+        ClusterComponent component = clusterComponents.stream().filter(cc -> cc.getComponentType().equals(ComponentType.CM_REPO_DETAILS)).findFirst()
+                .orElseThrow(NotFoundException.notFound("Cannot find Cloudera Manager Repo details for the cluster"));
+        return retrieveFromAttribute(component, ClouderaManagerRepo.class);
     }
 
     public ClouderaManagerRepo getClouderaManagerRepoDetails(Long clusterId) {
@@ -146,7 +161,7 @@ public class ClusterComponentConfigProvider {
     public ClusterComponent store(ClusterComponent component) {
         LOGGER.debug("Component is going to be saved: {}", component);
         ClusterComponent ret = componentRepository.save(component);
-        LOGGER.debug("Component saved: stackId: {}, component: {}", ret.getCluster().getId(), ret);
+        LOGGER.debug("Component saved: clusterId: {}, component: {}", ret.getCluster().getId(), ret);
         return ret;
     }
 
@@ -188,6 +203,14 @@ public class ClusterComponentConfigProvider {
         if (!components.isEmpty()) {
             LOGGER.debug("Components are going to be deleted: {}", components);
             componentRepository.deleteAll(components);
+            LOGGER.debug("Components have been deleted: {}", components);
+        }
+    }
+
+    public void deleteClusterComponentViews(Set<ClusterComponentView> components) {
+        if (!components.isEmpty()) {
+            LOGGER.debug("Components are going to be deleted: {}", components);
+            components.forEach(c -> componentRepository.deleteById(c.getId()));
             LOGGER.debug("Components have been deleted: {}", components);
         }
     }

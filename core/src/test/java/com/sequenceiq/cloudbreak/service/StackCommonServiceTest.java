@@ -65,6 +65,8 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -280,6 +282,9 @@ class StackCommonServiceTest {
     public void testStartInstancesInDefaultWorkspace() {
         Stack stack = new Stack();
         stack.setType(StackType.WORKLOAD);
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
 
         when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_CRN, WORKSPACE_ID)).thenReturn(Optional.of(stack));
 
@@ -316,6 +321,9 @@ class StackCommonServiceTest {
         Stack stack = new Stack();
         String variant = AwsConstants.AwsVariant.AWS_VARIANT.name();
         stack.setPlatformVariant(variant);
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         when(multiAzValidator.supportedVariant(variant)).thenReturn(Boolean.FALSE);
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
@@ -331,6 +339,9 @@ class StackCommonServiceTest {
         Stack stack = new Stack();
         String variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.name();
         stack.setPlatformVariant(variant);
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         when(multiAzValidator.supportedVariant(variant)).thenReturn(Boolean.TRUE);
         when(multiAzValidator.collectSubnetIds(any())).thenReturn(Set.of(SUBNET_ID));
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
@@ -349,6 +360,9 @@ class StackCommonServiceTest {
         stack.setCloudPlatform(AwsConstants.AWS_PLATFORM.value());
         String variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.name();
         stack.setPlatformVariant(variant);
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         when(transactionService.required(any(Supplier.class))).thenReturn(stack);
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
@@ -391,6 +405,9 @@ class StackCommonServiceTest {
         stack.setId(STACK_ID);
         stack.setName(STACK_NAME.getName());
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOPPED));
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -407,6 +424,9 @@ class StackCommonServiceTest {
         stack.setId(STACK_ID);
         stack.setName(STACK_NAME.getName());
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(instanceMetaDataService.anyInstanceStopped(STACK_ID)).thenReturn(true);
 
@@ -424,6 +444,9 @@ class StackCommonServiceTest {
         stack.setId(STACK_ID);
         stack.setName(STACK_NAME.getName());
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(instanceMetaDataService.anyInstanceStopped(STACK_ID)).thenReturn(false);
         when(stackOperationService.syncComponentVersionsFromCm(stack, Set.of())).thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
