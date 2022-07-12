@@ -1,5 +1,9 @@
 {%- from 'metadata/settings.sls' import metadata with context %}
 
+{% set postgres_directory = salt['pillar.get']('postgres:postgres_directory') %}
+{% set postgres_data_on_attached_disk = salt['pillar.get']('postgres:postgres_data_on_attached_disk', 'False') %}
+
+
 {% if not salt['file.file_exists']('/usr/pgsql-11/bin/psql') %}
 include:
   - postgresql.repo.pg11
@@ -143,6 +147,17 @@ disable-postgresql-10:
     - enable: False
     - name: postgresql-10
 {% endif %}
+
+{%- if postgres_data_on_attached_disk %}
+
+change-db-location-11:
+  file.replace:
+    - name: /usr/lib/systemd/system/postgresql-11.service
+    - pattern: "Environment=PGDATA=.*"
+    - repl: Environment=PGDATA={{ postgres_directory }}/data
+    - unless: grep "Environment=PGDATA={{ postgres_directory }}/data" /usr/lib/systemd/system/postgresql-11.service
+
+{%- endif %}
 
 postgresql-systemd-link:
   file.replace:
