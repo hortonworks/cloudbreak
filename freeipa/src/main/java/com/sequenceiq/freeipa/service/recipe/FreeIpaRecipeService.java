@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.recipe.RecipeCrnListProviderService;
 import com.sequenceiq.freeipa.entity.FreeIpaStackRecipe;
 import com.sequenceiq.freeipa.repository.FreeIpaStackRecipeRepository;
+import com.sequenceiq.freeipa.repository.StackRepository;
 
 @Service
 public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvider {
@@ -42,9 +43,17 @@ public class FreeIpaRecipeService implements AuthorizationResourceCrnListProvide
     @Inject
     private RecipeCrnListProviderService recipeCrnListProviderService;
 
+    @Inject
+    private StackRepository stackRepository;
+
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
         return recipeCrnListProviderService.getResourceCrnListByResourceNameList(resourceNames);
+    }
+
+    public List<String> getUsedRecipeNamesForAccount(String accountId) {
+        List<Long> stacksForAccount = stackRepository.findStackIdsByAccountId(accountId);
+        return freeIpaStackRecipeRepository.findByStackIdIn(stacksForAccount).stream().map(FreeIpaStackRecipe::getRecipe).collect(Collectors.toList());
     }
 
     public Set<String> getRecipeNamesForStack(Long stackId) {

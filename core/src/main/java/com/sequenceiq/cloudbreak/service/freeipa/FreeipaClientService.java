@@ -23,6 +23,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreate
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
+import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 
 @Service
 public class FreeipaClientService {
@@ -31,6 +32,9 @@ public class FreeipaClientService {
 
     @Inject
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
+
+    @Inject
+    private UtilV1Endpoint utilV1Endpoint;
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
@@ -105,5 +109,9 @@ public class FreeipaClientService {
             LOGGER.error(message, e);
             throw new CloudbreakServiceException(message, e);
         }
+    }
+
+    public List<String> recipes(String accountId) {
+        return utilV1Endpoint.usedRecipes(accountId);
     }
 }

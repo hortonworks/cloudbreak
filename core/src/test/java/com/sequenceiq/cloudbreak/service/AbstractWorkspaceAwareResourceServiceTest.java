@@ -13,6 +13,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -28,7 +29,7 @@ public class AbstractWorkspaceAwareResourceServiceTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    @Mock
+    @Mock(answer = Answers.CALLS_REAL_METHODS)
     private AbstractWorkspaceAwareResourceService<TestWorkspaceAwareResource> underTest;
 
     @Mock
@@ -42,15 +43,6 @@ public class AbstractWorkspaceAwareResourceServiceTest {
         // The mock service is the object under test. Mock methods of the abstract
         // class that are not under test here.
         when(underTest.repository()).thenReturn(testRepository);
-
-        // Have the mock call the real methods in the abstract class that are
-        // under test.
-        when(underTest.delete(any(TestWorkspaceAwareResource.class))).thenCallRealMethod();
-        when(underTest.delete(any(Set.class))).thenCallRealMethod();
-        when(underTest.deleteMultipleByNameFromWorkspace(any(Set.class), any(Long.class))).thenCallRealMethod();
-        when(underTest.getByNamesForWorkspaceId(any(Set.class), any(Long.class))).thenCallRealMethod();
-        when(underTest.deleteByNameFromWorkspace(anyString(), any(Long.class))).thenCallRealMethod();
-        when(underTest.getByNameForWorkspaceId(anyString(), any(Long.class))).thenCallRealMethod();
     }
 
     @Test

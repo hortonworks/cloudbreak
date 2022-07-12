@@ -111,6 +111,9 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.stackStatus.status IN :stackStatuses AND s.terminated = -1 ")
     List<Stack> findByAccountIdWithStatuses(@Param("accountId") String accountId, @Param("stackStatuses") Collection<Status> stackStatuses);
 
+    @Query("SELECT s.id FROM Stack s WHERE s.accountId = :accountId AND s.terminated = -1")
+    List<Long> findStackIdsByAccountId(@Param("accountId") String accountId);
+
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn IN :environmentCrns " +
             "AND s.stackStatus.status IN :stackStatuses AND s.terminated = -1 ")
     List<Stack> findMultipleByEnvironmentCrnAndAccountIdWithStatuses(

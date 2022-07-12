@@ -20,6 +20,7 @@ import com.sequenceiq.freeipa.api.v1.kerberosmgmt.KerberosMgmtV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.progress.ProgressV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 
 import io.opentracing.contrib.jaxrs2.client.ClientTracingFeature;
 
@@ -97,5 +98,11 @@ public class FreeIpaApiClientConfig {
     @ConditionalOnBean(name = "freeIpaApiClientWebTarget")
     FreeIpaUpgradeV1Endpoint freeIpaUpgradeV1Endpoint(WebTarget freeIpaApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(freeIpaApiClientWebTarget, FreeIpaUpgradeV1Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "freeIpaApiClientWebTarget")
+    UtilV1Endpoint utilV1Endpoint(WebTarget freeIpaApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(freeIpaApiClientWebTarget, UtilV1Endpoint.class);
     }
 }

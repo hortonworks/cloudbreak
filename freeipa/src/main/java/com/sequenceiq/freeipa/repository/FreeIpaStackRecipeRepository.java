@@ -11,6 +11,8 @@ import com.sequenceiq.freeipa.entity.FreeIpaStackRecipe;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface FreeIpaStackRecipeRepository extends CrudRepository<FreeIpaStackRecipe, Long> {
 
+    List<FreeIpaStackRecipe> findByStackIdIn(List<Long> stackIds);
+
     List<FreeIpaStackRecipe> findByStackId(Long stackId);
 
     void deleteFreeIpaStackRecipesByStackId(Long stackId);
