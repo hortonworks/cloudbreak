@@ -69,7 +69,7 @@ class RedbeamsDbCertificateProviderTest {
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
         stack.setType(StackType.DATALAKE);
-        when(dbServerConfigurer.isRemoteDatabaseNeeded(cluster)).thenReturn(Boolean.TRUE);
+        when(dbServerConfigurer.isRemoteDatabaseNeeded(dbServerCrn)).thenReturn(Boolean.TRUE);
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(new DatabaseServerV4Response());
 
 
@@ -86,7 +86,7 @@ class RedbeamsDbCertificateProviderTest {
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
         stack.setType(StackType.DATALAKE);
-        when(dbServerConfigurer.isRemoteDatabaseNeeded(cluster)).thenReturn(Boolean.TRUE);
+        when(dbServerConfigurer.isRemoteDatabaseNeeded(dbServerCrn)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(new SslConfigV4Response());
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
@@ -105,7 +105,7 @@ class RedbeamsDbCertificateProviderTest {
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
         stack.setType(StackType.DATALAKE);
-        when(dbServerConfigurer.isRemoteDatabaseNeeded(cluster)).thenReturn(Boolean.TRUE);
+        when(dbServerConfigurer.isRemoteDatabaseNeeded(dbServerCrn)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         SslConfigV4Response sslConfig = getSslConfigV4ResponseWithCertificate(Set.of(certificateA));
         databaseServerV4Response.setSslConfig(sslConfig);
@@ -126,7 +126,7 @@ class RedbeamsDbCertificateProviderTest {
         Stack stack = cluster.getStack();
         stack.setCluster(cluster);
         stack.setType(StackType.WORKLOAD);
-        when(dbServerConfigurer.isRemoteDatabaseNeeded(cluster)).thenReturn(Boolean.TRUE);
+        when(dbServerConfigurer.isRemoteDatabaseNeeded(dbServerCrn)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
@@ -157,8 +157,8 @@ class RedbeamsDbCertificateProviderTest {
         stack.setType(StackType.WORKLOAD);
 
         when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
-        when(dbServerConfigurer.isRemoteDatabaseNeeded(sdxCluster)).thenReturn(Boolean.FALSE);
-        when(dbServerConfigurer.isRemoteDatabaseNeeded(cluster)).thenReturn(Boolean.TRUE);
+        when(dbServerConfigurer.isRemoteDatabaseNeeded(null)).thenReturn(Boolean.FALSE);
+        when(dbServerConfigurer.isRemoteDatabaseNeeded(dbServerCrn)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateA)));
         when(dbServerConfigurer.getDatabaseServer(dbServerCrn)).thenReturn(databaseServerV4Response);
@@ -189,8 +189,8 @@ class RedbeamsDbCertificateProviderTest {
         stack.setType(StackType.WORKLOAD);
 
         when(datalakeService.getDatalakeStackByDatahubStack(any())).thenReturn(Optional.of(sdxStack));
-        when(dbServerConfigurer.isRemoteDatabaseNeeded(cluster)).thenReturn(Boolean.FALSE);
-        when(dbServerConfigurer.isRemoteDatabaseNeeded(sdxCluster)).thenReturn(Boolean.TRUE);
+        when(dbServerConfigurer.isRemoteDatabaseNeeded(null)).thenReturn(Boolean.FALSE);
+        when(dbServerConfigurer.isRemoteDatabaseNeeded(dbServerCrnB)).thenReturn(Boolean.TRUE);
         DatabaseServerV4Response databaseServerV4ResponseB = new DatabaseServerV4Response();
         databaseServerV4ResponseB.setSslConfig(getSslConfigV4ResponseWithCertificate(Set.of(certificateB)));
         when(dbServerConfigurer.getDatabaseServer(dbServerCrnB)).thenReturn(databaseServerV4ResponseB);

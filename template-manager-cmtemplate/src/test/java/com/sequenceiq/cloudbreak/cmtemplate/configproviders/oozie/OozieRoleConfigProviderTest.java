@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,15 +16,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
-import com.sequenceiq.common.api.type.InstanceGroupType;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OozieRoleConfigProviderTest {
@@ -94,18 +96,18 @@ public class OozieRoleConfigProviderTest {
     }
 
     static TemplatePreparationObject getTemplatePreparationObject(String inputJson,
-        CmTemplateProcessor cmTemplateProcessor, int numMasters) {
+            CmTemplateProcessor cmTemplateProcessor, int numMasters) {
         List<String> hosts = new ArrayList<>();
         for (int i = 0; i < numMasters; i++) {
             hosts.add("master" + i + ".blah.timbuk2.dev.cldr.");
         }
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, hosts);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(DatabaseType.OOZIE.toString());
-        rdsConfig.setConnectionPassword("testpassword");
-        rdsConfig.setConnectionUserName("testuser");
-        rdsConfig.setConnectionURL("jdbc:postgresql://testhost:5432/ooziedb");
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        lenient().when(rdsConfig.getType()).thenReturn(DatabaseType.OOZIE.toString());
+        lenient().when(rdsConfig.getConnectionPassword()).thenReturn("testpassword");
+        lenient().when(rdsConfig.getConnectionUserName()).thenReturn("testuser");
+        lenient().when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/ooziedb");
 
         return Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))

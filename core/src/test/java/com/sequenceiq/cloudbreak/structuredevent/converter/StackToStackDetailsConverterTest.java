@@ -66,7 +66,7 @@ public class StackToStackDetailsConverterTest {
     public void testConversionExternalDB() {
         // GIVEN
         Stack stack = createStack();
-        Mockito.when(dbServerConfigurer.isRemoteDatabaseNeeded(stack.getCluster())).thenReturn(true);
+        Mockito.when(dbServerConfigurer.isRemoteDatabaseNeeded(stack.getCluster().getDatabaseServerCrn())).thenReturn(true);
         // WHEN
         StackDetails actual = underTest.convert(stack);
         // THEN

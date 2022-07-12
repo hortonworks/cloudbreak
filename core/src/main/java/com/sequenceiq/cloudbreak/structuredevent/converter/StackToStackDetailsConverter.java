@@ -110,7 +110,7 @@ public class StackToStackDetailsConverter {
 
     private void convertDatabaseType(StackDetails stackDetails, Stack stack) {
         try {
-            if (dbServerConfigurer.isRemoteDatabaseNeeded(stack.getCluster())) {
+            if (dbServerConfigurer.isRemoteDatabaseNeeded(stack.getCluster().getDatabaseServerCrn())) {
                 stackDetails.setDatabaseType(EXTERNAL_DB);
             } else {
                 if (embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack)) {

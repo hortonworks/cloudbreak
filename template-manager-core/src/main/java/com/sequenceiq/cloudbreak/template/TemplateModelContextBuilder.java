@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -65,8 +65,8 @@ public class TemplateModelContextBuilder {
         return this;
     }
 
-    public TemplateModelContextBuilder withRdsConfigs(Iterable<RDSConfig> rdsConfigs) {
-        for (RDSConfig rdsConfig : rdsConfigs) {
+    public TemplateModelContextBuilder withRdsConfigs(Iterable<RdsConfigWithoutCluster> rdsConfigs) {
+        for (RdsConfigWithoutCluster rdsConfig : rdsConfigs) {
             if (rdsConfig != null) {
                 RdsView rdsView = new RdsView(rdsConfig);
                 String componentName = rdsConfig.getType().toLowerCase();

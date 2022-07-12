@@ -15,9 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
@@ -61,19 +61,19 @@ public class PostgresConfigService {
         }
     }
 
-    public Set<RDSConfig> createRdsConfigIfNeeded(Stack stack, Cluster cluster, DatabaseType databaseType) {
+    public Set<RdsConfigWithoutCluster> createRdsConfigIfNeeded(Stack stack, Cluster cluster, DatabaseType databaseType) {
         return rdsConfigProviderFactory.getRdsConfigProviderForRdsType(databaseType)
                 .createPostgresRdsConfigIfNeeded(stack, cluster);
     }
 
-    public Set<RDSConfig> createRdsConfigIfNeeded(Stack stack, Cluster cluster) {
+    public Set<RdsConfigWithoutCluster> createRdsConfigIfNeeded(Stack stack, Cluster cluster) {
         return rdsConfigProviderFactory.getAllSupportedRdsConfigProviders().stream().map(provider ->
                 provider.createPostgresRdsConfigIfNeeded(stack, cluster)).reduce((first, second) -> second).orElse(Collections.emptySet());
     }
 
     private Map<String, Object> initPostgresConfig(Stack stack, Cluster cluster) {
         Map<String, Object> postgresConfig = new HashMap<>();
-        if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster)) {
+        if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster.getDatabaseServerCrn())) {
             postgresConfig.put("configure_remote_db", "true");
         } else {
             postgresConfig.putAll(embeddedDatabaseConfigProvider.collectEmbeddedDatabaseConfigs(stack));

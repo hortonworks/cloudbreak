@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 
-import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
+import static com.sequenceiq.cloudbreak.TestUtil.rdsConfigWithoutCluster;
 import static com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight.HBASE_ADMIN;
 import static com.sequenceiq.cloudbreak.auth.altus.UmsVirtualGroupRight.RANGER_ADMIN;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getConfigNameToValueMap;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getConfigNameToVariableNameMap;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_ADMIN_SITE_XML_ROLE_SAFETY_VALVE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_DATABASE_HOST;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_DATABASE_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_DATABASE_PASSWORD;
@@ -13,7 +14,6 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.Ranger
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_DATABASE_USER;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_DEFAULT_POLICY_GROUPS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_HBASE_ADMIN_VIRTUAL_GROUPS;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_ADMIN_SITE_XML_ROLE_SAFETY_VALVE;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -39,8 +39,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
@@ -115,7 +115,7 @@ public class RangerRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
-                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.RANGER)))
+                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER)))
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
                 .withProductDetails(generateCmRepo(() -> cdhVersion), null)
                 .build();
@@ -157,7 +157,7 @@ public class RangerRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
-                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.RANGER)))
+                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER)))
                 .withProductDetails(generateCmRepo(() -> "7.0.0"), null)
                 .build();
 
@@ -196,7 +196,7 @@ public class RangerRoleConfigProviderTest {
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master))
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
-                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.RANGER)))
+                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER)))
                 .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2), null)
                 .build();
 
@@ -231,7 +231,7 @@ public class RangerRoleConfigProviderTest {
         // We do not configure RANGER DB
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, worker))
-                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.HIVE)))
+                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.HIVE)))
                 .build();
 
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
@@ -243,14 +243,15 @@ public class RangerRoleConfigProviderTest {
     @Test
     public void testRoleConfigsForMultipleDb() {
         // We configure multiple DBs
-        assertThatCode(() -> Builder.builder().withRdsConfigs(Set.of(rdsConfig(DatabaseType.RANGER), rdsConfig(DatabaseType.RANGER))).build())
+        assertThatCode(() -> Builder.builder()
+                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.RANGER), rdsConfigWithoutCluster(DatabaseType.RANGER))).build())
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     public void testGetRoleConfigsDbWithSsl() {
-        RDSConfig rdsConfig = rdsConfig(DatabaseType.RANGER);
-        rdsConfig.setSslMode(RdsSslMode.ENABLED);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
+        when(rdsConfig.getSslMode()).thenReturn(RdsSslMode.ENABLED);
         TemplatePreparationObject tpo = new TemplatePreparationObject.Builder()
                 .withRdsConfigs(Set.of(rdsConfig))
                 .withRdsSslCertificateFilePath(SSL_CERTS_FILE_PATH)
@@ -265,9 +266,9 @@ public class RangerRoleConfigProviderTest {
         assertThat(configNameToValueMap).containsOnly(
                 entry(RANGER_ADMIN_SITE_XML_ROLE_SAFETY_VALVE,
                         "<property>" +
-                        "<name>ranger.jpa.jdbc.url</name>" +
-                        "<value>jdbc:postgresql://10.1.1.1:5432/ranger?sslmode=verify-full&amp;sslrootcert=" + SSL_CERTS_FILE_PATH + "</value>" +
-                        "</property>"),
+                                "<name>ranger.jpa.jdbc.url</name>" +
+                                "<value>jdbc:postgresql://10.1.1.1:5432/ranger?sslmode=verify-full&amp;sslrootcert=" + SSL_CERTS_FILE_PATH + "</value>" +
+                                "</property>"),
                 entry(RANGER_DEFAULT_POLICY_GROUPS, ADMIN_GROUP)
         );
         Map<String, String> configNameToVariableNameMap = getConfigNameToVariableNameMap(result);

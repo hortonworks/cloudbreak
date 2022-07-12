@@ -4,7 +4,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.g
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
@@ -18,7 +18,7 @@ public abstract class AbstractRdsRoleConfigProvider extends AbstractRoleConfigPr
                 && super.isConfigurationNeeded(cmTemplateProcessor, source);
     }
 
-    protected RDSConfig getRdsConfig(TemplatePreparationObject source) {
+    protected RdsConfigWithoutCluster getRdsConfig(TemplatePreparationObject source) {
         return getRdsConfigOfType(dbType(), source);
     }
 

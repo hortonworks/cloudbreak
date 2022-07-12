@@ -2,10 +2,11 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive;
 
 import static com.sequenceiq.cloudbreak.TestUtil.kerberosConfigFreeipa;
 import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
-import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
+import static com.sequenceiq.cloudbreak.TestUtil.rdsConfigWithoutCluster;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getConfigNameToValueMap;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUtil.getConfigNameToVariableNameMap;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider.HIVE_COMPACTOR_INITIATOR_ON;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider.HIVE_METASTORE_DATABASE_HOST;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider.HIVE_METASTORE_DATABASE_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider.HIVE_METASTORE_DATABASE_PASSWORD;
@@ -18,7 +19,6 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMeta
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider.HIVE_SERVICE_CONFIG_SAFETY_VALVE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider.JDBC_URL_OVERRIDE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider.METASTORE_CANARY_HEALTH_ENABLED;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveMetastoreConfigProvider.HIVE_COMPACTOR_INITIATOR_ON;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -44,8 +44,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @ExtendWith(MockitoExtension.class)
@@ -317,9 +317,9 @@ class HiveMetastoreConfigProviderTest {
         assertThat(configNameToVariableNameMap).isEmpty();
     }
 
-    private RDSConfig createRdsConfig(RdsSslMode sslMode) {
-        RDSConfig rdsConfig = rdsConfig(DatabaseType.HIVE);
-        rdsConfig.setSslMode(sslMode);
+    private RdsConfigWithoutCluster createRdsConfig(RdsSslMode sslMode) {
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.HIVE);
+        when(rdsConfig.getSslMode()).thenReturn(sslMode);
         return rdsConfig;
     }
 

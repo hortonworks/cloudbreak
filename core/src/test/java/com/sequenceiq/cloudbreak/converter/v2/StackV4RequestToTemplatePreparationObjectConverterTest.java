@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -16,10 +15,13 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.inject.Inject;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +29,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -53,8 +56,8 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConvert
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.StackV4RequestToGatewayConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
@@ -62,7 +65,7 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -119,7 +122,9 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private StackV4RequestToTemplatePreparationObjectConverter underTest;
 
     @Mock
-    private RdsConfigService rdsConfigService;
+
+    @Inject
+    private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
     @Mock
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
@@ -275,10 +280,13 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         Set<String> rdsConfigNames = createRdsConfigNames();
         when(cluster.getDatabases()).thenReturn(rdsConfigNames);
         int i = 0;
+        Set<RdsConfigWithoutCluster> rdsConfigs = new HashSet<>();
         for (String rdsConfigName : rdsConfigNames) {
-            RDSConfig rdsConfig = rdsConfig(DatabaseType.values()[i++]);
-            when(rdsConfigService.getByNameForWorkspace(rdsConfigName, workspace)).thenReturn(rdsConfig);
+            RdsConfigWithoutCluster rdsConfig = TestUtil.rdsConfigWithoutCluster(DatabaseType.values()[i++]);
+            rdsConfigs.add(rdsConfig);
+            when(rdsConfig.getName()).thenReturn(rdsConfigName);
         }
+        when(rdsConfigWithoutClusterService.findAllByNamesAndWorkspaceId(rdsConfigNames, workspace)).thenReturn(rdsConfigs);
         TemplatePreparationObject result = underTest.convert(source);
         assertEquals(rdsConfigNames.size(), result.getRdsConfigs().size());
     }

@@ -32,7 +32,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslConfi
 public class RedbeamsDbServerConfigurerTest {
 
     private static final String EXAMPLE_JDBC_URL =
-        "jdbc:postgresql://dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/clouderamanager";
+            "jdbc:postgresql://dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.c8uqzbscgqmb.eu-west-1.rds.amazonaws.com:5432/clouderamanager";
 
     private static final String DB_SERVER_CRN = "crn:cdp:redbeams:us-west-1:default:databaseServer:e63520c8-aaf0-4bf3-b872-5613ce496ac3";
 
@@ -41,7 +41,7 @@ public class RedbeamsDbServerConfigurerTest {
     private static final String DB_USER = "cmuser";
 
     private static final String EXAMPLE_JDBC_URL_AZURE =
-        "jdbc:postgresql://dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.postgres.database.azure.com:5432/clouderamanager";
+            "jdbc:postgresql://dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.postgres.database.azure.com:5432/clouderamanager";
 
     private static final String DB_HOST_AZURE = "dbsvr-ed671174-77de-40e5-ad59-37761d8230d9.postgres.database.azure.com";
 
@@ -70,7 +70,8 @@ public class RedbeamsDbServerConfigurerTest {
         Cluster testCluster = createCluster(DB_SERVER_CRN);
         Stack testStack = createStack(testCluster);
 
-        RDSConfig config = underTest.createNewRdsConfig(testStack, testCluster, "clouderamanager", DB_USER, DatabaseType.CLOUDERA_MANAGER);
+        RDSConfig config = underTest.createNewRdsConfig(testStack.getName(), testStack.getId(), DB_SERVER_CRN, testCluster.getId(), "clouderamanager", DB_USER,
+                DatabaseType.CLOUDERA_MANAGER);
 
         assertThat(config.getName()).isEqualTo("CLOUDERA_MANAGER_simplestack1");
         assertThat(config.getConnectionURL()).isEqualTo(EXAMPLE_JDBC_URL);
@@ -96,7 +97,8 @@ public class RedbeamsDbServerConfigurerTest {
         Cluster testCluster = createCluster(DB_SERVER_CRN);
         Stack testStack = createStack(testCluster);
 
-        RDSConfig config = underTest.createNewRdsConfig(testStack, testCluster, "clouderamanager", DB_USER, DatabaseType.CLOUDERA_MANAGER);
+        RDSConfig config = underTest.createNewRdsConfig(testStack.getName(), testStack.getId(), DB_SERVER_CRN, testCluster.getId(), "clouderamanager", DB_USER,
+                DatabaseType.CLOUDERA_MANAGER);
 
         assertThat(config.getName()).isEqualTo("CLOUDERA_MANAGER_simplestack1");
         assertThat(config.getConnectionURL()).isEqualTo(EXAMPLE_JDBC_URL);
@@ -112,7 +114,8 @@ public class RedbeamsDbServerConfigurerTest {
         Cluster testCluster = createCluster(DB_SERVER_CRN);
         Stack testStack = createStack(testCluster);
 
-        RDSConfig config = underTest.createNewRdsConfig(testStack, testCluster, "clouderamanager", DB_USER, DatabaseType.CLOUDERA_MANAGER);
+        RDSConfig config = underTest.createNewRdsConfig(testStack.getName(), testStack.getId(), DB_SERVER_CRN, testCluster.getId(), "clouderamanager", DB_USER,
+                DatabaseType.CLOUDERA_MANAGER);
 
         assertThat(config.getName()).isEqualTo("CLOUDERA_MANAGER_simplestack1");
         assertThat(config.getConnectionURL()).isEqualTo(EXAMPLE_JDBC_URL_AZURE);
@@ -129,7 +132,8 @@ public class RedbeamsDbServerConfigurerTest {
         Cluster testCluster = createCluster(DB_SERVER_CRN);
         Stack testStack = createStack(testCluster);
 
-        RDSConfig config = underTest.createNewRdsConfig(testStack, testCluster, "clouderamanager", DB_USER, DatabaseType.CLOUDERA_MANAGER);
+        RDSConfig config = underTest.createNewRdsConfig(testStack.getName(), testStack.getId(), DB_SERVER_CRN, testCluster.getId(), "clouderamanager", DB_USER,
+                DatabaseType.CLOUDERA_MANAGER);
 
         assertThat(config.getName()).isEqualTo("CLOUDERA_MANAGER_simplestack1");
         assertThat(config.getConnectionURL()).isEqualTo(EXAMPLE_JDBC_URL_AZURE);
@@ -139,14 +143,12 @@ public class RedbeamsDbServerConfigurerTest {
 
     @Test
     public void isRemoteDatabaseNeededWhenDbServerCrnIsPresent() {
-        Cluster testCluster = createCluster(DB_SERVER_CRN);
-        assertThat(underTest.isRemoteDatabaseNeeded(testCluster)).isTrue();
+        assertThat(underTest.isRemoteDatabaseNeeded(DB_SERVER_CRN)).isTrue();
     }
 
     @Test
     public void isRemoteDatabaseNeeded() {
-        Cluster testCluster = createCluster(null);
-        assertThat(underTest.isRemoteDatabaseNeeded(testCluster)).isFalse();
+        assertThat(underTest.isRemoteDatabaseNeeded(null)).isFalse();
     }
 
     private Cluster createCluster(String dbServerCrn) {
@@ -157,7 +159,7 @@ public class RedbeamsDbServerConfigurerTest {
 
     private Stack createStack(Cluster testCluster) {
         Stack testStack = TestUtil.stack();
-        InstanceMetaData metaData = testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next();
+        InstanceMetaData metaData = (InstanceMetaData) testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().add(metaData);
         testStack.setCluster(testCluster);

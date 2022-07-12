@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.recipe.moduletest;
 import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static com.sequenceiq.cloudbreak.TestUtil.ldapConfig;
 import static com.sequenceiq.cloudbreak.TestUtil.ldapConfigBuilder;
-import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
+import static com.sequenceiq.cloudbreak.TestUtil.rdsConfigWithoutCluster;
 import static com.sequenceiq.cloudbreak.TestUtil.storageLocation;
 import static com.sequenceiq.cloudbreak.recipe.util.RecipeTestUtil.generalBlueprintView;
 import static com.sequenceiq.cloudbreak.recipe.util.RecipeTestUtil.generalClusterConfigs;
@@ -20,11 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
-import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
-import com.sequenceiq.common.api.filesystem.GcsFileSystem;
-import com.sequenceiq.common.api.filesystem.S3FileSystem;
-import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.recipe.testrepeater.TestFile;
@@ -38,6 +33,11 @@ import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfiguratio
 import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.api.filesystem.AdlsFileSystem;
+import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
+import com.sequenceiq.common.api.filesystem.GcsFileSystem;
+import com.sequenceiq.common.api.filesystem.S3FileSystem;
+import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 
 class RecipeModulTestModelProvider {
 
@@ -47,7 +47,7 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplatePreparationObject() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfig(DatabaseType.HIVE))))
+                .withRdsConfigs(new HashSet<>(Collections.singleton(rdsConfigWithoutCluster(DatabaseType.HIVE))))
                 .build();
     }
 
@@ -151,14 +151,14 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplateWithDruidRds() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.DRUID), rdsConfig(DatabaseType.HIVE)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.DRUID), rdsConfigWithoutCluster(DatabaseType.HIVE)))
                 .build();
     }
 
     static TemplatePreparationObject testTemplateWhenSharedServiceIsOnWithRangerAndHiveRds() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER), rdsConfig(DatabaseType.HIVE)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER), rdsConfigWithoutCluster(DatabaseType.HIVE)))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .build();
     }
@@ -174,7 +174,7 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplateWhenSharedServiceIsOnWithOnlyHiveRds() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.HIVE)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.HIVE)))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .build();
     }
@@ -182,7 +182,7 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplateWhenSharedServiceIsOnWithOnlyRangerRds() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER)))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .build();
     }
@@ -190,7 +190,7 @@ class RecipeModulTestModelProvider {
     static TemplatePreparationObject testTemplateWhenBlueprintVersionIs25() {
         return getPreparedBuilder("master")
                 .withBlueprintView(generalBlueprintView("", "2.5", "HDP"))
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER)))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
                 .build();
     }
@@ -200,7 +200,7 @@ class RecipeModulTestModelProvider {
                 .withGeneralClusterConfigs(generalClusterConfigs())
                 .withBlueprintView(generalBlueprintView("", "2.6", "HDP"))
                 .withSharedServiceConfigs(datalakeSharedServiceConfig())
-                .withRdsConfigs(Sets.newHashSet(rdsConfig(DatabaseType.RANGER), rdsConfig(DatabaseType.HIVE)))
+                .withRdsConfigs(Sets.newHashSet(rdsConfigWithoutCluster(DatabaseType.RANGER), rdsConfigWithoutCluster(DatabaseType.HIVE)))
                 .withHostgroups(hostNames.length == 0 ? getHostGroups("master", "worker", "compute") : getHostGroups(hostNames));
     }
 

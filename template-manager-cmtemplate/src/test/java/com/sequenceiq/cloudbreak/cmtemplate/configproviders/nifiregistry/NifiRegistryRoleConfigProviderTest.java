@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifiregistry;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
@@ -14,7 +16,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -57,13 +59,13 @@ public class NifiRegistryRoleConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
         BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
 
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(DatabaseType.NIFIREGISTRY.toString());
-        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
-        rdsConfig.setConnectionDriver(DatabaseVendor.POSTGRES.connectionDriver());
-        rdsConfig.setConnectionURL("jdbc:postgresql://testhost:5432/nifi_registry");
-        rdsConfig.setConnectionUserName("nifi_registry_server_user");
-        rdsConfig.setConnectionPassword("nifi_registry_server_password");
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(DatabaseType.NIFIREGISTRY.toString());
+        when(rdsConfig.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
+        when(rdsConfig.getConnectionDriver()).thenReturn(DatabaseVendor.POSTGRES.connectionDriver());
+        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/nifi_registry");
+        when(rdsConfig.getConnectionUserName()).thenReturn("nifi_registry_server_user");
+        when(rdsConfig.getConnectionPassword()).thenReturn("nifi_registry_server_password");
 
         return TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)

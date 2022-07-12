@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static org.mockito.Mockito.lenient;
 
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -20,6 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
@@ -68,6 +70,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -661,13 +664,7 @@ public class TestUtil {
         rdsConfig.setName(databaseType.name() + rdsConfig.getId());
         rdsConfig.setConnectionPassword("iamsoosecure");
         rdsConfig.setConnectionUserName("heyitsme");
-        if (databaseVendor == DatabaseVendor.ORACLE12 || databaseVendor == DatabaseVendor.ORACLE11) {
-            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + ":@10.1.1.1:1521:" + databaseType.name().toLowerCase());
-        } else if (databaseVendor == DatabaseVendor.MYSQL) {
-            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:3306/" + databaseType.name().toLowerCase());
-        } else {
-            rdsConfig.setConnectionURL("jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:5432/" + databaseType.name().toLowerCase());
-        }
+        rdsConfig.setConnectionURL(getConneectionUrl(databaseType, databaseVendor));
         rdsConfig.setType(databaseType.name());
         rdsConfig.setConnectionDriver(databaseVendor.connectionDriver());
         rdsConfig.setDatabaseEngine(databaseVendor);
@@ -680,8 +677,42 @@ public class TestUtil {
         return rdsConfig;
     }
 
+    public static RdsConfigWithoutCluster rdsConfigWithoutCluster(DatabaseType databaseType, DatabaseVendor databaseVendor) {
+        RdsConfigWithoutCluster rdsConfig = Mockito.mock(RdsConfigWithoutCluster.class);
+        lenient().when(rdsConfig.getId()).thenReturn(generateUniqueId());
+        String databaseName = databaseType.name() + rdsConfig.getId();
+        lenient().when(rdsConfig.getName()).thenReturn(databaseName);
+        lenient().when(rdsConfig.getConnectionPassword()).thenReturn("iamsoosecure");
+        lenient().when(rdsConfig.getConnectionUserName()).thenReturn("heyitsme");
+        lenient().when(rdsConfig.getConnectionURL()).thenReturn(getConneectionUrl(databaseType, databaseVendor));
+        lenient().when(rdsConfig.getType()).thenReturn(databaseType.name());
+        lenient().when(rdsConfig.getConnectionDriver()).thenReturn(databaseVendor.connectionDriver());
+        lenient().when(rdsConfig.getDatabaseEngine()).thenReturn(databaseVendor);
+        lenient().when(rdsConfig.getDescription()).thenReturn("someDescription");
+        lenient().when(rdsConfig.getStatus()).thenReturn(ResourceStatus.DEFAULT);
+        lenient().when(rdsConfig.getStackVersion()).thenReturn("3.2");
+        lenient().when(rdsConfig.getConnectorJarUrl()).thenReturn("http://somejarurl.com");
+        return rdsConfig;
+    }
+
     public static RDSConfig rdsConfig(DatabaseType databaseType) {
         return rdsConfig(databaseType, DatabaseVendor.POSTGRES);
+    }
+
+    public static RdsConfigWithoutCluster rdsConfigWithoutCluster(DatabaseType databaseType) {
+        return rdsConfigWithoutCluster(databaseType, DatabaseVendor.POSTGRES);
+    }
+
+    private static String getConneectionUrl(DatabaseType databaseType, DatabaseVendor databaseVendor) {
+        String connectionUrl;
+        if (databaseVendor == DatabaseVendor.ORACLE12 || databaseVendor == DatabaseVendor.ORACLE11) {
+            connectionUrl = "jdbc:" + databaseVendor.jdbcUrlDriverId() + ":@10.1.1.1:1521:" + databaseType.name().toLowerCase();
+        } else if (databaseVendor == DatabaseVendor.MYSQL) {
+            connectionUrl = "jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:3306/" + databaseType.name().toLowerCase();
+        } else {
+            connectionUrl = "jdbc:" + databaseVendor.jdbcUrlDriverId() + "://10.1.1.1:5432/" + databaseType.name().toLowerCase();
+        }
+        return connectionUrl;
     }
 
     private static void setGatewayTopology(Gateway gateway) {

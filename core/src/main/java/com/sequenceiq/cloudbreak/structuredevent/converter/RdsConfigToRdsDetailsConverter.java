@@ -5,13 +5,13 @@ import java.util.Optional;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.structuredevent.event.RdsDetails;
 
 @Component
 public class RdsConfigToRdsDetailsConverter {
 
-    public RdsDetails convert(RDSConfig source) {
+    public RdsDetails convert(RdsConfigWithoutCluster source) {
         RdsDetails rdsDetails = new RdsDetails();
         rdsDetails.setSslMode(Optional.ofNullable(source.getSslMode()).map(Enum::name).orElse(null));
         rdsDetails.setCreationDate(source.getCreationDate());
