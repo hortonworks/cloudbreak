@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
@@ -138,7 +139,7 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
     public T deleteWithMdcContextRestore(T resource) {
         Map<String, String> mdcContextMap = MDCBuilder.getMdcContextMap();
         try {
-            return deleteInternal(resource);
+            return deleteInternal(resource, this::prepareDeletion);
         } finally {
             MDCBuilder.buildMdcContextFromMap(mdcContextMap);
         }
@@ -146,21 +147,29 @@ public abstract class AbstractWorkspaceAwareResourceService<T extends WorkspaceA
 
     @Override
     public T delete(T resource) {
-        return deleteInternal(resource);
+        return deleteInternal(resource, this::prepareDeletion);
     }
 
-    private T deleteInternal(T resource) {
+    public T delete(T resource, Consumer<T> prepareDeletion) {
+        return deleteInternal(resource, prepareDeletion);
+    }
+
+    private T deleteInternal(T resource, Consumer<T> prepareDeletion) {
         MDCBuilder.buildMdcContext(resource);
         LOGGER.debug("Deleting {} with name: {}", resource.getResourceName(), resource.getName());
-        prepareDeletion(resource);
+        prepareDeletion.accept(resource);
         repository().delete(resource);
         return resource;
     }
 
     @Override
     public Set<T> delete(Set<T> resources) {
+        return delete(resources, this::prepareDeletion);
+    }
+
+    public Set<T> delete(Set<T> resources, Consumer<T> prepareDeletion) {
         return resources.stream()
-                .map(this::delete)
+                .map(r -> delete(r, prepareDeletion))
                 .collect(Collectors.toSet());
     }
 

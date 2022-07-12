@@ -9,28 +9,35 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atMostOnce;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -39,10 +46,12 @@ import com.sequenceiq.cloudbreak.domain.CreationType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -82,6 +91,12 @@ public class RecipeServiceTest {
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
+    @Mock
+    private FreeipaClientService freeipaClientService;
+
+    @Spy
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     @BeforeEach
     public void setUp() throws TransactionExecutionException {
         lenient().when(clock.getCurrentTimeMillis()).thenReturn(659602800L);
@@ -89,34 +104,89 @@ public class RecipeServiceTest {
         lenient().doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
         lenient().doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString());
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
+        regionAwareInternalCrnGeneratorFactory.setPartition("cdp");
+        regionAwareInternalCrnGeneratorFactory.setRegion("us-west-1");
+    }
+
+    @Test
+    public void testDeleteButRecipeUsedInFMS() {
+        Recipe recipe = getRecipe();
+        when(recipeRepository.findByNameAndWorkspaceId(recipe.getName(), recipe.getWorkspace().getId())).thenReturn(Optional.of(recipe));
+        when(freeipaClientService.recipes(any())).thenReturn(List.of(recipe.getName()));
+
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(NameOrCrn.ofName(recipe.getName()), recipe.getWorkspace().getId()));
+
+        verify(recipeRepository, times(1)).findByNameAndWorkspaceId(recipe.getName(), recipe.getWorkspace().getId());
+        verify(recipeRepository, times(0)).delete(any());
+    }
+
+    @Test
+    public void testMultipleDeleteBut1RecipeUsedInFMS() {
+        Recipe recipe1 = getRecipe(1L);
+        Recipe recipe2 = getRecipe(2L);
+        when(freeipaClientService.recipes(any())).thenReturn(List.of(recipe1.getName()));
+        ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
+            Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(Set.of(recipe1, recipe2)));
+        });
+
+        verify(recipeRepository, atMostOnce()).delete(any());
+    }
+
+    @Test
+    public void testMultipleDeleteButBothRecipeUsedInFMS() {
+        Recipe recipe1 = getRecipe(1L);
+        Recipe recipe2 = getRecipe(2L);
+        when(freeipaClientService.recipes(any())).thenReturn(List.of(recipe1.getName(), recipe2.getName()));
+        ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
+            Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(Set.of(recipe1, recipe2)));
+        });
+
+        verify(recipeRepository, times(0)).delete(any());
+    }
+
+    @Test
+    public void testMultipleByNameButRecipeUsedInFMS() {
+        Recipe recipe1 = getRecipe(1L);
+        Recipe recipe2 = getRecipe(2L);
+        when(recipeRepository.findByNameInAndWorkspaceId(Set.of(recipe1.getName(), recipe2.getName()), recipe1.getWorkspace().getId()))
+                .thenReturn(Set.of(recipe1, recipe2));
+        when(freeipaClientService.recipes(any())).thenReturn(List.of(recipe1.getName()));
+        ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
+            Assertions.assertThrows(BadRequestException.class, () -> underTest.deleteMultipleByNameFromWorkspace(Set.of(recipe1.getName(), recipe2.getName()),
+                    recipe1.getWorkspace().getId()));
+        });
+
+        verify(recipeRepository, atMostOnce()).delete(any());
     }
 
     @Test
     public void testDeleteWhenDtoNameFilledThenDeleteCalled() {
         Recipe recipe = getRecipe();
         when(recipeRepository.findByNameAndWorkspaceId(recipe.getName(), recipe.getWorkspace().getId())).thenReturn(Optional.of(recipe));
+        when(freeipaClientService.recipes(any())).thenReturn(Collections.emptyList());
 
         Recipe result = underTest.delete(NameOrCrn.ofName(recipe.getName()), recipe.getWorkspace().getId());
 
         assertEquals(recipe, result);
         verify(recipeRepository, times(1)).findByNameAndWorkspaceId(anyString(), anyLong());
         verify(recipeRepository, times(1)).findByNameAndWorkspaceId(recipe.getName(), recipe.getWorkspace().getId());
-        verify(recipeRepository, times(1)).save(any(Recipe.class));
-        verify(recipeRepository, times(1)).save(recipe);
+        verify(recipeRepository, times(1)).delete(any(Recipe.class));
+        verify(recipeRepository, times(1)).delete(recipe);
     }
 
     @Test
     public void testDeleteWhenDtoCrnFilledThenDeleteCalled() {
         Recipe recipe = getRecipe();
         when(recipeRepository.findByResourceCrnAndWorkspaceId(recipe.getResourceCrn(), recipe.getWorkspace().getId())).thenReturn(Optional.of(recipe));
+        when(freeipaClientService.recipes(any())).thenReturn(Collections.emptyList());
 
         Recipe result = underTest.delete(NameOrCrn.ofCrn(recipe.getResourceCrn()), recipe.getWorkspace().getId());
 
         assertEquals(recipe, result);
         verify(recipeRepository, times(1)).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
         verify(recipeRepository, times(1)).findByResourceCrnAndWorkspaceId(recipe.getResourceCrn(), recipe.getWorkspace().getId());
-        verify(recipeRepository, times(1)).save(any(Recipe.class));
-        verify(recipeRepository, times(1)).save(recipe);
+        verify(recipeRepository, times(1)).delete(any(Recipe.class));
+        verify(recipeRepository, times(1)).delete(recipe);
     }
 
     @Test
@@ -183,11 +253,15 @@ public class RecipeServiceTest {
     }
 
     private Recipe getRecipe() {
+        return getRecipe(1L);
+    }
+
+    private Recipe getRecipe(Long number) {
         Recipe recipe = new Recipe();
-        recipe.setName("somename");
+        recipe.setName("somename" + number);
         recipe.setCreator("someone");
         recipe.setContent("bnllaGVoZSwgbmEgZXogZWd5IGZhc3phIGJhc2U2NCBjdWNj");
-        recipe.setId(1L);
+        recipe.setId(number);
         recipe.setArchived(false);
         recipe.setResourceCrn(CrnTestUtil.getRecipeCrnBuilder()
                 .setAccountId("account")

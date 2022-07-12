@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.domain.view.RecipeView;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractArchivistService;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
@@ -68,17 +70,32 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
+    @Inject
+    private FreeipaClientService freeipaClientService;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public Recipe delete(NameOrCrn recipeNameOrCrn, Long workspaceId) {
         Recipe toDelete = get(recipeNameOrCrn, workspaceId);
-        Recipe deleted = super.delete(toDelete);
+        Recipe deleted = super.delete(toDelete, this::prepareDeletion);
         ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn());
         return deleted;
     }
 
     @Override
+    public Set<Recipe> delete(Set<Recipe> resources) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), () -> {
+            List<String> recipesUsedInFMS = freeipaClientService.recipes(accountId);
+            return resources.stream().peek(recipe -> super.delete(recipe, r -> prepareDeletion(recipe, recipesUsedInFMS))).collect(Collectors.toSet());
+        });
+    }
+
+    @Override
     public Set<Recipe> deleteMultipleByNameFromWorkspace(Set<String> names, Long workspaceId) {
         Set<Recipe> deletedRecipes = super.deleteMultipleByNameFromWorkspace(names, workspaceId);
-        deletedRecipes.stream().forEach(deleted -> ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn()));
+        deletedRecipes.forEach(deleted -> ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn()));
         return deletedRecipes;
     }
 
@@ -155,8 +172,33 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
         return recipeRepository;
     }
 
+    private void prepareDeletion(Recipe recipe, List<String> recipesUsedInFMS) {
+        checkIfRecipeUsedByHostGroups(recipe);
+        recipeUsedInFMS(recipe, recipesUsedInFMS);
+    }
+
     @Override
     protected void prepareDeletion(Recipe recipe) {
+        checkIfRecipeUsedByHostGroups(recipe);
+        Crn resourceCrn = Crn.fromString(recipe.getResourceCrn());
+        if (resourceCrn != null) {
+            ThreadBasedUserCrnProvider.doAsInternalActor(regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(), () -> {
+                List<String> recipesUsedInFMS = freeipaClientService.recipes(resourceCrn.getAccountId());
+                recipeUsedInFMS(recipe, recipesUsedInFMS);
+            });
+        }
+    }
+
+    private void recipeUsedInFMS(Recipe recipe, List<String> recipesUsedInFMS) {
+        if (!recipesUsedInFMS.isEmpty()) {
+            if (recipesUsedInFMS.contains(recipe.getName())) {
+                throw new BadRequestException(String.format("There are FreeIPA clusters associated with recipe '%s'. " +
+                        "Please remove these before deleting the recipe.", recipe.getName()));
+            }
+        }
+    }
+
+    private void checkIfRecipeUsedByHostGroups(Recipe recipe) {
         if (recipe == null) {
             throw new NotFoundException("Recipe not found.");
         }

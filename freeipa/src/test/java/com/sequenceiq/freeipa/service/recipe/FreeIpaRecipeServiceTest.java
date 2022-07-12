@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.recipe.RecipeCrnListProviderService;
 import com.sequenceiq.freeipa.entity.FreeIpaStackRecipe;
 import com.sequenceiq.freeipa.repository.FreeIpaStackRecipeRepository;
+import com.sequenceiq.freeipa.repository.StackRepository;
 
 @ExtendWith(MockitoExtension.class)
 class FreeIpaRecipeServiceTest {
@@ -52,6 +53,9 @@ class FreeIpaRecipeServiceTest {
 
     @Mock
     private RecipeCrnListProviderService recipeCrnListProviderService;
+
+    @Mock
+    private StackRepository stackRepository;
 
     @InjectMocks
     private FreeIpaRecipeService freeIpaRecipeService;
@@ -87,6 +91,15 @@ class FreeIpaRecipeServiceTest {
         Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
         Assertions.assertEquals("bash2", recipeModel2.getGeneratedScript());
         assertThat(recipeSet.getValue()).containsExactlyInAnyOrder("recipe1", "recipe2");
+    }
+
+    @Test
+    public void testGetUsedRecipeNamesForAccount() {
+        when(stackRepository.findStackIdsByAccountId(any())).thenReturn(List.of(1L, 2L, 3L));
+        when(freeIpaStackRecipeRepository.findByStackIdIn(List.of(1L, 2L, 3L))).thenReturn(List.of(new FreeIpaStackRecipe(1L, "recipe1"),
+                new FreeIpaStackRecipe(2L, "recipe2")));
+        List<String> recipes = freeIpaRecipeService.getUsedRecipeNamesForAccount("accountId");
+        assertThat(recipes).containsExactlyInAnyOrder("recipe1", "recipe2");
     }
 
     @Test
