@@ -117,6 +117,7 @@ public class ResourceCreationCallable implements Callable<ResourceRequestResult<
                             builder.getClass().getSimpleName(), group.getName(), stackName);
                 }
             } catch (CancellationException e) {
+                LOGGER.warn("Cancellation exception has been arrived, throwing forward: {}", e.getMessage());
                 throw e;
             } catch (Exception e) {
                 String errorMessage = format("Failed to create resources for instance with id: '%s', message: '%s'", instance.getTemplate().getPrivateId(),
