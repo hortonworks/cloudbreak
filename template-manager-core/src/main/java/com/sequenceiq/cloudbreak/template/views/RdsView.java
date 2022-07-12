@@ -77,8 +77,8 @@ public class RdsView {
         rdsConfig.setArchived(rdsConfigWithoutCluster.isArchived());
         rdsConfig.setConnectionDriver(rdsConfigWithoutCluster.getConnectionDriver());
         rdsConfig.setConnectionURL(rdsConfigWithoutCluster.getConnectionURL());
-        rdsConfig.setConnectionPassword(rdsConfigWithoutCluster.getConnectionPassword().getRaw());
-        rdsConfig.setConnectionUserName(rdsConfigWithoutCluster.getConnectionUserName().getRaw());
+        rdsConfig.setConnectionPassword(rdsConfigWithoutCluster.getConnectionPassword());
+        rdsConfig.setConnectionUserName(rdsConfigWithoutCluster.getConnectionUserName());
         rdsConfig.setConnectorJarUrl(rdsConfigWithoutCluster.getConnectorJarUrl());
         rdsConfig.setCreationDate(rdsConfigWithoutCluster.getCreationDate());
         rdsConfig.setDatabaseEngine(rdsConfigWithoutCluster.getDatabaseEngine());

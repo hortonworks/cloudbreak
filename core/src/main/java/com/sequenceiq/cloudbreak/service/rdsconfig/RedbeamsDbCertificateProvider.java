@@ -65,7 +65,7 @@ public class RedbeamsDbCertificateProvider {
 
     private Set<String> getDatabaseRootCerts(Cluster cluster) {
         Set<String> result = new HashSet<>();
-        if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster)) {
+        if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster.getDatabaseServerCrn())) {
             String stackResourceCrn = cluster.getStack().getResourceCrn();
             String clusterName = cluster.getName();
             LOGGER.info("Gathering cluster's(crn:'{}', name: '{}') remote database root certificates", stackResourceCrn, clusterName);

@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigs.GENERATED_RANGER_SERVICE_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.RANGER_PLUGIN_SR_SERVICE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
@@ -16,7 +18,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -71,12 +73,12 @@ public class SchemaRegistryServiceConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
         BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
 
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(DatabaseType.REGISTRY.toString());
-        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
-        rdsConfig.setConnectionURL("jdbc:postgresql://testhost:5432/schema_registry");
-        rdsConfig.setConnectionUserName("schema_registry_server");
-        rdsConfig.setConnectionPassword("schema_registry_server_password");
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(DatabaseType.REGISTRY.toString());
+        when(rdsConfig.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
+        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/schema_registry");
+        when(rdsConfig.getConnectionUserName()).thenReturn("schema_registry_server");
+        when(rdsConfig.getConnectionPassword()).thenReturn("schema_registry_server_password");
 
         return TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)

@@ -4,26 +4,34 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
@@ -39,6 +47,9 @@ class AbstractRdsConfigProviderTest {
     private static final String REMOTE_ADMIN = "admin";
 
     private static final String REMOTE_ADMIN_PASSWORD = "adminPassword";
+
+    @Mock
+    private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
     @Mock
     private RdsConfigService rdsConfigService;
@@ -66,14 +77,29 @@ class AbstractRdsConfigProviderTest {
     @Test
     void createServicePillarForLocalRdsConfig() {
         when(rdsConfigService.createIfNotExists(any(), any(), any())).thenAnswer(i -> i.getArguments()[1]);
+        RdsConfigWithoutCluster rdsConfigWithoutCluster = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfigWithoutCluster.getType()).thenReturn(DatabaseType.CLOUDERA_MANAGER.name());
+        when(rdsConfigWithoutCluster.getStatus()).thenReturn(ResourceStatus.DEFAULT);
+        when(rdsConfigWithoutCluster.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
+        when(rdsConfigWithoutCluster.getConnectionPassword()).thenReturn("pwd");
         Stack testStack = TestUtil.stack();
         InstanceMetaData metaData = testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().add(metaData);
         Cluster testCluster = TestUtil.cluster();
+        testCluster.setId(1L);
+        testStack.setCluster(testCluster);
         testCluster.setRdsConfigs(new HashSet<>());
+        when(rdsConfigWithoutClusterService.findByClusterId(anyLong())).thenReturn(Set.of(rdsConfigWithoutCluster));
 
         Map<String, Object> result = underTest.createServicePillarConfigMapIfNeeded(testStack, testCluster);
+
+        ArgumentCaptor<RDSConfig> rdsConfigCaptor = ArgumentCaptor.forClass(RDSConfig.class);
+        verify(rdsConfigService).createIfNotExists(any(), rdsConfigCaptor.capture(), any());
+
+        assertEquals("CLOUDERA_MANAGER_simplestack1", rdsConfigCaptor.getValue().getName());
+        assertEquals(1, rdsConfigCaptor.getValue().getClusters().size());
+        assertEquals(1L, rdsConfigCaptor.getValue().getClusters().iterator().next().getId().longValue());
 
         Map<String, Object> postgresData = (Map<String, Object>) result.get("clouderamanager");
         assertEquals("clouderamanager", postgresData.get("database"));
@@ -84,8 +110,14 @@ class AbstractRdsConfigProviderTest {
     @Test
     void createServicePillarForRemoteRdsConfig() {
         when(rdsConfigService.createIfNotExists(any(), any(), any())).thenAnswer(i -> i.getArguments()[1]);
-        RDSConfig config = TestUtil.rdsConfig(DatabaseType.CLOUDERA_MANAGER);
-        when(dbServerConfigurer.createNewRdsConfig(any(), any(), any(), any(), any())).thenReturn(config);
+        RdsConfigWithoutCluster rdsConfigWithoutCluster = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfigWithoutCluster.getType()).thenReturn(DatabaseType.CLOUDERA_MANAGER.name());
+        when(rdsConfigWithoutCluster.getStatus()).thenReturn(ResourceStatus.DEFAULT);
+        when(rdsConfigWithoutCluster.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
+        when(rdsConfigWithoutCluster.getConnectionPassword()).thenReturn("pwd");
+        RDSConfig config = new RDSConfig();
+        config.setType(DatabaseType.CLOUDERA_MANAGER.name());
+        when(dbServerConfigurer.createNewRdsConfig(any(), any(), any(), any(), any(), any(), any())).thenReturn(config);
         when(dbServerConfigurer.isRemoteDatabaseNeeded(any())).thenReturn(true);
         DatabaseServerV4Response resp = new DatabaseServerV4Response();
         resp.setHost(DB_HOST);
@@ -103,6 +135,7 @@ class AbstractRdsConfigProviderTest {
         testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().add(metaData);
         Cluster testCluster = TestUtil.cluster();
         testStack.setCluster(testCluster);
+        when(rdsConfigWithoutClusterService.findByClusterId(anyLong())).thenReturn(Set.of(rdsConfigWithoutCluster));
 
         Map<String, Object> result = underTest.createServicePillarConfigMapIfNeeded(testStack, testCluster);
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -33,8 +34,8 @@ public interface RdsConfigWithoutClusterRepository extends CrudRepository<RDSCon
             "r.connectorJarUrl as connectorJarUrl," +
             "r.archived as archived," +
             "r.deletionTimestamp as deletionTimestamp," +
-            "r.connectionUserName as connectionUserName," +
-            "r.connectionPassword as connectionPassword ";
+            "r.connectionUserName as connectionUserNameSecret," +
+            "r.connectionPassword as connectionPasswordSecret ";
 
     @Query("SELECT " + PROJECTION +
             "FROM RDSConfig r " +
@@ -66,4 +67,18 @@ public interface RdsConfigWithoutClusterRepository extends CrudRepository<RDSCon
     List<RdsConfigWithoutCluster> findByClusterIdAndStatusInAndTypeIn(@Param("clusterId") Long id,
             @Param("statuses") Set<ResourceStatus> statuses,
             @Param("databaseTypes") Set<String> databaseTypes);
+
+    @Query("SELECT DISTINCT " + PROJECTION + " FROM RDSConfig r " +
+            "INNER JOIN r.clusters c " +
+            "WHERE c.id= :clusterId " +
+            "AND r.status in (:statuses)")
+    List<RdsConfigWithoutCluster> findByClusterIdAndStatusIn(@Param("clusterId") Long id,
+            @Param("statuses") Set<ResourceStatus> statuses);
+
+    @Query("SELECT DISTINCT " + PROJECTION +
+            "FROM RDSConfig r " +
+            "WHERE r.workspace.id = :workspaceId " +
+            "AND r.name in :names " +
+            "AND r.status = 'USER_MANAGED'")
+    Set<RdsConfigWithoutCluster> findAllByNamesAndWorkspaceId(@Param("names") Collection<String> names, @Param("workspaceId") Long workspaceId);
 }

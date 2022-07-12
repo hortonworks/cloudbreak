@@ -1,15 +1,19 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 
 @Component
@@ -17,6 +21,9 @@ public class ClusterToClusterDetailsConverter {
 
     @Inject
     private RdsConfigToRdsDetailsConverter rdsConfigToRdsDetailsConverter;
+
+    @Inject
+    private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
     public ClusterDetails convert(Cluster source) {
         ClusterDetails clusterDetails = new ClusterDetails();
@@ -41,9 +48,10 @@ public class ClusterToClusterDetailsConverter {
     }
 
     private void addDatabaseInfo(ClusterDetails clusterDetails, Cluster source) {
-        if (source.getRdsConfigs() != null && !source.getRdsConfigs().isEmpty()) {
+        Set<RdsConfigWithoutCluster> rdsConfigs = rdsConfigWithoutClusterService.findByClusterId(source.getId());
+        if (!CollectionUtils.isEmpty(rdsConfigs)) {
             clusterDetails.setDatabases(
-                    source.getRdsConfigs().stream()
+                    rdsConfigs.stream()
                             .map(e -> rdsConfigToRdsDetailsConverter.convert(e))
                             .collect(Collectors.toList()));
         }

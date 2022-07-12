@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders;
 
-import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
+import static com.sequenceiq.cloudbreak.TestUtil.rdsConfigWithoutCluster;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
@@ -59,7 +59,7 @@ class AbstractRdsRoleConfigProviderTest {
 
     @Test
     void configurationNeededIfRdsConfigAndRoleBothPresent() {
-        RDSConfig rdsConfig = rdsConfig(DatabaseType.RANGER);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
         when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(rdsConfig);
         when(templateProcessor.isRoleTypePresentInService(subject.getServiceType(), subject.getRoleTypes())).thenReturn(Boolean.TRUE);
 
@@ -68,7 +68,7 @@ class AbstractRdsRoleConfigProviderTest {
 
     @Test
     void configurationNotNeededIfRoleAbsent() {
-        RDSConfig rdsConfig = rdsConfig(DatabaseType.RANGER);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
         when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(rdsConfig);
         when(templateProcessor.isRoleTypePresentInService(subject.getServiceType(), subject.getRoleTypes())).thenReturn(Boolean.FALSE);
 
@@ -84,7 +84,7 @@ class AbstractRdsRoleConfigProviderTest {
 
     @Test
     void getRdsConfigTestWhenRdsConfigPresent() {
-        RDSConfig rdsConfig = rdsConfig(DatabaseType.RANGER);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
         when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(rdsConfig);
 
         assertThat(subject.getRdsConfig(source)).isSameAs(rdsConfig);
@@ -99,7 +99,7 @@ class AbstractRdsRoleConfigProviderTest {
 
     @Test
     void getRdsViewTest() {
-        RDSConfig rdsConfig = rdsConfig(DatabaseType.RANGER);
+        RdsConfigWithoutCluster rdsConfig = rdsConfigWithoutCluster(DatabaseType.RANGER);
         when(source.getRdsConfig(DatabaseType.RANGER)).thenReturn(rdsConfig);
         when(source.getRdsSslCertificateFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
 

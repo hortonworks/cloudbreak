@@ -16,8 +16,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 
@@ -46,11 +47,11 @@ public class DasConfigProviderTest {
 
     @Test
     public void getServiceConfigs() {
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(HIVE_DAS);
-        rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
-        rdsConfig.setConnectionUserName(USER_NAME);
-        rdsConfig.setConnectionPassword(PASSWORD);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(DatabaseType.HIVE_DAS.toString());
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
         TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
@@ -92,11 +93,11 @@ public class DasConfigProviderTest {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(true);
 
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(HIVE_DAS);
-        rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
-        rdsConfig.setConnectionUserName(USER_NAME);
-        rdsConfig.setConnectionPassword(PASSWORD);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(DatabaseType.HIVE_DAS.toString());
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
         TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
@@ -109,11 +110,11 @@ public class DasConfigProviderTest {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(false);
 
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(HIVE_DAS);
-        rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
-        rdsConfig.setConnectionUserName(USER_NAME);
-        rdsConfig.setConnectionPassword(PASSWORD);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(DatabaseType.HIVE_DAS.toString());
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
         TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);

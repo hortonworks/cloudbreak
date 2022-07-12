@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
@@ -29,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
@@ -54,7 +54,7 @@ public class TemplatePreparationObject {
 
     private final BlueprintView blueprintView;
 
-    private final Map<String, RDSConfig> rdsConfigs;
+    private final Map<String, RdsConfigWithoutCluster> rdsConfigs;
 
     private final String rdsSslCertificateFilePath;
 
@@ -139,11 +139,11 @@ public class TemplatePreparationObject {
         return customConfigurationsView;
     }
 
-    public Set<RDSConfig> getRdsConfigs() {
+    public Set<RdsConfigWithoutCluster> getRdsConfigs() {
         return Set.copyOf(rdsConfigs.values());
     }
 
-    public RDSConfig getRdsConfig(DatabaseType type) {
+    public RdsConfigWithoutCluster getRdsConfig(DatabaseType type) {
         return rdsConfigs.get(type.name().toLowerCase());
     }
 
@@ -235,7 +235,7 @@ public class TemplatePreparationObject {
 
         private CloudPlatform cloudPlatform;
 
-        private Set<RDSConfig> rdsConfigs = new HashSet<>();
+        private Set<RdsConfigWithoutCluster> rdsConfigs = new HashSet<>();
 
         private String rdsSslCertificateFilePath;
 
@@ -290,7 +290,7 @@ public class TemplatePreparationObject {
             return this;
         }
 
-        public Builder withRdsConfigs(Set<RDSConfig> rdsConfigs) {
+        public Builder withRdsConfigs(Set<RdsConfigWithoutCluster> rdsConfigs) {
             this.rdsConfigs = rdsConfigs;
             return this;
         }

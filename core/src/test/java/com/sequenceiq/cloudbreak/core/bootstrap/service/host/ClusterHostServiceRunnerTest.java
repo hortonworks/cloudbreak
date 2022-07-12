@@ -87,7 +87,6 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -419,8 +418,8 @@ class ClusterHostServiceRunnerTest {
         when(rdsConfigWithoutClusterService.findByClusterIdAndType(any(), eq(DatabaseType.CLOUDERA_MANAGER))).thenReturn(rdsConfigWithoutCluster);
         when(rdsConfigWithoutCluster.getType()).thenReturn("asdf");
         when(rdsConfigWithoutCluster.getConnectionURL()).thenReturn("jdbc:postgresql:subname://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger");
-        when(rdsConfigWithoutCluster.getConnectionUserName()).thenReturn(new Secret("username"));
-        when(rdsConfigWithoutCluster.getConnectionPassword()).thenReturn(new Secret("password"));
+        when(rdsConfigWithoutCluster.getConnectionUserName()).thenReturn("username");
+        when(rdsConfigWithoutCluster.getConnectionPassword()).thenReturn("password");
         when(loadBalancerSANProvider.getLoadBalancerSAN(stack)).thenReturn(Optional.empty());
         ClusterPreCreationApi clusterPreCreationApi = mock(ClusterPreCreationApi.class);
         when(clusterApiConnectors.getConnector(cluster)).thenReturn(clusterPreCreationApi);
