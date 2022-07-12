@@ -27,7 +27,7 @@ public class AuthDistributorService {
     private EntitlementService entitlementService;
 
     public void updateAuthViewForEnvironment(String environmentCrn, UmsUsersState umsUsersState, String accountId, String operationId) {
-        if (entitlementService.isCdpSaasEnabled(accountId)) {
+        if (entitlementService.isSdxSaasIntegrationEnabled(accountId)) {
             try {
                 LOGGER.debug("Update auth view in auth distributor for env: {}, operationId: {}", environmentCrn, operationId);
                 UserState userState = umsUsersStateToAuthDistributorUserStateConverter.convert(umsUsersState);
@@ -40,7 +40,7 @@ public class AuthDistributorService {
     }
 
     public void removeAuthViewForEnvironment(String environmentCrn, String accountId) {
-        if (entitlementService.isCdpSaasEnabled(accountId)) {
+        if (entitlementService.isSdxSaasIntegrationEnabled(accountId)) {
             try {
                 LOGGER.debug("Remove auth view from auth distributor for env: {}", environmentCrn);
                 grpcAuthDistributorClient.removeAuthViewForEnvironment(environmentCrn);

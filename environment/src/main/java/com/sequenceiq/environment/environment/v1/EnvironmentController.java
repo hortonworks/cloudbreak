@@ -373,14 +373,6 @@ public class EnvironmentController implements EnvironmentEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ROTATE_SALTUSER_PASSWORD_ENVIRONMENT)
-    public void rotateSaltPasswordByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
-        freeIpaService.rotateSaltPassword(environmentDto);
-    }
-
-    @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public CredentialResponse verifyCredentialByEnvCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();

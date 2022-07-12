@@ -38,7 +38,7 @@ class AuthDistributorServiceTest {
 
     @Test
     public void testUpdateAuthViewForEnvironment() {
-        when(entitlementService.isCdpSaasEnabled("accountId")).thenReturn(Boolean.TRUE);
+        when(entitlementService.isSdxSaasIntegrationEnabled("accountId")).thenReturn(Boolean.TRUE);
         UmsUsersState umsUsersState = UmsUsersState.newBuilder().setUsersState(UsersState.newBuilder().build()).build();
         underTest.updateAuthViewForEnvironment("envCrn", umsUsersState, "accountId", "operationId");
 
@@ -48,7 +48,7 @@ class AuthDistributorServiceTest {
 
     @Test
     public void testUpdateAuthViewForEnvironmentWhenConverterFails() {
-        when(entitlementService.isCdpSaasEnabled("accountId")).thenReturn(Boolean.TRUE);
+        when(entitlementService.isSdxSaasIntegrationEnabled("accountId")).thenReturn(Boolean.TRUE);
         doThrow(new RuntimeException("error")).when(umsUsersStateToAuthDistributorUserStateConverter).convert(any());
         UmsUsersState umsUsersState = UmsUsersState.newBuilder().setUsersState(UsersState.newBuilder().build()).build();
         Assertions.assertDoesNotThrow(() -> underTest.updateAuthViewForEnvironment("envCrn", umsUsersState, "accountId", "operationId"));
@@ -58,7 +58,7 @@ class AuthDistributorServiceTest {
 
     @Test
     public void testUpdateAuthViewForEnvironmentWhenGrpcFails() {
-        when(entitlementService.isCdpSaasEnabled("accountId")).thenReturn(Boolean.TRUE);
+        when(entitlementService.isSdxSaasIntegrationEnabled("accountId")).thenReturn(Boolean.TRUE);
         doThrow(new RuntimeException("error")).when(grpcAuthDistributorClient).updateAuthViewForEnvironment(eq("envCrn"), any());
         UmsUsersState umsUsersState = UmsUsersState.newBuilder().setUsersState(UsersState.newBuilder().build()).build();
         Assertions.assertDoesNotThrow(() -> underTest.updateAuthViewForEnvironment("envCrn", umsUsersState, "accountId", "operationId"));
@@ -68,7 +68,7 @@ class AuthDistributorServiceTest {
 
     @Test
     public void testUpdateAuthViewForEnvironmentWhenCdpSaasEntitlementDisabled() {
-        when(entitlementService.isCdpSaasEnabled("accountId")).thenReturn(Boolean.FALSE);
+        when(entitlementService.isSdxSaasIntegrationEnabled("accountId")).thenReturn(Boolean.FALSE);
         UmsUsersState umsUsersState = UmsUsersState.newBuilder().setUsersState(UsersState.newBuilder().build()).build();
         underTest.updateAuthViewForEnvironment("envCrn", umsUsersState, "accountId", "operationId");
 
@@ -78,21 +78,21 @@ class AuthDistributorServiceTest {
 
     @Test
     public void testRemoveAuthViewForEnvironment() {
-        when(entitlementService.isCdpSaasEnabled("accountId")).thenReturn(Boolean.TRUE);
+        when(entitlementService.isSdxSaasIntegrationEnabled("accountId")).thenReturn(Boolean.TRUE);
         underTest.removeAuthViewForEnvironment("envCrn", "accountId");
         verify(grpcAuthDistributorClient).removeAuthViewForEnvironment(eq("envCrn"));
     }
 
     @Test
     public void testRemoveAuthViewForEnvironmentWhenGrpcFails() {
-        when(entitlementService.isCdpSaasEnabled("accountId")).thenReturn(Boolean.TRUE);
+        when(entitlementService.isSdxSaasIntegrationEnabled("accountId")).thenReturn(Boolean.TRUE);
         doThrow(new RuntimeException("error")).when(grpcAuthDistributorClient).removeAuthViewForEnvironment(eq("envCrn"));
         Assertions.assertDoesNotThrow(() -> underTest.removeAuthViewForEnvironment("envCrn", "accountId"));
     }
 
     @Test
     public void testRemoveAuthViewForEnvironmentWhenCdpSaasEntitlementDisabled() {
-        when(entitlementService.isCdpSaasEnabled("accountId")).thenReturn(Boolean.FALSE);
+        when(entitlementService.isSdxSaasIntegrationEnabled("accountId")).thenReturn(Boolean.FALSE);
         underTest.removeAuthViewForEnvironment("envCrn", "accountId");
         verify(grpcAuthDistributorClient, never()).removeAuthViewForEnvironment(eq("envCrn"));
     }
