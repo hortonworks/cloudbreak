@@ -63,7 +63,11 @@ public class EventSender {
         if (accepted != null) {
             try {
                 FlowAcceptResult acceptResult = (FlowAcceptResult) accepted.await(TIMEOUT, TimeUnit.SECONDS);
-                return createFlowIdentifier(acceptResult, resourceCrn);
+                if (acceptResult != null) {
+                    return createFlowIdentifier(acceptResult, resourceCrn);
+                } else {
+                    LOGGER.info("The acceptedResult is null, the flow identifier couldn't be created");
+                }
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e.getMessage());
             }
