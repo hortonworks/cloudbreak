@@ -103,7 +103,7 @@ public class UserSyncService {
     }
 
     private void checkPartialUserSync(String accountId, UserSyncRequestFilter userSyncFilter) {
-        if (entitlementService.isCdpSaasEnabled(accountId) && !userSyncFilter.isFullSync()) {
+        if (entitlementService.isSdxSaasIntegrationEnabled(accountId) && !userSyncFilter.isFullSync()) {
             String message = "Partial sync is not available for CDP SAAS.";
             LOGGER.warn(message);
             throw new BadRequestException(message);
