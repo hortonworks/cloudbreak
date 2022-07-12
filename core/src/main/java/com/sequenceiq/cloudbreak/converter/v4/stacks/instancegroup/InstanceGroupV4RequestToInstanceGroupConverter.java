@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.Inst
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 
 @Component
@@ -48,12 +49,22 @@ public class InstanceGroupV4RequestToInstanceGroupConverter {
         setAttributes(source, instanceGroup);
         instanceGroup.setInstanceGroupType(source.getType());
         instanceGroup.setInitialNodeCount(source.getNodeCount());
-        instanceGroup.setScalabilityOption(source.getScalabilityOption() == null ? ScalabilityOption.ALLOWED : source.getScalabilityOption());
+        instanceGroup.setScalabilityOption(getScalabilityOption(source));
         setNetwork(source, instanceGroup);
         if (source.getNodeCount() > 0) {
             addInstanceMetadatas(source, instanceGroup, variant);
         }
         return instanceGroup;
+    }
+
+    private ScalabilityOption getScalabilityOption(InstanceGroupV4Request source) {
+        if (InstanceGroupType.GATEWAY.equals(source.getType())) {
+            return ScalabilityOption.FORBIDDEN;
+        }
+        if (source.getScalabilityOption() == null) {
+            return ScalabilityOption.ALLOWED;
+        }
+        return source.getScalabilityOption();
     }
 
     private void setNetwork(InstanceGroupV4Request source, InstanceGroup instanceGroup) {
