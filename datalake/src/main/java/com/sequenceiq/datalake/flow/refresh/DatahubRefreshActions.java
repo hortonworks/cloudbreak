@@ -66,13 +66,13 @@ public class DatahubRefreshActions {
             @Override
             protected void doExecute(SdxContext context, DatahubRefreshStartEvent payload, Map<Object, Object> variables) throws Exception {
                 payload = new DatahubRefreshStartEvent(context.getSdxId(), payload.getSdxName(), payload.getUserId());
-                LOGGER.info("Start datahub refresh associated with Sdx: {}", payload.getSdxName());
+                LOGGER.info("Start Data Hub refresh associated with Sdx: {}", payload.getSdxName());
                 SdxCluster sdxCluster = sdxService.getById(context.getSdxId());
                 variables.put(SDX, sdxCluster);
                 eventSenderService.sendEventAndNotification(
                         sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_STARTED);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        "Datahub refresh in progress", payload.getResourceId());
+                        "Data Hub refresh in progress", payload.getResourceId());
                 sdxRefreshService.refreshAllDatahub(payload.getResourceId());
                 sendEvent(context, DatahubRefreshFlowEvent.DATAHUB_REFRESH_IN_PROGRESS_EVENT.selector(), payload);
             }
@@ -95,7 +95,7 @@ public class DatahubRefreshActions {
 
             @Override
             protected void doExecute(SdxContext context, DatahubRefreshStartEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Datahub refresh in progress for: {}", payload.getResourceId());
+                LOGGER.info("Data Hub refresh in progress for: {}", payload.getResourceId());
                 sendEvent(context, new DatahubRefreshWaitEvent(payload.getResourceId(), payload.getUserId()));
             }
 
@@ -117,7 +117,7 @@ public class DatahubRefreshActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Datahub refresh finished for: {}", payload.getResourceId());
+                LOGGER.info("Data Hub refresh finished for: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING, "Datahub refresh finished", payload.getResourceId());
                 eventSenderService.sendEventAndNotification(
                         (SdxCluster) variables.get(SDX), context.getFlowTriggerUserCrn(), ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_FINISHED);
@@ -144,11 +144,11 @@ public class DatahubRefreshActions {
 
             @Override
             protected void doExecute(SdxContext context, DatahubRefreshFailedEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.error("Datahub refresh failed for: {}", payload.getResourceId(), payload.getException());
+                LOGGER.error("Data Hub refresh failed for: {}", payload.getResourceId(), payload.getException());
                 eventSenderService.sendEventAndNotification(
                         (SdxCluster) variables.get(SDX), context.getFlowTriggerUserCrn(), ResourceEvent.ENVIRONMENT_RESTART_DATAHUB_FAILED);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
-                        "Datahub refresh failed", payload.getResourceId());
+                        "Data Hub refresh failed", payload.getResourceId());
                 sendEvent(context, DatahubRefreshFlowEvent.DATAHUB_REFRESH_FAILED_HANDLED_EVENT.selector(), payload);
 
             }

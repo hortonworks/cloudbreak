@@ -22,6 +22,7 @@ import com.cedarsoftware.util.io.JsonReader;
 import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.domain.FlowChainLog;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
 
 @Service
@@ -117,4 +118,8 @@ public class FlowChainLogService {
         return repository.save(chainLog);
     }
 
+    public boolean isFlowTriggeredByFlowChain(String flowChainType, FlowLogWithoutPayload lastFlowLog) {
+        Optional<FlowChainLog> flowChainLog = findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.getFlowChainId());
+        return flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(flowChainType);
+    }
 }

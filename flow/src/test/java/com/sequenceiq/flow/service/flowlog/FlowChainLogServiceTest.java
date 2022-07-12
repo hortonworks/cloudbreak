@@ -5,6 +5,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -21,6 +22,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.cedarsoftware.util.io.JsonWriter;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.domain.FlowChainLog;
+import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.repository.FlowChainLogRepository;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -129,6 +131,19 @@ public class FlowChainLogServiceTest {
                 .thenReturn(Optional.of(flowChainLog));
         String flowChainType = underTest.getFlowChainType("chainId");
         assertEquals("flowChainType", flowChainType);
+    }
+
+    @Test
+    public void testIsFlowTriggeredByFlowChain() {
+        FlowLogWithoutPayload flowLog = mock(FlowLogWithoutPayload.class);
+        when(flowLog.getFlowChainId()).thenReturn("chainId");
+        FlowChainLog flowChainLog = new FlowChainLog();
+        flowChainLog.setFlowChainType("flowChainType");
+        when(flowLogRepository.findFirstByFlowChainIdOrderByCreatedDesc("chainId"))
+                .thenReturn(Optional.of(flowChainLog));
+        assertTrue(underTest.isFlowTriggeredByFlowChain("flowChainType", flowLog));
+
+        assertFalse(underTest.isFlowTriggeredByFlowChain("flowChainType1", flowLog));
     }
 
     private FlowChainLog flowChainLog(String flowChainId, String parentFlowChainId, long created) {

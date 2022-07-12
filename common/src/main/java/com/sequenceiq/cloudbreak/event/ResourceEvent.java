@@ -501,6 +501,7 @@ public enum ResourceEvent {
     DATALAKE_RECOVERY_FINISHED("datalake.recovery.finished"),
 
     DATALAKE_RESIZE_TRIGGERED("datalake.resize.triggered"),
+    DATALAKE_RESIZE_COMPLETE("datalake.resize.complete"),
 
     DATAHUB_REFRESH_IN_PROGRESS("datalake.datahub.refresh.in.progress"),
     DATAHUB_REFRESH_FAILED("datalake.datahub.refresh.failed"),
