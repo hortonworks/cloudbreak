@@ -71,6 +71,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ROTATE_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SAAS_SDX_INTEGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UNBOUND_ELIMINATION;
@@ -191,6 +192,10 @@ public class EntitlementService {
 
     public boolean isCdpSaasEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_SAAS);
+    }
+
+    public boolean isSdxSaasIntegrationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_SAAS_SDX_INTEGRATION);
     }
 
     public boolean enableDistroxInstanceTypesEnabled(String accountId) {
