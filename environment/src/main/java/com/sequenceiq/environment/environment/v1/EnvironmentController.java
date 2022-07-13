@@ -35,8 +35,10 @@ import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
@@ -44,6 +46,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityTy
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
 import com.sequenceiq.common.api.type.DataHubStartAction;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentChangeCredentialRequest;
@@ -127,6 +130,10 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final EnvironmentUpgradeCcmService upgradeCcmService;
 
+    private final StackV4Endpoint stackV4Endpoint;
+
+    private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
@@ -144,7 +151,9 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EnvironmentLoadBalancerService environmentLoadBalancerService,
             EnvironmentFiltering environmentFiltering,
             CloudStorageValidator cloudStorageValidator,
-            EnvironmentUpgradeCcmService upgradeCcmService) {
+            EnvironmentUpgradeCcmService upgradeCcmService,
+            StackV4Endpoint stackV4Endpoint,
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -162,6 +171,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentFiltering = environmentFiltering;
         this.cloudStorageValidator = cloudStorageValidator;
         this.upgradeCcmService = upgradeCcmService;
+        this.stackV4Endpoint = stackV4Endpoint;
+        this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
     @Override
@@ -455,5 +466,16 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_CCM)
     public void upgradeCcmByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
         upgradeCcmService.upgradeCcmByCrn(crn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public boolean isUpgradeCcmAvailable(@ResourceCrn @TenantAwareParam String crn) {
+        EnvironmentDto environmentDto = environmentService.internalGetByCrn(crn);
+        return Tunnel.getUpgradables().contains(environmentDto.getTunnel()) ||
+                environmentDto.getTunnel() == Tunnel.latestUpgradeTarget() &&
+                        ThreadBasedUserCrnProvider.doAsInternalActor(
+                                regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
+                                () -> stackV4Endpoint.getNotCcmUpgradedStackCount(0L, crn, ThreadBasedUserCrnProvider.getUserCrn()) > 0);
     }
 }
