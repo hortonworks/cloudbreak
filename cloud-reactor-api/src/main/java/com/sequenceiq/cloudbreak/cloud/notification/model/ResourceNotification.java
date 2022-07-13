@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.notification.model;
 
+import java.util.Collections;
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -12,7 +15,7 @@ import reactor.rx.Promises;
  */
 public class ResourceNotification {
 
-    private final CloudResource cloudResource;
+    private final List<CloudResource> cloudResources;
 
     private final CloudContext cloudContext;
 
@@ -21,14 +24,25 @@ public class ResourceNotification {
     private final ResourceNotificationType type;
 
     public ResourceNotification(CloudResource cloudResource, CloudContext cloudContext, ResourceNotificationType type) {
-        this.cloudResource = cloudResource;
+        this(Collections.singletonList(cloudResource), cloudContext, type);
+    }
+
+    public ResourceNotification(List<CloudResource> cloudResources, CloudContext cloudContext, ResourceNotificationType type) {
+        this.cloudResources = cloudResources;
         this.cloudContext = cloudContext;
         promise = Promises.prepare();
         this.type = type;
     }
 
     public CloudResource getCloudResource() {
-        return cloudResource;
+        if (cloudResources.size() > 1) {
+            throw new UnsupportedOperationException("Please use the list version of this function");
+        }
+        return cloudResources.stream().findFirst().orElse(null);
+    }
+
+    public List<CloudResource> getCloudResources() {
+        return cloudResources;
     }
 
     public Promise<ResourcePersisted> getPromise() {
@@ -54,7 +68,7 @@ public class ResourceNotification {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("ResourceNotification{");
-        sb.append("cloudResource=").append(cloudResource);
+        sb.append("cloudResources=").append(cloudResources);
         sb.append(", promise=").append(promise);
         sb.append(", cloudContext=").append(cloudContext);
         sb.append(", type=").append(type);

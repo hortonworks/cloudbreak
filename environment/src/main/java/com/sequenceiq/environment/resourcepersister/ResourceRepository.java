@@ -6,6 +6,7 @@ import java.util.Optional;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -28,9 +29,15 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
             @Param("type") ResourceType type);
 
     @Query("SELECT r FROM Resource r WHERE r.resourceReference = :resourceReference AND r.resourceType = :type")
-    Optional<Resource> findByResourceReferenceAndType(@Param("resourceReference") String resourceReference,
-            @Param("type") ResourceType type);
+    Optional<Resource> findByResourceReferenceAndType(@Param("resourceReference") String resourceReference, @Param("type") ResourceType type);
 
     @Query("SELECT r FROM Resource r WHERE r.environment.id = :environmentId AND r.resourceType = :type")
     Optional<Resource> findByEnvironmentIdAndType(@Param("environmentId") Long environmentId, @Param("type") com.sequenceiq.common.api.type.ResourceType type);
+
+    @Query("SELECT count(r) > 0 FROM Resource r WHERE r.resourceReference = :resourceReference AND r.resourceType = :type")
+    boolean existsByResourceReferenceAndType(@Param("resourceReference") String resourceReference, @Param("type") ResourceType type);
+
+    @Modifying
+    @Query("DELETE FROM Resource r WHERE r.resourceReference = :resourceReference AND r.resourceType = :type")
+    void deleteByReferenceAndType(@Param("resourceReference") String resourceReference, @Param("type") ResourceType type);
 }

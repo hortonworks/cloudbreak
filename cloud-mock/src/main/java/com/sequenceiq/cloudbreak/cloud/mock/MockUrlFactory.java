@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 @Component
 public class MockUrlFactory {
 
+    private static final int TIMEOUT = 60000;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MockUrlFactory.class);
 
     @Value("${mock.infrastructure.host:localhost}")
@@ -45,6 +47,7 @@ public class MockUrlFactory {
                     and can default back to the original X509TrustStoreImpl. openjdk:11.0.6 */
                 .withSecure(false)
                 .withDebug(false)
+                .withTimeOut(TIMEOUT)
                 .build();
 
         Client client = RestClientUtil.get(config);
