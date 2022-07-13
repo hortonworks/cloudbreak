@@ -65,6 +65,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEv
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
@@ -213,9 +215,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public FlowIdentifier triggerRotateSaltPassword(Long stackId) {
+    public FlowIdentifier triggerRotateSaltPassword(Long stackId, RotateSaltPasswordReason reason) {
         String selector = RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event();
-        return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
+        return reactorNotifier.notify(stackId, selector, new RotateSaltPasswordRequest(stackId, reason));
     }
 
     public FlowIdentifier triggerClusterReInstall(Long stackId) {

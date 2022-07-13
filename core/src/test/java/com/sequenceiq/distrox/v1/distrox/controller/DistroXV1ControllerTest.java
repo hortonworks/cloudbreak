@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatal
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -124,6 +125,6 @@ class DistroXV1ControllerTest {
 
         distroXV1Controller.rotateSaltPasswordByCrn(CRN);
 
-        verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(CRN), ACCOUNT_ID);
+        verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(CRN), ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
     }
 }

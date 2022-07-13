@@ -30,7 +30,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -45,7 +44,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabi
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -66,11 +64,9 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
-import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
-import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
@@ -141,9 +137,6 @@ public class ClusterBootstrapper {
 
     @Inject
     private TransactionService transactionService;
-
-    @Inject
-    private SecurityConfigService securityConfigService;
 
     @Inject
     private ClusterService clusterService;
@@ -479,32 +472,5 @@ public class ClusterBootstrapper {
         if (EXIT.equals(pollingResult)) {
             throw new CancellationException(cancelledMessage);
         }
-    }
-
-    public void validateRotateSaltPassword(StackDto stack) {
-        if (!stack.isAvailable()) {
-            throw new BadRequestException("Rotating SaltStack user password is only available for stacks in available status");
-        }
-        if (!isChangeSaltuserPasswordSupported(stack)) {
-            throw new BadRequestException(String.format("Rotating SaltStack user password is not supported with your image version, " +
-                            "please upgrade to an image with salt-bootstrap version >= %s (you can find this information in the image catalog)",
-                    SaltBootstrapVersionChecker.CHANGE_SALTUSER_PASSWORD_SUPPORT_MIN_VERSION));
-        }
-    }
-
-    private boolean isChangeSaltuserPasswordSupported(StackDto stack) {
-        return stack.getAllAvailableGatewayInstances().stream()
-                .map(InstanceMetadataView::getImage)
-                .allMatch(image -> saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(image));
-    }
-
-    public void rotateSaltPassword(StackDto stack) throws CloudbreakOrchestratorException {
-        validateRotateSaltPassword(stack);
-        SecurityConfig securityConfig = securityConfigService.getOneByStackId(stack.getId());
-        String oldPassword = securityConfig.getSaltSecurityConfig().getSaltPassword();
-        String newPassword = PasswordUtil.generatePassword();
-        List<GatewayConfig> allGatewayConfig = gatewayConfigService.getAllGatewayConfigs(stack);
-        hostOrchestrator.changePassword(allGatewayConfig, newPassword, oldPassword);
-        securityConfigService.changeSaltPassword(securityConfig, newPassword);
     }
 }

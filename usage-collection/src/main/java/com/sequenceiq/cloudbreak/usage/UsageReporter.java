@@ -156,4 +156,11 @@ public interface UsageReporter {
      */
     void cdpStackPatcherEvent(
             UsageProto.CDPStackPatchEvent details);
+
+    /**
+     * Reports a CDP stack salt password rotation event.
+     * @param details the event details
+     */
+    void cdpSaltPasswordRotationEvent(
+            UsageProto.CDPSaltPasswordRotationEvent details);
 }
