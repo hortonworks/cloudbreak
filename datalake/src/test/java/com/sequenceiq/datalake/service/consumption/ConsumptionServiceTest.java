@@ -19,6 +19,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ResourceType;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
@@ -32,6 +33,8 @@ class ConsumptionServiceTest {
     private static final boolean CONSUMPTION_DISABLED = false;
 
     private static final String ACCOUNT_ID = "accountId";
+
+    private static final String INITIATOR_USER_CRN = "initiatorUserCrn";
 
     private static final String ENVIRONMENT_CRN = "environmentCrn";
 
@@ -66,7 +69,7 @@ class ConsumptionServiceTest {
         underTest.scheduleStorageConsumptionCollectionIfNeeded(sdxCluster());
 
         verify(entitlementService, never()).isCdpSaasEnabled(anyString());
-        verify(consumptionClientService, never()).scheduleStorageConsumptionCollection(anyString(), any(StorageConsumptionRequest.class));
+        verify(consumptionClientService, never()).scheduleStorageConsumptionCollection(anyString(), any(StorageConsumptionRequest.class), anyString());
     }
 
     private SdxCluster sdxCluster(String cloudStorageBaseLocation) {
@@ -85,7 +88,7 @@ class ConsumptionServiceTest {
 
         underTest.scheduleStorageConsumptionCollectionIfNeeded(sdxCluster());
 
-        verify(consumptionClientService, never()).scheduleStorageConsumptionCollection(anyString(), any(StorageConsumptionRequest.class));
+        verify(consumptionClientService, never()).scheduleStorageConsumptionCollection(anyString(), any(StorageConsumptionRequest.class), anyString());
     }
 
     @ParameterizedTest(name = "cloudStorageBaseLocation={0}")
@@ -96,16 +99,16 @@ class ConsumptionServiceTest {
 
         underTest.scheduleStorageConsumptionCollectionIfNeeded(sdxCluster(cloudStorageBaseLocation));
 
-        verify(consumptionClientService, never()).scheduleStorageConsumptionCollection(anyString(), any(StorageConsumptionRequest.class));
+        verify(consumptionClientService, never()).scheduleStorageConsumptionCollection(anyString(), any(StorageConsumptionRequest.class), anyString());
     }
 
     @Test
     void scheduleStorageConsumptionCollectionIfNeededTestExecute() {
         when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
 
-        underTest.scheduleStorageConsumptionCollectionIfNeeded(sdxCluster());
+        ThreadBasedUserCrnProvider.doAs(INITIATOR_USER_CRN, () -> underTest.scheduleStorageConsumptionCollectionIfNeeded(sdxCluster()));
 
-        verify(consumptionClientService).scheduleStorageConsumptionCollection(eq(ACCOUNT_ID), storageConsumptionRequestCaptor.capture());
+        verify(consumptionClientService).scheduleStorageConsumptionCollection(eq(ACCOUNT_ID), storageConsumptionRequestCaptor.capture(), anyString());
         verifyStorageConsumptionRequest(storageConsumptionRequestCaptor.getValue());
     }
 
@@ -125,7 +128,7 @@ class ConsumptionServiceTest {
         underTest.unscheduleStorageConsumptionCollectionIfNeeded(sdxCluster());
 
         verify(entitlementService, never()).isCdpSaasEnabled(anyString());
-        verify(consumptionClientService, never()).unscheduleStorageConsumptionCollection(anyString(), anyString(), anyString());
+        verify(consumptionClientService, never()).unscheduleStorageConsumptionCollection(anyString(), anyString(), anyString(), anyString());
     }
 
     private SdxCluster sdxCluster() {
@@ -138,7 +141,7 @@ class ConsumptionServiceTest {
 
         underTest.unscheduleStorageConsumptionCollectionIfNeeded(sdxCluster());
 
-        verify(consumptionClientService, never()).unscheduleStorageConsumptionCollection(anyString(), anyString(), anyString());
+        verify(consumptionClientService, never()).unscheduleStorageConsumptionCollection(anyString(), anyString(), anyString(), anyString());
     }
 
     @ParameterizedTest(name = "cloudStorageBaseLocation={0}")
@@ -149,16 +152,16 @@ class ConsumptionServiceTest {
 
         underTest.unscheduleStorageConsumptionCollectionIfNeeded(sdxCluster(cloudStorageBaseLocation));
 
-        verify(consumptionClientService, never()).unscheduleStorageConsumptionCollection(anyString(), anyString(), anyString());
+        verify(consumptionClientService, never()).unscheduleStorageConsumptionCollection(anyString(), anyString(), anyString(), anyString());
     }
 
     @Test
     void unscheduleStorageConsumptionCollectionIfNeededTestExecute() {
         when(entitlementService.isCdpSaasEnabled(ACCOUNT_ID)).thenReturn(true);
 
-        underTest.unscheduleStorageConsumptionCollectionIfNeeded(sdxCluster());
+        ThreadBasedUserCrnProvider.doAs(INITIATOR_USER_CRN, () -> underTest.unscheduleStorageConsumptionCollectionIfNeeded(sdxCluster()));
 
-        verify(consumptionClientService).unscheduleStorageConsumptionCollection(ACCOUNT_ID, DATALAKE_CRN, STORAGE_BASE_LOCATION);
+        verify(consumptionClientService).unscheduleStorageConsumptionCollection(ACCOUNT_ID, DATALAKE_CRN, STORAGE_BASE_LOCATION, INITIATOR_USER_CRN);
     }
 
 }
