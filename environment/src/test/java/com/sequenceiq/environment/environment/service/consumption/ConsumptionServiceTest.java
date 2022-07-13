@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.consumption.api.v1.consumption.endpoint.ConsumptionInternalEndpoint;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
@@ -26,6 +27,8 @@ import com.sequenceiq.environment.exception.ConsumptionOperationFailedException;
 class ConsumptionServiceTest {
 
     private static final String ACCOUNT_ID = "accountId";
+
+    private static final String INITIATOR_USER_CRN = "initiatorUserCrn";
 
     private static final String MONITORED_RESOURCE_CRN = "monitoredResourceCrn";
 
@@ -58,20 +61,21 @@ class ConsumptionServiceTest {
     void scheduleStorageConsumptionCollectionTestWhenSuccess() {
         StorageConsumptionRequest storageConsumptionRequest = new StorageConsumptionRequest();
 
-        underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest);
+        ThreadBasedUserCrnProvider.doAs(INITIATOR_USER_CRN, () -> underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest));
 
-        verify(consumptionInternalEndpoint).scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest);
+        verify(consumptionInternalEndpoint).scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest, INITIATOR_USER_CRN);
     }
 
     @Test
     void scheduleStorageConsumptionCollectionTestWhenFailure() {
         StorageConsumptionRequest storageConsumptionRequest = new StorageConsumptionRequest();
         WebApplicationException e = new WebApplicationException();
-        doThrow(e).when(consumptionInternalEndpoint).scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest);
+        doThrow(e).when(consumptionInternalEndpoint).scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest, INITIATOR_USER_CRN);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(e)).thenReturn(ERROR_MESSAGE);
 
         ConsumptionOperationFailedException consumptionOperationFailedException = assertThrows(ConsumptionOperationFailedException.class,
-                () -> underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest));
+                () -> ThreadBasedUserCrnProvider.doAs(INITIATOR_USER_CRN, () -> underTest.scheduleStorageConsumptionCollection(
+                        ACCOUNT_ID, storageConsumptionRequest)));
 
         verifyException(e, consumptionOperationFailedException);
     }
@@ -84,19 +88,22 @@ class ConsumptionServiceTest {
 
     @Test
     void unscheduleStorageConsumptionCollectionTestWhenSuccess() {
-        underTest.unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION);
+        ThreadBasedUserCrnProvider.doAs(INITIATOR_USER_CRN, () -> underTest.unscheduleStorageConsumptionCollection(
+                ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION));
 
-        verify(consumptionInternalEndpoint).unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION);
+        verify(consumptionInternalEndpoint).unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION, INITIATOR_USER_CRN);
     }
 
     @Test
     void unscheduleStorageConsumptionCollectionTestWhenFailure() {
         WebApplicationException e = new WebApplicationException();
-        doThrow(e).when(consumptionInternalEndpoint).unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION);
+        doThrow(e).when(consumptionInternalEndpoint).unscheduleStorageConsumptionCollection(
+                ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION, INITIATOR_USER_CRN);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(e)).thenReturn(ERROR_MESSAGE);
 
         ConsumptionOperationFailedException consumptionOperationFailedException = assertThrows(ConsumptionOperationFailedException.class,
-                () -> underTest.unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION));
+                () -> ThreadBasedUserCrnProvider.doAs(INITIATOR_USER_CRN, () -> underTest.unscheduleStorageConsumptionCollection(
+                        ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION)));
 
         verifyException(e, consumptionOperationFailedException);
     }

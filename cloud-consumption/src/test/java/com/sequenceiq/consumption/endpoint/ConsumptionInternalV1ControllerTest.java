@@ -36,6 +36,8 @@ public class ConsumptionInternalV1ControllerTest {
 
     private static final Long CONSUMPTION_ID = 123L;
 
+    private static final String INITIATOR_USER_CRN = "initiatorUserCrn";
+
     @Mock
     private ConsumptionService consumptionService;
 
@@ -52,7 +54,7 @@ public class ConsumptionInternalV1ControllerTest {
     public void testStorageConsumptionCollectionExists() {
         when(consumptionService.isConsumptionPresentForLocationAndMonitoredCrn(MONITORED_CRN, LOCATION)).thenReturn(true);
 
-        ConsumptionExistenceResponse response = underTest.doesStorageConsumptionCollectionExist(ACCOUNT_ID, MONITORED_CRN, LOCATION);
+        ConsumptionExistenceResponse response = underTest.doesStorageConsumptionCollectionExist(ACCOUNT_ID, MONITORED_CRN, LOCATION, INITIATOR_USER_CRN);
 
         verify(consumptionService).isConsumptionPresentForLocationAndMonitoredCrn(MONITORED_CRN, LOCATION);
         assertTrue(response.isExists());
@@ -62,7 +64,7 @@ public class ConsumptionInternalV1ControllerTest {
     public void testStorageConsumptionCollectionDoesntExist() {
         when(consumptionService.isConsumptionPresentForLocationAndMonitoredCrn(MONITORED_CRN, LOCATION)).thenReturn(false);
 
-        ConsumptionExistenceResponse response = underTest.doesStorageConsumptionCollectionExist(ACCOUNT_ID, MONITORED_CRN, LOCATION);
+        ConsumptionExistenceResponse response = underTest.doesStorageConsumptionCollectionExist(ACCOUNT_ID, MONITORED_CRN, LOCATION, INITIATOR_USER_CRN);
 
         verify(consumptionService).isConsumptionPresentForLocationAndMonitoredCrn(MONITORED_CRN, LOCATION);
         assertFalse(response.isExists());
@@ -76,7 +78,7 @@ public class ConsumptionInternalV1ControllerTest {
         when(consumptionApiConverter.initCreationDtoForStorage(request)).thenReturn(consumptionCreationDto);
         when(consumptionService.create(consumptionCreationDto)).thenReturn(Optional.empty());
 
-        underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, request);
+        underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, request, INITIATOR_USER_CRN);
 
         verify(jobService, never()).schedule(anyLong());
     }
@@ -89,7 +91,7 @@ public class ConsumptionInternalV1ControllerTest {
         when(consumptionApiConverter.initCreationDtoForStorage(request)).thenReturn(consumptionCreationDto);
         when(consumptionService.create(consumptionCreationDto)).thenReturn(Optional.of(consumption()));
 
-        underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, request);
+        underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, request, INITIATOR_USER_CRN);
 
         verify(jobService).schedule(CONSUMPTION_ID);
     }
@@ -98,7 +100,7 @@ public class ConsumptionInternalV1ControllerTest {
     void unscheduleStorageConsumptionCollectionTestWhenConsumptionAbsent() {
         when(consumptionService.findStorageConsumptionByMonitoredResourceCrnAndLocation(MONITORED_CRN, LOCATION)).thenReturn(Optional.empty());
 
-        underTest.unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_CRN, LOCATION);
+        underTest.unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_CRN, LOCATION, INITIATOR_USER_CRN);
 
         verify(jobService, never()).unschedule(anyString());
         verify(consumptionService, never()).delete(any(Consumption.class));
@@ -109,7 +111,7 @@ public class ConsumptionInternalV1ControllerTest {
         Consumption consumption = consumption();
         when(consumptionService.findStorageConsumptionByMonitoredResourceCrnAndLocation(MONITORED_CRN, LOCATION)).thenReturn(Optional.of(consumption));
 
-        underTest.unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_CRN, LOCATION);
+        underTest.unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_CRN, LOCATION, INITIATOR_USER_CRN);
 
         verify(jobService).unschedule("123");
         verify(consumptionService).delete(consumption);

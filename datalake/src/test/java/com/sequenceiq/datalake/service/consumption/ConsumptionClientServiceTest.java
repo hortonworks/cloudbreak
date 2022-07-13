@@ -26,6 +26,8 @@ class ConsumptionClientServiceTest {
 
     private static final String ACCOUNT_ID = "accountId";
 
+    private static final String INITIATOR_USER_CRN = "initiatorUserCrn";
+
     private static final String MONITORED_RESOURCE_CRN = "monitoredResourceCrn";
 
     private static final String STORAGE_LOCATION = "s3a://foo/bar";
@@ -57,20 +59,20 @@ class ConsumptionClientServiceTest {
     void scheduleStorageConsumptionCollectionTestWhenSuccess() {
         StorageConsumptionRequest storageConsumptionRequest = new StorageConsumptionRequest();
 
-        underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest);
+        underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest, INITIATOR_USER_CRN);
 
-        verify(consumptionInternalEndpoint).scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest);
+        verify(consumptionInternalEndpoint).scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest, INITIATOR_USER_CRN);
     }
 
     @Test
     void scheduleStorageConsumptionCollectionTestWhenFailure() {
         StorageConsumptionRequest storageConsumptionRequest = new StorageConsumptionRequest();
         WebApplicationException e = new WebApplicationException();
-        doThrow(e).when(consumptionInternalEndpoint).scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest);
+        doThrow(e).when(consumptionInternalEndpoint).scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest, INITIATOR_USER_CRN);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(e)).thenReturn(ERROR_MESSAGE);
 
         ConsumptionOperationFailedException consumptionOperationFailedException = assertThrows(ConsumptionOperationFailedException.class,
-                () -> underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest));
+                () -> underTest.scheduleStorageConsumptionCollection(ACCOUNT_ID, storageConsumptionRequest, INITIATOR_USER_CRN));
 
         verifyException(e, consumptionOperationFailedException);
     }
@@ -83,19 +85,20 @@ class ConsumptionClientServiceTest {
 
     @Test
     void unscheduleStorageConsumptionCollectionTestWhenSuccess() {
-        underTest.unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION);
+        underTest.unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION, INITIATOR_USER_CRN);
 
-        verify(consumptionInternalEndpoint).unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION);
+        verify(consumptionInternalEndpoint).unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION, INITIATOR_USER_CRN);
     }
 
     @Test
     void unscheduleStorageConsumptionCollectionTestWhenFailure() {
         WebApplicationException e = new WebApplicationException();
-        doThrow(e).when(consumptionInternalEndpoint).unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION);
+        doThrow(e).when(consumptionInternalEndpoint).unscheduleStorageConsumptionCollection(ACCOUNT_ID,
+                MONITORED_RESOURCE_CRN, STORAGE_LOCATION, INITIATOR_USER_CRN);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(e)).thenReturn(ERROR_MESSAGE);
 
         ConsumptionOperationFailedException consumptionOperationFailedException = assertThrows(ConsumptionOperationFailedException.class,
-                () -> underTest.unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION));
+                () -> underTest.unscheduleStorageConsumptionCollection(ACCOUNT_ID, MONITORED_RESOURCE_CRN, STORAGE_LOCATION, INITIATOR_USER_CRN));
 
         verifyException(e, consumptionOperationFailedException);
     }
