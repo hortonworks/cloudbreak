@@ -23,6 +23,7 @@ if [[ $rm_flag ]]; then
     docker volume rm cbd-source 1>/dev/null || :
 fi
 
+set -x
 chmod +x cbd
 mkdir etc
 
