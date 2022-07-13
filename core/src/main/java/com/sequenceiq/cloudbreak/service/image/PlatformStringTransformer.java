@@ -4,9 +4,9 @@ import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalog
 
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 @Service
@@ -15,14 +15,13 @@ public class PlatformStringTransformer {
     private static final String GOV = "_gov";
 
     public ImageCatalogPlatform getPlatformStringForImageCatalog(String cloudPlatform, String variant) {
-        String platformVariant = variant;
-        String platform = cloudPlatform.toLowerCase();
-        if (Strings.isNullOrEmpty(platformVariant)) {
-            return imageCatalogPlatform(platform);
-        } else if (platformVariant.toLowerCase().endsWith(GOV)) {
-            return getPlatformStringForImageCatalog(platform, true);
+        String lowerCasePlatform = cloudPlatform.toLowerCase();
+        if (StringUtils.isBlank(variant)) {
+            return imageCatalogPlatform(lowerCasePlatform);
+        } else if (variant.toLowerCase().endsWith(GOV)) {
+            return getPlatformStringForImageCatalog(lowerCasePlatform, true);
         } else {
-            return imageCatalogPlatform(platform);
+            return imageCatalogPlatform(lowerCasePlatform);
         }
     }
 
@@ -39,7 +38,7 @@ public class PlatformStringTransformer {
     }
 
     public ImageCatalogPlatform getPlatformStringForImageCatalogByRegion(String cloudPlatform, String region) {
-        if (region.toLowerCase().contains("-gov-")) {
+        if (StringUtils.isNotBlank(region) && region.toLowerCase().contains("-gov-")) {
             return imageCatalogPlatform(govCloudSegmentRequired(cloudPlatform) ? cloudPlatform.concat(GOV).toUpperCase() : cloudPlatform.toUpperCase());
         }
         return imageCatalogPlatform(cloudPlatform);
