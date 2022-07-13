@@ -35,7 +35,7 @@ public class PrepareDistroxUpgradeFlowEventChainFactory implements FlowEventChai
 
     private ClusterUpgradeValidationTriggerEvent createUpgradeValidationTriggerEvent(DistroXUpgradePreparationChainTriggerEvent event) {
         return new ClusterUpgradeValidationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto().getImageId(),
-                event.isLockComponents());
+                event.isLockComponents(), true);
     }
 
     private ClusterUpgradePreparationTriggerEvent createClusterUpgradePreparationTriggerEvent(DistroXUpgradePreparationChainTriggerEvent event) {

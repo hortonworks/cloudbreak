@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,8 +37,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeImageValidationEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.ParcelSizeService;
@@ -93,8 +93,8 @@ public class ClusterUpgradeImageValidationHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(event);
 
-        assertEquals(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
-        assertEquals(REQUIRED_FREE_SPACE, ((ClusterUpgradeDiskSpaceValidationEvent) nextFlowStepSelector).getRequiredFreeSpace());
+        assertEquals(FINISH_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
+        assertEquals(REQUIRED_FREE_SPACE, ((ClusterUpgradeImageValidationFinishedEvent) nextFlowStepSelector).getRequiredFreeSpace());
         verify(parcelAvailabilityService).validateAvailability(request.getTargetImage(), request.getResourceId());
         verify(parcelSizeService).getRequiredFreeSpace(responses);
         verify(cloudContext).getPlatformVariant();
@@ -145,7 +145,7 @@ public class ClusterUpgradeImageValidationHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
-        assertEquals(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
+        assertEquals(FINISH_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
         verify(parcelAvailabilityService).validateAvailability(any(), any());
         verify(parcelSizeService).getRequiredFreeSpace(any());
         verify(cloudContext).getPlatformVariant();

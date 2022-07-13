@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_DISK_SPACE_EVENT;
@@ -19,6 +20,8 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.DiskSpaceValidationService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -42,16 +45,32 @@ public class ClusterUpgradeDiskSpaceValidationHandlerTest {
     private StackService stackService;
 
     @Mock
+    private ParcelService parcelService;
+
+    @Mock
     private Stack stack;
 
     @Test
-    public void testHandlerToRetrieveTheImageFromTheCurrentImageCatalog() {
+    public void testHandlerToCallDiskSpaceValidation() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
 
-        Selectable nextFlowStepSelector = underTest.doAccept(createEvent());
+        Selectable nextFlowStepSelector = underTest.doAccept(createEvent(false));
 
         assertEquals(FINISH_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.name(), nextFlowStepSelector.selector());
         verify(stackService).getByIdWithListsInTransaction(STACK_ID);
+        verify(diskSpaceValidationService).validateFreeSpaceForUpgrade(stack, REQUIRED_FREE_SPACE);
+        verifyNoInteractions(parcelService);
+    }
+
+    @Test
+    public void testHandlerToCallDiskSpaceValidationAndRemoveUnusedParcelsInCaseOfUpgradePreparation() throws CloudbreakException {
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+
+        Selectable nextFlowStepSelector = underTest.doAccept(createEvent(true));
+
+        assertEquals(FINISH_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.name(), nextFlowStepSelector.selector());
+        verify(stackService).getByIdWithListsInTransaction(STACK_ID);
+        verify(parcelService).removeUnusedParcelComponents(stack);
         verify(diskSpaceValidationService).validateFreeSpaceForUpgrade(stack, REQUIRED_FREE_SPACE);
     }
 
@@ -61,14 +80,16 @@ public class ClusterUpgradeDiskSpaceValidationHandlerTest {
         doThrow(new UpgradeValidationFailedException("Validation failed")).when(diskSpaceValidationService)
                 .validateFreeSpaceForUpgrade(stack, REQUIRED_FREE_SPACE);
 
-        Selectable nextFlowStepSelector = underTest.doAccept(createEvent());
+        Selectable nextFlowStepSelector = underTest.doAccept(createEvent(false));
 
         assertEquals(FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.name(), nextFlowStepSelector.selector());
         verify(stackService).getByIdWithListsInTransaction(STACK_ID);
         verify(diskSpaceValidationService).validateFreeSpaceForUpgrade(stack, REQUIRED_FREE_SPACE);
+        verifyNoInteractions(parcelService);
     }
 
-    private HandlerEvent<ClusterUpgradeDiskSpaceValidationEvent> createEvent() {
-        return new HandlerEvent<>(new Event<>(new ClusterUpgradeDiskSpaceValidationEvent(VALIDATE_DISK_SPACE_EVENT.selector(), STACK_ID, REQUIRED_FREE_SPACE)));
+    private HandlerEvent<ClusterUpgradeDiskSpaceValidationEvent> createEvent(boolean upgradePreparation) {
+        return new HandlerEvent<>(new Event<>(
+                new ClusterUpgradeDiskSpaceValidationEvent(VALIDATE_DISK_SPACE_EVENT.selector(), STACK_ID, REQUIRED_FREE_SPACE, upgradePreparation)));
     }
 }

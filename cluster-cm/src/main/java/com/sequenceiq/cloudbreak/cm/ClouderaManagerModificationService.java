@@ -943,17 +943,19 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Override
     public ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents, Set<String> parcelNamesFromImage) {
+        LOGGER.debug("Starting to remove unused parcel from the cluster.");
         ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiClient);
         ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
-        Set<String> usedParcelComponentNames = usedParcelComponents.stream()
-                .map(component -> component.getAttributes().getSilent(ClouderaManagerProduct.class).getName())
+        Set<ClouderaManagerProduct> usedParcels = usedParcelComponents.stream()
+                .map(component -> component.getAttributes().getSilent(ClouderaManagerProduct.class))
                 .collect(Collectors.toSet());
+        LOGGER.debug("Used parcels: {}, available parcels on the image: {}", usedParcels, parcelNamesFromImage);
         ParcelOperationStatus deactivateStatus = clouderaManagerParcelDecommissionService
-                .deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(), usedParcelComponentNames, parcelNamesFromImage);
+                .deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(), usedParcels, parcelNamesFromImage);
         ParcelOperationStatus undistributeStatus = clouderaManagerParcelDecommissionService
-                .undistributeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, usedParcelComponentNames, parcelNamesFromImage);
+                .undistributeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, usedParcels, parcelNamesFromImage);
         ParcelOperationStatus removalStatus = clouderaManagerParcelDecommissionService
-                .removeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, usedParcelComponentNames, parcelNamesFromImage);
+                .removeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, usedParcels, parcelNamesFromImage);
         ParcelOperationStatus result = removalStatus.merge(deactivateStatus).merge(undistributeStatus);
         LOGGER.info("Result of the parcel removal: {}", result);
         return result;

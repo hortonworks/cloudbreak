@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_IMAGE_EVENT;
 
@@ -8,7 +8,6 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 
 public class ClusterUpgradeImageValidationEvent extends ClusterUpgradeValidationEvent {
 

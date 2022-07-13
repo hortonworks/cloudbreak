@@ -1164,7 +1164,7 @@ class ClouderaManagerModificationServiceTest {
         ClouderaManagerProduct cmProduct1 = createClouderaManagerProduct("product1", "version1");
         ClouderaManagerProduct cmProduct2 = createClouderaManagerProduct("product2", "version2");
         Set<ClusterComponent> usedComponents = Set.of(createClusterComponent(cmProduct1), createClusterComponent(cmProduct2));
-        Set<String> usedParcelComponentNames = Set.of(cmProduct1.getName(), cmProduct2.getName());
+        Set<ClouderaManagerProduct> usedParcelComponentNames = Set.of(cmProduct1, cmProduct2);
         when(clouderaManagerApiFactory.getParcelsResourceApi(apiClientMock)).thenReturn(parcelsResourceApi);
         when(clouderaManagerApiFactory.getParcelResourceApi(apiClientMock)).thenReturn(parcelResourceApi);
         when(clouderaManagerParcelDecommissionService.deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, STACK_NAME, usedParcelComponentNames,
@@ -1195,7 +1195,7 @@ class ClouderaManagerModificationServiceTest {
         ClouderaManagerProduct cmProduct1 = createClouderaManagerProduct("product1", "version1");
         ClouderaManagerProduct cmProduct2 = createClouderaManagerProduct("product2", "version2");
         Set<ClusterComponent> usedComponents = Set.of(createClusterComponent(cmProduct1), createClusterComponent(cmProduct2));
-        Set<String> usedParcelComponentNames = Set.of(cmProduct1.getName(), cmProduct2.getName());
+        Set<ClouderaManagerProduct> usedParcelComponentNames = Set.of(cmProduct1, cmProduct2);
         when(clouderaManagerApiFactory.getParcelsResourceApi(apiClientMock)).thenReturn(parcelsResourceApi);
         when(clouderaManagerApiFactory.getParcelResourceApi(apiClientMock)).thenReturn(parcelResourceApi);
         when(clouderaManagerParcelDecommissionService.deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, STACK_NAME, usedParcelComponentNames,

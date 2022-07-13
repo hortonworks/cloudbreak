@@ -11,6 +11,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DISTRIBUTED;
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DOWNLOADED;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -66,9 +70,10 @@ public class ClouderaManagerParcelDecommissionServiceTest {
     void testDeactivateUnusedComponents() throws Exception {
         // GIVEN
         Set<String> productsFromImage = Set.of("product1", "product2", "product3");
-        Set<String> usedComponents = Set.of("product1", "product2");
+        Set<ClouderaManagerProduct> usedComponents = Set.of(new ClouderaManagerProduct().withName("product1").withVersion("version1"),
+                new ClouderaManagerProduct().withName("product2").withVersion("version2"));
         Map<String, String> activatedParcels = Map.of("product1", "version1", "product3", "version3", "customParcel", "customParcelVersion");
-        ApiParcelList parcelList = createApiParcelList(activatedParcels, ParcelStatus.ACTIVATED);
+        ApiParcelList parcelList = createApiParcelList(activatedParcels, ACTIVATED);
         when(parcelsResourceApi.readParcels(STACK_NAME, "summary")).thenReturn(parcelList);
         // WHEN
         ParcelOperationStatus actual = underTest.deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, STACK_NAME, usedComponents, productsFromImage);
@@ -86,9 +91,10 @@ public class ClouderaManagerParcelDecommissionServiceTest {
     public void testDeactivateUnusedComponentsWhenDeactivationFailsOnParcel() throws Exception {
         // GIVEN
         Set<String> productsFromImage = Set.of("product1", "product2", "product3");
-        Set<String> usedComponents = Set.of("product1", "product2");
+        Set<ClouderaManagerProduct> usedComponents = Set.of(new ClouderaManagerProduct().withName("product1").withVersion("version1"),
+                new ClouderaManagerProduct().withName("product2").withVersion("version2"));
         Map<String, String> activatedParcels = Map.of("product1", "version1", "product3", "version3", "customParcel", "customParcelVersion");
-        ApiParcelList parcelList = createApiParcelList(activatedParcels, ParcelStatus.ACTIVATED);
+        ApiParcelList parcelList = createApiParcelList(activatedParcels, ACTIVATED);
         when(parcelsResourceApi.readParcels(STACK_NAME, "summary")).thenReturn(parcelList);
         when(parcelResourceApi.deactivateCommand(STACK_NAME, "product3", "version3")).thenThrow(new ApiException());
         // WHEN and THEN
@@ -106,9 +112,10 @@ public class ClouderaManagerParcelDecommissionServiceTest {
     public void testUndistributeUnusedComponents() throws Exception {
         // GIVEN
         Set<String> productsFromImage = Set.of("product1", "product2", "product3");
-        Set<String> usedComponents = Set.of("product1", "product2");
+        Set<ClouderaManagerProduct> usedComponents = Set.of(new ClouderaManagerProduct().withName("product1").withVersion("version1"),
+                new ClouderaManagerProduct().withName("product2").withVersion("version2"));
         Map<String, String> distributedParcels = Map.of("product1", "version1", "product3", "version3", "customParcel", "customParcelVersion");
-        ApiParcelList parcelList = createApiParcelList(distributedParcels, ParcelStatus.DISTRIBUTED);
+        ApiParcelList parcelList = createApiParcelList(distributedParcels, DISTRIBUTED);
         when(parcelsResourceApi.readParcels(STACK_NAME, "summary")).thenReturn(parcelList);
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn(STACK_NAME);
@@ -132,9 +139,10 @@ public class ClouderaManagerParcelDecommissionServiceTest {
     public void testUndistributeUnusedComponentsAndUndistributionFails() throws Exception {
         // GIVEN
         Set<String> productsFromImage = Set.of("product1", "product2", "product3");
-        Set<String> usedComponents = Set.of("product1", "product2");
+        Set<ClouderaManagerProduct> usedComponents = Set.of(new ClouderaManagerProduct().withName("product1").withVersion("version1"),
+                new ClouderaManagerProduct().withName("product2").withVersion("version2"));
         Map<String, String> distributedParcels = Map.of("product1", "version1", "product3", "version3", "customParcel", "customParcelVersion");
-        ApiParcelList parcelList = createApiParcelList(distributedParcels, ParcelStatus.DISTRIBUTED);
+        ApiParcelList parcelList = createApiParcelList(distributedParcels, DISTRIBUTED);
         when(parcelsResourceApi.readParcels(STACK_NAME, "summary")).thenReturn(parcelList);
         when(parcelResourceApi.startRemovalOfDistributionCommand(STACK_NAME, "product3", "version3")).thenThrow(new ApiException());
         Stack stack = mock(Stack.class);
@@ -159,9 +167,10 @@ public class ClouderaManagerParcelDecommissionServiceTest {
     public void testRemoveUnusedComponents() throws Exception {
         // GIVEN
         Set<String> productsFromImage = Set.of("product1", "product2", "product3");
-        Set<String> usedComponents = Set.of("product1", "product2");
+        Set<ClouderaManagerProduct> usedComponents = Set.of(new ClouderaManagerProduct().withName("product1").withVersion("version1"),
+                new ClouderaManagerProduct().withName("product2").withVersion("version2"));
         Map<String, String> distributedParcels = Map.of("product1", "version1", "product3", "version3", "customParcel", "customParcelVersion");
-        ApiParcelList parcelList = createApiParcelList(distributedParcels, ParcelStatus.DOWNLOADED);
+        ApiParcelList parcelList = createApiParcelList(distributedParcels, DOWNLOADED);
         when(parcelsResourceApi.readParcels(STACK_NAME, "summary")).thenReturn(parcelList);
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn(STACK_NAME);
@@ -185,9 +194,10 @@ public class ClouderaManagerParcelDecommissionServiceTest {
     public void testRemoveUnusedComponentsWhenRemovalFails() throws Exception {
         // GIVEN
         Set<String> productsFromImage = Set.of("product1", "product2", "product3");
-        Set<String> usedComponents = Set.of("product1", "product2");
+        Set<ClouderaManagerProduct> usedComponents = Set.of(new ClouderaManagerProduct().withName("product1").withVersion("version1"),
+                new ClouderaManagerProduct().withName("product2").withVersion("version2"));
         Map<String, String> distributedParcels = Map.of("product1", "version1", "product3", "version3", "customParcel", "customParcelVersion");
-        ApiParcelList parcelList = createApiParcelList(distributedParcels, ParcelStatus.DOWNLOADED);
+        ApiParcelList parcelList = createApiParcelList(distributedParcels, DOWNLOADED);
         when(parcelsResourceApi.readParcels(STACK_NAME, "summary")).thenReturn(parcelList);
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn(STACK_NAME);
@@ -214,21 +224,21 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         when(stack.getName()).thenReturn(STACK_NAME);
         ClouderaManagerProduct currentProductWithVersionToKeep = new ClouderaManagerProduct().withName("CDH").withVersion("current");
         doReturn(Set.of(
-                new ParcelInfo("ignored", "current", ParcelStatus.DISTRIBUTED),
-                new ParcelInfo(currentProductWithVersionToKeep.getName(), "old", ParcelStatus.DISTRIBUTED),
-                new ParcelInfo(currentProductWithVersionToKeep.getName(), "old2", ParcelStatus.DISTRIBUTED),
-                new ParcelInfo(currentProductWithVersionToKeep.getName(), currentProductWithVersionToKeep.getVersion(), ParcelStatus.DISTRIBUTED)))
-                .when(parcelManagementService).getParcelsInStatus(parcelsResourceApi, STACK_NAME, ParcelStatus.DISTRIBUTED);
+                new ParcelInfo("ignored", "current", DISTRIBUTED),
+                new ParcelInfo(currentProductWithVersionToKeep.getName(), "old", DISTRIBUTED),
+                new ParcelInfo(currentProductWithVersionToKeep.getName(), "old2", DISTRIBUTED),
+                new ParcelInfo(currentProductWithVersionToKeep.getName(), currentProductWithVersionToKeep.getVersion(), DISTRIBUTED)))
+                .when(parcelManagementService).getParcelsInStatus(parcelsResourceApi, STACK_NAME, DISTRIBUTED);
         ArgumentCaptor<Multimap<String, String>> parcelVersionsCaptorForDownloaded = ArgumentCaptor.forClass(Multimap.class);
         when(clouderaManagerPollingServiceProvider
-                .startPollingCmParcelStatus(eq(stack), eq(apiClient), parcelVersionsCaptorForDownloaded.capture(), eq(ParcelStatus.DOWNLOADED)))
+                .startPollingCmParcelStatus(eq(stack), eq(apiClient), parcelVersionsCaptorForDownloaded.capture(), eq(DOWNLOADED)))
                 .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
         doReturn(Set.of(
-                new ParcelInfo("ignored", "current", ParcelStatus.DOWNLOADED),
-                new ParcelInfo(currentProductWithVersionToKeep.getName(), "old", ParcelStatus.DOWNLOADED),
-                new ParcelInfo(currentProductWithVersionToKeep.getName(), "old2", ParcelStatus.DOWNLOADED),
-                new ParcelInfo(currentProductWithVersionToKeep.getName(), currentProductWithVersionToKeep.getVersion(), ParcelStatus.DOWNLOADED)))
-                .when(parcelManagementService).getParcelsInStatus(parcelsResourceApi, STACK_NAME, ParcelStatus.DOWNLOADED);
+                new ParcelInfo("ignored", "current", DOWNLOADED),
+                new ParcelInfo(currentProductWithVersionToKeep.getName(), "old", DOWNLOADED),
+                new ParcelInfo(currentProductWithVersionToKeep.getName(), "old2", DOWNLOADED),
+                new ParcelInfo(currentProductWithVersionToKeep.getName(), currentProductWithVersionToKeep.getVersion(), DOWNLOADED)))
+                .when(parcelManagementService).getParcelsInStatus(parcelsResourceApi, STACK_NAME, DOWNLOADED);
 
         ArgumentCaptor<Multimap<String, String>> parcelVersionsCaptorForDelete = ArgumentCaptor.forClass(Multimap.class);
         when(clouderaManagerPollingServiceProvider

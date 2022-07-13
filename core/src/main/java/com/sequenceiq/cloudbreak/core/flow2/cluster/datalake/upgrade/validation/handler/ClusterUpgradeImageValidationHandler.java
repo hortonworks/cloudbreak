@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_IMAGE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
 
 import java.util.Set;
 
@@ -19,8 +18,8 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeImageValidationEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeImageValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.ParcelSizeService;
@@ -53,8 +52,7 @@ public class ClusterUpgradeImageValidationHandler extends ExceptionCatcherEventH
             long requiredDiskSpaceForUpgrade = parcelSizeService.getRequiredFreeSpace(parcelsResponses);
             executePlatformSpecificValidations(request, cloudContext);
             LOGGER.debug("Cluster upgrade image validation succeeded.");
-            return new ClusterUpgradeDiskSpaceValidationEvent(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.selector(), request.getResourceId(),
-                    requiredDiskSpaceForUpgrade);
+            return new ClusterUpgradeImageValidationFinishedEvent(request.getResourceId(), requiredDiskSpaceForUpgrade);
         } catch (RuntimeException e) {
             LOGGER.warn("Cluster upgrade image validation failed: ", e);
             return new ClusterUpgradeValidationFailureEvent(request.getResourceId(), e);

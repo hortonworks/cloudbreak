@@ -17,9 +17,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_VALIDATION_INIT_EVENT;
 
@@ -50,7 +50,7 @@ public class ClusterUpgradeValidationFlowConfig
                     .defaultFailureEvent()
 
                     .from(CLUSTER_UPGRADE_IMAGE_VALIDATION_STATE).to(CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_STATE)
-                    .event(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT)
+                    .event(FINISH_CLUSTER_UPGRADE_IMAGE_VALIDATION_EVENT)
                     .defaultFailureEvent()
 
                     .from(CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_STATE).to(CLUSTER_UPGRADE_CLOUDPROVIDER_CHECK_UPDATE_STATE)

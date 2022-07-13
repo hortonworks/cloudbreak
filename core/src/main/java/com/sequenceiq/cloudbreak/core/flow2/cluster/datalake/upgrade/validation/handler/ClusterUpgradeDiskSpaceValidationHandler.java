@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.DiskSpaceValidationService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -32,13 +33,22 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
     @Inject
     private StackService stackService;
 
+    @Inject
+    private ParcelService parcelService;
+
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeDiskSpaceValidationEvent> event) {
-        LOGGER.debug("Accepting Cluster upgrade validation event.");
+        LOGGER.debug("Accepting Cluster upgrade validation event {}", event);
         ClusterUpgradeDiskSpaceValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
         try {
-            diskSpaceValidationService.validateFreeSpaceForUpgrade(getStack(stackId), request.getRequiredFreeSpace());
+            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+            if (request.isUpgradePreparation()) {
+                LOGGER.debug("Removing the unused parcels from the cluster upgrade ");
+                parcelService.removeUnusedParcelComponents(stack);
+            }
+            LOGGER.debug("Starting to validate disk space.");
+            diskSpaceValidationService.validateFreeSpaceForUpgrade(stack, request.getRequiredFreeSpace());
             return new ClusterUpgradeDiskSpaceValidationFinishedEvent(request.getResourceId());
         } catch (UpgradeValidationFailedException e) {
             LOGGER.warn("Cluster upgrade validation failed", e);
@@ -47,10 +57,6 @@ public class ClusterUpgradeDiskSpaceValidationHandler extends ExceptionCatcherEv
             LOGGER.error("Cluster upgrade validation was unsuccessful due to an internal error", e);
             return new ClusterUpgradeDiskSpaceValidationFinishedEvent(request.getResourceId());
         }
-    }
-
-    private Stack getStack(Long stackId) {
-        return stackService.getByIdWithListsInTransaction(stackId);
     }
 
     @Override
