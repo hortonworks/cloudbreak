@@ -300,4 +300,11 @@ public interface EnvironmentEndpoint {
             nickname = "upgradeCcmByEnvironmentCrnV1")
     void upgradeCcmByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
+    @GET
+    @Path("/crn/{crn}/upgrade_ccm_available")
+    @Produces(MediaType.TEXT_PLAIN)
+    @ApiOperation(value = EnvironmentOpDescription.UPGRADE_CCM_AVAILABLE, produces = MediaType.TEXT_PLAIN, notes = ENVIRONMENT_NOTES,
+            nickname = "isUpgradeCcmAvailableV1ByCrn")
+    boolean isUpgradeCcmAvailable(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+
 }
