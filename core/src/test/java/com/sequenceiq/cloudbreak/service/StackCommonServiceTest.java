@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
@@ -385,7 +386,8 @@ class StackCommonServiceTest {
     public void testRotateSaltPasswordWithoutEntitlement() {
         when(entitlementService.isSaltUserPasswordRotationEnabled(any())).thenReturn(false);
 
-        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, ACCOUNT_ID)))
+        assertThatThrownBy(() ->
+                ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Rotating SaltStack user password is not supported in your account");
     }
@@ -394,10 +396,10 @@ class StackCommonServiceTest {
     public void testRotateSaltPassword() throws CloudbreakOrchestratorException {
         when(entitlementService.isSaltUserPasswordRotationEnabled(any())).thenReturn(true);
 
-        ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, ACCOUNT_ID));
+        ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL));
 
         verify(entitlementService).isSaltUserPasswordRotationEnabled(any());
-        verify(stackOperationService).rotateSaltPassword(STACK_CRN, ACCOUNT_ID);
+        verify(stackOperationService).rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
     }
 
     @Test

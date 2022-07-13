@@ -22,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -29,12 +30,14 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.RotateSaltPasswordEvent;
+import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.SecurityConfigService;
@@ -75,6 +78,9 @@ class RotateSaltPasswordServiceTest {
     private FreeIpaFlowManager flowManager;
 
     @Mock
+    private UsageReporter usageReporter;
+
+    @Mock
     private Stack stack;
 
     @Mock
@@ -85,6 +91,9 @@ class RotateSaltPasswordServiceTest {
 
     @Captor
     private ArgumentCaptor<StackEvent> stackEventArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<UsageProto.CDPSaltPasswordRotationEvent> eventArgumentCaptor;
 
     @BeforeEach
     void setUp() {
@@ -149,7 +158,7 @@ class RotateSaltPasswordServiceTest {
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollable-id");
         when(flowManager.notify(anyString(), any())).thenReturn(flowIdentifier);
 
-        FlowIdentifier result = underTest.triggerRotateSaltPassword(ENVIRONMENT_CRN, ACCOUNT_ID);
+        FlowIdentifier result = underTest.triggerRotateSaltPassword(ENVIRONMENT_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
 
         assertThat(result)
                 .isEqualTo(flowIdentifier);
@@ -159,6 +168,33 @@ class RotateSaltPasswordServiceTest {
         assertThat(stackEvent)
                 .returns(selector, StackEvent::selector)
                 .returns(stack.getId(), StackEvent::getResourceId);
+    }
+
+    @Test
+    void sendSuccessUsageReport() {
+        underTest.sendSuccessUsageReport(ENVIRONMENT_CRN, RotateSaltPasswordReason.MANUAL);
+
+        verify(usageReporter).cdpSaltPasswordRotationEvent(eventArgumentCaptor.capture());
+        UsageProto.CDPSaltPasswordRotationEvent event = eventArgumentCaptor.getValue();
+        assertThat(event)
+                .returns(ENVIRONMENT_CRN, UsageProto.CDPSaltPasswordRotationEvent::getResourceCrn)
+                .returns(UsageProto.CDPSaltPasswordRotationEventReason.Value.MANUAL, UsageProto.CDPSaltPasswordRotationEvent::getReason)
+                .returns(UsageProto.CDPSaltPasswordRotationEventResult.Value.SUCCESS, UsageProto.CDPSaltPasswordRotationEvent::getEventResult)
+                .returns("", UsageProto.CDPSaltPasswordRotationEvent::getMessage);
+    }
+
+    @Test
+    void sendFailureUsageReport() {
+        String message = "failure message";
+        underTest.sendFailureUsageReport(ENVIRONMENT_CRN, RotateSaltPasswordReason.EXPIRED, message);
+
+        verify(usageReporter).cdpSaltPasswordRotationEvent(eventArgumentCaptor.capture());
+        UsageProto.CDPSaltPasswordRotationEvent event = eventArgumentCaptor.getValue();
+        assertThat(event)
+                .returns(ENVIRONMENT_CRN, UsageProto.CDPSaltPasswordRotationEvent::getResourceCrn)
+                .returns(UsageProto.CDPSaltPasswordRotationEventReason.Value.EXPIRED, UsageProto.CDPSaltPasswordRotationEvent::getReason)
+                .returns(UsageProto.CDPSaltPasswordRotationEventResult.Value.FAILURE, UsageProto.CDPSaltPasswordRotationEvent::getEventResult)
+                .returns(message, UsageProto.CDPSaltPasswordRotationEvent::getMessage);
     }
 
 }

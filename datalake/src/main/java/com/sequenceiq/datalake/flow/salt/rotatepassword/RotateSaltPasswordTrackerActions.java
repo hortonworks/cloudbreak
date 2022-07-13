@@ -61,7 +61,7 @@ public class RotateSaltPasswordTrackerActions {
             @Override
             protected void doExecute(SdxContext context, RotateSaltPasswordSuccessResponse payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Rotating salt password for SDX stack {} finished", context.getSdxId());
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.SALT_PASSWORD_ROTATION_FINISHED,
                         "Rotated SaltStack user password successfully", context.getSdxId());
                 sendEvent(context);
             }

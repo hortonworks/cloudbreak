@@ -40,13 +40,14 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -114,7 +115,7 @@ public class StackOperationService {
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
     @Inject
-    private ClusterBootstrapper clusterBootstrapper;
+    private RotateSaltPasswordService rotateSaltPasswordService;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -443,10 +444,10 @@ public class StackOperationService {
         return flowManager.triggerClusterProxyConfigReRegistration(stack.getId());
     }
 
-    public FlowIdentifier rotateSaltPassword(@NotNull NameOrCrn nameOrCrn, String accountId) {
+    public FlowIdentifier rotateSaltPassword(@NotNull NameOrCrn nameOrCrn, String accountId, RotateSaltPasswordReason reason) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
-        clusterBootstrapper.validateRotateSaltPassword(stack);
-        return flowManager.triggerRotateSaltPassword(stack.getId());
+        rotateSaltPasswordService.validateRotateSaltPassword(stack);
+        return flowManager.triggerRotateSaltPassword(stack.getId(), reason);
     }
 }

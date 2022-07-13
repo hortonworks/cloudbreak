@@ -206,6 +206,8 @@ message Event {
     CDPFreeIPAStatusChanged cdpFreeIPAStatusChanged = 93;
     // A Replication Manager usage event was detected
     RMUsageEvent rmUsageEvent = 95;
+    // A CDP stack's salt password is rotated.
+    CDPSaltPasswordRotationEvent cdpSaltPasswordRotationEvent = 100;
   }
 }
 
@@ -218,6 +220,8 @@ message AltusIamAccountType {
     REGULAR = 1;
     // A trial Altus account.
     TRIAL = 2;
+    // A managed Skynet CDPOne trial account.
+    MANAGED_SKYNET_CDPONE_TRIAL = 3;
   }
 }
 
@@ -900,6 +904,8 @@ message CDPCMLWorkspaceRequested {
   bool isRestore = 16;
   // Backup metadata for workspace restore
   CDPCMLWorkspaceBackupMetadata cdpCMLWorkspaceBackupMetadata = 17;
+  // Tenant type to identify the formfactor i.e. Saas or Paas
+  string tenantType = 18;
 }
 
 // Generated when a CDP CML workspace's status changed.
@@ -925,6 +931,11 @@ message CDPCMLWorkspaceStatusChanged {
   string userTags = 9;
   // Restore metadata for workspace
   CDPCMLWorkspaceRestoreMetadata cdpCMLWorkspaceRestoreMetadata = 10;
+  // Tenant type to identify the formfactor i.e. Saas or Paas
+  string tenantType = 11;
+  // added tags that are workspace reconfiguration specific. The format of this is a map serialized
+  // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+  string updateTags = 12;
 }
 
 // Generated when a valid CDP CML workspace backup creation request has been made
@@ -947,6 +958,8 @@ message CDPCMLWorkspaceBackupRequested{
   string workspaceVersion = 8;
   // the request id of the create event
   string requestId = 9;
+  // Tenant type to identify the formfactor i.e. Saas or Paas
+  string tenantType = 10;
 }
 
 // Generated when a CDP CML workspace backup status chnages
@@ -963,6 +976,8 @@ message CDPCMLWorkspaceBackupStatusChanged {
   string failureReason = 5;
   // the request id to track the whole event.  Can be any event. (delete, update, create, install, etc)
   string requestId = 6;
+  // Tenant type to identify the formfactor i.e. Saas or Paas
+  string tenantType = 7;
 }
 
 // States of the nodes in a CDP CML workspace.
@@ -1247,8 +1262,8 @@ message CDPLiftieClusterNodeState {
   string zone = 9;
   // All labels present on this node.
   repeated string labels = 10;
-  // The conditions present on this node.
-  CDPLiftieClusterNodeConditions nodeConditions = 11;
+  // Node Conditions is an array of current observed node conditions. More info: https://kubernetes.io/docs/concepts/nodes/node/#condition.
+  repeated CDPLiftieClusterNodeCondition nodeConditions = 11;
   // Is this a metered node
   bool metered = 12;
   // workload CRN for which this node is metered (optional, should NOT be set for liftie-infra, ml-infra)
@@ -1257,18 +1272,20 @@ message CDPLiftieClusterNodeState {
   repeated string annotations = 14;
 }
 
-// Conditions is an array of current observed node conditions. More info: https://kubernetes.io/docs/concepts/nodes/node/#condition.
-message CDPLiftieClusterNodeConditions {
-  // Indicates the Ready condition on this node.
-  string ready = 1;
-  // Indicates the NetworkUnavailable condition on this node.
-  string networkUnavailable = 2;
-  // Indicates the MemoryPressure condition on this node.
-  string memoryPressure = 3;
-  // Indicates the DiskPressure condition on this node.
-  string diskPressure = 4;
-  // Indicates the PIDPressure condition on this node.
-  string pidPressure = 5;
+// Node condition has all the details from kubernetes about a condition the node is in
+message CDPLiftieClusterNodeCondition {
+  // Indicates the condition
+  string condition = 1;
+  // Indicates the status of this condition
+  string status = 2;
+  // Indicates the last time an update was retrieved on this condition
+  uint64 lastHeartbeatTime = 3;
+  // Indicates the last time this condition changed
+  uint64 lastTransitionTime = 4;
+  // Reason for the conditions last transition
+  string reason = 5;
+  // Human readable string containing details about the last transition
+  string message = 6;
 }
 
 // The status of a CDP request
@@ -1556,8 +1573,8 @@ message CDPProxyDetails {
 
 // Show services for which the customer has provided their own DNS zones
 message CDPOwnDnsZones {
-    // Whether DNS is provided for the postgres by the customer or not
-    bool postgres = 1;
+  // Whether DNS is provided for the postgres by the customer or not
+  bool postgres = 1;
 }
 
 message CDPNetworkDetails {
@@ -2529,7 +2546,7 @@ message CDPDatahubAutoscaleConfigChanged {
   string clusterName = 5;
   // The cluster crn.
   string clusterCrn = 6;
-  // True if stop-start scaling is enabled for the cluster.
+  // Flag to indicate if stop-start scaling is enabled for the cluster.
   bool stopStartScalingEnabled = 7;
 }
 
@@ -3275,10 +3292,10 @@ message CDPStackPatchEvent {
 // Type of stack patch event.
 message CDPStackPatchEventType {
   enum Value {
-      UNSET = 0;
-      AFFECTED = 1;
-      SUCCESS = 2;
-      FAILURE = 3;
+    UNSET = 0;
+    AFFECTED = 1;
+    SUCCESS = 2;
+    FAILURE = 3;
   }
 }
 
@@ -3364,5 +3381,36 @@ message RMUsageEventSource {
     UI = 1;
     // A value indication that the request was made from the CLI
     CLI = 2;
+  }
+}
+
+// A CDP stack's salt password is rotated.
+message CDPSaltPasswordRotationEvent {
+  // Resource CRN of the affected stack.
+  string resourceCrn = 1;
+  // Reason for salt password rotation.
+  CDPSaltPasswordRotationEventReason.Value reason = 2;
+  // Result of salt password rotation.
+  CDPSaltPasswordRotationEventResult.Value eventResult = 3;
+  // Optional message with more details about the event.
+  string message = 4;
+}
+
+// Reason for salt password rotation.
+message CDPSaltPasswordRotationEventReason {
+  enum Value {
+    UNSET = 0;
+    MANUAL = 1;
+    EXPIRED = 2;
+    UNAUTHORIZED = 3;
+  }
+}
+
+// Result of salt password rotation.
+message CDPSaltPasswordRotationEventResult {
+  enum Value {
+    UNSET = 0;
+    SUCCESS = 1;
+    FAILURE = 2;
   }
 }

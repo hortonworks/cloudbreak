@@ -41,6 +41,7 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.authorization.FreeIpaFiltering;
 import com.sequenceiq.freeipa.controller.validation.AttachChildEnvironmentRequestValidator;
 import com.sequenceiq.freeipa.controller.validation.CreateFreeIpaRequestValidator;
+import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordReason;
 import com.sequenceiq.freeipa.orchestrator.RotateSaltPasswordService;
 import com.sequenceiq.freeipa.service.freeipa.cert.root.FreeIpaRootCertificateService;
 import com.sequenceiq.freeipa.service.image.ImageCatalogGeneratorService;
@@ -293,7 +294,7 @@ class FreeIpaV1ControllerTest {
 
         underTest.rotateSaltPassword(ENVIRONMENT_CRN);
 
-        verify(rotateSaltPasswordService).triggerRotateSaltPassword(ENVIRONMENT_CRN, ACCOUNT_ID);
+        verify(rotateSaltPasswordService).triggerRotateSaltPassword(ENVIRONMENT_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
     }
 
 }

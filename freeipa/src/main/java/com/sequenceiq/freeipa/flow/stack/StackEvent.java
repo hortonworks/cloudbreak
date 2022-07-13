@@ -77,7 +77,7 @@ public class StackEvent implements IdempotentEvent<StackEvent> {
 
     @Override
     public String toString() {
-        return "StackEvent{" +
+        return getClass() + "{" +
                 "selector='" + selector + '\'' +
                 ", stackId=" + stackId +
                 ", accepted=" + accepted +

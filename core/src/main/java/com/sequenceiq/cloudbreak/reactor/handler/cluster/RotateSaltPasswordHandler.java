@@ -7,11 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordFailureResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordSuccessResponse;
+import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -25,7 +25,7 @@ public class RotateSaltPasswordHandler extends ExceptionCatcherEventHandler<Rota
     private static final Logger LOGGER = LoggerFactory.getLogger(RotateSaltPasswordHandler.class);
 
     @Inject
-    private ClusterBootstrapper clusterBootstrapper;
+    private RotateSaltPasswordService rotateSaltPasswordService;
 
     @Inject
     private StackDtoService stackDtoService;
@@ -46,7 +46,7 @@ public class RotateSaltPasswordHandler extends ExceptionCatcherEventHandler<Rota
         Long stackId = event.getData().getResourceId();
         try {
             StackDto stack = stackDtoService.getById(stackId);
-            clusterBootstrapper.rotateSaltPassword(stack);
+            rotateSaltPasswordService.rotateSaltPassword(stack);
             return new RotateSaltPasswordSuccessResponse(stackId);
         } catch (Exception e) {
             LOGGER.warn("Failed to rotate salt password", e);

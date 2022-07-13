@@ -15,12 +15,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.usage.UsageReporter;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordFailureResponse;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordRequest;
 import com.sequenceiq.freeipa.flow.freeipa.salt.rotatepassword.event.RotateSaltPasswordSuccessResponse;
-import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
-import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvisionAction;
 import com.sequenceiq.freeipa.orchestrator.RotateSaltPasswordService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
@@ -35,37 +34,49 @@ public class RotateSaltPasswordActions {
     @Inject
     private RotateSaltPasswordService rotateSaltPasswordService;
 
+    @Inject
+    private UsageReporter usageReporter;
+
     @Bean(name = "ROTATE_SALT_PASSWORD_STATE")
     public Action<?, ?> rotateSaltPassword() {
-        return new AbstractStackProvisionAction<>(StackEvent.class) {
+        return new RotateSaltPasswordAction<>(RotateSaltPasswordRequest.class) {
 
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void prepareExecution(RotateSaltPasswordRequest payload, Map<Object, Object> variables) {
+                super.prepareExecution(payload, variables);
+                variables.put(REASON, payload.getReason());
+            }
+
+            @Override
+            protected void doExecute(RotateSaltPasswordContext context, RotateSaltPasswordRequest payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Rotating salt password for freeipa stack {}", context.getStack().getResourceCrn());
                 stackUpdater.updateStackStatus(payload.getResourceId(), SALT_STATE_UPDATE_IN_PROGRESS, "Rotating SaltStack user password");
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
-                return new RotateSaltPasswordRequest(context.getStack().getId());
+            protected Selectable createRequest(RotateSaltPasswordContext context) {
+                return new RotateSaltPasswordRequest(
+                        RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.selector(), context.getStack().getId(), context.getReason());
             }
         };
     }
 
     @Bean(name = "ROTATE_SALT_PASSWORD_SUCCESS_STATE")
     public Action<?, ?> rotateSaltPasswordFinished() {
-        return new AbstractStackProvisionAction<>(RotateSaltPasswordSuccessResponse.class) {
+        return new RotateSaltPasswordAction<>(RotateSaltPasswordSuccessResponse.class) {
 
             @Override
-            protected void doExecute(StackContext context, RotateSaltPasswordSuccessResponse payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(RotateSaltPasswordContext context, RotateSaltPasswordSuccessResponse payload, Map<Object, Object> variables)
+                    throws Exception {
                 LOGGER.info("Rotating salt password for freeipa stack {} finished", context.getStack().getResourceCrn());
                 stackUpdater.updateStackStatus(payload.getResourceId(), AVAILABLE, "SaltStack user password rotated");
+                rotateSaltPasswordService.sendSuccessUsageReport(context.getStack().getResourceCrn(), context.getReason());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(RotateSaltPasswordContext context) {
                 return new StackEvent(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_FINISHED_EVENT.event(), context.getStack().getId());
             }
         };
@@ -73,17 +84,19 @@ public class RotateSaltPasswordActions {
 
     @Bean(name = "ROTATE_SALT_PASSWORD_FAILED_STATE")
     public Action<?, ?> rotateSaltPasswordFailed() {
-        return new AbstractStackProvisionAction<>(RotateSaltPasswordFailureResponse.class) {
+        return new RotateSaltPasswordAction<>(RotateSaltPasswordFailureResponse.class) {
 
             @Override
-            protected void doExecute(StackContext context, RotateSaltPasswordFailureResponse payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(RotateSaltPasswordContext context, RotateSaltPasswordFailureResponse payload, Map<Object, Object> variables)
+                    throws Exception {
                 LOGGER.warn("Rotating salt password for freeipa stack {} failed", context.getStack().getResourceCrn());
                 stackUpdater.updateStackStatus(payload.getResourceId(), SALT_STATE_UPDATE_FAILED, "Failed to rotate SaltStack user password");
+                rotateSaltPasswordService.sendFailureUsageReport(context.getStack().getResourceCrn(), context.getReason(), payload.getException().getMessage());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackContext context) {
+            protected Selectable createRequest(RotateSaltPasswordContext context) {
                 return new StackEvent(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
