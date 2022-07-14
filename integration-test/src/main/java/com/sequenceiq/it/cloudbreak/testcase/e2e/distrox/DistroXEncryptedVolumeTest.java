@@ -160,6 +160,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 .then(this::verifyFreeIpaVolumeEncryptionKey)
                 .given(SdxTestDto.class)
                     .withCloudStorage()
+                    .withEnableMultiAz()
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
