@@ -28,8 +28,10 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCred
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.JsonParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.P12Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
+import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -107,7 +109,8 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public EnvironmentTestDto environment(EnvironmentTestDto environment) {
         SecurityAccessRequest securityAccessRequest = new SecurityAccessRequest();
-        EnvironmentTestDto result = super.environment(environment);
+        EnvironmentTestDto result = super.environment(environment)
+                .withFreeIpa(getAttachedFreeIpaRequest());
         if (StringUtils.isNotBlank(gcpProperties.getSecurityAccess().getDefaultSecurityGroup())) {
             securityAccessRequest.setDefaultSecurityGroupId(gcpProperties.getSecurityAccess().getDefaultSecurityGroup());
             result.withSecurityAccess(securityAccessRequest);
@@ -117,6 +120,14 @@ public class GcpCloudProvider extends AbstractCloudProvider {
             result.withSecurityAccess(securityAccessRequest);
         }
         return result;
+    }
+
+    private AttachedFreeIpaRequest getAttachedFreeIpaRequest() {
+        AttachedFreeIpaRequest attachedFreeIpaRequest = new AttachedFreeIpaRequest();
+        GcpFreeIpaParameters gcpFreeIpaParameters = new GcpFreeIpaParameters();
+        attachedFreeIpaRequest.setGcp(gcpFreeIpaParameters);
+        attachedFreeIpaRequest.setEnableMultiAz(isMultiAZ());
+        return attachedFreeIpaRequest;
     }
 
     @Override
@@ -219,7 +230,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public InstanceGroupNetworkV4Request instanceGroupNetworkV4Request(SubnetId subnetId) {
-        if (gcpProperties.getMultiaz()) {
+        if (isMultiAZ()) {
             InstanceGroupNetworkV4Request result = new InstanceGroupNetworkV4Request();
             result.createGcp();
             result.getGcp().setSubnetIds(subnetId.collectSubnets(gcpProperties.getNetwork().getSubnetIds()));
@@ -231,7 +242,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public InstanceGroupNetworkV1Request instanceGroupNetworkV1Request(SubnetId subnetId) {
-        if (gcpProperties.getMultiaz()) {
+        if (isMultiAZ()) {
             InstanceGroupNetworkV1Request result = new InstanceGroupNetworkV1Request();
             result.createAws();
             result.getGcp().setSubnetIds(subnetId.collectSubnets(gcpProperties.getNetwork().getSubnetIds()));

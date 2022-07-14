@@ -256,7 +256,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public InstanceGroupNetworkV4Request instanceGroupNetworkV4Request(SubnetId subnetId) {
-        if (awsProperties.getMultiaz()) {
+        if (isMultiAZ()) {
             InstanceGroupNetworkV4Request result = new InstanceGroupNetworkV4Request();
             result.createAws();
             result.getAws().setSubnetIds(subnetId.collectSubnets(new LinkedList<>(awsProperties.getSubnetIds())));
@@ -268,7 +268,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public InstanceGroupNetworkV1Request instanceGroupNetworkV1Request(SubnetId subnetId) {
-        if (awsProperties.getMultiaz()) {
+        if (isMultiAZ()) {
             InstanceGroupNetworkV1Request result = new InstanceGroupNetworkV1Request();
             result.createAws();
             result.getAws().setSubnetIds(subnetId.collectSubnets(new LinkedList<>(awsProperties.getSubnetIds())));
@@ -446,7 +446,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getVariant() {
-        if (awsProperties.getMultiaz()) {
+        if (isMultiAZ()) {
             return "AWS_NATIVE";
         } else if (getGovCloud()) {
             return "AWS_NATIVE_GOV";
@@ -467,6 +467,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
         awsFreeIpaSpotParameters.setPercentage(getSpotPercentage());
         awsFreeIpaParameters.setSpot(awsFreeIpaSpotParameters);
         attachedFreeIpaRequest.setAws(awsFreeIpaParameters);
+        attachedFreeIpaRequest.setEnableMultiAz(isMultiAZ());
         return attachedFreeIpaRequest;
     }
 

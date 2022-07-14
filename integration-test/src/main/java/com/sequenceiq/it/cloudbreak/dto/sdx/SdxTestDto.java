@@ -86,7 +86,8 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
                 .withEnvironmentName(getTestContext().get(EnvironmentTestDto.class).getResponse().getName())
                 .withClusterShape(getCloudProvider().getClusterShape())
                 .withTags(getCloudProvider().getTags())
-                .withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
+                .withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion())
+                .withEnableMultiAz(getCloudProvider().isMultiAZ());
         return getCloudProvider().sdx(this);
     }
 
@@ -351,6 +352,16 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto withRuntimeVersion(String runtimeVersion) {
         getRequest().setRuntime(runtimeVersion);
+        return this;
+    }
+
+    public SdxTestDto withEnableMultiAz(boolean enableMultiAz) {
+        getRequest().setEnableMultiAz(enableMultiAz);
+        return this;
+    }
+
+    public SdxTestDto withEnableMultiAz() {
+        getRequest().setEnableMultiAz(getCloudProvider().isMultiAZ());
         return this;
     }
 
