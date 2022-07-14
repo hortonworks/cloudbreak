@@ -86,7 +86,7 @@ altus:
     enabled: true
     endpoint: localhost:8982
   datalakedr:
-    enabled: false
+    enabled: true
     endpoint: localhost:8989
 
 datalake:
