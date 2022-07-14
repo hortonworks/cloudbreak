@@ -15,6 +15,8 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.util.SdxResizeTestValidator;
+import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -22,6 +24,9 @@ public class MockSdxResizeTests extends AbstractMockTest {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Inject
+    private SdxUtil sdxUtil;
 
     private String sdxName;
 
@@ -56,20 +61,23 @@ public class MockSdxResizeTests extends AbstractMockTest {
             then = "Resized SDX should be available AND deletable"
     )
     public void testDefaultSDXResizeSuccessfully(MockedTestContext testContext) {
+        SdxResizeTestValidator resizeTestValidator = new SdxResizeTestValidator(SdxClusterShape.LIGHT_DUTY);
         testContext
                 .given(sdxName, SdxInternalTestDto.class)
+                .then((tc, testDto, client) -> {
+                    resizeTestValidator.setExpectedCrn(sdxUtil.getCrn(testDto, client));
+                    resizeTestValidator.setExpectedName(testDto.getName());
+                    resizeTestValidator.setExpectedRuntime(sdxUtil.getRuntime(testDto, client));
+                    resizeTestValidator.setExpectedStorageLocation(sdxUtil.getCloudStorageBaseLocation(testDto, client));
+                    return testDto;
+                })
                 .when(sdxTestClient.resize(), key(sdxName))
+                .await(SdxClusterStatusResponse.DATALAKE_BACKUP_INPROGRESS, key(sdxName).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.STOP_IN_PROGRESS, key(sdxName).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, key(sdxName).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxName).withWaitForFlow(Boolean.FALSE))
-                .withClusterShape(SdxClusterShape.MEDIUM_DUTY_HA)
+                .await(SdxClusterStatusResponse.DATALAKE_RESTORE_INPROGRESS, key(sdxName).withWaitForFlow(Boolean.FALSE))
+                .then((tc, dto, client) -> resizeTestValidator.validateResizedCluster(dto))
                 .validate();
-
-//        testContext
-//                .given(sdxName+"-detached", SdxTestDto.class)
-//                .when(sdxTestClient.checkStatus(sdxName+"-detached"))
-//                .await(SdxClusterStatusResponse.RUNNING, key(sdxName+"-detached"))
-//                .validate();
-                //TODO Make sure that the runtime is same, storage location is also same.
     }
 }
