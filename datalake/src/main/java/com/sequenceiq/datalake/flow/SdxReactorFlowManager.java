@@ -49,6 +49,7 @@ import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEve
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeRecoveryFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxCmDiagnosticsCollectionEvent;
 import com.sequenceiq.datalake.flow.diagnostics.event.SdxDiagnosticsCollectionEvent;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
@@ -109,7 +110,8 @@ public class SdxReactorFlowManager {
         return notify(selector, new SdxEvent(selector, cluster.getId(), userId), cluster.getClusterName());
     }
 
-    public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster) {
+    public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster,
+            DatalakeDrSkipOptions skipOptions) {
         LOGGER.info("Trigger Datalake resizing for: {}", sdxClusterId);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         boolean performBackup = sdxBackupRestoreService.shouldSdxBackupBePerformed(
@@ -123,7 +125,8 @@ public class SdxReactorFlowManager {
         }
         eventSenderService.sendEventAndNotification(newSdxCluster, DATALAKE_RESIZE_TRIGGERED);
         return notify(SDX_RESIZE_FLOW_CHAIN_START_EVENT, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
-                environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup, performRestore), newSdxCluster.getClusterName());
+                environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup, performRestore,
+                skipOptions), newSdxCluster.getClusterName());
     }
 
     public FlowIdentifier triggerSdxResizeRecovery(SdxCluster oldSdxCluster, SdxCluster newSdxCluster) {
@@ -153,7 +156,8 @@ public class SdxReactorFlowManager {
         return notify(selector, new SdxRepairStartEvent(selector, cluster.getId(), userId, settings), cluster.getClusterName());
     }
 
-    public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId, SdxUpgradeReplaceVms replaceVms, boolean skipBackup) {
+    public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId, SdxUpgradeReplaceVms replaceVms, boolean skipBackup,
+            DatalakeDrSkipOptions skipOptions) {
         LOGGER.info("Trigger Datalake runtime upgrade for: {} with imageId: {} and replace vm param: {}", cluster, imageId, replaceVms);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         if (!skipBackup && sdxBackupRestoreService.shouldSdxBackupBePerformed(
@@ -162,7 +166,8 @@ public class SdxReactorFlowManager {
             LOGGER.info("Triggering backup before an upgrade");
             return notify(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT,
                     new DatalakeUpgradeFlowChainStartEvent(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT, cluster.getId(),
-                            userId, imageId, replaceVms.getBooleanValue(), environmentClientService.getBackupLocation(cluster.getEnvCrn())),
+                            userId, imageId, replaceVms.getBooleanValue(), environmentClientService.getBackupLocation(cluster.getEnvCrn()),
+                            skipOptions),
                     cluster.getClusterName());
         } else {
             return notify(DATALAKE_UPGRADE_EVENT.event(), new DatalakeUpgradeStartEvent(DATALAKE_UPGRADE_EVENT.event(), cluster.getId(),

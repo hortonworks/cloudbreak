@@ -37,7 +37,10 @@ public interface SdxBackupEndpoint {
     @ApiOperation(value = "backup the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "backupDatalake")
     SdxBackupResponse backupDatalakeByName(@PathParam("name") String name,
             @QueryParam("backupLocation") String backupLocation,
-            @QueryParam("backupName") String backupName);
+            @QueryParam("backupName") String backupName,
+            @QueryParam("skipAtlasMetadata") boolean skipAtlasMetadata,
+            @QueryParam("skipRangerAudits") boolean skipRangerAudits,
+            @QueryParam("skipRangerMetadata") boolean skipRangerMetadata);
 
     @POST
     @Path("{name}/backupDatalakeStatus")

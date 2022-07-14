@@ -5,6 +5,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 
 public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
 
@@ -16,6 +17,8 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
 
     private final String backupLocation;
 
+    private final DatalakeDrSkipOptions skipOptions;
+
     @JsonCreator
     public DatalakeUpgradeFlowChainStartEvent(
             @JsonProperty("selector") String selector,
@@ -23,11 +26,13 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
             @JsonProperty("userId") String userId,
             @JsonProperty("imageId") String imageId,
             @JsonProperty("replaceVms") boolean replaceVms,
-            @JsonProperty("backupLocation") String backupLocation) {
+            @JsonProperty("backupLocation") String backupLocation,
+            @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions) {
         super(selector, sdxId, userId);
         this.imageId = imageId;
         this.replaceVms = replaceVms;
         this.backupLocation = backupLocation;
+        this.skipOptions = skipOptions;
     }
 
     public String getImageId() {
@@ -40,6 +45,10 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
 
     public String getBackupLocation() {
         return backupLocation;
+    }
+
+    public DatalakeDrSkipOptions getSkipOptions() {
+        return skipOptions;
     }
 
     @Override
