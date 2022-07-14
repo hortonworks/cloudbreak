@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurationProperty;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.exception.CustomConfigurationsCreationException;
 import com.sequenceiq.cloudbreak.repository.CustomConfigurationPropertyRepository;
 import com.sequenceiq.cloudbreak.repository.CustomConfigurationsRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -101,6 +100,8 @@ public class CustomConfigurationsService implements CompositeAuthResourcePropert
     }
 
     private CustomConfigurations getByCrn(String crn) {
+        LOGGER.info("Retrieving custom configurations by crn: {}", crn);
+
         return customConfigurationsRepository.findByCrn(crn).orElseThrow(NotFoundException.notFound("Custom Configurations", crn));
     }
 
@@ -110,6 +111,7 @@ public class CustomConfigurationsService implements CompositeAuthResourcePropert
     }
 
     private CustomConfigurations getByName(String name, String accountId) {
+        LOGGER.info("Retrieving custom configurations by name: {} for account: {}", name, accountId);
         return customConfigurationsRepository.findByNameAndAccountId(name, accountId)
                 .orElseThrow(NotFoundException.notFound("Custom Configurations", name));
     }
@@ -119,7 +121,7 @@ public class CustomConfigurationsService implements CompositeAuthResourcePropert
         customConfigurationsRepository
                 .findByNameAndAccountId(customConfigurations.getName(), accountId)
                 .ifPresent(retrievedCustomConfigs -> {
-                    throw new CustomConfigurationsCreationException("Custom Configurations with name " + retrievedCustomConfigs.getName()
+                    throw new BadRequestException("Custom Configurations with name " + retrievedCustomConfigs.getName()
                         + " exists. Provide a different name"); });
         initializeCrnForCustomConfigs(customConfigurations, accountId);
         customConfigurations.setAccount(accountId);
@@ -167,6 +169,7 @@ public class CustomConfigurationsService implements CompositeAuthResourcePropert
 
     private void prepareDeletion(CustomConfigurations customConfigurations) {
         List<Cluster> clustersWithThisCustomConfigs = new ArrayList<>(clusterService.findByCustomConfigurations(customConfigurations));
+        LOGGER.info("Checking deletion of custom configurations");
         if (!clustersWithThisCustomConfigs.isEmpty()) {
             if (clustersWithThisCustomConfigs.size() > 1) {
                 String clusters = clustersWithThisCustomConfigs
@@ -186,6 +189,7 @@ public class CustomConfigurationsService implements CompositeAuthResourcePropert
 
     public CustomConfigurations deleteByCrn(String crn) {
         CustomConfigurations customConfigurationsByCrn = getByCrn(crn);
+        LOGGER.info("Deleting custom configurations: {}", customConfigurationsByCrn.getId());
         prepareDeletion(customConfigurationsByCrn);
         customConfigurationPropertyRepository.deleteAll(customConfigurationsByCrn.getConfigurations());
         ownerAssignmentService.notifyResourceDeleted(crn);
@@ -194,6 +198,7 @@ public class CustomConfigurationsService implements CompositeAuthResourcePropert
 
     public CustomConfigurations deleteByName(String name, String accountId) {
         CustomConfigurations customConfigurationsByName = getByName(name, accountId);
+        LOGGER.info("Deleting custom configurations: {}", customConfigurationsByName.getId());
         prepareDeletion(customConfigurationsByName);
         customConfigurationPropertyRepository.deleteAll(customConfigurationsByName.getConfigurations());
         ownerAssignmentService.notifyResourceDeleted(customConfigurationsByName.getCrn());
