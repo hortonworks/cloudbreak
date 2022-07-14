@@ -61,7 +61,7 @@ public class ClusterSyncActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterSyncEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(ClusterSyncEvent.FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

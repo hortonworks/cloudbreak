@@ -45,5 +45,4 @@ public class UpscaleStackResult extends CloudPlatformResult {
                 .add("results=" + results)
                 .toString();
     }
-
 }

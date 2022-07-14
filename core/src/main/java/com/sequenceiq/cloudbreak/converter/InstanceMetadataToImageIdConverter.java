@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class InstanceMetadataToImageIdConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceMetadataToImageIdConverter.class);
 
-    public String convert(InstanceMetaData source) {
+    public String convert(InstanceMetadataView source) {
         Image image = null;
         if (source.getImage() != null && StringUtils.isNotBlank(source.getImage().getValue())) {
             try {

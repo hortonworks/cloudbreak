@@ -20,11 +20,16 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForClusterServerR
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewaySuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayTriggerEvent;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Configuration
 public class ChangePrimaryGatewayActions {
     @Inject
     private ChangePrimaryGatewayService changePrimaryGatewayService;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Bean(name = "CHANGE_PRIMARY_GATEWAY_STATE")
     public Action<?, ?> repairGatewayAction() {
@@ -59,7 +64,8 @@ public class ChangePrimaryGatewayActions {
         return new AbstractClusterAction<>(WaitForAmbariServerSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, WaitForAmbariServerSuccess payload, Map<Object, Object> variables) {
-                changePrimaryGatewayService.ambariServerStarted(context.getStack());
+                InstanceMetadataView primaryGatewayInstanceMetadata = instanceMetaDataService.getPrimaryGatewayInstanceMetadataOrError(context.getStackId());
+                changePrimaryGatewayService.ambariServerStarted(context.getStack(), context.getCluster(), primaryGatewayInstanceMetadata);
                 sendEvent(context);
             }
 
@@ -75,13 +81,13 @@ public class ChangePrimaryGatewayActions {
         return new AbstractStackFailureAction<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                changePrimaryGatewayService.changePrimaryGatewayFailed(context.getStackView().getId(), payload.getException());
+                changePrimaryGatewayService.changePrimaryGatewayFailed(context.getStackId(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FAILURE_HANDLED.event(), context.getStackView().getId());
+                return new StackEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FAILURE_HANDLED.event(), context.getStackId());
             }
         };
     }

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 
 @Service
 public class ClusterComponentUpdater {
@@ -59,7 +60,7 @@ public class ClusterComponentUpdater {
     }
 
     private boolean isIdEqual(Component component, ClusterComponent clusterComponent) {
-        return clusterComponent.getCluster().getId().equals(component.getStack().getCluster().getId());
+        return clusterComponent.getCluster().getId().equals(component.getStack().getClusterId());
     }
 
     private boolean isCdhComponent(Component component, ClusterComponent clusterComponent) {
@@ -84,23 +85,23 @@ public class ClusterComponentUpdater {
         clusterComponentConfigProvider.deleteClusterComponents(unusedCdhProductDetails);
     }
 
-    public void removeUnusedCdhProductsFromClusterComponents(Long clusterId, Set<ClusterComponent> clusterComponentsByBlueprint,
+    public void removeUnusedCdhProductsFromClusterComponents(Long clusterId, Set<ClusterComponentView> clusterComponentsByBlueprint,
             ParcelOperationStatus removalStatus) {
-        Set<ClusterComponent> clusterComponentsFromDb = clusterComponentConfigProvider.getComponentsByClusterId(clusterId);
-        Set<ClusterComponent> unusedComponents = getUnusedComponents(clusterComponentsByBlueprint, clusterComponentsFromDb);
+        Set<ClusterComponentView> clusterComponentsFromDb = clusterComponentConfigProvider.getComponentListByType(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
+        Set<ClusterComponentView> unusedComponents = getUnusedComponents(clusterComponentsByBlueprint, clusterComponentsFromDb);
         if (unusedComponents.isEmpty()) {
             LOGGER.debug("There is no cluster component to be deleted.");
         } else {
-            Set<ClusterComponent> removedComponents = unusedComponents.stream()
+            Set<ClusterComponentView> removedComponents = unusedComponents.stream()
                     .filter(comp -> removalStatus.getSuccessful().containsKey(comp.getName()))
                     .collect(Collectors.toSet());
-            clusterComponentConfigProvider.deleteClusterComponents(removedComponents);
+            clusterComponentConfigProvider.deleteClusterComponentViews(removedComponents);
         }
     }
 
-    private Set<ClusterComponent> getUnusedComponents(Set<ClusterComponent> clusterComponentsByBlueprint, Set<ClusterComponent> clusterComponentsFromDb) {
+    private Set<ClusterComponentView> getUnusedComponents(Set<ClusterComponentView> clusterComponentsByBlueprint,
+            Set<ClusterComponentView> clusterComponentsFromDb) {
         return clusterComponentsFromDb.stream()
-                .filter(clusterComponent -> ComponentType.CDH_PRODUCT_DETAILS.equals(clusterComponent.getComponentType()))
                 .filter(clusterComponent -> clusterComponentsByBlueprint.stream()
                         .noneMatch(component -> clusterComponent.getName().equals(component.getName())))
                 .collect(Collectors.toSet());

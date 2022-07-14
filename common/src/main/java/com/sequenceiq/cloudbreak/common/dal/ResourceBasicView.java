@@ -7,4 +7,6 @@ public interface ResourceBasicView {
     String getResourceCrn();
 
     String getName();
+
+    String getEnvironmentCrn();
 }

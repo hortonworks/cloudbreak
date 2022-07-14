@@ -26,16 +26,16 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class RecipeEngine {
@@ -49,61 +49,57 @@ public class RecipeEngine {
     private LdapConfigService ldapConfigService;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private HostGroupService hostGroupService;
 
     @Inject
-    private ResourceService resourceService;
-
-    @Inject
     private RecipeTemplateService recipeTemplateService;
 
     public void uploadRecipes(Long stackId) throws CloudbreakException {
-        Stack stack = measure(() -> stackService.getByIdWithListsInTransaction(stackId), LOGGER,
-                "stackService.getByIdWithListsInTransaction() took {} ms");
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Upload recipes started for stack with name {}", stack.getName());
-        stack.setResources(measure(() -> resourceService.getNotInstanceRelatedByStackId(stackId), LOGGER,
-                "resourceService.getNotInstanceRelatedByStackId() took {} ms"));
-        Set<HostGroup> hostGroups = measure(() -> hostGroupService.getByClusterWithRecipes(stack.getCluster().getId()), LOGGER,
+        StackDto stackDto = measure(() -> stackDtoService.getById(stackId), LOGGER,
+                "stackDtoService.getById() took {} ms");
+        MDCBuilder.buildMdcContext(stackDto);
+        LOGGER.info("Upload recipes started for stack with name {}", stackDto.getName());
+        Set<HostGroup> hostGroups = measure(() -> hostGroupService.getByClusterWithRecipes(stackDto.getCluster().getId()), LOGGER,
                 "hostGroupService.getByClusterWithRecipes() took {} ms");
-        Map<HostGroup, List<RecipeModel>> recipeModels = recipeTemplateService.createRecipeModels(stack, hostGroups);
-        uploadRecipesOnHostGroups(stack, hostGroups, recipeModels);
-        LOGGER.info("Upload recipes finished successfully for stack with name {}", stack.getName());
+        Map<HostGroup, List<RecipeModel>> recipeModels = recipeTemplateService.createRecipeModels(stackDto, hostGroups);
+        uploadRecipesOnHostGroups(stackDto, hostGroups, recipeModels);
+        LOGGER.info("Upload recipes finished successfully for stack with name {}", stackDto.getName());
     }
 
-    public void executePreClusterManagerRecipes(Stack stack, Map<String, String> candidateAddresses, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePreClusterManagerRecipes(StackDto stackDto, Map<String, String> candidateAddresses, Set<HostGroup> hostGroups)
+            throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
         if (shouldExecuteRecipeOnStack(recipes, PRE_CLOUDERA_MANAGER_START, PRE_SERVICE_DEPLOYMENT)) {
-            uploadRecipesIfNeeded(stack, hostGroups);
+            uploadRecipesIfNeeded(stackDto, hostGroups);
             if (MapUtils.isEmpty(candidateAddresses)) {
-                orchestratorRecipeExecutor.preClusterManagerStartRecipes(stack);
+                orchestratorRecipeExecutor.preClusterManagerStartRecipes(stackDto);
             } else {
-                orchestratorRecipeExecutor.preClusterManagerStartRecipesOnTargets(stack, candidateAddresses);
+                orchestratorRecipeExecutor.preClusterManagerStartRecipesOnTargets(stackDto, candidateAddresses);
             }
         }
     }
 
-    public void executePostClouderaManagerStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePostClouderaManagerStartRecipes(StackDto stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
-        if (shouldExecutePostClouderaManagerStartRecipeOnStack(stack, recipes)) {
+        if (shouldExecutePostClouderaManagerStartRecipeOnStack(stack.getStack(), recipes)) {
             uploadRecipesIfNeeded(stack, hostGroups);
             orchestratorRecipeExecutor.postClusterManagerStartRecipes(stack);
         }
     }
 
-    public void executePostClouderaManagerStartRecipesOnTargets(Stack stack, Set<HostGroup> hostGroups, Map<String, String> candidateAddresses)
+    public void executePostClouderaManagerStartRecipesOnTargets(StackDto stack, Set<HostGroup> hostGroups, Map<String, String> candidateAddresses)
             throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
-        if (shouldExecutePostClouderaManagerStartRecipeOnStack(stack, recipes)) {
+        if (shouldExecutePostClouderaManagerStartRecipeOnStack(stack.getStack(), recipes)) {
             uploadRecipesIfNeeded(stack, hostGroups);
             orchestratorRecipeExecutor.postClusterManagerStartRecipesOnTargets(stack, candidateAddresses);
         }
     }
 
-    public void executePostInstallRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void executePostInstallRecipes(StackDto stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
         if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL, POST_SERVICE_DEPLOYMENT)) {
             uploadRecipesIfNeeded(stack, hostGroups);
@@ -111,7 +107,8 @@ public class RecipeEngine {
         }
     }
 
-    public void executePostInstallRecipesOnTargets(Stack stack, Set<HostGroup> hostGroups, Map<String, String> candidateAddresses) throws CloudbreakException {
+    public void executePostInstallRecipesOnTargets(StackDto stack, Set<HostGroup> hostGroups, Map<String, String> candidateAddresses)
+            throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
         if (shouldExecuteRecipeOnStack(recipes, POST_CLUSTER_INSTALL, POST_SERVICE_DEPLOYMENT)) {
             uploadRecipesIfNeeded(stack, hostGroups);
@@ -119,25 +116,25 @@ public class RecipeEngine {
         }
     }
 
-    public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups, boolean forced) throws CloudbreakException {
+    public void executePreTerminationRecipes(StackDto stack, Set<HostGroup> hostGroups, boolean forced) throws CloudbreakException {
         if (shouldExecutePreTerminationWithUploadRecipes(stack, hostGroups)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack, forced);
         }
     }
 
-    public void executePreTerminationRecipes(Stack stack, Set<HostGroup> hostGroups, Set<String> hostNames) throws CloudbreakException {
+    public void executePreTerminationRecipes(StackDto stack, Set<HostGroup> hostGroups, Set<String> hostNames) throws CloudbreakException {
         if (shouldExecutePreTerminationWithUploadRecipes(stack, hostGroups)) {
             orchestratorRecipeExecutor.preTerminationRecipes(stack, hostNames);
         }
     }
 
     // note: executed when LDAP config is present, because later the LDAP sync is hooked for this salt state in the top.sls.
-    private boolean shouldExecutePostClouderaManagerStartRecipeOnStack(Stack stack, Collection<Recipe> recipes) {
-        return (stack.getCluster() != null && ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName()))
+    private boolean shouldExecutePostClouderaManagerStartRecipeOnStack(StackView stack, Collection<Recipe> recipes) {
+        return (stack.getClusterId() != null && ldapConfigService.isLdapConfigExistsForEnvironment(stack.getEnvironmentCrn(), stack.getName()))
                 || recipesFound(recipes, POST_CLOUDERA_MANAGER_START);
     }
 
-    private boolean shouldExecutePreTerminationWithUploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    private boolean shouldExecutePreTerminationWithUploadRecipes(StackDto stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Collection<Recipe> recipes = hostGroupService.getRecipesByHostGroups(hostGroups);
         boolean shouldExecutePreTermination = shouldExecuteRecipeOnStack(recipes, PRE_TERMINATION);
         if (shouldExecutePreTermination) {
@@ -153,7 +150,7 @@ public class RecipeEngine {
         return shouldExecutePreTermination;
     }
 
-    private void uploadRecipesIfNeeded(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    private void uploadRecipesIfNeeded(StackDto stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Map<HostGroup, List<RecipeModel>> recipeModels = recipeTemplateService.createRecipeModels(stack, hostGroups);
         boolean generatedRecipesMatch = recipeTemplateService.isGeneratedRecipesInDbStale(hostGroups, recipeModels);
         if (generatedRecipesMatch) {
@@ -163,16 +160,17 @@ public class RecipeEngine {
         }
     }
 
-    private void uploadRecipesOnHostGroups(Stack stack, Set<HostGroup> hostGroups, Map<HostGroup, List<RecipeModel>> recipeModels) throws CloudbreakException {
+    private void uploadRecipesOnHostGroups(StackDto stackDto, Set<HostGroup> hostGroups, Map<HostGroup, List<RecipeModel>> recipeModels)
+            throws CloudbreakException {
         boolean recipesFound = recipesOrGeneratedRecipesFound(hostGroups);
         if (recipesFound) {
             Map<HostGroup, Set<GeneratedRecipe>> generatedRecipeTemplates = recipeTemplateService.createGeneratedRecipes(recipeModels,
-                    getRecipeNameMap(hostGroups), stack.getWorkspace());
-            checkedMeasure(() -> orchestratorRecipeExecutor.uploadRecipes(stack, recipeModels), LOGGER, "Upload recipes took {} ms");
+                    getRecipeNameMap(hostGroups), stackDto.getWorkspace());
+            checkedMeasure(() -> orchestratorRecipeExecutor.uploadRecipes(stackDto, recipeModels), LOGGER, "Upload recipes took {} ms");
             measure(() -> recipeTemplateService.updateAllGeneratedRecipes(hostGroups, generatedRecipeTemplates), LOGGER,
                     "Updating all the generated recipes took {} ms");
         } else {
-            LOGGER.debug("Not found any recipes for host groups in stack '{}'", stack.getName());
+            LOGGER.debug("Not found any recipes for host groups in stack '{}'", stackDto.getStack().getName());
         }
     }
 

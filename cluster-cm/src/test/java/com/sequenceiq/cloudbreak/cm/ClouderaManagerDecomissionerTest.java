@@ -48,11 +48,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerDecomissionerTest {
@@ -138,7 +139,12 @@ class ClouderaManagerDecomissionerTest {
         mockListClusterHosts();
         Set<String> hostNames = Set.of(DELETED_INSTANCE_FQDN, RUNNING_INSTANCE_FQDN);
 
-        Map<String, InstanceMetaData> result = underTest.collectHostsToRemove(getStack(), createHostGroup(), hostNames, client);
+        Stack stack = getStack();
+        InstanceGroup instanceGroup = createInstanceGroup();
+        String groupName = "hgName";
+        instanceGroup.setGroupName(groupName);
+        stack.setInstanceGroups(Set.of(instanceGroup));
+        Map<String, InstanceMetadataView> result = underTest.collectHostsToRemove(stack, groupName, hostNames, client);
 
         assertThat(result.keySet())
                 .contains(createDeletedInstanceMetadata().getDiscoveryFQDN(),
@@ -152,9 +158,6 @@ class ClouderaManagerDecomissionerTest {
         apiHostTemplateList.setItems(new ArrayList<>());
         when(hostTemplatesResourceApi.readHostTemplates(any())).thenReturn(apiHostTemplateList);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(client)).thenReturn(hostTemplatesResourceApi);
-
-        HostGroup compute = new HostGroup();
-        compute.setName("compute");
 
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
         when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
@@ -170,10 +173,10 @@ class ClouderaManagerDecomissionerTest {
         InstanceMetaData failed2 = createInstanceMetadata(InstanceStatus.ORCHESTRATION_FAILED, "host4.example.com", "compute");
         InstanceMetaData healthy2 = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, "host5.example.com", "compute");
 
-        Set<InstanceMetaData> instanceMetaDataSet = Set.of(failed1, failed2, healthy1, healthy2, bad1);
-        Stack stack = getStack();
-        stack.setPlatformVariant("AWS");
-        Set<InstanceMetaData> removableInstances = underTest.collectDownscaleCandidates(client, stack, compute, 4, instanceMetaDataSet);
+        Set<InstanceMetadataView> instanceMetaDataSet = Set.of(failed1, failed2, healthy1, healthy2, bad1);
+        StackDtoDelegate stack = getStack();
+
+        Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(client, stack, "compute", 4, instanceMetaDataSet);
         assertEquals(4, removableInstances.size());
         assertTrue(removableInstances.contains(failed1));
         assertTrue(removableInstances.contains(failed2));
@@ -183,7 +186,7 @@ class ClouderaManagerDecomissionerTest {
 
     @Test
     public void testDeleteHostWithoutFqdn() throws ApiException {
-        Stack stack = getStack();
+        StackDtoDelegate stack = getStack();
         InstanceMetaData instanceMetaData = createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, null, "compute");
         ServicesResourceApi servicesResourceApi = mock(ServicesResourceApi.class);
         when(clouderaManagerApiFactory.getServicesResourceApi(eq(client))).thenReturn(servicesResourceApi);
@@ -199,12 +202,10 @@ class ClouderaManagerDecomissionerTest {
         verify(hostsResourceApi, never()).deleteHost(any());
     }
 
-    private HostGroup createHostGroup() {
-        HostGroup hostGroup = new HostGroup();
+    private InstanceGroup createInstanceGroup() {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceMetaData(Set.of(createDeletedInstanceMetadata(), createRunningInstanceMetadata()));
-        hostGroup.setInstanceGroup(instanceGroup);
-        return hostGroup;
+        return instanceGroup;
     }
 
     private void mockDecommission(Pair<BigDecimal, ExtendedPollingResult> resultPair, Pair<BigDecimal, ExtendedPollingResult>... resultPairs)
@@ -268,6 +269,7 @@ class ClouderaManagerDecomissionerTest {
     private Stack getStack() {
         Stack stack = new Stack();
         stack.setName(STACK_NAME);
+        stack.setPlatformVariant("AWS");
         return stack;
     }
 }

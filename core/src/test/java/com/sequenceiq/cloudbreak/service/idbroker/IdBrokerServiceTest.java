@@ -45,8 +45,8 @@ public class IdBrokerServiceTest {
         IdBroker idBroker = new IdBroker();
 
         when(clusterService.findOneByStackIdOrNotFoundError(STACK_ID)).thenReturn(cluster);
-        when(repository.findByClusterId(cluster.getId())).thenReturn(null);
-        when(idBrokerConverterUtil.generateIdBrokerSignKeys(cluster)).thenReturn(idBroker);
+        when(repository.findByClusterId(CLUSTER_ID)).thenReturn(null);
+        when(idBrokerConverterUtil.generateIdBrokerSignKeys(CLUSTER_ID, null)).thenReturn(idBroker);
         ArgumentCaptor<IdBroker> argumentCaptor = ArgumentCaptor.forClass(IdBroker.class);
         underTest.generateIdBrokerSignKey(STACK_ID);
         verify(repository).save(argumentCaptor.capture());
@@ -64,6 +64,6 @@ public class IdBrokerServiceTest {
         underTest.generateIdBrokerSignKey(STACK_ID);
 
         verify(repository, never()).save(any());
-        verify(idBrokerConverterUtil, never()).generateIdBrokerSignKeys(cluster);
+        verify(idBrokerConverterUtil, never()).generateIdBrokerSignKeys(CLUSTER_ID, null);
     }
 }

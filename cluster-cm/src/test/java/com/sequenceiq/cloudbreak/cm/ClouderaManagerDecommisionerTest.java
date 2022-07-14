@@ -47,13 +47,13 @@ import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -82,16 +82,20 @@ public class ClouderaManagerDecommisionerTest {
     @InjectMocks
     private ClouderaManagerDecomissioner underTest;
 
+    @Mock
+    private StackDto stack;
+
+    @Mock
+    private ClusterView cluster;
+
     @Test
     public void testVerifyNodesAreRemovable() throws ApiException {
         // GIVEN
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 50, "vt");
-        Stack stack = createTestStack(volumeSetAttributes);
-        Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        Set<HostGroup> hostGroups = createTestHostGroups(1, 6);
-        cluster.setHostGroups(hostGroups);
+        List<InstanceGroupDto> instanceGroups = createTestInstanceGroups(1, 6);
         ApiHostTemplateList hostTemplates = createEmptyHostTemplates();
+        when(stack.getDiskResources()).thenReturn(resources(volumeSetAttributes));
+        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
         when(resourceAttributeUtil.getTypedAttributes(Mockito.any(Resource.class), Mockito.any(Class.class)))
@@ -100,8 +104,8 @@ public class ClouderaManagerDecommisionerTest {
         when(hostsResourceApi.readHosts(eq(null), eq(null), anyString())).thenReturn(apiHostList);
         when(apiHostList.getItems()).thenReturn(List.of());
         // WHEN
-        HostGroup firstHostGroup = hostGroups.iterator().next();
-        underTest.verifyNodesAreRemovable(stack, firstHostGroup.getInstanceGroup().getInstanceMetaDataSet(), new ApiClient());
+        InstanceGroupDto firstInstanceGroup = instanceGroups.iterator().next();
+        underTest.verifyNodesAreRemovable(stack, new ArrayList<>(firstInstanceGroup.getInstanceMetadataViews()), new ApiClient());
         // THEN no exception
     }
 
@@ -109,12 +113,10 @@ public class ClouderaManagerDecommisionerTest {
     public void testVerifyNodesAreBusy() throws ApiException {
         // GIVEN
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 50, "vt");
-        Stack stack = createTestStack(volumeSetAttributes);
-        Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        Set<HostGroup> hostGroups = createTestHostGroups(1, 6);
-        cluster.setHostGroups(hostGroups);
+        List<InstanceGroupDto> instanceGroups = createTestInstanceGroups(1, 6);
         ApiHostTemplateList hostTemplates = createEmptyHostTemplates();
+        when(stack.getDiskResources()).thenReturn(resources(volumeSetAttributes));
+        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
 
@@ -125,11 +127,11 @@ public class ClouderaManagerDecommisionerTest {
         when(resourceAttributeUtil.getTypedAttributes(Mockito.any(Resource.class), Mockito.any(Class.class)))
                 .thenReturn(Optional.of(volumeSetAttributes));
         // WHEN
-        HostGroup firstHostGroup = hostGroups.iterator().next();
+        InstanceGroupDto firstInstanceGroup = instanceGroups.iterator().next();
 
         NodeIsBusyException e = Assertions.assertThrows(NodeIsBusyException.class,
                 () -> underTest.verifyNodesAreRemovable(stack,
-                        firstHostGroup.getInstanceGroup().getInstanceMetaDataSet(),
+                        firstInstanceGroup.getInstanceMetadataViews(),
                         new ApiClient()));
         assertEquals("Node is in 'busy' state, cannot be decommissioned right now. " +
                 "Please try to remove the node later. Busy hosts: [hg0-host-1]", e.getMessage());
@@ -149,17 +151,13 @@ public class ClouderaManagerDecommisionerTest {
     public void testNotAvailableNodeShouldBeDeletedWhenRunningNodesFulfillTheReplicationNo() throws ApiException {
         // GIVEN
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", true, "fstab", List.of(), 50, "vt");
-        Stack stack = createTestStack(volumeSetAttributes);
-        Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        Set<HostGroup> hostGroups = createTestHostGroups(2, 2);
-        cluster.setHostGroups(hostGroups);
-        //ApiHostTemplateList hostTemplates = createEmptyHostTemplates();
-        ApiHostTemplateList hostTemplates = createHostTemplatesWithDataNodes(hostGroups.stream().findFirst().get().getName());
+        List<InstanceGroupDto> instanceGroups = createTestInstanceGroups(1, 2, InstanceStatus.SERVICES_HEALTHY);
+        InstanceGroupDto deletedOnProviderInstanceGroups = createTestInstanceGroup(2L, "hg1", 2, InstanceStatus.DELETED_BY_PROVIDER);
+        instanceGroups.add(deletedOnProviderInstanceGroups);
+        ApiHostTemplateList hostTemplates = createHostTemplatesWithDataNodes(instanceGroups.stream().findFirst().get().getInstanceGroup().getGroupName());
 
-        ApiServiceConfig apiServiceConfig = createApiServiceConfigWithReplication("1", true);
-        when(clouderaManagerApiFactory.getServicesResourceApi(Mockito.any(ApiClient.class))).thenReturn(servicesResourceApi);
-        when(servicesResourceApi.readServiceConfig(stack.getName(), "hdfs", "full")).thenReturn(apiServiceConfig);
+        when(stack.getDiskResources()).thenReturn(resources(volumeSetAttributes));
+        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
         when(clouderaManagerApiFactory.getHostsResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostsResourceApi);
@@ -168,10 +166,8 @@ public class ClouderaManagerDecommisionerTest {
         when(resourceAttributeUtil.getTypedAttributes(stack.getDiskResources().get(0), VolumeSetAttributes.class))
                 .thenReturn(Optional.of(volumeSetAttributes));
         // WHEN
-        HostGroup firstHostGroup = hostGroups.iterator().next();
-        InstanceMetaData firstInstanceMetaData = firstHostGroup.getInstanceGroup().getInstanceMetaDataSet().stream().findFirst().get();
-        firstInstanceMetaData.setInstanceStatus(InstanceStatus.DELETED_BY_PROVIDER);
-        Set<InstanceMetaData> removableInstances = Set.of(firstInstanceMetaData);
+        InstanceMetadataView firstInstanceMetaData = deletedOnProviderInstanceGroups.getInstanceMetadataViews().stream().findFirst().get();
+        Set<InstanceMetadataView> removableInstances = Set.of(firstInstanceMetaData);
         // WHEN
         underTest.verifyNodesAreRemovable(stack, removableInstances, new ApiClient());
         // THEN there is no exception
@@ -181,13 +177,11 @@ public class ClouderaManagerDecommisionerTest {
     public void testVerifyNodesAreRemovableWithoutRepairWithReplicationAndTooMuchRemovableNodes() throws ApiException {
         // GIVEN
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", true, "fstab", List.of(), 50, "vt");
-        Stack stack = createTestStack(volumeSetAttributes);
-        Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        Set<HostGroup> hostGroups = createTestHostGroups(2, 5);
-        cluster.setHostGroups(hostGroups);
+        List<InstanceGroupDto> instanceGroups = createTestInstanceGroups(2, 5);
         ApiServiceConfig apiServiceConfig = createApiServiceConfigWithReplication("3", true);
-        ApiHostTemplateList hostTemplates = createHostTemplatesWithDataNodes(hostGroups.stream().findFirst().get().getName());
+        ApiHostTemplateList hostTemplates = createHostTemplatesWithDataNodes(instanceGroups.stream().findFirst().get().getInstanceGroup().getGroupName());
+        when(stack.getDiskResources()).thenReturn(resources(volumeSetAttributes));
+        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
         when(resourceAttributeUtil.getTypedAttributes(stack.getDiskResources().get(0), VolumeSetAttributes.class))
@@ -195,9 +189,9 @@ public class ClouderaManagerDecommisionerTest {
         when(clouderaManagerApiFactory.getServicesResourceApi(Mockito.any(ApiClient.class))).thenReturn(servicesResourceApi);
         when(servicesResourceApi.readServiceConfig(stack.getName(), "hdfs", "full")).thenReturn(apiServiceConfig);
         // WHEN
-        HostGroup firstHostGroup = hostGroups.iterator().next();
-        Set<InstanceMetaData> firstHostGroupInstances = firstHostGroup.getInstanceGroup().getInstanceMetaDataSet();
-        Set<InstanceMetaData> removableInstances = firstHostGroupInstances.stream().limit(5).collect(Collectors.toSet());
+        InstanceGroupDto firstInstanceGroup = instanceGroups.iterator().next();
+        List<InstanceMetadataView> firstInstanceGroupInstances = firstInstanceGroup.getInstanceMetadataViews();
+        Set<InstanceMetadataView> removableInstances = firstInstanceGroupInstances.stream().limit(5).collect(Collectors.toSet());
         assertThrows(NotEnoughNodeException.class,
                 () -> underTest.verifyNodesAreRemovable(stack, removableInstances, new ApiClient()));
         // THEN no exception
@@ -207,13 +201,11 @@ public class ClouderaManagerDecommisionerTest {
     public void testVerifyNodesAreRemovableWithoutRepairAndReplication() throws ApiException {
         // GIVEN
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", true, "fstab", List.of(), 50, "vt");
-        Stack stack = createTestStack(volumeSetAttributes);
-        Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        Set<HostGroup> hostGroups = createTestHostGroups(2, 5);
-        cluster.setHostGroups(hostGroups);
+        List<InstanceGroupDto> instanceGroups = createTestInstanceGroups(2, 5);
         ApiServiceConfig apiServiceConfig = createApiServiceConfigWithReplication("3", true);
-        ApiHostTemplateList hostTemplates = createHostTemplatesWithDataNodes(hostGroups.stream().findFirst().get().getName());
+        ApiHostTemplateList hostTemplates = createHostTemplatesWithDataNodes(instanceGroups.stream().findFirst().get().getInstanceGroup().getGroupName());
+        when(stack.getDiskResources()).thenReturn(resources(volumeSetAttributes));
+        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
         when(resourceAttributeUtil.getTypedAttributes(stack.getDiskResources().get(0), VolumeSetAttributes.class))
@@ -224,9 +216,9 @@ public class ClouderaManagerDecommisionerTest {
         when(hostsResourceApi.readHosts(eq(null), eq(null), anyString())).thenReturn(apiHostList);
         when(apiHostList.getItems()).thenReturn(List.of());
         // WHEN
-        HostGroup firstHostGroup = hostGroups.iterator().next();
-        Set<InstanceMetaData> firstHostGroupInstances = firstHostGroup.getInstanceGroup().getInstanceMetaDataSet();
-        Set<InstanceMetaData> removableInstances = firstHostGroupInstances.stream().limit(2).collect(Collectors.toSet());
+        InstanceGroupDto firstInstanceGroup = instanceGroups.iterator().next();
+        List<InstanceMetadataView> firstInstanceGroupInstances = firstInstanceGroup.getInstanceMetadataViews();
+        Set<InstanceMetadataView> removableInstances = firstInstanceGroupInstances.stream().limit(2).collect(Collectors.toSet());
         underTest.verifyNodesAreRemovable(stack, removableInstances, new ApiClient());
         // THEN no exception
     }
@@ -235,14 +227,12 @@ public class ClouderaManagerDecommisionerTest {
     public void testVerifyNodesAreRemovableWithRepairAndReplication() throws ApiException {
         // GIVEN
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 50, "vt");
-        Stack stack = createTestStack(volumeSetAttributes);
-        Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        Set<HostGroup> hostGroups = createTestHostGroups(2, 5);
-        cluster.setHostGroups(hostGroups);
+        List<InstanceGroupDto> instanceGroups = createTestInstanceGroups(2, 5);
 //        Multimap<Long, InstanceMetaData> hostGroupWithInstances = createTestHostGroupWithInstances();
         ApiServiceConfig apiServiceConfig = createApiServiceConfigWithReplication("3", true);
-        ApiHostTemplateList hostTemplates = createHostTemplatesWithDataNodes(hostGroups.stream().findFirst().get().getName());
+        ApiHostTemplateList hostTemplates = createHostTemplatesWithDataNodes(instanceGroups.stream().findFirst().get().getInstanceGroup().getGroupName());
+        when(stack.getDiskResources()).thenReturn(resources(volumeSetAttributes));
+        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(Mockito.any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
 
@@ -254,9 +244,9 @@ public class ClouderaManagerDecommisionerTest {
         when(hostsResourceApi.readHosts(eq(null), eq(null), anyString())).thenReturn(apiHostList);
         when(apiHostList.getItems()).thenReturn(List.of());
         // WHEN
-        HostGroup firstHostGroup = hostGroups.iterator().next();
-        Set<InstanceMetaData> firstHostGroupInstances = firstHostGroup.getInstanceGroup().getInstanceMetaDataSet();
-        Set<InstanceMetaData> removableInstances = firstHostGroupInstances.stream().limit(5).collect(Collectors.toSet());
+        InstanceGroupDto firstInstanceGroup = instanceGroups.iterator().next();
+        List<InstanceMetadataView> firstInstanceGroupInstances = firstInstanceGroup.getInstanceMetadataViews();
+        Set<InstanceMetadataView> removableInstances = firstInstanceGroupInstances.stream().limit(5).collect(Collectors.toSet());
         underTest.verifyNodesAreRemovable(stack, removableInstances, new ApiClient());
         // THEN no exception
     }
@@ -265,13 +255,10 @@ public class ClouderaManagerDecommisionerTest {
     public void testCollectDownscaleCandidatesWhenEveryHostHasHostname() throws ApiException {
         // GIVEN
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 50, "vt");
-        Stack stack = createTestStack(volumeSetAttributes);
-        Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        Set<HostGroup> hostGroups = createTestHostGroups(1, 6);
-        cluster.setHostGroups(hostGroups);
-        HostGroup downscaledHostGroup = hostGroups.iterator().next();
+        List<InstanceGroupDto> instanceGroups = createTestInstanceGroups(1, 6);
+        InstanceGroupDto downscaledHostGroup = instanceGroups.iterator().next();
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        when(stack.getDiskResources()).thenReturn(resources(volumeSetAttributes));
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
@@ -279,9 +266,14 @@ public class ClouderaManagerDecommisionerTest {
         when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
         ApiHostList apiHostRefList = new ApiHostList();
         List<ApiHost> apiHosts = new ArrayList<>();
-        hostGroups.stream()
-                .flatMap(hostGroup -> hostGroup.getInstanceGroup().getAllInstanceMetaData().stream())
-                .map(InstanceMetaData::getDiscoveryFQDN)
+        instanceGroups.stream()
+                .flatMap(hostGroup -> hostGroup.getInstanceMetadataViews().stream())
+                .map(im -> {
+                    InstanceGroup instanceGroup = new InstanceGroup();
+                    instanceGroup.setGroupName("hgName");
+                    ((InstanceMetaData) im).setInstanceGroup(instanceGroup);
+                    return im.getDiscoveryFQDN();
+                })
                 .forEach(hostName -> {
                     ApiHost apiHostRef = new ApiHost();
                     apiHostRef.setHostname(hostName);
@@ -291,8 +283,8 @@ public class ClouderaManagerDecommisionerTest {
                 });
         apiHostRefList.setItems(apiHosts);
         when(hostsResourceApi.readHosts(any(), any(), any())).thenReturn(apiHostRefList);
-        Set<InstanceMetaData> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -2,
-                downscaledHostGroup.getInstanceGroup().getAllInstanceMetaData());
+        Set<InstanceMetadataView> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, "hgName", -2,
+                new HashSet<>(downscaledHostGroup.getInstanceMetadataViews()));
         assertEquals(2, downscaleCandidates.size());
         assertTrue("Assert if downscaleCandidates contains hg0-instanceid-4",
                 downscaleCandidates.stream().anyMatch(instanceMetaData -> "hg0-instanceid-4".equals(instanceMetaData.getInstanceId())));
@@ -304,37 +296,31 @@ public class ClouderaManagerDecommisionerTest {
     public void testCollectDownscaleCandidatesWhenEveryHostHasHostnameButNotEnoughNodesToDownscale() throws ApiException {
         // GIVEN
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 50, "vt");
-        Stack stack = createTestStack(volumeSetAttributes);
-        Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        Set<HostGroup> hostGroups = createTestHostGroups(1, 6);
-        cluster.setHostGroups(hostGroups);
-        HostGroup downscaledHostGroup = hostGroups.iterator().next();
+        List<InstanceGroupDto> instanceGroups = createTestInstanceGroups(1, 6);
+        InstanceGroupDto downscaledHostGroup = instanceGroups.iterator().next();
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        when(stack.getDiskResources()).thenReturn(resources(volumeSetAttributes));
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
         ApiHostTemplateList hostTemplates = createEmptyHostTemplates();
         when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
-        assertThrows(NotEnoughNodeException.class, () -> underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -8,
-                downscaledHostGroup.getInstanceGroup().getAllInstanceMetaData()));
+        assertThrows(NotEnoughNodeException.class, () -> underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, "hgName", -8,
+                new HashSet<>(downscaledHostGroup.getInstanceMetadataViews())));
     }
 
     @Test
     public void testCollectDownscaleCandidatesWhenOneHostDoesNotHaveFQDN() throws ApiException {
         // GIVEN
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 50, "vt");
-        Stack stack = createTestStack(volumeSetAttributes);
-        Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        Set<HostGroup> hostGroups = createTestHostGroups(1, 6);
-        cluster.setHostGroups(hostGroups);
-        HostGroup downscaledHostGroup = hostGroups.iterator().next();
-        Optional<InstanceMetaData> hgHost2 = downscaledHostGroup.getInstanceGroup().getAllInstanceMetaData().stream()
+        List<InstanceGroupDto> instanceGroups = createTestInstanceGroups(1, 6);
+        InstanceGroupDto downscaledHostGroup = instanceGroups.iterator().next();
+        Optional<InstanceMetadataView> hgHost2 = downscaledHostGroup.getInstanceMetadataViews().stream()
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN().equals("hg0-host-2"))
                 .findFirst();
-        hgHost2.ifPresent(instanceMetaData -> instanceMetaData.setDiscoveryFQDN(null));
+        hgHost2.ifPresent(instanceMetaData -> ((InstanceMetaData) instanceMetaData).setDiscoveryFQDN(null));
         HostsResourceApi hostsResourceApi = mock(HostsResourceApi.class);
+        when(stack.getDiskResources()).thenReturn(resources(volumeSetAttributes));
         when(clouderaManagerApiFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
         HostTemplatesResourceApi hostTemplatesResourceApi = mock(HostTemplatesResourceApi.class);
         when(clouderaManagerApiFactory.getHostTemplatesResourceApi(any(ApiClient.class))).thenReturn(hostTemplatesResourceApi);
@@ -342,9 +328,14 @@ public class ClouderaManagerDecommisionerTest {
         when(hostTemplatesResourceApi.readHostTemplates(stack.getName())).thenReturn(hostTemplates);
         ApiHostList apiHostRefList = new ApiHostList();
         List<ApiHost> apiHosts = new ArrayList<>();
-        hostGroups.stream()
-                .flatMap(hostGroup -> hostGroup.getInstanceGroup().getAllInstanceMetaData().stream())
-                .map(InstanceMetaData::getDiscoveryFQDN)
+        instanceGroups.stream()
+                .flatMap(ig -> ig.getInstanceMetadataViews().stream())
+                .map(im -> {
+                    InstanceGroup instanceGroup = new InstanceGroup();
+                    instanceGroup.setGroupName("hgName");
+                    ((InstanceMetaData) im).setInstanceGroup(instanceGroup);
+                    return im.getDiscoveryFQDN();
+                })
                 .forEach(hostName -> {
                     ApiHost apiHostRef = new ApiHost();
                     apiHostRef.setHostname(hostName);
@@ -354,8 +345,8 @@ public class ClouderaManagerDecommisionerTest {
                 });
         apiHostRefList.setItems(apiHosts);
         when(hostsResourceApi.readHosts(any(), any(), any())).thenReturn(apiHostRefList);
-        Set<InstanceMetaData> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, downscaledHostGroup, -2,
-                downscaledHostGroup.getInstanceGroup().getAllInstanceMetaData());
+        Set<InstanceMetadataView> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, "hgName", -2,
+                new HashSet<>(downscaledHostGroup.getInstanceMetadataViews()));
         assertEquals(2, downscaleCandidates.size());
         assertTrue("Assert if downscaleCandidates contains hg0-host-2, because FQDN is missing",
                 downscaleCandidates.stream().anyMatch(instanceMetaData -> "hg0-instanceid-2".equals(instanceMetaData.getInstanceId())));
@@ -378,40 +369,32 @@ public class ClouderaManagerDecommisionerTest {
         return apiServiceConfig;
     }
 
-    private Set<HostGroup> createTestHostGroups(int groupCount, int hostCount) {
-        Set<HostGroup> hostGroups = new HashSet<>();
-        for (long i = 0; i < groupCount; i++) {
-            hostGroups.add(createTestHostGroup(i, "hg" + i, hostCount));
-        }
-        return hostGroups;
+    private List<InstanceGroupDto> createTestInstanceGroups(int groupCount, int hostCount) {
+        return createTestInstanceGroups(groupCount, hostCount, InstanceStatus.SERVICES_HEALTHY);
     }
 
-    private HostGroup createTestHostGroup(Long id, String name, int hostCount) {
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName(name);
-        hostGroup.setId(id);
+    private List<InstanceGroupDto> createTestInstanceGroups(int groupCount, int hostCount, InstanceStatus instanceStatus) {
+        List<InstanceGroupDto> instanceGroupDtos = new ArrayList<>();
+        for (long i = 0; i < groupCount; i++) {
+            instanceGroupDtos.add(createTestInstanceGroup(i, "hg" + i, hostCount, instanceStatus));
+        }
+        return instanceGroupDtos;
+    }
+
+    private InstanceGroupDto createTestInstanceGroup(Long id, String name, int hostCount, InstanceStatus instanceStatus) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(name);
-        Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
+        instanceGroup.setId(id);
+        List<InstanceMetadataView> instanceMetaDatas = new ArrayList<>();
         for (long i = 0; i < hostCount; i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
             instanceMetaData.setInstanceId(name + "-instanceid-" + i);
             instanceMetaData.setDiscoveryFQDN(name + "-host-" + i);
             instanceMetaData.setInstanceGroup(instanceGroup);
-            instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
+            instanceMetaData.setInstanceStatus(instanceStatus);
             instanceMetaDatas.add(instanceMetaData);
         }
-        instanceGroup.setInstanceMetaData(instanceMetaDatas);
-        hostGroup.setInstanceGroup(instanceGroup);
-        return hostGroup;
-    }
-
-    private Stack createTestStack(VolumeSetAttributes volumeSetAttributes) {
-        Stack stack = new Stack();
-        stack.setName("stack");
-        stack.setPlatformVariant(CloudConstants.AWS);
-        stack.setResources(resources(volumeSetAttributes));
-        return stack;
+        return new InstanceGroupDto(instanceGroup, instanceMetaDatas);
     }
 
     private ApiHostTemplateList createEmptyHostTemplates() {
@@ -431,8 +414,8 @@ public class ClouderaManagerDecommisionerTest {
         return apiHostTemplateList;
     }
 
-    private Set<Resource> resources(VolumeSetAttributes volumeSetAttributes) {
-        Set<Resource> resources = new HashSet<>();
+    private List<Resource> resources(VolumeSetAttributes volumeSetAttributes) {
+        List<Resource> resources = new ArrayList<>();
         Resource resource = new Resource();
         resource.setResourceType(ResourceType.AWS_VOLUMESET);
         resource.setAttributes(new Json(volumeSetAttributes));

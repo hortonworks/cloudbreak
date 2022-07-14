@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.structuredevent.converter;
 import static org.mockito.ArgumentMatchers.any;
 
 import java.util.HashSet;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -54,7 +55,7 @@ public class StackToStackDetailsConverterTest {
         // GIVEN
         Stack stack = createStack();
         // WHEN
-        StackDetails actual = underTest.convert(stack);
+        StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN
         Assertions.assertEquals(stack.getName(), actual.getName());
         Assertions.assertEquals(stack.getTunnel().name(), actual.getTunnel());
@@ -68,7 +69,7 @@ public class StackToStackDetailsConverterTest {
         Stack stack = createStack();
         Mockito.when(dbServerConfigurer.isRemoteDatabaseNeeded(stack.getCluster().getDatabaseServerCrn())).thenReturn(true);
         // WHEN
-        StackDetails actual = underTest.convert(stack);
+        StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN
         Assertions.assertEquals("EXTERNAL_DB", actual.getDatabaseType());
     }
@@ -77,9 +78,9 @@ public class StackToStackDetailsConverterTest {
     public void testConversionWhenDBOnAttachedDisk() {
         // GIVEN
         Stack stack = createStack();
-        Mockito.when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack)).thenReturn(true);
+        Mockito.when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack.getCluster(), Optional.empty())).thenReturn(true);
         // WHEN
-        StackDetails actual = underTest.convert(stack);
+        StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN
         Assertions.assertEquals("ON_ATTACHED_VOLUME", actual.getDatabaseType());
     }
@@ -88,9 +89,9 @@ public class StackToStackDetailsConverterTest {
     public void testConversionWhenDBTypeThrowsException() {
         // GIVEN
         Stack stack = createStack();
-        Mockito.when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack)).thenThrow(new RuntimeException());
+        Mockito.when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack.getCluster(), Optional.empty())).thenThrow(new RuntimeException());
         // WHEN
-        StackDetails actual = underTest.convert(stack);
+        StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
         // THEN
         Assertions.assertEquals("UNKNOWN", actual.getDatabaseType());
     }
@@ -110,7 +111,7 @@ public class StackToStackDetailsConverterTest {
                 .thenReturn(customConfigurationsDetails);
 
         // WHEN
-        StackDetails actual = underTest.convert(stack);
+        StackDetails actual = underTest.convert(stack, stack.getCluster(), stack.getInstanceGroupDtos());
 
         // THEN
         Assertions.assertNotNull(actual.getCustomConfigurations());
@@ -125,7 +126,7 @@ public class StackToStackDetailsConverterTest {
         stack.setCluster(cluster);
 
         // WHEN
-        StackDetails actual = underTest.convert(stack);
+        StackDetails actual = underTest.convert(stack, cluster, stack.getInstanceGroupDtos());
 
         // THEN
         Assertions.assertNull(actual.getCustomConfigurations());

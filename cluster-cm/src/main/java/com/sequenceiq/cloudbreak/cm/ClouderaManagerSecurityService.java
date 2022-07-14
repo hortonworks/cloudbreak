@@ -42,13 +42,13 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.dto.datalake.DatalakeDto;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.util.URLUtils;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Service
 @Scope("prototype")
@@ -79,18 +79,18 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
 
-    private final Stack stack;
+    private final StackDtoDelegate stack;
 
     private final HttpClientConfig clientConfig;
 
-    public ClouderaManagerSecurityService(Stack stack, HttpClientConfig clientConfig) {
+    public ClouderaManagerSecurityService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
     }
 
     @Override
     public void replaceUserNamePassword(String newUserName, String newPassword) throws CloudbreakException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
@@ -114,7 +114,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
 
     @Override
     public void updateUserNamePassword(String newPassword) throws CloudbreakException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String cmUser = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
@@ -169,7 +169,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
             ApiUser2List userList = usersResourceApi.readUsers2("SUMMARY");
 
             ApiUser2 oldAdminUser = getOldAdminUser(userList).orElseThrow(() -> new CloudbreakException("Can't find original admin user"));
-            Cluster cluster = stack.getCluster();
+            ClusterView cluster = stack.getCluster();
             createNewUser(usersResourceApi, oldAdminUser.getAuthRoles(), cluster.getCloudbreakAmbariUser(), cluster.getCloudbreakAmbariPassword(), userList);
             createNewUser(usersResourceApi, oldAdminUser.getAuthRoles(), cluster.getDpAmbariUser(), cluster.getDpAmbariPassword(), userList);
             if (ADMIN_USER.equals(cluster.getUserName())) {
@@ -185,7 +185,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
         }
     }
 
-    private void createUserSuppliedCMUser(ApiUser2List userList, ApiUser2 oldAdminUser, Cluster cluster)
+    private void createUserSuppliedCMUser(ApiUser2List userList, ApiUser2 oldAdminUser, ClusterView cluster)
             throws ClouderaManagerClientInitException, ApiException {
         ApiClient client;
         String user = cluster.getCloudbreakAmbariUser();
@@ -220,7 +220,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
 
     private ApiClient createClientWithNewPassword() throws ClouderaManagerClientInitException {
         LOGGER.debug("Cloudera Manager already running, old admin user's password has been changed.");
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         return clouderaManagerApiClientProvider.getV40Client(stack.getGatewayPort(), user, password, clientConfig);
@@ -254,7 +254,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     @Override
     public void setupLdapAndSSO(String primaryGatewayPublicAddress, LdapView ldapConfig, VirtualGroupRequest virtualGroupRequest) throws CloudbreakException {
         try {
-            ldapService.setupLdap(stack, stack.getCluster(), clientConfig, ldapConfig, virtualGroupRequest);
+            ldapService.setupLdap(stack.getStack(), stack.getCluster(), clientConfig, ldapConfig, virtualGroupRequest);
         } catch (ApiException | ClouderaManagerClientInitException e) {
             throw new CloudbreakException(e);
         }
@@ -307,7 +307,7 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
 
     @Override
     public void rotateHostCertificates(String sshUser, KeyPair sshKeyPair, String subAltName) throws CloudbreakException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {

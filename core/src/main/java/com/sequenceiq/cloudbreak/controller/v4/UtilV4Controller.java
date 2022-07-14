@@ -141,7 +141,8 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public Response renewCertificate(RenewCertificateV4Request renewCertificateV4Request) {
-        stackOperationService.renewCertificate(renewCertificateV4Request.getStackName());
+        String accountId = restRequestThreadLocalService.getAccountId();
+        stackOperationService.renewCertificate(renewCertificateV4Request.getStackName(), accountId);
         return Response.ok().build();
     }
 

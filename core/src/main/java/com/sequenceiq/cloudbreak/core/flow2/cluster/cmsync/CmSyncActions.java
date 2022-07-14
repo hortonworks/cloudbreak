@@ -67,7 +67,7 @@ public class CmSyncActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.warn("Error during executing syncing Cloudera Manager and parcels versions from CM.", payload.getException());
-                flowMessageService.fireEventAndLog(context.getStackView().getId(), EVENT_TYPE, ResourceEvent.STACK_SYNC_VERSIONS_FROM_CM_TO_DB_FAILED,
+                flowMessageService.fireEventAndLog(context.getStackId(), EVENT_TYPE, ResourceEvent.STACK_SYNC_VERSIONS_FROM_CM_TO_DB_FAILED,
                         payload.getException().getMessage());
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
@@ -76,7 +76,7 @@ public class CmSyncActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(CmSyncEvent.CM_SYNC_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(CmSyncEvent.CM_SYNC_FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
 
 @Entity
 @Table(name = "Blueprint")
+@Deprecated
 public class BlueprintView extends CompactView {
     private String stackType;
 

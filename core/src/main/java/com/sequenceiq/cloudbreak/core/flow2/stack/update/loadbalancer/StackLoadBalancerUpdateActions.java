@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -120,7 +121,7 @@ public class StackLoadBalancerUpdateActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                Stack stack = context.getStack();
+                StackDtoDelegate stack = context.getStack();
                 List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(stack.getId()).stream()
                     .map(LoadBalancer::getType)
                     .collect(Collectors.toList());
@@ -160,7 +161,7 @@ public class StackLoadBalancerUpdateActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new RegisterFreeIpaDnsRequest(context.getStack());
+                return new RegisterFreeIpaDnsRequest(context.getStack().getId());
             }
         };
     }
@@ -176,7 +177,7 @@ public class StackLoadBalancerUpdateActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new UpdateServiceConfigRequest(context.getStack());
+                return new UpdateServiceConfigRequest(context.getStack().getId());
             }
         };
     }
@@ -192,7 +193,7 @@ public class StackLoadBalancerUpdateActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new RestartCmForLbRequest(context.getStack());
+                return new RestartCmForLbRequest(context.getStack().getId());
             }
         };
     }
@@ -218,13 +219,13 @@ public class StackLoadBalancerUpdateActions {
         return new AbstractStackFailureAction<StackLoadBalancerUpdateState, StackLoadBalancerUpdateEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                stackLoadBalancerUpdateService.updateClusterFailed(context.getStackView().getId(), payload.getException());
+                stackLoadBalancerUpdateService.updateClusterFailed(context.getStackId(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackLoadBalancerUpdateEvent.LOAD_BALANCER_UPDATE_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(StackLoadBalancerUpdateEvent.LOAD_BALANCER_UPDATE_FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }
@@ -267,7 +268,7 @@ public class StackLoadBalancerUpdateActions {
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                 .withTenantId(stack.getWorkspace().getId())
                 .build();
-            CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
+            CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
             CloudStack cloudStack = cloudStackConverter.convert(stack);
             return new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
         }

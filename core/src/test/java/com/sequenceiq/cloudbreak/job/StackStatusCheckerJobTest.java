@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.verify;
@@ -15,19 +16,21 @@ import static org.mockito.Mockito.when;
 
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -54,8 +57,8 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -63,6 +66,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
@@ -73,7 +77,7 @@ import com.sequenceiq.flow.core.FlowLogService;
 
 import io.opentracing.Tracer;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class StackStatusCheckerJobTest {
 
     private static final String BLUEPRINT_TEXT = "blueprintText";
@@ -83,6 +87,9 @@ public class StackStatusCheckerJobTest {
 
     @Mock
     private StatusCheckerJobService jobService;
+
+    @Mock
+    private StackDtoService stackDtoService;
 
     @Mock
     private StackService stackService;
@@ -116,6 +123,9 @@ public class StackStatusCheckerJobTest {
 
     @Mock
     private ClusterStatusService clusterStatusService;
+
+    @Spy
+    private StackDto stackDto;
 
     private Stack stack;
 
@@ -162,12 +172,12 @@ public class StackStatusCheckerJobTest {
     @Mock
     private MetricsClient metricsClient;
 
-    @Before
+    @BeforeEach
     public void init() {
         Tracer tracer = Mockito.mock(Tracer.class);
         underTest = new StackStatusCheckerJob(tracer);
         MockitoAnnotations.openMocks(this);
-        when(flowLogService.isOtherFlowRunning(anyLong())).thenReturn(Boolean.FALSE);
+        lenient().when(flowLogService.isOtherFlowRunning(anyLong())).thenReturn(Boolean.FALSE);
         underTest.setLocalId("1");
         underTest.setRemoteResourceCrn("remote:crn");
 
@@ -183,15 +193,17 @@ public class StackStatusCheckerJobTest {
         stack.setCreator(user);
         stack.setCloudPlatform("AWS");
 
-        when(stackService.get(anyLong())).thenReturn(stack);
-        when(jobExecutionContext.getMergedJobDataMap()).thenReturn(new JobDataMap());
-        when(cluster.getBlueprint()).thenReturn(blueprint);
-        when(blueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
-        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
-        when(stackService.computeMonitoringEnabled(any())).thenReturn(Optional.of(true));
+        lenient().when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
+        lenient().when(stackDto.getStack()).thenReturn(stack);
+        lenient().when(stackDto.getCluster()).thenReturn(cluster);
+        lenient().when(jobExecutionContext.getMergedJobDataMap()).thenReturn(new JobDataMap());
+        lenient().when(stackDto.getBlueprint()).thenReturn(blueprint);
+        lenient().when(blueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
+        lenient().when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
+        lenient().when(stackService.computeMonitoringEnabled(any())).thenReturn(Optional.of(true));
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         validateMockitoUsage();
     }
@@ -201,7 +213,7 @@ public class StackStatusCheckerJobTest {
         when(flowLogService.isOtherFlowRunning(anyLong())).thenReturn(Boolean.TRUE);
         underTest.executeTracedJob(jobExecutionContext);
 
-        verify(stackService, times(0)).getByIdWithListsInTransaction(anyLong());
+        verify(stackDtoService, times(0)).getById(anyLong());
     }
 
     @Test
@@ -210,7 +222,7 @@ public class StackStatusCheckerJobTest {
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt(), any());
-        verify(clusterApiConnectors, times(0)).getConnector(stack);
+        verify(clusterApiConnectors, times(0)).getConnector(stackDto);
     }
 
     @Test
@@ -221,7 +233,7 @@ public class StackStatusCheckerJobTest {
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt(), any());
-        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
+        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stackDto), any());
     }
 
     @Test
@@ -233,13 +245,13 @@ public class StackStatusCheckerJobTest {
 
         verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt(), any());
         verify(clusterOperationService, times(0)).reportHealthChange(anyString(), any(), anySet());
-        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
+        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stackDto), any());
     }
 
     @Test
     public void testInstanceSyncCMRunning() throws JobExecutionException {
         setupForCM();
-        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
@@ -247,7 +259,7 @@ public class StackStatusCheckerJobTest {
 
         verify(metricsClient, times(1)).processStackStatus(anyString(), anyString(), anyString(), anyInt(), any());
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
-        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
+        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stackDto), any());
         verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true);
     }
 
@@ -260,14 +272,14 @@ public class StackStatusCheckerJobTest {
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
         when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.STOPPED);
         when(instanceMetaData.getDiscoveryFQDN()).thenReturn("host1");
-        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
-        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
+        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stackDto), any());
         verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true);
         verify(clusterService, times(1)).updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.NODE_FAILURE);
     }
@@ -303,10 +315,8 @@ public class StackStatusCheckerJobTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         when(instanceMetaData.getDiscoveryFQDN()).thenReturn("host1");
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName(instanceHgName);
-        when(instanceMetaData.getInstanceGroup()).thenReturn(instanceGroup);
-        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        lenient().when(instanceMetaData.getInstanceGroupName()).thenReturn(instanceHgName);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
         Set<String> computeGroups = new HashSet<>();
@@ -315,7 +325,7 @@ public class StackStatusCheckerJobTest {
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
-        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
+        verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stackDto), any());
         verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true);
         verify(clusterService, times(1)).updateClusterStatusByStackId(stack.getId(), expected);
     }
@@ -339,19 +349,19 @@ public class StackStatusCheckerJobTest {
 
     private void setupForCM() {
         setStackStatus(DetailedStackStatus.AVAILABLE);
-        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
-        when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(true);
+        lenient().when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        lenient().when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(true);
         Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.HEALTHY, Optional.empty()),
                 new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty()));
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), healthChecks));
-        when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
-        when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.SERVICES_HEALTHY);
+        lenient().when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
+        lenient().when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of(instanceMetaData));
+        lenient().when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.SERVICES_HEALTHY);
     }
 
     private void setupForCMNotAccessible() {
         setStackStatus(DetailedStackStatus.STOPPED);
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of(instanceMetaData));
     }
 
     private void setStackStatus(DetailedStackStatus detailedStackStatus) {

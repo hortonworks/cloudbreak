@@ -37,6 +37,8 @@ import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 
@@ -52,8 +54,6 @@ public class MultiAzCalculatorServiceTest {
     private static final int NO_SUBNETS = 0;
 
     private static final int SINGLE_SUBNET = 1;
-
-    private static final String INSTANCE_ID = "i-123";
 
     @Mock
     private MultiAzValidator multiAzValidator;
@@ -116,19 +116,19 @@ public class MultiAzCalculatorServiceTest {
     static Object[][] testSubnetDistributionForWholeInstanceGroupData() {
         return new Object[][]{
                 // cloudPlatform, subnetCount, instanceCount, expectedCounts, supported
-                { CloudPlatform.AWS,    1,  99,  Arrays.asList(99L),                  true   },
-                { CloudPlatform.AWS,    3,  99,  Arrays.asList(33L, 33L, 33L),        true   },
-                { CloudPlatform.AWS,    3,  60,  Arrays.asList(20L, 20L, 20L),        true   },
-                { CloudPlatform.AWS,    3,  59,  Arrays.asList(20L, 20L, 19L),        true   },
-                { CloudPlatform.AWS,    3,  58,  Arrays.asList(20L, 19L, 19L),        true   },
-                { CloudPlatform.AWS,    3,  57,  Arrays.asList(19L, 19L, 19L),        true   },
-                { CloudPlatform.AWS,    3,  56,  Arrays.asList(19L, 19L, 18L),        true   },
-                { CloudPlatform.AWS,    4,  60,  Arrays.asList(15L, 15L, 15L, 15L),   true   },
-                { CloudPlatform.AWS,    4,  59,  Arrays.asList(15L, 15L, 15L, 14L),   true   },
-                { CloudPlatform.AWS,    4,  58,  Arrays.asList(15L, 15L, 14L, 14L),   true   },
-                { CloudPlatform.AWS,    4,  57,  Arrays.asList(15L, 14L, 14L, 14L),   true   },
-                { CloudPlatform.AWS,    4,  56,  Arrays.asList(14L, 14L, 14L, 14L),   true   },
-                { CloudPlatform.YARN,   0,  0,   Arrays.asList(),                     false  },
+                {CloudPlatform.AWS, 1, 99, Arrays.asList(99L), true},
+                {CloudPlatform.AWS, 3, 99, Arrays.asList(33L, 33L, 33L), true},
+                {CloudPlatform.AWS, 3, 60, Arrays.asList(20L, 20L, 20L), true},
+                {CloudPlatform.AWS, 3, 59, Arrays.asList(20L, 20L, 19L), true},
+                {CloudPlatform.AWS, 3, 58, Arrays.asList(20L, 19L, 19L), true},
+                {CloudPlatform.AWS, 3, 57, Arrays.asList(19L, 19L, 19L), true},
+                {CloudPlatform.AWS, 3, 56, Arrays.asList(19L, 19L, 18L), true},
+                {CloudPlatform.AWS, 4, 60, Arrays.asList(15L, 15L, 15L, 15L), true},
+                {CloudPlatform.AWS, 4, 59, Arrays.asList(15L, 15L, 15L, 14L), true},
+                {CloudPlatform.AWS, 4, 58, Arrays.asList(15L, 15L, 14L, 14L), true},
+                {CloudPlatform.AWS, 4, 57, Arrays.asList(15L, 14L, 14L, 14L), true},
+                {CloudPlatform.AWS, 4, 56, Arrays.asList(14L, 14L, 14L, 14L), true},
+                {CloudPlatform.YARN, 0, 0, Arrays.asList(), false},
         };
     }
 
@@ -140,16 +140,16 @@ public class MultiAzCalculatorServiceTest {
         if (supported) {
             when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
         }
-        InstanceGroup instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
+        InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
 
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),
-                instanceGroup);
+                (InstanceGroup) instanceGroup.getInstanceGroup());
 
         List<Long> actualCounts = new ArrayList<>();
         for (int i = 0; i < subnetCount; i++) {
             int finalI = i;
-            actualCounts.add(instanceGroup.getAllInstanceMetaData()
+            actualCounts.add(instanceGroup.getInstanceMetadataViews()
                     .stream()
                     .filter(instance -> instance.getSubnetId().equals(cloudSubnetName(finalI)))
                     .count());
@@ -169,18 +169,18 @@ public class MultiAzCalculatorServiceTest {
             when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
         }
 
-        InstanceGroup instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
+        InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
         InstanceMetaData instanceWithPrepopulatedForeignSubnetId = instanceMetaData(instanceCount, SUBNET_ID, AVAILABILITY_ZONE, InstanceStatus.REQUESTED);
-        instanceGroup.getAllInstanceMetaData().add(instanceWithPrepopulatedForeignSubnetId);
+        instanceGroup.getInstanceMetadataViews().add(instanceWithPrepopulatedForeignSubnetId);
 
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),
-                instanceGroup);
+                (InstanceGroup) instanceGroup.getInstanceGroup());
 
         List<Long> actualCounts = new ArrayList<>();
         for (int i = 0; i < subnetCount; i++) {
             int finalI = i;
-            actualCounts.add(instanceGroup.getAllInstanceMetaData()
+            actualCounts.add(instanceGroup.getInstanceMetadataViews()
                     .stream()
                     .filter(instance -> instance.getSubnetId().equals(cloudSubnetName(finalI)))
                     .count());
@@ -197,19 +197,19 @@ public class MultiAzCalculatorServiceTest {
     static Object[][] testSubnetDistributionForWholeInstanceGroupWhen5InstancesWithPrepopulatedKnownSubnetIdData() {
         return new Object[][]{
                 // cloudPlatform, subnetCount, instanceCount, expectedCounts, supported
-                { CloudPlatform.AWS,    1,  99,  Arrays.asList(104L),                 true   },
-                { CloudPlatform.AWS,    3,  99,  Arrays.asList(35L, 35L, 34L),        true   },
-                { CloudPlatform.AWS,    3,  60,  Arrays.asList(22L, 22L, 21L),        true   },
-                { CloudPlatform.AWS,    3,  59,  Arrays.asList(22L, 21L, 21L),        true   },
-                { CloudPlatform.AWS,    3,  58,  Arrays.asList(21L, 21L, 21L),        true   },
-                { CloudPlatform.AWS,    3,  57,  Arrays.asList(21L, 21L, 20L),        true   },
-                { CloudPlatform.AWS,    3,  56,  Arrays.asList(21L, 20L, 20L),        true   },
-                { CloudPlatform.AWS,    4,  60,  Arrays.asList(17L, 16L, 16L, 16L),   true   },
-                { CloudPlatform.AWS,    4,  59,  Arrays.asList(16L, 16L, 16L, 16L),   true   },
-                { CloudPlatform.AWS,    4,  58,  Arrays.asList(16L, 16L, 16L, 15L),   true   },
-                { CloudPlatform.AWS,    4,  57,  Arrays.asList(16L, 16L, 15L, 15L),   true   },
-                { CloudPlatform.AWS,    4,  56,  Arrays.asList(16L, 15L, 15L, 15L),   true   },
-                { CloudPlatform.YARN,   0,  0,   Arrays.asList(),                     false  },
+                {CloudPlatform.AWS, 1, 99, Arrays.asList(104L), true},
+                {CloudPlatform.AWS, 3, 99, Arrays.asList(35L, 35L, 34L), true},
+                {CloudPlatform.AWS, 3, 60, Arrays.asList(22L, 22L, 21L), true},
+                {CloudPlatform.AWS, 3, 59, Arrays.asList(22L, 21L, 21L), true},
+                {CloudPlatform.AWS, 3, 58, Arrays.asList(21L, 21L, 21L), true},
+                {CloudPlatform.AWS, 3, 57, Arrays.asList(21L, 21L, 20L), true},
+                {CloudPlatform.AWS, 3, 56, Arrays.asList(21L, 20L, 20L), true},
+                {CloudPlatform.AWS, 4, 60, Arrays.asList(17L, 16L, 16L, 16L), true},
+                {CloudPlatform.AWS, 4, 59, Arrays.asList(16L, 16L, 16L, 16L), true},
+                {CloudPlatform.AWS, 4, 58, Arrays.asList(16L, 16L, 16L, 15L), true},
+                {CloudPlatform.AWS, 4, 57, Arrays.asList(16L, 16L, 15L, 15L), true},
+                {CloudPlatform.AWS, 4, 56, Arrays.asList(16L, 15L, 15L, 15L), true},
+                {CloudPlatform.YARN, 0, 0, Arrays.asList(), false},
         };
     }
 
@@ -222,7 +222,7 @@ public class MultiAzCalculatorServiceTest {
             when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
         }
 
-        InstanceGroup instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
+        InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
         Set<InstanceMetaData> extraInstancesWithPrepopulatedSubnetId = new HashSet<>();
         String subnetIdForExtraInstances = cloudSubnetName(0);
         String availabilityZoneForExtraInstances = cloudSubnetAz(0);
@@ -232,16 +232,17 @@ public class MultiAzCalculatorServiceTest {
                         null));
             }
         }
-        instanceGroup.getAllInstanceMetaData().addAll(extraInstancesWithPrepopulatedSubnetId);
+        instanceGroup.addAllInstanceMetadata(extraInstancesWithPrepopulatedSubnetId);
 
+        // until the InstanceGroups are not refactored completly, we need the cast
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),
-                instanceGroup);
+                (InstanceGroup) instanceGroup.getInstanceGroup());
 
         List<Long> actualCounts = new ArrayList<>();
         for (int i = 0; i < subnetCount; i++) {
             int finalI = i;
-            actualCounts.add(instanceGroup.getAllInstanceMetaData()
+            actualCounts.add(instanceGroup.getInstanceMetadataViews()
                     .stream()
                     .filter(instance -> instance.getSubnetId().equals(cloudSubnetName(finalI)))
                     .count());
@@ -266,7 +267,7 @@ public class MultiAzCalculatorServiceTest {
             when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
         }
 
-        InstanceGroup instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
+        InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
         Set<InstanceMetaData> deletedInstancesWithPrepopulatedSubnetId = new HashSet<>();
         String subnetIdForDeletedInstances = cloudSubnetName(0);
         String availabilityZoneForDeletedInstances = cloudSubnetAz(0);
@@ -282,16 +283,16 @@ public class MultiAzCalculatorServiceTest {
             deletedInstancesWithPrepopulatedSubnetId.add(instanceMetaData(instanceCount + 3, subnetIdForDeletedInstances, availabilityZoneForDeletedInstances,
                     InstanceStatus.DELETED_ON_PROVIDER_SIDE));
         }
-        instanceGroup.getAllInstanceMetaData().addAll(deletedInstancesWithPrepopulatedSubnetId);
+        instanceGroup.getInstanceMetadataViews().addAll(deletedInstancesWithPrepopulatedSubnetId);
 
         underTest.calculateByRoundRobin(
                 subnetAzPairs(subnetCount),
-                instanceGroup);
+                (InstanceGroup) instanceGroup.getInstanceGroup());
 
         List<Long> actualCounts = new ArrayList<>();
         for (int i = 0; i < subnetCount; i++) {
             int finalI = i;
-            actualCounts.add(instanceGroup.getAllInstanceMetaData()
+            actualCounts.add(instanceGroup.getInstanceMetadataViews()
                     .stream()
                     .filter(instance -> instance.getSubnetId().equals(cloudSubnetName(finalI)))
                     .filter(instance -> !deletedInstancesWithPrepopulatedSubnetId.contains(instance))
@@ -322,7 +323,8 @@ public class MultiAzCalculatorServiceTest {
     @MethodSource("calculateByRoundRobinTestWhenWholeInstanceGroupAndNoSubnetIdsDataProvider")
     void calculateByRoundRobinTestWhenWholeInstanceGroupAndNoSubnetIds(String testCaseName, boolean disableNetwork, boolean disableAttributes,
             boolean disableSubnetIdsAttribute) {
-        InstanceGroup instanceGroup = instanceGroup(CloudPlatform.AWS, SINGLE_INSTANCE, NO_SUBNETS);
+        InstanceGroupDto instanceGroupDto = instanceGroup(CloudPlatform.AWS, SINGLE_INSTANCE, NO_SUBNETS);
+        InstanceGroup instanceGroup = (InstanceGroup) instanceGroupDto.getInstanceGroup();
         if (disableNetwork) {
             instanceGroup.setInstanceGroupNetwork(null);
         } else if (disableAttributes) {
@@ -335,7 +337,7 @@ public class MultiAzCalculatorServiceTest {
                 subnetAzPairs(NO_SUBNETS),
                 instanceGroup);
 
-        instanceGroup.getAllInstanceMetaData().forEach(instance -> {
+        instanceGroupDto.getInstanceMetadataViews().forEach(instance -> {
             assertThat(instance.getSubnetId()).isNull();
             assertThat(instance.getAvailabilityZone()).isNull();
         });
@@ -402,7 +404,7 @@ public class MultiAzCalculatorServiceTest {
             when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
         }
 
-        InstanceGroup instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
+        InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
         initSubnetIdAndAvailabilityZoneForInstances(existingCounts, instanceGroup);
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -426,10 +428,10 @@ public class MultiAzCalculatorServiceTest {
             when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
         }
 
-        InstanceGroup instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
+        InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
         initSubnetIdAndAvailabilityZoneForInstances(existingCounts, instanceGroup);
         InstanceMetaData instanceWithPrepopulatedForeignSubnetId = instanceMetaData(instanceCount, SUBNET_ID, AVAILABILITY_ZONE, InstanceStatus.REQUESTED);
-        instanceGroup.getAllInstanceMetaData().add(instanceWithPrepopulatedForeignSubnetId);
+        instanceGroup.getInstanceMetadataViews().add(instanceWithPrepopulatedForeignSubnetId);
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         underTest.calculateByRoundRobin(
@@ -451,10 +453,10 @@ public class MultiAzCalculatorServiceTest {
     public void calculateByRoundRobinTestWhenCloudInstanceAndDeletedInstances(CloudPlatform cloudPlatform, int subnetCount, int instanceCount,
             List<Integer> existingCounts, boolean supported, Set<Integer> expectedPermissibleSubnetIdIndexes) {
         if (supported) {
-            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
+            when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroupView.class))).thenReturn(true);
         }
 
-        InstanceGroup instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
+        InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
         initSubnetIdAndAvailabilityZoneForInstances(existingCounts, instanceGroup);
         Set<InstanceMetaData> deletedInstancesWithPrepopulatedSubnetId = new HashSet<>();
         String subnetIdForDeletedInstances = cloudSubnetName(0);
@@ -465,13 +467,13 @@ public class MultiAzCalculatorServiceTest {
             instanceWithTerminationDate.setTerminationDate(1234L);
             deletedInstancesWithPrepopulatedSubnetId.add(instanceWithTerminationDate);
             deletedInstancesWithPrepopulatedSubnetId.add(instanceMetaData(instanceCount + 1, subnetIdForDeletedInstances, availabilityZoneForDeletedInstances,
-                    InstanceStatus.TERMINATED));
+                    InstanceStatus.ZOMBIE));
             deletedInstancesWithPrepopulatedSubnetId.add(instanceMetaData(instanceCount + 2, subnetIdForDeletedInstances, availabilityZoneForDeletedInstances,
                     InstanceStatus.DELETED_BY_PROVIDER));
             deletedInstancesWithPrepopulatedSubnetId.add(instanceMetaData(instanceCount + 3, subnetIdForDeletedInstances, availabilityZoneForDeletedInstances,
                     InstanceStatus.DELETED_ON_PROVIDER_SIDE));
         }
-        instanceGroup.getAllInstanceMetaData().addAll(deletedInstancesWithPrepopulatedSubnetId);
+        instanceGroup.getInstanceMetadataViews().addAll(deletedInstancesWithPrepopulatedSubnetId);
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
 
@@ -508,13 +510,13 @@ public class MultiAzCalculatorServiceTest {
     @MethodSource("calculateByRoundRobinTestWhenCloudInstanceAndNoSubnetIdsDataProvider")
     void calculateByRoundRobinTestWhenCloudInstanceAndNoSubnetIds(String testCaseName, boolean disableNetwork, boolean disableAttributes,
             boolean disableSubnetIdsAttribute, boolean prepopulateCloudInstanceSubnet) {
-        InstanceGroup instanceGroup = instanceGroup(CloudPlatform.AWS, SINGLE_INSTANCE, NO_SUBNETS);
+        InstanceGroupDto instanceGroup = instanceGroup(CloudPlatform.AWS, SINGLE_INSTANCE, NO_SUBNETS);
         if (disableNetwork) {
-            instanceGroup.setInstanceGroupNetwork(null);
+            ((InstanceGroup) instanceGroup.getInstanceGroup()).setInstanceGroupNetwork(null);
         } else if (disableAttributes) {
-            instanceGroup.getInstanceGroupNetwork().setAttributes(null);
+            ((InstanceGroup) instanceGroup.getInstanceGroup()).getInstanceGroupNetwork().setAttributes(null);
         } else if (disableSubnetIdsAttribute) {
-            instanceGroup.getInstanceGroupNetwork().setAttributes(new Json(Map.of()));
+            ((InstanceGroup) instanceGroup.getInstanceGroup()).getInstanceGroupNetwork().setAttributes(new Json(Map.of()));
         }
 
         String cloudInstanceSubnetId = prepopulateCloudInstanceSubnet ? SUBNET_ID : null;
@@ -533,7 +535,7 @@ public class MultiAzCalculatorServiceTest {
                 cloudInstanceAvailabilityZone == null ? Set.of() : Set.of(cloudInstanceAvailabilityZone),
                 instanceMetaData);
 
-        instanceGroup.getAllInstanceMetaData().forEach(instance -> {
+        instanceGroup.getInstanceMetadataViews().forEach(instance -> {
             assertThat(instance.getSubnetId()).isNull();
             assertThat(instance.getAvailabilityZone()).isNull();
         });
@@ -544,7 +546,7 @@ public class MultiAzCalculatorServiceTest {
         when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
 
         List<Integer> existingCounts = List.of(SINGLE_SUBNET);
-        InstanceGroup instanceGroup = instanceGroup(CloudPlatform.AWS, SINGLE_INSTANCE, SINGLE_SUBNET);
+        InstanceGroupDto instanceGroup = instanceGroup(CloudPlatform.AWS, SINGLE_INSTANCE, SINGLE_SUBNET);
         initSubnetIdAndAvailabilityZoneForInstances(existingCounts, instanceGroup);
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -589,7 +591,7 @@ public class MultiAzCalculatorServiceTest {
             when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
         }
 
-        InstanceGroup instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
+        InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
 
@@ -601,7 +603,7 @@ public class MultiAzCalculatorServiceTest {
 
         verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
 
-        instanceGroup.getAllInstanceMetaData().forEach(instance -> {
+        instanceGroup.getInstanceMetadataViews().forEach(instance -> {
             assertThat(instance.getSubnetId()).isNull();
             assertThat(instance.getAvailabilityZone()).isNull();
         });
@@ -661,7 +663,7 @@ public class MultiAzCalculatorServiceTest {
             when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
         }
 
-        InstanceGroup instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
+        InstanceGroupDto instanceGroup = instanceGroup(cloudPlatform, instanceCount, subnetCount);
         initSubnetIdAndAvailabilityZoneForInstances(existingCounts, instanceGroup);
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -684,7 +686,7 @@ public class MultiAzCalculatorServiceTest {
     @Test
     public void testWhenNoAvailableSubnetInTheEnvironmentByInstanceGroup() {
         when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
-        InstanceGroup instanceGroup = instanceGroup(CloudPlatform.AWS, SINGLE_INSTANCE, SINGLE_SUBNET);
+        InstanceGroupDto instanceGroup = instanceGroup(CloudPlatform.AWS, SINGLE_INSTANCE, SINGLE_SUBNET);
 
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setSubnetId(SUBNET_ID);
@@ -695,7 +697,7 @@ public class MultiAzCalculatorServiceTest {
                 "update previously? Missing subnets: [name-0]");
     }
 
-    private InstanceGroup instanceGroup(CloudPlatform cloudPlatform, int instanceNumber, int subnetCount) {
+    private InstanceGroupDto instanceGroup(CloudPlatform cloudPlatform, int instanceNumber, int subnetCount) {
         InstanceGroup instanceGroup = new InstanceGroup();
         List<String> subnets = new ArrayList<>();
         for (int i = 0; i < subnetCount; i++) {
@@ -709,7 +711,7 @@ public class MultiAzCalculatorServiceTest {
         for (int i = 0; i < instanceNumber; i++) {
             instanceGroup.getAllInstanceMetaData().add(instanceMetaData(i));
         }
-        return instanceGroup;
+        return new InstanceGroupDto(instanceGroup, new ArrayList<>(instanceGroup.getAllInstanceMetaData()));
     }
 
     private InstanceMetaData instanceMetaData(int i, String subnetId, String availabilityZone, InstanceStatus instanceStatus) {
@@ -750,7 +752,7 @@ public class MultiAzCalculatorServiceTest {
         return "az-" + i;
     }
 
-    private void initSubnetIdAndAvailabilityZoneForInstances(List<Integer> existingCounts, InstanceGroup instanceGroup) {
+    private void initSubnetIdAndAvailabilityZoneForInstances(List<Integer> existingCounts, InstanceGroupDto instanceGroup) {
         int totalExistingCount = existingCounts.stream()
                 .mapToInt(Integer::intValue)
                 .sum();
@@ -762,11 +764,11 @@ public class MultiAzCalculatorServiceTest {
             }
             existingSubnetIdIndex++;
         }
-        instanceGroup.getAllInstanceMetaData().forEach(instance -> {
+        instanceGroup.getInstanceMetadataViews().forEach(instance -> {
             Integer subnetIdIndex = existingSubnetIdIndexes.poll();
             if (subnetIdIndex != null) {
-                instance.setSubnetId(cloudSubnetName(subnetIdIndex));
-                instance.setAvailabilityZone(cloudSubnetAz(subnetIdIndex));
+                ((InstanceMetaData) instance).setSubnetId(cloudSubnetName(subnetIdIndex));
+                ((InstanceMetaData) instance).setAvailabilityZone(cloudSubnetAz(subnetIdIndex));
             }
         });
     }
@@ -801,7 +803,7 @@ public class MultiAzCalculatorServiceTest {
         }
     }
 
-    private void verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(List<Integer> existingCounts, InstanceGroup instanceGroup,
+    private void verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(List<Integer> existingCounts, InstanceGroupDto instanceGroup,
             Set<InstanceMetaData> instancesToIgnore) {
         int countNum = existingCounts.size();
         Map<String, Integer> subnetIdToIndexMap = new HashMap<>(countNum);
@@ -813,7 +815,7 @@ public class MultiAzCalculatorServiceTest {
 
         Integer[] actualCountsArray = new Integer[countNum];
         Arrays.fill(actualCountsArray, 0);
-        instanceGroup.getAllInstanceMetaData().forEach(instance -> {
+        instanceGroup.getInstanceMetadataViews().forEach(instance -> {
             if (!instancesToIgnore.contains(instance)) {
                 Integer subnetIdIndex = subnetIdToIndexMap.get(instance.getSubnetId());
                 Integer availabilityZoneIndex = availabilityZoneToIndexMap.get(instance.getAvailabilityZone());

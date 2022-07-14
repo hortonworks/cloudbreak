@@ -8,12 +8,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -34,7 +34,7 @@ public class StartAmbariServicesHandler implements EventHandler<StartAmbariServi
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Override
     public String selector() {
@@ -47,9 +47,13 @@ public class StartAmbariServicesHandler implements EventHandler<StartAmbariServi
         Long stackId = request.getResourceId();
         Selectable response;
         try {
-            clusterServiceRunner.runAmbariServices(stackId);
-            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            clusterApiConnectors.getConnector(stack).waitForServer(stack, request.isDefaultClusterManagerAuth());
+            StackDto stack = stackDtoService.getById(stackId);
+            String clusterManagerIp = stack.getClusterManagerIp();
+            if (clusterManagerIp == null) {
+                clusterManagerIp = clusterServiceRunner.updateAmbariClientConfig(stack);
+            }
+            clusterServiceRunner.runAmbariServices(stack);
+            clusterApiConnectors.getConnector(stack, clusterManagerIp).waitForServer(request.isDefaultClusterManagerAuth());
             response = new StartClusterManagerServicesSuccess(stackId);
         } catch (Exception e) {
             LOGGER.info("Start cluster manager services failed!", e);

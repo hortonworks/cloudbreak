@@ -4,8 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
 public class CloudbreakRestRequestThreadLocalService implements LegacyRestRequestThreadLocalService {
@@ -47,12 +47,12 @@ public class CloudbreakRestRequestThreadLocalService implements LegacyRestReques
         CLOUDBREAK_USER.set(new CloudbreakUser(userId, "", "", "", tenant));
     }
 
-    public void setWorkspace(Workspace workspace) {
-        if (workspace != null) {
+    public void setWorkspaceId(Long workspaceId) {
+        if (workspaceId != null) {
             LOGGER.debug("Set workspace id thread local variable to '{}'. Value was '{}'.",
-                    workspace.getId(),
+                    workspaceId,
                     getRequestedWorkspaceId());
-            setRequestedWorkspaceId(workspace.getId());
+            setRequestedWorkspaceId(workspaceId);
         } else {
             LOGGER.error("Workspace is missing, unable to set the thread local variable to a valid workspace id. " +
                     "Overwrite the previous value ('{}') with null.", getRequestedWorkspaceId());
@@ -62,5 +62,9 @@ public class CloudbreakRestRequestThreadLocalService implements LegacyRestReques
 
     public String getRestThreadLocalContextAsString() {
         return String.format("CloudbreakUser: %s WorkspaceId: %s", CLOUDBREAK_USER.get(), REQUESTED_WORKSPACE_ID.get());
+    }
+
+    public String getAccountId() {
+        return ThreadBasedUserCrnProvider.getAccountId();
     }
 }

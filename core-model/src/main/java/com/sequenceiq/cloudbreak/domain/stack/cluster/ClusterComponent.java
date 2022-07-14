@@ -15,7 +15,6 @@ import javax.persistence.NamedSubgraph;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Transient;
 
-import com.sequenceiq.cloudbreak.domain.converter.ComponentTypeConverter;
 import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 
@@ -23,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.converter.ComponentTypeConverter;
 
 @NamedEntityGraph(name = "ClusterComponent.cluster.rdsConfig",
         attributeNodes = @NamedAttributeNode(value = "cluster", subgraph = "rdsConfig"),

@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -21,23 +22,27 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintToBlueprintV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.database.RDSConfigToDatabaseV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClusterToClouderaManagerV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.GatewayToGatewayV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.workspaces.WorkspaceToWorkspaceResourceV4ResponseConverter;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.cloudstorage.AwsEfsParameters;
 import com.sequenceiq.common.api.cloudstorage.AwsStorageParameters;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
@@ -78,43 +83,50 @@ public class ClusterToClusterV4ResponseConverter {
     @Inject
     private RDSConfigToDatabaseV4ResponseConverter rdsConfigToDatabaseV4ResponseConverter;
 
+    @Inject
+    private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
+
+    @Inject
+    private ClusterToClouderaManagerV4ResponseConverter clusterToClouderaManagerV4ResponseConverter;
+
     @Value("${cb.disable.show.blueprint:false}")
     private boolean disableShowBlueprint;
 
-    public ClusterV4Response convert(Cluster source) {
+    public ClusterV4Response convert(StackDtoDelegate stackDto) {
+        ClusterView source = stackDto.getCluster();
         ClusterV4Response clusterResponse = new ClusterV4Response();
         clusterResponse.setId(source.getId());
         clusterResponse.setName(source.getName());
-        Stack stack = source.getStack();
+        StackView stack = stackDto.getStack();
         clusterResponse.setStatus(stack.getStatus());
         clusterResponse.setStatusReason(stack.getStatusReason());
-        setUptime(source, clusterResponse);
+        setUptime(source, stack, clusterResponse);
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
-        String managerAddress = stackUtil.extractClusterManagerAddress(stack);
+        String managerAddress = stackUtil.extractClusterManagerAddress(stackDto);
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesForTopologies =
-                    serviceEndpointCollector.prepareClusterExposedServices(source, managerAddress);
+                serviceEndpointCollector.prepareClusterExposedServices(stackDto, managerAddress);
         clusterResponse.setExposedServices(clusterExposedServicesForTopologies);
         convertCustomQueue(source, clusterResponse);
-        convertNullableProperties(source, clusterResponse);
+        convertNullableProperties(stackDto, clusterResponse);
         convertContainerConfig(source, clusterResponse);
         clusterResponse.setCreationFinished(source.getCreationFinished());
         decorateResponseWithProxyConfig(source, clusterResponse);
         clusterResponse.setCloudStorage(getCloudStorage(source));
-        clusterResponse.setCm(ClusterToClouderaManagerV4ResponseConverter.convert(source));
+        clusterResponse.setCm(clusterToClouderaManagerV4ResponseConverter.convert(stackDto));
+        WorkspaceResourceV4Response workspaceResponse = workspaceToWorkspaceResourceV4ResponseConverter.convert(stackDto.getWorkspace());
         clusterResponse.setDatabases(
-                source.getRdsConfigs()
-                .stream()
-                .filter(rds -> ResourceStatus.USER_MANAGED.equals(rds.getStatus()))
-                .map(rds -> rdsConfigToDatabaseV4ResponseConverter.convert(rds))
-                .collect(Collectors.toList())
+                rdsConfigWithoutClusterService.findByClusterIdAndStatusIn(source.getId(), Set.of(ResourceStatus.USER_MANAGED))
+                        .stream()
+                        .map(rds -> rdsConfigToDatabaseV4ResponseConverter.convert(rds, workspaceResponse))
+                        .collect(Collectors.toList())
         );
-        clusterResponse.setWorkspace(workspaceToWorkspaceResourceV4ResponseConverter.convert(source.getWorkspace()));
-        clusterResponse.setBlueprint(getIfNotNull(source.getBlueprint(), blueprintToBlueprintV4ResponseConverter::convert));
+        clusterResponse.setWorkspace(workspaceResponse);
+        clusterResponse.setBlueprint(getIfNotNull(stackDto.getBlueprint(), blueprintToBlueprintV4ResponseConverter::convert));
         clusterResponse.setExtendedBlueprintText(getExtendedBlueprintText(source));
         convertDpSecrets(source, clusterResponse);
-        clusterResponse.setServerIp(stackUtil.extractClusterManagerIp(stack));
+        clusterResponse.setServerIp(stackUtil.extractClusterManagerIp(stackDto));
         clusterResponse.setServerFqdn(source.getFqdn());
-        clusterResponse.setServerUrl(serviceEndpointCollector.getManagerServerUrl(source, managerAddress));
+        clusterResponse.setServerUrl(serviceEndpointCollector.getManagerServerUrl(stackDto, managerAddress));
         clusterResponse.setCustomConfigurationsName(getIfNotNull(source.getCustomConfigurations(), configurations -> configurations.getName()));
         clusterResponse.setCustomConfigurationsCrn(getIfNotNull(source.getCustomConfigurations(), configurations -> configurations.getCrn()));
         clusterResponse.setDatabaseServerCrn(source.getDatabaseServerCrn());
@@ -123,8 +135,8 @@ public class ClusterToClusterV4ResponseConverter {
         return clusterResponse;
     }
 
-    private void setUptime(Cluster source, ClusterV4Response clusterResponse) {
-        long uptime = stackUtil.getUptimeForCluster(source, source.getStack().isAvailable());
+    private void setUptime(ClusterView source, StackView stackView, ClusterV4Response clusterResponse) {
+        long uptime = stackUtil.getUptimeForCluster(source, stackView.getStatus() == Status.AVAILABLE);
         int minutes = (int) ((uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);
         int hours = (int) (uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE));
         clusterResponse.setUptime(uptime);
@@ -132,7 +144,7 @@ public class ClusterToClusterV4ResponseConverter {
         clusterResponse.setMinutesUp(minutes);
     }
 
-    private void convertCustomQueue(Cluster source, ClusterV4Response clusterResponse) {
+    private void convertCustomQueue(ClusterView source, ClusterV4Response clusterResponse) {
         if (source.getAttributes() != null) {
             Json fromVault = new Json(source.getAttributes());
             Map<String, Object> attributes = fromVault.getMap();
@@ -145,7 +157,7 @@ public class ClusterToClusterV4ResponseConverter {
         }
     }
 
-    private String getExtendedBlueprintText(Cluster source) {
+    private String getExtendedBlueprintText(ClusterView source) {
         if (StringUtils.isNotEmpty(source.getExtendedBlueprintText()) && !disableShowBlueprint) {
             String fromVault = source.getExtendedBlueprintText();
             return anonymize(fromVault);
@@ -153,12 +165,12 @@ public class ClusterToClusterV4ResponseConverter {
         return null;
     }
 
-    private CloudStorageResponse getCloudStorage(Cluster source) {
-        if (source.getFileSystem() != null) {
-            CloudStorageResponse cloudStorageResponse = cloudStorageConverter.fileSystemToResponse(source.getFileSystem());
+    private CloudStorageResponse getCloudStorage(ClusterView clusterView) {
+        if (clusterView.getFileSystem() != null) {
+            CloudStorageResponse cloudStorageResponse = cloudStorageConverter.fileSystemToResponse(clusterView.getFileSystem());
 
-            if (source.getAdditionalFileSystem() != null) {
-                AwsEfsParameters efsParameters = cloudStorageConverter.fileSystemToEfsParameters(source.getAdditionalFileSystem());
+            if (clusterView.getAdditionalFileSystem() != null) {
+                AwsEfsParameters efsParameters = cloudStorageConverter.fileSystemToEfsParameters(clusterView.getAdditionalFileSystem());
 
                 if (efsParameters != null) {
                     if (cloudStorageResponse.getAws() == null) {
@@ -174,18 +186,18 @@ public class ClusterToClusterV4ResponseConverter {
         return null;
     }
 
-    private void convertNullableProperties(Cluster source, ClusterV4Response clusterResponse) {
-        if (source.getGateway() != null) {
-            GatewayV4Response gatewayV4Response = gatewayToGatewayV4ResponseConverter.convert(source.getGateway());
+    private void convertNullableProperties(StackDtoDelegate stackDto, ClusterV4Response clusterResponse) {
+        if (stackDto.getGateway() != null) {
+            GatewayV4Response gatewayV4Response = gatewayToGatewayV4ResponseConverter.convert(stackDto.getGateway());
             clusterResponse.setGateway(gatewayV4Response);
         }
-        if (source.getAttributes() != null) {
-            Json fromVault = new Json(source.getAttributes());
+        if (stackDto.getCluster().getAttributes() != null) {
+            Json fromVault = new Json(stackDto.getCluster().getAttributes());
             clusterResponse.setAttributes(fromVault.getMap());
         }
     }
 
-    private void convertContainerConfig(Cluster source, ClusterV4Response clusterResponse) {
+    private void convertContainerConfig(ClusterView source, ClusterV4Response clusterResponse) {
         Json customContainerDefinition = source.getCustomContainerDefinition();
         if (customContainerDefinition != null && StringUtils.isNotEmpty(customContainerDefinition.getValue())) {
             try {
@@ -206,7 +218,7 @@ public class ClusterToClusterV4ResponseConverter {
         }
     }
 
-    private void decorateResponseWithProxyConfig(Cluster source, ClusterV4Response clusterResponse) {
+    private void decorateResponseWithProxyConfig(ClusterView source, ClusterV4Response clusterResponse) {
         String proxyConfigCrn = source.getProxyConfigCrn();
         if (StringUtils.isNotEmpty(proxyConfigCrn)) {
             clusterResponse.setProxyConfigCrn(proxyConfigCrn);
@@ -214,10 +226,10 @@ public class ClusterToClusterV4ResponseConverter {
         }
     }
 
-    private void convertDpSecrets(Cluster source, ClusterV4Response response) {
-        if (isNotEmpty(source.getDpAmbariUserSecret()) && isNotEmpty(source.getDpAmbariPasswordSecret())) {
-            response.setCmMgmtUser(stringToSecretResponseConverter.convert(source.getDpAmbariUserSecret()));
-            response.setCmMgmtPassword(stringToSecretResponseConverter.convert(source.getDpAmbariPasswordSecret()));
+    private void convertDpSecrets(ClusterView source, ClusterV4Response response) {
+        if (isNotEmpty(source.getDpAmbariUserPath()) && isNotEmpty(source.getDpAmbariPasswordPath())) {
+            response.setCmMgmtUser(stringToSecretResponseConverter.convert(source.getDpAmbariUserPath()));
+            response.setCmMgmtPassword(stringToSecretResponseConverter.convert(source.getDpAmbariPasswordPath()));
         }
     }
 }

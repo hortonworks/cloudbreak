@@ -24,9 +24,14 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 public abstract class AbstractRdsConfigProvider {
@@ -57,17 +62,16 @@ public abstract class AbstractRdsConfigProvider {
      * {@link #getPillarKey()}. The configuration information is ultimately used to create the
      * database.
      *
-     * @param stack   stack for cluster
-     * @param cluster cluster to associate database with
+     * @param stackDto   stack for cluster
      * @return salt pillar configuration information for this provider's database
      */
-    public Map<String, Object> createServicePillarConfigMapIfNeeded(Stack stack, Cluster cluster) {
-        if (isRdsConfigNeeded(cluster.getBlueprint(), cluster.hasGateway())) {
-            Set<RdsConfigWithoutCluster> rdsConfigs = createPostgresRdsConfigIfNeeded(stack, cluster);
+    public Map<String, Object> createServicePillarConfigMapIfNeeded(StackDto stackDto) {
+        if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway())) {
+            Set<RdsConfigWithoutCluster> rdsConfigs = createPostgresRdsConfigIfNeeded(stackDto);
             RdsConfigWithoutCluster rdsConfig = rdsConfigs.stream().filter(c -> c.getType().equalsIgnoreCase(getRdsType().name())).findFirst().get();
             if (rdsConfig.getStatus() == ResourceStatus.DEFAULT && rdsConfig.getDatabaseEngine() != DatabaseVendor.EMBEDDED) {
                 Map<String, Object> postgres = new HashMap<>();
-                String databaseServerCrn = stack.getCluster().getDatabaseServerCrn();
+                String databaseServerCrn = stackDto.getCluster().getDatabaseServerCrn();
                 if (dbServerConfigurer.isRemoteDatabaseNeeded(databaseServerCrn)) {
                     DatabaseServerV4Response dbServerResponse = dbServerConfigurer.getDatabaseServer(databaseServerCrn);
                     postgres.put("remote_db_url", dbServerResponse.getHost());
@@ -118,11 +122,35 @@ public abstract class AbstractRdsConfigProvider {
     }
 
     private void populateNewRdsConfig(Stack stack, Cluster cluster, RDSConfig newRdsConfig) {
-        RDSConfig rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), newRdsConfig, stack.getWorkspace().getId());
+        RDSConfig rdsConfig = rdsConfigService.createIfNotExists(stack.getCreator(), newRdsConfig, stack.getWorkspaceId());
         Set<RDSConfig> rdsConfigs = new HashSet<>(cluster.getRdsConfigs());
         rdsConfigs.add(rdsConfig);
         cluster.setRdsConfigs(rdsConfigs);
         clusterService.save(cluster);
+    }
+
+    public Set<RdsConfigWithoutCluster> createPostgresRdsConfigIfNeeded(StackDtoDelegate stackDto) {
+        ClusterView cluster = stackDto.getCluster();
+        if (isRdsConfigNeeded(stackDto.getBlueprint(), stackDto.hasGateway())
+                && !rdsConfigService.existsByClusterIdAndType(cluster.getId(), getRdsType())) {
+            RDSConfig newRdsConfig;
+            StackView stack = stackDto.getStack();
+            if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster.getDatabaseServerCrn())) {
+                newRdsConfig = dbServerConfigurer.createNewRdsConfig(stack.getName(), stack.getId(), cluster.getDatabaseServerCrn(), cluster.getId(),
+                        getDb(), getDbUser(), getRdsType());
+            } else {
+                LOGGER.debug("Creating postgres Database for {}", getRdsType().name());
+                String databaseHost = stackDto.getPrimaryGatewayInstance().getDiscoveryFQDN();
+                newRdsConfig = createNewRdsConfig(stack, cluster, databaseHost, getDb(), getDbUser(), getDbPort());
+            }
+            populateNewRdsConfig(stack.getCreator(), stackDto.getWorkspaceId(), cluster.getId(), newRdsConfig);
+        }
+        return rdsConfigWithoutClusterService.findByClusterId(cluster.getId());
+    }
+
+    private void populateNewRdsConfig(User creator, Long workspaceId, Long clusterId, RDSConfig newRdsConfig) {
+        RDSConfig rdsConfig = rdsConfigService.createIfNotExists(creator, newRdsConfig, workspaceId);
+        clusterService.addRdsConfigToCluster(rdsConfig.getId(), clusterId);
     }
 
     /**
@@ -135,7 +163,7 @@ public abstract class AbstractRdsConfigProvider {
      * @param dbPort     port for database connections (through gateway)
      * @return RDSConfig object for database
      */
-    private RDSConfig createNewRdsConfig(Stack stack, Cluster cluster, String databaseHost, String dbName, String dbUserName, String dbPort) {
+    private RDSConfig createNewRdsConfig(StackView stack, ClusterView cluster, String databaseHost, String dbName, String dbUserName, String dbPort) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setName(getRdsType().name() + '_' + stack.getName() + stack.getId());
         rdsConfig.setConnectionUserName(dbUserName);

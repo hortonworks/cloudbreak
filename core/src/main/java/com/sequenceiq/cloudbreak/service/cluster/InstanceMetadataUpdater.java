@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 @ConfigurationProperties(prefix = "cb.instance")
@@ -246,10 +247,10 @@ public class InstanceMetadataUpdater {
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
-    public List<String> collectPackagesWithMultipleVersions(Collection<InstanceMetaData> instanceMetadataList) {
+    public List<String> collectPackagesWithMultipleVersions(Collection<? extends InstanceMetadataView> instanceMetadataList) {
         try {
             Multimap<String, String> pkgVersionsMMap = HashMultimap.create();
-            for (InstanceMetaData im : instanceMetadataList) {
+            for (InstanceMetadataView im : instanceMetadataList) {
                 Image image = im.getImage().get(Image.class);
                 for (Entry<String, String> packageEntry : image.getPackageVersions().entrySet()) {
                     pkgVersionsMMap.put(packageEntry.getKey(), packageEntry.getValue());
@@ -271,10 +272,10 @@ public class InstanceMetadataUpdater {
         }
     }
 
-    public Map<String, List<String>> collectInstancesWithMissingPackageVersions(Collection<InstanceMetaData> instanceMetaDatas) {
+    public Map<String, List<String>> collectInstancesWithMissingPackageVersions(Collection<? extends InstanceMetadataView> instanceMetaDatas) {
         Map<String, List<String>> instancesWithMissingPackageVersions = new HashMap<>();
 
-        for (InstanceMetaData instanceMetaData : instanceMetaDatas) {
+        for (InstanceMetadataView instanceMetaData : instanceMetaDatas) {
             try {
                 Image image = instanceMetaData.getImage().get(Image.class);
                 Set<String> packages = image.getPackageVersions().keySet();

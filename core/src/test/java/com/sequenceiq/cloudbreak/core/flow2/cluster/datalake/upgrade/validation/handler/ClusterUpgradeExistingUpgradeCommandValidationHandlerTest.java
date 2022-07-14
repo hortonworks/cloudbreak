@@ -27,10 +27,11 @@ import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -48,10 +49,13 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
     private ClusterApiConnectors clusterApiConnectors;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
-    private Stack stack;
+    private StackDto stack;
+
+    @Mock
+    private StackView stackView;
 
     @Mock
     private ClusterApi connector;
@@ -67,8 +71,9 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
 
     @Before
     public void setup() {
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(stack.getName()).thenReturn(STACK_NAME);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.getName()).thenReturn(STACK_NAME);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(connector.clusterStatusService()).thenReturn(clusterStatusService);
     }

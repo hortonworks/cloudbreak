@@ -13,6 +13,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -42,10 +43,9 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -55,13 +55,14 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
-import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -83,10 +84,7 @@ public class StackOperationService {
     private TransactionService transactionService;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
-    private WorkspaceService workspaceService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ClusterService clusterService;
@@ -118,8 +116,8 @@ public class StackOperationService {
     @Inject
     private ClusterBootstrapper clusterBootstrapper;
 
-    public FlowIdentifier removeInstance(Stack stack, String instanceId, boolean forced) {
-        InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
+    public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
+        InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
         String instanceGroupName = metaData.getInstanceGroupName();
         int scalingAdjustment = -1;
         updateNodeCountValidator.validateServiceRoles(stack, instanceGroupName, scalingAdjustment);
@@ -130,10 +128,10 @@ public class StackOperationService {
         return flowManager.triggerStackRemoveInstance(stack.getId(), instanceGroupName, metaData.getPrivateId(), forced);
     }
 
-    public FlowIdentifier removeInstances(Stack stack, Collection<String> instanceIds, boolean forced) {
+    public FlowIdentifier removeInstances(StackDto stack, Collection<String> instanceIds, boolean forced) {
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         for (String instanceId : instanceIds) {
-            InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
+            InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
             instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
         }
         updateNodeCountValidator.validateServiceRoles(stack, instanceIdsByHostgroupMap.entrySet()
@@ -150,12 +148,13 @@ public class StackOperationService {
         return flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
     }
 
-    public FlowIdentifier stopInstances(Stack stack, Collection<String> instanceIds, boolean forced) {
+    public FlowIdentifier stopInstances(StackDto stackDto, Collection<String> instanceIds, boolean forced) {
         LOGGER.info("Received stop instances request for instanceIds: [{}]", instanceIds);
 
         if (instanceIds == null || instanceIds.isEmpty()) {
             throw new BadRequestException("Stop request cannot process an empty instanceIds collection");
         }
+        StackView stack = stackDto.getStack();
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         Set<String> instanceIdsWithoutMetadata = new HashSet<>();
         for (String instanceId : instanceIds) {
@@ -169,20 +168,20 @@ public class StackOperationService {
         if (instanceIdsByHostgroupMap.size() > 1) {
             throw new BadRequestException("Downscale via Instance Stop cannot process more than one host group");
         }
-        updateNodeCountValidator.validateInstanceGroup(stack, instanceIdsByHostgroupMap.keySet().iterator().next());
+        updateNodeCountValidator.validateInstanceGroup(stackDto, instanceIdsByHostgroupMap.keySet().iterator().next());
         LOGGER.info("InstanceIds without metadata: [{}]", instanceIdsWithoutMetadata);
-        updateNodeCountValidator.validateServiceRoles(stack, instanceIdsByHostgroupMap.entrySet()
+        updateNodeCountValidator.validateServiceRoles(stackDto, instanceIdsByHostgroupMap.entrySet()
                 .stream()
                 .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)));
-        updateNodeCountValidator.validateInstanceGroupForStopStart(stack, instanceIdsByHostgroupMap.keySet().iterator().next(),
+        updateNodeCountValidator.validateInstanceGroupForStopStart(stackDto, instanceIdsByHostgroupMap.keySet().iterator().next(),
                 instanceIdsByHostgroupMap.entrySet().iterator().next().getValue().size() * -1);
         LOGGER.info("Stopping the following instances: {}", instanceIdsByHostgroupMap);
         if (!forced) {
             for (Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
                 String instanceGroupName = entry.getKey();
                 int scalingAdjustment = entry.getValue().size() * -1;
-                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
-                updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
+                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackDto, instanceGroupName, scalingAdjustment);
+                updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stackDto);
             }
         }
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_BY_STOP_REQUESTED,
@@ -194,38 +193,34 @@ public class StackOperationService {
         return flowManager.triggerStackImageUpdate(imageChangeDto);
     }
 
-    public FlowIdentifier updateStatus(Long stackId, StatusRequest status, boolean updateCluster) {
-        Stack stack = stackService.getByIdWithLists(stackId);
-        Cluster cluster = null;
-        if (stack.getCluster() != null) {
-            cluster = clusterService.findOneWithLists(stack.getCluster().getId()).orElse(null);
-        }
+    public FlowIdentifier updateStatus(StackDto stackDto, StatusRequest status, boolean updateCluster) {
         switch (status) {
             case SYNC:
-                return sync(stack, false);
+                return sync(stackDto.getStack(), false);
             case FULL_SYNC:
-                return sync(stack, true);
+                return sync(stackDto.getStack(), true);
             case REPAIR_FAILED_NODES:
-                return repairFailedNodes(stack);
+                return repairFailedNodes(stackDto.getId());
             case STOPPED:
-                return stop(stack, cluster, updateCluster);
+                return stop(stackDto, updateCluster);
             case STARTED:
-                return start(stack);
+                return start(stackDto.getStack());
             default:
                 throw new BadRequestException("Cannot update the status of stack because status request not valid.");
         }
     }
 
     @VisibleForTesting
-    FlowIdentifier triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster) {
-        if (!isStopNeeded(stack)) {
+    FlowIdentifier triggerStackStopIfNeeded(StackDto stackDto, ClusterView cluster, boolean updateCluster) {
+        if (!isStopNeeded(stackDto)) {
             return FlowIdentifier.notTriggered();
         }
-        if (spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)) {
-            throw new BadRequestException(format("Cannot update the status of stack '%s' to STOPPED, because it runs on spot instances", stack.getName()));
+        if (spotInstanceUsageCondition.isStackRunsOnSpotInstances(stackDto)) {
+            throw new BadRequestException(format("Cannot update the status of stack '%s' to STOPPED, because it runs on spot instances", stackDto.getName()));
         }
+        StackView stack = stackDto.getStack();
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.stoppable());
-        checkForZombieInstances(stack);
+        checkForZombieInstances(stackDto);
         if (cluster != null && !stack.isStopped() && !stack.isStopFailed()) {
             if (!updateCluster) {
                 throw NotAllowedStatusUpdate
@@ -234,7 +229,7 @@ public class StackOperationService {
                         .badRequest();
             } else if (stack.isReadyForStop() || stack.isStopFailed()) {
                 sendStopRequestedEvent(stack);
-                return clusterOperationService.updateStatus(stack.getId(), StatusRequest.STOPPED);
+                return clusterOperationService.updateStatus(stackDto.getId(), StatusRequest.STOPPED);
             } else {
                 throw NotAllowedStatusUpdate
                         .cluster(stack)
@@ -242,12 +237,12 @@ public class StackOperationService {
                         .badRequest();
             }
         } else {
-            return flowManager.triggerStackStop(stack.getId());
+            return flowManager.triggerStackStop(stackDto.getId());
         }
     }
 
-    private void checkForZombieInstances(Stack stack) {
-        Set<InstanceMetaData> zombieInstanceMetaDataSet = stack.getZombieInstanceMetaDataSet();
+    private void checkForZombieInstances(StackDto stack) {
+        List<InstanceMetadataView> zombieInstanceMetaDataSet = stack.getZombieInstanceMetaData();
         if (!zombieInstanceMetaDataSet.isEmpty()) {
             Set<String> zombieInstanceIds = zombieInstanceMetaDataSet.stream().map(im -> im.getInstanceId()).collect(Collectors.toSet());
             LOGGER.warn("Cannot stop cluster, because there are nodes in ZOMBIE status: {}", zombieInstanceIds);
@@ -256,12 +251,12 @@ public class StackOperationService {
         }
     }
 
-    private FlowIdentifier repairFailedNodes(Stack stack) {
-        LOGGER.debug("Received request to replace failed nodes: {}", stack.getId());
-        return flowManager.triggerManualRepairFlow(stack.getId());
+    private FlowIdentifier repairFailedNodes(Long stackId) {
+        LOGGER.debug("Received request to replace failed nodes: {}", stackId);
+        return flowManager.triggerManualRepairFlow(stackId);
     }
 
-    private FlowIdentifier sync(Stack stack, boolean full) {
+    private FlowIdentifier sync(StackView stack, boolean full) {
         // TODO: is it a good condition?
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
             if (full) {
@@ -275,20 +270,22 @@ public class StackOperationService {
         }
     }
 
-    public FlowIdentifier syncComponentVersionsFromCm(Stack stack, Set<String> candidateImageUuids) {
+    public FlowIdentifier syncComponentVersionsFromCm(StackView stack, Set<String> candidateImageUuids) {
         return flowManager.triggerSyncComponentVersionsFromCm(stack.getId(), candidateImageUuids);
     }
 
-    private FlowIdentifier stop(Stack stack, Cluster cluster, boolean updateCluster) {
+    private FlowIdentifier stop(StackDto stackDto, boolean updateCluster) {
+        ClusterView cluster = stackDto.getCluster();
+        StackView stack = stackDto.getStack();
         if (cluster != null && stack.isStopInProgress()) {
             sendStopRequestedEvent(stack);
             return FlowIdentifier.notTriggered();
         } else {
-            return triggerStackStopIfNeeded(stack, cluster, updateCluster);
+            return triggerStackStopIfNeeded(stackDto, cluster, updateCluster);
         }
     }
 
-    public FlowIdentifier updateNodeCountStartInstances(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson,
+    public FlowIdentifier updateNodeCountStartInstances(StackDto stackDto, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson,
             boolean withClusterEvent, ScalingStrategy scalingStrategy) {
 
         if (instanceGroupAdjustmentJson.getScalingAdjustment() == 0) {
@@ -298,27 +295,26 @@ public class StackOperationService {
             throw new BadRequestException("Attempting to downscale via the start instances method. (File a bug)");
         }
 
+        StackView stack = stackDto.getStack();
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
         try {
             return transactionService.required(() -> {
-                Stack stackWithLists = stackService.getByIdWithLists(stack.getId());
-
-                updateNodeCountValidator.validateServiceRoles(stackWithLists, instanceGroupAdjustmentJson);
-                updateNodeCountValidator.validateStackStatusForStartHostGroup(stackWithLists);
-                updateNodeCountValidator.validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
-                updateNodeCountValidator.validateInstanceGroupForStopStart(stackWithLists,
+                updateNodeCountValidator.validateServiceRoles(stackDto, instanceGroupAdjustmentJson);
+                updateNodeCountValidator.validateStackStatusForStartHostGroup(stack);
+                updateNodeCountValidator.validateInstanceGroup(stackDto, instanceGroupAdjustmentJson.getInstanceGroup());
+                updateNodeCountValidator.validateInstanceGroupForStopStart(stackDto,
                         instanceGroupAdjustmentJson.getInstanceGroup(), instanceGroupAdjustmentJson.getScalingAdjustment());
-                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackWithLists, instanceGroupAdjustmentJson);
-                updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
+                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackDto, instanceGroupAdjustmentJson);
+                updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackDto);
                 if (withClusterEvent) {
-                    updateNodeCountValidator.validateClusterStatusForStartHostGroup(stackWithLists);
-                    updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackWithLists);
-                    updateNodeCountValidator.validateCMStatus(stackWithLists, instanceGroupAdjustmentJson);
+                    updateNodeCountValidator.validateClusterStatusForStartHostGroup(stack);
+                    updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackDto);
+                    updateNodeCountValidator.validateCMStatus(stackDto);
                 }
-                stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_BY_START_REQUESTED,
+                stackUpdater.updateStackStatus(stackDto.getId(), DetailedStackStatus.UPSCALE_BY_START_REQUESTED,
                         "Requested node count for upscaling (stopstart): " + instanceGroupAdjustmentJson.getScalingAdjustment());
                 return flowManager.triggerStopStartStackUpscale(
-                        stackWithLists.getId(),
+                        stackDto.getId(),
                         instanceGroupAdjustmentJson,
                         withClusterEvent);
             });
@@ -330,39 +326,39 @@ public class StackOperationService {
         }
     }
 
-    public FlowIdentifier updateNodeCount(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent) {
+    public FlowIdentifier updateNodeCount(StackDto stackDto, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent) {
+        StackView stack = stackDto.getStack();
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
         try {
             return transactionService.required(() -> {
                 boolean upscale = instanceGroupAdjustmentJson.getScalingAdjustment() > 0;
-                Stack stackWithLists = stackService.getByIdWithLists(stack.getId());
-                updateNodeCountValidator.validateServiceRoles(stackWithLists, instanceGroupAdjustmentJson);
-                updateNodeCountValidator.validateStackStatus(stackWithLists, upscale);
-                updateNodeCountValidator.validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
-                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackWithLists, instanceGroupAdjustmentJson);
-                updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
-                boolean instanceStatusValidationNeeded = !upscale || !targetedUpscaleSupportService.targetedUpscaleOperationSupported(stackWithLists);
+                updateNodeCountValidator.validateServiceRoles(stackDto, instanceGroupAdjustmentJson);
+                updateNodeCountValidator.validateStackStatus(stack, upscale);
+                updateNodeCountValidator.validateInstanceGroup(stackDto, instanceGroupAdjustmentJson.getInstanceGroup());
+                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackDto, instanceGroupAdjustmentJson);
+                updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackDto);
+                boolean instanceStatusValidationNeeded = !upscale || !targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack);
                 if (instanceStatusValidationNeeded) {
-                    updateNodeCountValidator.validateInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
+                    updateNodeCountValidator.validateInstanceStatuses(stackDto, instanceGroupAdjustmentJson);
                 }
                 if (withClusterEvent) {
-                    updateNodeCountValidator.validateClusterStatus(stackWithLists, upscale);
-                    updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackWithLists);
+                    updateNodeCountValidator.validateClusterStatus(stack, upscale);
+                    updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackDto);
                     if (instanceStatusValidationNeeded) {
-                        updateNodeCountValidator.validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);
+                        updateNodeCountValidator.validataHostMetadataStatuses(stackDto, instanceGroupAdjustmentJson);
                     }
                 }
                 if (upscale) {
-                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
+                    stackUpdater.updateStackStatus(stackDto.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
                             "Requested node count for upscaling: " + instanceGroupAdjustmentJson.getScalingAdjustment());
                     return flowManager.triggerStackUpscale(
-                            stackWithLists.getId(),
+                            stackDto.getId(),
                             instanceGroupAdjustmentJson,
                             withClusterEvent);
                 } else {
-                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED,
+                    stackUpdater.updateStackStatus(stackDto.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED,
                             "Requested node count for downscaling: " + abs(instanceGroupAdjustmentJson.getScalingAdjustment()));
-                    return flowManager.triggerStackDownscale(stackWithLists.getId(), instanceGroupAdjustmentJson);
+                    return flowManager.triggerStackDownscale(stackDto.getId(), instanceGroupAdjustmentJson);
                 }
             });
         } catch (TransactionExecutionException e) {
@@ -378,7 +374,7 @@ public class StackOperationService {
     }
 
     @VisibleForTesting
-    FlowIdentifier start(Stack stack) {
+    FlowIdentifier start(StackView stack) {
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.startable());
         dataLakeStatusCheckerService.validateRunningState(stack);
@@ -394,14 +390,13 @@ public class StackOperationService {
         return flowIdentifier;
     }
 
-    public FlowIdentifier renewCertificate(String stackName) {
-        Workspace workspace = workspaceService.getForCurrentUser();
-        Stack stack = stackService.getByNameInWorkspace(stackName, workspace.getId());
+    public FlowIdentifier renewCertificate(String stackName, String accountId) {
+        StackView stack = stackDtoService.getStackViewByName(stackName, accountId);
         return renewCertificate(stack.getId());
     }
 
     public FlowIdentifier renewInternalCertificate(String stackCrn) {
-        Stack stack = stackService.getByCrn(stackCrn);
+        StackView stack = stackDtoService.getStackViewByCrn(stackCrn);
         return renewCertificate(stack.getId());
     }
 
@@ -414,9 +409,10 @@ public class StackOperationService {
         return flowManager.triggerClusterCertificationRenewal(stackId);
     }
 
-    private boolean isStopNeeded(Stack stack) {
+    private boolean isStopNeeded(StackDto stackDto) {
         boolean result = true;
-        StopRestrictionReason reason = stackStopRestrictionService.isInfrastructureStoppable(stack);
+        StopRestrictionReason reason = stackStopRestrictionService.isInfrastructureStoppable(stackDto);
+        StackView stack = stackDto.getStack();
         if (stack.isStopped()) {
             eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), STACK_STOP_IGNORED);
             result = false;
@@ -433,22 +429,22 @@ public class StackOperationService {
         return result;
     }
 
-    public boolean rangerRazEnabled(Long workspaceId, String crn) {
-        Stack stack = stackService.getNotTerminatedByCrnInWorkspace(crn, workspaceId);
+    public boolean rangerRazEnabled(String crn) {
+        StackDto stack = stackDtoService.getByCrn(crn);
         return clusterService.isRangerRazEnabledOnCluster(stack);
     }
 
-    private void sendStopRequestedEvent(Stack stack) {
+    private void sendStopRequestedEvent(StackView stack) {
         eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), STACK_STOP_REQUESTED);
     }
 
-    public FlowIdentifier reRegisterClusterProxyConfig(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
-        Stack stack = stackService.getNotTerminatedByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId);
+    public FlowIdentifier reRegisterClusterProxyConfig(@NotNull NameOrCrn nameOrCrn, String accountId) {
+        StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         return flowManager.triggerClusterProxyConfigReRegistration(stack.getId());
     }
 
-    public FlowIdentifier rotateSaltPassword(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
-        Stack stack = stackService.getByNameOrCrnAndWorkspaceIdWithLists(nameOrCrn, workspaceId);
+    public FlowIdentifier rotateSaltPassword(@NotNull NameOrCrn nameOrCrn, String accountId) {
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         clusterBootstrapper.validateRotateSaltPassword(stack);
         return flowManager.triggerRotateSaltPassword(stack.getId());

@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateOnProviderRequest;
@@ -68,7 +68,7 @@ public class UserDataUpdateActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                Stack stack = context.getStack();
+                StackDtoDelegate stack = context.getStack();
                 String userData;
                 try {
                     userData = imageService.getImage(stack.getId()).getUserdata().get(InstanceGroupType.GATEWAY);

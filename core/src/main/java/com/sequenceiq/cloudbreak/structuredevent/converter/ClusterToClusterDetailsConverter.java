@@ -9,12 +9,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.GatewayView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class ClusterToClusterDetailsConverter {
@@ -25,12 +25,11 @@ public class ClusterToClusterDetailsConverter {
     @Inject
     private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
-    public ClusterDetails convert(Cluster source) {
+    public ClusterDetails convert(ClusterView source, StackView stack, GatewayView gatewayView) {
         ClusterDetails clusterDetails = new ClusterDetails();
         clusterDetails.setId(source.getId());
         clusterDetails.setName(source.getName());
         clusterDetails.setDescription(source.getDescription());
-        Stack stack = source.getStack();
         if (stack != null && stack.getStatus() != null) {
             clusterDetails.setStatus(stack.getStatus().toString());
         }
@@ -41,13 +40,13 @@ public class ClusterToClusterDetailsConverter {
         clusterDetails.setCreationFinished(source.getCreationFinished());
         clusterDetails.setUpSince(source.getUpSince());
         clusterDetails.setRazEnabled(source.isRangerRazEnabled());
-        convertGatewayProperties(clusterDetails, source.getGateway());
+        convertGatewayProperties(clusterDetails, gatewayView);
         convertFileSystemProperties(clusterDetails, source.getFileSystem());
         addDatabaseInfo(clusterDetails, source);
         return clusterDetails;
     }
 
-    private void addDatabaseInfo(ClusterDetails clusterDetails, Cluster source) {
+    private void addDatabaseInfo(ClusterDetails clusterDetails, ClusterView source) {
         Set<RdsConfigWithoutCluster> rdsConfigs = rdsConfigWithoutClusterService.findByClusterId(source.getId());
         if (!CollectionUtils.isEmpty(rdsConfigs)) {
             clusterDetails.setDatabases(
@@ -57,7 +56,7 @@ public class ClusterToClusterDetailsConverter {
         }
     }
 
-    private void convertGatewayProperties(ClusterDetails clusterDetails, Gateway gateway) {
+    private void convertGatewayProperties(ClusterDetails clusterDetails, GatewayView gateway) {
         if (gateway != null) {
             clusterDetails.setGatewayEnabled(true);
             clusterDetails.setGatewayType(gateway.getGatewayType().toString());

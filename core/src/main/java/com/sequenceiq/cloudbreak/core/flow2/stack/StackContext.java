@@ -3,13 +3,13 @@ package com.sequenceiq.cloudbreak.core.flow2.stack;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public class StackContext extends CommonContext {
 
-    private final Stack stack;
+    private final StackDtoDelegate stack;
 
     private final CloudContext cloudContext;
 
@@ -17,7 +17,7 @@ public class StackContext extends CommonContext {
 
     private final CloudStack cloudStack;
 
-    public StackContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
+    public StackContext(FlowParameters flowParameters, StackDtoDelegate stack, CloudContext cloudContext, CloudCredential cloudCredential,
             CloudStack cloudStack) {
         super(flowParameters);
         this.stack = stack;
@@ -26,7 +26,7 @@ public class StackContext extends CommonContext {
         this.cloudStack = cloudStack;
     }
 
-    public Stack getStack() {
+    public StackDtoDelegate getStack() {
         return stack;
     }
 

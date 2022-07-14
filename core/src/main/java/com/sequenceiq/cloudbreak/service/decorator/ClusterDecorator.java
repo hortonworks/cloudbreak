@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Optional;
 
@@ -60,7 +61,7 @@ public class ClusterDecorator {
 
     private void validateBlueprintIfRequired(Cluster subject, ClusterV4Request request, Stack stack) {
         BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(subject.getBlueprint());
-        blueprintValidator.validate(subject.getBlueprint(), subject.getHostGroups(), stack.getInstanceGroups(),
+        blueprintValidator.validate(subject.getBlueprint(), subject.getHostGroups(), new ArrayList<>(stack.getInstanceGroups()),
                 request.getValidateBlueprint());
     }
 
@@ -83,7 +84,7 @@ public class ClusterDecorator {
         subject.setRdsConfigs(new HashSet<>());
         Optional.ofNullable(request.getDatabases())
                 .ifPresent(confs -> confs.forEach(confName -> subject.getRdsConfigs().add(
-                        rdsConfigService.getByNameForWorkspace(confName, stack.getWorkspace()))));
+                        rdsConfigService.getByNameForWorkspaceId(confName, stack.getWorkspaceId()))));
     }
 
     private void setupEmbeddedDatabase(Cluster cluster, Stack stack) {

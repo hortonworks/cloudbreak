@@ -67,7 +67,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
@@ -81,8 +82,8 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -136,7 +137,7 @@ public class StackCreatorService {
     private ImageCatalogService imageCatalogService;
 
     @Inject
-    private StackViewService stackViewService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private OwnerAssignmentService ownerAssignmentService;
@@ -176,7 +177,7 @@ public class StackCreatorService {
                 "Check that recipes do exist took {} ms");
 
         measure(() ->
-                ensureStackDoesNotExists(stackName, workspace),
+                ensureStackDoesNotExists(stackName),
                 LOGGER,
                 "Stack does not exist check took {} ms");
 
@@ -273,7 +274,8 @@ public class StackCreatorService {
             throw new TransactionRuntimeExecutionException(e);
         }
 
-        StackV4Response response = measure(() -> stackToStackV4ResponseConverter.convert(savedStack),
+        StackDto stackDto = stackDtoService.getById(savedStack.getId());
+        StackV4Response response = measure(() -> stackToStackV4ResponseConverter.convert(stackDto),
                 LOGGER, "Stack response has been created for stack took {} ms with name {}", stackName);
 
         LOGGER.info("Generated stack response after creation: {}", JsonUtil.writeValueAsStringSilentSafe(response));
@@ -413,8 +415,9 @@ public class StackCreatorService {
         }
     }
 
-    private void ensureStackDoesNotExists(String stackName, Workspace workspace) {
-        Optional<StackView> byName = stackViewService.findByName(stackName, workspace.getId());
+    private void ensureStackDoesNotExists(String stackName) {
+        String accountId = restRequestThreadLocalService.getAccountId();
+        Optional<StackView> byName = stackDtoService.getStackViewByNameOrCrnOpt(NameOrCrn.ofName(stackName), accountId);
         if (byName.isPresent()) {
             throw new BadRequestException("Cluster already exists: " + stackName);
         }

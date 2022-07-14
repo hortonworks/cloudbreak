@@ -32,9 +32,7 @@ import com.sequenceiq.cloudbreak.cluster.service.NodeIsBusyException;
 import com.sequenceiq.cloudbreak.cluster.service.NotEnoughNodeException;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsFailed;
@@ -43,7 +41,10 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ClusterDownscaleService {
@@ -52,6 +53,9 @@ public class ClusterDownscaleService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -81,10 +85,9 @@ public class ClusterDownscaleService {
             flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_REMOVING_NODES, String.valueOf(Math.abs(nodeCount)));
         } else {
             LOGGER.info("Decommissioning hosts '{}'", hostGroupsWithPrivateIds);
-            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             ResourceEvent resourceEvent = details.isForced() ? CLUSTER_FORCE_REMOVING_NODES : CLUSTER_REMOVING_NODES;
             List<Long> privateIds = hostGroupsWithPrivateIds.values().stream().flatMap(Collection::stream).collect(Collectors.toList());
-            List<String> decommissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
+            List<String> decommissionedHostNames = instanceMetaDataService.getAllAvailableHostNamesByPrivateIds(stackId, privateIds);
             flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), resourceEvent,
                     String.join(", ", decommissionedHostNames));
         }
@@ -95,12 +98,12 @@ public class ClusterDownscaleService {
         Set<String> zombieHostGroups = payload.getZombieHostGroups();
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_DOWN_ZOMBIE_NODES,
                 String.join(", ", zombieHostGroups));
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Map<String, Set<Long>> zombiePrivateIdsByHostGroups = stack.getZombieInstanceMetaDataSet().stream()
+        StackDto stack = stackDtoService.getById(stackId);
+        Map<String, Set<Long>> zombiePrivateIdsByHostGroups = stack.getZombieInstanceMetaData().stream()
                 .filter(instanceMetaData -> zombieHostGroups.contains(instanceMetaData.getInstanceGroupName()))
                 .collect(Collectors.groupingBy(
-                        InstanceMetaData::getInstanceGroupName,
-                        Collectors.mapping(InstanceMetaData::getPrivateId, Collectors.toSet())));
+                        InstanceMetadataView::getInstanceGroupName,
+                        Collectors.mapping(InstanceMetadataView::getPrivateId, Collectors.toSet())));
         LOGGER.info("Decommissioning ZOMBIE nodes '{}'", zombiePrivateIdsByHostGroups);
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_REMOVING_ZOMBIE_NODES,
                 String.valueOf(zombiePrivateIdsByHostGroups.values().stream().flatMap(Collection::stream).collect(Collectors.toSet()).size()));
@@ -109,7 +112,7 @@ public class ClusterDownscaleService {
     }
 
     public void finalizeClusterScaleDown(Long stackId, @Nullable Set<String> hostGroupName) {
-        StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
+        StackView stackView = stackDtoService.getStackViewById(stackId);
         clusterService.updateClusterStatusByStackId(stackView.getId(), DetailedStackStatus.AVAILABLE);
         if (hostGroupName != null) {
             flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SCALED_DOWN, String.join(", ", hostGroupName));
@@ -120,7 +123,7 @@ public class ClusterDownscaleService {
 
     public void updateMetadataStatusToFailed(DecommissionResult payload) {
         if (payload.getErrorPhase() != null) {
-            Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
+            StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
             for (String hostName : payload.getHostNames()) {
                 instanceMetaDataService.findByHostname(stack.getId(), hostName).ifPresent(instanceMetaData -> {
                     instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.DECOMMISSION_FAILED, payload.getStatusReason());

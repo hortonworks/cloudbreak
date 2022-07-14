@@ -10,16 +10,17 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.GrainOperation;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorGrainRunnerParams;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class RdsRecoverySetupService {
@@ -40,7 +41,7 @@ public class RdsRecoverySetupService {
     private StackUtil stackUtil;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     public void addRecoverRole(Long stackId) throws CloudbreakOrchestratorFailedException {
         modifyRecoverRole(stackId, GrainOperation.ADD);
@@ -51,20 +52,24 @@ public class RdsRecoverySetupService {
     }
 
     private void modifyRecoverRole(Long stackId, GrainOperation operation) throws CloudbreakOrchestratorFailedException {
-        OrchestratorGrainRunnerParams stateParams = createRecoverGrainRunnerParams(stackService.getByIdWithListsInTransaction(stackId), operation);
+        StackDto stackDto = stackDtoService.getById(stackId);
+        OrchestratorGrainRunnerParams stateParams = createRecoverGrainRunnerParams(stackDto, operation);
         LOGGER.debug("{} 'recover' role with params {}", operation.name().toLowerCase(), stateParams);
         hostOrchestrator.runOrchestratorGrainRunner(stateParams);
     }
 
-    private OrchestratorGrainRunnerParams createRecoverGrainRunnerParams(Stack stack, GrainOperation operation) {
+    private OrchestratorGrainRunnerParams createRecoverGrainRunnerParams(StackDto stack, GrainOperation operation) {
         Set<Node> nodes = stackUtil.collectReachableNodes(stack);
-        return createOrchestratorGrainRunnerParams(stack, stack.getCluster(), nodes, operation);
+        return createOrchestratorGrainRunnerParams(stack, nodes, operation);
     }
 
-    private OrchestratorGrainRunnerParams createOrchestratorGrainRunnerParams(Stack stack, Cluster cluster, Set<Node> nodes, GrainOperation grainOperation) {
+    private OrchestratorGrainRunnerParams createOrchestratorGrainRunnerParams(StackDto stackDto, Set<Node> nodes, GrainOperation grainOperation) {
         OrchestratorGrainRunnerParams grainRunnerParams = new OrchestratorGrainRunnerParams();
-        InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
-        grainRunnerParams.setPrimaryGatewayConfig(gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().hasGateway()));
+        InstanceMetadataView gatewayInstance = stackDto.getPrimaryGatewayInstance();
+        StackView stack = stackDto.getStack();
+        ClusterView cluster = stackDto.getCluster();
+        grainRunnerParams.setPrimaryGatewayConfig(gatewayConfigService.getGatewayConfig(stack, stackDto.getSecurityConfig(), gatewayInstance,
+                stackDto.hasGateway()));
         Set<String> targetHostNames = gatewayInstance.getDiscoveryFQDN() != null ? Set.of(gatewayInstance.getDiscoveryFQDN()) : Set.of();
         grainRunnerParams.setTargetHostNames(targetHostNames);
         grainRunnerParams.setAllNodes(nodes);

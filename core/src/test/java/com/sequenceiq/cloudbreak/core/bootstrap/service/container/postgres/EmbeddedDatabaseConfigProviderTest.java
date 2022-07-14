@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
 
@@ -46,7 +48,8 @@ public class EmbeddedDatabaseConfigProviderTest {
     @Test
     public void testIsEmbeddedDatabaseOnAttachedDiskEnabled() {
         // GIVEN
-        Stack stack = new Stack();
+        StackDto stack = mock(StackDto.class);
+        when(stack.getStack()).thenReturn(new Stack());
         when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(any())).thenReturn(true);
         // WHEN
         Map<String, Object> actualResult = underTest.collectEmbeddedDatabaseConfigs(stack);
@@ -60,7 +63,8 @@ public class EmbeddedDatabaseConfigProviderTest {
     @Test
     public void collectEmbeddedDatabaseConfigsWhenDbOnAttachedDiskDisabledOrNoAttachedVolumes() {
         // GIVEN
-        Stack stack = new Stack();
+        StackDto stack = mock(StackDto.class);
+        when(stack.getStack()).thenReturn(new Stack());
         when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(any())).thenReturn(false);
         // WHEN
         Map<String, Object> actualResult = underTest.collectEmbeddedDatabaseConfigs(stack);
@@ -74,11 +78,13 @@ public class EmbeddedDatabaseConfigProviderTest {
     @Test
     public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWithVersion() {
         // GIVEN
+        StackDto stackDto = mock(StackDto.class);
         Stack stack = new Stack();
         stack.setExternalDatabaseEngineVersion("testVersion");
+        when(stackDto.getStack()).thenReturn(stack);
         when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(any())).thenReturn(true);
         // WHEN
-        Map<String, Object> actualResult = underTest.collectEmbeddedDatabaseConfigs(stack);
+        Map<String, Object> actualResult = underTest.collectEmbeddedDatabaseConfigs(stackDto);
         // THEN
         assertTrue((Boolean) actualResult.get(POSTGRES_DATA_ON_ATTACHED_DISK_KEY));
         assertEquals(VolumeUtils.DATABASE_VOLUME + "/" + POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK, actualResult.get(POSTGRES_DIRECTORY_KEY));
@@ -89,11 +95,13 @@ public class EmbeddedDatabaseConfigProviderTest {
     @Test
     public void collectEmbeddedDatabaseConfigsWhenDbOnAttachedDiskDisabledOrNoAttachedVolumesWithVersion() {
         // GIVEN
+        StackDto stackDto = mock(StackDto.class);
         Stack stack = new Stack();
         stack.setExternalDatabaseEngineVersion("testVersion");
+        when(stackDto.getStack()).thenReturn(stack);
         when(embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(any())).thenReturn(false);
         // WHEN
-        Map<String, Object> actualResult = underTest.collectEmbeddedDatabaseConfigs(stack);
+        Map<String, Object> actualResult = underTest.collectEmbeddedDatabaseConfigs(stackDto);
         // THEN
         assertFalse((Boolean) actualResult.get(POSTGRES_DATA_ON_ATTACHED_DISK_KEY));
         assertEquals(POSTGRES_DEFAULT_DIRECTORY, actualResult.get(POSTGRES_DIRECTORY_KEY));

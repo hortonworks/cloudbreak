@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.service.StackCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.common.api.type.ImageStatus;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -90,10 +89,8 @@ public class CheckImageActionTest {
 
     @Test
     void testWhenCreateFinishedThenSendEvent() {
-        Stack stack = mock(Stack.class);
-        when(stack.getId()).thenReturn(STACK_ID);
         FlowParameters flowParameters = new FlowParameters("flowId", "flowTriggerUserCrn", mock(SpanContext.class));
-        when(stackContext.getStack()).thenReturn(stack);
+        when(stackContext.getStackId()).thenReturn(STACK_ID);
         when(stackContext.getFlowParameters()).thenReturn(flowParameters);
         when(reactorEventFactory.createEvent(any(Map.class), any())).thenReturn(mock(Event.class));
         CheckImageResult checkImageResult = new CheckImageResult(1L, ImageStatus.CREATE_FINISHED, ANY_STATUS_PROGRESS_VALUE);

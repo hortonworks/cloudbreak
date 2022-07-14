@@ -17,11 +17,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.EventParameterFactory;
@@ -57,7 +57,7 @@ public class ReactorNotifier {
     private EventBusStatisticReporter reactorReporter;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private EventParameterFactory eventParameterFactory;
@@ -69,11 +69,11 @@ public class ReactorNotifier {
     private FlowNameFormatService flowNameFormatService;
 
     public FlowIdentifier notify(Long stackId, String selector, Acceptable acceptable) {
-        return notify(stackId, selector, acceptable, stackService::getByIdWithTransaction);
+        return notify(stackId, selector, acceptable, stackDtoService::getStackViewById);
     }
 
     public FlowIdentifier notifyWithoutCheck(Long stackId, String selector, Acceptable acceptable) {
-        return notify(stackId, selector, acceptable, stackService::getByIdWithTransaction);
+        return notify(stackId, selector, acceptable, stackDtoService::getStackViewById);
     }
 
     public FlowIdentifier notify(BaseFlowEvent selectable, Event.Headers headers) {
@@ -83,10 +83,10 @@ public class ReactorNotifier {
         return checkFlowStatus(event, selectable.getResourceCrn());
     }
 
-    public FlowIdentifier notify(Long stackId, String selector, Acceptable acceptable, Function<Long, Stack> getStackFn) {
+    public FlowIdentifier notify(Long stackId, String selector, Acceptable acceptable, Function<Long, StackView> getStackFn) {
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(eventParameterFactory.createEventParameters(stackId), acceptable);
-        Stack stack = getStackFn.apply(event.getData().getResourceId());
-        Optional.ofNullable(stack).map(Stack::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));
+        StackView stack = getStackFn.apply(event.getData().getResourceId());
+        Optional.ofNullable(stack).map(StackView::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));
         reactorReporter.logInfoReport();
         reactor.notify(selector, event);
         return checkFlowStatus(event, stack.getName());

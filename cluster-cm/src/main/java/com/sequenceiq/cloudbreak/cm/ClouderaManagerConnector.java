@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Service(ClusterApi.CLOUDERA_MANAGER)
 @Scope("prototype")
@@ -25,11 +25,11 @@ public class ClouderaManagerConnector implements ClusterApi {
     @Inject
     private ApplicationContext applicationContext;
 
-    private final Stack stack;
+    private final StackDtoDelegate stack;
 
     private final HttpClientConfig clientConfig;
 
-    public ClouderaManagerConnector(Stack stack, HttpClientConfig clientConfig) {
+    public ClouderaManagerConnector(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
     }

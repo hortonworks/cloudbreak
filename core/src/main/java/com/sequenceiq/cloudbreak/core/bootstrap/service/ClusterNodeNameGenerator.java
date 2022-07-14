@@ -13,8 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class ClusterNodeNameGenerator {
@@ -24,7 +24,8 @@ public class ClusterNodeNameGenerator {
     @Inject
     private HostDiscoveryService hostDiscoveryService;
 
-    public String getNodeNameForInstanceMetadata(InstanceMetaData im, Stack stack, Map<String, AtomicLong> hostGroupNodeIndexes, Set<String> clusterNodeNames) {
+    public String getNodeNameForInstanceMetadata(InstanceMetadataView im, StackView stack, Map<String, AtomicLong> hostGroupNodeIndexes,
+            Set<String> clusterNodeNames) {
         if (isNotBlank(im.getShortHostname())) {
             LOGGER.info("Short hostname is filled for {}: {}", im.getInstanceId(), im.getShortHostname());
             return im.getShortHostname();

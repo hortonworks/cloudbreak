@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 public class ClouderaManagerParcelActivationListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
@@ -34,7 +34,7 @@ public class ClouderaManagerParcelActivationListenerTask extends AbstractClouder
     @Override
     protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
         ApiClient apiClient = pollerObject.getApiClient();
-        Stack stack = pollerObject.getStack();
+        StackDtoDelegate stack = pollerObject.getStack();
         ApiParcelList parcels = getClouderaManagerParcels(apiClient, stack.getName());
         List<ApiParcel> notActivated = getNotActivatedOrMissingParcels(parcels);
         if (notActivated.isEmpty()) {

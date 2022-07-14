@@ -26,10 +26,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @ExtendWith(MockitoExtension.class)
 public class TargetedUpscaleSupportServiceTest {
@@ -93,7 +95,7 @@ public class TargetedUpscaleSupportServiceTest {
         lenient().when(hostOrchestrator.unboundClusterConfigPresentOnAnyNodes(any(), any())).thenReturn(unboundConfigPresentOnAnyNodes);
         when(entitlementService.isUnboundEliminationSupported(any())).thenReturn(unboundEliminationSupported);
 
-        assertEquals(result, underTest.getActualDnsResolverType(getStack(null)));
+        assertEquals(result, underTest.getActualDnsResolverType(getStackDto()));
     }
 
     private static Stream<Arguments> testUpdatingStackDnsResolverData() {
@@ -105,10 +107,16 @@ public class TargetedUpscaleSupportServiceTest {
         );
     }
 
-    private Stack getStack(DnsResolverType dnsResolverType) {
+    private StackView getStack(DnsResolverType dnsResolverType) {
         Stack stack = new Stack();
         stack.setResourceCrn(DATAHUB_CRN);
         stack.setDomainDnsResolver(dnsResolverType);
         return stack;
+    }
+
+    private StackDto getStackDto() {
+        Stack stack = new Stack();
+        stack.setResourceCrn(DATAHUB_CRN);
+        return new StackDto(stack, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
     }
 }

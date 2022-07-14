@@ -81,17 +81,17 @@ public class ClusterServicesRestartActions {
         return new AbstractStackFailureAction<ClusterServicesRestartState, ClusterServicesRestartEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                String errorMessage = String.format("Cluster %s failed to restart", context.getStackView().getName());
+                String errorMessage = String.format("Cluster %s failed to restart", context.getStack().getName());
 
                 LOGGER.error(errorMessage, payload.getException());
-                stackUpdater.updateStackStatus(context.getStackView().getId(), DetailedStackStatus.CLUSTER_RESTART_FAILED, errorMessage);
+                stackUpdater.updateStackStatus(context.getStackId(), DetailedStackStatus.CLUSTER_RESTART_FAILED, errorMessage);
 
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterServicesRestartEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(ClusterServicesRestartEvent.FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

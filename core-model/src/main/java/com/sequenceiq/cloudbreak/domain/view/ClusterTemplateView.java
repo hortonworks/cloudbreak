@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.converter.ResourceStatusConverter;
 
 @Entity
 @Table(name = "ClusterTemplate")
+@Deprecated
 public class ClusterTemplateView extends CompactView {
 
     @Convert(converter = ResourceStatusConverter.class)

@@ -104,7 +104,7 @@ public class ClusterTerminationActions {
 
             @Override
             protected Selectable createRequest(ClusterViewContext context) {
-                return new ClusterTerminationRequest(context.getStackId(), context.getClusterView() != null ? context.getClusterView().getId() : null);
+                return new ClusterTerminationRequest(context.getStackId(), context.getCluster() != null ? context.getCluster().getId() : null);
             }
         };
     }
@@ -143,7 +143,7 @@ public class ClusterTerminationActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterTerminationEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(ClusterTerminationEvent.FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

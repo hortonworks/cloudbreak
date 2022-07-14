@@ -14,8 +14,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntries;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class StackResponseEventProvider implements ResponseProvider {
@@ -26,17 +27,17 @@ public class StackResponseEventProvider implements ResponseProvider {
     private CloudbreakEventsFacade cloudbreakEventsFacade;
 
     @Override
-    public StackV4Response providerEntriesToStackResponse(Stack stack, StackV4Response stackResponse) {
+    public StackV4Response providerEntriesToStackResponse(StackDtoDelegate stack, StackV4Response stackResponse) {
         List<CloudbreakEventV4Response> events = new ArrayList<>();
         List<CloudbreakEventV4Response> cloudbreakEvents = cloudbreakEventsFacade
-                .retrieveEventsByStack(stack.getId(), stack.getType(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
+                .retrieveEventsByStack(stack.getStack().getId(), stack.getStack().getType(), PageRequest.of(0, Integer.MAX_VALUE)).getContent();
         events.addAll(cloudbreakEvents);
-        events.addAll(getLegacyStackType(stack));
+        events.addAll(getLegacyStackType(stack.getStack()));
         stackResponse.setCloudbreakEvents(events);
         return stackResponse;
     }
 
-    private List<CloudbreakEventV4Response> getLegacyStackType(Stack stack) {
+    private List<CloudbreakEventV4Response> getLegacyStackType(StackView stack) {
         List<CloudbreakEventV4Response> events = cloudbreakEventsFacade
                 .retrieveEventsByStack(stack.getId(), StackType.LEGACY, PageRequest.of(0, Integer.MAX_VALUE)).getContent();
         if (events.isEmpty()) {

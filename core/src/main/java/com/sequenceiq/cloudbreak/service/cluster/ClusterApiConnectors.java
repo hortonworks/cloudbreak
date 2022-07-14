@@ -10,9 +10,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Service
 public class ClusterApiConnectors {
@@ -22,13 +22,18 @@ public class ClusterApiConnectors {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    public ClusterApi getConnector(Stack stack) {
+    public ClusterApi getConnector(StackDtoDelegate stack) {
+        return getConnector(stack, stack.getClusterManagerIp());
+    }
+
+    public ClusterApi getConnector(StackDtoDelegate stack, String clusterManagerIp) {
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(),
-                stack.getClusterManagerIp(), stack.cloudPlatform());
+                clusterManagerIp, stack.getCloudPlatform());
         return (ClusterApi) applicationContext.getBean(stack.getCluster().getVariant(), stack, httpClientConfig);
     }
 
-    public ClusterPreCreationApi getConnector(Cluster cluster) {
+    public ClusterPreCreationApi getConnector(ClusterView cluster) {
         return applicationContext.getBean(cluster.getVariant() + BEAN_POST_TAG, ClusterPreCreationApi.class);
     }
+
 }

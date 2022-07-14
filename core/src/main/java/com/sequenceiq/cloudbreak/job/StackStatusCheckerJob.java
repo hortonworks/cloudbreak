@@ -44,10 +44,9 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
@@ -56,14 +55,16 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.service.stack.flow.SyncConfig;
 import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowLogService;
 
 import io.opentracing.Tracer;
@@ -81,7 +82,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private StackService stackService;
 
     @Inject
-    private StackViewService stackViewService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ClusterService clusterService;
@@ -127,8 +128,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected Object getMdcContextObject() {
-        return stackViewService.findById(getStackId()).orElseGet(StackView::new);
+    protected MdcContextInfoProvider getMdcContextConfigProvider() {
+        return stackDtoService.getStackViewByIdOpt(getStackId()).orElse(null);
     }
 
     @Override
@@ -139,7 +140,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
         try {
             measure(() -> {
-                Stack stack = stackService.get(getStackId());
+                StackDto stack = stackDtoService.getById(getStackId());
                 Status stackStatus = stack.getStatus();
                 if (Status.getUnschedulableStatuses().contains(stackStatus)) {
                     LOGGER.debug("Stack sync will be unscheduled, stack state is {}", stackStatus);
@@ -153,12 +154,12 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 } else if (syncableStates().contains(stackStatus)) {
                     RegionAwareInternalCrnGenerator dataHub = regionAwareInternalCrnGeneratorFactory.datahub();
                     ThreadBasedUserCrnProvider.doAs(dataHub.getInternalCrnForServiceAsString(), () -> doSync(stack));
-                    switchToShortSyncIfNecessary(context);
+                    switchToShortSyncIfNecessary(context, stack);
                 } else {
                     LOGGER.warn("Unhandled stack status, {}", stackStatus);
                 }
                 if (stackStatus != null) {
-                    metricsClient.processStackStatus(stack.getResourceCrn(), stack.cloudPlatform(), stackStatus.name(), stackStatus.ordinal(),
+                    metricsClient.processStackStatus(stack.getResourceCrn(), stack.getCloudPlatform(), stackStatus.name(), stackStatus.ordinal(),
                             stackService.computeMonitoringEnabled(stack));
                 }
             }, LOGGER, "Check status took {} ms for stack {}.", getStackId());
@@ -167,10 +168,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    private void switchToShortSyncIfNecessary(JobExecutionContext context) {
+    private void switchToShortSyncIfNecessary(JobExecutionContext context, StackDto stackDto) {
         if (isLongSyncJob(context)) {
-            Stack stack = stackService.get(getStackId());
-            Status stackStatus = stack.getStatus();
+            Status stackStatus = stackDto.getStatus();
             if (!longSyncableStates().contains(stackStatus)) {
                 jobService.schedule(getStackId(), StackJobAdapter.class);
             }
@@ -241,11 +241,11 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         );
     }
 
-    private void doSync(Stack stack) {
+    private void doSync(StackDto stack) {
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId());
+        List<InstanceMetadataView> runningInstances = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
         try {
-            if (isClusterManagerRunning(stack, connector)) {
+            if (isClusterManagerRunning(stack.getStack(), connector)) {
                 ExtendedHostStatuses extendedHostStatuses = getExtendedHostStatuses(stack, connector);
                 Map<HostName, Set<HealthCheck>> hostStatuses = extendedHostStatuses.getHostsHealth();
                 LOGGER.debug("Cluster '{}' state check, host certicates expiring: [{}], cm running, hoststates: {}",
@@ -261,8 +261,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         }
     }
 
-    private void reportHealthAndSyncInstances(Stack stack, Collection<InstanceMetaData> runningInstances,
-            Map<InstanceMetaData, Optional<String>> failedInstances, Set<String> newHealthyHostNames, boolean hostCertExpiring) {
+    private void reportHealthAndSyncInstances(StackDto stack, Collection<InstanceMetadataView> runningInstances,
+            Map<InstanceMetadataView, Optional<String>> failedInstances, Set<String> newHealthyHostNames, boolean hostCertExpiring) {
         Map<String, Optional<String>> newFailedNodeNamesWithReason = failedInstances.entrySet()
                 .stream()
                 .filter(e -> !Set.of(SERVICES_UNHEALTHY, STOPPED)
@@ -273,17 +273,17 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         syncInstances(stack, runningInstances, failedInstances.keySet(), InstanceSyncState.RUNNING, true);
     }
 
-    private void updateStates(Stack stack, Collection<InstanceMetaData> failedInstances, Map<String, Optional<String>> newFailedNodeNamesWithReason,
+    private void updateStates(StackDto stack, Collection<InstanceMetadataView> failedInstances, Map<String, Optional<String>> newFailedNodeNamesWithReason,
             Set<String> newHealthyHostNames, boolean hostCertExpiring) {
         LOGGER.info("Updating status: Failed instances: {} New failed node names: {} New healthy host name: {} Host cert expiring: {}",
                 failedInstances, newFailedNodeNamesWithReason.keySet(), newHealthyHostNames, hostCertExpiring);
         clusterService.updateClusterCertExpirationState(stack.getCluster(), hostCertExpiring);
         if (!failedInstances.isEmpty()) {
-            if (stackUtil.stopStartScalingEntitlementEnabled(stack)) {
-                Set<InstanceMetaData> stoppedInstances = failedInstances.stream().filter(im -> im.getInstanceStatus().equals(STOPPED)).collect(toSet());
+            if (stackUtil.stopStartScalingEntitlementEnabled(stack.getStack())) {
+                Set<InstanceMetadataView> stoppedInstances = failedInstances.stream().filter(im -> im.getInstanceStatus().equals(STOPPED)).collect(toSet());
                 long stoppedInstancesCount = stoppedInstances.size();
-                Set<String> computeGroups = getComputeHostGroups(stack.getCluster());
-                boolean stoppedComputeOnly = stoppedInstances.stream().map(im -> im.getInstanceGroup().getGroupName()).allMatch(computeGroups::contains);
+                Set<String> computeGroups = getComputeHostGroups(stack.getBlueprint());
+                boolean stoppedComputeOnly = stoppedInstances.stream().map(im -> im.getInstanceGroupName()).allMatch(computeGroups::contains);
                 if (stoppedInstancesCount > 0 && stoppedComputeOnly && stoppedInstancesCount == failedInstances.size()) {
                     // TODO CB-15146: This may need to change depending on the final form of how we check which operations are to be allowed
                     //  when there are some STOPPED instances
@@ -320,23 +320,23 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.ENABLE_SECURITY_FAILED);
     }
 
-    private boolean isClusterManagerRunning(Stack stack, ClusterApi connector) {
+    private boolean isClusterManagerRunning(StackView stack, ClusterApi connector) {
         return !stack.isStopped()
                 && !stack.isStackInDeletionOrFailedPhase()
                 && isCMRunning(connector);
     }
 
-    private void syncInstances(Stack stack, Collection<InstanceMetaData> instanceMetaData, boolean cmServerRunning) {
+    private void syncInstances(StackDto stack, Collection<InstanceMetadataView> instanceMetaData, boolean cmServerRunning) {
         syncInstances(stack, instanceMetaData, instanceMetaData, InstanceSyncState.DELETED_ON_PROVIDER_SIDE, cmServerRunning);
     }
 
-    private void syncInstances(Stack stack, Collection<InstanceMetaData> runningInstances,
-            Collection<InstanceMetaData> instanceMetaData, InstanceSyncState defaultState, boolean cmServerRunning) {
-        List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instanceMetaData, stack.getEnvironmentCrn(), stack.getStackAuthentication());
+    private void syncInstances(StackDto stack, Collection<InstanceMetadataView> runningInstances,
+            Collection<InstanceMetadataView> instanceMetaData, InstanceSyncState defaultState, boolean cmServerRunning) {
+        List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(instanceMetaData, stack.getStack());
         List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, cloudInstances);
         LOGGER.debug("Cluster '{}' state check on provider, instances: {}", stack.getId(), instanceStatuses);
         SyncConfig syncConfig = new SyncConfig(true, cmServerRunning);
-        ifFlowNotRunning(() -> syncService.autoSync(stack, runningInstances, instanceStatuses, defaultState, syncConfig));
+        ifFlowNotRunning(() -> syncService.autoSync(stack.getStack(), runningInstances, instanceStatuses, defaultState, syncConfig));
     }
 
     private boolean isCMRunning(ClusterApi connector) {
@@ -345,14 +345,14 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 "Checking Cloudera Manager is running");
     }
 
-    private ExtendedHostStatuses getExtendedHostStatuses(Stack stack, ClusterApi connector) {
+    private ExtendedHostStatuses getExtendedHostStatuses(StackDto stack, ClusterApi connector) {
         return Benchmark.measureAndWarnIfLong(() -> connector.clusterStatusService()
                         .getExtendedHostStatuses(runtimeVersionService.getRuntimeVersion(stack.getCluster().getId())),
                 LOGGER,
                 "Getting extended host statuses");
     }
 
-    private Set<String> getNewHealthyHostNames(ExtendedHostStatuses hostStatuses, Set<InstanceMetaData> runningInstances) {
+    private Set<String> getNewHealthyHostNames(ExtendedHostStatuses hostStatuses, Collection<InstanceMetadataView> runningInstances) {
         Set<String> healthyHosts = hostStatuses.getHostsHealth().keySet().stream()
                 .filter(hostStatuses::isHostHealthy)
                 .map(HostName::value)
@@ -360,7 +360,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         Set<String> unhealthyStoredHosts = runningInstances.stream()
                 .filter(i -> statesFromHealthyAllowed().contains(i.getInstanceStatus()))
                 .filter(i -> i.getDiscoveryFQDN() != null)
-                .map(InstanceMetaData::getDiscoveryFQDN)
+                .map(InstanceMetadataView::getDiscoveryFQDN)
                 .collect(toSet());
         return Sets.intersect(healthyHosts, unhealthyStoredHosts);
     }
@@ -373,15 +373,15 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 FAILED);
     }
 
-    private Map<InstanceMetaData, Optional<String>> getFailedInstancesInstanceMetadata(ExtendedHostStatuses hostStatuses,
-            Set<InstanceMetaData> runningInstances) {
+    private Map<InstanceMetadataView, Optional<String>> getFailedInstancesInstanceMetadata(ExtendedHostStatuses hostStatuses,
+            Collection<InstanceMetadataView> runningInstances) {
         Map<String, Optional<String>> failedHosts = hostStatuses.getHostsHealth().entrySet().stream()
                 .filter(e -> !hostStatuses.isHostHealthy(e.getKey()))
                 .collect(Collectors.toMap(e -> e.getKey().value(), e -> Optional.ofNullable(hostStatuses.statusReasonForHost(e.getKey()))));
         Set<String> noReportHosts = runningInstances.stream()
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                 .filter(instanceMetaData -> !instanceMetaData.isZombie())
-                .map(InstanceMetaData::getDiscoveryFQDN)
+                .map(InstanceMetadataView::getDiscoveryFQDN)
                 .filter(discoveryFQDN -> hostStatuses.getHostsHealth().get(hostName(discoveryFQDN)) == null)
                 .collect(toSet());
         return runningInstances.stream()
@@ -389,15 +389,15 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .collect(Collectors.toMap(imd -> imd, imd -> getReasonForFailedInstance(failedHosts, imd)));
     }
 
-    private Optional<String> getReasonForFailedInstance(Map<String, Optional<String>> failedHosts, InstanceMetaData imd) {
+    private Optional<String> getReasonForFailedInstance(Map<String, Optional<String>> failedHosts, InstanceMetadataView imd) {
         if (failedHosts.containsKey(imd.getDiscoveryFQDN())) {
             return failedHosts.get(imd.getDiscoveryFQDN());
         }
         return Optional.empty();
     }
 
-    private Set<String> getComputeHostGroups(Cluster cluster) {
-        String blueprintText = cluster.getBlueprint().getBlueprintText();
+    private Set<String> getComputeHostGroups(Blueprint blueprint) {
+        String blueprintText = blueprint.getBlueprintText();
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
         Versioned blueprintVersion = () -> blueprintProcessor.getVersion().get();
         return blueprintProcessor.getComputeHostGroups(blueprintVersion);

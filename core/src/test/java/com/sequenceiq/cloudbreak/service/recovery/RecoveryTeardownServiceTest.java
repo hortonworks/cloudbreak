@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_FA
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_TEARDOWN_FINISHED;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -21,7 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
@@ -67,7 +68,7 @@ public class RecoveryTeardownServiceTest {
         when(stackTerminationContext.getStack()).thenReturn(stack);
         when(stack.getId()).thenReturn(STACK_ID);
 
-        underTest.handleRecoveryTeardownSuccess(stackTerminationContext, terminateStackResult);
+        underTest.handleRecoveryTeardownSuccess(stack, terminateStackResult);
         verifyNoInteractions(stackUpdater);
         verify(terminationService).finalizeRecoveryTeardown(STACK_ID);
         verify(metricService).incrementMetricCounter(MetricType.STACK_RECOVERY_TEARDOWN_SUCCESSFUL, stack);
@@ -80,7 +81,9 @@ public class RecoveryTeardownServiceTest {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         Exception exception = new Exception(ERROR_MESSAGE);
         String stackUpdateMessage = "Recovery failed: " + exception.getMessage();
-        StackView stackView = getStackView();
+        StackView stackView = mock(StackView.class);
+
+        when(stackView.getId()).thenReturn(STACK_ID);
 
         underTest.handleRecoveryTeardownError(stackView, exception);
 
@@ -88,11 +91,5 @@ public class RecoveryTeardownServiceTest {
         verify(metricService).incrementMetricCounter(MetricType.STACK_RECOVERY_TEARDOWN_FAILED, stackView, exception);
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(CLUSTER_RECOVERY_FAILED.name()), captor.capture(), eq(stackUpdateMessage));
         assertEquals(DATALAKE_RECOVERY_FAILED, captor.getValue());
-    }
-
-    private StackView getStackView() {
-        StackView stackView = new StackView();
-        stackView.setId(STACK_ID);
-        return stackView;
     }
 }

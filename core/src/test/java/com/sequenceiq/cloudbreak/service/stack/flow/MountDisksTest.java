@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MountDisksTest {
@@ -75,6 +76,7 @@ public class MountDisksTest {
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getPlatformVariant()).thenReturn(CloudConstants.MOCK);
         when(stack.getCluster()).thenReturn(new Cluster());
+        when(stack.getDiskResourceType()).thenReturn(ResourceType.MOCK_VOLUME);
         CloudbreakDetails cloudbreakDetails = new CloudbreakDetails();
         cloudbreakDetails.setVersion("2.34.0");
         when(componentConfigProviderService.getCloudbreakDetails(any())).thenReturn(cloudbreakDetails);

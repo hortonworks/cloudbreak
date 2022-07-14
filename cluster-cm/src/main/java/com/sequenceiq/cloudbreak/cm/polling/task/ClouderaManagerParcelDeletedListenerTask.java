@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 public class ClouderaManagerParcelDeletedListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelDeletedListenerTask.class);
@@ -32,7 +32,7 @@ public class ClouderaManagerParcelDeletedListenerTask extends AbstractClouderaMa
     @Override
     protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
         ApiClient apiClient = pollerObject.getApiClient();
-        Stack stack = pollerObject.getStack();
+        StackDtoDelegate stack = pollerObject.getStack();
         ApiParcelList parcels = getClouderaManagerParcels(apiClient, stack.getName());
         List<ApiParcel> existedParcels = collectExistingParcels(parcels);
         if (existedParcels.isEmpty()) {

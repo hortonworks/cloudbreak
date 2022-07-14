@@ -23,11 +23,15 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ParcelService {
@@ -52,53 +56,69 @@ public class ParcelService {
     @Inject
     private ImageReaderService imageReaderService;
 
-    public Set<ClusterComponent> getParcelComponentsByBlueprint(Stack stack) {
-        Set<ClusterComponent> components = getComponents(stack);
+    public Set<ClusterComponentView> getParcelComponentsByBlueprint(StackDtoDelegate stack) {
+        return getParcelComponentsByBlueprint(stack.getStack(), stack.getCluster(), stack.getBlueprint());
+    }
+
+    public Set<ClusterComponentView> getParcelComponentsByBlueprint(StackDto stackDto) {
+        return getParcelComponentsByBlueprint(stackDto.getStack(), stackDto.getCluster(), stackDto.getBlueprint());
+    }
+
+    public Set<ClusterComponentView> getParcelComponentsByBlueprint(StackView stack, ClusterView cluster, Blueprint blueprint) {
+        if (cluster == null) {
+            return Collections.emptySet();
+        }
+        Set<ClusterComponentView> components = getComponents(cluster.getId());
         LOGGER.debug("The following components are available in the cluster {}", components);
         if (stack.isDatalake()) {
             return getDataLakeClusterComponents(components);
         } else {
-            Map<String, ClusterComponent> cmProductMap = new HashMap<>();
+            Map<String, ClusterComponentView> cmProductMap = new HashMap<>();
             Set<ClouderaManagerProduct> cmProducts = new HashSet<>();
-            for (ClusterComponent clusterComponent : components) {
+            for (ClusterComponentView clusterComponent : components) {
                 ClouderaManagerProduct product = clusterComponent.getAttributes().getSilent(ClouderaManagerProduct.class);
                 cmProductMap.put(product.getName(), clusterComponent);
                 cmProducts.add(product);
             }
-            cmProducts = filterParcelsByBlueprint(stack.getWorkspace().getId(), stack.getId(), cmProducts, stack.getCluster().getBlueprint());
-            Set<ClusterComponent> componentsByRequiredProducts = getComponentsByRequiredProducts(cmProductMap, cmProducts);
+            cmProducts = filterParcelsByBlueprint(stack.getWorkspaceId(), stack.getId(), cmProducts, blueprint);
+            Set<ClusterComponentView> componentsByRequiredProducts = getComponentsByRequiredProducts(cmProductMap, cmProducts);
             LOGGER.debug("The following components are required for cluster {}", componentsByRequiredProducts);
             return componentsByRequiredProducts;
         }
     }
 
-    public Set<ClusterComponent> getComponentsByImage(Stack stack, Image image) {
-        Set<ClusterComponent> components = getComponents(stack);
+    public Set<String> getComponentNamesByImage(Stack stack, Image image) {
+        return getComponentsByImage(stack, image).stream().map(ClusterComponentView::getName).collect(Collectors.toSet());
+    }
+
+    public Set<ClusterComponentView> getComponentsByImage(Stack stack, Image image) {
+        return getComponentsByImage(stack, stack.getCluster().getId(), stack.getCluster().getBlueprint(), image);
+    }
+
+    public Set<ClusterComponentView> getComponentsByImage(StackView stack, Long clusterId, Blueprint blueprint, Image image) {
+        Set<ClusterComponentView> components = getComponents(clusterId);
         if (stack.isDatalake()) {
             return getDataLakeClusterComponents(components);
         } else {
-            Map<String, ClusterComponent> cmProductMap = collectClusterComponentsByName(components);
+            Map<String, ClusterComponentView> cmProductMap = collectClusterComponentsByName(components);
             Set<ClouderaManagerProduct> cmProducts = clouderaManagerProductTransformer.transform(image, true, true);
-            cmProducts = filterParcelsByBlueprint(stack.getWorkspace().getId(), stack.getId(), cmProducts, stack.getCluster().getBlueprint());
+            cmProducts = filterParcelsByBlueprint(stack.getWorkspaceId(), stack.getId(), cmProducts, blueprint);
             LOGGER.debug("The following parcels are used in CM based on blueprint: {}", cmProducts);
             return getComponentsByRequiredProducts(cmProductMap, cmProducts);
         }
     }
 
-    public Set<String> getComponentNamesByImage(Stack stack, Image image) {
-        return getComponentsByImage(stack, image).stream().map(ClusterComponent::getName).collect(Collectors.toSet());
+    public ParcelOperationStatus removeUnusedParcelComponents(StackDtoDelegate stackDto) throws CloudbreakException {
+        Set<ClusterComponentView> clusterComponentsByBlueprint = getParcelComponentsByBlueprint(stackDto);
+        return removeUnusedParcelComponents(stackDto, clusterComponentsByBlueprint);
     }
 
-    public ParcelOperationStatus removeUnusedParcelComponents(Stack stack) throws CloudbreakException {
-        Set<ClusterComponent> clusterComponentsByBlueprint = getParcelComponentsByBlueprint(stack);
-        return removeUnusedParcelComponents(stack, clusterComponentsByBlueprint);
-    }
-
-    public ParcelOperationStatus removeUnusedParcelComponents(Stack stack, Set<ClusterComponent> clusterComponentsByBlueprint) throws CloudbreakException {
+    public ParcelOperationStatus removeUnusedParcelComponents(StackDtoDelegate stackDto, Set<ClusterComponentView> clusterComponentsByBlueprint)
+            throws CloudbreakException {
         LOGGER.debug("Starting to remove unused parcels from the cluster.");
-        Set<String> parcelsFromImage = imageReaderService.getParcelNames(stack.getWorkspace().getId(), stack.getId());
-        ParcelOperationStatus removalStatus = clusterApiConnectors.getConnector(stack).removeUnusedParcels(clusterComponentsByBlueprint, parcelsFromImage);
-        clusterComponentUpdater.removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint, removalStatus);
+        Set<String> parcelsFromImage = imageReaderService.getParcelNames(stackDto.getStack().getWorkspaceId(), stackDto.getId());
+        ParcelOperationStatus removalStatus = clusterApiConnectors.getConnector(stackDto).removeUnusedParcels(clusterComponentsByBlueprint, parcelsFromImage);
+        clusterComponentUpdater.removeUnusedCdhProductsFromClusterComponents(stackDto.getCluster().getId(), clusterComponentsByBlueprint, removalStatus);
         return removalStatus;
     }
 
@@ -110,34 +130,32 @@ public class ParcelService {
                 .collect(Collectors.toSet());
     }
 
-    private Map<String, ClusterComponent> collectClusterComponentsByName(Set<ClusterComponent> components) {
-        return components.stream().collect(Collectors.toMap(ClusterComponent::getName, component -> component));
+    private Map<String, ClusterComponentView> collectClusterComponentsByName(Set<ClusterComponentView> components) {
+        return components.stream().collect(Collectors.toMap(ClusterComponentView::getName, component -> component));
     }
 
-    private Set<ClusterComponent> getComponents(Stack stack) {
-        return clusterComponentConfigProvider.getComponentsByClusterId(stack.getCluster().getId()).stream()
-                .filter(clusterComponent -> ComponentType.CDH_PRODUCT_DETAILS == clusterComponent.getComponentType())
-                .collect(Collectors.toSet());
+    private Set<ClusterComponentView> getComponents(Long clusterId) {
+        return clusterComponentConfigProvider.getComponentListByType(clusterId, ComponentType.CDH_PRODUCT_DETAILS);
     }
 
     private Set<ClouderaManagerProduct> filterParcelsByBlueprint(Long workspaceId, Long stackId, Set<ClouderaManagerProduct> cmProducts, Blueprint blueprint) {
         return parcelFilterService.filterParcelsByBlueprint(workspaceId, stackId, cmProducts, blueprint);
     }
 
-    private Set<ClusterComponent> getDataLakeClusterComponents(Set<ClusterComponent> components) {
-        ClusterComponent stackComponent = getCdhComponent(components);
+    private Set<ClusterComponentView> getDataLakeClusterComponents(Set<ClusterComponentView> components) {
+        ClusterComponentView stackComponent = getCdhComponent(components);
         LOGGER.debug("For datalake clusters only the CDH parcel is used in CM: {}", stackComponent);
         return Collections.singleton(stackComponent);
     }
 
-    private ClusterComponent getCdhComponent(Set<ClusterComponent> components) {
+    private ClusterComponentView getCdhComponent(Set<ClusterComponentView> components) {
         return components.stream()
                 .filter(clusterComponent -> clusterComponent.getName().equals(StackType.CDH.name()))
                 .findFirst()
                 .orElseThrow(() -> new NotFoundException("Runtime component not found!"));
     }
 
-    private Set<ClusterComponent> getComponentsByRequiredProducts(Map<String, ClusterComponent> cmProductMap, Set<ClouderaManagerProduct> cmProducts) {
+    private Set<ClusterComponentView> getComponentsByRequiredProducts(Map<String, ClusterComponentView> cmProductMap, Set<ClouderaManagerProduct> cmProducts) {
         return cmProducts.stream()
                 .map(cmp -> cmProductMap.get(cmp.getName()))
                 .filter(Objects::nonNull)

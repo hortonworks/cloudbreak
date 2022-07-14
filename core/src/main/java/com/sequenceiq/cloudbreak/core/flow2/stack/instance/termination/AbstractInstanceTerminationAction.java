@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -20,52 +19,33 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.InstancePayload;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
-import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
-import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowParameters;
 
 abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
         extends AbstractStackAction<InstanceTerminationState, InstanceTerminationEvent, InstanceTerminationContext, P> {
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private StackToCloudStackConverter cloudStackConverter;
-
-    @Inject
-    private ResourceToCloudResourceConverter cloudResourceConverter;
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
 
     @Inject
     private StackUtil stackUtil;
-
-    @Inject
-    private ResourceService resourceService;
-
-    @Inject
-    private EnvironmentClientService environmentClientService;
 
     protected AbstractInstanceTerminationAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -74,8 +54,7 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
     @Override
     protected InstanceTerminationContext createFlowContext(FlowParameters flowParameters,
             StateContext<InstanceTerminationState, InstanceTerminationEvent> stateContext, P payload) {
-        Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
-        stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
+        StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
@@ -85,27 +64,22 @@ abstract class AbstractInstanceTerminationAction<P extends InstancePayload>
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
+                .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
-                .withTenantId(stack.getTenant().getId())
+                .withTenantId(stack.getTenantId())
                 .build();
-        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
-        Set<String> instanceIds = payload.getInstanceIds();
-        CloudStack cloudStack = cloudStackConverter.convert(stack, instanceIds);
-        List<CloudResource> cloudResources = stack.getResources().stream()
-                .map(r -> cloudResourceConverter.convert(r))
-                .collect(Collectors.toList());
-        List<InstanceMetaData> instanceMetaDataList = new ArrayList<>();
-        List<CloudInstance> cloudInstances = new ArrayList<>();
-        DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
-        for (String instanceId : instanceIds) {
-            InstanceMetaData instanceMetaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
-                    .orElseThrow(NotFoundException.notFound("instanceMetadata", instanceId));
-            CloudInstance cloudInstance = metadataConverter.convert(instanceMetaData, environment, stack.getStackAuthentication());
-            instanceMetaDataList.add(instanceMetaData);
-            cloudInstances.add(cloudInstance);
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
+        final Set<String> instanceIds = payload.getInstanceIds();
+        List<InstanceMetadataView> instanceMetaDataList = instanceMetaDataService.findAllViewByStackIdAndInstanceId(stack.getId(), instanceIds);
+        if (instanceMetaDataList.size() != instanceIds.size()) {
+            List<String> missingInstanceIds = instanceMetaDataList.stream()
+                    .filter(im -> !instanceIds.contains(im.getInstanceId()))
+                    .map(im -> im.getInstanceId())
+                    .collect(Collectors.toList());
+            throw new NotFoundException("Missing instances with instanceIds: " + String.join(", ", missingInstanceIds));
         }
-        return new InstanceTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, cloudResources, cloudInstances,
+        List<CloudInstance> cloudInstances = new ArrayList<>(metadataConverter.convert(instanceMetaDataList, stack));
+        return new InstanceTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudInstances,
                 instanceMetaDataList);
     }
 

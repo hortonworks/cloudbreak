@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.action;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -16,15 +17,15 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseContext;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.config.ExternalDatabaseCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.config.ExternalDatabaseCreationState;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractExternalDatabaseCreationActionTest {
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private FlowParameters flowParameters;
@@ -39,8 +40,10 @@ class AbstractExternalDatabaseCreationActionTest {
 
     @Test
     void createFlowContext() {
-        Stack stack = new Stack();
-        when(stackService.getByIdWithClusterInTransaction(1L)).thenReturn(stack);
+        StackView stack = mock(StackView.class);
+        when(stack.getTenantName()).thenReturn("tenant");
+        when(stack.getWorkspaceName()).thenReturn("ws");
+        when(stackDtoService.getStackViewById(1L)).thenReturn(stack);
 
         semaphore = false;
         ExternalDatabaseContext flowContext = underTest.createFlowContext(flowParameters, stateContext, new TestPayload());

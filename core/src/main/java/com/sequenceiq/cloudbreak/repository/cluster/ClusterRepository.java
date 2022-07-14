@@ -8,6 +8,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,7 +23,7 @@ import com.sequenceiq.common.api.type.CertExpirationState;
 
 @Transactional(TxType.REQUIRED)
 @EntityType(entityClass = Cluster.class)
-public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, Long> {
+public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, Long>, JpaRepository<Cluster, Long> {
 
     @Override
     Cluster save(Cluster entity);
@@ -63,4 +64,32 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
             "JOIN c.stack s " +
             "WHERE s.resourceCrn = :stackResourceCrn")
     Optional<Cluster> findByStackResourceCrn(@Param("stackResourceCrn") String stackResourceCrn);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.creationStarted = :creationStarted WHERE c.id = :clusterId")
+    void updateCreationStartedByClusterId(@Param("clusterId") Long clusterId, @Param("creationStarted") long creationStarted);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.upSince = :now WHERE c.id = :clusterId")
+    void updateUpSinceByClusterId(@Param("clusterId") Long clusterId, @Param("now") long now);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.creationFinished = :now, c.upSince = :now WHERE c.id = :clusterId")
+    void updateCreationFinishedAndUpSinceByClusterId(@Param("clusterId") Long clusterId, @Param("now") long now);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.databusCredential = :databusCredential WHERE c.id = :clusterId")
+    void updateDatabusCredentialByClusterId(@Param("clusterId") Long clusterId, @Param("databusCredential") String databusCredentialJsonString);
+
+    @Modifying
+    @Query(value = "INSERT INTO cluster_rdsconfig(clusters_id, rdsconfigs_id) VALUES (:clusterId, :rdsConfigId)", nativeQuery = true)
+    void addRdsConfigToCluster(@Param("clusterId") Long clusterId, @Param("rdsConfigId") Long rdsConfigId);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.fqdn = :fqdn WHERE c.id = :clusterId")
+    void updateFqdnByClusterId(@Param("clusterId") Long clusterId, @Param("fqdn") String fqdn);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.clusterManagerIp = :clusterManagerIp WHERE c.id = :clusterId")
+    void updateClusterManagerIp(@Param("clusterId") Long clusterId, @Param("clusterManagerIp") String clusterManagerIp);
 }

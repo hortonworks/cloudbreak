@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -67,12 +68,11 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -82,6 +82,10 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -129,20 +133,20 @@ public class StackToCloudStackConverter {
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
 
-    public CloudStack convert(Stack stack) {
+    public CloudStack convert(StackDtoDelegate stack) {
         return convert(stack, Collections.emptySet());
     }
 
-    public CloudStack convertForDownscale(Stack stack, Set<String> deleteRequestedInstances) {
+    public CloudStack convertForDownscale(StackDtoDelegate stack, Set<String> deleteRequestedInstances) {
         return convert(stack, deleteRequestedInstances);
     }
 
-    public CloudStack convert(Stack stack, Collection<String> deleteRequestedInstances) {
+    public CloudStack convert(StackDtoDelegate stack, Collection<String> deleteRequestedInstances) {
         Image image = null;
         String environmentCrn = stack.getEnvironmentCrn();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(environmentCrn);
         List<Group> instanceGroups = buildInstanceGroups(stack,
-                stack.getInstanceGroupsAsList(),
+                stack.getInstanceGroupDtos(),
                 stack.getStackAuthentication(),
                 deleteRequestedInstances,
                 environment);
@@ -151,7 +155,7 @@ public class StackToCloudStackConverter {
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.debug(e.getMessage());
         }
-        Network network = buildNetwork(stack);
+        Network network = buildNetwork(stack.getNetwork());
         StackTemplate stackTemplate = componentConfigProviderService.getStackTemplate(stack.getId());
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
         SpiFileSystem cloudFileSystem = buildSpiFileSystem(stack);
@@ -161,15 +165,15 @@ public class StackToCloudStackConverter {
             template = stackTemplate.getTemplate();
         }
         Map<String, String> parameters = buildCloudStackParameters(stack, environment);
-        List<CloudLoadBalancer> cloudLoadBalancers = buildLoadBalancers(stack, instanceGroups);
+        List<CloudLoadBalancer> cloudLoadBalancers = buildLoadBalancers(stack.getStack(), instanceGroups);
 
-        return new CloudStack(instanceGroups, network, image, parameters, getUserDefinedTags(stack), template,
+        return new CloudStack(instanceGroups, network, image, parameters, getUserDefinedTags(stack.getStack()), template,
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
                 cloudFileSystem, cloudLoadBalancers, additionalCloudFileSystem);
     }
 
-    public List<CloudInstance> buildInstances(Stack stack, DetailedEnvironmentResponse environment) {
-        List<Group> groups = buildInstanceGroups(stack, stack.getInstanceGroupsAsList(), stack.getStackAuthentication(),
+    public List<CloudInstance> buildInstances(StackDtoDelegate stack, DetailedEnvironmentResponse environment) {
+        List<Group> groups = buildInstanceGroups(stack, stack.getInstanceGroupDtos(), stack.getStackAuthentication(),
                 Collections.emptySet(), environment);
         List<CloudInstance> cloudInstances = new ArrayList<>();
         for (Group group : groups) {
@@ -178,11 +182,11 @@ public class StackToCloudStackConverter {
         return cloudInstances;
     }
 
-    public List<CloudInstance> buildInstances(Stack stack) {
+    public List<CloudInstance> buildInstances(StackDtoDelegate stack) {
         return buildInstances(stack, environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn()));
     }
 
-    public CloudInstance buildInstance(InstanceMetaData instanceMetaData, InstanceGroup instanceGroup,
+    public CloudInstance buildInstance(InstanceMetadataView instanceMetaData, InstanceGroupView instanceGroup,
             StackAuthentication stackAuthentication, Long privateId, InstanceStatus status, DetailedEnvironmentResponse environment) {
         return buildInstance(instanceMetaData,
                 instanceGroup,
@@ -193,18 +197,17 @@ public class StackToCloudStackConverter {
                 NetworkScaleDetails.getEmpty());
     }
 
-    public CloudInstance buildInstance(InstanceMetaData instanceMetaData, InstanceGroup instanceGroup, StackAuthentication stackAuthentication, Long privateId,
-            InstanceStatus status, DetailedEnvironmentResponse environment, NetworkScaleDetails networkScaleDetails) {
-        LOGGER.debug("Instance metadata is {}", instanceMetaData);
+    public CloudInstance buildInstance(InstanceMetadataView instanceMetaData, InstanceGroupView instanceGroup, StackAuthentication stackAuthentication,
+            Long privateId, InstanceStatus status, DetailedEnvironmentResponse environment, NetworkScaleDetails networkScaleDetails) {
+        LOGGER.trace("Instance metadata is {}", instanceMetaData == null ? null : instanceMetaData.getInstanceId());
         String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
         String instanceImageId = instanceMetaData == null ? null : instanceMetadataToImageIdConverter.convert(instanceMetaData);
         String name = instanceGroup.getGroupName();
-        Stack stack = instanceGroup.getStack();
         InstanceTemplate instanceTemplate = buildInstanceTemplate(instanceGroup.getTemplate(), name, privateId, status, instanceImageId);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
 
         Map<String, Object> parameters = buildCloudInstanceParameters(
-                environment, instanceMetaData, CloudPlatform.valueOf(stack.getCloudPlatform()));
+                environment, instanceMetaData, CloudPlatform.valueOf(instanceGroup.getTemplate().getCloudPlatform()));
         return new CloudInstance(
                 id,
                 instanceTemplate,
@@ -259,7 +262,7 @@ public class StackToCloudStackConverter {
         return cloudVolumeUsageType;
     }
 
-    private Map<String, String> getUserDefinedTags(Stack stack) {
+    private Map<String, String> getUserDefinedTags(StackView stack) {
         Map<String, String> result = Maps.newHashMap();
         try {
             if (stack.getTags() != null) {
@@ -279,19 +282,20 @@ public class StackToCloudStackConverter {
         return result;
     }
 
-    private List<Group> buildInstanceGroups(Stack stack, List<InstanceGroup> instanceGroups,
+    private List<Group> buildInstanceGroups(StackDtoDelegate stack, List<InstanceGroupDto> instanceGroups,
             StackAuthentication stackAuthentication, Collection<String> deleteRequests, DetailedEnvironmentResponse environment) {
         // sort by name to avoid shuffling the different instance groups
-        Collections.sort(instanceGroups);
+        instanceGroups.sort(Comparator.comparing(o -> o.getInstanceGroup().getGroupName()));
         List<Group> groups = new ArrayList<>();
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         if (cluster != null) {
-            String blueprintText = cluster.getBlueprint() != null ? cluster.getBlueprint().getBlueprintText() : cluster.getExtendedBlueprintText();
+            String blueprintText = stack.getBlueprint() != null ? stack.getBlueprint().getBlueprintText() : cluster.getExtendedBlueprintText();
             if (blueprintText != null) {
                 CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
                 Map<String, Set<String>> componentsByHostGroup = cmTemplateProcessor.getComponentsByHostGroup();
-                Map<String, String> userDefinedTags = getUserDefinedTags(stack);
-                for (InstanceGroup instanceGroup : instanceGroups) {
+                Map<String, String> userDefinedTags = getUserDefinedTags(stack.getStack());
+                for (InstanceGroupDto instanceGroupDto : instanceGroups) {
+                    InstanceGroupView instanceGroup = instanceGroupDto.getInstanceGroup();
                     if (instanceGroup.getTemplate() != null) {
                         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
                         Optional<CloudFileSystemView> cloudFileSystemView
@@ -299,16 +303,16 @@ public class StackToCloudStackConverter {
                         groups.add(
                                 new Group(instanceGroup.getGroupName(),
                                         instanceGroup.getInstanceGroupType(),
-                                        buildCloudInstances(environment, stackAuthentication, deleteRequests, instanceGroup),
+                                        buildCloudInstances(environment, stackAuthentication, deleteRequests, instanceGroupDto),
                                         buildSecurity(instanceGroup),
-                                        buildCloudInstanceSkeleton(environment, stackAuthentication, instanceGroup),
+                                        buildCloudInstanceSkeleton(environment, stackAuthentication, instanceGroupDto),
                                         getFields(instanceGroup),
                                         instanceAuthentication,
                                         instanceAuthentication.getLoginUserName(),
                                         instanceAuthentication.getPublicKey(),
                                         getRootVolumeSize(instanceGroup),
                                         cloudFileSystemView,
-                                        buildDeletedCloudInstances(environment, stackAuthentication, instanceGroup),
+                                        buildDeletedCloudInstances(environment, stackAuthentication, deleteRequests, instanceGroupDto),
                                         buildGroupNetwork(stack.getNetwork(), instanceGroup),
                                         userDefinedTags)
                         );
@@ -321,14 +325,14 @@ public class StackToCloudStackConverter {
         return groups;
     }
 
-    private List<CloudLoadBalancer> buildLoadBalancers(Stack stack, List<Group> instanceGroups) {
+    private List<CloudLoadBalancer> buildLoadBalancers(StackView stack, List<Group> instanceGroups) {
         List<CloudLoadBalancer> cloudLoadBalancers = new ArrayList<>();
         for (LoadBalancer loadBalancer : loadBalancerPersistenceService.findByStackId(stack.getId())) {
             CloudLoadBalancer cloudLoadBalancer = new CloudLoadBalancer(loadBalancer.getType(), loadBalancer.getSku());
             for (TargetGroup targetGroup : targetGroupPersistenceService.findByLoadBalancerId(loadBalancer.getId())) {
                 Set<TargetGroupPortPair> portPairs = loadBalancerConfigService.getTargetGroupPortPairs(targetGroup);
                 Set<String> targetInstanceGroupName = instanceGroupService.findByTargetGroupId(targetGroup.getId()).stream()
-                        .map(InstanceGroup::getGroupName)
+                        .map(InstanceGroupView::getGroupName)
                         .collect(Collectors.toSet());
 
                 for (TargetGroupPortPair portPair : portPairs) {
@@ -352,27 +356,35 @@ public class StackToCloudStackConverter {
     private List<CloudInstance> buildCloudInstances(DetailedEnvironmentResponse environment,
             StackAuthentication stackAuthentication,
             Collection<String> deleteRequests,
-            InstanceGroup instanceGroup) {
+            InstanceGroupDto instanceGroupDto) {
         List<CloudInstance> instances = new ArrayList<>();
         // existing instances
-        for (InstanceMetaData metaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+        InstanceGroupView instanceGroupView = instanceGroupDto.getInstanceGroup();
+        LOGGER.debug("There are {} instances will be added for {}", instanceGroupDto.getNotDeletedInstanceMetaData().size(),
+                instanceGroupView.getGroupName());
+        for (InstanceMetadataView metaData : instanceGroupDto.getNotDeletedInstanceMetaData()) {
             InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-            instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), status, environment));
+            instances.add(buildInstance(metaData, instanceGroupView, stackAuthentication, metaData.getPrivateId(), status, environment));
         }
         return instances;
     }
 
     private List<CloudInstance> buildDeletedCloudInstances(DetailedEnvironmentResponse environment,
             StackAuthentication stackAuthentication,
-            InstanceGroup instanceGroup) {
+            Collection<String> deletedRequests,
+            InstanceGroupDto instanceGroupDto) {
         List<CloudInstance> instances = new ArrayList<>();
-        for (InstanceMetaData metaData : instanceGroup.getDeletedInstanceMetaDataSet()) {
-            instances.add(buildInstance(metaData, instanceGroup, stackAuthentication, metaData.getPrivateId(), TERMINATED, environment));
+        InstanceGroupView instanceGroupView = instanceGroupDto.getInstanceGroup();
+        // the original set contained the terminated instances, but it can be several thousands and more.
+        // We need to investigate how can exist cloud watches for the properly terminated instances (because we use this value only for cloud watch deletion)
+        LOGGER.debug("There are {} instances will be added for {}", instanceGroupDto.getDeletedInstanceMetaData().size(), instanceGroupView.getGroupName());
+        for (InstanceMetadataView metaData : instanceGroupDto.getDeletedInstanceMetaData()) {
+            instances.add(buildInstance(metaData, instanceGroupView, stackAuthentication, metaData.getPrivateId(), TERMINATED, environment));
         }
         return instances;
     }
 
-    private Security buildSecurity(InstanceGroup ig) {
+    private Security buildSecurity(InstanceGroupView ig) {
         List<SecurityRule> rules = new ArrayList<>();
         if (ig.getSecurityGroup() == null) {
             return new Security(rules, Collections.emptyList());
@@ -397,21 +409,22 @@ public class StackToCloudStackConverter {
     }
 
     private CloudInstance buildCloudInstanceSkeleton(DetailedEnvironmentResponse environment, StackAuthentication stackAuthentication,
-            InstanceGroup instanceGroup) {
+            InstanceGroupDto instanceGroup) {
         CloudInstance skeleton = null;
         if (instanceGroup.getNodeCount() == 0) {
-            skeleton = buildInstance(null, instanceGroup, stackAuthentication, 0L,
+            LOGGER.debug("A skeleton instances will be generated for group of {}", instanceGroup.getInstanceGroup().getGroupName());
+            skeleton = buildInstance(null, instanceGroup.getInstanceGroup(), stackAuthentication, 0L,
                     CREATE_REQUESTED, environment);
         }
         return skeleton;
     }
 
-    private Map<String, Object> getFields(InstanceGroup instanceGroup) {
+    private Map<String, Object> getFields(InstanceGroupView instanceGroup) {
         Json attributes = instanceGroup.getAttributes();
         return attributes == null ? Collections.emptyMap() : attributes.getMap();
     }
 
-    private Integer getRootVolumeSize(InstanceGroup instanceGroup) {
+    private Integer getRootVolumeSize(InstanceGroupView instanceGroup) {
         Template template = instanceGroup.getTemplate();
         Integer rootVolumeSize = template.getRootVolumeSize();
         if (Objects.isNull(rootVolumeSize)) {
@@ -420,7 +433,7 @@ public class StackToCloudStackConverter {
         return rootVolumeSize;
     }
 
-    private SpiFileSystem buildSpiFileSystem(Stack stack) {
+    private SpiFileSystem buildSpiFileSystem(StackDtoDelegate stack) {
         SpiFileSystem spiFileSystem = null;
         if (stack.getCluster() != null) {
             FileSystem fileSystem = stack.getCluster().getFileSystem();
@@ -431,7 +444,7 @@ public class StackToCloudStackConverter {
         return spiFileSystem;
     }
 
-    private SpiFileSystem buildAdditionalSpiFileSystem(Stack stack) {
+    private SpiFileSystem buildAdditionalSpiFileSystem(StackDtoDelegate stack) {
         SpiFileSystem spiFileSystem = null;
         if (stack.getCluster() != null) {
             FileSystem fileSystem = stack.getCluster().getAdditionalFileSystem();
@@ -442,7 +455,7 @@ public class StackToCloudStackConverter {
         return spiFileSystem;
     }
 
-    public GroupNetwork buildGroupNetwork(com.sequenceiq.cloudbreak.domain.Network stackNetwork, InstanceGroup instanceGroup) {
+    public GroupNetwork buildGroupNetwork(com.sequenceiq.cloudbreak.domain.Network stackNetwork, InstanceGroupView instanceGroup) {
         GroupNetwork groupNetwork = null;
         InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
         if (instanceGroupNetwork != null) {
@@ -468,8 +481,7 @@ public class StackToCloudStackConverter {
         return groupNetwork;
     }
 
-    public Network buildNetwork(Stack stack) {
-        com.sequenceiq.cloudbreak.domain.Network stackNetwork = stack.getNetwork();
+    public Network buildNetwork(com.sequenceiq.cloudbreak.domain.Network stackNetwork) {
         Network result = null;
         if (stackNetwork != null) {
             Subnet subnet = new Subnet(stackNetwork.getSubnetCIDR());
@@ -484,7 +496,7 @@ public class StackToCloudStackConverter {
         return stackNetwork == null ? OutboundInternetTraffic.ENABLED : stackNetwork.getOutboundInternetTraffic();
     }
 
-    private InstanceStatus getInstanceStatus(InstanceMetaData metaData, Collection<String> deleteRequests) {
+    private InstanceStatus getInstanceStatus(InstanceMetadataView metaData, Collection<String> deleteRequests) {
         InstanceStatus status;
         if (deleteRequests.contains(metaData.getInstanceId())) {
             status = DELETE_REQUESTED;
@@ -496,13 +508,13 @@ public class StackToCloudStackConverter {
         return status;
     }
 
-    public Map<String, Object> buildCloudInstanceParameters(DetailedEnvironmentResponse environment, InstanceMetaData instanceMetaData,
+    public Map<String, Object> buildCloudInstanceParameters(DetailedEnvironmentResponse environment, InstanceMetadataView instanceMetaData,
             CloudPlatform platform) {
         Map<String, Object> params = new HashMap<>();
-        putIfPresent(params, CloudInstance.DISCOVERY_NAME, getIfNotNull(instanceMetaData, InstanceMetaData::getShortHostname));
-        putIfPresent(params, SUBNET_ID, getIfNotNull(instanceMetaData, InstanceMetaData::getSubnetId));
-        putIfPresent(params, CloudInstance.INSTANCE_NAME, getIfNotNull(instanceMetaData, InstanceMetaData::getInstanceName));
-        putIfPresent(params, CloudInstance.FQDN, getIfNotNull(instanceMetaData, InstanceMetaData::getDiscoveryFQDN));
+        putIfPresent(params, CloudInstance.DISCOVERY_NAME, getIfNotNull(instanceMetaData, InstanceMetadataView::getShortHostname));
+        putIfPresent(params, SUBNET_ID, getIfNotNull(instanceMetaData, InstanceMetadataView::getSubnetId));
+        putIfPresent(params, CloudInstance.INSTANCE_NAME, getIfNotNull(instanceMetaData, InstanceMetadataView::getInstanceName));
+        putIfPresent(params, CloudInstance.FQDN, getIfNotNull(instanceMetaData, InstanceMetadataView::getDiscoveryFQDN));
         Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environment, platform);
         if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {
             AzureResourceGroup resourceGroup = resourceGroupOptional.get();
@@ -514,7 +526,7 @@ public class StackToCloudStackConverter {
         return params;
     }
 
-    private Map<String, String> buildCloudStackParameters(Stack stack, DetailedEnvironmentResponse environment) {
+    private Map<String, String> buildCloudStackParameters(StackDtoDelegate stack, DetailedEnvironmentResponse environment) {
         Map<String, String> params = new HashMap<>(stack.getParameters());
         Optional<AzureResourceGroup> resourceGroupOptional = getAzureResourceGroup(environment, CloudPlatform.valueOf(stack.getCloudPlatform()));
         if (resourceGroupOptional.isPresent() && !ResourceGroupUsage.MULTIPLE.equals(resourceGroupOptional.get().getResourceGroupUsage())) {

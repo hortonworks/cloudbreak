@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 @Component
@@ -28,7 +28,7 @@ public class CloudFileSystemViewProvider {
     private InstanceGroupService instanceGroupService;
 
     public Optional<CloudFileSystemView> getCloudFileSystemView(FileSystem fileSystem,
-            Map<String, Set<String>> componentsByHostGroup, InstanceGroup instanceGroup) {
+            Map<String, Set<String>> componentsByHostGroup, InstanceGroupView instanceGroup) {
         Optional<CloudFileSystemView> fileSystemView;
         if (fileSystem != null) {
             SpiFileSystem spiFileSystem = fileSystemConverter.fileSystemToSpi(fileSystem);

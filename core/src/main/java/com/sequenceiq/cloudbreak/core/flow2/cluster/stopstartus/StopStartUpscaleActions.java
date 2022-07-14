@@ -9,7 +9,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStart
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_FINALIZED_EVENT;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,16 +46,18 @@ import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -72,6 +73,9 @@ public class StopStartUpscaleActions {
 
     @Inject
     private CloudInstanceIdToInstanceMetaDataConverter cloudInstanceIdToInstanceMetaDataConverter;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Bean(name = "STOPSTART_UPSCALE_START_INSTANCE_STATE")
     public Action<?, ?> startInstancesAction() {
@@ -91,23 +95,23 @@ public class StopStartUpscaleActions {
 
             @Override
             protected Selectable createRequest(StopStartUpscaleContext context) {
-                Stack stack = context.getStack();
-                List<InstanceMetaData> instanceMetaDataList = stack.getNotDeletedAndNotZombieInstanceMetaDataList();
+                StackDtoDelegate stack = context.getStack();
 
-                List<InstanceMetaData> instanceMetaDataForHg = instanceMetaDataList.stream().filter(
-                        x -> x.getInstanceGroupName().equals(context.getHostGroupName())).collect(Collectors.toList());
+                List<InstanceMetadataView> instanceMetaDataList = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
 
-                List<InstanceMetaData> stoppedInstancesInHg = instanceMetaDataForHg.stream()
+                List<InstanceMetadataView> instanceMetaDataForHg = instanceMetaDataList.stream()
+                        .filter(x -> x.getInstanceGroupName().equals(context.getHostGroupName()))
+                        .collect(Collectors.toList());
+
+                List<InstanceMetadataView> stoppedInstancesInHg = instanceMetaDataForHg.stream()
                         .filter(s -> s.getInstanceStatus() == STOPPED)
                         .collect(Collectors.toList());
 
                 LOGGER.info("NotDeletedInstanceMetadata totalCount={}. count for hostGroup: {}={}, stoppedInstancesInHgCount={}",
                         instanceMetaDataList.size(), context.getHostGroupName(), instanceMetaDataForHg.size(), stoppedInstancesInHg.size());
 
-                List<CloudInstance> stoppedCloudInstancesForHg = instanceMetaDataToCloudInstanceConverter.convert(stoppedInstancesInHg,
-                        stack.getEnvironmentCrn(), stack.getStackAuthentication());
-                List<CloudInstance> allCloudInstancesForHg = instanceMetaDataToCloudInstanceConverter.convert(instanceMetaDataForHg,
-                        stack.getEnvironmentCrn(), stack.getStackAuthentication());
+                List<CloudInstance> stoppedCloudInstancesForHg = instanceMetaDataToCloudInstanceConverter.convert(stoppedInstancesInHg, stack.getStack());
+                List<CloudInstance> allCloudInstancesForHg = instanceMetaDataToCloudInstanceConverter.convert(instanceMetaDataList, stack.getStack());
 
                 return new StopStartUpscaleStartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
                         context.getHostGroupName(), stoppedCloudInstancesForHg, allCloudInstancesForHg, Collections.emptyList(), context.getAdjustment());
@@ -129,17 +133,19 @@ public class StopStartUpscaleActions {
                         .filter(x -> x.getStatus() == InstanceStatus.STARTED)
                         .map(x -> x.getCloudInstance().getInstanceId())
                         .collect(Collectors.toUnmodifiableSet());
-                List<InstanceMetaData> startedInstancesMetaData = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
-                        context.getStack(), context.getHostGroupName(), cloudInstanceIdsStarted);
-                clusterUpscaleFlowService.instancesStarted(context.getStack().getId(), startedInstancesMetaData);
+                StackDtoDelegate stack = context.getStack();
+                List<InstanceMetadataView> allInstanceMetadata = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
+                List<InstanceMetadataView> startedInstancesMetaData = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
+                        allInstanceMetadata, context.getHostGroupName(), cloudInstanceIdsStarted);
+                clusterUpscaleFlowService.instancesStarted(stack.getId(), startedInstancesMetaData);
 
                 handleInstanceUnsuccessfulStart(context, cloudVmInstanceStatusList);
 
                 // This list is currently empty. It could be populated later in another flow-step by querying CM to get service health.
                 // Meant to be a mechanism which detects cloud instances which are RUNNING, but not being utilized (likely due to previous failures)
                 List<CloudInstance> instancesWithServicesNotRunning = payload.getStartInstanceRequest().getStartedInstancesWithServicesNotRunning();
-                List<InstanceMetaData> metaDataWithServicesNotRunning = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
-                        context.getStack(),
+                List<InstanceMetadataView> metaDataWithServicesNotRunning = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
+                        allInstanceMetadata,
                         context.getHostGroupName(),
                         instancesWithServicesNotRunning.stream().map(i -> i.getInstanceId()).collect(Collectors.toUnmodifiableSet()));
 
@@ -151,13 +157,13 @@ public class StopStartUpscaleActions {
                 int toCommissionNodeCount = metaDataWithServicesNotRunning.size() + startedInstancesMetaData.size();
                 if (toCommissionNodeCount < context.getAdjustment()) {
                     LOGGER.warn("Not enough nodes found to commission. DesiredCount={}, availableCount={}", context.getAdjustment(), toCommissionNodeCount);
-                    clusterUpscaleFlowService.warnNotEnoughInstances(context.getStack().getId(), context.getHostGroupName(),
+                    clusterUpscaleFlowService.warnNotEnoughInstances(stack.getId(), context.getHostGroupName(),
                             context.getAdjustment(), toCommissionNodeCount);
                 }
-                clusterUpscaleFlowService.upscaleCommissioningNodes(context.getStack().getId(), context.getHostGroupName(),
+                clusterUpscaleFlowService.upscaleCommissioningNodes(stack.getId(), context.getHostGroupName(),
                         startedInstancesMetaData, metaDataWithServicesNotRunning);
 
-                StopStartUpscaleCommissionViaCMRequest commissionRequest = new StopStartUpscaleCommissionViaCMRequest(context.getStack().getId(),
+                StopStartUpscaleCommissionViaCMRequest commissionRequest = new StopStartUpscaleCommissionViaCMRequest(stack.getId(),
                         context.getHostGroupName(), startedInstancesMetaData, metaDataWithServicesNotRunning);
                 sendEvent(context, commissionRequest);
 
@@ -194,13 +200,14 @@ public class StopStartUpscaleActions {
                 LOGGER.debug("STOPSTART_UPSCALE_FINALIZE_STATE - finalizing upscale via start");
 
                 logInstancesNotCommissioned(context, payload.getNotRecommissionedFqdns());
-
-                List<InstanceMetaData> notDeletedInstanceMetaDataList = context.getStack().getNotDeletedAndNotZombieInstanceMetaDataList();
-                List<InstanceMetaData> instancesCommissioned = notDeletedInstanceMetaDataList.stream()
+                StackDtoDelegate stack = context.getStack();
+                List<InstanceMetadataView> notDeletedInstanceMetaDataList = instanceMetaDataService
+                        .getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
+                List<InstanceMetadataView> instancesCommissioned = notDeletedInstanceMetaDataList.stream()
                         .filter(i -> payload.getSuccessfullyCommissionedFqdns().contains(i.getDiscoveryFQDN()))
                         .collect(Collectors.toList());
 
-                clusterUpscaleFlowService.clusterUpscaleFinished(context.getStackView(), context.getHostGroupName(),
+                clusterUpscaleFlowService.clusterUpscaleFinished(stack, context.getHostGroupName(),
                         instancesCommissioned, DetailedStackStatus.AVAILABLE);
 
                 sendEvent(context, STOPSTART_UPSCALE_FINALIZED_EVENT.event(), payload);
@@ -260,13 +267,13 @@ public class StopStartUpscaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Handling a failure from Upscale via Instance Start");
-                clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackView().getId(),  payload.getException());
+                clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackId(),  payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StopStartUpscaleEvent.STOPSTART_UPSCALE_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(StopStartUpscaleEvent.STOPSTART_UPSCALE_FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }
@@ -279,10 +286,7 @@ public class StopStartUpscaleActions {
         static final String ADJUSTMENT = "ADJUSTMENT";
 
         @Inject
-        private StackService stackService;
-
-        @Inject
-        private ResourceService resourceService;
+        private StackDtoService stackDtoService;
 
         @Inject
         private StackUtil stackUtil;
@@ -303,9 +307,9 @@ public class StopStartUpscaleActions {
         protected StopStartUpscaleContext createFlowContext(FlowParameters flowParameters, StateContext<StopStartUpscaleState,
                 StopStartUpscaleEvent> stateContext, P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
-            Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
-            stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
-            MDCBuilder.buildMdcContext(stack.getCluster());
+            StackDto stackDto = stackDtoService.getById(payload.getResourceId());
+            StackView stack = stackDto.getStack();
+            MDCBuilder.buildMdcContext(stackDto.getCluster());
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
 
             CloudContext cloudContext = CloudContext.Builder.builder()
@@ -315,14 +319,14 @@ public class StopStartUpscaleActions {
                     .withPlatform(stack.getCloudPlatform())
                     .withVariant(stack.getPlatformVariant())
                     .withLocation(location)
-                    .withWorkspaceId(stack.getWorkspace().getId())
+                    .withWorkspaceId(stack.getWorkspaceId())
                     .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
-                    .withTenantId(stack.getTenant().getId())
+                    .withTenantId(stackDto.getTenant().getId())
                     .build();
-            CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
-            CloudStack cloudStack = cloudStackConverter.convert(stack);
+            CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
+            CloudStack cloudStack = cloudStackConverter.convert(stackDto);
 
-            return new StopStartUpscaleContext(flowParameters, stack, stackService.getViewByIdWithoutAuth(stack.getId()),
+            return new StopStartUpscaleContext(flowParameters, stackDto,
                     cloudContext, cloudCredential, cloudStack,
                     getHostgroupName(variables), getAdjustment(variables),
                     ClusterManagerType.CLOUDERA_MANAGER);

@@ -6,6 +6,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,18 +39,22 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.ResourceType;
 
 class StackUtilTest {
+
+    private static final String ENV_CRN = "envCrn";
 
     @Mock
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -104,14 +110,12 @@ class StackUtilTest {
 
     @Test
     void testGetCloudCredential() {
-        Stack stack = new Stack();
-        stack.setEnvironmentCrn("envCrn");
         CloudCredential cloudCredential = new CloudCredential("123", "CloudCred", "account");
 
         when(credentialClientService.getByEnvironmentCrn(anyString())).thenReturn(Credential.builder().build());
         when(credentialToCloudCredentialConverter.convert(any(Credential.class))).thenReturn(cloudCredential);
 
-        CloudCredential result = stackUtil.getCloudCredential(stack);
+        CloudCredential result = stackUtil.getCloudCredential(ENV_CRN);
         assertEquals(result.getId(), cloudCredential.getId());
         assertEquals(result.getName(), cloudCredential.getName());
     }
@@ -145,7 +149,16 @@ class StackUtilTest {
 
     @Test
     void collectAndCheckReachableNodes() throws NodesUnreachableException {
-        Stack stack = createStack();
+        StackDto stack = mock(StackDto.class);
+        InstanceMetaData instanceMetaData1 = getInstanceMetaData("node1.example.com");
+        InstanceMetaData instanceMetaData2 = getInstanceMetaData("node2.example.com");
+        instanceMetaData2.setInstanceStatus(InstanceStatus.DELETED_BY_PROVIDER);
+        InstanceMetaData instanceMetaData3 = getInstanceMetaData("node3.example.com");
+        instanceMetaData3.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+        InstanceGroup instanceGroup = getInstanceGroup();
+
+        when(stack.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(instanceGroup,
+                List.of(instanceMetaData1, instanceMetaData2, instanceMetaData3))));
         ArrayList<String> necessaryNodes = new ArrayList<>();
         necessaryNodes.add("node1.example.com");
         necessaryNodes.add("node3.example.com");
@@ -166,7 +179,7 @@ class StackUtilTest {
 
     @Test
     void collectAndCheckReachableNodesButSomeNodeMissing() {
-        Stack stack = createStack();
+        StackDto stack = mock(StackDto.class);
         ArrayList<String> necessaryNodes = new ArrayList<>();
         necessaryNodes.add("node1.example.com");
         necessaryNodes.add("node3.example.com");
@@ -184,13 +197,21 @@ class StackUtilTest {
 
     @Test
     void collectReachableNodesTest() {
-        Stack stack = createStack();
+        StackDto stackDto = mock(StackDto.class);
+        InstanceMetaData instanceMetaData1 = getInstanceMetaData("node1.example.com");
+        InstanceMetaData instanceMetaData2 = getInstanceMetaData("node2.example.com");
+        instanceMetaData2.setInstanceStatus(InstanceStatus.DELETED_BY_PROVIDER);
+        InstanceMetaData instanceMetaData3 = getInstanceMetaData("node3.example.com");
+        instanceMetaData3.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+        InstanceGroup instanceGroup = getInstanceGroup();
 
+        when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(instanceGroup,
+                List.of(instanceMetaData1, instanceMetaData2, instanceMetaData3))));
         Set<Node> nodes = new HashSet<>();
         nodes.add(new Node("1.1.1.1", "1.1.1.1", "1", "m5.xlarge", "node1.example.com", "worker"));
         when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
 
-        stackUtil.collectReachableNodes(stack);
+        stackUtil.collectReachableNodes(stackDto);
 
         verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any());
         List<String> fqdns = nodesCaptor.getValue().stream().map(Node::getHostname).collect(Collectors.toList());
@@ -201,39 +222,38 @@ class StackUtilTest {
 
     @Test
     void testCollectGatewayNodes() {
-        Stack stack = createStack();
+        StackDto stack = spy(StackDto.class);
+        InstanceGroup instanceGroup = getInstanceGroup();
+        InstanceMetaData instanceMetaData1 = getInstanceMetaData("node1.example.com");
+        instanceMetaData1.setInstanceGroup(instanceGroup);
+        InstanceMetaData instanceMetaData2 = getInstanceMetaData("node2.example.com");
+        instanceMetaData2.setInstanceStatus(InstanceStatus.DELETED_BY_PROVIDER);
+        instanceMetaData2.setInstanceGroup(instanceGroup);
+        InstanceMetaData instanceMetaData3 = getInstanceMetaData("node3.example.com");
+        instanceMetaData3.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+        instanceMetaData3.setInstanceGroup(instanceGroup);
+
+        List<InstanceMetadataView> instanceMetaDataList = List.of(instanceMetaData1, instanceMetaData2, instanceMetaData3);
+        when(stack.getInstanceGroupByInstanceGroupName(instanceGroup.getGroupName())).thenReturn(new InstanceGroupDto(instanceGroup, instanceMetaDataList));
+        when(stack.getNotDeletedInstanceMetaData()).thenReturn(instanceMetaDataList);
         Set<Node> result = stackUtil.collectGatewayNodes(stack);
         assertThat(result).hasSize(1);
         Node node = result.stream().findFirst().get();
         assertThat(node.getHostname()).isEqualTo("node3.example.com");
     }
 
-    private Stack createStack() {
-        Stack stack = new Stack();
-        Set<InstanceGroup> instanceGroupSet = new HashSet<>();
-        InstanceGroup instanceGroup = new InstanceGroup();
-        Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
+    private InstanceMetaData getInstanceMetaData(String fqdn) {
         InstanceMetaData instanceMetaData1 = new InstanceMetaData();
-        instanceMetaData1.setInstanceGroup(instanceGroup);
-        instanceMetaData1.setDiscoveryFQDN("node1.example.com");
-        InstanceMetaData instanceMetaData2 = new InstanceMetaData();
-        instanceMetaData2.setInstanceStatus(InstanceStatus.TERMINATED);
-        instanceMetaData2.setInstanceGroup(instanceGroup);
-        instanceMetaData2.setDiscoveryFQDN("node2.example.com");
-        InstanceMetaData instanceMetaData3 = new InstanceMetaData();
-        instanceMetaData3.setInstanceGroup(instanceGroup);
-        instanceMetaData3.setDiscoveryFQDN("node3.example.com");
-        instanceMetaData3.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
-        instanceMetaDataSet.add(instanceMetaData1);
-        instanceMetaDataSet.add(instanceMetaData2);
-        instanceMetaDataSet.add(instanceMetaData3);
-        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
+        instanceMetaData1.setDiscoveryFQDN(fqdn);
+        return instanceMetaData1;
+    }
+
+    private InstanceGroup getInstanceGroup() {
+        InstanceGroup instanceGroup = new InstanceGroup();
         Template template = new Template();
         template.setInstanceType("m5.xlarge");
         instanceGroup.setTemplate(template);
-        instanceGroupSet.add(instanceGroup);
-        stack.setInstanceGroups(instanceGroupSet);
-        return stack;
+        return instanceGroup;
     }
 
     private Resource getVolumeSetResource(String instanceID) {

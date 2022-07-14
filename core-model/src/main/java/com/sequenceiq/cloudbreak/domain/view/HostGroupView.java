@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
 @Table(name = "HostGroup")
+@Deprecated
 public class HostGroupView implements ProvisionEntity {
 
     @Id

@@ -16,7 +16,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -48,21 +47,22 @@ public class DasConfigProviderTest {
     @Test
     public void getServiceConfigs() {
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfig.getType()).thenReturn(DatabaseType.HIVE_DAS.toString());
+        when(rdsConfig.getType()).thenReturn(HIVE_DAS);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+
         TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
         Map<String, String> paramToVariable =
                 result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getValue));
         assertThat(paramToVariable).containsOnly(
-            new SimpleEntry<>("data_analytics_studio_database_host", HOST),
-            new SimpleEntry<>("data_analytics_studio_database_port", PORT),
-            new SimpleEntry<>("data_analytics_studio_database_name", DB_NAME),
-            new SimpleEntry<>("data_analytics_studio_database_username", USER_NAME),
-            new SimpleEntry<>("data_analytics_studio_database_password", PASSWORD));
+                new SimpleEntry<>("data_analytics_studio_database_host", HOST),
+                new SimpleEntry<>("data_analytics_studio_database_port", PORT),
+                new SimpleEntry<>("data_analytics_studio_database_name", DB_NAME),
+                new SimpleEntry<>("data_analytics_studio_database_username", USER_NAME),
+                new SimpleEntry<>("data_analytics_studio_database_password", PASSWORD));
     }
 
     @Test
@@ -72,7 +72,7 @@ public class DasConfigProviderTest {
         Map<String, String> paramToVariable =
                 result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getValue));
         assertThat(paramToVariable).containsOnly(
-            new SimpleEntry<>("data_analytics_studio_user_authentication", "KNOX_PROXY"));
+                new SimpleEntry<>("data_analytics_studio_user_authentication", "KNOX_PROXY"));
         result = underTest.getRoleConfigs(DasRoles.EVENTPROCESSOR, tpo);
         assertThat(result.isEmpty()).isTrue();
     }
@@ -94,7 +94,8 @@ public class DasConfigProviderTest {
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(true);
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfig.getType()).thenReturn(DatabaseType.HIVE_DAS.toString());
+
+        when(rdsConfig.getType()).thenReturn(HIVE_DAS);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
@@ -111,7 +112,8 @@ public class DasConfigProviderTest {
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(false);
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfig.getType()).thenReturn(DatabaseType.HIVE_DAS.toString());
+
+        when(rdsConfig.getType()).thenReturn(HIVE_DAS);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);

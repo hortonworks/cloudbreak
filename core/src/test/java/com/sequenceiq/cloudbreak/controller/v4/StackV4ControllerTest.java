@@ -32,6 +32,8 @@ class StackV4ControllerTest {
 
     private static final long WORKSPACE_ID = 1236L;
 
+    private static final String ACCOUNT_ID = "accountId";
+
     private static final String STACK_NAME = "stack name";
 
     @Mock
@@ -71,7 +73,7 @@ class StackV4ControllerTest {
 
         underTest.rangerRazEnabledInternal(WORKSPACE_ID, stackCrn, USER_CRN);
 
-        verify(stackOperationService).rangerRazEnabled(WORKSPACE_ID, stackCrn);
+        verify(stackOperationService).rangerRazEnabled(stackCrn);
     }
 
     @Test
@@ -94,8 +96,9 @@ class StackV4ControllerTest {
     public void rotateSaltPasswordInternal() {
         String stackCrn = "crn";
 
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         underTest.rotateSaltPasswordInternal(WORKSPACE_ID, stackCrn, USER_CRN);
 
-        verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(stackCrn), WORKSPACE_ID);
+        verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(stackCrn), ACCOUNT_ID);
     }
 }

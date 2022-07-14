@@ -18,6 +18,6 @@ class UserDataUpdateFailureHandlerAction extends AbstractStackFailureAction<Upda
     @Override
     protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
         LOGGER.error("UserData change failed", payload.getException());
-        sendEvent(context, new StackEvent(UPDATE_USERDATA_FAILURE_HANDLED_EVENT.event(), context.getStackView().getId()));
+        sendEvent(context, new StackEvent(UPDATE_USERDATA_FAILURE_HANDLED_EVENT.event(), context.getStackId()));
     }
 }

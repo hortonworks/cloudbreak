@@ -2,7 +2,12 @@ package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -17,10 +22,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -37,7 +43,7 @@ public class EmbeddedDatabaseServiceTest {
     @Test
     public void testIsEmbeddedDatabaseOnAttachedDiskEnabled() {
         // GIVEN
-        Stack stack = createStack(1);
+        StackDto stack = createStack(1);
         Mockito.when(cloudParameterCache.isVolumeAttachmentSupported(CLOUDPLATFORM)).thenReturn(true);
         // WHEN
         boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, null);
@@ -48,7 +54,7 @@ public class EmbeddedDatabaseServiceTest {
     @Test
     public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWhenNoDisksAttachedSupported() {
         // GIVEN
-        Stack stack = createStack(0);
+        StackDto stack = createStack(0);
         Mockito.when(cloudParameterCache.isVolumeAttachmentSupported(CLOUDPLATFORM)).thenReturn(false);
         // WHEN
         boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, null);
@@ -59,8 +65,8 @@ public class EmbeddedDatabaseServiceTest {
     @Test
     public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWhenExternalDBUsed() {
         // GIVEN
-        Stack stack = createStack(0);
-        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.NON_HA);
+        StackDto stack = createStack(0);
+        when(stack.getExternalDatabaseCreationType()).thenReturn(DatabaseAvailabilityType.NON_HA);
         // WHEN
         boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, null);
         // THEN
@@ -70,7 +76,7 @@ public class EmbeddedDatabaseServiceTest {
     @Test
     public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWhenExternalDBCrnSet() {
         // GIVEN
-        Stack stack = createStack(0);
+        StackDto stack = createStack(0);
         Cluster cluster = new Cluster();
         cluster.setDatabaseServerCrn("dbcrn");
         // WHEN
@@ -82,8 +88,8 @@ public class EmbeddedDatabaseServiceTest {
     @Test
     public void testIsEmbeddedDatabaseOnAttachedDiskEnabledWhenEmbeddedDbOnRootDisk() {
         // GIVEN
-        Stack stack = createStack(0);
-        stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.ON_ROOT_VOLUME);
+        StackDto stack = createStack(0);
+        when(stack.getExternalDatabaseCreationType()).thenReturn(DatabaseAvailabilityType.ON_ROOT_VOLUME);
         // WHEN
         boolean actualResult = underTest.isEmbeddedDatabaseOnAttachedDiskEnabled(stack, null);
         // THEN
@@ -93,10 +99,10 @@ public class EmbeddedDatabaseServiceTest {
     @Test
     public void testIsAttachedDiskForEmbeddedDatabaseCreated() {
         // GIVEN
-        Stack stack = createStack(1);
+        StackDto stack = createStack(1);
         Cluster cluster = new Cluster();
         cluster.setEmbeddedDatabaseOnAttachedDisk(true);
-        stack.setCluster(cluster);
+        when(stack.getCluster()).thenReturn(cluster);
         // WHEN
         boolean actualResult = underTest.isAttachedDiskForEmbeddedDatabaseCreated(stack);
         // THEN
@@ -106,10 +112,10 @@ public class EmbeddedDatabaseServiceTest {
     @Test
     public void testIsAttachedDiskForEmbeddedDatabaseCreatedWhenNoVolumeAttached() {
         // GIVEN
-        Stack stack = createStack(0);
+        StackDto stack = createStack(0);
         Cluster cluster = new Cluster();
         cluster.setEmbeddedDatabaseOnAttachedDisk(true);
-        stack.setCluster(cluster);
+        when(stack.getCluster()).thenReturn(cluster);
         // WHEN
         boolean actualResult = underTest.isAttachedDiskForEmbeddedDatabaseCreated(stack);
         // THEN
@@ -119,10 +125,10 @@ public class EmbeddedDatabaseServiceTest {
     @Test
     public void testIsAttachedDiskForEmbeddedDatabaseCreatedWhenNoTemplate() {
         // GIVEN
-        Stack stack = createStackWithoutTemplate();
+        StackDto stack = createStackWithoutTemplate();
         Cluster cluster = new Cluster();
         cluster.setEmbeddedDatabaseOnAttachedDisk(true);
-        stack.setCluster(cluster);
+        when(stack.getCluster()).thenReturn(cluster);
         // WHEN
         boolean actualResult = underTest.isAttachedDiskForEmbeddedDatabaseCreated(stack);
         // THEN
@@ -132,18 +138,18 @@ public class EmbeddedDatabaseServiceTest {
     @Test
     public void testIsAttachedDiskForEmbeddedDatabaseCreatedWhenDbOnAttachedDiskIsDisabled() {
         // GIVEN
-        Stack stack = createStack(1);
+        StackDto stack = createStack(1);
         Cluster cluster = new Cluster();
         cluster.setEmbeddedDatabaseOnAttachedDisk(false);
-        stack.setCluster(cluster);
+        when(stack.getCluster()).thenReturn(cluster);
         // WHEN
         boolean actualResult = underTest.isAttachedDiskForEmbeddedDatabaseCreated(stack);
         // THEN
         assertFalse(actualResult);
     }
 
-    private Stack createStack(int volumeCount) {
-        Stack stack = new Stack();
+    private StackDto createStack(int volumeCount) {
+        StackDto stack = mock(StackDto.class);
         InstanceGroup masterGroup = new InstanceGroup();
         masterGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -156,20 +162,21 @@ public class EmbeddedDatabaseServiceTest {
         volumeTemplate.setUsageType(VolumeUsageType.DATABASE);
         template.setVolumeTemplates(Set.of(volumeTemplate));
         masterGroup.setTemplate(template);
-        stack.setInstanceGroups(Set.of(masterGroup));
-        stack.setCloudPlatform(CLOUDPLATFORM);
+        lenient().when(stack.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(masterGroup, List.of(instanceMetaData))));
+        lenient().when(stack.getCloudPlatform()).thenReturn(CLOUDPLATFORM);
+        lenient().when(stack.getGatewayGroup()).thenReturn(Optional.of(masterGroup));
         return stack;
     }
 
-    private Stack createStackWithoutTemplate() {
-        Stack stack = new Stack();
+    private StackDto createStackWithoutTemplate() {
+        StackDto stack = mock(StackDto.class);
         InstanceGroup masterGroup = new InstanceGroup();
         masterGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceGroup(masterGroup);
         instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         masterGroup.setInstanceMetaData(Set.of(instanceMetaData));
-        stack.setInstanceGroups(Set.of(masterGroup));
+        lenient().when(stack.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(masterGroup, List.of(instanceMetaData))));
         return stack;
     }
 }

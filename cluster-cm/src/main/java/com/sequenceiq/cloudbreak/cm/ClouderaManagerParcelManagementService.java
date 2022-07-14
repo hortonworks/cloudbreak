@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.model.ParcelResource;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -76,7 +76,7 @@ class ClouderaManagerParcelManagementService {
         clouderaManagerResourceApi.updateConfig("Updated configurations.", apiConfigList);
     }
 
-    public void refreshParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi, Stack stack, ApiClient apiClient) {
+    public void refreshParcelRepos(ClouderaManagerResourceApi clouderaManagerResourceApi, StackDtoDelegate stack, ApiClient apiClient) {
         try {
             LOGGER.info("Refreshing parcel repos.");
             ApiCommand apiCommand = clouderaManagerResourceApi.refreshParcelRepos();
@@ -87,7 +87,7 @@ class ClouderaManagerParcelManagementService {
         }
     }
 
-    public void downloadParcels(Set<ClouderaManagerProduct> products, ParcelResourceApi parcelResourceApi, Stack stack, ApiClient apiClient)
+    public void downloadParcels(Set<ClouderaManagerProduct> products, ParcelResourceApi parcelResourceApi, StackDtoDelegate stack, ApiClient apiClient)
             throws ApiException, CloudbreakException {
         for (ClouderaManagerProduct product : products) {
             LOGGER.info("Downloading {} parcel.", product.getName());
@@ -99,7 +99,7 @@ class ClouderaManagerParcelManagementService {
         }
     }
 
-    public void distributeParcels(Set<ClouderaManagerProduct> products, ParcelResourceApi parcelResourceApi, Stack stack, ApiClient apiClient)
+    public void distributeParcels(Set<ClouderaManagerProduct> products, ParcelResourceApi parcelResourceApi, StackDtoDelegate stack, ApiClient apiClient)
             throws ApiException, CloudbreakException {
         for (ClouderaManagerProduct product : products) {
             LOGGER.info("Distributing downloaded {} parcel", product.getName());
@@ -111,7 +111,7 @@ class ClouderaManagerParcelManagementService {
         }
     }
 
-    public void activateParcels(Set<ClouderaManagerProduct> products, ParcelResourceApi parcelResourceApi, Stack stack, ApiClient apiClient)
+    public void activateParcels(Set<ClouderaManagerProduct> products, ParcelResourceApi parcelResourceApi, StackDtoDelegate stack, ApiClient apiClient)
             throws ApiException, CloudbreakException {
         for (ClouderaManagerProduct product : products) {
             String productName = product.getName();
@@ -124,7 +124,7 @@ class ClouderaManagerParcelManagementService {
         }
     }
 
-    public void checkParcelApiAvailability(Stack stack, ApiClient apiClient) throws CloudbreakException {
+    public void checkParcelApiAvailability(StackDtoDelegate stack, ApiClient apiClient) throws CloudbreakException {
         LOGGER.debug("Checking if Parcels API is available");
         ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingParcelsApiAvailable(stack, apiClient);
         handlePollingResult(pollingResult.getPollingResult(), "Cluster was terminated while waiting for Parcels API to be available",

@@ -48,7 +48,7 @@ public class ClouderaManagerSyncApiCommandIdCheckerTask
         ClouderaManagerSyncCommandPollerObject castedObj = cast(pollerObject);
         try {
             Optional<BigDecimal> commandId = syncApiCommandRetriever.getCommandId(
-                    castedObj.getCommandName(), api, castedObj.getStack());
+                    castedObj.getCommandName(), api, castedObj.getStack().getStack());
             if (commandId.isPresent() && !commandId.get().equals(pollerObject.getId())) {
                 LOGGER.debug("Found a new latest command ID for {} command: {}", castedObj.getCommandName(), commandId);
                 result = true;

@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
@@ -45,7 +45,7 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
 
     @Override
     protected void doExecute(StackTerminationContext context, TerminationEvent payload, Map<Object, Object> variables) {
-        Stack stack = context.getStack();
+        StackDtoDelegate stack = context.getStack();
         if (stack == null || StringUtils.isEmpty(stack.getEnvironmentCrn())) {
             LOGGER.info("Could not trigger stack event on null, {}", payload);
             String statusReason = "Stack or environment not found.";
@@ -74,9 +74,9 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
         }
     }
 
-    private void sendEvent(StackTerminationContext context, TerminationEvent payload, Stack stack) {
+    private void sendEvent(StackTerminationContext context, TerminationEvent payload, StackDtoDelegate stack) {
         boolean recovery = payload.getTerminationType().isRecovery();
-        LOGGER.debug("Assembling {} stack event for stack: {} and triggering event: {}", recovery ? "recovery" : "terminate", stack, payload);
+        LOGGER.debug("Assembling {} stack event for stack: {} and triggering event: {}", recovery ? "recovery" : "terminate", stack.getName(), payload);
         sendEvent(context);
     }
 

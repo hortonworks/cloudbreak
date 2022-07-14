@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventTyp
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.NOTIFICATION;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
@@ -17,9 +19,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.converter.BlueprintToBlueprintDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.converter.ClusterToClusterDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.converter.StackToStackDetailsConverter;
@@ -33,6 +36,9 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredFlowEventFactory;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.GatewayView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
@@ -42,7 +48,7 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseLegacyStructuredFlowEventFactory.class);
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ClusterToClusterDetailsConverter clusterToClusterDetailsConverter;
@@ -69,22 +75,25 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
 
     @Override
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
-        Stack stack = stackService.getByIdWithTransaction(stackId);
+        StackView stack = stackDtoService.getStackViewById(stackId);
+        ClusterView cluster = stackDtoService.getClusterViewByStackId(stackId);
+        List<InstanceGroupDto> instanceGroupDtos = stackDtoService.getInstanceMetadataByInstanceGroup(stackId);
         String resourceType = (stack.getType() == null || stack.getType().equals(StackType.WORKLOAD))
                 ? CloudbreakEventService.DATAHUB_RESOURCE_TYPE
                 : CloudbreakEventService.DATALAKE_RESOURCE_TYPE;
         OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), FLOW, resourceType, stackId, stack.getName(),
-                nodeConfig.getId(), cbVersion, stack.getWorkspace().getId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(),
-                stack.getTenant().getName(), stack.getResourceCrn(), stack.getCreator().getUserCrn(), stack.getEnvironmentCrn(), null);
+                nodeConfig.getId(), cbVersion, stack.getWorkspaceId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(),
+                stack.getTenantName(), stack.getResourceCrn(), stack.getCreator().getUserCrn(), stack.getEnvironmentCrn(), null);
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
         if (detailed) {
-            stackDetails = stackToStackDetailsConverter.convert(stack);
-            Cluster cluster = stack.getCluster();
+            stackDetails = stackToStackDetailsConverter.convert(stack, cluster, instanceGroupDtos);
             if (cluster != null) {
-                clusterDetails = clusterToClusterDetailsConverter.convert(cluster);
-                blueprintDetails = getIfNotNull(cluster.getBlueprint(), blueprintToBlueprintDetailsConverter::convert);
+                GatewayView gateway = stackDtoService.getGatewayView(cluster.getId());
+                Blueprint blueprint = stackDtoService.getBlueprint(cluster.getId());
+                clusterDetails = clusterToClusterDetailsConverter.convert(cluster, stack, gateway);
+                blueprintDetails = getIfNotNull(blueprint, blueprintToBlueprintDetailsConverter::convert);
             }
         }
         StructuredFlowEvent event = new StructuredFlowEvent(operationDetails, flowDetails, stackDetails, clusterDetails, blueprintDetails);
@@ -96,11 +105,12 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
 
     @Override
     public StructuredNotificationEvent createStructuredNotificationEvent(Long stackId, String notificationType, String message, String instanceGroupName) {
-        Stack stack = stackService.getByIdWithTransaction(stackId);
-        return createStructuredNotificationEvent(stack, notificationType, message, instanceGroupName);
+        StackDto stackDto = stackDtoService.getById(stackId);
+        return createStructuredNotificationEvent(stackDto, notificationType, message, instanceGroupName);
     }
 
-    public StructuredNotificationEvent createStructuredNotificationEvent(Stack stack, String notificationType, String message, String instanceGroupName) {
+    public StructuredNotificationEvent createStructuredNotificationEvent(StackDtoDelegate stack, String notificationType, String message,
+            String instanceGroupName) {
         Long stackId = stack.getId();
         NotificationDetails notificationDetails = new NotificationDetails();
         notificationDetails.setNotificationType(notificationType);
@@ -112,19 +122,19 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
         String userId = stack.getCreator().getUserId();
 
         try {
-            notificationDetails.setCloud(stack.cloudPlatform());
+            notificationDetails.setCloud(stack.getCloudPlatform());
             notificationDetails.setRegion(stack.getRegion());
             notificationDetails.setAvailabiltyZone(stack.getAvailabilityZone());
             notificationDetails.setStackName(stack.getDisplayName());
             notificationDetails.setStackStatus(stack.getStatus().name());
-            notificationDetails.setNodeCount(stack.getNotDeletedInstanceMetaDataSet().size());
-            Cluster cluster = stack.getCluster();
+            notificationDetails.setNodeCount(stack.getNotDeletedInstanceMetaData().size());
+            ClusterView cluster = stack.getCluster();
             notificationDetails.setInstanceGroup(instanceGroupName);
             if (cluster != null) {
                 notificationDetails.setClusterId(cluster.getId());
                 notificationDetails.setClusterName(cluster.getName());
                 notificationDetails.setClusterStatus(stack.getStatus().name());
-                Blueprint blueprint = cluster.getBlueprint();
+                Blueprint blueprint = stack.getBlueprint();
                 if (blueprint != null) {
                     notificationDetails.setBlueprintId(blueprint.getId());
                     notificationDetails.setBlueprintName(blueprint.getStackName());

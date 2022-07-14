@@ -7,8 +7,8 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -18,7 +18,7 @@ public class DataLakeStatusCheckerService {
     @Inject
     private SdxClientService sdxClientService;
 
-    public void validateRunningState(Stack stack) {
+    public void validateRunningState(StackView stack) {
         if (StackType.WORKLOAD.equals(stack.getType())) {
             List<SdxClusterResponse> sdxClusterResponses = sdxClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             sdxClusterResponses.forEach(sdxClusterResponse -> validateState(sdxClusterResponse, SdxClusterStatusResponse.RUNNING));

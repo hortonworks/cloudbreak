@@ -21,7 +21,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cm.model.CommandResource;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Service
@@ -46,7 +46,7 @@ public class SyncApiCommandRetriever {
      * - if listActiveCommands is empty (in case of the command after the timeout) use /cmf/commands/activeCommandTable call,
      * - if that won't work either, use /cmf/commands/commandTable call (both with the response cookie of listActiveCommands call)
      */
-    public Optional<BigDecimal> getCommandId(String commandName, ClustersResourceApi api, Stack stack)
+    public Optional<BigDecimal> getCommandId(String commandName, ClustersResourceApi api, StackView stack)
             throws CloudbreakException, ApiException {
         return getCommandId(commandName, api, stack, false);
     }
@@ -56,7 +56,7 @@ public class SyncApiCommandRetriever {
      * - use listActiveCommands against CB API, but use only the cookies from the response
      * - with the cookie of listActiveCommands response, try to gather the last finished command ID with /cmf/commands/commandTable call
      */
-    public Optional<BigDecimal> getLastFinishedCommandId(String commandName, ClustersResourceApi api, Stack stack)
+    public Optional<BigDecimal> getLastFinishedCommandId(String commandName, ClustersResourceApi api, StackView stack)
             throws CloudbreakException, ApiException {
         Optional<BigDecimal> lastSyncApiCommandId = getCommandId(commandName, api, stack, true);
         lastSyncApiCommandId.ifPresent(commandId -> {
@@ -65,7 +65,7 @@ public class SyncApiCommandRetriever {
         return lastSyncApiCommandId;
     }
 
-    private Optional<BigDecimal> getCommandId(String commandName, ClustersResourceApi api, Stack stack, boolean skipActiveRunningCommands)
+    private Optional<BigDecimal> getCommandId(String commandName, ClustersResourceApi api, StackView stack, boolean skipActiveRunningCommands)
             throws CloudbreakException, ApiException {
         ApiResponse<ApiCommandList> commandListResponse =
                 api.listActiveCommandsWithHttpInfo(stack.getName(), null);

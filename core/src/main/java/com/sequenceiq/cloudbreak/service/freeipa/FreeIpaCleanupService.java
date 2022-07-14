@@ -21,13 +21,14 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupStep;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
@@ -84,26 +85,26 @@ public class FreeIpaCleanupService {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public void cleanupButIp(Stack stack) {
-        Set<String> hostNames = instanceMetadataProcessor.extractFqdn(stack);
+    public void cleanupButIp(StackDtoDelegate stackDto) {
+        Set<String> hostNames = instanceMetadataProcessor.extractFqdn(stackDto);
         Set<String> ips = Set.of();
         LOGGER.info("Full cleanup invoked with hostnames {} and IPs {}", hostNames, ips);
-        cleanup(stack, Set.of(), hostNames, ips);
+        cleanup(stackDto.getStack(), Set.of(), hostNames, ips);
     }
 
-    public void cleanupOnScale(Stack stack, Set<String> hostNames, Set<String> ips) {
+    public void cleanupOnScale(StackView stack, Set<String> hostNames, Set<String> ips) {
         validateCleanupParametersSet(hostNames, ips);
         LOGGER.info("Cleanup on scale invoked with hostnames {} and IPs {}", hostNames, ips);
         cleanup(stack, STEPS_TO_SKIP_ON_SCALE, hostNames, ips);
     }
 
-    public void cleanupOnRecover(Stack stack, Set<String> hostNames, Set<String> ips) {
+    public void cleanupOnRecover(StackView stack, Set<String> hostNames, Set<String> ips) {
         validateCleanupParametersSet(hostNames, ips);
         LOGGER.info("Cleanup on recover invoked with hostnames {} and IPs {}", hostNames, ips);
         cleanup(stack, STEPS_TO_SKIP_ON_RECOVER, hostNames, ips);
     }
 
-    public void cleanupDnsOnly(Stack stack, Set<String> hostNames, Set<String> ips) {
+    public void cleanupDnsOnly(StackView stack, Set<String> hostNames, Set<String> ips) {
         validateCleanupParametersSet(hostNames, ips);
         LOGGER.info("DNS only cleanup invoked with hostnames {} and IPs {}", hostNames, ips);
         cleanup(stack, STEPS_TO_SKIP_WHEN_DNS_ONLY, hostNames, ips);
@@ -114,11 +115,11 @@ public class FreeIpaCleanupService {
         Objects.requireNonNull(ips, "IPs must be set");
     }
 
-    private void cleanup(Stack stack, Set<CleanupStep> stepsToSkip, Set<String> hostNames, Set<String> ips) {
+    private void cleanup(StackView stack, Set<CleanupStep> stepsToSkip, Set<String> hostNames, Set<String> ips) {
         Optional<KerberosConfig> kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         boolean childEnvironment = environmentConfigProvider.isChildEnvironment(stack.getEnvironmentCrn());
 
-        if (kerberosDetailService.keytabsShouldBeUpdated(stack.cloudPlatform(), childEnvironment, kerberosConfig)) {
+        if (kerberosDetailService.keytabsShouldBeUpdated(stack.getCloudPlatform(), childEnvironment, kerberosConfig)) {
             OperationStatus operationStatus = sendCleanupRequest(stack, stepsToSkip, hostNames, ips);
             pollCleanupOperation(operationStatus, Crn.safeFromString(stack.getResourceCrn()).getAccountId());
         }
@@ -137,7 +138,7 @@ public class FreeIpaCleanupService {
         }
     }
 
-    private OperationStatus sendCleanupRequest(Stack stack, Set<CleanupStep> stepsToSkip, Set<String> hostNames, Set<String> ips) {
+    private OperationStatus sendCleanupRequest(StackView stack, Set<CleanupStep> stepsToSkip, Set<String> hostNames, Set<String> ips) {
         try {
             CleanupRequest cleanupRequest = createCleanupRequest(stack, stepsToSkip, hostNames, ips);
             LOGGER.info("Sending cleanup request to FreeIPA: [{}]", cleanupRequest);
@@ -158,7 +159,7 @@ public class FreeIpaCleanupService {
         }
     }
 
-    private CleanupRequest createCleanupRequest(Stack stack, Set<CleanupStep> stepsToSkip, Set<String> hostNames, Set<String> ips) {
+    private CleanupRequest createCleanupRequest(StackView stack, Set<CleanupStep> stepsToSkip, Set<String> hostNames, Set<String> ips) {
         CleanupRequest cleanupRequest = new CleanupRequest();
         cleanupRequest.setHosts(hostNames);
         cleanupRequest.setIps(ips);

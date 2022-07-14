@@ -20,7 +20,7 @@ import com.cloudera.api.swagger.model.ApiCommandList;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
@@ -37,7 +37,7 @@ class ClouderaManagerRoleRefreshService {
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
 
-    void refreshClusterRoles(ApiClient client, Stack stack) throws ApiException, CloudbreakException {
+    void refreshClusterRoles(ApiClient client, StackDtoDelegate stack) throws ApiException, CloudbreakException {
         waitForGenerateCredentialsToFinish(stack, client);
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
         ApiCommand refreshCommand = clustersResourceApi.refresh(stack.getCluster().getName());
@@ -46,7 +46,7 @@ class ClouderaManagerRoleRefreshService {
         LOGGER.debug("Cluster role refresh finished successfully.");
     }
 
-    private void pollingRefresh(ApiCommand command, ApiClient client, Stack stack) throws CloudbreakException {
+    private void pollingRefresh(ApiCommand command, ApiClient client, StackDtoDelegate stack) throws CloudbreakException {
         ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
         try {
             pollingResult = clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(stack, client, command.getId());
@@ -60,7 +60,7 @@ class ClouderaManagerRoleRefreshService {
         }
     }
 
-    private void waitForGenerateCredentialsToFinish(Stack stack, ApiClient client) throws ApiException {
+    private void waitForGenerateCredentialsToFinish(StackDtoDelegate stack, ApiClient client) throws ApiException {
         LOGGER.debug("Wait if Generate Credentials command is still active.");
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
         ApiCommandList apiCommandList = clouderaManagerResourceApi.listActiveCommands(DataView.SUMMARY.name());
@@ -73,7 +73,7 @@ class ClouderaManagerRoleRefreshService {
         return apiCommand -> GENERATE_CREDENTIALS_COMMAND_NAME.equals(apiCommand.getName());
     }
 
-    private Consumer<BigDecimal> pollCredentialGeneration(Stack stack, ApiClient client) {
+    private Consumer<BigDecimal> pollCredentialGeneration(StackDtoDelegate stack, ApiClient client) {
         return id -> {
             LOGGER.debug("Generate Credentials command is still active.");
             clouderaManagerPollingServiceProvider.startPollingCmGenerateCredentials(stack, client, id);

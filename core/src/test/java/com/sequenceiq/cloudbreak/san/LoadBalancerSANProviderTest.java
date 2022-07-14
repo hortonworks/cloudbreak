@@ -66,31 +66,31 @@ class LoadBalancerSANProviderTest {
 
     @Test
     void newerVersionHasNoLoadBalancer() {
-        assertTrue(loadBalancerSANProvider.getLoadBalancerSAN(stack).isEmpty());
+        assertTrue(loadBalancerSANProvider.getLoadBalancerSAN(stack.getId(), blueprint).isEmpty());
     }
 
     @Test
     void olderVersionHasNoLoadBalancer() {
         when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-knox.bp"));
-        assertTrue(loadBalancerSANProvider.getLoadBalancerSAN(stack).isEmpty());
+        assertTrue(loadBalancerSANProvider.getLoadBalancerSAN(stack.getId(), blueprint).isEmpty());
     }
 
     @Test
     void newerVersionHasLoadBalancerWithDNS() {
         loadBalancerSetUp("foobar.timbuk2.com", null);
-        assertEquals("DNS:foobar.timbuk2.com", loadBalancerSANProvider.getLoadBalancerSAN(stack).get());
+        assertEquals("DNS:foobar.timbuk2.com", loadBalancerSANProvider.getLoadBalancerSAN(stack.getId(), blueprint).get());
     }
 
     @Test
     void newerVersionHasLoadBalancerWithIP() {
         loadBalancerSetUp(null, "10.10.10.10");
-        assertEquals("IP:10.10.10.10", loadBalancerSANProvider.getLoadBalancerSAN(stack).get());
+        assertEquals("IP:10.10.10.10", loadBalancerSANProvider.getLoadBalancerSAN(stack.getId(), blueprint).get());
     }
 
     @Test
     void newerVersionHasLoadBalancerWithoutDNSOrIP() {
         loadBalancerSetUp(null, null);
-        assertTrue(loadBalancerSANProvider.getLoadBalancerSAN(stack).isEmpty());
+        assertTrue(loadBalancerSANProvider.getLoadBalancerSAN(stack.getId(), blueprint).isEmpty());
     }
 
     private void loadBalancerSetUp(String dns, String ip) {

@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi.NifiConfigProvider;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 
 public class NifiHostPublicDnsEntryService extends BaseDnsEntryService {
@@ -18,8 +18,8 @@ public class NifiHostPublicDnsEntryService extends BaseDnsEntryService {
     private NifiConfigProvider nifiConfigProvider;
 
     @Override
-    protected Map<String, List<String>> getComponentLocation(Stack stack) {
-        return componentLocatorService.getComponentLocation(stack.getCluster(), nifiConfigProvider.getRoleTypes());
+    protected Map<String, List<String>> getComponentLocation(StackDtoDelegate stack) {
+        return componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes());
     }
 
     @Override

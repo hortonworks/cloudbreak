@@ -27,13 +27,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -61,7 +61,7 @@ public class LoadBalancerRecreatorService implements ResourceRecreator {
     private MetadataSetupService metadataSetupService;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
@@ -82,7 +82,7 @@ public class LoadBalancerRecreatorService implements ResourceRecreator {
         CloudStack cloudStack = request.getCloudStack();
         loadBalancerLaunchService.launchLoadBalancerResources(ac, cloudStack, persistenceNotifier, elasticLoadBalancingClient, false);
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = collectLoadBalancerMetadata(ac, ac.getCloudContext().getId());
-        Stack stack = stackService.getByIdWithLists(ac.getCloudContext().getId());
+        StackView stack = stackDtoService.getStackViewById(ac.getCloudContext().getId());
         metadataSetupService.saveLoadBalancerMetadata(stack, cloudLoadBalancerMetadata);
     }
 

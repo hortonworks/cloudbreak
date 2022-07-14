@@ -31,15 +31,15 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
 import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class StackDownscaleService {
@@ -55,7 +55,7 @@ public class StackDownscaleService {
     private StackScalingService stackScalingService;
 
     @Inject
-    private StackService stackService;
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private FreeIpaCleanupService freeIpaCleanupService;
@@ -72,16 +72,18 @@ public class StackDownscaleService {
     public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
         LOGGER.debug("Downscaling of stack {}", context.getStack().getId());
         stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
-        Set<Long> privateIds = null;
+        List<Long> privateIds = null;
         if (MapUtils.isNotEmpty(stackDownscaleTriggerEvent.getHostGroupsWithPrivateIds())) {
-            privateIds = stackDownscaleTriggerEvent.getHostGroupsWithPrivateIds().values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+            privateIds = stackDownscaleTriggerEvent.getHostGroupsWithPrivateIds().values().stream().flatMap(Collection::stream).collect(Collectors.toList());
         } else if (MapUtils.isNotEmpty(context.getHostGroupWithPrivateIds())) {
-            privateIds = context.getHostGroupWithPrivateIds().values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+            privateIds = context.getHostGroupWithPrivateIds().values().stream().flatMap(Collection::stream).collect(Collectors.toList());
         }
         String msgParam;
         if (CollectionUtils.isNotEmpty(privateIds)) {
-            Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
-            List<String> instanceIdList = stackService.getInstanceIdsForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
+            List<String> instanceIdList = instanceMetaDataService
+                    .getInstanceMetadataViewsByStackIdAndPrivateIds(context.getStackId(), privateIds).stream()
+                    .map(InstanceMetadataView::getInstanceId)
+                    .collect(toList());
             msgParam = String.join(",", instanceIdList);
         } else if (stackDownscaleTriggerEvent.getHostGroupsWithAdjustment() != null) {
             Integer adjustmentSize = stackDownscaleTriggerEvent.getHostGroupsWithAdjustment().values().stream().reduce(0, Integer::sum);
@@ -94,12 +96,9 @@ public class StackDownscaleService {
 
     public void finishStackDownscale(StackScalingFlowContext context, Collection<Long> privateIds)
             throws TransactionExecutionException {
-        Stack stack = context.getStack();
+        StackView stack = context.getStack();
         stackScalingService.updateInstancesToTerminated(privateIds, stack.getId());
-        List<InstanceMetaData> instanceMetaDatas = stack.getInstanceGroups()
-                .stream().flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
-                .filter(im -> privateIds.contains(im.getPrivateId()))
-                .collect(toList());
+        List<InstanceMetadataView> instanceMetaDatas = instanceMetaDataService.getInstanceMetadataViewsByStackIdAndPrivateIds(stack.getId(), privateIds);
         if (context.isRepair()) {
             fillDiscoveryFQDNForRepair(stack, instanceMetaDatas);
         }
@@ -113,10 +112,10 @@ public class StackDownscaleService {
         flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_DOWNSCALE_SUCCESS, String.join(",", deletedInstanceIds));
     }
 
-    private void fillDiscoveryFQDNForRepair(Stack stack, List<InstanceMetaData> removableInstances) {
+    private void fillDiscoveryFQDNForRepair(StackView stack, List<InstanceMetadataView> removableInstances) {
         List<Resource> diskResources = resourceService.findByStackIdAndType(stack.getId(), stack.getDiskResourceType());
         List<String> removeableInstanceIds = removableInstances
-                .stream().map(InstanceMetaData::getInstanceId).collect(Collectors.toList());
+                .stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList());
         for (Resource volumeSet : diskResources) {
             Optional<VolumeSetAttributes> attributes = resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class);
             attributes.ifPresent(volumeSetAttributes ->
@@ -125,11 +124,11 @@ public class StackDownscaleService {
         resourceService.saveAll(diskResources);
     }
 
-    private void fillDiscoveryFQDNInVolumeSetIfEmpty(List<InstanceMetaData> removableInstances, List<String> removeableInstanceIds, Resource volumeSet,
+    private void fillDiscoveryFQDNInVolumeSetIfEmpty(List<InstanceMetadataView> removableInstances, List<String> removeableInstanceIds, Resource volumeSet,
             VolumeSetAttributes volumeSetAttributes) {
         if (removeableInstanceIds.contains(volumeSet.getInstanceId())
                 && StringUtils.isNullOrEmpty(volumeSetAttributes.getDiscoveryFQDN())) {
-            Optional<InstanceMetaData> metaData = removableInstances.stream()
+            Optional<InstanceMetadataView> metaData = removableInstances.stream()
                     .filter(instanceMetaData -> volumeSet.getInstanceId().equals(instanceMetaData.getInstanceId()))
                     .findFirst();
             metaData.ifPresent(im -> {
@@ -139,7 +138,7 @@ public class StackDownscaleService {
         }
     }
 
-    private void cleanupDnsRecords(Stack stack, Collection<InstanceMetaData> instanceMetaDatas) {
+    private void cleanupDnsRecords(StackView stack, Collection<InstanceMetadataView> instanceMetaDatas) {
         Set<String> fqdns = instanceMetadataProcessor.extractFqdn(instanceMetaDatas);
         Set<String> ips = Set.of();
         try {
@@ -152,7 +151,7 @@ public class StackDownscaleService {
 
     public void handleStackDownscaleError(StackFailureContext context, Exception errorDetails) {
         LOGGER.info("Exception during the downscaling of stack", errorDetails);
-        flowMessageService.fireEventAndLog(context.getStackView().getId(), UPDATE_FAILED.name(), STACK_DOWNSCALE_FAILED, errorDetails.getMessage());
-        stackUpdater.updateStackStatus(context.getStackView().getId(), DetailedStackStatus.DOWNSCALE_FAILED, errorDetails.getMessage());
+        flowMessageService.fireEventAndLog(context.getStackId(), UPDATE_FAILED.name(), STACK_DOWNSCALE_FAILED, errorDetails.getMessage());
+        stackUpdater.updateStackStatus(context.getStackId(), DetailedStackStatus.DOWNSCALE_FAILED, errorDetails.getMessage());
     }
 }

@@ -20,11 +20,11 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.dto.datalake.DatalakeDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Service
 public class ClouderaManagerDeregisterService {
@@ -54,13 +54,13 @@ public class ClouderaManagerDeregisterService {
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
-    public void deregisterServices(HttpClientConfig clientConfig, Stack stack, Optional<DatalakeDto> datalakeDto) {
-        Cluster cluster = stack.getCluster();
+    public void deregisterServices(HttpClientConfig clientConfig, StackDtoDelegate stack, Optional<DatalakeDto> datalakeDto) {
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
         try {
-            CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(stack.getCluster().getBlueprint().getBlueprintText());
+            CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintText());
             if (CMRepositoryVersionUtil.isRangerTearDownSupported(clouderaManagerRepoDetails)) {
                 if (datalakeDto.isPresent()) {
                     LOGGER.info("The current cluster {} is a Data Hub cluster so teardown REQUIRED.", stack.getName());

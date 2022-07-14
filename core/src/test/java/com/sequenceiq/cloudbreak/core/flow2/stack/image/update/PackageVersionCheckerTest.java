@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.Package;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 public class PackageVersionCheckerTest {
 
@@ -70,7 +71,7 @@ public class PackageVersionCheckerTest {
         instanceMetaData.setImage(new Json(new com.sequenceiq.cloudbreak.cloud.model.Image(
                 "image", Collections.emptyMap(), "os", "ostype", "catalogn", "catalogu", "id",
                 packageVersions)));
-        Set<InstanceMetaData> instanceMetaDataSet = Collections.singleton(instanceMetaData);
+        Set<InstanceMetadataView> instanceMetaDataSet = Collections.singleton(instanceMetaData);
 
         CheckResult result = underTest.compareImageAndInstancesMandatoryPackageVersion(statedImage, instanceMetaDataSet);
 
@@ -93,7 +94,7 @@ public class PackageVersionCheckerTest {
         instanceMetaData.setImage(new Json(new com.sequenceiq.cloudbreak.cloud.model.Image(
                 "image", Collections.emptyMap(), "os", "ostype", "catalogn", "catalogu", "id",
                 packageVersions)));
-        Set<InstanceMetaData> instanceMetaDataSet = Collections.singleton(instanceMetaData);
+        Set<InstanceMetadataView> instanceMetaDataSet = Collections.singleton(instanceMetaData);
 
         CheckResult result = underTest.compareImageAndInstancesMandatoryPackageVersion(statedImage, instanceMetaDataSet);
 
@@ -115,7 +116,7 @@ public class PackageVersionCheckerTest {
         instanceMetaData.setImage(new Json(new com.sequenceiq.cloudbreak.cloud.model.Image(
                 "image", Collections.emptyMap(), "os", "ostype", "catalogn", "catalogu", "id",
                 packageVersions)));
-        Set<InstanceMetaData> instanceMetaDataSet = Collections.singleton(instanceMetaData);
+        Set<InstanceMetadataView> instanceMetaDataSet = Collections.singleton(instanceMetaData);
 
         CheckResult result = underTest.compareImageAndInstancesMandatoryPackageVersion(statedImage, instanceMetaDataSet);
 
@@ -137,7 +138,7 @@ public class PackageVersionCheckerTest {
         instanceMetaData.setImage(new Json(new com.sequenceiq.cloudbreak.cloud.model.Image(
                 "image", Collections.emptyMap(), "os", "ostype", "catalogn", "catalogu", "id",
                 packageVersions)));
-        Set<InstanceMetaData> instanceMetaDataSet = Collections.singleton(instanceMetaData);
+        Set<InstanceMetadataView> instanceMetaDataSet = Collections.singleton(instanceMetaData);
 
         CheckResult result = underTest.compareImageAndInstancesMandatoryPackageVersion(statedImage, instanceMetaDataSet);
 

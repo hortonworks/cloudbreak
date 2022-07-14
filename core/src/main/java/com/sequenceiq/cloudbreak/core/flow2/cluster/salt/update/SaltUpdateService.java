@@ -18,14 +18,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class SaltUpdateService {
@@ -38,39 +34,30 @@ public class SaltUpdateService {
     private CloudbreakFlowMessageService flowMessageService;
 
     @Inject
-    private TransactionService transactionService;
-
-    @Inject
     private ClusterCreationService clusterCreationService;
 
-    public void bootstrappingMachines(Stack stack) {
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SALT_UPDATE_STARTED);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.BOOTSTRAPPING_MACHINES);
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_BOOTSTRAP);
+    public void bootstrappingMachines(Long stackId) {
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SALT_UPDATE_STARTED);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.BOOTSTRAPPING_MACHINES);
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_BOOTSTRAP);
     }
 
-    public void startingClusterServices(StackView stack) {
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES, "Running cluster services.");
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_RUN_SERVICES);
+    public void startingClusterServices(Long stackId) {
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES, "Running cluster services.");
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_RUN_SERVICES);
     }
 
-    public void rotateSaltPassword(Stack stack) {
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SALT_PASSWORD_ROTATE_STARTED);
+    public void rotateSaltPassword(Long stackId) {
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SALT_PASSWORD_ROTATE_STARTED);
     }
 
-    public void clusterInstallationFinished(StackView stackView) {
-        try {
-            transactionService.required(() -> {
-                stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Salt update finished.");
-                flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_SALT_UPDATE_FINISHED);
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+    public void clusterInstallationFinished(Long stackId) {
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Salt update finished.");
+        flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SALT_UPDATE_FINISHED);
     }
 
     public void handleClusterCreationFailure(StackView stackView, Exception exception) {
-        if (stackView.getClusterView() != null) {
+        if (stackView.getClusterId() != null) {
             String errorMessage = clusterCreationService.getErrorMessageFromException(exception);
             stackUpdater.updateStackStatus(stackView.getId(), SALT_UPDATE_FAILED, errorMessage);
             flowMessageService.fireEventAndLog(stackView.getId(), UPDATE_FAILED.name(), CLUSTER_SALT_UPDATE_FAILED, errorMessage);

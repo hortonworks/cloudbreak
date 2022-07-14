@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
-
 import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 
@@ -20,14 +18,14 @@ import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager.SavingX509TrustManager;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.polling.nginx.NginxCertListenerTask;
 import com.sequenceiq.cloudbreak.polling.nginx.NginxPollerObject;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class TlsSetupService {
@@ -52,7 +50,7 @@ public class TlsSetupService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    public void setupTls(Stack stack, InstanceMetaData gwInstance) throws CloudbreakException {
+    public void setupTls(StackDtoDelegate stack, InstanceMetadataView gwInstance) throws CloudbreakException {
         try {
             SavingX509TrustManager x509TrustManager = new SavingX509TrustManager();
             TrustManager[] trustManagers = {x509TrustManager};
@@ -60,7 +58,7 @@ public class TlsSetupService {
             sslContext.init(null, trustManagers, new SecureRandom());
             Client client = RestClientUtil.createClient(sslContext, false);
             Integer gatewayPort = stack.getGatewayPort();
-            String ip = gatewayConfigService.getGatewayIp(stack, gwInstance);
+            String ip = gatewayConfigService.getGatewayIp(stack.getSecurityConfig(), gwInstance);
             LOGGER.debug("Trying to fetch the server's certificate: {}:{}", ip, gatewayPort);
             nginxPollerService.pollWithAbsoluteTimeout(
                     nginxCertListenerTask, new NginxPollerObject(client, ip, gatewayPort, x509TrustManager),
@@ -69,9 +67,8 @@ public class TlsSetupService {
             nginxTarget.path("/").request().get().close();
             X509Certificate[] chain = x509TrustManager.getChain();
             String serverCert = PkiUtil.convert(chain[0]);
-            InstanceMetaData metaData = getInstanceMetaData(gwInstance);
-            metaData.setServerCert(BaseEncoding.base64().encode(serverCert.getBytes()));
-            instanceMetaDataService.save(metaData);
+            String serverCertBase64 = BaseEncoding.base64().encode(serverCert.getBytes());
+            instanceMetaDataService.updateServerCert(gwInstance.getId(), serverCertBase64);
         } catch (Exception e) {
             throw new CloudbreakException("Failed to retrieve the server's certificate from Nginx."
                     + " Please check your security group is open enough and the Management Console can access your VPC and subnet."
@@ -79,10 +76,5 @@ public class TlsSetupService {
                     + " Refer to Cloudera documentation at"
                     + " https://docs.cloudera.com/management-console/cloud/proxy/topics/mc-outbound-internet-access-and-proxy.html", e);
         }
-    }
-
-    private InstanceMetaData getInstanceMetaData(InstanceMetaData gwInstance) {
-        return instanceMetaDataService.findById(gwInstance.getId())
-                .orElseThrow(notFound("Instance metadata", gwInstance.getId()));
     }
 }

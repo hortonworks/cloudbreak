@@ -13,7 +13,8 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 
-@Service
+@Service("stackViewServiceDeprecated")
+@Deprecated
 public class StackViewService {
 
     @Inject

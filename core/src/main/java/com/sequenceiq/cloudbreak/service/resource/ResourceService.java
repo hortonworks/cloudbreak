@@ -47,10 +47,6 @@ public class ResourceService {
         return repository.findAllByStackId(stackId);
     }
 
-    public Collection<Resource> getAllByStackIdAndStatuses(Long stackId, Collection<CommonStatus> statuses) {
-        return repository.findAllByStackIdAndStatusIn(stackId, statuses);
-    }
-
     public Optional<Resource> findByStackIdAndNameAndType(Long stackId, String name, ResourceType type) {
         return repository.findByStackIdAndNameAndType(stackId, name, type);
     }

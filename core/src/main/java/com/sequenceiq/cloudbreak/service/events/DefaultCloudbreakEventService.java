@@ -21,12 +21,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackResponseEntrie
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.stack.CmCommandLinkProvider;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -78,6 +80,9 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService, Cl
     private StackService stackService;
 
     @Inject
+    private StackDtoService stackDtoService;
+
+    @Inject
     private BaseLegacyStructuredFlowEventFactory baseLegacyStructuredFlowEventFactory;
 
     @Inject
@@ -107,7 +112,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService, Cl
     }
 
     @Override
-    public void fireCloudbreakEvent(Stack stack, ResourceEvent resourceEvent, Collection<String> eventMessageArgs) {
+    public void fireCloudbreakEvent(StackDtoDelegate stack, ResourceEvent resourceEvent, Collection<String> eventMessageArgs) {
         String eventMessage = getMessage(resourceEvent, eventMessageArgs);
         LOGGER.debug("Firing Cloudbreak event: stackId: {}, type: {}, message: {}", stack.getId(), stack.getStatus().name(), eventMessage);
         fireEventWithPayload(stack, stack.getStatus().name(), resourceEvent, eventMessageArgs, eventMessage, null);
@@ -122,7 +127,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService, Cl
     }
 
     @Override
-    public void fireClusterManagerEvent(Stack stack, ResourceEvent resourceEvent, String eventName, Optional<BigDecimal> clusterManagerEventId) {
+    public void fireClusterManagerEvent(StackDtoDelegate stack, ResourceEvent resourceEvent, String eventName, Optional<BigDecimal> clusterManagerEventId) {
         if (stack != null && clusterManagerEventId.isPresent()) {
             Optional<String> link = cmCommandLinkProvider.getCmCommandLink(stack, clusterManagerEventId.get().toString());
             if (link.isPresent()) {
@@ -170,11 +175,12 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService, Cl
 
     private void fireEventWithPayload(Long stackId, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs,
             String eventMessage, String instanceGroupName) {
-        Stack stack = stackService.getByIdWithTransaction(stackId);
+        StackDto stack = stackDtoService.getById(stackId);
         fireEventWithPayload(stack, eventType, resourceEvent, eventMessageArgs, eventMessage, instanceGroupName);
     }
 
-    private void fireEventWithPayload(Stack stack, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs, String eventMessage,
+    private void fireEventWithPayload(StackDtoDelegate stack, String eventType, ResourceEvent resourceEvent, Collection<String> eventMessageArgs,
+            String eventMessage,
             String instanceGroupName) {
         StructuredNotificationEvent structuredNotificationEvent = baseLegacyStructuredFlowEventFactory.createStructuredNotificationEvent(
                 stack,

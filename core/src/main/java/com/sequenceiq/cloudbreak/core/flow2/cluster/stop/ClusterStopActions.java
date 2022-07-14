@@ -14,14 +14,14 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopResult;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -31,7 +31,7 @@ public class ClusterStopActions {
     private ClusterStopService clusterStopService;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Bean(name = "CLUSTER_STOPPING_STATE")
     public Action<?, ?> stoppingCluster() {
@@ -71,22 +71,22 @@ public class ClusterStopActions {
         return new AbstractStackFailureAction<ClusterStopState, ClusterStopEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                clusterStopService.handleClusterStopFailure(context.getStackView(), payload.getException().getMessage());
-                getMetricService().incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStackView(), payload.getException());
+                clusterStopService.handleClusterStopFailure(context.getStackId(), payload.getException().getMessage());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStack(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterStopEvent.FINALIZED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(ClusterStopEvent.FINALIZED_EVENT.event(), context.getStackId());
             }
 
             @Override
             protected StackFailureContext createFlowContext(FlowParameters flowParameters, StateContext<ClusterStopState, ClusterStopEvent> stateContext,
                     StackFailureEvent payload) {
-                StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
+                StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stack);
-                return new StackFailureContext(flowParameters, stack);
+                return new StackFailureContext(flowParameters, stack, stack.getId());
             }
         };
     }

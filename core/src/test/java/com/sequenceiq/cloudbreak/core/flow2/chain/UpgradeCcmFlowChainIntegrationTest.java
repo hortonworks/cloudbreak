@@ -9,15 +9,14 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 import javax.inject.Inject;
@@ -61,12 +60,10 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.update.userdata.FlowIntegrationTestConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.update.userdata.UpdateUserDataFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.update.userdata.UserDataUpdateActions;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.DeregisterAgentHandler;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.ccm.HealthCheckHandler;
@@ -81,8 +78,10 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -118,6 +117,9 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     @MockBean(reset = MockReset.NONE)
     private StackService stackService;
+
+    @MockBean(reset = MockReset.NONE)
+    private StackDtoService stackDtoService;
 
     @MockBean
     private StackUpdater stackUpdater;
@@ -158,17 +160,6 @@ class UpgradeCcmFlowChainIntegrationTest {
     @Mock
     private ResourceConnector<Object> resourcesApi;
 
-    private StackView mockStackView() {
-        StackView stackView = mock(StackView.class);
-        ClusterView clusterView = mock(ClusterView.class);
-
-        when(stackView.getClusterView()).thenReturn(clusterView);
-        when(stackView.getId()).thenReturn(1L);
-        when(stackView.isStartInProgress()).thenReturn(true);
-
-        return stackView;
-    }
-
     private Stack mockStack() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
@@ -176,7 +167,7 @@ class UpgradeCcmFlowChainIntegrationTest {
         StackStatus stackStatus = new StackStatus(stack, Status.AVAILABLE, "no reason at all", DetailedStackStatus.AVAILABLE);
         stack.setStackStatus(stackStatus);
         Cluster cluster = new Cluster();
-        cluster.setId(1L);
+        cluster.setId(0L);
         stack.setCluster(cluster);
         User user = new User();
         user.setUserId("alma");
@@ -184,24 +175,25 @@ class UpgradeCcmFlowChainIntegrationTest {
         stack.setResourceCrn(DATAHUB_CRN);
         Workspace workspace = new Workspace();
         workspace.setId(1L);
+        workspace.setTenant(new Tenant());
         stack.setWorkspace(workspace);
 
         return stack;
     }
 
-    private void mockStackService(Stack mockStack) {
-        StackView stackView = mockStackView();
-        when(stackService.getByIdWithTransaction(STACK_ID)).thenReturn(mockStack);
-        when(stackService.getViewByIdWithoutAuth(STACK_ID)).thenReturn(stackView);
+    private void mockStackService() {
+        StackDto stackDto = spy(StackDto.class);
+        Stack stack = mockStack();
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getClusterViewByStackId(STACK_ID)).thenReturn(stack.getCluster());
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stackDto.getWorkspace()).thenReturn(stack.getWorkspace());
     }
 
     @BeforeEach
     public void setup() throws CloudbreakImageNotFoundException {
-        Stack mockStack = mockStack();
-        mockStackService(mockStack);
-        Collection<Resource> resources = Set.of();
-        when(resourceService.getAllByStackId(STACK_ID)).thenReturn(resources);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(mockStack);
+        mockStackService();
         Image image = new Image("alma", Map.of(InstanceGroupType.GATEWAY, USER_DATA), "", "", "", "", "", null);
         when(imageService.getImage(STACK_ID)).thenReturn(image);
 

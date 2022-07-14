@@ -27,10 +27,10 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.CmDiagnosticsParameters;
 
@@ -49,20 +49,20 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
 
-    private final Stack stack;
+    private final StackDtoDelegate stack;
 
     private final HttpClientConfig clientConfig;
 
     private ApiClient client;
 
-    public ClouderaManagerDiagnosticsService(Stack stack, HttpClientConfig clientConfig) {
+    public ClouderaManagerDiagnosticsService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
     }
 
     @PostConstruct
     public void initApiClient() throws ClusterClientInitException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String cloudbreakAmbariUser = cluster.getCloudbreakAmbariUser();
         String cloudbreakAmbariPassword = cluster.getCloudbreakAmbariPassword();
         try {

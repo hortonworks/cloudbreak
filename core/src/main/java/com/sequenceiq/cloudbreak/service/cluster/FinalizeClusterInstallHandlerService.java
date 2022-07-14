@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import java.util.Date;
-import java.util.Set;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -10,9 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class FinalizeClusterInstallHandlerService {
@@ -24,15 +24,10 @@ public class FinalizeClusterInstallHandlerService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    public void finalizeClusterInstall(Set<InstanceMetaData> instances, Cluster cluster) {
+    public void finalizeClusterInstall(List<InstanceMetadataView> instances, ClusterView cluster) {
         LOGGER.info("Cluster created successfully. Cluster name: {}", cluster.getName());
-        for (InstanceMetaData instance : instances) {
-            instance.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
-        }
-        instanceMetaDataService.saveAll(instances);
-        Long now = new Date().getTime();
-        cluster.setCreationFinished(now);
-        cluster.setUpSince(now);
-        clusterService.updateCluster(cluster);
+        List<Long> metadataIds = instances.stream().map(InstanceMetadataView::getId).collect(Collectors.toList());
+        instanceMetaDataService.updateAllInstancesToStatus(metadataIds, InstanceStatus.SERVICES_HEALTHY, "Cluster install finalized, services are healthy");
+        clusterService.updateCreationFinishedAndUpSinceToNowByClusterId(cluster.getId());
     }
 }

@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
@@ -57,12 +58,13 @@ import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionType;
@@ -74,11 +76,15 @@ import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupEphemeralVolumeChecker;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -92,6 +98,9 @@ public class StackCreationService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -141,30 +150,29 @@ public class StackCreationService {
     @Inject
     private InstanceGroupEphemeralVolumeChecker ephemeralVolumeChecker;
 
-    public void setupProvision(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_SETUP, "Provisioning setup");
+    public void setupProvision(Long stackId) {
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.PROVISION_SETUP, "Provisioning setup");
     }
 
-    public void prepareImage(Stack stack, Map<Object, Object> variables) {
+    public void prepareImage(Long stackId, Map<Object, Object> variables) {
         variables.put(IMAGE_COPY_START_MILLIS, System.currentTimeMillis());
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.IMAGE_SETUP, "Image setup");
-        flowMessageService.fireEventAndLog(stack.getId(), CREATE_IN_PROGRESS.name(), STACK_IMAGE_SETUP);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.IMAGE_SETUP, "Image setup");
+        flowMessageService.fireEventAndLog(stackId, CREATE_IN_PROGRESS.name(), STACK_IMAGE_SETUP);
     }
 
-    public void startProvisioning(StackContext context, Map<Object, Object> variables) {
-        Stack stack = context.getStack();
+    public void startProvisioning(StackDto stack, CloudStack cloudStack, Map<Object, Object> variables) {
         if (variables.containsKey(IMAGE_COPY_START_MILLIS)) {
             long startMillis = (long) variables.get(IMAGE_COPY_START_MILLIS);
             metricService.recordImageCopyTime(stack, startMillis);
         }
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CREATING_INFRASTRUCTURE, "Creating infrastructure");
         flowMessageService.fireEventAndLog(stack.getId(), CREATE_IN_PROGRESS.name(), STACK_PROVISIONING);
-        instanceMetaDataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
+        instanceMetaDataService.saveInstanceRequests(stack, cloudStack.getGroups());
     }
 
     public Stack stackProvisioningFinished(StackContext context, LaunchStackResult result, Map<Object, Object> variables) {
         Date startDate = getStartDateIfExist(variables);
-        Stack stack = context.getStack();
+        StackDtoDelegate stack = context.getStack();
         validateResourceResults(context.getCloudContext(), result);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CREATING_LOAD_BALANCER, "Creating load balancer");
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_TIME,
@@ -174,13 +182,9 @@ public class StackCreationService {
         return provisionedStack;
     }
 
-    public Stack loadBalancerProvisioningFinished(StackContext context, LaunchLoadBalancerResult result, Map<Object, Object> variables) {
-        Stack stack = context.getStack();
+    public void loadBalancerProvisioningFinished(StackCreationContext context, LaunchLoadBalancerResult result, Map<Object, Object> variables) {
         validateResourceResults(context.getCloudContext(), result);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.METADATA_COLLECTION, "Metadata collection");
-        Stack provisionedStack = stackService.getByIdWithListsInTransaction(stack.getId());
-        provisionedStack.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
-        return provisionedStack;
+        stackUpdater.updateStackStatus(context.getStackId(), DetailedStackStatus.METADATA_COLLECTION, "Metadata collection");
     }
 
     private Date getStartDateIfExist(Map<Object, Object> variables) {
@@ -192,9 +196,9 @@ public class StackCreationService {
         return result;
     }
 
-    public CheckImageResult checkImage(StackContext context) {
+    public CheckImageResult checkImage(StackCreationContext context) {
         try {
-            Stack stack = context.getStack();
+            StackDto stack = stackDtoService.getById(context.getStackId());
             Image image = imageService.getImage(stack.getId());
             CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(context.getCloudContext(), context.getCloudCredential(),
                     cloudStackConverter.convert(stack), image);
@@ -212,52 +216,39 @@ public class StackCreationService {
         }
     }
 
-    public Stack setupMetadata(StackContext context, CollectMetadataResult collectMetadataResult) {
-        Stack stack = context.getStack();
+    public void setupMetadata(StackView stack, CollectMetadataResult collectMetadataResult) {
         metadatSetupService.saveInstanceMetaData(stack, collectMetadataResult.getResults(), InstanceStatus.CREATED);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.LOAD_BALANCER_METADATA_COLLECTION, "Load balancer metadata collection");
         LOGGER.debug("Metadata setup DONE.");
-        Stack stackWithMetadata = stackService.getByIdWithListsInTransaction(stack.getId());
-        stackWithMetadata.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
-        return stackWithMetadata;
     }
 
-    public Stack setupLoadBalancerMetadata(StackContext context, CollectLoadBalancerMetadataResult collectMetadataResult) {
-        Stack stack = context.getStack();
+    public void setupLoadBalancerMetadata(StackView stack, CollectLoadBalancerMetadataResult collectMetadataResult) {
         metadatSetupService.saveLoadBalancerMetadata(stack, collectMetadataResult.getResults());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.TLS_SETUP, "TLS setup");
         LOGGER.debug("Load balancer metadata setup DONE.");
-        Stack stackWithMetadata = stackService.getByIdWithListsInTransaction(stack.getId());
-        stackWithMetadata.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
-        return stackWithMetadata;
     }
 
-    public Stack saveTlsInfo(StackContext context, TlsInfo tlsInfo) {
+    public void saveTlsInfo(StackDto stack, TlsInfo tlsInfo) {
         boolean usePrivateIpToTls = tlsInfo.usePrivateIpToTls();
-        Stack stack = context.getStack();
         if (usePrivateIpToTls) {
             SecurityConfig securityConfig = stack.getSecurityConfig();
             securityConfig.setUsePrivateIpToTls(true);
-            stackUpdater.updateStackSecurityConfig(stack, securityConfig);
-            stack = stackService.getByIdWithListsInTransaction(stack.getId());
-            stack.setResources(new HashSet<>(resourceService.getAllByStackId(stack.getId())));
+            stackUpdater.updateStackSecurityConfig(stack.getStack(), securityConfig);
             LOGGER.debug("Update Stack and it's SecurityConfig to use private ip when TLS is built.");
         }
-        return stack;
     }
 
-    public void setupTls(StackContext context) throws CloudbreakException {
-        Stack stack = context.getStack();
-        for (InstanceMetaData gwInstance : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
-            tlsSetupService.setupTls(stack, gwInstance);
+    public void setupTls(StackDto stackDto) throws CloudbreakException {
+        for (InstanceMetadataView gwInstance : stackDto.getAllAvailableGatewayInstances()) {
+            tlsSetupService.setupTls(stackDto, gwInstance);
         }
     }
 
-    public void stackCreationFinished(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED, "Stack provisioned.");
+    public void stackCreationFinished(Long stackId) {
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.PROVISIONED, "Stack provisioned.");
     }
 
-    public void handleStackCreationFailure(StackView stack, Exception errorDetails, ProvisionType provisionType) {
+    public void handleStackCreationFailure(StackDto stack, Exception errorDetails, ProvisionType provisionType) {
         LOGGER.info("Error during stack creation flow:", errorDetails);
         String errorReason = errorDetails == null ? "Unknown error" : errorDetails.getMessage();
         if (errorDetails instanceof CancellationException || ExceptionUtils.getRootCause(errorDetails) instanceof CancellationException) {
@@ -274,13 +265,14 @@ public class StackCreationService {
         }
     }
 
-    public void setInstanceStoreCount(StackContext stackContext) {
-        Stack stack = stackContext.getStack();
+    public void setInstanceStoreCount(StackCreationContext stackContext) {
+        StackView stack = stackContext.getStack();
+        List<InstanceGroupDto> instanceGroupDtos = stackDtoService.getInstanceMetadataByInstanceGroup(stack.getId());
         CloudConnector<Object> connector = cloudPlatformConnectors.get(stackContext.getCloudContext().getPlatformVariant());
         AuthenticatedContext ac = connector.authentication().authenticate(stackContext.getCloudContext(), stackContext.getCloudCredential());
 
-        List<String> instanceTypes = stack.getInstanceGroups().stream()
-                .map(InstanceGroup::getTemplate)
+        List<String> instanceTypes = instanceGroupDtos.stream()
+                .map(ig -> ig.getInstanceGroup().getTemplate())
                 .filter(Objects::nonNull)
                 .map(Template::getInstanceType)
                 .filter(Objects::nonNull)
@@ -289,43 +281,44 @@ public class StackCreationService {
         InstanceStoreMetadata instanceStoreMetadata = connector.metadata().collectInstanceStorageCount(ac, instanceTypes);
 
 
-        for (InstanceGroup ig : stack.getInstanceGroups()) {
-            Template template = ig.getTemplate();
+        for (InstanceGroupDto ig : instanceGroupDtos) {
+            InstanceGroupView instanceGroup = ig.getInstanceGroup();
+            Template template = instanceGroup.getTemplate();
             if (template != null) {
                 Integer instanceStorageCount = instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(template.getInstanceType());
-                if (ephemeralVolumeChecker.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(ig)) {
+                if (ephemeralVolumeChecker.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(instanceGroup)) {
                     LOGGER.debug("Instance storage was already requested. Setting temporary storage in template to: {}. " +
                             "Group name: {}, Template id: {}, instance type: {}",
-                            TemporaryStorage.EPHEMERAL_VOLUMES_ONLY.name(), ig.getGroupName(), template.getId(), template.getInstanceType());
+                            TemporaryStorage.EPHEMERAL_VOLUMES_ONLY.name(), instanceGroup.getGroupName(), template.getId(), template.getInstanceType());
                     template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY);
                 } else if (instanceStorageCount > 0 && stack.getType().equals(StackType.WORKLOAD)) {
                     LOGGER.debug("The host group's instance type has ephemeral volumes. Setting temporary storage in template to: {}. " +
                                     "Group name: {}, Template id: {}, instance type: {}",
-                            TemporaryStorage.EPHEMERAL_VOLUMES.name(), ig.getGroupName(), template.getId(), template.getInstanceType());
+                            TemporaryStorage.EPHEMERAL_VOLUMES.name(), instanceGroup.getGroupName(), template.getId(), template.getInstanceType());
                     template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
                 }
                 LOGGER.debug("Setting instance storage count in template. " +
-                        "Group name: {}, Template id: {}, instance type: {}", ig.getGroupName(), template.getId(), template.getInstanceType());
+                        "Group name: {}, Template id: {}, instance type: {}", instanceGroup.getGroupName(), template.getId(), template.getInstanceType());
                 template.setInstanceStorageCount(instanceStorageCount);
                 templateService.savePure(template);
             }
         }
     }
 
-    private void sendNotificationIfNecessary(CheckImageResult result, Stack stack) {
+    private void sendNotificationIfNecessary(CheckImageResult result, StackDtoDelegate stack) {
         if (of(CREATE_FAILED, CREATE_FINISHED).contains(result.getImageStatus())) {
             notificationSender.send(getImageCopyNotification(result, stack));
         }
     }
 
-    private Notification<CloudbreakEventV4Response> getImageCopyNotification(CheckImageResult result, Stack stack) {
+    private Notification<CloudbreakEventV4Response> getImageCopyNotification(CheckImageResult result, StackDtoDelegate stack) {
         CloudbreakEventV4Response notification = new CloudbreakEventV4Response();
         notification.setEventType("IMAGE_COPY_STATE");
         notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(String.valueOf(result.getStatusProgressValue()));
         notification.setUserId(stack.getCreator().getUserId());
-        notification.setWorkspaceId(stack.getWorkspace().getId());
-        notification.setCloud(stack.cloudPlatform());
+        notification.setWorkspaceId(stack.getWorkspaceId());
+        notification.setCloud(stack.getCloudPlatform());
         notification.setRegion(stack.getRegion());
         notification.setStackCrn(stack.getResourceCrn());
         notification.setStackName(stack.getName());
@@ -334,18 +327,13 @@ public class StackCreationService {
         return new Notification<>(notification);
     }
 
-    private void handleFailure(StackView stackView, String errorReason) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackView.getId());
-        handleFailure(stack, errorReason);
-    }
-
-    private void handleFailure(Stack stack, String errorReason) {
+    private void handleFailure(StackDto stack, String errorReason) {
         try {
             if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
                 LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
             } else {
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ROLLING_BACK, errorReason);
-                connector.rollback(stack, stack.getResources());
+                connector.rollback(stack);
                 flowMessageService.fireEventAndLog(stack.getId(), Status.CREATE_FAILED.name(), STACK_INFRASTRUCTURE_CREATE_FAILED, errorReason);
             }
         } catch (Exception ex) {

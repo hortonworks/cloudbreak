@@ -39,13 +39,13 @@ public class SaltUpdateActions {
         return new AbstractStackCreationAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
-                saltUpdateService.bootstrappingMachines(context.getStack());
+                saltUpdateService.bootstrappingMachines(context.getStackId());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new BootstrapMachinesRequest(context.getStack().getId(), true);
+                return new BootstrapMachinesRequest(context.getStackId(), true);
             }
         };
     }
@@ -85,7 +85,7 @@ public class SaltUpdateActions {
         return new AbstractClusterAction<>(KeytabConfigurationSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, KeytabConfigurationSuccess payload, Map<Object, Object> variables) {
-                saltUpdateService.startingClusterServices(context.getStack());
+                saltUpdateService.startingClusterServices(context.getStackId());
                 sendEvent(context);
             }
 
@@ -101,7 +101,7 @@ public class SaltUpdateActions {
         return new AbstractClusterAction<>(StartClusterManagerServicesSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, StartClusterManagerServicesSuccess payload, Map<Object, Object> variables) {
-                saltUpdateService.clusterInstallationFinished(context.getStack());
+                saltUpdateService.clusterInstallationFinished(context.getStackId());
                 sendEvent(context);
             }
 
@@ -117,13 +117,13 @@ public class SaltUpdateActions {
         return new AbstractStackFailureAction<ClusterCreationState, ClusterCreationEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                saltUpdateService.handleClusterCreationFailure(context.getStackView(), payload.getException());
+                saltUpdateService.handleClusterCreationFailure(context.getStack(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(SaltUpdateEvent.SALT_UPDATE_FAILURE_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(SaltUpdateEvent.SALT_UPDATE_FAILURE_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

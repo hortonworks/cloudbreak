@@ -65,11 +65,11 @@ public class ClusterCredentialChangeActions {
             protected void doExecute(ClusterViewContext context, ClusterCredentialChangeResult payload, Map<Object, Object> variables) {
                 switch (payload.getRequest().getType()) {
                     case REPLACE:
-                        clusterCredentialChangeService.finishCredentialReplace(context.getStackId(), context.getClusterId(),
+                        clusterCredentialChangeService.finishCredentialReplace(context.getStackId(), context.getCluster().getId(),
                                 payload.getRequest().getUser(), payload.getRequest().getPassword());
                         break;
                     case UPDATE:
-                        clusterCredentialChangeService.finishCredentialUpdate(context.getStackId(), context.getClusterId(),
+                        clusterCredentialChangeService.finishCredentialUpdate(context.getStackId(), context.getCluster().getId(),
                                 payload.getRequest().getPassword());
                         break;
                     default:
@@ -97,7 +97,7 @@ public class ClusterCredentialChangeActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterCredentialChangeEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(ClusterCredentialChangeEvent.FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

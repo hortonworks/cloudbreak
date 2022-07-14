@@ -6,30 +6,23 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 class StackScalabilityCondition {
 
-    boolean isScalable(Stack stack, String instanceGroupName) {
-        InstanceGroup instanceGroup = getInstanceGroupByName(stack, instanceGroupName);
+    boolean isScalable(StackDtoDelegate stack, String instanceGroupName) {
+        InstanceGroupDto instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         List<InstanceStatus> statuses = getStatuses(instanceGroup);
         return statuses.stream().noneMatch(status -> status.equals(InstanceStatus.REQUESTED));
 
     }
 
-    private List<InstanceStatus> getStatuses(InstanceGroup instanceGroup) {
-        return instanceGroup.getInstanceMetaDataSet().stream()
-                .map(InstanceMetaData::getInstanceStatus)
+    private List<InstanceStatus> getStatuses(InstanceGroupDto instanceGroup) {
+        return instanceGroup.getInstanceMetadataViews().stream()
+                .map(InstanceMetadataView::getInstanceStatus)
                 .collect(Collectors.toList());
-    }
-
-    private InstanceGroup getInstanceGroupByName(Stack stack, String instanceGroupName) {
-        return stack.getInstanceGroups().stream()
-                .filter(group -> group.getGroupName().equals(instanceGroupName))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("No instance group found."));
     }
 }

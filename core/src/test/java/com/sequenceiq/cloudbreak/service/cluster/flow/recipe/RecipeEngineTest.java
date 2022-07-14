@@ -5,31 +5,30 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -48,32 +47,24 @@ public class RecipeEngineTest {
     private LdapConfigService ldapConfigService;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private HostGroupService hostGroupService;
 
     @Mock
-    private ResourceService resourceService;
-
-    @Mock
     private RecipeTemplateService recipeTemplateService;
-
-    @BeforeEach
-    public void setUp() {
-        recipeEngine = new RecipeEngine();
-        MockitoAnnotations.openMocks(this);
-    }
 
     @Test
     public void testUploadRecipes() throws CloudbreakException {
         // GIVEN
-        given(stackService.getByIdWithListsInTransaction(eq(DUMMY_STACK_ID))).willReturn(stack());
+        StackDto stack = stack();
+        given(stackDtoService.getById(eq(DUMMY_STACK_ID))).willReturn(stack);
         given(hostGroupService.getByClusterWithRecipes(eq(DUMMY_STACK_ID))).willReturn(hostGroups());
         // WHEN
         recipeEngine.uploadRecipes(DUMMY_STACK_ID);
         // THEN
-        verify(orchestratorRecipeExecutor, times(1)).uploadRecipes(any(Stack.class), anyMap());
+        verify(orchestratorRecipeExecutor, times(1)).uploadRecipes(any(StackDto.class), anyMap());
         verify(recipeTemplateService, times(1)).updateAllGeneratedRecipes(anySet(), anyMap());
     }
 
@@ -127,25 +118,26 @@ public class RecipeEngineTest {
         hg2.setName("worker");
         hgs.add(hg1);
         hgs.add(hg2);
-        given(stackService.getByIdWithListsInTransaction(eq(DUMMY_STACK_ID))).willReturn(stack());
+        StackDto stack = stack();
+        given(stackDtoService.getById(eq(DUMMY_STACK_ID))).willReturn(stack);
         given(hostGroupService.getByClusterWithRecipes(eq(DUMMY_STACK_ID))).willReturn(hgs);
         // WHEN
         recipeEngine.uploadRecipes(DUMMY_STACK_ID);
         // THEN
-        verify(orchestratorRecipeExecutor, times(1)).uploadRecipes(any(Stack.class), anyMap());
+        verify(orchestratorRecipeExecutor, times(1)).uploadRecipes(any(StackDto.class), anyMap());
         verify(recipeTemplateService, times(1)).updateAllGeneratedRecipes(anySet(), anyMap());
     }
 
-    private Stack stack() {
-        Stack stack = new Stack();
-        stack.setId(DUMMY_STACK_ID);
-        stack.setName("dummy");
+    private StackDto stack() {
+        StackDto stack = mock(StackDto.class);
+        lenient().when(stack.getId()).thenReturn(DUMMY_STACK_ID);
+        lenient().when(stack.getName()).thenReturn("dummy");
         Cluster cluster = new Cluster();
         cluster.setId(DUMMY_STACK_ID);
-        stack.setCluster(cluster);
+        lenient().when(stack.getCluster()).thenReturn(cluster);
         Workspace workspace = new Workspace();
         workspace.setId(DUMMY_STACK_ID);
-        stack.setWorkspace(workspace);
+        lenient().when(stack.getWorkspace()).thenReturn(workspace);
         return stack;
     }
 

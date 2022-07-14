@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUp
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.isNotNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,10 +41,13 @@ import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
@@ -84,22 +88,25 @@ class StackUpscaleActionsTest {
     @InjectMocks
     private StackUpscaleActions underTest;
 
+    @Mock
+    private StackDtoService stackDtoService;
+
     private StackScalingFlowContext context;
 
     @Mock
     private FlowParameters flowParameters;
 
     @Mock
-    private Stack stack;
+    private StackView stack;
+
+    @Mock
+    private StackDto stackDto;
 
     @Mock
     private CloudContext cloudContext;
 
     @Mock
     private CloudCredential cloudCredential;
-
-    @Mock
-    private CloudStack cloudStack;
 
     @Mock
     private FlowRegister runningFlows;
@@ -121,7 +128,8 @@ class StackUpscaleActionsTest {
 
     @BeforeEach
     void setUp() {
-        context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT),
+        lenient().when(stack.getId()).thenReturn(STACK_ID);
+        context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT),
                 Map.of(), Map.of(), false, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()));
     }
 
@@ -144,10 +152,11 @@ class StackUpscaleActionsTest {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
         UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
 
-        when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(stackUpscaleService.getInstanceCountToCreate(stackDto, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT);
 
         Stack updatedStack = mock(Stack.class);
-        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, Map.of(INSTANCE_GROUP_NAME, 3), Map.of(), false, false,
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(stackDto, Map.of(INSTANCE_GROUP_NAME, 3), Map.of(), false, false,
                 context.getStackNetworkScaleDetails())).thenReturn(updatedStack);
         CloudStack convertedCloudStack = mock(CloudStack.class);
         when(cloudStackConverter.convert(updatedStack)).thenReturn(convertedCloudStack);
@@ -179,7 +188,8 @@ class StackUpscaleActionsTest {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
         UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
 
-        when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT_ZERO);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(stackUpscaleService.getInstanceCountToCreate(stackDto, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT_ZERO);
 
         List<CloudResourceStatus> resourceStatuses = List.of(cloudResourceStatus);
 
@@ -206,11 +216,12 @@ class StackUpscaleActionsTest {
     @Test
     void prevalidateTestDoExecuteWhenScalingNotNeeded() throws Exception {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT_ZERO.longValue());
-        context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
+        context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
                 Map.of(), Map.of(), false, adjustmentTypeWithThreshold);
         UpdateDomainDnsResolverResult payload = new UpdateDomainDnsResolverResult(STACK_ID);
 
-        when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, false)).thenReturn(ADJUSTMENT_ZERO);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(stackUpscaleService.getInstanceCountToCreate(stackDto, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, false)).thenReturn(ADJUSTMENT_ZERO);
 
         List<CloudResourceStatus> resourceStatuses = List.of(cloudResourceStatus);
 

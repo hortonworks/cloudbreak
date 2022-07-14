@@ -15,12 +15,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ClusterTerminationFlowService {
@@ -43,18 +43,18 @@ public class ClusterTerminationFlowService {
 
     public void finishClusterTerminationAllowed(ClusterViewContext context, ClusterTerminationResult payload) {
         LOGGER.debug("Terminate cluster result: {}", payload);
-        StackView stackView = context.getStack();
-        ClusterView clusterView = context.getClusterView();
-        if (clusterView != null) {
-            InMemoryStateStore.deleteCluster(clusterView.getId());
-            stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.CLUSTER_DELETE_COMPLETED);
+        StackView stack = context.getStack();
+        ClusterView cluster = context.getCluster();
+        if (cluster != null) {
+            InMemoryStateStore.deleteCluster(cluster.getId());
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_DELETE_COMPLETED);
         }
     }
 
     public void finishClusterTerminationNotAllowed(ClusterViewContext context, ClusterTerminationResult payload) {
-        StackView stackView = context.getStack();
-        Long stackId = stackView.getId();
-        flowMessageService.fireEventAndLog(stackId, DELETE_FAILED.name(), CLUSTER_DELETE_FAILED, "Operation not allowed");
+        StackView stack = context.getStack();
+        Long stackId = stack.getId();
+        flowMessageService.fireEventAndLog(context.getStackId(), DELETE_FAILED.name(), CLUSTER_DELETE_FAILED, "Operation not allowed");
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
     }
 

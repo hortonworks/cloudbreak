@@ -28,7 +28,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
@@ -50,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.SpiFileSystem;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -75,39 +75,45 @@ class StackUpscaleServiceTest {
     @InjectMocks
     private StackUpscaleService stackUpscaleService;
 
+    @Mock
+    private StackDto stackDto;
+
     @Test
     public void testGetInstanceCountToCreateWhenRepair() {
         InstanceGroup instanceGroup = new InstanceGroup();
+        when(stackDto.getId()).thenReturn(1L);
         when(stackScalabilityCondition.isScalable(any(), eq("worker"))).thenReturn(Boolean.TRUE);
         when(instanceMetaDataService.unusedInstancesInInstanceGroupByName(eq(1L), eq("worker")))
                 .thenReturn(Set.of(instanceMetaData(1L, 1L, InstanceStatus.CREATED, false, instanceGroup),
                         instanceMetaData(2L, 1L, InstanceStatus.CREATED, false, instanceGroup)));
 
-        int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(TestUtil.stack(), "worker", 3, true);
+        int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(stackDto, "worker", 3, true);
         assertEquals(3, instanceCountToCreate);
     }
 
     @Test
     public void testGetInstanceCountToCreateWhenUpscale() {
         InstanceGroup instanceGroup = new InstanceGroup();
+        when(stackDto.getId()).thenReturn(1L);
         when(stackScalabilityCondition.isScalable(any(), eq("worker"))).thenReturn(Boolean.TRUE);
         when(instanceMetaDataService.unusedInstancesInInstanceGroupByName(eq(1L), eq("worker")))
                 .thenReturn(Set.of(instanceMetaData(1L, 1L, InstanceStatus.CREATED, false, instanceGroup),
                         instanceMetaData(2L, 1L, InstanceStatus.CREATED, false, instanceGroup)));
 
-        int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(TestUtil.stack(), "worker", 3, false);
+        int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(stackDto, "worker", 3, false);
         assertEquals(1, instanceCountToCreate);
     }
 
     @Test
     public void testGetInstanceCountToCreateWhenStackIsNotScalable() {
         InstanceGroup instanceGroup = new InstanceGroup();
+        when(stackDto.getId()).thenReturn(1L);
         when(stackScalabilityCondition.isScalable(any(), eq("worker"))).thenReturn(Boolean.FALSE);
         when(instanceMetaDataService.unusedInstancesInInstanceGroupByName(eq(1L), eq("worker")))
                 .thenReturn(Set.of(instanceMetaData(1L, 1L, InstanceStatus.CREATED, false, instanceGroup),
                         instanceMetaData(2L, 1L, InstanceStatus.CREATED, false, instanceGroup)));
 
-        int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(TestUtil.stack(), "worker", 3, false);
+        int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(stackDto, "worker", 3, false);
         assertEquals(0, instanceCountToCreate);
 
     }

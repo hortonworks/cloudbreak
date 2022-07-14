@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cm.util.ConfigUtils.makeApiConfigList;
-import static java.util.stream.Collectors.joining;
 import static java.lang.module.ModuleDescriptor.Version;
+import static java.util.stream.Collectors.joining;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,12 +26,12 @@ import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -115,7 +115,7 @@ public class ClouderaManagerMgmtTelemetryService {
     @Inject
     private MonitoringConfiguration monitoringConfiguration;
 
-    public void setupTelemetryRole(final Stack stack, final ApiClient client, final ApiHostRef cmHostRef,
+    public void setupTelemetryRole(final StackDtoDelegate stack, final ApiClient client, final ApiHostRef cmHostRef,
             final ApiRoleList mgmtRoles, final Telemetry telemetry, String sdxStackCrn) throws ApiException {
         if (isWorkflowAnalyticsEnabled(stack, telemetry)) {
             WorkloadAnalytics workloadAnalytics = telemetry.getWorkloadAnalytics();
@@ -145,7 +145,7 @@ public class ClouderaManagerMgmtTelemetryService {
         }
     }
 
-    public void updateTelemetryConfigs(final Stack stack, final ApiClient client,
+    public void updateTelemetryConfigs(final StackDtoDelegate stack, final ApiClient client,
             final Telemetry telemetry, final String sdxContextName,
             final String sdxStackCrn, final ProxyConfig proxyConfig) throws ApiException {
         if (isWorkflowAnalyticsEnabled(stack, telemetry)) {
@@ -157,7 +157,7 @@ public class ClouderaManagerMgmtTelemetryService {
         }
     }
 
-    public void updateServiceMonitorConfigs(final Stack stack, final ApiClient client,
+    public void updateServiceMonitorConfigs(final StackDtoDelegate stack, final ApiClient client,
             final Telemetry telemetry) throws ApiException {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         if (isMonitoringSupported(stack, telemetry, accountId)) {
@@ -180,7 +180,7 @@ public class ClouderaManagerMgmtTelemetryService {
     }
 
     @VisibleForTesting
-    ApiConfigList buildTelemetryConfigList(Stack stack, WorkloadAnalytics wa, String sdxContextName,
+    ApiConfigList buildTelemetryConfigList(StackDtoDelegate stack, WorkloadAnalytics wa, String sdxContextName,
             String sdxCrn, ProxyConfig proxyConfig) {
         final Map<String, String> configsToUpdate = new HashMap<>();
         Map<String, String> telemetrySafetyValveMap = new HashMap<>();
@@ -216,7 +216,7 @@ public class ClouderaManagerMgmtTelemetryService {
     }
 
     @VisibleForTesting
-    void enrichWithSdxData(String sdxContextName, String sdxCrn, Stack stack, WorkloadAnalytics workloadAnalytics,
+    void enrichWithSdxData(String sdxContextName, String sdxCrn, StackDtoDelegate stack, WorkloadAnalytics workloadAnalytics,
             Map<String, String> telemetrySafetyValveMap) {
         sdxContextName = StringUtils.isNotEmpty(sdxContextName)
                 ? sdxContextName : String.format("%s-%s", stack.getCluster().getName(), stack.getCluster().getId().toString());
@@ -238,13 +238,13 @@ public class ClouderaManagerMgmtTelemetryService {
                 .collect(joining("\n"));
     }
 
-    private boolean isWorkflowAnalyticsEnabled(Stack stack, Telemetry telemetry) {
+    private boolean isWorkflowAnalyticsEnabled(StackDtoDelegate stack, Telemetry telemetry) {
         return telemetry != null
                 && telemetry.getWorkloadAnalytics() != null
                 && !StackType.DATALAKE.equals(stack.getType());
     }
 
-    private boolean isMonitoringSupported(Stack stack, Telemetry telemetry, String accountId) {
+    private boolean isMonitoringSupported(StackDtoDelegate stack, Telemetry telemetry, String accountId) {
         return monitoringConfiguration.isEnabled()
                 && telemetry.isMonitoringFeatureEnabled()
                 && (monitoringConfiguration.isPaasSupport() || entitlementService.isCdpSaasEnabled(accountId))

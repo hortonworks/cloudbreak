@@ -11,8 +11,8 @@ public class StackToAutoscaleStackV4ResponseConverter {
 
     public AutoscaleStackV4Response convert(Stack source) {
         AutoscaleStackV4Response result = new AutoscaleStackV4Response();
-        result.setTenant(source.getWorkspace().getTenant().getName());
-        result.setWorkspaceId(source.getWorkspace().getId());
+        result.setTenant(source.getTenantName());
+        result.setWorkspaceId(source.getWorkspaceId());
         result.setUserId(source.getCreator().getUserId());
         result.setStackId(source.getId());
         result.setName(source.getName());
@@ -29,8 +29,8 @@ public class StackToAutoscaleStackV4ResponseConverter {
         if (source.getCluster() != null) {
             Cluster cluster = source.getCluster();
             result.setClusterManagerIp(cluster.getClusterManagerIp());
-            result.setUserNamePath(cluster.getCloudbreakAmbariUserSecret());
-            result.setPasswordPath(cluster.getCloudbreakAmbariPasswordSecret());
+            result.setUserNamePath(cluster.getCloudbreakAmbariUserSecretPath());
+            result.setPasswordPath(cluster.getCloudbreakAmbariPasswordSecretPath());
             result.setClusterStatus(source.getStatus());
         }
         return result;

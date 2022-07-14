@@ -58,8 +58,9 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
     public void testConvertWhenParamsFromCloudInstanceOnly() {
         InstanceMetaData source = getSource();
         initStackToCloudStackConverter(true);
+        InstanceGroup instanceGroup = source.getInstanceGroup();
 
-        CloudInstance cloudInstance = underTest.convert(source, environment, new StackAuthentication());
+        CloudInstance cloudInstance = underTest.convert(source, instanceGroup, environment, new StackAuthentication());
 
         verifyParams(cloudInstance, SUBNET_ID, INSTANCE_NAME, AVAILABILITY_ZONE);
         assertEquals(source.getInstanceId(), cloudInstance.getInstanceId());
@@ -85,8 +86,9 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
         InstanceMetaData source = getSource();
         addParamsToInstanceMetaData(source);
         initStackToCloudStackConverter(true);
+        InstanceGroup instanceGroup = source.getInstanceGroup();
 
-        CloudInstance cloudInstance = underTest.convert(source, environment, new StackAuthentication());
+        CloudInstance cloudInstance = underTest.convert(source, instanceGroup, environment, new StackAuthentication());
 
         verifyParams(cloudInstance, SUBNET_ID, INSTANCE_NAME, AVAILABILITY_ZONE);
         assertEquals(source.getInstanceId(), cloudInstance.getInstanceId());
@@ -103,8 +105,9 @@ public class InstanceMetaDataToCloudInstanceConverterTest extends AbstractEntity
         InstanceMetaData source = getSource();
         addParamsToInstanceMetaData(source);
         initStackToCloudStackConverter(false);
+        InstanceGroup instanceGroup = source.getInstanceGroup();
 
-        CloudInstance cloudInstance = underTest.convert(source, environment, new StackAuthentication());
+        CloudInstance cloudInstance = underTest.convert(source, instanceGroup, environment, new StackAuthentication());
 
         verifyParams(cloudInstance, SUBNET_ID_2, INSTANCE_NAME_2, AVAILABILITY_ZONE_2);
         assertEquals(source.getInstanceId(), cloudInstance.getInstanceId());

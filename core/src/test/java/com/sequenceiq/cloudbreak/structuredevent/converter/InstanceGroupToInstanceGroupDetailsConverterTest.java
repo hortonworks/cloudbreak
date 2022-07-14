@@ -28,14 +28,14 @@ public class InstanceGroupToInstanceGroupDetailsConverterTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setSecurityGroup(new SecurityGroup());
 
-        InstanceGroupDetails instanceGroupDetails = underTest.convert(instanceGroup);
+        InstanceGroupDetails instanceGroupDetails = underTest.convert(instanceGroup, 0);
 
         assertThat(instanceGroupDetails).isNotNull();
     }
 
     @Test
     void convert() {
-        InstanceGroupDetails instanceGroupDetails = underTest.convert(createInstanceGroup());
+        InstanceGroupDetails instanceGroupDetails = underTest.convert(createInstanceGroup(), 0);
 
         assertEquals("ATTACHED_VOLUMES", instanceGroupDetails.getTemporaryStorage());
         // keep only encryted

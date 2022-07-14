@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.san;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_11;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -13,8 +12,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
@@ -29,14 +27,11 @@ public class LoadBalancerSANProvider {
     @Inject
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
 
-    public Optional<String> getLoadBalancerSAN(Stack stack) {
-        checkNotNull(stack);
-        checkNotNull(stack.getCluster());
-        Cluster cluster = stack.getCluster();
-        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(cluster.getBlueprint().getBlueprintText());
+    public Optional<String> getLoadBalancerSAN(Long stackId, Blueprint blueprint) {
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(blueprint.getBlueprintText());
         String cdhVersion = cmTemplateProcessor.getStackVersion();
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_11)) {
-            Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stack.getId());
+            Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId);
             if (!loadBalancers.isEmpty()) {
                 Optional<LoadBalancer> loadBalancer = loadBalancerConfigService.selectLoadBalancerForFrontend(loadBalancers, LoadBalancerType.PUBLIC);
                 return loadBalancer.flatMap(this::getBestSANForLB);

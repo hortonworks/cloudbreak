@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.domain.converter.StatusConverter;
 
 @Entity
 @Table(name = "stackstatus")
+@Deprecated
 public class StackStatusView implements ProvisionEntity {
     @Id
     private Long id;

@@ -24,7 +24,7 @@ public class CloudbreakRestRequestThreadLocalServiceTest {
     @Test
     public void shouldOverwritePreviousWorkspaceIdWithTheCurrentOne() {
         victim.setRequestedWorkspaceId(PREVIOUS_WORKSPACE_ID);
-        victim.setWorkspace(aWorkspace());
+        victim.setWorkspaceId(aWorkspace().getId());
 
         assertEquals(WORKSPACE_ID, victim.getRequestedWorkspaceId());
     }
@@ -32,7 +32,7 @@ public class CloudbreakRestRequestThreadLocalServiceTest {
     @Test
     public void shouldClearPreviousWorkspaceIdInCaseOfMissingWorkspace() {
         victim.setRequestedWorkspaceId(PREVIOUS_WORKSPACE_ID);
-        victim.setWorkspace(null);
+        victim.setWorkspaceId(null);
 
         assertNull(victim.getRequestedWorkspaceId());
     }

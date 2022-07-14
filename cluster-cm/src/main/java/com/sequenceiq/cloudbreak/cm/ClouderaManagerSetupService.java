@@ -63,18 +63,19 @@ import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommand;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.repository.ClusterCommandRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
@@ -128,20 +129,20 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     @Inject
     private EntitlementService entitlementService;
 
-    private final Stack stack;
+    private final StackDtoDelegate stack;
 
     private final HttpClientConfig clientConfig;
 
     private ApiClient apiClient;
 
-    public ClouderaManagerSetupService(Stack stack, HttpClientConfig clientConfig) {
+    public ClouderaManagerSetupService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
     }
 
     @PostConstruct
     public void initApiClient() throws ClusterClientInitException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
@@ -179,7 +180,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             KerberosConfig kerberosConfig) {
         Long clusterId = stack.getCluster().getId();
         try {
-            Set<InstanceMetaData> instances = instanceMetaDataByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
+            Set<InstanceMetadataView> instances = instanceMetaDataByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
             waitForHosts(instances);
             String sdxContextName = Optional.ofNullable(sdxContext).map(this::setupRemoteDataContext).orElse(null);
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
@@ -244,7 +245,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public void configureKerberos(KerberosConfig kerberosConfig) {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         try {
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(cluster.getId());
             if (!CMRepositoryVersionUtil.isEnableKerberosSupportedViaBlueprint(clouderaManagerRepoDetails)) {
@@ -259,7 +260,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public void installCluster(String template) {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         try {
             Optional<ApiCluster> cmCluster = getCmClusterByName(cluster.getName());
             boolean prewarmed = isPrewarmed(cluster.getId());
@@ -267,7 +268,6 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
                     ClusterCommandType.IMPORT_CLUSTER);
             if (cmCluster.isEmpty() || importCommand.isEmpty()) {
                 ApiClusterTemplate apiClusterTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
-                cluster.setExtendedBlueprintText(getExtendedBlueprintText(apiClusterTemplate));
                 ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
                 LOGGER.info("Generated Cloudera cluster template: {}", AnonymizerUtil.anonymize(template));
                 // addRepositories - if true the parcels repositories in the cluster template
@@ -287,13 +287,13 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             throw new ClouderaManagerOperationFailedException(msg, e);
         } catch (CloudStorageConfigurationFailedException e) {
             LOGGER.info("Error while configuring cloud storage. Message: {}", e.getMessage(), e);
-            throw new ClouderaManagerOperationFailedException(mapStorageError(e, stack.getResourceCrn(), stack.cloudPlatform(), cluster), e);
+            throw new ClouderaManagerOperationFailedException(mapStorageError(e, stack.getResourceCrn(), stack.getCloudPlatform(), cluster), e);
         } catch (Exception e) {
             throw mapException(e);
         }
     }
 
-    private String mapStorageError(CloudStorageConfigurationFailedException exception, String stackCrn, String cloudPlatform, Cluster cluster) {
+    private String mapStorageError(CloudStorageConfigurationFailedException exception, String stackCrn, String cloudPlatform, ClusterView cluster) {
         String accountId = Crn.safeFromString(stackCrn).getAccountId();
         String result = exception.getMessage();
         if ((CloudPlatform.AWS.equalsIgnoreCase(cloudPlatform) && !entitlementService.awsCloudStorageValidationEnabled(accountId)) ||
@@ -348,8 +348,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     @Override
-    public ExtendedPollingResult waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException {
-        Cluster cluster = stack.getCluster();
+    public ExtendedPollingResult waitForHosts(Set<InstanceMetadataView> hostsInCluster) throws ClusterClientInitException {
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         ApiClient client;
@@ -358,13 +358,13 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
-        List<String> privateIps = hostsInCluster.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
+        List<String> privateIps = hostsInCluster.stream().map(InstanceMetadataView::getPrivateIp).collect(Collectors.toList());
         return clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, client, privateIps);
     }
 
     @Override
-    public void waitForHostsHealthy(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException {
-        Cluster cluster = stack.getCluster();
+    public void waitForHostsHealthy(Set<InstanceMetadataView> hostsInCluster) throws ClusterClientInitException {
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         ApiClient client;
@@ -384,7 +384,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public String getSdxContext() {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
@@ -427,7 +427,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     private void addNoProxyHosts(ProxyConfig proxyConfig, ApiConfigList proxyConfigList) {
         if (StringUtils.isNotBlank(proxyConfig.getNoProxyHosts())) {
-            Cluster cluster = stack.getCluster();
+            ClusterView cluster = stack.getCluster();
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(cluster.getId());
             if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_6_0)) {
                 proxyConfigList.addItemsItem(new ApiConfig().name("parcel_no_proxy_list").value(proxyConfig.getNoProxyHosts()));
@@ -437,7 +437,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Override
     public String setupRemoteDataContext(String sdxContext) {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {

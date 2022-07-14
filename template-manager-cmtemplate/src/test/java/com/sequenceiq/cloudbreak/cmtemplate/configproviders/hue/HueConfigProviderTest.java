@@ -20,7 +20,6 @@ import org.junit.Test;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateVariable;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
@@ -102,7 +101,7 @@ public class HueConfigProviderTest {
         BlueprintView blueprintView = getMockBlueprintView("7.2.0", "7.1.0");
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfig.getType()).thenReturn(DatabaseType.HUE.toString());
+        when(rdsConfig.getType()).thenReturn(HUE);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
@@ -128,7 +127,7 @@ public class HueConfigProviderTest {
         BlueprintView blueprintView = getMockBlueprintView("7.0.1", "7.0.1");
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfig.getType()).thenReturn(DatabaseType.HUE.toString());
+        when(rdsConfig.getType()).thenReturn(HUE);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
@@ -178,7 +177,7 @@ public class HueConfigProviderTest {
         when(blueprintView.getProcessor()).thenReturn(templateProcessor);
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfig.getType()).thenReturn(DatabaseType.HUE.toString());
+        when(rdsConfig.getType()).thenReturn(HUE);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
@@ -232,7 +231,7 @@ public class HueConfigProviderTest {
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(true);
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfig.getType()).thenReturn(DatabaseType.HUE.toString());
+        when(rdsConfig.getType()).thenReturn(HUE);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
@@ -249,7 +248,7 @@ public class HueConfigProviderTest {
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(false);
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfig.getType()).thenReturn(DatabaseType.HUE.toString());
+        when(rdsConfig.getType()).thenReturn(HUE);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
@@ -276,7 +275,7 @@ public class HueConfigProviderTest {
         BlueprintView blueprintView = getMockBlueprintView("7.0.1", "7.0.1");
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfig.getType()).thenReturn(DatabaseType.HUE.toString());
+        when(rdsConfig.getType()).thenReturn(HUE);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
@@ -313,7 +312,7 @@ public class HueConfigProviderTest {
         BlueprintView blueprintView = getMockBlueprintView("7.2.0", "7.1.0");
 
         RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
-        when(rdsConfig.getType()).thenReturn(DatabaseType.HUE.toString());
+        when(rdsConfig.getType()).thenReturn(HUE);
         when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
         when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);

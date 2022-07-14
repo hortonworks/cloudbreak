@@ -17,14 +17,16 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseCon
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.ExternalDatabaseStopEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.ExternalDatabaseStopState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @ExtendWith(MockitoExtension.class)
 class AbstractExternalDatabaseStopActionTest {
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private FlowParameters flowParameters;
@@ -40,7 +42,10 @@ class AbstractExternalDatabaseStopActionTest {
     @Test
     void createFlowContext() {
         Stack stack = new Stack();
-        when(stackService.getByIdWithClusterInTransaction(1L)).thenReturn(stack);
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
+        when(stackDtoService.getStackViewById(1L)).thenReturn(stack);
 
         semaphore = false;
         ExternalDatabaseContext flowContext = underTest.createFlowContext(flowParameters, stateContext, new TestPayload());

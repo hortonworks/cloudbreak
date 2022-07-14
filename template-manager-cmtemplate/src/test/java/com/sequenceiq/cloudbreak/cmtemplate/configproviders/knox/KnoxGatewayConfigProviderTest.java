@@ -190,7 +190,7 @@ public class KnoxGatewayConfigProviderTest {
         );
         assertEquals(
                 List.of(
-                        config("gateway_master_secret", gateway.getKnoxMasterSecret()),
+                        config("gateway_master_secret", gateway.getKnoxMaster()),
                         config("gateway_default_topology_name",
                             gateway.getTopologies().iterator().next().getTopologyName()),
                         config("gateway_knox_admin_groups", ""),
@@ -251,7 +251,7 @@ public class KnoxGatewayConfigProviderTest {
         );
         assertEquals(
                 List.of(
-                        config("gateway_master_secret", gateway.getKnoxMasterSecret()),
+                        config("gateway_master_secret", gateway.getKnoxMaster()),
                         config("gateway_default_topology_name",
                                 gateway.getTopologies().iterator().next().getTopologyName()),
                         config("gateway_knox_admin_groups", ""),
@@ -353,7 +353,7 @@ public class KnoxGatewayConfigProviderTest {
         );
         assertEquals(
             List.of(
-                config("gateway_master_secret", gateway.getKnoxMasterSecret()),
+                config("gateway_master_secret", gateway.getKnoxMaster()),
                 config("gateway_default_topology_name", "cdp-proxy"),
                 config("gateway_knox_admin_groups", "knox_admins"),
                 config("gateway_auto_discovery_enabled", "false"),
@@ -410,7 +410,7 @@ public class KnoxGatewayConfigProviderTest {
         );
         assertEquals(
                 List.of(
-                        config("gateway_master_secret", gateway.getKnoxMasterSecret()),
+                        config("gateway_master_secret", gateway.getKnoxMaster()),
                         config("gateway_default_topology_name", "cdp-proxy"),
                         config("gateway_knox_admin_groups", "knox_admins"),
                         config("gateway_auto_discovery_enabled", "false"),

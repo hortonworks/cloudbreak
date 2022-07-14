@@ -9,8 +9,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,14 +18,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
-import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 public class NetworkToNetworkV4ResponseConverterTest {
@@ -40,6 +40,9 @@ public class NetworkToNetworkV4ResponseConverterTest {
 
     @Mock
     private ProviderParameterCalculator providerParameterCalculator;
+
+    @Mock
+    private ResourceService resourceService;
 
     @InjectMocks
     private NetworkToNetworkV4ResponseConverter underTest;
@@ -66,11 +69,11 @@ public class NetworkToNetworkV4ResponseConverterTest {
     }
 
     @Test
-    public void testConvertShouldRCallTheParserWhenTheStackStackDoesNotContainNetworkRelatedResources() throws JsonProcessingException {
+    public void testConvertShouldRCallTheParserWhenTheStackStackDoesNotContainNetworkRelatedResources() {
         Resource gcpDisk = new Resource();
         gcpDisk.setResourceType(ResourceType.GCP_DISK);
         gcpDisk.setResourceName("myproject-attachedworkerdisk");
-        when(stack.getResources()).thenReturn(Set.of(gcpDisk));
+        when(resourceService.findAllByStackIdAndResourceTypeIn(any(), any())).thenReturn(List.of(gcpDisk));
         when(stack.getNetwork()).thenReturn(network);
 
         Map<String, Object> attributes = Map.of("cloudPlatform", "GCP");
@@ -85,7 +88,7 @@ public class NetworkToNetworkV4ResponseConverterTest {
     }
 
     @Test
-    public void testConvertShouldRCallTheParserWhenTheStackStackContainsNetworkRelatedResources() throws JsonProcessingException {
+    public void testConvertShouldRCallTheParserWhenTheStackStackContainsNetworkRelatedResources() {
         Resource vpc = new Resource();
         vpc.setResourceType(ResourceType.AWS_VPC);
         vpc.setResourceName("idOfTheCreatedVPC");
@@ -95,7 +98,7 @@ public class NetworkToNetworkV4ResponseConverterTest {
         Resource azureNetwork = new Resource();
         azureNetwork.setResourceType(ResourceType.AZURE_NETWORK);
         azureNetwork.setResourceName("idOfTheCreatedAzureNetwork");
-        when(stack.getResources()).thenReturn(Set.of(vpc, subnet, azureNetwork));
+        when(resourceService.findAllByStackIdAndResourceTypeIn(any(), any())).thenReturn(List.of(vpc, subnet, azureNetwork));
         when(stack.getNetwork()).thenReturn(network);
 
         Map<String, Object> attributes = Map.of("cloudPlatform", "MOCK");

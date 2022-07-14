@@ -22,12 +22,12 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.core.flow2.validate.cloud.config.CloudConfigValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.cloud.config.CloudConfigValidationState;
 import com.sequenceiq.cloudbreak.core.flow2.validate.cloud.event.ValidateCloudConfigRequest;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -40,7 +40,7 @@ public class CloudConfigValidationActions {
     private StackUpdaterService stackUpdaterService;
 
     @Inject
-    private StackViewService stackViewService;
+    private StackDtoService stackDtoService;
 
     @Bean(name = "VALIDATE_CLOUD_CONFIG_STATE")
     public Action<?, ?> cloudConfigValidationAction() {
@@ -66,23 +66,23 @@ public class CloudConfigValidationActions {
             protected StackFailureContext createFlowContext(FlowParameters flowParameters,
                     StateContext<CloudConfigValidationState, CloudConfigValidationEvent> stateContext, StackFailureEvent payload) {
                 Flow flow = getFlow(flowParameters.getFlowId());
-                StackView stackView = stackViewService.findById(payload.getResourceId()).get();
-                MDCBuilder.buildMdcContext(stackView);
+                StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
+                MDCBuilder.buildMdcContext(stack);
                 flow.setFlowFailed(payload.getException());
-                return new StackFailureContext(flowParameters, stackView);
+                return new StackFailureContext(flowParameters, stack, stack.getId());
             }
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 String statusReason = payload.getException().getMessage();
-                stackUpdaterService.updateStatusAndSendEventWithArgs(context.getStackView().getId(), DetailedStackStatus.PROVISION_FAILED,
+                stackUpdaterService.updateStatusAndSendEventWithArgs(context.getStackId(), DetailedStackStatus.PROVISION_FAILED,
                         ResourceEvent.CLOUD_CONFIG_VALIDATION_FAILED, statusReason, statusReason);
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(CloudConfigValidationEvent.VALIDATE_CLOUD_CONFIG_FAILURE_HANDLED_EVENT.selector(), context.getStackView().getId());
+                return new StackEvent(CloudConfigValidationEvent.VALIDATE_CLOUD_CONFIG_FAILURE_HANDLED_EVENT.selector(), context.getStackId());
             }
         };
     }

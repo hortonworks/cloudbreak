@@ -24,16 +24,18 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDownscaleValidatorService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class UpdateNodeCountValidator {
@@ -62,10 +64,10 @@ public class UpdateNodeCountValidator {
     @Inject
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
-    public void validataHostMetadataStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
+    public void validataHostMetadataStatuses(StackDto stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         if (upscaleEvent(instanceGroupAdjustmentJson.getScalingAdjustment())) {
-            List<InstanceMetaData> instanceMetaDataAsList = stack.getInstanceMetaDataAsList();
-            List<InstanceMetaData> unhealthyInstanceMetadataList = instanceMetaDataAsList.stream()
+            List<InstanceMetadataView> instanceMetaDataAsList = stack.getNotTerminatedInstanceMetaData();
+            List<InstanceMetadataView> unhealthyInstanceMetadataList = instanceMetaDataAsList.stream()
                     .filter(instanceMetaData -> InstanceStatus.SERVICES_UNHEALTHY.equals(instanceMetaData.getInstanceStatus()))
                     .collect(Collectors.toList());
             if (!unhealthyInstanceMetadataList.isEmpty()) {
@@ -78,18 +80,18 @@ public class UpdateNodeCountValidator {
         }
     }
 
-    public void validateHostGroupIsPresent(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack) {
-        Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
-                .filter(input -> input.getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
-        if (!hostGroup.isPresent()) {
+    public void validateHostGroupIsPresent(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, StackDto stack) {
+        Optional<InstanceGroupView> hostGroup = stack.getInstanceGroupViews().stream()
+                .filter(input -> input.getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
+        if (hostGroup.isEmpty()) {
             throw new BadRequestException(format("Group '%s' not found or not part of Data Hub '%s'",
                     instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
         }
     }
 
-    public void validateCMStatus(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
-        List<InstanceMetaData> instanceMetaDataAsList = stack.getInstanceMetaDataAsList();
-        List<InstanceMetaData> unhealthyCM = instanceMetaDataAsList.stream()
+    public void validateCMStatus(StackDto stack) {
+        List<InstanceMetadataView> instanceMetaDataAsList = stack.getAllAvailableInstances();
+        List<InstanceMetadataView> unhealthyCM = instanceMetaDataAsList.stream()
                 .filter(instanceMetaData -> (instanceMetaData.getInstanceMetadataType().equals(InstanceMetadataType.GATEWAY) ||
                         instanceMetaData.getInstanceMetadataType().equals(InstanceMetadataType.GATEWAY_PRIMARY))
                         && !InstanceStatus.SERVICES_HEALTHY.equals(instanceMetaData.getInstanceStatus()))
@@ -103,7 +105,7 @@ public class UpdateNodeCountValidator {
         }
     }
 
-    public void validateStackStatus(Stack stack, boolean upscale) {
+    public void validateStackStatus(StackView stack, boolean upscale) {
         if (upscale &&
                 !(stack.isAvailable() || (stack.hasNodeFailure() && targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(stack.getResourceCrn())))) {
             throwBadRequest(stack);
@@ -112,48 +114,48 @@ public class UpdateNodeCountValidator {
         }
     }
 
-    public void validateClusterStatus(Stack stack, boolean upscale) {
-        Cluster cluster = stack.getCluster();
-        if (upscale && cluster != null && !(stack.isAvailable()
+    public void validateClusterStatus(StackView stack, boolean upscale) {
+        Long clusterId = stack.getClusterId();
+        if (upscale && clusterId != null && !(stack.isAvailable()
                 || (stack.hasNodeFailure() && targetedUpscaleSupportService.targetedUpscaleEntitlementsEnabled(stack.getResourceCrn())))) {
             throwBadRequest(stack);
-        } else if (!upscale && cluster != null && !stack.isAvailable()) {
+        } else if (!upscale && clusterId != null && !stack.isAvailable()) {
             throwBadRequest(stack);
         }
     }
 
-    private void throwBadRequest(Stack stack) {
+    private void throwBadRequest(StackView stack) {
         throw new BadRequestException(format("Data Hub '%s' is currently in '%s' state. Node count can only be updated if it's running.",
                 stack.getName(), stack.getStatus()));
     }
 
-    public void validateStackStatusForStartHostGroup(Stack stack) {
+    public void validateStackStatusForStartHostGroup(StackView stack) {
         if (!(stack.isAvailable() || stack.isAvailableWithStoppedInstances())) {
             throw new BadRequestException(format("Data Hub '%s' has '%s' state. Node group start operation is not allowed for this state.",
                     stack.getName(), stack.getStatus()));
         }
     }
 
-    public void validateServiceRoles(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
+    public void validateServiceRoles(StackDto stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         validateServiceRoles(stack, instanceGroupAdjustmentJson.getInstanceGroup(), instanceGroupAdjustmentJson.getScalingAdjustment());
     }
 
-    public void validateServiceRoles(Stack stack, Map<String, Integer> instanceGroupAdjustments) {
+    public void validateServiceRoles(StackDto stack, Map<String, Integer> instanceGroupAdjustments) {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         cmTemplateValidator.validateHostGroupScalingRequest(
                 accountId,
-                stack.getCluster().getBlueprint(),
+                stack.getBlueprint(),
                 instanceGroupAdjustments,
                 clusterComponentConfigProvider.getNormalizedCdhProductWithNormalizedVersion(stack.getCluster().getId()),
                 instanceGroupService.findNotTerminatedByStackId(stack.getId()));
     }
 
-    public void validateServiceRoles(Stack stack, String instanceGroup, int scalingAdjustment) {
+    public void validateServiceRoles(StackDto stack, String instanceGroup, int scalingAdjustment) {
         if (hostGroupService.hasHostGroupInCluster(stack.getCluster().getId(), instanceGroup)) {
             String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
             cmTemplateValidator.validateHostGroupScalingRequest(
                     accountId,
-                    stack.getCluster().getBlueprint(),
+                    stack.getBlueprint(),
                     clusterComponentConfigProvider.getNormalizedCdhProductWithNormalizedVersion(stack.getCluster().getId()),
                     instanceGroup,
                     scalingAdjustment,
@@ -161,42 +163,42 @@ public class UpdateNodeCountValidator {
         }
     }
 
-    public void validateClusterStatusForStartHostGroup(Stack stack) {
-        Cluster cluster = stack.getCluster();
-        if (cluster != null && !(stack.isAvailable() || stack.isAvailableWithStoppedInstances())) {
+    public void validateClusterStatusForStartHostGroup(StackView stack) {
+        Long clusterId = stack.getClusterId();
+        if (clusterId != null && !(stack.isAvailable() || stack.isAvailableWithStoppedInstances())) {
             throw new BadRequestException(format("Data Hub '%s' has '%s' state. Node group start operation is not allowed for this state.",
-                    cluster.getName(), stack.getStatus()));
+                    stack.getName(), stack.getStatus()));
         }
     }
 
-    public void validateInstanceGroup(Stack stack, String instanceGroupName) {
-        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
+    public void validateInstanceGroup(StackDto stack, String instanceGroupName) {
+        InstanceGroupDto instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         if (instanceGroup == null) {
             throw new BadRequestException(format("Data Hub '%s' does not have a group named '%s'.", stack.getName(), instanceGroupName));
         }
     }
 
-    public void validateScalabilityOfInstanceGroup(Stack stack, HostGroupAdjustmentV4Request hostGroupAdjustmentV4Request) {
+    public void validateScalabilityOfInstanceGroup(StackDto stack, HostGroupAdjustmentV4Request hostGroupAdjustmentV4Request) {
         validateScalabilityOfInstanceGroup(stack,
                 hostGroupAdjustmentV4Request.getHostGroup(),
                 hostGroupAdjustmentV4Request.getScalingAdjustment());
     }
 
-    public void validateScalabilityOfInstanceGroup(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
+    public void validateScalabilityOfInstanceGroup(StackDto stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         validateScalabilityOfInstanceGroup(stack,
                 instanceGroupAdjustmentJson.getInstanceGroup(),
                 instanceGroupAdjustmentJson.getScalingAdjustment());
     }
 
-    public void validateScalabilityOfInstanceGroup(Stack stack, String instanceGroupName, int scalingAdjustment) {
-        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
+    public void validateScalabilityOfInstanceGroup(StackDto stack, String instanceGroupName, int scalingAdjustment) {
+        InstanceGroupDto instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         validateGroupAdjustment(
-                stack,
+                stack.getStack(),
                 scalingAdjustment,
                 instanceGroup);
     }
 
-    public void validateInstanceGroupForStopStart(Stack stack, String instanceGroupName, int scalingAdjustment) {
+    public void validateInstanceGroupForStopStart(StackDto stack, String instanceGroupName, int scalingAdjustment) {
         Set<String> computeGroups = getComputeHostGroup(stack);
         if (!computeGroups.contains(instanceGroupName)) {
             if (upscaleEvent(scalingAdjustment)) {
@@ -209,16 +211,17 @@ public class UpdateNodeCountValidator {
         }
     }
 
-    private void validateGroupAdjustment(Stack stack, Integer scalingAdjustment, InstanceGroup instanceGroup) {
+    private void validateGroupAdjustment(StackView stack, Integer scalingAdjustment, InstanceGroupDto instanceGroupDto) {
+        InstanceGroupView instanceGroup = instanceGroupDto.getInstanceGroup();
         if (upscaleEvent(scalingAdjustment)) {
-            if (nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(instanceGroup, scalingAdjustment)) {
+            if (nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(instanceGroupDto, scalingAdjustment)) {
                 throw new BadRequestException(format("Requested scaling up is forbidden on %s Data Hub %s group because the " +
                                 "the current node count is %s node the node count after the upscale action will be %s node and the minimal " +
                                 "node count in the %s group is %s node. You can not go under the minimal node count.",
                         stack.getName(),
                         instanceGroup.getGroupName(),
-                        instanceGroup.getNodeCount(),
-                        getNodeCountAfterScaling(instanceGroup, scalingAdjustment),
+                        instanceGroupDto.getNodeCount(),
+                        getNodeCountAfterScaling(instanceGroupDto, scalingAdjustment),
                         instanceGroup.getGroupName(),
                         instanceGroup.getMinimumNodeCount()));
             }
@@ -228,14 +231,14 @@ public class UpdateNodeCountValidator {
                         instanceGroup.getGroupName()));
             }
         } else if (downScaleEvent(scalingAdjustment)) {
-            if (nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(instanceGroup, scalingAdjustment)) {
+            if (nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(instanceGroupDto, scalingAdjustment)) {
                 throw new BadRequestException(format("Requested scaling down is forbidden on %s Data Hub %s group because the " +
                                 "the current node count is %s node the node count after the downscale action will be %s node and the minimal " +
                                 "node count in the %s group is %s node. You can not go under the minimal node count.",
                         stack.getName(),
                         instanceGroup.getGroupName(),
-                        instanceGroup.getNodeCount(),
-                        getNodeCountAfterScaling(instanceGroup, scalingAdjustment),
+                        instanceGroupDto.getNodeCount(),
+                        getNodeCountAfterScaling(instanceGroupDto, scalingAdjustment),
                         instanceGroup.getGroupName(),
                         instanceGroup.getMinimumNodeCount()));
             }
@@ -247,21 +250,21 @@ public class UpdateNodeCountValidator {
         }
     }
 
-    private int getNodeCountAfterScaling(InstanceGroup instanceGroup, Integer scalingAdjustment) {
+    private int getNodeCountAfterScaling(InstanceGroupDto instanceGroup, Integer scalingAdjustment) {
         return instanceGroup.getNodeCount() + scalingAdjustment.intValue();
     }
 
-    private Set<String> getComputeHostGroup(Stack stack) {
-        String blueprintText = stack.getCluster().getBlueprint().getBlueprintText();
+    private Set<String> getComputeHostGroup(StackDto stack) {
+        String blueprintText = stack.getBlueprint().getBlueprintText();
         CmTemplateProcessor templateProcessor = cmTemplateProcessorFactory.get(blueprintText);
         Versioned version = () -> templateProcessor.getVersion().get();
         return templateProcessor.getComputeHostGroups(version);
     }
 
-    private boolean nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(InstanceGroup instanceGroup,
-            Integer scalingAdjustment) {
+    private boolean nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(InstanceGroupDto instanceGroupDto, Integer scalingAdjustment) {
+        InstanceGroupView instanceGroup = instanceGroupDto.getInstanceGroup();
         int minimumNodeCount = instanceGroup.getMinimumNodeCount();
-        return getNodeCountAfterScaling(instanceGroup, scalingAdjustment) < minimumNodeCount;
+        return getNodeCountAfterScaling(instanceGroupDto, scalingAdjustment) < minimumNodeCount;
     }
 
     private boolean downScaleEvent(Integer scalingAdjustment) {
@@ -272,14 +275,15 @@ public class UpdateNodeCountValidator {
         return 0 < scalingAdjustment;
     }
 
-    public void validateScalingAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack) {
+    public void validateScalingAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, StackDto stack) {
         validateScalingAdjustment(instanceGroupAdjustmentJson.getInstanceGroup(),
                 instanceGroupAdjustmentJson.getScalingAdjustment(),
                 stack);
     }
 
-    public void validateScalingAdjustment(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
-        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
+    public void validateScalingAdjustment(String instanceGroupName, Integer scalingAdjustment, StackDto stack) {
+        InstanceGroupDto instanceGroupDto = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
+        InstanceGroupView instanceGroup = instanceGroupDto.getInstanceGroup();
         if (upscaleEvent(scalingAdjustment)) {
             if (!instanceGroup.getScalabilityOption().upscalable()) {
                 throw new BadRequestException(format("Requested scaling up is forbidden on %s Data Hub %s group.",
@@ -287,14 +291,14 @@ public class UpdateNodeCountValidator {
                         instanceGroup.getGroupName()));
             }
         } else if (downScaleEvent(scalingAdjustment)) {
-            if (nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(instanceGroup, scalingAdjustment)) {
+            if (nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(instanceGroupDto, scalingAdjustment)) {
                 throw new BadRequestException(format("Requested scaling down is forbidden on %s Data Hub %s group because the " +
                                 "the current node count is %s node the node count after the downscale action will be %s and the minimal " +
                                 "node count in the %s group is %s node. You can not go under the minimal node count.",
                         stack.getName(),
                         instanceGroup.getGroupName(),
-                        instanceGroup.getNodeCount(),
-                        getNodeCountAfterScaling(instanceGroup, scalingAdjustment),
+                        instanceGroupDto.getNodeCount(),
+                        getNodeCountAfterScaling(instanceGroupDto, scalingAdjustment),
                         instanceGroup.getGroupName(),
                         instanceGroup.getMinimumNodeCount()));
             }
@@ -306,10 +310,10 @@ public class UpdateNodeCountValidator {
         }
     }
 
-    public void validateInstanceStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
+    public void validateInstanceStatuses(StackDtoDelegate stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         if (upscaleEvent(instanceGroupAdjustmentJson.getScalingAdjustment())) {
-            List<InstanceMetaData> instanceMetaDataList =
-                    stack.getInstanceMetaDataAsList().stream().filter(im -> !im.isTerminated() && !im.isRunning() && !im.isCreated())
+            List<InstanceMetadataView> instanceMetaDataList =
+                    stack.getNotTerminatedInstanceMetaData().stream().filter(im -> !im.isTerminated() && !im.isRunning() && !im.isCreated())
                             .collect(Collectors.toList());
             if (!instanceMetaDataList.isEmpty()) {
                 String ims = instanceMetaDataList.stream()
@@ -321,7 +325,7 @@ public class UpdateNodeCountValidator {
         }
     }
 
-    public InstanceMetaData validateInstanceForDownscale(String instanceId, Stack stack) {
+    public InstanceMetaData validateInstanceForDownscale(String instanceId, StackView stack) {
         InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
                 .orElseThrow(() -> new NotFoundException(format("Metadata for instance %s has not found.", instanceId)));
         downscaleValidatorService.checkInstanceIsTheClusterManagerServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
@@ -329,7 +333,7 @@ public class UpdateNodeCountValidator {
         return metaData;
     }
 
-    public InstanceMetaData validateInstanceForStop(String instanceId, Stack stack) {
+    public InstanceMetaData validateInstanceForStop(String instanceId, StackView stack) {
         InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId).orElse(null);
         if (metaData != null) {
             downscaleValidatorService.checkInstanceIsTheClusterManagerServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());

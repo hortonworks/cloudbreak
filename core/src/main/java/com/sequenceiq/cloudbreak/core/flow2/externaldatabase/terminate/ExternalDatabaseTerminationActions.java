@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.action.AbstractExternalDatabaseTerminationAction;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationState;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExternalDatabaseFailed;
@@ -24,6 +23,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExt
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -38,7 +38,7 @@ public class ExternalDatabaseTerminationActions {
         return new AbstractExternalDatabaseTerminationAction<>(TerminationEvent.class) {
             @Override
             protected void doExecute(ExternalDatabaseContext context, TerminationEvent payload, Map<Object, Object> variables) {
-                Stack stack = context.getStack();
+                StackView stack = context.getStack();
                 TerminateExternalDatabaseRequest request = new TerminateExternalDatabaseRequest(stack.getId(), "TerminateExternalDatabaseRequest",
                         stack.getName(), stack.getResourceCrn(), payload.getTerminationType().isForced());
                 sendEvent(context, request);
@@ -57,7 +57,7 @@ public class ExternalDatabaseTerminationActions {
 
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
-                return new StackEvent(ExternalDatabaseTerminationEvent.EXTERNAL_DATABASE_TERMINATION_FINISHED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ExternalDatabaseTerminationEvent.EXTERNAL_DATABASE_TERMINATION_FINISHED_EVENT.event(), context.getStackId());
             }
         };
     }
@@ -68,7 +68,7 @@ public class ExternalDatabaseTerminationActions {
 
             @Override
             protected void doExecute(ExternalDatabaseContext context, TerminateExternalDatabaseFailed payload, Map<Object, Object> variables) {
-                stackUpdaterService.updateStatus(context.getStack().getId(), DetailedStackStatus.DELETE_FAILED,
+                stackUpdaterService.updateStatus(context.getStackId(), DetailedStackStatus.DELETE_FAILED,
                         ResourceEvent.CLUSTER_EXTERNAL_DATABASE_DELETION_FAILED, payload.getException().getMessage());
                 getMetricService().incrementMetricCounter(MetricType.EXTERNAL_DATABASE_TERMINATION_FAILED, context.getStack());
                 sendEvent(context);
@@ -76,8 +76,7 @@ public class ExternalDatabaseTerminationActions {
 
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
-                return new StackEvent(ExternalDatabaseTerminationEvent.EXTERNAL_DATABASE_TERMINATION_FAILURE_HANDLED_EVENT.event(),
-                        context.getStack().getId());
+                return new StackEvent(ExternalDatabaseTerminationEvent.EXTERNAL_DATABASE_TERMINATION_FAILURE_HANDLED_EVENT.event(), context.getStackId());
             }
 
             @Override

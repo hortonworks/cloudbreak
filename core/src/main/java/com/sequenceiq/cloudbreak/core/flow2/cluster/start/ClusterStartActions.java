@@ -11,11 +11,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartPillarConfigUpdateRequest;
@@ -26,6 +27,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStartResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.DnsUpdateFinished;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Configuration
 public class ClusterStartActions {
@@ -33,6 +37,12 @@ public class ClusterStartActions {
 
     @Inject
     private ClusterStartService clusterStartService;
+
+    @Inject
+    private StackDtoService stackDtoService;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Bean(name = "CLUSTER_START_UPDATE_PILLAR_CONFIG_STATE")
     public Action<?, ?> startingClusterPillarConfigUpdate() {
@@ -54,7 +64,7 @@ public class ClusterStartActions {
         return new AbstractClusterAction<>(ClusterStartPillarConfigUpdateResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterStartPillarConfigUpdateResult payload, Map<Object, Object> variables) {
-                Stack stack = getStackService().getByIdWithListsInTransaction(payload.getResourceId());
+                StackDto stack = stackDtoService.getById(payload.getResourceId());
                 clusterStartService.updateDnsEntriesInPem(stack);
                 sendEvent(context);
             }
@@ -71,7 +81,9 @@ public class ClusterStartActions {
         return new AbstractClusterAction<>(DnsUpdateFinished.class) {
             @Override
             protected void doExecute(ClusterViewContext context, DnsUpdateFinished payload, Map<Object, Object> variables) {
-                clusterStartService.startingCluster(context.getStack());
+                InstanceMetadataView primaryGatewayInstanceMetadata = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(context.getStackId())
+                        .orElseThrow(NotFoundException.notFound("Primary gateway instance not found for the cluster"));
+                clusterStartService.startingCluster(context.getStack(), context.getCluster(), primaryGatewayInstanceMetadata);
                 sendEvent(context);
             }
 
@@ -114,14 +126,14 @@ public class ClusterStartActions {
         return new AbstractStackFailureAction<ClusterStartState, ClusterStartEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                clusterStartService.handleClusterStartFailure(context.getStackView(), payload.getException().getMessage());
-                getMetricService().incrementMetricCounter(MetricType.CLUSTER_START_FAILED, context.getStackView(), payload.getException());
+                clusterStartService.handleClusterStartFailure(context.getStack(), payload.getException().getMessage());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_START_FAILED, context.getStack(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterStartEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(ClusterStartEvent.FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

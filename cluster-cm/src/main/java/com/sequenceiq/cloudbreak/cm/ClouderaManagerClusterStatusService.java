@@ -69,10 +69,10 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Service
 @Scope("prototype")
@@ -121,7 +121,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             ClouderaManagerClusterStatusService::getCertCheck
     );
 
-    private final Stack stack;
+    private final StackDtoDelegate stack;
 
     private final HttpClientConfig clientConfig;
 
@@ -147,7 +147,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     private ApiClient fastClient;
 
-    ClouderaManagerClusterStatusService(Stack stack, HttpClientConfig clientConfig) {
+    ClouderaManagerClusterStatusService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
     }
@@ -160,7 +160,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     // need to translate checked exception for usage in stream
-    private static Stream<ApiRole> readRoles(RolesResourceApi api, Stack stack, String service) {
+    private static Stream<ApiRole> readRoles(RolesResourceApi api, StackDtoDelegate stack, String service) {
         try {
             return api.readRoles(stack.getCluster().getName(), service, "", FULL_VIEW).getItems().stream();
         } catch (ApiException e) {
@@ -246,7 +246,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     @PostConstruct
     public void initApiClient() throws ClusterClientInitException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String cloudbreakAmbariUser = cluster.getCloudbreakAmbariUser();
         String cloudbreakAmbariPassword = cluster.getCloudbreakAmbariPassword();
         try {
@@ -367,7 +367,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         return convertHealthSummary(getHostHealthSummary(), ApiHealthSummary::getValue);
     }
 
-    private ClusterStatusResult determineClusterStatus(Stack stack) {
+    private ClusterStatusResult determineClusterStatus(StackDtoDelegate stack) {
         try {
             Collection<ApiService> services = readServices(stack);
             Map<ClusterStatus, List<String>> servicesByStatus = groupServicesByState(services);
@@ -395,7 +395,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         }
     }
 
-    private ClusterStatusResult determineClusterStatusFromRoles(Stack stack, Collection<String> apiServices) {
+    private ClusterStatusResult determineClusterStatusFromRoles(StackDtoDelegate stack, Collection<String> apiServices) {
         Map<ClusterStatus, List<String>> rolesByStatus = groupRolesByState(stack, apiServices);
         Set<ClusterStatus> statuses = rolesByStatus.keySet();
         if (hasPendingOperation(statuses)) {
@@ -412,12 +412,12 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         return ClusterStatusResult.of(ClusterStatus.UNKNOWN);
     }
 
-    private Collection<ApiService> readServices(Stack stack) throws ApiException {
+    private Collection<ApiService> readServices(StackDtoDelegate stack) throws ApiException {
         ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(client);
         return api.readServices(stack.getCluster().getName(), FULL_VIEW).getItems();
     }
 
-    private Map<ClusterStatus, List<String>> groupRolesByState(Stack stack, Collection<String> services) {
+    private Map<ClusterStatus, List<String>> groupRolesByState(StackDtoDelegate stack, Collection<String> services) {
         RolesResourceApi api = clouderaManagerApiFactory.getRolesResourceApi(client);
         return services.stream()
                 .flatMap(service -> readRoles(api, stack, service))
@@ -473,14 +473,14 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
     }
 
     @Override
-    public Optional<ClusterManagerCommand> findCommand(Stack stack, ClusterCommandType command) {
+    public Optional<ClusterManagerCommand> findCommand(StackDtoDelegate stack, ClusterCommandType command) {
         try {
             ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
             ClouderaManagerCommand clouderaManagerCommand = ClouderaManagerCommand.ofType(command);
             if (clouderaManagerCommand == null) {
                 return Optional.empty();
             }
-            Optional<BigDecimal> commandId = syncApiCommandRetriever.getCommandId(clouderaManagerCommand.getName(), clustersResourceApi, stack);
+            Optional<BigDecimal> commandId = syncApiCommandRetriever.getCommandId(clouderaManagerCommand.getName(), clustersResourceApi, stack.getStack());
             if (commandId.isPresent()) {
                 return Optional.ofNullable(convertApiCommand(clouderaManagerCommandsService.getApiCommand(client, commandId.get())));
             } else {

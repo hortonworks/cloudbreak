@@ -5,8 +5,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public class StopStartUpscaleContext extends StackContext {
@@ -17,15 +16,12 @@ public class StopStartUpscaleContext extends StackContext {
 
     private final ClusterManagerType clusterManagerType;
 
-    private final StackView stackView;
-
-    public StopStartUpscaleContext(FlowParameters flowParameters, Stack stack, StackView stackView, CloudContext cloudContext, CloudCredential cloudCredentials,
+    public StopStartUpscaleContext(FlowParameters flowParameters, StackDtoDelegate stack, CloudContext cloudContext, CloudCredential cloudCredentials,
             CloudStack cloudStack, String hostGroupName, Integer adjustment, ClusterManagerType clusterManagerType) {
         super(flowParameters, stack, cloudContext, cloudCredentials, cloudStack);
         this.hostGroupName = hostGroupName;
         this.adjustment = adjustment;
         this.clusterManagerType = clusterManagerType;
-        this.stackView = stackView;
     }
 
     public String getHostGroupName() {
@@ -38,9 +34,5 @@ public class StopStartUpscaleContext extends StackContext {
 
     public ClusterManagerType getClusterManagerType() {
         return clusterManagerType;
-    }
-
-    public StackView getStackView() {
-        return stackView;
     }
 }

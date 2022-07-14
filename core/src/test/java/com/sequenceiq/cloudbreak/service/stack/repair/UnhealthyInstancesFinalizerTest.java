@@ -28,11 +28,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UnhealthyInstancesFinalizerTest {
+
+    private static final String ENV_CRN = "envCrn";
 
     @Mock
     private StackUtil stackUtil;
@@ -51,19 +53,19 @@ public class UnhealthyInstancesFinalizerTest {
         Stack stack = TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential());
 
         CloudCredential cloudCredential = mock(CloudCredential.class);
-        when(stackUtil.getCloudCredential(stack)).thenReturn(cloudCredential);
+        when(stackUtil.getCloudCredential(ENV_CRN)).thenReturn(cloudCredential);
 
         String instanceId1 = "i-0f1e0605506aaaaaa";
         String instanceId2 = "i-0f1e0605506bbbbbb";
 
-        Set<InstanceMetaData> candidateUnhealthyInstances = new HashSet<>();
+        Set<InstanceMetadataView> candidateUnhealthyInstances = new HashSet<>();
         setupInstanceMetaData(instanceId1, candidateUnhealthyInstances);
         setupInstanceMetaData(instanceId2, candidateUnhealthyInstances);
 
         List<CloudInstance> cloudInstances = new ArrayList<>();
         CloudInstance cloudInstance1 = setupCloudInstance(instanceId1, cloudInstances);
         CloudInstance cloudInstance2 = setupCloudInstance(instanceId2, cloudInstances);
-        when(cloudInstanceConverter.convert(candidateUnhealthyInstances, stack.getEnvironmentCrn(), stack.getStackAuthentication())).thenReturn(cloudInstances);
+        when(cloudInstanceConverter.convert(candidateUnhealthyInstances, stack)).thenReturn(cloudInstances);
 
         List<CloudVmInstanceStatus> cloudVmInstanceStatusList = new ArrayList<>();
         setupCloudVmInstanceStatus(cloudInstance1, InstanceStatus.STOPPED, cloudVmInstanceStatusList);
@@ -82,18 +84,18 @@ public class UnhealthyInstancesFinalizerTest {
         Stack stack = TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential());
 
         CloudCredential cloudCredential = mock(CloudCredential.class);
-        when(stackUtil.getCloudCredential(stack)).thenReturn(cloudCredential);
+        when(stackUtil.getCloudCredential(ENV_CRN)).thenReturn(cloudCredential);
 
         String instanceId1 = "i-0f1e0605506aaaaaa";
         String instanceId2 = "i-0f1e0605506bbbbbb";
 
-        Set<InstanceMetaData> candidateUnhealthyInstances = new HashSet<>();
+        Set<InstanceMetadataView> candidateUnhealthyInstances = new HashSet<>();
         setupInstanceMetaData(instanceId1, candidateUnhealthyInstances);
         setupInstanceMetaData(instanceId2, candidateUnhealthyInstances);
 
         List<CloudInstance> cloudInstances = new ArrayList<>();
         CloudInstance cloudInstance1 = setupCloudInstance(instanceId1, cloudInstances);
-        when(cloudInstanceConverter.convert(candidateUnhealthyInstances, stack.getEnvironmentCrn(), stack.getStackAuthentication())).thenReturn(cloudInstances);
+        when(cloudInstanceConverter.convert(candidateUnhealthyInstances, stack)).thenReturn(cloudInstances);
 
         List<CloudVmInstanceStatus> cloudVmInstanceStatusList = new ArrayList<>();
         setupCloudVmInstanceStatus(cloudInstance1, InstanceStatus.TERMINATED, cloudVmInstanceStatusList);
@@ -122,8 +124,8 @@ public class UnhealthyInstancesFinalizerTest {
         return cloudInstance;
     }
 
-    private void setupInstanceMetaData(String instanceId, Set<InstanceMetaData> candidateUnhealthyInstances) {
-        InstanceMetaData imd1 = mock(InstanceMetaData.class);
+    private void setupInstanceMetaData(String instanceId, Set<InstanceMetadataView> candidateUnhealthyInstances) {
+        InstanceMetadataView imd1 = mock(InstanceMetadataView.class);
         when(imd1.getInstanceId()).thenReturn(instanceId);
         candidateUnhealthyInstances.add(imd1);
     }

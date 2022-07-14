@@ -11,9 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.publicendpoint.dns.BaseDnsEntryService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ClusterPublicEndpointManagementService {
@@ -28,13 +29,13 @@ public class ClusterPublicEndpointManagementService {
     @Inject
     private FreeIPAEndpointManagementService freeIPAEndpointManagementService;
 
-    public boolean provision(Stack stack) {
+    public boolean provision(StackDtoDelegate stack) {
         boolean certGenerationWasSuccessful = gatewayPublicEndpointManagementService.generateCertAndSaveForStackAndUpdateDnsEntry(stack);
         dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdate(stack));
         return certGenerationWasSuccessful;
     }
 
-    public boolean provisionLoadBalancer(Stack stack) {
+    public boolean provisionLoadBalancer(StackDtoDelegate stack) {
         if (!gatewayPublicEndpointManagementService.renewCertificate(stack)) {
             LOGGER.warn("Certificate was not updated with load balancer SAN in PEM service.");
         } else {
@@ -43,19 +44,19 @@ public class ClusterPublicEndpointManagementService {
         return gatewayPublicEndpointManagementService.updateDnsEntryForLoadBalancers(stack);
     }
 
-    public void terminate(Stack stack) {
+    public void terminate(StackDtoDelegate stack) {
         gatewayPublicEndpointManagementService.deleteDnsEntry(stack, null);
         gatewayPublicEndpointManagementService.deleteLoadBalancerDnsEntry(stack, null);
         dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.deregister(stack));
         freeIPAEndpointManagementService.deleteLoadBalancerDomainFromFreeIPA(stack);
     }
 
-    public void upscale(Stack stack, Map<String, String> newAddressesByFqdn) {
+    public void upscale(StackDtoDelegate stack, Map<String, String> newAddressesByFqdn) {
         changeGatewayAddress(stack, newAddressesByFqdn);
         dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdateCandidates(stack, newAddressesByFqdn));
     }
 
-    public void downscale(Stack stack, Map<String, String> downscaledAddressesByFqdn) {
+    public void downscale(StackDtoDelegate stack, Map<String, String> downscaledAddressesByFqdn) {
         if (MapUtils.isNotEmpty(downscaledAddressesByFqdn)) {
             LOGGER.info("Downscale candidate addresses to be de-registered from PEM: {}", String.join(", ", downscaledAddressesByFqdn.keySet()));
             dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.deregister(stack, downscaledAddressesByFqdn));
@@ -64,7 +65,7 @@ public class ClusterPublicEndpointManagementService {
         }
     }
 
-    public boolean changeGateway(Stack stack) {
+    public boolean changeGateway(StackDtoDelegate stack) {
         String result = null;
         if (gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem()) {
             result = gatewayPublicEndpointManagementService.updateDnsEntryForCluster(stack);
@@ -72,15 +73,15 @@ public class ClusterPublicEndpointManagementService {
         return StringUtils.isNoneEmpty(result);
     }
 
-    public boolean renewCertificate(Stack stack) {
+    public boolean renewCertificate(StackDtoDelegate stack) {
         boolean result = false;
-        if (gatewayPublicEndpointManagementService.isCertRenewalTriggerable(stack)) {
+        if (gatewayPublicEndpointManagementService.isCertRenewalTriggerable(stack.getStack())) {
             result = gatewayPublicEndpointManagementService.renewCertificate(stack);
         }
         return result;
     }
 
-    public void start(Stack stack) {
+    public void start(StackDtoDelegate stack) {
         if (gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem()) {
             try {
                 LOGGER.info("Updating DNS entries of a restarted cluster: '{}'", stack.getName());
@@ -96,17 +97,17 @@ public class ClusterPublicEndpointManagementService {
         return gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem();
     }
 
-    private void changeGatewayAddress(Stack stack, Map<String, String> newAddressesByFqdn) {
-        InstanceMetaData gatewayInstanceMetadata = stack.getPrimaryGatewayInstance();
+    private void changeGatewayAddress(StackDtoDelegate stackDto, Map<String, String> newAddressesByFqdn) {
+        InstanceMetadataView gatewayInstanceMetadata = stackDto.getPrimaryGatewayInstance();
         String ipWrapper = gatewayInstanceMetadata.getPublicIpWrapper();
 
         if (newAddressesByFqdn.containsValue(ipWrapper)) {
             LOGGER.info("Gateway's DNS entry needs to be updated because primary gateway IP has been updated to: '{}'", ipWrapper);
-            changeGateway(stack);
+            changeGateway(stackDto);
         }
     }
 
-    public void registerLoadBalancerWithFreeIPA(Stack stack) {
+    public void registerLoadBalancerWithFreeIPA(StackView stack) {
         freeIPAEndpointManagementService.registerLoadBalancerDomainWithFreeIPA(stack);
     }
 }

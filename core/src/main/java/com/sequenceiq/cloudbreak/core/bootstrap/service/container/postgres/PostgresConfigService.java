@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
@@ -45,10 +47,10 @@ public class PostgresConfigService {
     @Inject
     private EmbeddedDatabaseConfigProvider embeddedDatabaseConfigProvider;
 
-    public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, Stack stack, Cluster cluster) {
-        Map<String, Object> postgresConfig = initPostgresConfig(stack, cluster);
+    public void decorateServicePillarWithPostgresIfNeeded(Map<String, SaltPillarProperties> servicePillar, StackDto stackDto) {
+        Map<String, Object> postgresConfig = initPostgresConfig(stackDto);
 
-        Set<String> rootCerts = dbCertificateProvider.getRelatedSslCerts(stack, cluster);
+        Set<String> rootCerts = dbCertificateProvider.getRelatedSslCerts(stackDto);
         if (CollectionUtils.isNotEmpty(rootCerts)) {
             Map<String, String> rootSslCertsMap = Map.of("ssl_certs", String.join("\n", rootCerts),
                     "ssl_certs_file_path", dbCertificateProvider.getSslCertsFilePath());
@@ -66,23 +68,25 @@ public class PostgresConfigService {
                 .createPostgresRdsConfigIfNeeded(stack, cluster);
     }
 
-    public Set<RdsConfigWithoutCluster> createRdsConfigIfNeeded(Stack stack, Cluster cluster) {
-        return rdsConfigProviderFactory.getAllSupportedRdsConfigProviders().stream().map(provider ->
-                provider.createPostgresRdsConfigIfNeeded(stack, cluster)).reduce((first, second) -> second).orElse(Collections.emptySet());
+    public Set<RdsConfigWithoutCluster> createRdsConfigIfNeeded(StackDtoDelegate stackDto) {
+        return rdsConfigProviderFactory.getAllSupportedRdsConfigProviders().stream()
+                .map(provider -> provider.createPostgresRdsConfigIfNeeded(stackDto))
+                .reduce((first, second) -> second)
+                .orElse(Collections.emptySet());
     }
 
-    private Map<String, Object> initPostgresConfig(Stack stack, Cluster cluster) {
+    private Map<String, Object> initPostgresConfig(StackDto stackDto) {
         Map<String, Object> postgresConfig = new HashMap<>();
-        if (dbServerConfigurer.isRemoteDatabaseNeeded(cluster.getDatabaseServerCrn())) {
+        if (dbServerConfigurer.isRemoteDatabaseNeeded(stackDto.getCluster().getDatabaseServerCrn())) {
             postgresConfig.put("configure_remote_db", "true");
         } else {
-            postgresConfig.putAll(embeddedDatabaseConfigProvider.collectEmbeddedDatabaseConfigs(stack));
+            postgresConfig.putAll(embeddedDatabaseConfigProvider.collectEmbeddedDatabaseConfigs(stackDto));
         }
         if (CollectionUtils.isNotEmpty(databasesReusedDuringRecovery)) {
             postgresConfig.put("recovery_reused_databases", databasesReusedDuringRecovery);
         }
         rdsConfigProviderFactory.getAllSupportedRdsConfigProviders().forEach(provider ->
-                postgresConfig.putAll(provider.createServicePillarConfigMapIfNeeded(stack, cluster)));
+                postgresConfig.putAll(provider.createServicePillarConfigMapIfNeeded(stackDto)));
         return postgresConfig;
     }
 }

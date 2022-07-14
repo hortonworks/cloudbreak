@@ -42,14 +42,15 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
-import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
@@ -87,7 +88,10 @@ public class ServiceProviderConnectorAdapter {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public Set<String> removeInstances(Stack stack, Set<String> instanceIds, String instanceGroup) {
+    @Inject
+    private ResourceService resourceService;
+
+    public Set<String> removeInstances(StackDto stack, Set<String> instanceIds, String instanceGroup) {
         LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
@@ -97,21 +101,21 @@ public class ServiceProviderConnectorAdapter {
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
+                .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                 .withTenantId(stack.getTenant().getId())
                 .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
-        List<CloudResource> resources = stack.getResources().stream()
+        List<CloudResource> resources = resourceService.getAllByStackId(stack.getId()).stream()
                 .map(r -> cloudResourceConverter.convert(r))
                 .collect(Collectors.toList());
         List<CloudInstance> instances = new ArrayList<>();
-        InstanceGroup group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
+        InstanceGroupDto group = stack.getInstanceGroupByInstanceGroupName(instanceGroup);
         DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
-        for (InstanceMetaData metaData : group.getAllInstanceMetaData()) {
+        for (InstanceMetadataView metaData : group.getInstanceMetadataViews()) {
             if (instanceIds.contains(metaData.getInstanceId())) {
-                CloudInstance cloudInstance = metadataConverter.convert(metaData, environment, stack.getStackAuthentication());
+                CloudInstance cloudInstance = metadataConverter.convert(metaData, group.getInstanceGroup(), environment, stack.getStackAuthentication());
                 instances.add(cloudInstance);
             }
         }
@@ -134,7 +138,7 @@ public class ServiceProviderConnectorAdapter {
         }
     }
 
-    public void deleteStack(Stack stack) {
+    public void deleteStack(StackDto stack) {
         LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
@@ -144,13 +148,13 @@ public class ServiceProviderConnectorAdapter {
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
+                .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                 .withTenantId(stack.getTenant().getId())
                 .build();
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         CloudCredential cloudCredential = credentialConverter.convert(credential);
-        List<CloudResource> resources = stack.getResources().stream()
+        List<CloudResource> resources = resourceService.getAllByStackId(stack.getId()).stream()
                 .map(r -> cloudResourceConverter.convert(r))
                 .collect(Collectors.toList());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
@@ -173,7 +177,7 @@ public class ServiceProviderConnectorAdapter {
         }
     }
 
-    public void rollback(Stack stack, Set<Resource> resourceSet) {
+    public void rollback(StackDto stack) {
         LOGGER.debug("Rollback the whole stack for {}", stack.getId());
         deleteStack(stack);
     }
@@ -247,7 +251,7 @@ public class ServiceProviderConnectorAdapter {
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
+                .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(credential.getCrn()).getAccountId())
                 .withGovCloud(credential.isGovCloud())
                 .build();

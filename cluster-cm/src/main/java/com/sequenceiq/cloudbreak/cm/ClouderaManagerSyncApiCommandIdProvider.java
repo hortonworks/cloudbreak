@@ -23,7 +23,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandPollerConfig;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
@@ -46,7 +46,7 @@ public class ClouderaManagerSyncApiCommandIdProvider {
             ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider,
             SyncApiCommandPollerConfig syncApiCommandPollerConfig,
             @Qualifier("cloudbreakListeningScheduledExecutorService")
-                    ExecutorService executorService) {
+            ExecutorService executorService) {
         this.syncApiCommandRetriever = syncApiCommandRetriever;
         this.executorService = executorService;
         this.clouderaManagerPollingServiceProvider = clouderaManagerPollingServiceProvider;
@@ -61,7 +61,7 @@ public class ClouderaManagerSyncApiCommandIdProvider {
      * 4. if the API command ties out, use 1. with polling
      * 5. if polling finished, do a last check, returns with the command id or throw an exception
      */
-    public BigDecimal executeSyncApiCommandAndGetCommandId(String commandName, ClustersResourceApi api, Stack stack,
+    public BigDecimal executeSyncApiCommandAndGetCommandId(String commandName, ClustersResourceApi api, StackDtoDelegate stack,
             List<ApiCommand> activeCommands, Callable<ApiCommand> commandAction) throws CloudbreakException, ApiException {
         Optional<BigDecimal> runningCommandIdOpt = getRunningCommandIdFromActiveCommands(commandName, activeCommands);
         if (runningCommandIdOpt.isPresent()) {
@@ -72,9 +72,9 @@ public class ClouderaManagerSyncApiCommandIdProvider {
         }
     }
 
-    private BigDecimal executeSyncApiCommand(String commandName, ClustersResourceApi api, Stack stack, Callable<ApiCommand> commandAction)
+    private BigDecimal executeSyncApiCommand(String commandName, ClustersResourceApi api, StackDtoDelegate stack, Callable<ApiCommand> commandAction)
             throws CloudbreakException, ApiException {
-        Optional<BigDecimal> lastSyncApiCommandId = syncApiCommandRetriever.getLastFinishedCommandId(commandName, api, stack);
+        Optional<BigDecimal> lastSyncApiCommandId = syncApiCommandRetriever.getLastFinishedCommandId(commandName, api, stack.getStack());
         Map<String, String> mdcContext = MDCBuilder.getMdcContextMap();
         Future<ApiCommand> future = executorService.submit(() -> {
             MDCBuilder.buildMdcContextFromMap(mdcContext);
@@ -115,7 +115,7 @@ public class ClouderaManagerSyncApiCommandIdProvider {
         }
     }
 
-    private BigDecimal getCommandIdAfterTimeout(String commandName, ClustersResourceApi api, Stack stack,
+    private BigDecimal getCommandIdAfterTimeout(String commandName, ClustersResourceApi api, StackDtoDelegate stack,
             Future<ApiCommand> future, BigDecimal lastSyncApiCommandId)
             throws ApiException, CloudbreakException {
         future.cancel(true);
@@ -123,7 +123,7 @@ public class ClouderaManagerSyncApiCommandIdProvider {
         clouderaManagerPollingServiceProvider.checkSyncApiCommandId(
                 stack, api.getApiClient(), commandName, lastSyncApiCommandId,
                 syncApiCommandRetriever);
-        Optional<BigDecimal> finalCommandId = syncApiCommandRetriever.getCommandId(commandName, api, stack);
+        Optional<BigDecimal> finalCommandId = syncApiCommandRetriever.getCommandId(commandName, api, stack.getStack());
         if (finalCommandId.isPresent()) {
             LOGGER.debug("Get final command ID after timeout: {}", finalCommandId.get());
             return finalCommandId.get();

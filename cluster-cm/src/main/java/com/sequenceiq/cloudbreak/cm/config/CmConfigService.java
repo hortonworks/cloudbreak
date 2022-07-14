@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.model.ApiRoleList;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Service
 public class CmConfigService {
@@ -16,7 +16,7 @@ public class CmConfigService {
         this.delegates = delegates;
     }
 
-    public void setConfigs(Stack stack, ApiRoleList apiRoleList) {
+    public void setConfigs(StackDtoDelegate stack, ApiRoleList apiRoleList) {
         delegates.forEach(configService -> configService.setConfigs(stack, apiRoleList));
     }
 }

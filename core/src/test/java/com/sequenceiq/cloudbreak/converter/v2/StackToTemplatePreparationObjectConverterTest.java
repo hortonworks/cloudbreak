@@ -36,7 +36,6 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -70,6 +69,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.exception.CustomConfigurationsRuntimeVersionException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
@@ -78,9 +78,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintViewProvider;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceGroupMetadataCollector;
-import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsViewProvider;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
@@ -90,7 +88,6 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
@@ -166,9 +163,6 @@ public class StackToTemplatePreparationObjectConverterTest {
     private FileSystemConfigurationProvider fileSystemConfigurationProvider;
 
     @Mock
-    private ClusterService clusterService;
-
-    @Mock
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
 
     @Mock
@@ -176,9 +170,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private Stack stackMock;
-
-    @Mock
-    private Cluster cluster;
 
     @Mock
     private Cluster sourceCluster;
@@ -203,9 +194,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private LdapConfigService ldapConfigService;
-
-    @Mock
-    private CustomConfigurationsService customConfigurationsService;
 
     @Mock
     private KerberosConfigService kerberosConfigService;
@@ -248,9 +236,6 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Mock
     private AccountTagClientService accountTagClientService;
-
-    @Mock
-    private ResourceService resourceService;
 
     @Mock
     private IdBrokerService idBrokerService;
@@ -303,9 +288,8 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getAvailabilityZone()).thenReturn(AVAILABILITY_ZONE);
         when(stackMock.getName()).thenReturn("stackname");
         when(sourceCluster.getId()).thenReturn(TEST_CLUSTER_ID);
-        when(cluster.getId()).thenReturn(TEST_CLUSTER_ID);
         when(instanceGroupMetadataCollector.collectMetadata(stackMock)).thenReturn(groupInstances);
-        when(cluster.getBlueprint()).thenReturn(blueprint);
+        when(stackMock.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(blueprint.getStackVersion()).thenReturn("7.2.11");
         when(stackMock.getInputs()).thenReturn(stackInputs);
@@ -315,7 +299,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(sourceCluster.getCustomConfigurations()).thenReturn(customConfigurations);
         when(customConfigurations.getCrn()).thenReturn("test-custom-configs-crn");
         when(stackMock.getResourceCrn()).thenReturn("crn:cdp:datahub:us-west-1:account:cluster:cluster");
-        when(clusterService.findOneWithCustomConfigurations(anyLong())).thenReturn(sourceCluster);
+        when(stackMock.getCluster()).thenReturn(sourceCluster);
         when(accountTagClientService.list()).thenReturn(new HashMap<>());
         when(entitlementService.internalTenant(anyString())).thenReturn(true);
         when(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(anyLong())).thenReturn(null);
@@ -335,25 +319,24 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(awsMockAccountMappingService.getGroupMappings(REGION, cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
         when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
         when(ldapConfigService.get(anyString(), anyString())).thenReturn(Optional.empty());
-        when(clusterService.getById(anyLong())).thenReturn(cluster);
-        when(customConfigurationsService.getByNameOrCrn(any(NameOrCrn.class))).thenReturn(customConfigurations);
         when(exposedServiceCollector.getAllKnoxExposed(any())).thenReturn(Set.of());
-        when(resourceService.getAllByStackId(anyLong())).thenReturn(Collections.EMPTY_LIST);
-        IdBroker idbroker = idBrokerConverterUtil.generateIdBrokerSignKeys(cluster);
-        when(idBrokerService.getByCluster(any(Cluster.class))).thenReturn(idbroker);
+        when(stackMock.getResources()).thenReturn(Collections.EMPTY_SET);
+        IdBroker idbroker = idBrokerConverterUtil.generateIdBrokerSignKeys(TEST_CLUSTER_ID, null);
+        when(idBrokerService.getByCluster(anyLong())).thenReturn(idbroker);
         when(idBrokerService.save(any(IdBroker.class))).thenReturn(idbroker);
         when(grpcUmsClient.listServicePrincipalCloudIdentities(anyString(), anyString())).thenReturn(Collections.EMPTY_LIST);
         when(dbCertificateProvider.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
         when(stackMock.getId()).thenReturn(1L);
-        when(generalClusterConfigsProvider.generalClusterConfigs(any(Stack.class), any(Cluster.class))).thenReturn(new GeneralClusterConfigs());
+        when(generalClusterConfigsProvider.generalClusterConfigs(any(StackDtoDelegate.class))).thenReturn(new GeneralClusterConfigs());
     }
 
     @Test
     public void testConvertWhenClusterGivesGatewayThenNotNullShouldBeStored() {
         Gateway gateway = mock(Gateway.class);
         when(gateway.getSignKey()).thenReturn(null);
-        when(cluster.getGateway()).thenReturn(gateway);
+        when(stackMock.getGateway()).thenReturn(gateway);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -362,8 +345,9 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     @Test
     public void testConvertWhenClusterDoesNotGivesAGatewayThenNullShouldBeStored() {
-        when(cluster.getGateway()).thenReturn(null);
+        when(stackMock.getGateway()).thenReturn(null);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -373,21 +357,20 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenClusterProvidesFileSystemThenBaseFileSystemConfigurationsViewShouldBeExists() throws IOException {
         FileSystem sourceFileSystem = new FileSystem();
-        FileSystem clusterServiceFileSystem = new FileSystem();
         ConfigQueryEntries configQueryEntries = new ConfigQueryEntries();
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
-        when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(eq(clusterServiceFileSystem), eq(stackMock), any(),
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(eq(sourceFileSystem), eq(stackMock), any(),
                 eq(new Json("")), eq(configQueryEntries))).thenReturn(expected);
         when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getFileSystemConfigurationView().isPresent()).isTrue();
         assertThat(result.getFileSystemConfigurationView().get()).isEqualTo(expected);
-        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(eq(clusterServiceFileSystem),
+        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(eq(sourceFileSystem),
                 eq(stackMock), any(), eq(new Json("")), eq(configQueryEntries));
     }
 
@@ -396,10 +379,10 @@ public class StackToTemplatePreparationObjectConverterTest {
         FileSystem clusterServiceFileSystem = new FileSystem();
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         when(sourceCluster.getFileSystem()).thenReturn(null);
-        when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
         when(fileSystemConfigurationProvider.fileSystemConfiguration(clusterServiceFileSystem, stackMock, resourceType -> Collections.EMPTY_LIST,
                 new Json(""), new ConfigQueryEntries())).thenReturn(expected);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -414,14 +397,13 @@ public class StackToTemplatePreparationObjectConverterTest {
         String ioExceptionMessage = "Unable to obtain BaseFileSystemConfigurationsView";
         IOException invokedException = new IOException(ioExceptionMessage);
         FileSystem sourceFileSystem = new FileSystem();
-        FileSystem clusterServiceFileSystem = new FileSystem();
         ConfigQueryEntries configQueryEntries = new ConfigQueryEntries();
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
-        when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
         when(stackMock.getEnvironmentCrn()).thenReturn("envCredentialCRN");
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(eq(clusterServiceFileSystem), eq(stackMock), any(), eq(new Json("")),
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(eq(sourceFileSystem), eq(stackMock), any(), eq(new Json("")),
                 eq(configQueryEntries))).thenThrow(invokedException);
         when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class, () -> underTest.convert(stackMock));
         assertThat(cloudbreakServiceException).hasMessage(ioExceptionMessage).hasCause(invokedException);
@@ -431,7 +413,6 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenEnvironmentBackupLocationDefinedThenBaseFileSystemConfigurationsViewShouldAddIt() throws IOException {
         String backupLocation = "s3a://test";
         FileSystem sourceFileSystem = new FileSystem();
-        FileSystem clusterServiceFileSystem = new FileSystem();
         ConfigQueryEntries configQueryEntries = new ConfigQueryEntries();
         BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
         List<StorageLocationView> storageLocationViews = mock(List.class);
@@ -449,19 +430,19 @@ public class StackToTemplatePreparationObjectConverterTest {
         storageLocation.setProperty(RangerCloudStorageServiceConfigProvider.DEFAULT_BACKUP_DIR);
         StorageLocationView backupLocationView = new StorageLocationView(storageLocation);
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
-        when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
-        when(fileSystemConfigurationProvider.fileSystemConfiguration(eq(clusterServiceFileSystem), eq(stackMock), any(),
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(eq(sourceFileSystem), eq(stackMock), any(),
                 eq(new Json("")), eq(configQueryEntries))).thenReturn(expected);
         when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
         when(expected.getLocations()).thenReturn(storageLocationViews);
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
         assertThat(result.getFileSystemConfigurationView().isPresent()).isTrue();
         assertThat(result.getFileSystemConfigurationView().get()).isEqualTo(expected);
-        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(eq(clusterServiceFileSystem),
+        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(eq(sourceFileSystem),
                 eq(stackMock), any(), eq(new Json("")), eq(configQueryEntries));
         verify(expected, times(1)).getLocations();
         verify(storageLocationViews, times(1)).add(eq(backupLocationView));
@@ -472,6 +453,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         LdapView ldapView = LdapView.LdapViewBuilder.aLdapView().withProtocol("").withBindDn("admin<>").build();
         when(ldapConfigService.get(anyString(), anyString())).thenReturn(Optional.of(ldapView));
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -481,6 +463,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenClusterFromClusterServiceHasNoLdapConfigThenTheOptionalShouldBeEmpty() {
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -491,6 +474,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertBlueprintViewShouldMatch() {
         BlueprintView expected = mock(BlueprintView.class);
         when(blueprintViewProvider.getBlueprintView(blueprint)).thenReturn(expected);
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -500,8 +484,9 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenGeneralClusterConfigsProvidedThenThisShouldBeStored() {
         GeneralClusterConfigs expected = mock(GeneralClusterConfigs.class);
-        when(generalClusterConfigsProvider.generalClusterConfigs(stackMock, cluster)).thenReturn(expected);
+        when(generalClusterConfigsProvider.generalClusterConfigs(stackMock)).thenReturn(expected);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -514,6 +499,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(customConfigurationsViewProvider.getCustomConfigurationsView(customConfigurations)).thenReturn(expected);
         when(stackMock.getType()).thenReturn(StackType.WORKLOAD);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -525,6 +511,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertWhenClusterHasNoCustomConfigsThenOptionalShouldBeEmpty() {
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -537,6 +524,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(customConfigurationsViewProvider.getCustomConfigurationsView(customConfigurations)).thenReturn(expected);
         when(stackMock.getType()).thenReturn(StackType.WORKLOAD);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -552,6 +540,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(stackMock.getType()).thenReturn(StackType.WORKLOAD);
         when(stackMock.getStackVersion()).thenReturn("7.2.15");
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         assertThatThrownBy(() -> underTest.convert(stackMock))
                 .isInstanceOf(CustomConfigurationsRuntimeVersionException.class)
@@ -562,8 +551,12 @@ public class StackToTemplatePreparationObjectConverterTest {
     public void testConvertWhenDataLakeIdNotNullThenExpectedSharedServiceConfigsShouldBeStored() {
         // just in case adding one to avoid matching with the class variable
         SharedServiceConfigsView expected = new SharedServiceConfigsView();
-        when(datalakeService.createSharedServiceConfigsView(stackMock)).thenReturn(expected);
+        when(sourceCluster.getPassword()).thenReturn("pwd");
+        when(stackMock.getDatalakeCrn()).thenReturn("crn");
+
+        when(datalakeService.createSharedServiceConfigsView("pwd", StackType.DATALAKE, "crn")).thenReturn(expected);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -578,6 +571,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(this.stackInputs.get(StackInputs.class)).thenReturn(stackInputs);
         when(stackInputs.getCustomInputs()).thenReturn(customInputs);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -590,6 +584,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(this.stackInputs.get(StackInputs.class)).thenReturn(stackInputs);
         when(stackInputs.getCustomInputs()).thenReturn(null);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -601,6 +596,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         String ioExceptionMessage = "unable to get inputs";
         IOException invokedException = new IOException(ioExceptionMessage);
         when(stackInputs.get(StackInputs.class)).thenThrow(invokedException);
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class, () -> underTest.convert(stackMock));
         assertThat(cloudbreakServiceException).hasMessage(ioExceptionMessage).hasCause(invokedException);
@@ -609,6 +605,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testConvertCloudPlatformMatches() {
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -620,6 +617,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(virtualGroupService.createOrGetVirtualGroup(any(VirtualGroupRequest.class), eq(CLOUDER_MANAGER_ADMIN))).thenReturn("mockAdmins");
         when(stackMock.getCluster().getFileSystem()).thenReturn(new FileSystem());
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -634,6 +632,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         when(virtualGroupService.createOrGetVirtualGroup(any(VirtualGroupRequest.class), eq(CLOUDER_MANAGER_ADMIN))).thenReturn("mockAdmins");
         when(stackMock.getCluster().getFileSystem()).thenReturn(null);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -647,6 +646,8 @@ public class StackToTemplatePreparationObjectConverterTest {
         CloudStorage sourceCloudStorage = mock(CloudStorage.class);
         when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
         when(sourceFileSystem.getCloudStorage()).thenReturn(sourceCloudStorage);
+        when(stackMock.getStack()).thenReturn(stackMock);
+
         AccountMapping accountMapping = new AccountMapping();
         accountMapping.setGroupMappings(GROUP_MAPPINGS);
         accountMapping.setUserMappings(USER_MAPPINGS);
@@ -664,6 +665,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     public void testStackPlacement() {
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -677,11 +679,12 @@ public class StackToTemplatePreparationObjectConverterTest {
         GeneralClusterConfigs configs = new GeneralClusterConfigs();
         Optional<String> primaryGatewayFqdn = Optional.of("primaryFqdn");
         configs.setPrimaryGatewayInstanceDiscoveryFQDN(primaryGatewayFqdn);
-        when(generalClusterConfigsProvider.generalClusterConfigs(any(Stack.class), any(Cluster.class))).thenReturn(configs);
+        when(generalClusterConfigsProvider.generalClusterConfigs(any(Stack.class))).thenReturn(configs);
         when(gatewayConfigService.getPrimaryGatewayIp(any(Stack.class))).thenReturn("10.0.0.1");
         InstanceMetaData dummyMetadata = new InstanceMetaData();
         when(stackMock.getPrimaryGatewayInstance()).thenReturn(dummyMetadata);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -692,6 +695,7 @@ public class StackToTemplatePreparationObjectConverterTest {
     @Test
     void testRdsSslCertificateFilePath() {
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 
@@ -704,6 +708,7 @@ public class StackToTemplatePreparationObjectConverterTest {
         String lbUrl = "loadbalancer.domain";
         when(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(anyLong())).thenReturn(lbUrl);
         when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
+        when(stackMock.getStack()).thenReturn(stackMock);
 
         TemplatePreparationObject result = underTest.convert(stackMock);
 

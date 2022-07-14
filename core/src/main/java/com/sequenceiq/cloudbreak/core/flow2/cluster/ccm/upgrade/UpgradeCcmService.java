@@ -26,14 +26,15 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.AbstractUpgradeCcmEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.HealthCheckService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.UpgradeCcmOrchestratorService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 
@@ -50,6 +51,9 @@ public class UpgradeCcmService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Inject
     private ClusterServiceRunner clusterServiceRunner;
@@ -185,7 +189,7 @@ public class UpgradeCcmService {
     }
 
     public void deregisterAgent(Long stackId, Tunnel oldTunnel) {
-        Stack stack = stackService.getById(stackId);
+        StackView stack = stackDtoService.getStackViewById(stackId);
         if (oldTunnel == Tunnel.CCM) {
             String keyId = CcmResourceUtil.getKeyId(stack.getResourceCrn());
             String userCrn = ThreadBasedUserCrnProvider.getUserCrn();

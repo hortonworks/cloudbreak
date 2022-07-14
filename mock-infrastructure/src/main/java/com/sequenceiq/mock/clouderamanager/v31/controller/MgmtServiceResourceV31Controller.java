@@ -52,4 +52,9 @@ public class MgmtServiceResourceV31Controller implements MgmtServiceResourceApi 
     public ResponseEntity<ApiCommand> stopCommand(String mockUuid) {
         return mgmtServiceResourceOperation.stopCommand(mockUuid);
     }
+
+    @Override
+    public ResponseEntity<ApiService> deleteCMS(String mockUuid) {
+        return mgmtServiceResourceOperation.deleteCMS(mockUuid);
+    }
 }

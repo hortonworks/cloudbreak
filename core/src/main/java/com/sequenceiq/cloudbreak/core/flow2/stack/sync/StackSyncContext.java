@@ -4,16 +4,16 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public class StackSyncContext extends CommonContext {
 
-    private final Stack stack;
+    private final StackView stack;
 
-    private final List<InstanceMetaData> instanceMetaData;
+    private final List<InstanceMetadataView> instanceMetaData;
 
     private final CloudContext cloudContext;
 
@@ -21,7 +21,7 @@ public class StackSyncContext extends CommonContext {
 
     private final Boolean statusUpdateEnabled;
 
-    public StackSyncContext(FlowParameters flowParameters, Stack stack, List<InstanceMetaData> instanceMetaData, CloudContext cloudContext,
+    public StackSyncContext(FlowParameters flowParameters, StackView stack, List<InstanceMetadataView> instanceMetaData, CloudContext cloudContext,
             CloudCredential cloudCredential, Boolean statusUpdateEnabled) {
         super(flowParameters);
         this.stack = stack;
@@ -31,11 +31,11 @@ public class StackSyncContext extends CommonContext {
         this.statusUpdateEnabled = statusUpdateEnabled;
     }
 
-    public Stack getStack() {
+    public StackView getStack() {
         return stack;
     }
 
-    public List<InstanceMetaData> getInstanceMetaData() {
+    public List<InstanceMetadataView> getInstanceMetaData() {
         return instanceMetaData;
     }
 

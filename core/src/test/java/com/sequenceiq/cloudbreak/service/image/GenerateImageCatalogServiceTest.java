@@ -33,6 +33,8 @@ public class GenerateImageCatalogServiceTest {
 
     private static final String SOURCE_IMAGE_ID = "source image id";
 
+    private static final long STACK_ID = 1L;
+
     @Mock
     private StackImageService stackImageService;
 
@@ -59,7 +61,8 @@ public class GenerateImageCatalogServiceTest {
 
     @Test
     public void shouldGenerateImageCatalog() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(stackImageService.getCurrentImage(stack)).thenReturn(image);
+        when(stack.getId()).thenReturn(1L);
+        when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(image);
         when(image.getImageCatalogUrl()).thenReturn(IMAGE_CATALOG_URL);
         when(image.getImageCatalogName()).thenReturn(IMAGE_CATALOG_NAME);
         when(image.getImageId()).thenReturn(IMAGE_ID);
@@ -93,7 +96,8 @@ public class GenerateImageCatalogServiceTest {
 
     @Test
     public void shouldThrowCloudbreakServiceExceptionInCaseOfImageCatalogUrlIsNull() throws CloudbreakImageNotFoundException {
-        when(stackImageService.getCurrentImage(stack)).thenReturn(image);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(image);
         when(image.getImageCatalogUrl()).thenReturn(null);
 
         Assertions.assertThrows(CloudbreakServiceException.class, () -> victim.generateImageCatalogForStack(stack));
@@ -101,7 +105,8 @@ public class GenerateImageCatalogServiceTest {
 
     @Test
     public void shouldThrowCloudbreakServiceExceptionInCaseOfCustomImage() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(stackImageService.getCurrentImage(stack)).thenReturn(image);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(image);
         when(image.getImageCatalogUrl()).thenReturn(IMAGE_CATALOG_URL);
         when(image.getImageCatalogName()).thenReturn(IMAGE_CATALOG_NAME);
         when(image.getImageId()).thenReturn(IMAGE_ID);
@@ -116,7 +121,8 @@ public class GenerateImageCatalogServiceTest {
 
     @Test
     public void shouldMapCloudbreakImageNotFoundExceptionToNotFoundException() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(stackImageService.getCurrentImage(stack)).thenReturn(image);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(image);
         when(image.getImageCatalogUrl()).thenReturn(IMAGE_CATALOG_URL);
         when(image.getImageCatalogName()).thenReturn(IMAGE_CATALOG_NAME);
         when(image.getImageId()).thenReturn(IMAGE_ID);
@@ -130,7 +136,8 @@ public class GenerateImageCatalogServiceTest {
     @Test
     public void shouldMapCloudbreakCloudbreakImageCatalogExceptionToCloudbreakServiceException()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        when(stackImageService.getCurrentImage(stack)).thenReturn(image);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(image);
         when(image.getImageCatalogUrl()).thenReturn(IMAGE_CATALOG_URL);
         when(image.getImageCatalogName()).thenReturn(IMAGE_CATALOG_NAME);
         when(image.getImageId()).thenReturn(IMAGE_ID);

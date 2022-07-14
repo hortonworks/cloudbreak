@@ -54,7 +54,7 @@ public class JaxRSUtil {
             LOGGER.warn("Couldn't parse response: [{}]", response, e);
             throw handleUnexpectedError(response);
         } finally {
-            LOGGER.debug("Original salt response: {}", AnonymizerUtil.anonymize(response.readEntity(String.class)));
+            LOGGER.trace("Original salt response: {}", AnonymizerUtil.anonymize(response.readEntity(String.class)));
             response.close();
         }
     }

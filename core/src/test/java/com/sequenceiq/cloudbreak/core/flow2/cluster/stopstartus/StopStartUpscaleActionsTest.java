@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.lenient;
@@ -16,7 +15,6 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -54,12 +52,13 @@ import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -90,6 +89,9 @@ public class StopStartUpscaleActionsTest {
     private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
 
     @Mock
+    private InstanceMetaDataService instanceMetaDataService;
+
+    @Mock
     private CloudInstanceIdToInstanceMetaDataConverter cloudInstanceIdToInstanceMetaDataConverter;
 
     @InjectMocks
@@ -100,9 +102,6 @@ public class StopStartUpscaleActionsTest {
 
     @Mock
     private Stack stack;
-
-    @Mock
-    private StackView stackView;
 
     @Mock
     private CloudContext cloudContext;
@@ -162,7 +161,7 @@ public class StopStartUpscaleActionsTest {
         verify(eventBus).notify("STOPSTARTUPSCALESTARTINSTANCESREQUEST", event);
         assertThat(argumentCaptor.getValue()).isInstanceOf(StopStartUpscaleStartInstancesRequest.class);
 
-        verify(instanceMetaDataToCloudInstanceConverter, times(2)).convert(anyCollection(), anyString(), any(StackAuthentication.class));
+        verify(instanceMetaDataToCloudInstanceConverter, times(2)).convert(anyCollection(), any());
 
         StopStartUpscaleStartInstancesRequest req = (StopStartUpscaleStartInstancesRequest) argumentCaptor.getValue();
 
@@ -233,7 +232,7 @@ public class StopStartUpscaleActionsTest {
                 (AbstractStackFailureAction<StopStartUpscaleState, StopStartUpscaleEvent>) underTest.clusterUpscaleFailedAction();
         initActionPrivateFields(action);
 
-        StackFailureContext stackFailureContext = new StackFailureContext(flowParameters, stackView);
+        StackFailureContext stackFailureContext = new StackFailureContext(flowParameters, stack, STACK_ID);
         Exception exception = new Exception("FailedStart");
         StackFailureEvent stackFailureEvent = new StackFailureEvent(STACK_ID, exception);
 
@@ -339,7 +338,7 @@ public class StopStartUpscaleActionsTest {
         List<InstanceMetaData> instancesRandomStopped =
                 generateInstances(8, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
 
-        List<InstanceMetaData> startedInstances = instancesActionableStopped.subList(0, adjustment);
+        List<InstanceMetadataView> startedInstances = new ArrayList<>(instancesActionableStopped.subList(0, adjustment));
 
         StopStartUpscaleCommissionViaCMRequest request =
                 new StopStartUpscaleCommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, startedInstances, Collections.emptyList());
@@ -381,12 +380,12 @@ public class StopStartUpscaleActionsTest {
         List<InstanceMetaData> instancesRandomStopped =
                 generateInstances(8, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
 
-        List<InstanceMetaData> startedInstances = instancesActionableStopped.subList(0, adjustment - 2);
+        List<InstanceMetadataView> startedInstances = new ArrayList<>(instancesActionableStopped.subList(0, adjustment - 2));
         List<InstanceMetaData> notCommissioned = instancesActionableStopped.subList(adjustment - 2, adjustment);
         List<String> notCommissionedFqdns = notCommissioned.stream().map(x -> x.getDiscoveryFQDN()).collect(Collectors.toList());
 
         StopStartUpscaleCommissionViaCMRequest request =
-                new StopStartUpscaleCommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, startedInstances, notCommissioned);
+                new StopStartUpscaleCommissionViaCMRequest(1L, INSTANCE_GROUP_NAME_ACTIONABLE, startedInstances, new ArrayList<>(notCommissioned));
         Set<String> successfullyCommissionedFqdns = startedInstances.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.toUnmodifiableSet());
         StopStartUpscaleCommissionViaCMResult payload = new StopStartUpscaleCommissionViaCMResult(request, successfullyCommissionedFqdns, notCommissionedFqdns);
 
@@ -406,7 +405,7 @@ public class StopStartUpscaleActionsTest {
     }
 
     private StopStartUpscaleContext createContext(int adjustment) {
-        return new StopStartUpscaleContext(flowParameters, stack, stackView,
+        return new StopStartUpscaleContext(flowParameters, stack,
                 cloudContext, cloudCredential, cloudStack, INSTANCE_GROUP_NAME_ACTIONABLE,
                 adjustment, ClusterManagerType.CLOUDERA_MANAGER);
     }
@@ -414,27 +413,21 @@ public class StopStartUpscaleActionsTest {
     private void mockStackEtc(List<InstanceMetaData> instancesActionableNotStopped, List<InstanceMetaData> instancesActionableStopped,
             List<InstanceMetaData> instancesRandomNotStopped, List<InstanceMetaData> instancesRandomStopped) {
 
-        List<InstanceMetaData> combined =
+        List<InstanceMetadataView> combined =
                 Stream.of(instancesActionableNotStopped, instancesActionableStopped, instancesRandomNotStopped, instancesRandomStopped)
-                .flatMap(Collection::stream).collect(Collectors.toList());
-        lenient().when(stack.getNotDeletedAndNotZombieInstanceMetaDataList()).thenReturn(combined);
+                        .flatMap(Collection::stream).collect(Collectors.toList());
         lenient().when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         lenient().when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
         lenient().when(stack.getId()).thenReturn(STACK_ID);
 
-        lenient().when(stackView.getId()).thenReturn(STACK_ID);
-
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName(INSTANCE_GROUP_NAME_ACTIONABLE);
-        instanceGroup.setInstanceMetaData(new HashSet<>(combined));
-        lenient().when(stack.getInstanceGroupByInstanceGroupName(eq(INSTANCE_GROUP_NAME_ACTIONABLE))).thenReturn(instanceGroup);
+        lenient().when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId())).thenReturn(combined);
 
         List<InstanceMetaData> instancesHg = Stream.of(instancesActionableNotStopped, instancesActionableStopped)
                 .flatMap(Collection::stream).collect(Collectors.toList());
         List<CloudInstance> cloudInstancesActionableStopped = convertToCloudInstance(instancesActionableStopped);
         List<CloudInstance> cloudInstancesActionableAll = convertToCloudInstance(instancesHg);
 
-        lenient().when(instanceMetaDataToCloudInstanceConverter.convert(any(), anyString(), any(StackAuthentication.class)))
+        lenient().when(instanceMetaDataToCloudInstanceConverter.convert(anyCollection(), any()))
                 .thenReturn(cloudInstancesActionableStopped, cloudInstancesActionableAll);
 
         lenient().when(cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(any(), any(), any())).thenCallRealMethod();

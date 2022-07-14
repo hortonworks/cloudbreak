@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller.v4;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -100,14 +99,14 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public FlowIdentifier putStackStartInstancesByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid UpdateStackV4Request updateRequest) {
-        return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId(),
+        return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(),
                 updateRequest, ScalingStrategy.STOPSTART);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public FlowIdentifier putStackStartInstancesByName(@ResourceName String name, @Valid UpdateStackV4Request updateRequest) {
-        return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(),
+        return stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(),
                 updateRequest, ScalingStrategy.STOPSTART);
     }
 
@@ -121,7 +120,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public void decommissionInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, Long workspaceId,
             List<String> instanceIds, Boolean forced) {
-        stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getRequestedWorkspaceId(),
+        stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getAccountId(),
                 new HashSet(instanceIds), forced);
     }
 
@@ -151,7 +150,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
             List<String> instanceIds, Boolean forced) {
         LOGGER.info("decommissionInternalInstancesForClusterCrn. forced={}, clusterCrn={}, instanceIds=[{}]",
                 forced, clusterCrn, instanceIds);
-        stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getRequestedWorkspaceId(),
+        stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getAccountId(),
                 new HashSet(instanceIds), forced);
     }
 
@@ -161,7 +160,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
             Boolean forced, ScalingStrategy scalingStrategy) {
         LOGGER.info("stopInstancesForClusterCrn. ScalingStrategy={}, forced={}, clusterCrn={}, instanceIds=[{}]",
                 scalingStrategy, forced, clusterCrn, instanceIds);
-        return stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getRequestedWorkspaceId(),
+        return stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getAccountId(),
                 new HashSet(instanceIds), forced);
     }
 
@@ -171,7 +170,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
             Boolean forced, ScalingStrategy scalingStrategy) {
         LOGGER.info("stopInstancesForClusterName: ScalingStrategy={}, forced={}, clusterName={}, instanceIds=[{}]",
                 scalingStrategy, forced, clusterName, instanceIds);
-        return stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofName(clusterName), restRequestThreadLocalService.getRequestedWorkspaceId(),
+        return stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofName(clusterName), restRequestThreadLocalService.getAccountId(),
                 new HashSet<>(instanceIds), forced);
     }
 
@@ -185,7 +184,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     @InternalOnly
     public StackV4Response get(@TenantAwareParam String crn) {
-        return stackCommonService.getByCrn(crn, Collections.emptySet());
+        return stackCommonService.getByCrn(crn);
     }
 
     @Override
@@ -235,7 +234,7 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
         Stack stack = stackService.getByCrn(crn);
 
         String blueprintName = stack.getCluster().getBlueprint().getName();
-        Long workspaceId = stack.getWorkspace().getId();
+        Long workspaceId = stack.getWorkspaceId();
 
         AutoscaleRecommendation autoscaleRecommendation = blueprintService.getAutoscaleRecommendation(workspaceId, blueprintName);
 

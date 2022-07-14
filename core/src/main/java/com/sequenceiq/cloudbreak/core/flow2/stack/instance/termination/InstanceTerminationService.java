@@ -22,11 +22,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class InstanceTerminationService {
@@ -42,14 +42,14 @@ public class InstanceTerminationService {
     private CloudbreakFlowMessageService flowMessageService;
 
     public void instanceTermination(InstanceTerminationContext context) {
-        Stack stack = context.getStack();
+        StackView stack = context.getStack();
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REMOVE_INSTANCE, "Removing instance");
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_REMOVING_INSTANCE);
-        List<InstanceMetaData> instanceMetaDataList = context.getInstanceMetaDataList();
-        for (InstanceMetaData instanceMetaData : instanceMetaDataList) {
+        List<InstanceMetadataView> instanceMetaDataList = context.getInstanceMetaDataList();
+        for (InstanceMetadataView instanceMetaData : instanceMetaDataList) {
             String hostName = instanceMetaData.getDiscoveryFQDN();
             if (hostName != null) {
-                String instanceGroupName = instanceMetaData.getInstanceGroup().getGroupName();
+                String instanceGroupName = instanceMetaData.getInstanceGroupName();
                 flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP,
                         hostName, instanceGroupName);
             }
@@ -58,9 +58,9 @@ public class InstanceTerminationService {
 
     public void finishInstanceTermination(InstanceTerminationContext context, RemoveInstanceResult payload)
             throws TransactionService.TransactionExecutionException {
-        Stack stack = context.getStack();
-        List<InstanceMetaData> instanceMetaDataList = context.getInstanceMetaDataList();
-        Set<Long> privateIds = instanceMetaDataList.stream().map(InstanceMetaData::getPrivateId).collect(Collectors.toSet());
+        StackView stack = context.getStack();
+        List<InstanceMetadataView> instanceMetaDataList = context.getInstanceMetaDataList();
+        Set<Long> privateIds = instanceMetaDataList.stream().map(InstanceMetadataView::getPrivateId).collect(Collectors.toSet());
         stackScalingService.updateInstancesToTerminated(privateIds, stack.getId());
         LOGGER.debug("Terminate instance result: {}", payload);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Instance removed");

@@ -13,13 +13,14 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class SshKeyService {
@@ -42,24 +43,26 @@ public class SshKeyService {
         return PkiUtil.generateKeypair();
     }
 
-    public void addSshPublicKeyToHosts(Stack stack, String user, KeyPair keyPair, String authKeysComment) throws Exception {
-        OrchestratorStateParams stateParams = createSshStateParams(stack, user, keyPair, authKeysComment, REMOVE_SSH_PUBLICKEY_STATE);
+    public void addSshPublicKeyToHosts(StackDto stackDto, String user, KeyPair keyPair, String authKeysComment) throws Exception {
+        OrchestratorStateParams stateParams = createSshStateParams(stackDto, user, keyPair, authKeysComment, REMOVE_SSH_PUBLICKEY_STATE);
         hostOrchestrator.runOrchestratorState(stateParams);
         stateParams.setState(ADD_SSH_PUBLICKEY_STATE);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
-    public void removeSshPublicKeyFromHosts(Stack stack, String user, String authKeysComment) throws Exception {
-        OrchestratorStateParams stateParams = createSshStateParams(stack, user, null, authKeysComment, REMOVE_SSH_PUBLICKEY_STATE);
+    public void removeSshPublicKeyFromHosts(StackDto stackDto, String user, String authKeysComment) throws Exception {
+        OrchestratorStateParams stateParams = createSshStateParams(stackDto, user, null, authKeysComment, REMOVE_SSH_PUBLICKEY_STATE);
         hostOrchestrator.runOrchestratorState(stateParams);
     }
 
-    private OrchestratorStateParams createSshStateParams(Stack stack, String user, KeyPair keyPair, String authKeysComment, String saltState) {
-        Cluster cluster = stack.getCluster();
-        Set<Node> nodes = stackUtil.collectReachableNodes(stack);
+    private OrchestratorStateParams createSshStateParams(StackDto stackDto, String user, KeyPair keyPair, String authKeysComment, String saltState) {
+        StackView stack = stackDto.getStack();
+        ClusterView cluster = stackDto.getCluster();
+        Set<Node> nodes = stackUtil.collectReachableNodes(stackDto);
         OrchestratorStateParams stateParams = new OrchestratorStateParams();
         stateParams.setState(saltState);
-        stateParams.setPrimaryGatewayConfig(gatewayConfigService.getGatewayConfig(stack, stack.getPrimaryGatewayInstance(), stack.getCluster().hasGateway()));
+        stateParams.setPrimaryGatewayConfig(gatewayConfigService.getGatewayConfig(stack, stackDto.getSecurityConfig(), stackDto.getPrimaryGatewayInstance(),
+                stackDto.hasGateway()));
         stateParams.setTargetHostNames(nodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
         stateParams.setAllNodes(nodes);
         stateParams.setExitCriteriaModel(ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId()));

@@ -9,8 +9,10 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
@@ -47,8 +50,10 @@ import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
+import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.type.FeatureSetting;
 
 public class TelemetryDecoratorTest {
 
@@ -120,8 +125,8 @@ public class TelemetryDecoratorTest {
                 .build();
         mockConfigServiceResults(dataConfigView, fluentConfigView, new MeteringConfigView.Builder().build());
         // WHEN
-        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar,
-                createStack(), new Telemetry());
+        StackDto stack = createStack();
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), new Telemetry());
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(result, "fluent");
         assertEquals(results.get("providerPrefix"), "s3");
@@ -132,7 +137,7 @@ public class TelemetryDecoratorTest {
         assertEquals(results.get("user"), "root");
         verify(fluentConfigService, times(1)).createFluentConfigs(any(TelemetryClusterDetails.class),
                 anyBoolean(), anyBoolean(), isNull(), any(Telemetry.class));
-        verify(meteringConfigService, times(1)).createMeteringConfigs(anyBoolean(), anyString(), anyString(),
+        verify(meteringConfigService, times(0)).createMeteringConfigs(anyBoolean(), anyString(), anyString(),
                 anyString(), anyString(), anyString());
     }
 
@@ -155,8 +160,8 @@ public class TelemetryDecoratorTest {
                 .build();
         mockConfigServiceResults(dataConfigView, fluentConfigView, new MeteringConfigView.Builder().build());
         // WHEN
-        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar,
-                createStack(), new Telemetry());
+        StackDto stack = createStack();
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), new Telemetry());
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(result, "fluent");
         assertEquals(results.get("providerPrefix"), "s3a");
@@ -169,6 +174,12 @@ public class TelemetryDecoratorTest {
     public void testDecorateWithMetering() {
         // GIVEN
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        Telemetry telemetry = new Telemetry();
+        Features features = new Features();
+        FeatureSetting metering = new FeatureSetting();
+        metering.setEnabled(true);
+        features.setMetering(metering);
+        telemetry.setFeatures(features);
         MeteringConfigView meteringConfigView = new MeteringConfigView.Builder()
                 .withEnabled(true)
                 .withPlatform("AWS")
@@ -180,8 +191,8 @@ public class TelemetryDecoratorTest {
                 .build();
         mockConfigServiceResults(dataConfigView, new FluentConfigView.Builder().build(), meteringConfigView);
         // WHEN
-        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar,
-                createStack(), new Telemetry());
+        StackDto stack = createStack();
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), telemetry);
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(result, "metering");
         assertEquals(results.get("serviceType"), "DATAHUB");
@@ -219,8 +230,8 @@ public class TelemetryDecoratorTest {
         Telemetry telemetry = new Telemetry();
         telemetry.setMonitoring(new Monitoring());
         // WHEN
-        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar,
-                createStack(), telemetry);
+        StackDto stack = createStack();
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), telemetry);
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(result, "monitoring");
         assertEquals(results.get("clusterType"), "datahub");
@@ -239,8 +250,8 @@ public class TelemetryDecoratorTest {
                 .build();
         mockConfigServiceResults(dataConfigView, fluentConfigView, new MeteringConfigView.Builder().build());
         // WHEN
-        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar,
-                createStack(), new Telemetry());
+        StackDto stack = createStack();
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), new Telemetry());
         // THEN
         assertNotNull(result.get("telemetry"));
         assertNull(result.get("fleunt"));
@@ -260,8 +271,8 @@ public class TelemetryDecoratorTest {
                 .build();
         mockConfigServiceResults(dataConfigView, fluentConfigView, new MeteringConfigView.Builder().build());
         // WHEN
-        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar,
-                createStack(), new Telemetry());
+        StackDto stack = createStack();
+        Map<String, SaltPillarProperties> result = underTest.decoratePillar(servicePillar, stack.getStack(), stack.getCluster(), new Telemetry());
         // THEN
         Map<String, Object> results = createMapFromFluentPillars(result, "databus");
         assertEquals(results.get("accessKeyId"), "myAccessKeyId");
@@ -272,7 +283,8 @@ public class TelemetryDecoratorTest {
         return (Map<String, Object>) servicePillar.get(pillarType).getProperties().get(pillarType);
     }
 
-    private Stack createStack() {
+    private StackDto createStack() {
+        StackDto stackDto = spy(StackDto.class);
         Stack stack = new Stack();
         stack.setName("my-stack-name");
         stack.setType(StackType.WORKLOAD);
@@ -287,7 +299,9 @@ public class TelemetryDecoratorTest {
         creator.setUserCrn("crn:cdp:iam:us-west-1:accountId:user:name");
         stack.setCreator(creator);
         stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
-        return stack;
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stackDto.getCluster()).thenReturn(cluster);
+        return stackDto;
     }
 
     private void mockConfigServiceResults(DatabusConfigView databusConfigView, FluentConfigView fluentConfigView,

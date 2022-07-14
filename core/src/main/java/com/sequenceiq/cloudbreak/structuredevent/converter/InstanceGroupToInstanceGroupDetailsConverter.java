@@ -7,18 +7,18 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.structuredevent.event.InstanceGroupDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.VolumeDetails;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 @Component
 public class InstanceGroupToInstanceGroupDetailsConverter {
 
-    public InstanceGroupDetails convert(InstanceGroup source) {
+    public InstanceGroupDetails convert(InstanceGroupView source, int nodeCount) {
         InstanceGroupDetails instanceGroupDetails = new InstanceGroupDetails();
         instanceGroupDetails.setGroupName(source.getGroupName());
         instanceGroupDetails.setGroupType(source.getInstanceGroupType().name());
-        instanceGroupDetails.setNodeCount(source.getNodeCount());
+        instanceGroupDetails.setNodeCount(nodeCount);
         Template template = source.getTemplate();
         if (template != null) {
             instanceGroupDetails.setInstanceType(template.getInstanceType());

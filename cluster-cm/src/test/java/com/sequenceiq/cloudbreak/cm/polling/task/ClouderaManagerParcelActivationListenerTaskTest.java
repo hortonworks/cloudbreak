@@ -68,7 +68,7 @@ class ClouderaManagerParcelActivationListenerTaskTest {
         underTest = new ClouderaManagerParcelActivationListenerTask(clouderaManagerApiPojoFactory, clusterEventService, createProducts());
         stack = new Stack();
         cluster = new Cluster();
-        stack.setCluster(TestUtil.clusterComponents(cluster));
+        stack.setCluster(cluster);
         stack.setName(STACK_NAME);
     }
 

@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
@@ -112,7 +114,9 @@ public class ClusterBootstrapperErrorHandlerTest {
         thrown.expect(CloudbreakOrchestratorFailedException.class);
         thrown.expectMessage("invalide.nodecount");
 
-        underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
+        StackDto stackDto = mock(StackDto.class);
+
+        underTest.terminateFailedNodes(null, orchestrator, stackDto,
                 new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 443, "instanceId", false), prepareNodes(stack));
     }
 
@@ -126,7 +130,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         when(instanceMetaDataService.save(any(InstanceMetaData.class))).then(returnsFirstArg());
         when(resourceService.findByStackIdAndNameAndType(nullable(Long.class), nullable(String.class), nullable(ResourceType.class)))
                 .thenReturn(Optional.of(new Resource()));
-        when(connector.removeInstances(any(Stack.class), anySet(), anyString())).thenReturn(new HashSet<>());
+        when(connector.removeInstances(any(StackDto.class), anySet(), anyString())).thenReturn(new HashSet<>());
         when(instanceMetaDataService.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer((Answer<Optional<InstanceMetaData>>) invocation -> {
             Object[] args = invocation.getArguments();
             String ip = (String) args[1];
@@ -148,13 +152,14 @@ public class ClusterBootstrapperErrorHandlerTest {
                     }
                     return Optional.empty();
                 });
-        underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
+        StackDto stackDto = mock(StackDto.class);
+        underTest.terminateFailedNodes(null, orchestrator, stackDto,
                 new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 443, "instanceId", false), prepareNodes(stack));
 
         verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), any(ResourceEvent.class), nullable(Collection.class));
         verify(instanceGroupService, times(3)).save(any(InstanceGroup.class));
         verify(instanceMetaDataService, times(3)).save(any(InstanceMetaData.class));
-        verify(connector, times(3)).removeInstances(any(Stack.class), anySet(), anyString());
+        verify(connector, times(3)).removeInstances(any(StackDto.class), anySet(), anyString());
         verify(resourceService, times(3)).findByStackIdAndNameAndType(anyLong(), anyString(), nullable(ResourceType.class));
         verify(resourceService, times(3)).delete(nullable(Resource.class));
         verify(instanceGroupService, times(3)).findOneWithInstanceMetadataByGroupNameInStack(anyLong(), anyString());

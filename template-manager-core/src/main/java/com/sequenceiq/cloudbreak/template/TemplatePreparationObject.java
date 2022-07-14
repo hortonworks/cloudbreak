@@ -363,6 +363,11 @@ public class TemplatePreparationObject {
             return this;
         }
 
+        public Builder withGateway(com.sequenceiq.cloudbreak.view.GatewayView gateway, String signKey, Set<String> fullServiceList) {
+            gatewayView = gateway != null ? new GatewayView(gateway, signKey, fullServiceList) : null;
+            return this;
+        }
+
         public Builder withBlueprintView(BlueprintView blueprintView) {
             this.blueprintView = blueprintView;
             return this;

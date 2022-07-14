@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
+import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -17,6 +18,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -26,7 +29,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -59,6 +61,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -66,7 +69,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -76,6 +79,8 @@ import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 public class StackOperationServiceTest {
+
+    private static final long STACK_ID = 9876L;
 
     @InjectMocks
     private StackOperationService underTest;
@@ -96,7 +101,7 @@ public class StackOperationServiceTest {
     private ClusterOperationService clusterOperationService;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private ClusterService clusterService;
@@ -142,19 +147,20 @@ public class StackOperationServiceTest {
     @ParameterizedTest(name = "{0}: With stackStatus={1}")
     @MethodSource("stackStatusForStop")
     public void testStop(String methodName, DetailedStackStatus stackStatus) {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getId()).thenReturn(STACK_ID);
         Stack stack = new Stack();
-        stack.setId(9876L);
+        stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, stackStatus));
         Cluster cluster = new Cluster();
         cluster.setId(1L);
-        stack.setCluster(cluster);
+        when(stackDto.getCluster()).thenReturn(cluster);
+        when(stackDto.getStack()).thenReturn(stack);
         when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
         // On demand instances
-        when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
-        when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
-        when(clusterService.findOneWithLists(cluster.getId())).thenReturn(Optional.of(cluster));
+        when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stackDto)).thenReturn(false);
 
-        underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true);
+        underTest.updateStatus(stackDto, StatusRequest.STOPPED, true);
 
         if (stackStatus == STOP_FAILED) {
             verify(flowManager).triggerStackStop(stack.getId());
@@ -200,7 +206,7 @@ public class StackOperationServiceTest {
     @Test
     public void testStartWhenClusterStopFailed() {
         Stack stack = new Stack();
-        stack.setId(9876L);
+        stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, Status.STOPPED, "", STOPPED));
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
@@ -211,14 +217,15 @@ public class StackOperationServiceTest {
     @Test
     public void shouldNotTriggerStopWhenStackRunsOnSpotInstances() {
         Stack stack = new Stack();
-        stack.setId(9876L);
+        stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getStack()).thenReturn(stack);
 
         when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
-        when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(true);
-        when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
+        when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stackDto)).thenReturn(true);
 
-        assertThatThrownBy(() -> underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true))
+        assertThatThrownBy(() -> underTest.updateStatus(stackDto, StatusRequest.STOPPED, true))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(String.format("Cannot update the status of stack '%s' to STOPPED, because it runs on spot instances", stack.getName()));
         verify(stackUpdater, never()).updateStackStatus(any(), any(DetailedStackStatus.class));
@@ -227,7 +234,7 @@ public class StackOperationServiceTest {
     @Test
     public void testStartWhenCheckCallEnvironmentCheck() {
         Stack stack = new Stack();
-        stack.setId(9876L);
+        stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, STOPPED));
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
@@ -238,39 +245,45 @@ public class StackOperationServiceTest {
     @Test
     public void testTriggerStackStopIfNeededWhenCheckCallEnvironmentCheck() {
         Stack stack = new Stack();
-        stack.setId(9876L);
+        stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getId()).thenReturn(STACK_ID);
         Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stackDto)).thenReturn(false);
         when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
-        underTest.triggerStackStopIfNeeded(stack, cluster, true);
+        underTest.triggerStackStopIfNeeded(stackDto, cluster, true);
         verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.stoppable());
     }
 
     @Test
     public void testUpdateNodeCountWhenCheckCallEnvironmentCheck() throws TransactionService.TransactionExecutionException {
+        StackDto stackDto = mock(StackDto.class);
         Stack stack = new Stack();
-        stack.setId(9876L);
+        stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        when(stackDto.getStack()).thenReturn(stack);
         InstanceGroupAdjustmentV4Request adjustment = new InstanceGroupAdjustmentV4Request();
 
         when(transactionService.required(any(Supplier.class))).thenReturn(null);
 
-        underTest.updateNodeCount(stack, adjustment, false);
+        underTest.updateNodeCount(stackDto, adjustment, false);
         verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
     }
 
     @Test
     public void testUpdateNodeCountAndCheckDownscaleAndUpscaleStatusChange() throws TransactionService.TransactionExecutionException {
         Stack stack = new Stack();
-        stack.setId(9876L);
+        stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getId()).thenReturn(STACK_ID);
+        when(stackDto.getStack()).thenReturn(stack);
         InstanceGroupAdjustmentV4Request upscaleAdjustment = new InstanceGroupAdjustmentV4Request();
         upscaleAdjustment.setScalingAdjustment(5);
 
         when(transactionService.required(any(Supplier.class))).thenAnswer(ans -> ((Supplier) ans.getArgument(0)).get());
-        when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
         when(targetedUpscaleSupportService.targetedUpscaleOperationSupported(any())).thenReturn(Boolean.TRUE);
         doNothing().when(updateNodeCountValidator).validateServiceRoles(any(), any(InstanceGroupAdjustmentV4Request.class));
         doNothing().when(updateNodeCountValidator).validateInstanceGroup(any(), any());
@@ -278,7 +291,7 @@ public class StackOperationServiceTest {
         doNothing().when(updateNodeCountValidator).validateScalingAdjustment(any(InstanceGroupAdjustmentV4Request.class), any());
         doNothing().when(updateNodeCountValidator).validateHostGroupIsPresent(any(InstanceGroupAdjustmentV4Request.class), any());
 
-        underTest.updateNodeCount(stack, upscaleAdjustment, true);
+        underTest.updateNodeCount(stackDto, upscaleAdjustment, true);
         verify(stackUpdater).updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
                 "Requested node count for upscaling: " + upscaleAdjustment.getScalingAdjustment());
         verify(flowManager).triggerStackUpscale(stack.getId(), upscaleAdjustment, true);
@@ -287,13 +300,13 @@ public class StackOperationServiceTest {
 
         InstanceGroupAdjustmentV4Request downscaleAdjustment = new InstanceGroupAdjustmentV4Request();
         downscaleAdjustment.setScalingAdjustment(-5);
-        underTest.updateNodeCount(stack, downscaleAdjustment, true);
+        underTest.updateNodeCount(stackDto, downscaleAdjustment, true);
         verify(stackUpdater).updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED,
                 "Requested node count for downscaling: " + 5);
         verify(flowManager).triggerStackDownscale(stack.getId(), downscaleAdjustment);
 
         when(targetedUpscaleSupportService.targetedUpscaleOperationSupported(any())).thenReturn(Boolean.FALSE);
-        underTest.updateNodeCount(stack, upscaleAdjustment, true);
+        underTest.updateNodeCount(stackDto, upscaleAdjustment, true);
         verify(updateNodeCountValidator, times(2)).validateInstanceStatuses(any(), any());
         verify(updateNodeCountValidator, times(2)).validataHostMetadataStatuses(any(), any());
 
@@ -304,13 +317,11 @@ public class StackOperationServiceTest {
     @MethodSource("stackStatusForUpdateNodeCount")
     public void testUpdateNodeCountStartInstances(String methodName, DetailedStackStatus stackStatus) throws TransactionService.TransactionExecutionException {
         Stack stack = new Stack();
-        stack.setId(9876L);
+        stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, stackStatus));
-        Cluster cluster = new Cluster();
-        cluster.setStatus(Status.AVAILABLE);
-        stack.setCluster(cluster);
-
-        when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
+        StackDto stackDto = mock(StackDto.class);
+        lenient().when(stackDto.getId()).thenReturn(STACK_ID);
+        when(stackDto.getStack()).thenReturn(stack);
 
         InstanceGroupAdjustmentV4Request upscaleAdjustment = new InstanceGroupAdjustmentV4Request();
         upscaleAdjustment.setScalingAdjustment(5);
@@ -327,7 +338,7 @@ public class StackOperationServiceTest {
 
         // Regular
         try {
-            underTest.updateNodeCountStartInstances(stack, upscaleAdjustment, true, ScalingStrategy.STOPSTART);
+            underTest.updateNodeCountStartInstances(stackDto, upscaleAdjustment, true, ScalingStrategy.STOPSTART);
             String expectedStatusReason = "Requested node count for upscaling (stopstart): " + upscaleAdjustment.getScalingAdjustment();
             verify(stackUpdater).updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_BY_START_REQUESTED, expectedStatusReason);
             verify(flowManager).triggerStopStartStackUpscale(stack.getId(), upscaleAdjustment, true);
@@ -339,11 +350,11 @@ public class StackOperationServiceTest {
         // Somehow invoked with a negative value
         upscaleAdjustment.setScalingAdjustment(-1);
         assertThrows(BadRequestException.class,
-                () -> underTest.updateNodeCountStartInstances(stack, upscaleAdjustment, true, ScalingStrategy.STOPSTART));
+                () -> underTest.updateNodeCountStartInstances(stackDto, upscaleAdjustment, true, ScalingStrategy.STOPSTART));
 
         upscaleAdjustment.setScalingAdjustment(0);
         assertThrows(BadRequestException.class,
-                () -> underTest.updateNodeCountStartInstances(stack, upscaleAdjustment, true, ScalingStrategy.STOPSTART));
+                () -> underTest.updateNodeCountStartInstances(stackDto, upscaleAdjustment, true, ScalingStrategy.STOPSTART));
     }
 
     public static Stream<Arguments> stackStatusForUpdateNodeCount() {
@@ -363,11 +374,11 @@ public class StackOperationServiceTest {
     @Test
     public void testRemoveInstances() {
         Stack stack = new Stack();
-        stack.setId(9876L);
+        stack.setId(STACK_ID);
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
-        Cluster cluster = new Cluster();
-        cluster.setStatus(Status.AVAILABLE);
-        stack.setCluster(cluster);
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getId()).thenReturn(STACK_ID);
+        when(stackDto.getStack()).thenReturn(stack);
 
         Collection<String> instanceIds = new LinkedList<>();
         InstanceMetaData im1 = createInstanceMetadataForTest(1L, "group1");
@@ -393,7 +404,7 @@ public class StackOperationServiceTest {
 
         // Verify non stop-start invocation
         capturedInstances = ArgumentCaptor.forClass(Map.class);
-        underTest.removeInstances(stack, instanceIds, false);
+        underTest.removeInstances(stackDto, instanceIds, false);
         verify(flowManager).triggerStackRemoveInstances(eq(stack.getId()), capturedInstances.capture(), eq(false));
         captured = capturedInstances.getValue();
         assertEquals(1, captured.size());
@@ -408,7 +419,7 @@ public class StackOperationServiceTest {
         // Verify stop-start invocation
         reset(flowManager);
         capturedInstances = ArgumentCaptor.forClass(Map.class);
-        underTest.stopInstances(stack, instanceIds, false);
+        underTest.stopInstances(stackDto, instanceIds, false);
         verify(flowManager).triggerStopStartStackDownscale(eq(stack.getId()), capturedInstances.capture(), eq(false));
         captured = capturedInstances.getValue();
         assertEquals(1, captured.size());
@@ -416,7 +427,7 @@ public class StackOperationServiceTest {
         assertEquals(3, captured.entrySet().iterator().next().getValue().size());
 
         // No requestIds sent - BadRequest stopstart
-        assertThatThrownBy(() -> underTest.stopInstances(stack, null, false))
+        assertThatThrownBy(() -> underTest.stopInstances(stackDto, null, false))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Stop request cannot process an empty instanceIds collection");
 
@@ -425,14 +436,14 @@ public class StackOperationServiceTest {
         InstanceMetaData im4 = createInstanceMetadataForTest(4L, "group2");
         doReturn(im4).when(updateNodeCountValidator).validateInstanceForStop(im4.getInstanceId(), stack);
         instanceIds.add("i4");
-        assertThatThrownBy(() -> underTest.stopInstances(stack, instanceIds, false))
+        assertThatThrownBy(() -> underTest.stopInstances(stackDto, instanceIds, false))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Downscale via Instance Stop cannot process more than one host group");
 
         // regular scaling supports multiple hostgroups
         reset(flowManager);
         doReturn(im4).when(updateNodeCountValidator).validateInstanceForDownscale(im4.getInstanceId(), stack);
-        underTest.removeInstances(stack, instanceIds, false);
+        underTest.removeInstances(stackDto, instanceIds, false);
         verify(flowManager).triggerStackRemoveInstances(eq(stack.getId()), capturedInstances.capture(), eq(false));
         captured = capturedInstances.getValue();
         assertEquals(2, captured.size());
@@ -445,19 +456,18 @@ public class StackOperationServiceTest {
     @Test
     public void testRotateSaltPassword() {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn("crn");
-        long workspaceId = 0L;
-        Stack stack = new Stack();
-        stack.setId(5L);
-        when(stackService.getByNameOrCrnAndWorkspaceIdWithLists(nameOrCrn, workspaceId)).thenReturn(stack);
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getId()).thenReturn(5L);
+        when(stackDtoService.getByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stackDto);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollableId");
-        when(flowManager.triggerRotateSaltPassword(stack.getId())).thenReturn(flowIdentifier);
+        when(flowManager.triggerRotateSaltPassword(stackDto.getId())).thenReturn(flowIdentifier);
 
-        FlowIdentifier result = underTest.rotateSaltPassword(nameOrCrn, workspaceId);
+        FlowIdentifier result = underTest.rotateSaltPassword(nameOrCrn, ACCOUNT_ID);
 
         assertEquals(flowIdentifier, result);
-        verify(stackService).getByNameOrCrnAndWorkspaceIdWithLists(nameOrCrn, workspaceId);
-        verify(clusterBootstrapper).validateRotateSaltPassword(stack);
-        verify(flowManager).triggerRotateSaltPassword(stack.getId());
+        verify(stackDtoService).getByNameOrCrn(nameOrCrn, ACCOUNT_ID);
+        verify(clusterBootstrapper).validateRotateSaltPassword(stackDto);
+        verify(flowManager).triggerRotateSaltPassword(stackDto.getId());
     }
 
     private InstanceMetaData createInstanceMetadataForTest(Long privateId, String instanceGroupName) {

@@ -12,16 +12,17 @@ import org.springframework.stereotype.Service;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -34,7 +35,7 @@ public class AltusMachineUserService {
 
     private final AltusIAMService altusIAMService;
 
-    private final StackService stackService;
+    private final StackDtoService stackDtoService;
 
     private final ClusterService clusterService;
 
@@ -44,12 +45,12 @@ public class AltusMachineUserService {
 
     public AltusMachineUserService(
             AltusIAMService altusIAMService,
-            StackService stackService,
+            StackDtoService stackDtoService,
             ClusterService clusterService,
             ComponentConfigProviderService componentConfigProviderService,
             RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
         this.altusIAMService = altusIAMService;
-        this.stackService = stackService;
+        this.stackDtoService = stackDtoService;
         this.clusterService = clusterService;
         this.componentConfigProviderService = componentConfigProviderService;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
@@ -58,7 +59,7 @@ public class AltusMachineUserService {
     /**
      * Generate machine user for fluentd - databus communication
      */
-    public Optional<AltusCredential> generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry, boolean forced) {
+    public Optional<AltusCredential> generateDatabusMachineUserForFluent(StackView stack, Telemetry telemetry, boolean forced) {
         if (isAnyDataBusBasedFeatureSupported(telemetry) || forced) {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
@@ -71,15 +72,15 @@ public class AltusMachineUserService {
         return Optional.empty();
     }
 
-    public Optional<AltusCredential> generateDatabusMachineUserForFluent(Stack stack, Telemetry telemetry) {
+    public Optional<AltusCredential> generateDatabusMachineUserForFluent(StackView stack, Telemetry telemetry) {
         return generateDatabusMachineUserForFluent(stack, telemetry, false);
     }
 
     /**
      * Delete machine user for fluent based upload with its access keys (and unassign databus role if required)
      */
-    public void clearFluentMachineUser(Stack stack, Telemetry telemetry) {
-        if (isAnyDataBusBasedFeatureSupported(telemetry) || isDataBusCredentialAvailable(stack)) {
+    public void clearFluentMachineUser(StackView stack, ClusterView cluster, Telemetry telemetry) {
+        if (isAnyDataBusBasedFeatureSupported(telemetry) || isDataBusCredentialAvailable(cluster)) {
             String machineUserName = getFluentDatabusMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
@@ -112,8 +113,9 @@ public class AltusMachineUserService {
      */
     public DataBusCredential getOrCreateDataBusCredentialIfNeeded(Long stackId) throws IOException {
         LOGGER.debug("Get or create databus credential for stack");
-        Stack stack = stackService.get(stackId);
-        Cluster cluster = clusterService.findOneByStackIdOrNotFoundError(stackId);
+        StackDto stackDto = stackDtoService.getById(stackId);
+        StackView stack = stackDto.getStack();
+        ClusterView cluster = stackDto.getCluster();
         cluster.getDatabusCredential();
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
         if (cluster.getDatabusCredential() != null) {
@@ -138,17 +140,15 @@ public class AltusMachineUserService {
      * @param stack component will be attached to this stack
      * @return domain object that holds databus credential
      */
-    public DataBusCredential storeDataBusCredential(Optional<AltusCredential> altusCredential, Stack stack) {
+    public DataBusCredential storeDataBusCredential(Optional<AltusCredential> altusCredential, StackView stack) {
         if (altusCredential.isPresent()) {
             DataBusCredential dataBusCredential = new DataBusCredential();
             dataBusCredential.setMachineUserName(getFluentDatabusMachineUserName(stack));
             dataBusCredential.setAccessKey(altusCredential.get().getAccessKey());
             dataBusCredential.setPrivateKey(altusCredential.get().getPrivateKey() != null ? new String(altusCredential.get().getPrivateKey()) : null);
             String databusCredentialJsonString = new Json(dataBusCredential).getValue();
-            Cluster cluster = stack.getCluster();
-            if (cluster != null) {
-                cluster.setDatabusCredential(databusCredentialJsonString);
-                clusterService.updateCluster(cluster);
+            if (stack.getClusterId() != null) {
+                clusterService.updateDatabusCredentialByClusterId(stack.getClusterId(), databusCredentialJsonString);
             }
             return dataBusCredential;
         }
@@ -161,7 +161,7 @@ public class AltusMachineUserService {
      * @param stack stack object holder that can be used to calculate the machine user name
      * @return check result - if true, no need to regenerate keys
      */
-    public boolean isDataBusCredentialStillExist(Telemetry telemetry, DataBusCredential dataBusCredential, Stack stack) {
+    public boolean isDataBusCredentialStillExist(Telemetry telemetry, DataBusCredential dataBusCredential, StackView stack) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                 () -> altusIAMService.doesMachineUserHasAccessKey(
@@ -186,11 +186,11 @@ public class AltusMachineUserService {
         return String.format(FLUENT_DATABUS_MACHINE_USER_NAME_PATTERN, clusterType, resource);
     }
 
-    private boolean isDataBusCredentialAvailable(Stack stack) {
-        return stack.getCluster() != null && StringUtils.isNotBlank(stack.getCluster().getDatabusCredential());
+    private boolean isDataBusCredentialAvailable(ClusterView cluster) {
+        return cluster != null && StringUtils.isNotBlank(cluster.getDatabusCredential());
     }
 
-    private String getFluentDatabusMachineUserName(Stack stack) {
+    private String getFluentDatabusMachineUserName(StackView stack) {
         String clusterType = "cb";
         if (StackType.DATALAKE.equals(stack.getType())) {
             clusterType = "datalake";

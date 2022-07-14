@@ -12,8 +12,8 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Component
 public class ClouderaManagerStorageErrorMapper {
@@ -23,16 +23,16 @@ public class ClouderaManagerStorageErrorMapper {
     private static final String MESSAGE_VALIDATION_ERROR = "No surprise that cluster creation has failed, probably something was not validated properly " +
             "in cloud storage config. This is most probably a control plane bug: ";
 
-    public String map(CloudStorageConfigurationFailedException e, String cloudPlatform, Cluster cluster) {
+    public String map(CloudStorageConfigurationFailedException e, String cloudPlatform, ClusterView cluster) {
         String originalMessage = e.getMessage();
         String mappedMessage = cluster.isRangerRazEnabled() ? getRazError(originalMessage) : mapNonRazMessage(originalMessage, cloudPlatform, cluster);
         LOGGER.debug("Mapped error message: {} original: {}", mappedMessage, originalMessage);
         return mappedMessage;
     }
 
-    private String mapNonRazMessage(String originalMessage, String cloudPlatform, Cluster cluster) {
+    private String mapNonRazMessage(String originalMessage, String cloudPlatform, ClusterView cluster) {
         Optional<CloudStorage> cloudStorage = Optional.of(cluster)
-                .map(Cluster::getFileSystem)
+                .map(ClusterView::getFileSystem)
                 .map(FileSystem::getCloudStorage);
         if (cloudStorage.isPresent() && cloudStorage.get().getCloudIdentities() != null && cloudStorage.get().getAccountMapping() != null
                 && cloudStorage.get().getAccountMapping().getUserMappings() != null) {

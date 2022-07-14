@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
@@ -67,11 +68,13 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterRecoveryService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
@@ -99,6 +102,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Inject
     private ClusterCommonService clusterCommonService;
@@ -202,9 +208,9 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackV4Response;
     }
 
-    public StackV4Response get(NameOrCrn nameOrCrn, Long workspaceId, Set<String> entries, StackType stackType) {
-        LOGGER.info("Validate stack in workspace {}.", workspaceId);
-        StackV4Response stackResponse = stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId, entries, stackType);
+    public StackV4Response get(NameOrCrn nameOrCrn, String accountId, Set<String> entries, StackType stackType) {
+        LOGGER.info("Validate stack in account {}.", accountId);
+        StackV4Response stackResponse = stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, accountId, entries, stackType);
         LOGGER.info("Adding environment name and credential to the response.");
         environmentServiceDecorator.prepareEnvironmentAndCredentialName(stackResponse);
         LOGGER.info("Adding SDX CRN and name to the response.");
@@ -230,40 +236,40 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackClusterStatusViewToStatusConverter.convert(statuses);
     }
 
-    public FlowIdentifier deleteInstance(@NotNull NameOrCrn nameOrCrn, Long workspaceId, boolean forced, String instanceId) {
-        return stackCommonService.deleteInstanceInWorkspace(nameOrCrn, workspaceId, instanceId, forced);
+    public FlowIdentifier deleteInstance(@NotNull NameOrCrn nameOrCrn, String accountId, boolean forced, String instanceId) {
+        return stackCommonService.deleteInstanceInWorkspace(nameOrCrn, accountId, instanceId, forced);
     }
 
-    public FlowIdentifier deleteInstances(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
-        return stackCommonService.deleteMultipleInstancesInWorkspace(nameOrCrn, workspaceId, instanceIds, forced);
+    public FlowIdentifier deleteInstances(NameOrCrn nameOrCrn, String accountId, Set<String> instanceIds, boolean forced) {
+        return stackCommonService.deleteMultipleInstancesInWorkspace(nameOrCrn, accountId, instanceIds, forced);
     }
 
-    public FlowIdentifier sync(NameOrCrn nameOrCrn, Long workspaceId) {
-        return stackCommonService.syncInWorkspace(nameOrCrn, workspaceId);
+    public FlowIdentifier sync(NameOrCrn nameOrCrn, String accountId) {
+        return stackCommonService.syncInWorkspace(nameOrCrn, accountId);
     }
 
-    public FlowIdentifier syncComponentVersionsFromCm(NameOrCrn nameOrCrn, Long workspaceId, Set<String> candidateImageUuids) {
-        return stackCommonService.syncComponentVersionsFromCmInWorkspace(nameOrCrn, workspaceId, candidateImageUuids);
+    public FlowIdentifier syncComponentVersionsFromCm(NameOrCrn nameOrCrn, String accountId, Set<String> candidateImageUuids) {
+        return stackCommonService.syncComponentVersionsFromCmInWorkspace(nameOrCrn, accountId, candidateImageUuids);
     }
 
     public FlowIdentifier retry(NameOrCrn nameOrCrn, Long workspaceId) {
         return stackCommonService.retryInWorkspace(nameOrCrn, workspaceId);
     }
 
-    public FlowIdentifier putStop(NameOrCrn nameOrCrn, Long workspaceId) {
-        return stackCommonService.putStopInWorkspace(nameOrCrn, workspaceId);
+    public FlowIdentifier putStop(NameOrCrn nameOrCrn, String accountId) {
+        return stackCommonService.putStopInWorkspace(nameOrCrn, accountId);
     }
 
-    public FlowIdentifier putStart(NameOrCrn nameOrCrn, Long workspaceId) {
-        return stackCommonService.putStartInWorkspace(nameOrCrn, workspaceId);
+    public FlowIdentifier putStart(NameOrCrn nameOrCrn, String accountId) {
+        return stackCommonService.putStartInWorkspace(nameOrCrn, accountId);
     }
 
-    public FlowIdentifier rotateSaltPassword(NameOrCrn nameOrCrn, Long workspaceId) {
-        return stackCommonService.rotateSaltPassword(nameOrCrn, workspaceId);
+    public FlowIdentifier rotateSaltPassword(NameOrCrn nameOrCrn, String accountId) {
+        return stackCommonService.rotateSaltPassword(nameOrCrn, accountId);
     }
 
-    public FlowIdentifier putScaling(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid StackScaleV4Request updateRequest) {
-        return stackCommonService.putScalingInWorkspace(nameOrCrn, workspaceId, updateRequest);
+    public FlowIdentifier putScaling(@NotNull NameOrCrn nameOrCrn, String accountId, @Valid StackScaleV4Request updateRequest) {
+        return stackCommonService.putScalingInWorkspace(nameOrCrn, accountId, updateRequest);
     }
 
     public FlowIdentifier repairCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid ClusterRepairV4Request clusterRepairRequest) {
@@ -276,14 +282,14 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return recoveryService.recoverCluster(workspaceId, nameOrCrn);
     }
 
-    public FlowIdentifier updateSalt(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+    public FlowIdentifier updateSalt(@NotNull NameOrCrn nameOrCrn, String accountId) {
         LOGGER.debug("Starting salt update: " + nameOrCrn);
-        return clusterCommonService.updateSalt(nameOrCrn, workspaceId);
+        return clusterCommonService.updateSalt(nameOrCrn, accountId);
     }
 
-    public FlowIdentifier updatePillarConfiguration(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+    public FlowIdentifier updatePillarConfiguration(@NotNull NameOrCrn nameOrCrn, String accountId) {
         LOGGER.debug("Starting pillar configuration update: " + nameOrCrn);
-        return clusterCommonService.updatePillarConfiguration(nameOrCrn, workspaceId);
+        return clusterCommonService.updatePillarConfiguration(nameOrCrn, accountId);
     }
 
     public GeneratedBlueprintV4Response postStackForBlueprint(@Valid StackV4Request stackRequest) {
@@ -294,8 +300,8 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackCommonService.changeImageInWorkspace(nameOrCrn, workspaceId, stackImageChangeRequest);
     }
 
-    public void delete(@NotNull NameOrCrn nameOrCrn, Long workspaceId, boolean forced) {
-        stackCommonService.deleteWithKerberosInWorkspace(nameOrCrn, workspaceId, forced);
+    public void delete(@NotNull NameOrCrn nameOrCrn, String accountId, boolean forced) {
+        stackCommonService.deleteWithKerberosInWorkspace(nameOrCrn, accountId, forced);
     }
 
     public void updateNameAndCrn(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String newName, String newCrn, boolean retainOriginalName) {
@@ -322,22 +328,20 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackClusterStatusViewToStatusConverter.convert(stackStatusView);
     }
 
-    public FlowIdentifier putPassword(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
-        Stack stack = nameOrCrn.hasName()
-                ? stackService.getByNameInWorkspace(nameOrCrn.getName(), workspaceId)
-                : stackService.getNotTerminatedByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId);
+    public FlowIdentifier putPassword(@NotNull NameOrCrn nameOrCrn, String accountId, @Valid UserNamePasswordV4Request userNamePasswordJson) {
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         UpdateClusterV4Request updateClusterJson = userNamePasswordV4RequestToUpdateClusterV4RequestConverter.convert(userNamePasswordJson);
-        return clusterCommonService.put(stack.getResourceCrn(), updateClusterJson);
+        return clusterCommonService.put(stack, updateClusterJson);
     }
 
-    public FlowIdentifier setClusterMaintenanceMode(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @NotNull MaintenanceModeV4Request maintenanceMode) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+    public FlowIdentifier setClusterMaintenanceMode(@NotNull NameOrCrn nameOrCrn, String accountId, @NotNull MaintenanceModeV4Request maintenanceMode) {
+        StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         return clusterCommonService.setMaintenanceMode(stack, maintenanceMode.getStatus());
     }
 
-    public FlowIdentifier putCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid UpdateClusterV4Request updateJson) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        return clusterCommonService.put(stack.getResourceCrn(), updateJson);
+    public FlowIdentifier putCluster(@NotNull String stackName, String accountId, @Valid UpdateClusterV4Request updateJson) {
+        StackDto stack = stackDtoService.getByNameOrCrn(NameOrCrn.ofName(stackName), accountId);
+        return clusterCommonService.put(stack, updateJson);
     }
 
     public String getClusterHostsInventory(Long workspaceId, String name) {
@@ -406,15 +410,15 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return resourceCrnWithEnvCrn;
     }
 
-    public CertificatesRotationV4Response rotateAutoTlsCertificates(@NotNull NameOrCrn nameOrCrn, Long workspaceId,
+    public CertificatesRotationV4Response rotateAutoTlsCertificates(@NotNull NameOrCrn nameOrCrn, String accountId,
             CertificatesRotationV4Request certificatesRotationV4Request) {
         LOGGER.debug("Starting cluster autotls certificates rotation: " + nameOrCrn);
-        return clusterCommonService.rotateAutoTlsCertificates(nameOrCrn, workspaceId, certificatesRotationV4Request);
+        return clusterCommonService.rotateAutoTlsCertificates(nameOrCrn, accountId, certificatesRotationV4Request);
     }
 
-    public FlowIdentifier updateLoadBalancers(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+    public FlowIdentifier updateLoadBalancers(@NotNull NameOrCrn nameOrCrn, String accountId) {
         LOGGER.debug("Creating load balancers for stack: " + nameOrCrn);
-        return loadBalancerUpdateService.updateLoadBalancers(nameOrCrn, workspaceId);
+        return loadBalancerUpdateService.updateLoadBalancers(nameOrCrn, accountId);
     }
 
     public UpdateRecipesV4Response refreshRecipes(@NotNull NameOrCrn nameOrCrn, Long workspaceId, UpdateRecipesV4Request request) {

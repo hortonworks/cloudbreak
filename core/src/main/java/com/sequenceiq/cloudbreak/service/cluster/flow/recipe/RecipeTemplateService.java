@@ -17,9 +17,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.GeneratedRecipe;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.recipe.CentralRecipeUpdater;
 import com.sequenceiq.cloudbreak.service.recipe.GeneratedRecipeService;
@@ -97,7 +97,7 @@ public class RecipeTemplateService {
     /**
      * Generate recipe model objects (for every host group) from provided stack and host group inputs with stack template object.
      */
-    public Map<HostGroup, List<RecipeModel>> createRecipeModels(Stack stack, Set<HostGroup> hostGroups) {
+    public Map<HostGroup, List<RecipeModel>> createRecipeModels(StackDto stack, Set<HostGroup> hostGroups) {
         Set<HostGroup> hostGroupsWithRecipes = hostGroups.stream().filter(hg -> !hg.getRecipes().isEmpty()).collect(Collectors.toSet());
         if (hasAnyTemplateInRecipes(hostGroupsWithRecipes)) {
             TemplatePreparationObject templatePreparationObject = measure(() -> stackToTemplatePreparationObjectConverter.convert(stack),

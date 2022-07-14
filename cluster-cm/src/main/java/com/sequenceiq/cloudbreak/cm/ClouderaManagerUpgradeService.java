@@ -18,7 +18,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
@@ -43,7 +43,7 @@ class ClouderaManagerUpgradeService {
     @Inject
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
-    void callUpgradeCdhCommand(String stackProductVersion, ClustersResourceApi clustersResourceApi, Stack stack, ApiClient apiClient)
+    void callUpgradeCdhCommand(String stackProductVersion, ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, ApiClient apiClient)
             throws ApiException, CloudbreakException {
         LOGGER.info("Upgrading the CDP Runtime...");
         try {
@@ -63,7 +63,7 @@ class ClouderaManagerUpgradeService {
         LOGGER.info("Runtime is successfully upgraded!");
     }
 
-    void callPostRuntimeUpgradeCommand(ClustersResourceApi clustersResourceApi, Stack stack, ApiClient apiClient)
+    void callPostRuntimeUpgradeCommand(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, ApiClient apiClient)
             throws ApiException, CloudbreakException {
         LOGGER.info("Call post runtime upgrade command after maintenance upgrade");
         BigDecimal upgradeCommandId = determineUpgradeLogic("", clustersResourceApi, stack, apiClient, true);
@@ -73,7 +73,7 @@ class ClouderaManagerUpgradeService {
         LOGGER.info("Runtime is successfully upgraded!");
     }
 
-    private BigDecimal determineUpgradeLogic(String stackProductVersion, ClustersResourceApi clustersResourceApi, Stack stack,
+    private BigDecimal determineUpgradeLogic(String stackProductVersion, ClustersResourceApi clustersResourceApi, StackDtoDelegate stack,
             ApiClient apiClient, boolean postRuntimeUpgrade) throws ApiException {
         String command = postRuntimeUpgrade ? POST_RUNTIME_UPGRADE_COMMAND : RUNTIME_UPGRADE_COMMAND;
         LOGGER.debug("Upgrade command to execute: {}", command);
@@ -105,7 +105,7 @@ class ClouderaManagerUpgradeService {
         return upgradeCommandId;
     }
 
-    private BigDecimal executeUpgrade(String stackProductVersion, ClustersResourceApi clustersResourceApi, Stack stack,
+    private BigDecimal executeUpgrade(String stackProductVersion, ClustersResourceApi clustersResourceApi, StackDtoDelegate stack,
             boolean postRuntimeUpgrade) throws ApiException {
         BigDecimal upgradeCommandId;
         if (postRuntimeUpgrade) {
@@ -118,19 +118,19 @@ class ClouderaManagerUpgradeService {
         return upgradeCommandId;
     }
 
-    private BigDecimal callUpgrade(String stackProductVersion, ClustersResourceApi clustersResourceApi, Stack stack) throws ApiException {
+    private BigDecimal callUpgrade(String stackProductVersion, ClustersResourceApi clustersResourceApi, StackDtoDelegate stack) throws ApiException {
         ApiCdhUpgradeArgs upgradeArgs = new ApiCdhUpgradeArgs();
         upgradeArgs.setCdhParcelVersion(stackProductVersion);
         return clustersResourceApi.upgradeCdhCommand(stack.getName(), upgradeArgs).getId();
     }
 
-    private BigDecimal callPostUpgrade(ClustersResourceApi clustersResourceApi, Stack stack) throws ApiException {
+    private BigDecimal callPostUpgrade(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack) throws ApiException {
         return clustersResourceApi.postClouderaRuntimeUpgrade(stack.getName()).getId();
     }
 
-    private Optional<BigDecimal> findUpgradeApiCommandId(ClustersResourceApi clustersResourceApi, Stack stack, String command) {
+    private Optional<BigDecimal> findUpgradeApiCommandId(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, String command) {
         try {
-            return syncApiCommandRetriever.getCommandId(command, clustersResourceApi, stack);
+            return syncApiCommandRetriever.getCommandId(command, clustersResourceApi, stack.getStack());
         } catch (CloudbreakException | ApiException e) {
             LOGGER.warn("Unexpected error during CM command table fetching, assuming no such command exists", e);
             return Optional.empty();

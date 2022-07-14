@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
 
@@ -40,7 +40,7 @@ public class StackInstanceStatusChecker {
     @Inject
     private CredentialToCloudCredentialConverter cloudCredentialConverter;
 
-    public List<CloudVmInstanceStatus> queryInstanceStatuses(Stack stack, List<CloudInstance> cloudInstances) {
+    public List<CloudVmInstanceStatus> queryInstanceStatuses(StackDtoDelegate stack, List<CloudInstance> cloudInstances) {
         List<CloudVmInstanceStatus> result = Collections.emptyList();
         if (!cloudInstances.isEmpty()) {
             cloudInstances.forEach(instance -> stack.getParameters().forEach(instance::putParameter));
@@ -53,7 +53,7 @@ public class StackInstanceStatusChecker {
                     .withPlatform(stack.getCloudPlatform())
                     .withVariant(stack.getPlatformVariant())
                     .withLocation(location)
-                    .withWorkspaceId(stack.getWorkspace().getId())
+                    .withWorkspaceId(stack.getWorkspaceId())
                     .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                     .withTenantId(stack.getTenant().getId())
                     .build();

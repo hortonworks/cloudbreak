@@ -21,8 +21,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -122,8 +120,6 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
     private StackV4RequestToTemplatePreparationObjectConverter underTest;
 
     @Mock
-
-    @Inject
     private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
     @Mock

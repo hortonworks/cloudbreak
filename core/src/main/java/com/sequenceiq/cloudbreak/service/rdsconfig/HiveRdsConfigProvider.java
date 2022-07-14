@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Inject;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 
 @Component
 public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
@@ -43,8 +44,8 @@ public class HiveRdsConfigProvider extends AbstractRdsConfigProvider {
      *  user: hive
      */
     @Override
-    public Map<String, Object> createServicePillarConfigMapIfNeeded(Stack stack, Cluster cluster) {
-        Map<String, Object> servicePillarConfigMap = new HashMap<>(super.createServicePillarConfigMapIfNeeded(stack, cluster));
+    public Map<String, Object> createServicePillarConfigMapIfNeeded(StackDto stackDto) {
+        Map<String, Object> servicePillarConfigMap = new HashMap<>(super.createServicePillarConfigMapIfNeeded(stackDto));
         if (servicePillarConfigMap.containsKey(PILLAR_KEY)) {
             Map<String, Object> hiveConfigMap = (Map<String, Object>) servicePillarConfigMap.get(PILLAR_KEY);
             servicePillarConfigMap.putAll(hiveConfigMap);

@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterKerberosService;
 
@@ -13,7 +13,7 @@ public class PreTerminationStateExecutor {
     @Inject
     private ClusterKerberosService clusterKerberosService;
 
-    public void runPreTerminationTasks(Stack stack) throws CloudbreakException {
-        clusterKerberosService.leaveDomains(stack);
+    public void runPreTerminationTasks(StackDto stackDto) throws CloudbreakException {
+        clusterKerberosService.leaveDomains(stackDto);
     }
 }

@@ -90,10 +90,14 @@ public class RecipeService extends AbstractArchivistService<Recipe> implements C
     }
 
     public Set<Recipe> getRecipesByNamesForWorkspace(Workspace workspace, Set<String> recipeNames) {
+        return getRecipesByNamesForWorkspace(workspace.getId(), recipeNames);
+    }
+
+    public Set<Recipe> getRecipesByNamesForWorkspace(Long workspaceId, Set<String> recipeNames) {
         if (recipeNames.isEmpty()) {
             return emptySet();
         }
-        Set<Recipe> recipes = recipeRepository.findByNameInAndWorkspaceId(recipeNames, workspace.getId());
+        Set<Recipe> recipes = recipeRepository.findByNameInAndWorkspaceId(recipeNames, workspaceId);
         if (recipeNames.size() != recipes.size()) {
             throw new NotFoundException(String.format("Recipes '%s' not found.", collectMissingRecipeNames(recipes, recipeNames)));
         }

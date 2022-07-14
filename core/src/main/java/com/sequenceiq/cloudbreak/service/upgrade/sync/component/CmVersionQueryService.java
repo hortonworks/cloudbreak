@@ -19,7 +19,7 @@ import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.model.PackageInfo;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -56,7 +56,7 @@ public class CmVersionQueryService {
      * @param stack The stack, with metadata to be able to build the client to query package versions
      * @return List of package info found in each host (map key is host fqdn)
      */
-    public Map<String, List<PackageInfo>> queryCmPackageInfo(Stack stack) throws CloudbreakOrchestratorFailedException {
+    public Map<String, List<PackageInfo>> queryCmPackageInfo(StackDtoDelegate stack) throws CloudbreakOrchestratorFailedException {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         Map<String, Optional<String>> packageMap = packages.stream()
                 .filter(aPackage -> aPackage.getName().equals(ImagePackageVersion.CM.getKey()))

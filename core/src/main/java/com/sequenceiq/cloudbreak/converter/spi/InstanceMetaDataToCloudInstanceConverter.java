@@ -4,9 +4,12 @@ import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_I
 import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,13 +19,17 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.InstanceMetadataToImageIdConverter;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -37,17 +44,48 @@ public class InstanceMetaDataToCloudInstanceConverter {
     @Inject
     private EnvironmentClientService environmentClientService;
 
-    public List<CloudInstance> convert(Iterable<InstanceMetaData> metaDataEntities, String envCrn, StackAuthentication stackAuthentication) {
+    @Inject
+    private InstanceGroupService instanceGroupService;
+
+    public List<CloudInstance> convert(List<InstanceGroupDto> instanceGroups, String envCrn, StackAuthentication stackAuthentication) {
         List<CloudInstance> cloudInstances = new ArrayList<>();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(envCrn);
-        for (InstanceMetaData metaDataEntity : metaDataEntities) {
-            cloudInstances.add(convert(metaDataEntity, environment, stackAuthentication));
+        for (InstanceGroupDto instanceGroup : instanceGroups) {
+            for (InstanceMetadataView metaDataEntity : instanceGroup.getNotDeletedAndNotZombieInstanceMetaData()) {
+                cloudInstances.add(convert(metaDataEntity, instanceGroup.getInstanceGroup(), environment, stackAuthentication));
+            }
         }
         return cloudInstances;
     }
 
-    public CloudInstance convert(InstanceMetaData metaDataEntity, DetailedEnvironmentResponse environment, StackAuthentication stackAuthentication) {
-        InstanceGroup group = metaDataEntity.getInstanceGroup();
+    public List<CloudInstance> convert(Collection<InstanceMetadataView> instanceMetadataViews, StackView stack) {
+        List<CloudInstance> cloudInstances = new ArrayList<>();
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
+        Set<String> instanceGroupNames = instanceMetadataViews.stream().map(im -> im.getInstanceGroupName()).collect(Collectors.toSet());
+        List<InstanceGroupView> instanceGroupViews = instanceGroupService
+                .findAllInstanceGroupViewByStackIdAndGroupName(stack.getId(), instanceGroupNames);
+        for (InstanceMetadataView instanceMetadataView : instanceMetadataViews) {
+            InstanceGroupView instanceGroupView = instanceGroupViews.stream()
+                    .filter(ig -> ig.getGroupName().equals(instanceMetadataView.getInstanceGroupName()))
+                    .findFirst()
+                    .orElseThrow(NotFoundException.notFound("InstanceGroup", instanceMetadataView.getInstanceGroupName()));
+            cloudInstances.add(convert(instanceMetadataView, instanceGroupView, environment, stack.getStackAuthentication()));
+        }
+        return cloudInstances;
+    }
+
+    public List<CloudInstance> convert(List<InstanceMetadataView> metaDataEntities, InstanceGroupView group, String envCrn,
+            StackAuthentication stackAuthentication) {
+        List<CloudInstance> cloudInstances = new ArrayList<>();
+        DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(envCrn);
+        for (InstanceMetadataView metaDataEntity : metaDataEntities) {
+            cloudInstances.add(convert(metaDataEntity, group, environment, stackAuthentication));
+        }
+        return cloudInstances;
+    }
+
+    public CloudInstance convert(InstanceMetadataView metaDataEntity, InstanceGroupView group,
+            DetailedEnvironmentResponse environment, StackAuthentication stackAuthentication) {
         Template template = group.getTemplate();
         InstanceStatus status = getInstanceStatus(metaDataEntity);
         String imageId = instanceMetadataToImageIdConverter.convert(metaDataEntity);
@@ -75,7 +113,7 @@ public class InstanceMetaDataToCloudInstanceConverter {
                 params);
     }
 
-    private InstanceStatus getInstanceStatus(InstanceMetaData metaData) {
+    private InstanceStatus getInstanceStatus(InstanceMetadataView metaData) {
         switch (metaData.getInstanceStatus()) {
             case REQUESTED:
                 return InstanceStatus.CREATE_REQUESTED;

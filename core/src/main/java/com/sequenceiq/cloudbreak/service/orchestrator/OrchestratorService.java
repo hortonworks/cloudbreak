@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.orchestrator;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -64,6 +65,10 @@ public class OrchestratorService implements OrchestratorMetadataProvider {
     @Override
     public List<String> getSaltStateDefinitionBaseFolders() {
         return Arrays.asList("salt-common", "salt");
+    }
+
+    public Optional<Orchestrator> getByStackId(Long stackId) {
+        return repository.findByStackId(stackId);
     }
 
 }

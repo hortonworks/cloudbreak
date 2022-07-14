@@ -4,9 +4,9 @@ import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
 import java.util.Set;
 import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
@@ -22,15 +22,16 @@ import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hue.HueRoles;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -54,15 +55,15 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
 
-    public boolean isCertRenewalTriggerable(Stack stack) {
+    public boolean isCertRenewalTriggerable(StackView stack) {
         return manageCertificateAndDnsInPem()
                 && stack != null
-                && stack.getCluster() != null;
+                && stack.getClusterId() != null;
     }
 
-    public boolean generateCertAndSaveForStackAndUpdateDnsEntry(Stack stack) {
+    public boolean generateCertAndSaveForStackAndUpdateDnsEntry(StackDtoDelegate stack) {
         boolean success = false;
-        if (isCertRenewalTriggerable(stack)) {
+        if (stack != null && isCertRenewalTriggerable(stack.getStack())) {
             if (StringUtils.isEmpty(stack.getSecurityConfig().getUserFacingCert())) {
                 success = generateCertAndSaveForStack(stack);
             }
@@ -74,14 +75,14 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         return success;
     }
 
-    public String updateDnsEntry(Stack stack, String gatewayIp) {
+    public String updateDnsEntry(StackDtoDelegate stack, String gatewayIp) {
         LOGGER.info("Update dns entry");
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
         Set<String> hueHostGroups = getHueHostGroups(stack);
 
         if (StringUtils.isEmpty(gatewayIp)) {
-            Optional<InstanceMetaData> gateway = Optional.ofNullable(stack.getPrimaryGatewayInstance());
+            Optional<InstanceMetadataView> gateway = Optional.ofNullable(stack.getPrimaryGatewayInstance());
             if (gateway.isEmpty()) {
                 LOGGER.info("No running gateway or all node is terminated, we skip the dns entry deletion.");
                 return null;
@@ -108,12 +109,12 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         return null;
     }
 
-    public Set<String> getHueHostGroups(Stack stack) {
-        return new CmTemplateProcessor(stack.getCluster().getBlueprint().getBlueprintText())
+    public Set<String> getHueHostGroups(StackDtoDelegate stack) {
+        return new CmTemplateProcessor(stack.getBlueprint().getBlueprintText())
                 .getHostGroupsWithComponent(HueRoles.HUE_SERVER);
     }
 
-    public boolean updateDnsEntryForLoadBalancers(Stack stack) {
+    public boolean updateDnsEntryForLoadBalancers(StackDtoDelegate stack) {
         boolean success = false;
         if (manageCertificateAndDnsInPem() && stack != null) {
             Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerWithEndpoint(stack);
@@ -166,14 +167,14 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         LOGGER.info("Set load balancer's FQDN to {}.", loadBalancer.getFqdn());
     }
 
-    public String deleteDnsEntry(Stack stack, String environmentName) {
+    public String deleteDnsEntry(StackDtoDelegate stack, String environmentName) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         if (StringUtils.isEmpty(environmentName)) {
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
             environmentName = environment.getName();
         }
-        Optional<InstanceMetaData> gateway = Optional.ofNullable(stack.getPrimaryGatewayInstance());
-        if (!gateway.isPresent()) {
+        Optional<InstanceMetadataView> gateway = Optional.ofNullable(stack.getPrimaryGatewayInstance());
+        if (gateway.isEmpty()) {
             LOGGER.info("No running gateway or all node is terminated, we skip the dns entry deletion.");
             return null;
         }
@@ -187,7 +188,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         return ip;
     }
 
-    public void deleteLoadBalancerDnsEntry(Stack stack, String environmentName) {
+    public void deleteLoadBalancerDnsEntry(StackDtoDelegate stack, String environmentName) {
         Optional<LoadBalancer> loadBalancerOptional = getLoadBalancerWithEndpoint(stack);
 
         if (loadBalancerOptional.isEmpty()) {
@@ -215,9 +216,9 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         }
     }
 
-    public boolean renewCertificate(Stack stack) {
+    public boolean renewCertificate(StackDtoDelegate stack) {
         boolean certGeneratedSuccessfully = true;
-        if (isCertRenewalTriggerable(stack)) {
+        if (stack != null && isCertRenewalTriggerable(stack.getStack())) {
             LOGGER.info("Renew certificate for stack: '{}'", stack.getName());
             certGeneratedSuccessfully = generateCertAndSaveForStack(stack);
             if (certGeneratedSuccessfully) {
@@ -228,7 +229,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         return certGeneratedSuccessfully;
     }
 
-    private boolean generateCertAndSaveForStack(Stack stack) {
+    private boolean generateCertAndSaveForStack(StackDtoDelegate stack) {
         boolean result = false;
         LOGGER.info("Acquire certificate from PEM service and save for stack");
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
@@ -265,7 +266,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         return result;
     }
 
-    private KeyPair getKeyPairForStack(Stack stack) {
+    private KeyPair getKeyPairForStack(StackDtoDelegate stack) {
         KeyPair keyPair;
         SecurityConfig securityConfig = stack.getSecurityConfig();
         if (StringUtils.isEmpty(securityConfig.getUserFacingKey())) {
@@ -281,30 +282,29 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         return keyPair;
     }
 
-    public String updateDnsEntryForCluster(Stack stack) {
+    public String updateDnsEntryForCluster(StackDtoDelegate stack) {
         String fqdn = updateDnsEntry(stack, null);
         if (fqdn != null) {
-            Cluster cluster = stack.getCluster();
-            cluster.setFqdn(fqdn);
-            clusterService.save(cluster);
+            ClusterView cluster = stack.getCluster();
+            clusterService.updateFqdnOnCluster(cluster.getId(), fqdn);
             LOGGER.info("The '{}' domain name has been generated, registered through PEM service and saved for the cluster.", fqdn);
         }
         return fqdn;
     }
 
-    private String getEndpointNameForStack(Stack stack) {
+    private String getEndpointNameForStack(StackDtoDelegate stack) {
         return stack.getPrimaryGatewayInstance().getShortHostname();
     }
 
     @VisibleForTesting
-    Set<String> getLoadBalancerNamesForStack(Stack stack) {
+    Set<String> getLoadBalancerNamesForStack(StackDtoDelegate stack) {
         return loadBalancerPersistenceService.findByStackId(stack.getId()).stream()
             .filter(lb -> StringUtils.isNotEmpty(lb.getEndpoint()))
             .map(LoadBalancer::getEndpoint)
             .collect(Collectors.toSet());
     }
 
-    private Optional<LoadBalancer> getLoadBalancerWithEndpoint(Stack stack) {
+    private Optional<LoadBalancer> getLoadBalancerWithEndpoint(StackDtoDelegate stack) {
         Optional<LoadBalancer> loadBalancerOptional;
         Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stack.getId());
         if (loadBalancers.isEmpty()) {

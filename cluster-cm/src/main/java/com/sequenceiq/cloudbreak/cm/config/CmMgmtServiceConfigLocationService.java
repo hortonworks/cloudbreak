@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.sequenceiq.cloudbreak.cluster.model.ServiceLocationMap;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Service
 class CmMgmtServiceConfigLocationService implements CmConfigServiceDelegate {
@@ -20,7 +20,7 @@ class CmMgmtServiceConfigLocationService implements CmConfigServiceDelegate {
     private CmMgmtVolumePathBuilder volumePathBuilder;
 
     @Override
-    public void setConfigs(Stack stack, ApiRoleList apiRoleList) {
+    public void setConfigs(StackDtoDelegate stack, ApiRoleList apiRoleList) {
         ServiceLocationMap serviceLocationMap = volumePathBuilder.buildServiceLocationMap();
         Arrays.stream(MgmtServices.values()).forEach(mgmtService -> addConfigIfRoleIsPresent(apiRoleList, serviceLocationMap, mgmtService));
     }

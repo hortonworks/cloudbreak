@@ -118,7 +118,7 @@ class UnboundRestartPatchServiceTest {
 
     @Test
     void failedFlowState() {
-        when(clusterOperationService.updateSalt(stack)).thenReturn(new FlowIdentifier(FlowType.FLOW, POLLABLE_ID));
+        when(clusterOperationService.updateSalt(stack.getId())).thenReturn(new FlowIdentifier(FlowType.FLOW, POLLABLE_ID));
         setFlowState(true, true);
 
         assertThatThrownBy(() -> underTest.doApply(stack))
@@ -129,7 +129,7 @@ class UnboundRestartPatchServiceTest {
     @Test
     void allHostsSucceedToApplyAndInternalCrnWithAccountIdIsTheActor() throws ExistingStackPatchApplyException {
         AtomicReference<String> actor = new AtomicReference<>();
-        when(clusterOperationService.updateSalt(stack)).then(invocation -> {
+        when(clusterOperationService.updateSalt(stack.getId())).then(invocation -> {
             actor.set(ThreadBasedUserCrnProvider.getUserCrn());
             return new FlowIdentifier(FlowType.FLOW, POLLABLE_ID);
         });
@@ -152,7 +152,7 @@ class UnboundRestartPatchServiceTest {
     private void setStackImageId(String id) throws CloudbreakImageNotFoundException {
         Image image = mock(Image.class);
         when(image.getImageId()).thenReturn(id);
-        when(stackImageService.getCurrentImage(stack)).thenReturn(image);
+        when(stackImageService.getCurrentImage(stack.getId())).thenReturn(image);
     }
 
     private void setFlowState(boolean finished, boolean failed) {

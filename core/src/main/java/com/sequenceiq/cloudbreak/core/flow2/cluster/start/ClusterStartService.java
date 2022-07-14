@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STARTING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_FAILED;
 
-import java.util.Date;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -16,20 +15,16 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ClusterStartService {
@@ -53,10 +48,7 @@ public class ClusterStartService {
     @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
-    @Inject
-    private TransactionService transactionService;
-
-    public void updateDnsEntriesInPem(Stack stack) {
+    public void updateDnsEntriesInPem(StackDtoDelegate stack) {
         if (clusterPublicEndpointManagementService.manageCertificateAndDnsInPem()) {
             String updatingDnsMsg = "Updating the cluster's DNS entries in Public Endpoint Management Service.";
             LOGGER.info(updatingDnsMsg);
@@ -70,17 +62,15 @@ public class ClusterStartService {
         }
     }
 
-    public void startingCluster(StackView stack) {
+    public void startingCluster(StackView stack, ClusterView cluster, InstanceMetadataView primaryGatewayInstance) {
+        String clusterManagerIp = stackUtil.extractClusterManagerIp(cluster, primaryGatewayInstance);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_IN_PROGRESS, String.format("Starting the cluster. Cluster manager ip: %s",
-                stackUtil.extractClusterManagerIp(stack)));
-        flowMessageService.fireEventAndLog(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), CLUSTER_STARTING, stackUtil.extractClusterManagerIp(stack));
+                clusterManagerIp));
+        flowMessageService.fireEventAndLog(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), CLUSTER_STARTING, clusterManagerIp);
     }
 
     public void clusterStartFinished(StackView stack) {
-        Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(stack.getId())
-                .orElseThrow(NotFoundException.notFound("cluster", stack.getId()));
-        cluster.setUpSince(new Date().getTime());
-        clusterService.updateCluster(cluster);
+        clusterService.updatedUpSinceToNowByClusterId(stack.getClusterId());
         updateInstancesToHealthy(stack);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster started.");
         flowMessageService.fireEventAndLog(stack.getId(), Status.AVAILABLE.name(), CLUSTER_STARTED);
@@ -92,16 +82,8 @@ public class ClusterStartService {
     }
 
     private void updateInstancesToHealthy(StackView stack) {
-        try {
-            transactionService.required(() -> {
-                Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId());
-                for (InstanceMetaData metaData : instances) {
-                    metaData.setInstanceStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY);
-                }
-                instanceMetaDataService.saveAll(instances);
-            });
-        } catch (TransactionExecutionException e) {
-            throw new TransactionRuntimeExecutionException(e);
-        }
+            Set<Long> instances = instanceMetaDataService.findNotTerminatedAndNotZombieIdForStack(stack.getId());
+            instanceMetaDataService.updateAllInstancesToStatus(instances, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY,
+                    "Cluster start finished successfully");
     }
 }

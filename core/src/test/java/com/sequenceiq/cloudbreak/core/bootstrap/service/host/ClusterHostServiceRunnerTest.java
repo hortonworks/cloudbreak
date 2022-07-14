@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,13 +32,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
@@ -60,11 +62,12 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttri
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -83,19 +86,19 @@ import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
+import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.Tunnel;
 
 @ExtendWith(MockitoExtension.class)
@@ -104,16 +107,10 @@ class ClusterHostServiceRunnerTest {
     private static final String TEST_CLUSTER_CRN = "crn:cdp:datahub:us-west-1:datahub:cluster:f7563fc1-e8ff-486a-9260-4e54ccabbaa0";
 
     @Mock
-    private StackService stackService;
-
-    @Mock
     private GatewayConfigService gatewayConfigService;
 
     @Mock
     private HostGroupService hostGroupService;
-
-    @Mock
-    private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
@@ -181,8 +178,11 @@ class ClusterHostServiceRunnerTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Spy
+    private StackDto stack;
+
     @Mock
-    private Stack stack;
+    private StackView stackView;
 
     @Mock
     private Cluster cluster;
@@ -203,9 +203,6 @@ class ClusterHostServiceRunnerTest {
     private LoadBalancerConfigService loadBalancerConfigService;
 
     @Mock
-    private InstanceGroupService instanceGroupService;
-
-    @Mock
     private IdBrokerService idBrokerService;
 
     @Mock
@@ -223,8 +220,13 @@ class ClusterHostServiceRunnerTest {
     @Captor
     private ArgumentCaptor<List<GatewayConfig>> gatewayConfigsCaptor;
 
+    @Mock
+    private GatewayService gatewayService;
+
     @BeforeEach
     void setUp() {
+        lenient().when(stack.getCluster()).thenReturn(cluster);
+        lenient().when(stack.getStack()).thenReturn(stackView);
         lenient().when(stack.getEnvironmentCrn()).thenReturn("envCrn");
         lenient().when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn("envCrn");
     }
@@ -232,7 +234,7 @@ class ClusterHostServiceRunnerTest {
     @Test
     void shouldUsecollectAndCheckReachableNodes() throws NodesUnreachableException {
         try {
-            underTest.runClusterServices(stack, cluster, Map.of());
+            underTest.runClusterServices(stack, Map.of());
             fail();
         } catch (NullPointerException e) {
             verify(stackUtil).collectAndCheckReachableNodes(eq(stack), any());
@@ -246,7 +248,7 @@ class ClusterHostServiceRunnerTest {
         when(stackUtil.collectAndCheckReachableNodes(eq(stack), any())).thenThrow(new NodesUnreachableException("error", unreachableNodes));
 
         CloudbreakServiceException cloudbreakServiceException = Assertions.assertThrows(CloudbreakServiceException.class,
-                () -> underTest.runClusterServices(stack, cluster, Map.of()));
+                () -> underTest.runClusterServices(stack, Map.of()));
         assertEquals("Can not run cluster services on new nodes because the configuration management service is not responding on these nodes: " +
                 "[node1.example.com]", cloudbreakServiceException.getMessage());
     }
@@ -314,9 +316,14 @@ class ClusterHostServiceRunnerTest {
     @Test
     void testDecoratePillarWithMountInfoAndTargetedSaltCall() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
+        Template template = new Template();
+        template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
         Set<Node> nodes = Sets.newHashSet(node("fqdn3"), node("gateway1"), node("gateway3"));
+        List<InstanceGroupDto> instanceGroups = new ArrayList<>();
+        createInstanceGroup(template, instanceGroups, "gateway1", "gateway2", "1.1.3.1", "1.1.3.2");
+        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(stackUtil.collectReachableAndUnreachableCandidateNodes(any(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
-        underTest.runTargetedClusterServices(stack, cluster, Map.of("fqdn3", "1.1.1.1"));
+        underTest.runTargetedClusterServices(stack, Map.of("fqdn3", "1.1.1.1"));
 
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
@@ -337,7 +344,7 @@ class ClusterHostServiceRunnerTest {
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
         when(stackUtil.collectAndCheckReachableNodes(any(), any())).thenReturn(nodes);
-        underTest.runClusterServices(stack, cluster, Map.of());
+        underTest.runClusterServices(stack, Map.of());
 
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
@@ -360,7 +367,7 @@ class ClusterHostServiceRunnerTest {
                 node("gateway1"), node("gateway3"));
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
 
-        underTest.redeployGatewayPillarOnly(stack, cluster);
+        underTest.redeployGatewayPillarOnly(stack);
         ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfigCaptor.capture());
         Set<Node> allNodes = allNodesCaptor.getValue();
@@ -373,7 +380,7 @@ class ClusterHostServiceRunnerTest {
     void testRedeployStates() throws CloudbreakOrchestratorException {
         List<GatewayConfig> gwConfigs = List.of(new GatewayConfig("addr", "endpoint", "privateAddr", 123, "instance", false));
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
-        underTest.redeployStates(stack, cluster);
+        underTest.redeployStates(stack);
         verify(hostOrchestrator).uploadStates(gatewayConfigsCaptor.capture(), any());
         List<GatewayConfig> gatewayConfigs = gatewayConfigsCaptor.getValue();
         assertEquals(gwConfigs, gatewayConfigs);
@@ -381,13 +388,10 @@ class ClusterHostServiceRunnerTest {
 
     private void setupMocksForRunClusterServices() {
         when(umsClient.getAccountDetails(any(), any())).thenReturn(UserManagementProto.Account.getDefaultInstance());
-        when(stackService.get(any())).thenReturn(stack);
-        when(stack.getCluster()).thenReturn(cluster);
-        when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
-        when(stack.getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
+        when(stackView.getTunnel()).thenReturn(Tunnel.DIRECT);
+        when(stackView.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
+        when(stackView.getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
         when(cluster.getName()).thenReturn("clustername");
-        when(cluster.getStack()).thenReturn(stack);
         when(componentLocator.getComponentLocation(any(), any())).thenReturn(new HashMap<>());
         when(exposedServiceCollector.getImpalaService()).thenReturn(mock(ExposedService.class));
         when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn("crn:cdp:iam:us-west-1:accid:user:mockuser@cloudera.com");
@@ -397,7 +401,7 @@ class ClusterHostServiceRunnerTest {
         when(gatewayConfig.getPrivateAddress()).thenReturn("1.2.3.4");
         when(gatewayConfig.getHostname()).thenReturn("hostname");
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(any())).thenReturn(clouderaManagerRepo);
+        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
         when(exposedServiceCollector.getRangerService()).thenReturn(mock(ExposedService.class));
         ExposedService cmExposedService = mock(ExposedService.class);
         when(cmExposedService.getServiceName()).thenReturn("CM");
@@ -406,21 +410,18 @@ class ClusterHostServiceRunnerTest {
         Template template = new Template();
         template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
 
-        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        List<InstanceGroupDto> instanceGroups = new ArrayList<>();
         createInstanceGroup(template, instanceGroups, "fqdn1", null, "1.1.1.1", "1.1.1.2");
         createInstanceGroup(template, instanceGroups, "fqdn2", null, "1.1.2.1", "1.1.2.2");
-        InstanceGroup gwIg = createInstanceGroup(template, instanceGroups, "gateway1", "gateway2", "1.1.3.1", "1.1.3.2");
 
-        lenient().when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(Lists.newArrayList(gwIg.getAllInstanceMetaData()));
-
-        when(stack.getInstanceGroups()).thenReturn(instanceGroups);
+        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         RdsConfigWithoutCluster rdsConfigWithoutCluster = mock(RdsConfigWithoutCluster.class);
         when(rdsConfigWithoutClusterService.findByClusterIdAndType(any(), eq(DatabaseType.CLOUDERA_MANAGER))).thenReturn(rdsConfigWithoutCluster);
         when(rdsConfigWithoutCluster.getType()).thenReturn("asdf");
         when(rdsConfigWithoutCluster.getConnectionURL()).thenReturn("jdbc:postgresql:subname://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger");
         when(rdsConfigWithoutCluster.getConnectionUserName()).thenReturn("username");
         when(rdsConfigWithoutCluster.getConnectionPassword()).thenReturn("password");
-        when(loadBalancerSANProvider.getLoadBalancerSAN(stack)).thenReturn(Optional.empty());
+        when(loadBalancerSANProvider.getLoadBalancerSAN(anyLong(), any())).thenReturn(Optional.empty());
         ClusterPreCreationApi clusterPreCreationApi = mock(ClusterPreCreationApi.class);
         when(clusterApiConnectors.getConnector(cluster)).thenReturn(clusterPreCreationApi);
         ServiceLocationMap serviceLocationMap = new ServiceLocationMap();
@@ -430,16 +431,15 @@ class ClusterHostServiceRunnerTest {
         ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "1");
     }
 
-    private InstanceGroup createInstanceGroup(Template template, Set<InstanceGroup> instanceGroups, String fqdn1, String fqdn2,
+    private InstanceGroup createInstanceGroup(Template template, List<InstanceGroupDto> instanceGroups, String fqdn1, String fqdn2,
             String privateIp1, String privateIp2) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setTemplate(template);
         instanceGroup.setGroupName("group");
-        Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
+        List<InstanceMetadataView> instanceMetaDataSet = new ArrayList<>();
         instanceMetaDataSet.add(createInstanceMetadata(fqdn1, instanceGroup, privateIp1));
         instanceMetaDataSet.add(createInstanceMetadata(fqdn2, instanceGroup, privateIp2));
-        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
-        instanceGroups.add(instanceGroup);
+        instanceGroups.add(new InstanceGroupDto(instanceGroup, instanceMetaDataSet));
         return instanceGroup;
     }
 

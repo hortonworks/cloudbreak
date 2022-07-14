@@ -13,9 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -24,8 +22,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RestartClusterManager
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RestartClusterManagerServerSuccess;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -37,7 +38,7 @@ public class RestartClusterManagerServerHandler  extends ExceptionCatcherEventHa
     private static final Logger LOGGER = LoggerFactory.getLogger(RestartClusterManagerServerHandler.class);
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
@@ -68,9 +69,9 @@ public class RestartClusterManagerServerHandler  extends ExceptionCatcherEventHa
         Long stackId = request.getResourceId();
         Selectable response;
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            restartCMServer(stack);
-            clusterApiConnectors.getConnector(stack).waitForServer(stack, request.isDefaultClusterManagerAuth());
+            StackDto stackDto = stackDtoService.getById(stackId);
+            restartCMServer(stackDto);
+            clusterApiConnectors.getConnector(stackDto).waitForServer(request.isDefaultClusterManagerAuth());
             response = new RestartClusterManagerServerSuccess(stackId);
         } catch (Exception e) {
             LOGGER.info("Cluster Manager restart failed", e);
@@ -79,13 +80,14 @@ public class RestartClusterManagerServerHandler  extends ExceptionCatcherEventHa
         return response;
     }
 
-    private void restartCMServer(Stack stack) throws Exception {
-        Cluster cluster = stack.getCluster();
-        InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
-        GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.hasGateway());
+    private void restartCMServer(StackDto stackDto) throws Exception {
+        ClusterView cluster = stackDto.getCluster();
+        StackView stack = stackDto.getStack();
+        InstanceMetadataView gatewayInstance = stackDto.getPrimaryGatewayInstance();
+        GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, stackDto.getSecurityConfig(), gatewayInstance, stackDto.hasGateway());
         Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
         ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId());
-        Set<Node> nodes = stackUtil.collectReachableNodes(stack);
+        Set<Node> nodes = stackUtil.collectReachableNodes(stackDto);
         Set<String> agentTargets = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         hostOrchestrator.updateAgentCertDirectoryPermission(gatewayConfig, agentTargets, nodes, exitModel);
         hostOrchestrator.restartClusterManagerOnMaster(gatewayConfig, gatewayFQDN, nodes, exitModel);

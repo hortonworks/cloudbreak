@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -17,10 +16,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class StackScalingService {
@@ -49,19 +48,18 @@ public class StackScalingService {
         });
     }
 
-    public Set<Long> getUnusedPrivateIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
+    public Set<Long> getUnusedPrivateIds(InstanceGroupDto instanceGroupDto, Integer scalingAdjustment) {
         if (scalingAdjustment > 0) {
             LOGGER.error("Scaling adjustment shouldn't be a positive number, we are trying to downscaling..");
             return Collections.emptySet();
         }
-        InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        List<InstanceMetaData> unattachedInstanceMetaDatas = new ArrayList<>(instanceGroup.getUnattachedInstanceMetaDataSet());
+        List<InstanceMetadataView> unattachedInstanceMetaDatas = instanceGroupDto.getUnattachedInstanceMetaData();
 
         return unattachedInstanceMetaDatas.stream()
                 .filter(instanceMetaData -> instanceMetaData.getInstanceId() != null && instanceMetaData.getDiscoveryFQDN() != null)
-                .sorted(Comparator.comparing(InstanceMetaData::getStartDate))
+                .sorted(Comparator.comparing(InstanceMetadataView::getStartDate))
                 .limit(Math.abs(scalingAdjustment))
-                .map(InstanceMetaData::getPrivateId)
+                .map(InstanceMetadataView::getPrivateId)
                 .collect(Collectors.toSet());
     }
 
