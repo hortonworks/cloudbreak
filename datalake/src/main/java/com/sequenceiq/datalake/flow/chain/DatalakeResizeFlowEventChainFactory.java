@@ -45,6 +45,7 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
             // Take a backup
             chain.add(new DatalakeTriggerBackupEvent(DATALAKE_TRIGGER_BACKUP_EVENT.event(),
                     event.getResourceId(), event.getUserId(), event.getBackupLocation(), "resize" + System.currentTimeMillis(),
+                    event.getSkipOptions(),
                     DatalakeBackupFailureReason.BACKUP_ON_RESIZE, event.accepted()));
             // Stop datalake
             chain.add(new SdxStartStopEvent(SDX_STOP_EVENT.event(), event.getResourceId(), event.getUserId(), STOP_DATAHUBS));
@@ -62,7 +63,7 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
         if (event.shouldPerformRestore()) {
             //restore the new cluster
             chain.add(new DatalakeTriggerRestoreEvent(DATALAKE_TRIGGER_RESTORE_EVENT.event(), event.getResourceId(), event.getSdxCluster().getClusterName(),
-                    event.getUserId(), null, event.getBackupLocation(), null, DatalakeRestoreFailureReason.RESTORE_ON_RESIZE));
+                    event.getUserId(), null, event.getBackupLocation(), null, event.getSkipOptions(), DatalakeRestoreFailureReason.RESTORE_ON_RESIZE));
         }
 
         // Delete the detached Sdx

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 
 public class DatalakeResizeFlowChainStartEvent extends SdxEvent {
 
@@ -19,6 +20,9 @@ public class DatalakeResizeFlowChainStartEvent extends SdxEvent {
 
     private final boolean restore;
 
+    private final DatalakeDrSkipOptions skipOptions;
+
+    @SuppressWarnings("ExecutableStatementCount")
     @JsonCreator
     public DatalakeResizeFlowChainStartEvent(
             @JsonProperty("resourceId") Long sdxId,
@@ -26,12 +30,14 @@ public class DatalakeResizeFlowChainStartEvent extends SdxEvent {
             @JsonProperty("userId") String userId,
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("backup") boolean backup,
-            @JsonProperty("restore") boolean restore) {
+            @JsonProperty("restore") boolean restore,
+            @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions) {
         super(sdxId, userId);
         this.sdxCluster = sdxCluster;
         this.backupLocation = backupLocation;
         this.backup = backup;
         this.restore = restore;
+        this.skipOptions = skipOptions;
     }
 
     public boolean shouldTakeBackup() {
@@ -56,6 +62,10 @@ public class DatalakeResizeFlowChainStartEvent extends SdxEvent {
 
     public String getBackupLocation() {
         return backupLocation;
+    }
+
+    public DatalakeDrSkipOptions getSkipOptions() {
+        return skipOptions;
     }
 
     @Override

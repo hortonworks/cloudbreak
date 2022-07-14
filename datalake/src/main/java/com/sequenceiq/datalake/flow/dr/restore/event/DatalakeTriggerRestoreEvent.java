@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.dr.event.DatalakeDatabaseDrStartBaseEvent;
 import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFailureReason;
 
@@ -19,6 +20,8 @@ public class DatalakeTriggerRestoreEvent extends DatalakeDatabaseDrStartBaseEven
 
     private final String backupLocationOverride;
 
+    private final DatalakeDrSkipOptions skipOptions;
+
     @JsonCreator
     public DatalakeTriggerRestoreEvent(
             @JsonProperty("selector") String selector,
@@ -28,11 +31,13 @@ public class DatalakeTriggerRestoreEvent extends DatalakeDatabaseDrStartBaseEven
             @JsonProperty("backupId") String backupId,
             @JsonProperty("backupLocation") String backupLocation,
             @JsonProperty("backupLocationOverride") String backupLocationOverride,
+            @JsonProperty("skipOptions") DatalakeDrSkipOptions skipOptions,
             @JsonProperty("reason") DatalakeRestoreFailureReason reason) {
         super(selector, sdxId, sdxName, userId, SdxOperationType.RESTORE);
         this.backupId = backupId;
         this.backupLocation = backupLocation;
         this.backupLocationOverride = backupLocationOverride;
+        this.skipOptions = skipOptions;
         this.reason = reason;
     }
 
@@ -42,6 +47,10 @@ public class DatalakeTriggerRestoreEvent extends DatalakeDatabaseDrStartBaseEven
 
     public String getBackupLocation() {
         return backupLocation;
+    }
+
+    public DatalakeDrSkipOptions getSkipOptions() {
+        return skipOptions;
     }
 
     public String getBackupLocationOverride() {

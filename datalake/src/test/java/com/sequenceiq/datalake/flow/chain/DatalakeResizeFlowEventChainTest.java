@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeTriggerBackupEvent;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -41,7 +42,7 @@ public class DatalakeResizeFlowEventChainTest {
     @Test
     public void chainCreationTest() {
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(sdxCluster.getId(), sdxCluster, USER_CRN, BACKUP_LOCATION,
-                true, true);
+                true, true,  new DatalakeDrSkipOptions(false, false, false));
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
         assertEquals(7, flowTriggerEventQueue.getQueue().size());
         assertTriggerBackupEvent(flowTriggerEventQueue);
@@ -51,7 +52,7 @@ public class DatalakeResizeFlowEventChainTest {
     public void chainCreationWithRazTest() {
         SdxCluster clusterWithRaz = getValidSdxClusterwithRaz();
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(clusterWithRaz.getId(), clusterWithRaz, USER_CRN, BACKUP_LOCATION,
-                true, true);
+                true, true,  new DatalakeDrSkipOptions(false, false, false));
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
         assertEquals(7, flowTriggerEventQueue.getQueue().size());
         assertTriggerBackupEvent(flowTriggerEventQueue);

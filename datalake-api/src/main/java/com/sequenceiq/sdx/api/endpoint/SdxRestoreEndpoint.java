@@ -33,7 +33,11 @@ public interface SdxRestoreEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "restore the datalake ", produces = MediaType.APPLICATION_JSON, nickname = "restoreDatalake")
     SdxRestoreResponse restoreDatalakeByName(@PathParam("name") String name,
-            @QueryParam("backupId") String backupId, @QueryParam("backupLocationOverride") String backupLocationOverride);
+            @QueryParam("backupId") String backupId,
+            @QueryParam("backupLocationOverride") String backupLocationOverride,
+            @QueryParam("skipAtlasMetadata") boolean skipAtlasMetadata,
+            @QueryParam("skipRangerAudits") boolean skipRangerAudits,
+            @QueryParam("skipRangerMetadata") boolean skipRangerMetadata);
 
     @POST
     @Path("{name}/restoreDatalakeStatus")

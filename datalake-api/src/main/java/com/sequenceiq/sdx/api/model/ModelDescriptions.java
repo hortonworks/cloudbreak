@@ -94,6 +94,12 @@ public class ModelDescriptions {
 
     public static final String SKIP_BACKUP = "Option to skip the backup before the upgrade.";
 
+    public static final String SKIP_ATLAS = "Option to skip the backup/restore of Atlas data.";
+
+    public static final String SKIP_RANGER_AUDIT = "Option to skip the backup/restore of Ranger Audit data.";
+
+    public static final String SKIP_RANGER_METADATA = "Option to skip the backup/restore of Ranger HMS Metadata.";
+
     public static final String SHOW_AVAILABLE_IMAGES = "Option to show available images.";
 
     public static final String REPLACE_VMS = "Option to replace virtual machines  during the upgrade.";

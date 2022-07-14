@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -38,6 +39,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.flow.dr.backup.event.DatalakeDatabaseBackupStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
@@ -122,10 +124,11 @@ public class SdxBackupRestoreServiceTest {
     @Test
     public void triggerDatabaseBackupInternalSuccess() {
         String drOperationId = UUID.randomUUID().toString();
-        when(datalakeDrClient.triggerBackup(any(), any(), any(), any()))
+        when(datalakeDrClient.triggerBackup(any(), any(), any(), any(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(new DatalakeBackupStatusResponse(drOperationId, DatalakeBackupStatusResponse.State.IN_PROGRESS, Optional.empty()));
         when(sdxClusterRepository.findById(sdxCluster.getId())).thenReturn(Optional.of(sdxCluster));
-        DatalakeBackupStatusResponse backupResponse = sdxBackupRestoreService.triggerDatalakeBackup(sdxCluster.getId(), BACKUP_LOCATION, BACKUP_NAME, USER_CRN);
+        DatalakeBackupStatusResponse backupResponse = sdxBackupRestoreService.triggerDatalakeBackup(sdxCluster.getId(), BACKUP_LOCATION, BACKUP_NAME, USER_CRN,
+                new DatalakeDrSkipOptions(false, false, false));
         assertNotNull(backupResponse);
         assertEquals(drOperationId, backupResponse.getBackupId());
         assertTrue(isUUID(backupResponse.getBackupId()));

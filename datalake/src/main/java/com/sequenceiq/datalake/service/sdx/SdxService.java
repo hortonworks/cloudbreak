@@ -106,6 +106,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
@@ -598,7 +599,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
         newSdxCluster.setStackRequest(stackRequest);
-        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster);
+        FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxResize(sdxCluster.getId(), newSdxCluster,
+                new DatalakeDrSkipOptions(sdxClusterResizeRequest.isSkipAtlasMetadata(),
+                        sdxClusterResizeRequest.isSkipRangerAudits(), sdxClusterResizeRequest.isSkipRangerMetadata()));
         return Pair.of(sdxCluster, flowIdentifier);
     }
 

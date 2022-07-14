@@ -121,7 +121,8 @@ public class DatalakeRestoreActions {
                         sdxBackupRestoreService.triggerDatalakeRestore(context.getSdxId(),
                                 payload.getBackupId(),
                                 payload.getBackupLocationOverride(),
-                                payload.getUserId());
+                                payload.getUserId(),
+                                payload.getSkipOptions());
                 variables.put(RESTORE_ID, restoreStatusResponse.getRestoreId());
                 variables.put(BACKUP_ID, restoreStatusResponse.getBackupId());
                 variables.put(OPERATION_ID, restoreStatusResponse.getRestoreId());

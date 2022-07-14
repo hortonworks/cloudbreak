@@ -104,6 +104,7 @@ import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.flow.dr.DatalakeDrSkipOptions;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
@@ -1475,7 +1476,8 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
 
         mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
-        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class))).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class)))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));

@@ -19,6 +19,7 @@ import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeB
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest;
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.SkipFlag;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter;
@@ -51,7 +52,8 @@ public class DatalakeDrClient {
         this.tracer = tracer;
     }
 
-    public DatalakeBackupStatusResponse triggerBackup(String datalakeName, String backupLocation, String backupName, String actorCrn) {
+    public DatalakeBackupStatusResponse triggerBackup(String datalakeName, String backupLocation, String backupName, String actorCrn,
+            boolean skipAtlasMetadata, boolean skipRangerAudits, boolean skipRangerMetadata) {
         if (!datalakeDrConfig.isConfigured()) {
             return missingConnectorResponseOnBackup();
         }
@@ -65,6 +67,16 @@ public class DatalakeDrClient {
                     .setDatalakeName(datalakeName)
                     .setBackupLocation(backupLocation)
                     .setCloseDbConnections(true);
+
+            if (skipAtlasMetadata) {
+                builder.setSkipAtlasMetadata(SkipFlag.SKIP);
+            }
+            if (skipRangerAudits) {
+                builder.setSkipRangerAudits(SkipFlag.SKIP);
+            }
+            if (skipRangerMetadata) {
+                builder.setSkipRangerHmsMetadata(SkipFlag.SKIP);
+            }
             if (!Strings.isNullOrEmpty(backupName)) {
                 builder.setBackupName(backupName);
             }
@@ -75,7 +87,8 @@ public class DatalakeDrClient {
         }
     }
 
-    public DatalakeRestoreStatusResponse triggerRestore(String datalakeName, String backupId, String backupLocationOverride, String actorCrn) {
+    public DatalakeRestoreStatusResponse triggerRestore(String datalakeName, String backupId, String backupLocationOverride, String actorCrn,
+            boolean skipAtlasMetadata, boolean skipRangerAudits, boolean skipRangerMetadata) {
         if (!datalakeDrConfig.isConfigured()) {
             return missingConnectorResponseOnRestore();
         }
@@ -87,6 +100,15 @@ public class DatalakeDrClient {
                     .setDatalakeName(datalakeName);
             if (!Strings.isNullOrEmpty(backupId)) {
                 builder.setBackupId(backupId);
+            }
+            if (skipAtlasMetadata) {
+                builder.setSkipAtlasMetadata(SkipFlag.SKIP);
+            }
+            if (skipRangerAudits) {
+                builder.setSkipRangerAudits(SkipFlag.SKIP);
+            }
+            if (skipRangerMetadata) {
+                builder.setSkipRangerHmsMetadata(SkipFlag.SKIP);
             }
             if (!Strings.isNullOrEmpty(backupLocationOverride)) {
                 builder.setBackupLocationOverride(backupLocationOverride);
