@@ -65,10 +65,12 @@ public class SdxResizeTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .when(sdxTestClient.resize(), key(sdx))
+                .await(SdxClusterStatusResponse.DATALAKE_BACKUP_INPROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.STOP_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdx))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .awaitForHealthyInstances()
+                .await(SdxClusterStatusResponse.DATALAKE_RESTORE_INPROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .then((tc, dto, client) -> validateStackCrn(expectedCrn, dto))
                 .then((tc, dto, client) -> validateCrn(expectedCrn, dto))
                 .then((tc, dto, client) -> validateShape(dto))
