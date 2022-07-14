@@ -24,10 +24,10 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
@@ -56,7 +56,7 @@ public class SdxUpgradeRecoveryServiceTest {
     private SdxReactorFlowManager sdxReactorFlowManager;
 
     @Mock
-    private DatalakeDrClient datalakeDrClient;
+    private SdxBackupRestoreService backupRestoreService;
 
     @Mock
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
@@ -144,7 +144,7 @@ public class SdxUpgradeRecoveryServiceTest {
 
         when(cluster.getRuntime()).thenReturn(RUNTIME);
         when(stackV4Endpoint.getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, USER_CRN)).thenReturn(recoveryV4Response);
-        when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.of(RUNTIME))).thenReturn(datalakeBackupInfo);
+        when(backupRestoreService.getLastSuccessfulBackupInfoWithRuntime(CLUSTER_NAME, USER_CRN, RUNTIME)).thenReturn(Optional.of(datalakeBackupInfo));
         when(sdxReactorFlowManager.triggerDatalakeRuntimeRecoveryFlow(cluster, SdxRecoveryType.RECOVER_WITH_DATA))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
@@ -164,7 +164,7 @@ public class SdxUpgradeRecoveryServiceTest {
         request.setType(SdxRecoveryType.RECOVER_WITH_DATA);
 
         when(cluster.getRuntime()).thenReturn(RUNTIME);
-        when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.of(RUNTIME))).thenReturn(null);
+        when(backupRestoreService.getLastSuccessfulBackupInfoWithRuntime(CLUSTER_NAME, USER_CRN, RUNTIME)).thenReturn(Optional.empty());
 
         SdxRecoverableResponse sdxRecoverableResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.validateRecovery(cluster, request));

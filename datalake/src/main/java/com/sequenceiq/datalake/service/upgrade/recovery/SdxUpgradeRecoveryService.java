@@ -17,12 +17,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.Recove
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.recovery.RecoveryService;
+import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
@@ -44,7 +44,7 @@ public class SdxUpgradeRecoveryService implements RecoveryService {
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
     @Inject
-    private DatalakeDrClient datalakeDrClient;
+    private SdxBackupRestoreService backupRestoreService;
 
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
@@ -64,9 +64,10 @@ public class SdxUpgradeRecoveryService implements RecoveryService {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             if (Objects.nonNull(request) && request.getType() == SdxRecoveryType.RECOVER_WITH_DATA) {
                 String clusterRuntime = sdxCluster.getRuntime();
-                datalakeDRProto.DatalakeBackupInfo lastSuccessfulBackup = datalakeDrClient.getLastSuccessfulBackup(sdxCluster.getClusterName(),
-                        initiatorUserCrn, Optional.of(clusterRuntime));
-                if (Objects.isNull(lastSuccessfulBackup)) {
+                Optional<datalakeDRProto.DatalakeBackupInfo> lastSuccessfulBackup = backupRestoreService.getLastSuccessfulBackupInfoWithRuntime(
+                        sdxCluster.getClusterName(), initiatorUserCrn, clusterRuntime
+                );
+                if (lastSuccessfulBackup.isEmpty()) {
                     return new SdxRecoverableResponse("There is no successful backup taken yet for data lake cluster with runtime " + clusterRuntime + ".",
                             RecoveryStatus.NON_RECOVERABLE);
                 }

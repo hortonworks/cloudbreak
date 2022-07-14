@@ -50,7 +50,7 @@ public class GrpcServerConfig {
     @Value("${grpc.server.port:8982}")
     private int grpcServerPort;
 
-    @Value("${datalakedr.server.port:8989}")
+    @Value("${datalakedr.server.port:8981}")
     private int datalakeDrServerPort;
 
     @Bean

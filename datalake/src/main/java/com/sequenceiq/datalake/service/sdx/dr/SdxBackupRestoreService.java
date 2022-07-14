@@ -168,6 +168,15 @@ public class SdxBackupRestoreService {
         return lastSuccessfulBackupInfo;
     }
 
+    public Optional<datalakeDRProto.DatalakeBackupInfo> getLastSuccessfulBackupInfoWithRuntime(String datalakeName, String userCrn, String runtime) {
+        datalakeDRProto.DatalakeBackupInfo lastSuccessfulBackupInfo = datalakeDrClient.getLastSuccessfulBackup(datalakeName, userCrn, Optional.of(runtime));
+        if (lastSuccessfulBackupInfo == null) {
+            LOGGER.error("No successful backup found for data lake: {}", datalakeName);
+            return Optional.empty();
+        }
+        return Optional.of(lastSuccessfulBackupInfo);
+    }
+
     private SdxDatabaseBackupResponse triggerDatalakeDatabaseBackupFlow(SdxCluster cluster, SdxDatabaseBackupRequest backupRequest) {
         String selector = DATALAKE_DATABASE_BACKUP_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();

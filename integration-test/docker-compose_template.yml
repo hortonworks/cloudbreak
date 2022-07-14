@@ -9,6 +9,7 @@ services:
     ports:
       - 10080:8080
       - 8982:8982
+      - 8981:8981
     volumes:
     - ../mock-thunderhead/build/libs/mock-thunderhead.jar:/mock-thunderhead.jar
     - ./integcb/etc:/etc/auth
