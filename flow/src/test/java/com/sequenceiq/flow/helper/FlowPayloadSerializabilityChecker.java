@@ -7,8 +7,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
@@ -35,6 +38,8 @@ public class FlowPayloadSerializabilityChecker {
     private final Set<Class<?>> checked = new HashSet<>();
 
     private final List<String> validationErrors = new ArrayList<>();
+
+    private final Deque<String> parentClasses = new ArrayDeque<>();
 
     public void checkAcceptableClasses() {
         Reflections reflections = new Reflections("com.sequenceiq", new SubTypesScanner(true));
@@ -74,10 +79,12 @@ public class FlowPayloadSerializabilityChecker {
     private void checkPrivateFieldsRecursive(Class<?> clazz) {
         for (Field f : clazz.getDeclaredFields()) {
             if (!Modifier.isFinal(f.getModifiers()) &&
-                f.getType().getPackageName().startsWith("com.sequenceiq.") &&
-                        !f.getType().isEnum() && !f.getType().isInterface() &&
-                        !ClassUtils.isPrimitiveOrWrapper(f.getType())) {
+                    f.getType().getPackageName().startsWith("com.sequenceiq.") &&
+                    !f.getType().isEnum() && !f.getType().isInterface() &&
+                    !ClassUtils.isPrimitiveOrWrapper(f.getType())) {
+                parentClasses.add(clazz.getName());
                 performChecksCache(f.getType());
+                parentClasses.removeLast();
             }
         }
     }
@@ -89,8 +96,9 @@ public class FlowPayloadSerializabilityChecker {
                 if (paramType.getPackageName().startsWith("com.sequenceiq.") &&
                         !paramType.isEnum() &&
                         !ClassUtils.isPrimitiveOrWrapper(paramType)) {
-
+                    parentClasses.add(maxParamCtor.get().getDeclaringClass().getName());
                     performChecksCache(paramType);
+                    parentClasses.removeLast();
                 }
             }
         }
@@ -102,15 +110,15 @@ public class FlowPayloadSerializabilityChecker {
             Class<?> deserializerClass = jsonDeserAnnotation.builder();
             Optional<Class<?>> builderClassOpt = getBuilderClass(clazz);
             if (builderClassOpt.isEmpty()) {
-                validationErrors.add(String.format(
+                validationErrors.add(decorateWitParentClasses(String.format(
                         "Class %s has @JsonDeserialize attribute with Builder %s but it does not have a nested builder class",
-                        clazz.getName(), deserializerClass.getName()));
+                        clazz.getName(), deserializerClass.getName())));
                 return false;
             }
             if (!builderClassOpt.get().equals(deserializerClass)) {
-                validationErrors.add(String.format(
+                validationErrors.add(decorateWitParentClasses(String.format(
                         "Class %s has @JsonDeserialize attribute with Builder %s but it does not match the nested builder class %s",
-                        clazz.getName(), deserializerClass.getName(), builderClassOpt.get().getName()));
+                        clazz.getName(), deserializerClass.getName(), builderClassOpt.get().getName())));
                 return false;
             }
             checkClassForJsonPojoBuilder(clazz, builderClassOpt.get());
@@ -122,9 +130,10 @@ public class FlowPayloadSerializabilityChecker {
     private void checkJacksonCreatorAnnotation(Class<?> clazz, Constructor<?>[] constructors) {
         Set<Constructor<?>> creators = Arrays.stream(constructors).filter(c -> c.getAnnotation(JsonCreator.class) != null).collect(Collectors.toSet());
         if (creators.isEmpty()) {
-            validationErrors.add(String.format("Class %s has no constructor with @JsonCreator attribute", clazz.getName()));
+            validationErrors.add(decorateWitParentClasses(String.format("Class %s has no constructor with @JsonCreator attribute", clazz.getName())));
         } else if (creators.size() > 1) {
-            validationErrors.add(String.format("Class %s has more than 1 constructors with @JsonCreator attribute, ambiguity", clazz.getName()));
+            validationErrors.add(decorateWitParentClasses(
+                    String.format("Class %s has more than 1 constructors with @JsonCreator attribute, ambiguity", clazz.getName())));
         } else {
             Constructor<?> creator = creators.iterator().next();
             checkCreator(clazz, creator);
@@ -157,29 +166,31 @@ public class FlowPayloadSerializabilityChecker {
             }
         }
         if (!missingJsonPropertyParams.isEmpty()) {
-            validationErrors.add(String.format("Class %s has a @JsonCreator constructor with parameters [%s] missing the @JsonProperty annotation",
-                    clazz.getName(), String.join(",", missingJsonPropertyParams)));
+            validationErrors.add(decorateWitParentClasses(String.format(
+                    "Class %s has a @JsonCreator constructor with parameters [%s] missing the @JsonProperty annotation.",
+                            clazz.getName(), String.join(",", missingJsonPropertyParams))));
         }
         if (uniqueNamesCheck.size() != jsonPropertyCount) {
-            validationErrors.add(String.format("Class %s has a @JsonCreator constructor with duplicate @JsonProperty values [%s]",
-                    clazz.getName(), String.join(",", duplicateNames)));
+            validationErrors.add(decorateWitParentClasses(String.format("Class %s has a @JsonCreator constructor with duplicate @JsonProperty values [%s].",
+                    clazz.getName(), String.join(",", duplicateNames))));
         }
         if (!missingGetters.isEmpty()) {
-            validationErrors.add(String.format("Class %s has a @JsonCreator constructor with @JsonProperty but no matching getters for values [%s]",
-                    clazz.getName(), String.join(",", missingGetters)));
+            validationErrors.add(decorateWitParentClasses(String.format(
+                            "Class %s has a @JsonCreator constructor with @JsonProperty but no matching getters for values [%s].",
+                            clazz.getName(), String.join(",", missingGetters))));
         }
     }
 
     private void checkClassForJsonPojoBuilder(Class<?> clazz, Class<?> builderClass) {
         if (builderClass.getAnnotation(JsonPOJOBuilder.class) == null) {
-            validationErrors.add(String.format(
-                    "Class %s has @JsonDeserialize attribute with Builder but has no nested Builder class with @JsonPOJOBuilder annotation",
-                    clazz.getName()));
+            validationErrors.add(decorateWitParentClasses(String.format(
+                    "Class %s has @JsonDeserialize attribute with Builder but has no nested Builder class with @JsonPOJOBuilder annotation.",
+                    clazz.getName())));
         } else {
             List<String> fieldNames = checkAllPrivateFieldsForBuilderSetter(clazz, builderClass);
             if (!fieldNames.isEmpty()) {
-                validationErrors.add(String.format("Class %s has field(s) [%s] with no corresponding Builder method(s)",
-                        clazz.getName(), String.join(",", fieldNames)));
+                validationErrors.add(decorateWitParentClasses(String.format("Class %s has field(s) [%s] with no corresponding Builder method(s).",
+                        clazz.getName(), String.join(",", fieldNames))));
             }
         }
     }
@@ -200,16 +211,16 @@ public class FlowPayloadSerializabilityChecker {
     private void checkMissingGetters(Class<?> clazz) {
         List<String> fieldNames = checkAllPrivateFieldsForGetter(clazz);
         if (!fieldNames.isEmpty()) {
-            validationErrors.add(String.format("Class %s has non-final field(s) [%s] with no getter",
-                    clazz.getName(), String.join(",", fieldNames)));
+            validationErrors.add(decorateWitParentClasses(String.format("Class %s has non-final field(s) [%s] with no getter.",
+                    clazz.getName(), String.join(",", fieldNames))));
         }
     }
 
     private void checkMissingSetters(Class<?> clazz) {
         List<String> fieldNames = checkAllPrivateFieldsForSetter(clazz);
         if (!fieldNames.isEmpty()) {
-            validationErrors.add(String.format("Class %s has non-final field(s) [%s] with no setter",
-                    clazz.getName(), String.join(",", fieldNames)));
+            validationErrors.add(decorateWitParentClasses(String.format("Class %s has non-final field(s) [%s] with no setter.",
+                    clazz.getName(), String.join(",", fieldNames))));
         }
     }
 
@@ -219,8 +230,8 @@ public class FlowPayloadSerializabilityChecker {
                 getBuilderClass(clazz).isPresent() &&
                 constructors[0].getParameterTypes()[0].equals(getBuilderClass(clazz).get())) {
 
-            validationErrors.add(
-                    String.format("Class %s has only a constructor for its builder thus it cannot be deserialized without proper annotation", clazz.getName()));
+            validationErrors.add(decorateWitParentClasses(String.format(
+                    "Class %s has only a constructor for its builder thus it cannot be deserialized without proper annotation", clazz.getName())));
         }
     }
 
@@ -340,5 +351,11 @@ public class FlowPayloadSerializabilityChecker {
             });
         }
         return false;
+    }
+
+    private String decorateWitParentClasses(String content) {
+        return String.format("%s%s", content, CollectionUtils.isEmpty(parentClasses)
+                ? StringUtils.EMPTY
+                : String.format(" Parent classes: %s", parentClasses));
     }
 }
