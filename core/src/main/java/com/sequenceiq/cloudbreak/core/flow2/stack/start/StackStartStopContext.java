@@ -4,35 +4,35 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public class StackStartStopContext extends CommonContext {
-    private final Stack stack;
+    private final StackDto stack;
 
-    private final List<InstanceMetaData> instanceMetaData;
+    private final List<InstanceGroupDto> instanceGroupDtos;
 
     private final CloudContext cloudContext;
 
     private final CloudCredential cloudCredential;
 
-    public StackStartStopContext(FlowParameters flowParameters, Stack stack, List<InstanceMetaData> instanceMetaData,
+    public StackStartStopContext(FlowParameters flowParameters, StackDto stack, List<InstanceGroupDto> instanceGroupDtos,
             CloudContext cloudContext, CloudCredential cloudCredential) {
         super(flowParameters);
         this.stack = stack;
-        this.instanceMetaData = instanceMetaData;
+        this.instanceGroupDtos = instanceGroupDtos;
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
     }
 
-    public Stack getStack() {
+    public StackDto getStack() {
         return stack;
     }
 
-    public Iterable<InstanceMetaData> getInstanceMetaData() {
-        return instanceMetaData;
+    public List<InstanceGroupDto> getInstanceGroupDtos() {
+        return instanceGroupDtos;
     }
 
     public CloudContext getCloudContext() {

@@ -8,12 +8,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverResult;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -29,7 +30,7 @@ public class UpdateDomainDnsResolverHandler extends ExceptionCatcherEventHandler
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Override
     public String selector() {
@@ -45,12 +46,12 @@ public class UpdateDomainDnsResolverHandler extends ExceptionCatcherEventHandler
     protected Selectable doAccept(HandlerEvent<UpdateDomainDnsResolverRequest> updateDomainDnsResolverRequestHandlerEvent) {
         UpdateDomainDnsResolverRequest event = updateDomainDnsResolverRequestHandlerEvent.getData();
         try {
-            Stack stack = stackService.getByIdWithLists(event.getResourceId());
-            DnsResolverType actualDnsResolverType = targetedUpscaleSupportService.getActualDnsResolverType(stack);
+            StackDto stackDto = stackDtoService.getById(event.getResourceId());
+            StackView stack = stackDto.getStack();
+            DnsResolverType actualDnsResolverType = targetedUpscaleSupportService.getActualDnsResolverType(stackDto);
             if (!actualDnsResolverType.equals(stack.getDomainDnsResolver())) {
                 LOGGER.debug("New value of domainDnsResolver field for stack {} is {}", stack.getResourceCrn(), actualDnsResolverType);
-                stack.setDomainDnsResolver(actualDnsResolverType);
-                stackService.save(stack);
+                stackDtoService.updateDomainDnsResolver(stack.getId(), actualDnsResolverType);
                 LOGGER.debug("domainDnsResolver field of stack {} has been successfully updated!", stack.getResourceCrn());
             } else {
                 LOGGER.debug("Currently set and actual domainDnsResolverType is the same, not need for update, value {}", actualDnsResolverType);

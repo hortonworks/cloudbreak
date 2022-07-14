@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.job;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -63,6 +64,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
@@ -80,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
@@ -88,6 +91,7 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -110,6 +114,9 @@ class StackStatusIntegrationTest {
 
     @MockBean
     private StackService stackService;
+
+    @MockBean
+    private StackDtoService stackDtoService;
 
     @MockBean
     private ClusterApiConnectors clusterApiConnectors;
@@ -167,7 +174,10 @@ class StackStatusIntegrationTest {
 
     private Stack stack;
 
-    private Set<InstanceMetaData> runningInstances;
+    @Mock
+    private StackDto stackDto;
+
+    private List<InstanceMetadataView> runningInstances;
 
     private Map<HostName, Set<HealthCheck>> hostStatuses;
 
@@ -184,7 +194,7 @@ class StackStatusIntegrationTest {
     }
 
     private void setUpRunningInstances() {
-        runningInstances = Set.of(createInstance(INSTANCE_1), createInstance(INSTANCE_2));
+        runningInstances = List.of(createInstance(INSTANCE_1), createInstance(INSTANCE_2));
     }
 
     private InstanceMetaData createInstance(String instanceName) {
@@ -213,16 +223,18 @@ class StackStatusIntegrationTest {
         workspace.setId(564L);
         stack.setWorkspace(workspace);
 
-        when(stackService.get(STACK_ID)).thenReturn(stack);
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(STACK_ID)).thenReturn(runningInstances);
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(STACK_ID)).thenReturn(runningInstances);
+        when(stackDto.getId()).thenReturn(STACK_ID);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stackDto.getCluster()).thenReturn(cluster);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(runningInstances);
     }
 
     private void setUpClusterApi() {
         ClusterApi clusterApi = Mockito.mock(ClusterApi.class);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
 
-        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
 
         hostStatuses = new HashMap<>();
 
@@ -232,12 +244,13 @@ class StackStatusIntegrationTest {
     @Test
     @DisplayName(
             "GIVEN an available stack " +
-            "WHEN all instances are healthy " +
-            "THEN stack is still available"
+                    "WHEN all instances are healthy " +
+                    "THEN stack is still available"
     )
     void availableStackInstancesAreHealthy() throws JobExecutionException {
         setUpClusterStatus(ClusterStatus.STARTED);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        when(stackDto.getStatus()).thenReturn(AVAILABLE);
         setUpHealthForInstance(INSTANCE_1, HealthCheckResult.HEALTHY);
         setUpHealthForInstance(INSTANCE_2, HealthCheckResult.HEALTHY);
         setUpCloudVmInstanceStatuses(Map.of(
@@ -262,12 +275,13 @@ class StackStatusIntegrationTest {
     @Test
     @DisplayName(
             "GIVEN an available stack " +
-            "WHEN one instance goes down " +
-            "THEN stack is still available"
+                    "WHEN one instance goes down " +
+                    "THEN stack is still available"
     )
     void availableStackOneInstanceGoesDown() throws JobExecutionException {
         setUpClusterStatus(ClusterStatus.STARTED);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        when(stackDto.getStatus()).thenReturn(AVAILABLE);
         setUpHealthForInstance(INSTANCE_1, HealthCheckResult.HEALTHY);
         setUpHealthForInstance(INSTANCE_2, HealthCheckResult.UNHEALTHY);
         setUpCloudVmInstanceStatuses(Map.of(
@@ -293,18 +307,19 @@ class StackStatusIntegrationTest {
     @Test
     @DisplayName(
             "GIVEN an available stack " +
-            "WHEN all instances go down " +
-            "THEN stack is no more available"
+                    "WHEN all instances go down " +
+                    "THEN stack is no more available"
     )
     void availableStackAllInstancesGoesDown() throws JobExecutionException {
         setUpClusterStatus(ClusterStatus.STARTED);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        when(stackDto.getStatus()).thenReturn(AVAILABLE);
         setUpHealthForInstance(INSTANCE_1, HealthCheckResult.HEALTHY);
         setUpHealthForInstance(INSTANCE_2, HealthCheckResult.UNHEALTHY);
         setUpCloudVmInstanceStatuses(Map.of(
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(STACK_ID)).thenReturn(Set.of());
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(runningInstances, List.of());
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
@@ -326,18 +341,19 @@ class StackStatusIntegrationTest {
     @Test
     @DisplayName(
             "GIVEN an available stack with one instance down " +
-            "WHEN all instances go down " +
-            "THEN stack is no more available"
+                    "WHEN all instances go down " +
+                    "THEN stack is no more available"
     )
     void availableStackWithOneInstanceDownAllInstancesGoesDown() throws JobExecutionException {
         setUpClusterStatus(ClusterStatus.STARTED);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        when(stackDto.getStatus()).thenReturn(AVAILABLE);
         setUpHealthForInstance(INSTANCE_1, HealthCheckResult.HEALTHY);
         setUpHealthForInstance(INSTANCE_2, HealthCheckResult.UNHEALTHY);
         setUpCloudVmInstanceStatuses(Map.of(
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(STACK_ID)).thenReturn(Set.of());
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(STACK_ID)).thenReturn(runningInstances, List.of());
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.datahub()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.executeTracedJob(jobExecutionContext);
@@ -360,8 +376,8 @@ class StackStatusIntegrationTest {
         verify(instanceMetaDataService, times(instanceStatuses.keySet().size())).updateInstanceStatus(any(), any());
         for (Map.Entry<String, InstanceStatus> instanceStatusEntry : instanceStatuses.entrySet()) {
             verify(instanceMetaDataService, times(1))
-                .updateInstanceStatus(argThat(im -> instanceStatusEntry.getKey().equals(im.getInstanceId())),
-                        argThat(status -> instanceStatusEntry.getValue().equals(status)));
+                    .updateInstanceStatus(argThat(im -> instanceStatusEntry.getKey().equals(im.getInstanceId())),
+                            argThat(status -> instanceStatusEntry.getValue().equals(status)));
         }
     }
 
@@ -369,7 +385,7 @@ class StackStatusIntegrationTest {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = instanceStatuses.entrySet().stream()
                 .map(e -> createCloudVmInstanceStatus(e.getKey(), e.getValue()))
                 .collect(Collectors.toList());
-        when(stackStatusChecker.queryInstanceStatuses(eq(stack), any())).thenReturn(cloudVmInstanceStatuses);
+        when(stackStatusChecker.queryInstanceStatuses(eq(stackDto), any())).thenReturn(cloudVmInstanceStatuses);
     }
 
     private CloudVmInstanceStatus createCloudVmInstanceStatus(String instanceId, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus instanceStatus) {

@@ -106,7 +106,7 @@ public class JpaTest {
                 if (e.getCause() instanceof UnsupportedOperationException) {
                     Assertions.assertTrue(true, "find finished with UnsupportedOperation");
                 } else {
-                    Assertions.fail("Could not call find method", e);
+                    Assertions.fail("Could not call find method: " + method, e);
                 }
             }
         };

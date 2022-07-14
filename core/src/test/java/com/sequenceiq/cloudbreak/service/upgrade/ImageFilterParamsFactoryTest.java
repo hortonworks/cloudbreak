@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
@@ -58,7 +58,7 @@ public class ImageFilterParamsFactoryTest {
     public void testCreateShouldReturnsANewImageFilterParamsInstanceWhenTheStackTypeIsDataLake() {
         Image image = mock(Image.class);
         Stack stack = createStack(StackType.DATALAKE);
-        Set<ClusterComponent> clusterComponents = createCdhClusterComponent();
+        Set<ClusterComponentView> clusterComponents = createCdhClusterComponent();
         String cdhName = com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH.name();
         String cdhVersion = "7.2.0";
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(CLOUD_PLATFORM));
@@ -82,7 +82,7 @@ public class ImageFilterParamsFactoryTest {
     public void testCreateShouldReturnsANewImageFilterParamsInstanceWhenTheStackTypeIsDataHub() {
         Image image = mock(Image.class);
         Stack stack = createStack(StackType.WORKLOAD);
-        Set<ClusterComponent> cdhClusterComponent = createCdhClusterComponent();
+        Set<ClusterComponentView> cdhClusterComponent = createCdhClusterComponent();
         String sparkName = "Spark";
         String sparkVersion = "123";
         ClouderaManagerProduct spark = createCMProduct(sparkName, sparkVersion);
@@ -112,7 +112,7 @@ public class ImageFilterParamsFactoryTest {
     public void testCreateShouldThrowExceptionThenThereIsNoCdhComponentAvailable() {
         Image image = mock(Image.class);
         Stack stack = createStack(StackType.DATALAKE);
-        ClusterComponent clusterComponent = new ClusterComponent();
+        ClusterComponentView clusterComponent = new ClusterComponentView();
         clusterComponent.setName("CM");
 
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(Collections.singleton(clusterComponent));
@@ -122,8 +122,8 @@ public class ImageFilterParamsFactoryTest {
         verify(parcelService).getParcelComponentsByBlueprint(stack);
     }
 
-    private Set<ClusterComponent> createCdhClusterComponent() {
-        return Collections.singleton(new ClusterComponent());
+    private Set<ClusterComponentView> createCdhClusterComponent() {
+        return Collections.singleton(new ClusterComponentView());
     }
 
     private Stack createStack(StackType stackType) {

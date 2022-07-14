@@ -64,6 +64,8 @@ public class StackOperationsTest {
 
     private static final String IMAGE_CATALOG = "image catalog";
 
+    private static final String ACCOUNT_ID = "accountId";
+
     @Rule
     public final ExpectedException exceptionRule = ExpectedException.none();
 
@@ -134,45 +136,45 @@ public class StackOperationsTest {
     public void testDeleteWhenForcedTrueThenDeleteCalled() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
 
-        underTest.delete(nameOrCrn, stack.getWorkspace().getId(), true);
+        underTest.delete(nameOrCrn, ACCOUNT_ID, true);
 
-        verify(stackCommonService, times(1)).deleteWithKerberosInWorkspace(nameOrCrn, stack.getWorkspace().getId(), true);
+        verify(stackCommonService, times(1)).deleteWithKerberosInWorkspace(nameOrCrn, ACCOUNT_ID, true);
     }
 
     @Test
     public void testDeleteWhenForcedFalseThenDeleteCalled() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
 
-        underTest.delete(nameOrCrn, stack.getWorkspace().getId(), false);
+        underTest.delete(nameOrCrn, ACCOUNT_ID, false);
 
-        verify(stackCommonService, times(1)).deleteWithKerberosInWorkspace(nameOrCrn, stack.getWorkspace().getId(), false);
+        verify(stackCommonService, times(1)).deleteWithKerberosInWorkspace(nameOrCrn, ACCOUNT_ID, false);
     }
 
     @Test
     public void testGetWhenNameOrCrnNameFilledThenProperGetCalled() {
         StackV4Response expected = stackResponse();
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
-        when(stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE))
+        when(stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE))
                 .thenReturn(expected);
 
-        StackV4Response result = underTest.get(nameOrCrn, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
+        StackV4Response result = underTest.get(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE);
 
         assertEquals(expected, result);
-        verify(stackCommonService, times(1)).findStackByNameOrCrnAndWorkspaceId(nameOrCrn, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
+        verify(stackCommonService, times(1)).findStackByNameOrCrnAndWorkspaceId(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE);
     }
 
     @Test
     public void testGetWhenNameOrCrnCrnFilledThenProperGetCalled() {
         StackV4Response expected = stackResponse();
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(stack.getResourceCrn());
-        when(stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE))
+        when(stackCommonService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE))
                 .thenReturn(expected);
 
-        StackV4Response result = underTest.get(nameOrCrn, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
+        StackV4Response result = underTest.get(nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE);
 
         assertEquals(expected, result);
         verify(stackCommonService, times(1)).findStackByNameOrCrnAndWorkspaceId(
-                nameOrCrn, stack.getWorkspace().getId(), STACK_ENTRIES, STACK_TYPE);
+                nameOrCrn, ACCOUNT_ID, STACK_ENTRIES, STACK_TYPE);
     }
 
     @Test
@@ -247,11 +249,10 @@ public class StackOperationsTest {
     @Test
     public void rotateSaltPassword() {
         NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
-        long workspaceId = 0L;
 
-        underTest.rotateSaltPassword(nameOrCrn, workspaceId);
+        underTest.rotateSaltPassword(nameOrCrn, ACCOUNT_ID);
 
-        verify(stackCommonService).rotateSaltPassword(nameOrCrn, workspaceId);
+        verify(stackCommonService).rotateSaltPassword(nameOrCrn, ACCOUNT_ID);
     }
 
     private StackV4Response stackResponse() {

@@ -37,9 +37,9 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
@@ -52,7 +52,7 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -81,7 +81,7 @@ class DecommissionHandlerTest {
     private EventBus eventBus;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private RecipeEngine recipeEngine;
@@ -128,11 +128,12 @@ class DecommissionHandlerTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private StackDto stackDto;
+
     private Stack stack;
 
     private Cluster cluster;
-
-    private HostGroup hostGroup;
 
     private InstanceMetaData instance;
 
@@ -151,20 +152,20 @@ class DecommissionHandlerTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceMetaData(Set.of(instance));
         stack.setInstanceGroups(Set.of(instanceGroup));
-        hostGroup = new HostGroup();
-        hostGroup.setName(HOST_GROUP_NAME);
         stack.setResourceCrn(CrnTestUtil.getDatahubCrnBuilder().setAccountId("a1").setResource("r1").build().toString());
+
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stackDto.getCluster()).thenReturn(cluster);
     }
 
     @Test
     public void shouldContinueSingleHostDecommissionIfForcedAndFailed() throws CloudbreakException, ClusterClientInitException {
         when(entitlementService.bulkHostsRemovalFromCMSupported(any())).thenReturn(Boolean.FALSE);
-        when(stackService.getInstanceMetadata(any(), eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
-        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
+        when(stackDto.getInstanceMetadata(eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterDecomissionService()).thenReturn(clusterDecomissionService);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(hostGroupService.getByClusterIdAndName(CLUSTER_ID, HOST_GROUP_NAME)).thenReturn(Optional.of(hostGroup));
-        when(clusterDecomissionService.collectHostsToRemove(hostGroup, Set.of(FQDN))).thenReturn(Map.of(FQDN, instance));
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(clusterDecomissionService.collectHostsToRemove(HOST_GROUP_NAME, Set.of(FQDN))).thenReturn(Map.of(FQDN, instance));
         doThrow(new CloudbreakException("Restart stale services failed.")).when(clusterDecomissionService).restartStaleServices(true);
 
         underTest.accept(new Event<>(new Headers(), forcedDecommissionRequest()));
@@ -186,12 +187,11 @@ class DecommissionHandlerTest {
     @Test
     public void shouldContinueSingleHostDecommissionFailIfNotForced() throws CloudbreakException, ClusterClientInitException {
         when(entitlementService.bulkHostsRemovalFromCMSupported(any())).thenReturn(Boolean.FALSE);
-        when(stackService.getInstanceMetadata(any(), eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
-        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
+        when(stackDto.getInstanceMetadata(eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterDecomissionService()).thenReturn(clusterDecomissionService);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(hostGroupService.getByClusterIdAndName(CLUSTER_ID, HOST_GROUP_NAME)).thenReturn(Optional.of(hostGroup));
-        when(clusterDecomissionService.collectHostsToRemove(hostGroup, Set.of(FQDN))).thenReturn(Map.of(FQDN, instance));
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(clusterDecomissionService.collectHostsToRemove(HOST_GROUP_NAME, Set.of(FQDN))).thenReturn(Map.of(FQDN, instance));
         when(clusterDecomissionService.decommissionClusterNodes(Map.of(FQDN, instance))).thenReturn(Set.of(FQDN));
         CloudbreakException cloudbreakException = new CloudbreakException("Restart stale services failed.");
         doThrow(cloudbreakException).when(clusterDecomissionService).restartStaleServices(false);
@@ -215,12 +215,11 @@ class DecommissionHandlerTest {
     public void testBulkHostDecommission() throws ClusterClientInitException {
         when(entitlementService.bulkHostsRemovalFromCMSupported(any())).thenReturn(Boolean.TRUE);
         when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of(CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_14.getVersion()));
-        when(stackService.getInstanceMetadata(any(), eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
-        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
+        when(stackDto.getInstanceMetadata(eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterDecomissionService()).thenReturn(clusterDecomissionService);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(hostGroupService.getByClusterIdAndName(CLUSTER_ID, HOST_GROUP_NAME)).thenReturn(Optional.of(hostGroup));
-        when(clusterDecomissionService.collectHostsToRemove(hostGroup, Set.of(FQDN))).thenReturn(Map.of(FQDN, instance));
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(clusterDecomissionService.collectHostsToRemove(HOST_GROUP_NAME, Set.of(FQDN))).thenReturn(Map.of(FQDN, instance));
 
         underTest.accept(new Event<>(new Headers(), decommissionRequest()));
 

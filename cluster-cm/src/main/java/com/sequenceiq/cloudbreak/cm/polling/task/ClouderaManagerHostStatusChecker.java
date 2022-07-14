@@ -17,7 +17,7 @@ import com.cloudera.api.swagger.model.ApiHostList;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerApiCheckerTask<ClouderaManagerPollerObject> {
 
@@ -57,11 +57,11 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerApi
     @Override
     protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject) throws ApiException {
         List<String> hostIpsFromManager = fetchHeartbeatedHostIpsFromManager(pollerObject);
-        List<InstanceMetaData> notKnownInstancesByManager = collectNotKnownInstancesByManager(pollerObject, hostIpsFromManager);
+        List<InstanceMetadataView> notKnownInstancesByManager = collectNotKnownInstancesByManager(pollerObject, hostIpsFromManager);
         if (!notKnownInstancesByManager.isEmpty()) {
             LOGGER.warn("there are missing nodes from cloudera manager, not known instances: {}", notKnownInstancesByManager);
             notKnownInstanceIds = notKnownInstancesByManager.stream()
-                    .map(InstanceMetaData::getId)
+                    .map(InstanceMetadataView::getId)
                     .collect(Collectors.toSet());
             return false;
         } else {
@@ -76,10 +76,10 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerApi
         }
     }
 
-    private List<InstanceMetaData> collectNotKnownInstancesByManager(ClouderaManagerPollerObject pollerObject, List<String> hostIpsFromManager) {
-        return pollerObject.getStack().getInstanceMetaDataAsList().stream()
+    private List<InstanceMetadataView> collectNotKnownInstancesByManager(ClouderaManagerPollerObject pollerObject, List<String> hostIpsFromManager) {
+        return pollerObject.getStack().getNotTerminatedInstanceMetaData().stream()
                 .filter(metaData -> metaData.getDiscoveryFQDN() != null)
-                .filter(InstanceMetaData::isReachable)
+                .filter(InstanceMetadataView::isReachable)
                 .filter(md -> CollectionUtils.isEmpty(targets) || targets.contains(md.getPrivateIp()))
                 .filter(metaData -> !hostIpsFromManager.contains(metaData.getPrivateIp()))
                 .collect(Collectors.toList());

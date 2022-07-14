@@ -15,13 +15,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentType;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -31,7 +31,7 @@ public class TelemetryService implements TelemetryConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryService.class);
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
@@ -41,15 +41,15 @@ public class TelemetryService implements TelemetryConfigProvider {
 
     @Override
     public Map<String, SaltPillarProperties> createTelemetryConfigs(Long stackId, Set<TelemetryComponentType> components) {
-        Stack stack = stackService.getById(stackId);
-        Cluster cluster = stack.getCluster();
+        StackView stack = stackDtoService.getStackViewById(stackId);
+        ClusterView cluster = stackDtoService.getClusterViewByStackId(stackId);
         DataBusCredential dataBusCredential = getDatabusCredential(cluster).orElse(null);
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stackId);
         LOGGER.debug("Generating telemetry configs for stack '{}'", stack.getResourceCrn());
-        return telemetryDecorator.decoratePillar(new HashMap<>(), stack, telemetry, dataBusCredential);
+        return telemetryDecorator.decoratePillar(new HashMap<>(), stack, cluster, telemetry, dataBusCredential);
     }
 
-    private Optional<DataBusCredential> getDatabusCredential(Cluster cluster) {
+    private Optional<DataBusCredential> getDatabusCredential(ClusterView cluster) {
         if (StringUtils.isNotBlank(cluster.getDatabusCredential())) {
             try {
                 return Optional.ofNullable(new Json(cluster.getDatabusCredential()).get(DataBusCredential.class));

@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -13,6 +15,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -22,6 +25,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupViewRepository;
 import com.sequenceiq.cloudbreak.service.network.instancegroup.InstanceGroupNetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import com.sequenceiq.cloudbreak.view.AvailabilityZoneView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.CloudIdentityType;
 
@@ -114,8 +118,12 @@ public class InstanceGroupService {
         return repository.findOneByStackIdAndGroupName(stackId, groupName);
     }
 
-    public Optional<InstanceGroup> findInstanceGroupInStackByHostName(Long stackId, String hostName) {
-        return repository.findInstanceGroupInStackByHostName(stackId, hostName);
+    public Optional<com.sequenceiq.cloudbreak.view.InstanceGroupView> findInstanceGroupViewByStackIdAndGroupName(Long stackId, String groupName) {
+        return Optional.ofNullable(repository.findInstanceGroupViewByStackIdAndGroupName(stackId, groupName).orElse(null));
+    }
+
+    public List<com.sequenceiq.cloudbreak.view.InstanceGroupView> findAllInstanceGroupViewByStackIdAndGroupName(Long stackId, Collection<String> groupNames) {
+        return new ArrayList<>(repository.findAllInstanceGroupViewByStackIdAndGroupNames(stackId, groupNames));
     }
 
     public InstanceGroup save(InstanceGroup instanceGroup) {
@@ -130,15 +138,17 @@ public class InstanceGroupService {
         return repository.saveAll(instanceGroups);
     }
 
-    public void setCloudIdentityType(InstanceGroup instanceGroup, CloudIdentityType cloudIdentityType) {
+    public void setCloudIdentityType(com.sequenceiq.cloudbreak.view.InstanceGroupView instanceGroup, CloudIdentityType cloudIdentityType) {
         if (instanceGroup.getCloudIdentityType().isEmpty()) {
-            instanceGroup.setCloudIdentityType(cloudIdentityType);
-            save(instanceGroup);
+            Map<String, Object> attributeMap = instanceGroup.getAttributes().getMap();
+            attributeMap.put(InstanceGroup.IDENTITY_TYPE_ATTRIBUTE, cloudIdentityType);
+            Json attributes = new Json(attributeMap);
+            repository.updateAttributes(instanceGroup.getId(), attributes);
         }
     }
 
-    public Set<InstanceGroup> findByTargetGroupId(Long targetGroupId) {
-        return repository.findByTargetGroupId(targetGroupId);
+    public List<com.sequenceiq.cloudbreak.view.InstanceGroupView> findByTargetGroupId(Long targetGroupId) {
+        return new ArrayList<>(repository.findByTargetGroupId(targetGroupId));
     }
 
     public InstanceGroup getPrimaryGatewayInstanceGroupByStackId(Long stackId) {
@@ -147,5 +157,18 @@ public class InstanceGroupService {
 
     public Set<InstanceGroup> getByStackAndFetchTemplates(Long stackId) {
         return repository.getByStackAndFetchTemplates(stackId);
+    }
+
+    public List<com.sequenceiq.cloudbreak.view.InstanceGroupView> getInstanceGroupViewByStackId(Long stackId) {
+        return new ArrayList<>(repository.findInstanceGroupViewByStackId(stackId));
+    }
+
+    public void terminateInstanceGroupByIds(List<Long> instanceGroupIds) {
+        repository.updateToNullForTermination(instanceGroupIds);
+    }
+
+    public Map<Long, List<AvailabilityZoneView>> getAvailabilityZonesByStackId(Long stackId) {
+        List<AvailabilityZoneView> availabilityZones = repository.findAvailabilityZonesByStackId(stackId);
+        return availabilityZones.stream().collect(Collectors.groupingBy(AvailabilityZoneView::getInstanceGroupId));
     }
 }

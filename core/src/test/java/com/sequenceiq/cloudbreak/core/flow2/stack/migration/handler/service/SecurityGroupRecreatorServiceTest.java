@@ -81,7 +81,7 @@ public class SecurityGroupRecreatorServiceTest {
         when(group.getName()).thenReturn(hostGroupName);
         when(cloudStack.getGroups()).thenReturn(List.of(group));
         when(cloudStack.getNetwork()).thenReturn(network);
-        when(persistenceNotifier.notifyAllocation(any(), any())).thenReturn(resourcePersisted);
+        when(persistenceNotifier.notifyAllocation(any(CloudResource.class), any())).thenReturn(resourcePersisted);
         when(awsSecurityGroupResourceBuilder.create(awsContext, ac, group, network)).thenReturn(cloudResource);
         when(awsSecurityGroupResourceBuilder.build(eq(awsContext), eq(ac), eq(group), eq(network), any(), any())).thenReturn(cloudResource);
 
@@ -109,7 +109,7 @@ public class SecurityGroupRecreatorServiceTest {
         when(cloudStack.getNetwork()).thenReturn(network);
         Exception value = new Exception();
         when(resourcePersisted.getException()).thenReturn(value);
-        when(persistenceNotifier.notifyAllocation(any(), any())).thenReturn(resourcePersisted);
+        when(persistenceNotifier.notifyAllocation(any(CloudResource.class), any())).thenReturn(resourcePersisted);
         when(awsSecurityGroupResourceBuilder.create(awsContext, ac, group, network)).thenReturn(cloudResource);
 
         Exception actual = Assertions.assertThrows(Exception.class, () -> underTest.recreate(request, awsContext, ac));

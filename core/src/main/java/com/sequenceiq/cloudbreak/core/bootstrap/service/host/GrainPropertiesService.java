@@ -19,13 +19,13 @@ import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GrainProperties;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.model.CloudIdentityType;
 
 @Service
@@ -37,28 +37,25 @@ class GrainPropertiesService {
     private ComponentLocatorService componentLocator;
 
     @Inject
-    private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
     private ExposedServiceCollector exposedServiceCollector;
 
-    List<GrainProperties> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs, Cluster cluster, Set<Node> nodes) {
+    List<GrainProperties> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs, StackDto stackDto, Set<Node> nodes) {
         List<GrainProperties> grainPropertiesList = new ArrayList<>();
         Optional.ofNullable(addGatewayAddress(gatewayConfigs, Set.of())).ifPresent(grainPropertiesList::add);
-        Optional.ofNullable(addNameNodeRoleForHosts(cluster, Set.of())).ifPresent(grainPropertiesList::add);
-        Optional.ofNullable(addKnoxRoleForHosts(cluster, Set.of())).ifPresent(grainPropertiesList::add);
-        Optional.ofNullable(addIdBrokerRoleForHosts(cluster, Set.of())).ifPresent(grainPropertiesList::add);
-        Optional.ofNullable(addCloudIdentityRolesForHosts(cluster, nodes)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addNameNodeRoleForHosts(stackDto, Set.of())).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addKnoxRoleForHosts(stackDto, Set.of())).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addIdBrokerRoleForHosts(stackDto, Set.of())).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addCloudIdentityRolesForHosts(stackDto, nodes)).ifPresent(grainPropertiesList::add);
         return grainPropertiesList;
     }
 
-    List<GrainProperties> createGrainPropertiesForTargetedUpscale(Iterable<GatewayConfig> gatewayConfigs, Cluster cluster, Set<Node> nodes) {
+    List<GrainProperties> createGrainPropertiesForTargetedUpscale(Iterable<GatewayConfig> gatewayConfigs, StackDto stackDto, Set<Node> nodes) {
         List<GrainProperties> grainPropertiesList = new ArrayList<>();
         Optional.ofNullable(addGatewayAddress(gatewayConfigs, nodes)).ifPresent(grainPropertiesList::add);
-        Optional.ofNullable(addNameNodeRoleForHosts(cluster, nodes)).ifPresent(grainPropertiesList::add);
-        Optional.ofNullable(addKnoxRoleForHosts(cluster, nodes)).ifPresent(grainPropertiesList::add);
-        Optional.ofNullable(addIdBrokerRoleForHosts(cluster, nodes)).ifPresent(grainPropertiesList::add);
-        Optional.ofNullable(addCloudIdentityRolesForHosts(cluster, nodes)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addNameNodeRoleForHosts(stackDto, nodes)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addKnoxRoleForHosts(stackDto, nodes)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addIdBrokerRoleForHosts(stackDto, nodes)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addCloudIdentityRolesForHosts(stackDto, nodes)).ifPresent(grainPropertiesList::add);
         return grainPropertiesList;
     }
 
@@ -74,8 +71,8 @@ class GrainPropertiesService {
         return grainProperties.getProperties().isEmpty() ? null : grainProperties;
     }
 
-    private Map<String, List<String>> filteredLocations(Cluster cluster, String serviceName, Set<Node> nodes) {
-        Map<String, List<String>> locations = getComponentLocationByHostname(cluster, serviceName);
+    private Map<String, List<String>> filteredLocations(StackDto stackDto, String serviceName, Set<Node> nodes) {
+        Map<String, List<String>> locations = getComponentLocationByHostname(stackDto, serviceName);
         if (!nodes.isEmpty() && !MapUtils.isEmpty(locations) && locations.containsKey(serviceName)) {
             List<String> filteredFqdns = locations.get(serviceName).stream().filter(fqdn ->
                     nodes.stream().map(node -> node.getHostname()).collect(Collectors.toSet()).contains(fqdn)).collect(Collectors.toList());
@@ -84,52 +81,52 @@ class GrainPropertiesService {
         return locations;
     }
 
-    private GrainProperties addNameNodeRoleForHosts(Cluster cluster, Set<Node> nodes) {
+    private GrainProperties addNameNodeRoleForHosts(StackDto stackDto, Set<Node> nodes) {
         GrainProperties grainProperties = new GrainProperties();
         ExposedService nameNodeService = exposedServiceCollector.getNameNodeService();
-        Map<String, List<String>> nameNodeServiceLocations = filteredLocations(cluster, nameNodeService.getServiceName(), nodes);
+        Map<String, List<String>> nameNodeServiceLocations = filteredLocations(stackDto, nameNodeService.getServiceName(), nodes);
         nameNodeServiceLocations
                 .getOrDefault(nameNodeService.getServiceName(), List.of())
                 .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "namenode"));
         return grainProperties.getProperties().isEmpty() ? null : grainProperties;
     }
 
-    private GrainProperties addKnoxRoleForHosts(Cluster cluster, Set<Node> nodes) {
+    private GrainProperties addKnoxRoleForHosts(StackDto stackDto, Set<Node> nodes) {
         GrainProperties grainProperties = new GrainProperties();
-        Map<String, List<String>> knoxServiceLocations = filteredLocations(cluster, KnoxRoles.KNOX_GATEWAY, nodes);
+        Map<String, List<String>> knoxServiceLocations = filteredLocations(stackDto, KnoxRoles.KNOX_GATEWAY, nodes);
         knoxServiceLocations
                 .getOrDefault(KnoxRoles.KNOX_GATEWAY, List.of())
                 .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "knox"));
         return grainProperties.getProperties().isEmpty() ? null : grainProperties;
     }
 
-    private GrainProperties addIdBrokerRoleForHosts(Cluster cluster, Set<Node> nodes) {
+    private GrainProperties addIdBrokerRoleForHosts(StackDto stackDto, Set<Node> nodes) {
         GrainProperties grainProperties = new GrainProperties();
-        Map<String, List<String>> idBrokerServiceLocations = filteredLocations(cluster, KnoxRoles.IDBROKER, nodes);
+        Map<String, List<String>> idBrokerServiceLocations = filteredLocations(stackDto, KnoxRoles.IDBROKER, nodes);
         idBrokerServiceLocations
                 .getOrDefault(KnoxRoles.IDBROKER, List.of())
                 .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "idbroker"));
         return grainProperties.getProperties().isEmpty() ? null : grainProperties;
     }
 
-    private Map<String, List<String>> getComponentLocationByHostname(Cluster cluster, String componentName) {
-        return componentLocator.getComponentLocationByHostname(cluster, List.of(componentName));
+    private Map<String, List<String>> getComponentLocationByHostname(StackDto stackDto, String componentName) {
+        return componentLocator.getComponentLocationByHostname(stackDto, List.of(componentName));
     }
 
-    private GrainProperties addCloudIdentityRolesForHosts(Cluster cluster, Set<Node> nodes) {
-        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.getAllInstanceMetadataByStackId(cluster.getStack().getId());
+    private GrainProperties addCloudIdentityRolesForHosts(StackDto stackDto, Set<Node> nodes) {
         GrainProperties propertiesForIdentityRoles = new GrainProperties();
         Set<String> hostNames = nodes.stream().map(Node::getHostname).collect(toSet());
-        for (InstanceMetaData instanceMetaData : instanceMetaDataSet) {
-            if (hostNames.contains(instanceMetaData.getDiscoveryFQDN())) {
-                setCloudIdentityRoles(propertiesForIdentityRoles, instanceMetaData);
-            }
+        for (InstanceGroupDto instanceGroupDto : stackDto.getInstanceGroupDtos()) {
+            instanceGroupDto.getInstanceMetadataViews().forEach(im -> {
+                if (hostNames.contains(im.getDiscoveryFQDN())) {
+                    setCloudIdentityRoles(propertiesForIdentityRoles, im, instanceGroupDto.getInstanceGroup());
+                }
+            });
         }
         return propertiesForIdentityRoles.getProperties().isEmpty() ? null : propertiesForIdentityRoles;
     }
 
-    private void setCloudIdentityRoles(GrainProperties propertiesForIdentityRoles, InstanceMetaData instanceMetaData) {
-        InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
+    private void setCloudIdentityRoles(GrainProperties propertiesForIdentityRoles, InstanceMetadataView instanceMetaData, InstanceGroupView instanceGroup) {
         CloudIdentityType cloudIdentityType = instanceGroup.getCloudIdentityType().orElse(CloudIdentityType.LOG);
         Map<String, String> grainsForInstance = new HashMap<>();
         grainsForInstance.put(ROLES, cloudIdentityType.roleName());

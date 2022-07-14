@@ -133,7 +133,8 @@ public class ClusterUpgradeValidationActions {
                 LOGGER.info("Starting cluster upgrade image validation.");
                 UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(payload.getImageId(), payload.getResourceId());
                 Image targetImage = stackImageService
-                        .getImageModelFromStatedImage(context.getStack(), upgradeImageInfo.getCurrentImage(), upgradeImageInfo.getTargetStatedImage());
+                        .getImageModelFromStatedImage(context.getStack().getStack(), upgradeImageInfo.getCurrentImage(),
+                                upgradeImageInfo.getTargetStatedImage());
                 variables.put(TARGET_IMAGE, targetImage);
                 CloudStack cloudStack = context.getCloudStack().replaceImage(targetImage);
                 ClusterUpgradeImageValidationEvent event = new ClusterUpgradeImageValidationEvent(payload.getResourceId(), payload.getImageId(), cloudStack,

@@ -15,6 +15,7 @@ import com.sequenceiq.mock.service.HostNameService;
 import com.sequenceiq.mock.spi.SpiService;
 import com.sequenceiq.mock.spi.SpiStoreService;
 import com.sequenceiq.mock.swagger.model.ApiCluster;
+import com.sequenceiq.mock.swagger.model.ApiClusterTemplate;
 import com.sequenceiq.mock.swagger.model.ApiClusterTemplateHostTemplate;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
 import com.sequenceiq.mock.swagger.model.ApiHealthCheck;
@@ -26,6 +27,8 @@ import com.sequenceiq.mock.swagger.model.ApiHostRefList;
 import com.sequenceiq.mock.swagger.model.ApiHostTemplate;
 import com.sequenceiq.mock.swagger.model.ApiHostTemplateList;
 import com.sequenceiq.mock.swagger.model.ApiRoleConfigGroupRef;
+import com.sequenceiq.mock.swagger.model.ApiRoleRef;
+import com.sequenceiq.mock.swagger.model.ApiRoleState;
 import com.sequenceiq.mock.swagger.model.ApiService;
 import com.sequenceiq.mock.swagger.model.ApiServiceList;
 
@@ -120,6 +123,7 @@ public class DataProviderService {
                 .ipAddress(privateIp)
                 .lastHeartbeat(Instant.now().plusSeconds(SECONDS_TO_ADD).toString())
                 .healthSummary(healthSummary)
+                .roleRefs(List.of(new ApiRoleRef().roleStatus(ApiRoleState.STARTED)))
                 .healthChecks(List.of(new ApiHealthCheck()
                         .name("HOST_SCM_HEALTH")
                         .summary(healthSummary)));
@@ -158,7 +162,11 @@ public class DataProviderService {
 
     public ApiServiceList readServices(String mockUuid, String clusterName, String view) {
         ClouderaManagerDto read = clouderaManagerStoreService.read(mockUuid);
-        List<ApiService> services = read.getClusterTemplate().getServices().stream()
+        ApiClusterTemplate clusterTemplate = read.getClusterTemplate();
+        if (clusterTemplate == null) {
+            return new ApiServiceList().items(Collections.emptyList());
+        }
+        List<ApiService> services = clusterTemplate.getServices().stream()
                 .map(s -> new ApiService()
                         .name(s.getRefName())
                         .serviceState(read.getServiceStates().get(s.getRefName()))

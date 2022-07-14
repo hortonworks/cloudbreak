@@ -12,9 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
@@ -25,8 +23,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.backup.DatabaseBac
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.BackupRestoreSaltConfigGenerator;
 import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.RangerVirtualGroupService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -47,7 +48,7 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
     private HostOrchestrator hostOrchestrator;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private StackUtil stackUtil;
@@ -72,16 +73,17 @@ public class DatabaseBackupHandler extends ExceptionCatcherEventHandler<Database
         Long stackId = request.getResourceId();
         LOGGER.debug("Backing up database on stack {}, backup id {}", stackId, request.getBackupId());
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            Cluster cluster = stack.getCluster();
-            InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
-            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.hasGateway());
+            StackDto stackDto = stackDtoService.getById(stackId);
+            ClusterView cluster = stackDto.getCluster();
+            StackView stack = stackDto.getStack();
+            InstanceMetadataView gatewayInstance = stackDto.getPrimaryGatewayInstance();
+            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, stackDto.getSecurityConfig(), gatewayInstance, stackDto.hasGateway());
             Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
             ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, cluster.getId());
             String rangerAdminGroup = rangerVirtualGroupService.getRangerVirtualGroup(stack);
             SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(request.getBackupLocation(), request.getBackupId(), rangerAdminGroup,
                     request.isCloseConnections(), stack);
-            hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stack), saltConfig, exitModel);
+            hostOrchestrator.backupDatabase(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stackDto), saltConfig, exitModel);
 
             result = new DatabaseBackupSuccess(stackId);
         } catch (Exception e) {

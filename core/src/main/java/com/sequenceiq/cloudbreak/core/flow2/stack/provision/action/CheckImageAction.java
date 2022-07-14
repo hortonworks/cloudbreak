@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.PrepareImageResultToStackEventConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.service.StackCreationService;
@@ -74,7 +73,7 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
 
     @Override
     protected Selectable createRequest(StackCreationContext context) {
-        return new StackEvent(getFinishedEvent().event(), context.getStack().getId());
+        return new StackEvent(getFinishedEvent().event(), context.getStackId());
     }
 
     protected FlowEvent getFinishedEvent() {
@@ -86,9 +85,9 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
         payloadConverters.add(new PrepareImageResultToStackEventConverter());
     }
 
-    private void repeat(StackContext context) {
+    private void repeat(StackCreationContext context) {
         timer.submit(aLong -> sendEvent(context, new StackEvent(getRepeatEvent().event(),
-                context.getStack().getId())), REPEAT_TIME, TimeUnit.MILLISECONDS);
+                context.getStackId())), REPEAT_TIME, TimeUnit.MILLISECONDS);
     }
 
     protected FlowEvent getRepeatEvent() {

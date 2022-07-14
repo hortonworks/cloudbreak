@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.converter.BlueprintToBlueprintDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.converter.ClusterToClusterDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.converter.StackToStackDetailsConverter;
@@ -32,7 +32,7 @@ public class StructuredSyncEventFactoryTest {
     private Clock clock;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private NodeConfig nodeConfig;
@@ -55,16 +55,16 @@ public class StructuredSyncEventFactoryTest {
         stack.setResourceCrn("crn");
         Cluster cluster = TestUtil.cluster();
         Blueprint blueprint = TestUtil.blueprint();
-        cluster.setBlueprint(blueprint);
-        stack.setCluster(cluster);
 
         BlueprintDetails blueprintDetails = new BlueprintDetails();
         blueprintDetails.setBlueprintName("testBpName");
 
-        when(stackToStackDetailsConverter.convert(any())).thenReturn(null);
+        when(stackToStackDetailsConverter.convert(any(), any(), any())).thenReturn(null);
         when(blueprintToBlueprintDetailsConverter.convert(blueprint)).thenReturn(blueprintDetails);
 
-        when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
+        when(stackDtoService.getStackViewById(1L)).thenReturn(stack);
+        when(stackDtoService.getClusterViewByStackId(1L)).thenReturn(cluster);
+        when(stackDtoService.getBlueprint(cluster.getId())).thenReturn(blueprint);
         when(nodeConfig.getId()).thenReturn("cbid");
 
         StructuredSyncEvent result = underTest.createStructuredSyncEvent(1L);

@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.stream.Collectors;
 
 import javax.ws.rs.WebApplicationException;
 
@@ -52,7 +51,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
+import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -258,7 +257,9 @@ class SaltOrchestratorTest {
     @Test
     void runServiceTest() throws Exception {
         SaltConfig saltConfig = new SaltConfig();
-        saltOrchestrator.initServiceRun(() -> Set.of(), Collections.singletonList(gatewayConfig), targets, targets,
+        OrchestratorAware orchestratorAware = mock(OrchestratorAware.class);
+        when(orchestratorAware.getAllNodes()).thenReturn(Set.of());
+        saltOrchestrator.initServiceRun(orchestratorAware, Collections.singletonList(gatewayConfig), targets, targets,
                 saltConfig, exitCriteriaModel, "testPlatform");
         saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
 
@@ -310,8 +311,10 @@ class SaltOrchestratorTest {
         Node remainingNode = mock(Node.class);
         when(remainingNode.getPrivateIp()).thenReturn("10.0.0.1");
         ExitCriteriaModel exitCriteriaModel = mock(ExitCriteriaModel.class);
+        OrchestratorAware orchestratorAware = mock(OrchestratorAware.class);
+        when(orchestratorAware.getAllNodes()).thenReturn(Set.of());
 
-        saltOrchestrator.tearDown(() -> Set.of(), Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(remainingNode), exitCriteriaModel);
+        saltOrchestrator.tearDown(orchestratorAware, Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(remainingNode), exitCriteriaModel);
 
         verify(saltConnector, times(1)).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
 
@@ -406,15 +409,17 @@ class SaltOrchestratorTest {
         responsiveAddresses.add("10.0.0.3");
         when(saltStateService.collectMinionIpAddresses(any(), any())).thenReturn(responsiveAddresses);
 
-        Set<OrchestrationNode> allNodes = new HashSet<>();
-        allNodes.add(() -> new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg", "fqdn3", null));
-        allNodes.addAll(downscaleTargets.stream().map(node -> (OrchestrationNode) () -> node).collect(Collectors.toSet()));
+        Set<Node> allNodes = new HashSet<>();
+        allNodes.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg", "fqdn3", null));
+        allNodes.addAll(downscaleTargets);
 
         Callable pillarSaveCallable = mock(Callable.class);
         when(saltRunner.runner(any(), any(), any())).thenReturn(pillarSaveCallable);
         when(saltRunner.runner(any(), any(), any(), anyInt(), anyBoolean())).thenReturn(mock(Callable.class));
 
-        saltOrchestrator.stopClusterManagerAgent(() -> allNodes, gatewayConfig, targets, downscaleTargets,
+        OrchestratorAware orchestratorAware = mock(OrchestratorAware.class);
+        when(orchestratorAware.getAllNodes()).thenReturn(allNodes);
+        saltOrchestrator.stopClusterManagerAgent(orchestratorAware, gatewayConfig, targets, downscaleTargets,
                 exitCriteriaModel, new CmAgentStopFlags(false, false, false));
 
         ArgumentCaptor<ModifyGrainBase> modifyGrainBaseArgumentCaptor = ArgumentCaptor.forClass(ModifyGrainBase.class);

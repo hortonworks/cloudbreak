@@ -79,13 +79,13 @@ public class ClusterResetActions {
         return new AbstractStackFailureAction<ClusterResetState, ClusterResetEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                clusterResetService.handleResetClusterFailure(context.getStackView(), payload.getException());
+                clusterResetService.handleResetClusterFailure(context.getStackId(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterResetEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(ClusterResetEvent.FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

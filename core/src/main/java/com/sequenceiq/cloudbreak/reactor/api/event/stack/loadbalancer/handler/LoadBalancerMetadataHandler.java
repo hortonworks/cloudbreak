@@ -15,13 +15,13 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.handler.service.LoadBalancerMetadataService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataFailure;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.LoadBalancerMetadataSuccess;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -40,7 +40,7 @@ public class LoadBalancerMetadataHandler extends ExceptionCatcherEventHandler<Lo
     private MetadataSetupService metadataSetupService;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Override
     public String selector() {
@@ -56,7 +56,7 @@ public class LoadBalancerMetadataHandler extends ExceptionCatcherEventHandler<Lo
     protected Selectable doAccept(HandlerEvent<LoadBalancerMetadataRequest> event) {
         LoadBalancerMetadataRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
-        Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
+        StackView stack = stackDtoService.getStackViewById(request.getResourceId());
         try {
             LOGGER.info("Fetch cloud load balancer metadata");
             List<CloudLoadBalancerMetadata> loadBalancerStatuses = loadBalancerMetadataService.collectMetadata(cloudContext,
@@ -76,7 +76,7 @@ public class LoadBalancerMetadataHandler extends ExceptionCatcherEventHandler<Lo
             metadataSetupService.saveLoadBalancerMetadata(stack, loadBalancerStatuses);
 
             LOGGER.info("Load balancer metadata collection was successful");
-            return new LoadBalancerMetadataSuccess(stack);
+            return new LoadBalancerMetadataSuccess(stack.getId());
         } catch (Exception e) {
             LOGGER.warn("Failed to fetch cloud load balancer metadata.", e);
             return new LoadBalancerMetadataFailure(request.getResourceId(), e);

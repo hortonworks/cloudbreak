@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -20,7 +19,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -30,6 +29,8 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class StackImageUpdateService {
@@ -59,17 +60,17 @@ public class StackImageUpdateService {
     @Inject
     private StackImageService stackImageService;
 
-    public StatedImage getNewImageIfVersionsMatch(Stack stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
+    public StatedImage getNewImageIfVersionsMatch(StackDtoDelegate stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
         try {
-            restRequestThreadLocalService.setWorkspace(stack.getWorkspace());
+            restRequestThreadLocalService.setWorkspaceId(stack.getWorkspaceId());
 
-            Image currentImage = stackImageService.getCurrentImage(stack);
+            Image currentImage = stackImageService.getCurrentImage(stack.getId());
 
             StatedImage newImage = getNewImage(stack.getWorkspace().getId(), newImageId, imageCatalogName, imageCatalogUrl, currentImage);
 
             if (!isCloudPlatformMatches(stack, newImage)) {
                 String message = messagesService.getMessage(Msg.CLOUDPLATFORM_DIFFERENT.code(),
-                        Lists.newArrayList(String.join(",", newImage.getImage().getImageSetsByProvider().keySet()), stack.cloudPlatform()));
+                        Lists.newArrayList(String.join(",", newImage.getImage().getImageSetsByProvider().keySet()), stack.getCloudPlatform()));
                 LOGGER.debug(message);
                 throw new OperationException(message);
             }
@@ -98,8 +99,8 @@ public class StackImageUpdateService {
         }
     }
 
-    private boolean isCloudPlatformMatches(Stack stack, StatedImage newImage) {
-        return newImage.getImage().getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(stack.cloudPlatform()));
+    private boolean isCloudPlatformMatches(StackDtoDelegate stack, StatedImage newImage) {
+        return newImage.getImage().getImageSetsByProvider().keySet().stream().anyMatch(key -> key.equalsIgnoreCase(stack.getCloudPlatform()));
     }
 
     private boolean isOsVersionsMatch(Image currentImage, StatedImage newImage) {
@@ -116,7 +117,7 @@ public class StackImageUpdateService {
         return newImage;
     }
 
-    public boolean isCbVersionOk(Stack stack) {
+    public boolean isCbVersionOk(StackDtoDelegate stack) {
         CloudbreakDetails cloudbreakDetails = componentConfigProviderService.getCloudbreakDetails(stack.getId());
         VersionComparator versionComparator = new VersionComparator();
         String version = StringUtils.substringBefore(cloudbreakDetails.getVersion(), "-");
@@ -136,8 +137,8 @@ public class StackImageUpdateService {
         return true;
     }
 
-    public CheckResult checkPackageVersions(Stack stack, StatedImage newImage) {
-        Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedAndNotZombieInstanceMetaDataSet();
+    public CheckResult checkPackageVersions(StackDtoDelegate stack, StatedImage newImage) {
+        List<InstanceMetadataView> instanceMetaDataSet = stack.getAllAvailableInstances();
 
         CheckResult instanceHaveMultipleVersionResult = packageVersionChecker.checkInstancesHaveMultiplePackageVersions(instanceMetaDataSet);
         if (instanceHaveMultipleVersionResult.getStatus() == EventStatus.FAILED) {
@@ -164,7 +165,7 @@ public class StackImageUpdateService {
     public boolean isValidImage(Stack stack, String newImageId, String imageCatalogName, String imageCatalogUrl) {
         if (isCbVersionOk(stack)) {
             try {
-                Image currentImage = stackImageService.getCurrentImage(stack);
+                Image currentImage = stackImageService.getCurrentImage(stack.getId());
                 StatedImage newImage = getNewImage(stack.getWorkspace().getId(), newImageId, imageCatalogName, imageCatalogUrl, currentImage);
 
                 boolean cloudPlatformMatches = isCloudPlatformMatches(stack, newImage);

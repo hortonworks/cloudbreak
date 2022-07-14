@@ -1,14 +1,12 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-
-import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
-import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
-import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
-import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DISTRIBUTED;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,15 +21,13 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
-import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
-import com.sequenceiq.cloudbreak.service.upgrade.sync.component.CmServerQueryService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ParcelUrlProviderTest {
@@ -49,75 +45,42 @@ public class ParcelUrlProviderTest {
     @Mock
     private ParcelService parcelService;
 
-    @Mock
-    private CmServerQueryService cmServerQueryService;
-
-    @Mock
-    private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
-
     @InjectMocks
     private ParcelUrlProvider underTest;
 
     @Test
-    public void testGetRequiredParcelsFromImageShouldReturnRequiredParcelUrlsWhenTheStackTypeIsWorkload() {
+    public void testGetRequiredParcelsFromImageWhenTheStackTypeIsWorkload() {
         Stack stack = createStack(StackType.WORKLOAD);
         Image image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
-        ClouderaManagerProduct cdh = createCmProduct("CDH", "7.2.15", "https://cdh.parcel");
-        ClouderaManagerProduct spark3 = createCmProduct("SPARK3", "1.2.4", "https://spark3.parcel").withCsd(Collections.singletonList(PRE_WARM_CSD));
-        ClouderaManagerProduct nifi = createCmProduct("NIFI", "4.5.6", "https://nifi.parcel");
-        when(parcelService.getComponentNamesByImage(stack, image)).thenReturn(Set.of("CDH", "SPARK3"));
-        when(cmServerQueryService.queryAllParcels(stack)).thenReturn(
-                Set.of(new ParcelInfo("CDH", "7.2.7", ACTIVATED), new ParcelInfo("SPARK3", "1.2.3", ACTIVATED)));
-        when(clouderaManagerProductTransformer.transform(image, true, true)).thenReturn(Set.of(cdh, spark3, nifi));
+
+        when(parcelService.getComponentsByImage(stack, image)).thenReturn(createClusterComponents());
 
         Set<String> actual = underTest.getRequiredParcelsFromImage(image, stack);
 
         assertEquals(3, actual.size());
-        assertTrue(actual.contains(cdh.getParcelFileUrl()));
-        assertTrue(actual.contains(spark3.getParcelFileUrl()));
+        assertTrue(actual.contains("http://testCDH-2.7.6-el7.parcel"));
+        assertTrue(actual.contains("http://test/spark/SPARK3-el7.parcel"));
         assertTrue(actual.contains(PRE_WARM_CSD));
-        verify(parcelService).getComponentNamesByImage(stack, image);
-        verify(cmServerQueryService).queryAllParcels(stack);
-        verify(clouderaManagerProductTransformer).transform(image, true, true);
+        verify(parcelService).getComponentsByImage(stack, image);
     }
 
     @Test
-    public void testGetRequiredParcelsFromImageShouldReturnRequiredParcelUrlsWhenTheStackTypeIsDataLake() {
+    public void testGetRequiredParcelsFromImageWhenTheStackTypeIsDataLake() {
         Stack stack = createStack(StackType.DATALAKE);
         Image image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
-        ClouderaManagerProduct cdh = createCmProduct("CDH", "7.2.15", "https://cdh.parcel");
-        when(parcelService.getComponentNamesByImage(stack, image)).thenReturn(Collections.singleton("CDH"));
-        when(cmServerQueryService.queryAllParcels(stack)).thenReturn(Set.of(new ParcelInfo("CDH", "7.2.7", ACTIVATED)));
-        when(clouderaManagerProductTransformer.transform(image, true, false)).thenReturn(Collections.singleton(cdh));
 
         Set<String> actual = underTest.getRequiredParcelsFromImage(image, stack);
 
         assertEquals(1, actual.size());
-        assertTrue(actual.contains(cdh.getParcelFileUrl()));
-        verify(parcelService).getComponentNamesByImage(stack, image);
-        verify(cmServerQueryService).queryAllParcels(stack);
-        verify(clouderaManagerProductTransformer).transform(image, true, false);
+        assertTrue(actual.contains("http://testCDH-2.7.6-el7.parcel"));
+        verifyNoInteractions(parcelService);
     }
 
-    @Test
-    public void testGetRequiredParcelsFromImageShouldReturnEmptyListWhenAllRequiredParcelIsAlreadyDistributed() {
-        Stack stack = createStack(StackType.WORKLOAD);
-        Image image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
-        ClouderaManagerProduct cdh = createCmProduct("CDH", "7.2.15", "https://cdh.parcel");
-        ClouderaManagerProduct spark3 = createCmProduct("SPARK3", "1.2.4", "https://spark3.parcel").withCsd(Collections.singletonList(PRE_WARM_CSD));
-        ClouderaManagerProduct nifi = createCmProduct("NIFI", "4.5.6", "https://nifi.parcel");
-        when(parcelService.getComponentNamesByImage(stack, image)).thenReturn(Set.of("CDH", "SPARK3"));
-        when(cmServerQueryService.queryAllParcels(stack)).thenReturn(
-                Set.of(new ParcelInfo(cdh.getName(), "7.2.7", ACTIVATED), new ParcelInfo(spark3.getName(), "1.2.3", ACTIVATED),
-                        new ParcelInfo(cdh.getName(), cdh.getVersion(), DISTRIBUTED), new ParcelInfo(spark3.getName(), spark3.getVersion(), DISTRIBUTED)));
-        when(clouderaManagerProductTransformer.transform(image, true, true)).thenReturn(Set.of(cdh, spark3, nifi));
-
-        Set<String> actual = underTest.getRequiredParcelsFromImage(image, stack);
-
-        assertTrue(actual.isEmpty());
-        verify(parcelService).getComponentNamesByImage(stack, image);
-        verify(cmServerQueryService).queryAllParcels(stack);
-        verify(clouderaManagerProductTransformer).transform(image, true, true);
+    private Set<ClusterComponentView> createClusterComponents() {
+        ClusterComponentView clusterComponent = new ClusterComponentView();
+        clusterComponent.setComponentType(ComponentType.CDH_PRODUCT_DETAILS);
+        clusterComponent.setName("SPARK3");
+        return Collections.singleton(clusterComponent);
     }
 
     private Image createImage(StackRepoDetails stackRepoDetails) {
@@ -150,10 +113,6 @@ public class ParcelUrlProviderTest {
         Stack stack = new Stack();
         stack.setType(stackType);
         return stack;
-    }
-
-    private ClouderaManagerProduct createCmProduct(String name, String version, String parcelFileUrl) {
-        return new ClouderaManagerProduct().withName(name).withVersion(version).withParcelFileUrl(parcelFileUrl);
     }
 
 }

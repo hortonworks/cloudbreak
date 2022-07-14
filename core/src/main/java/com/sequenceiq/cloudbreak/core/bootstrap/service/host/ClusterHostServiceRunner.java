@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
+import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -72,17 +73,14 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttri
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.IdBroker;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
@@ -107,14 +105,12 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaConfigProvider;
+import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MountDisks;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
@@ -122,6 +118,11 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.GatewayView;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -144,9 +145,6 @@ public class ClusterHostServiceRunner {
     private String defaultKerberosEncryptionType;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private HostOrchestrator hostOrchestrator;
 
     @Inject
@@ -154,9 +152,6 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private HostGroupService hostGroupService;
-
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private LoadBalancerSANProvider loadBalancerSANProvider;
@@ -228,9 +223,6 @@ public class ClusterHostServiceRunner {
     private LoadBalancerConfigService loadBalancerConfigService;
 
     @Inject
-    private InstanceGroupService instanceGroupService;
-
-    @Inject
     private IdBrokerService idBrokerService;
 
     @Inject
@@ -251,13 +243,16 @@ public class ClusterHostServiceRunner {
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public NodeReachabilityResult runClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, Map<String, String> candidateAddresses) {
+    @Inject
+    private GatewayService gatewayService;
+
+    public NodeReachabilityResult runClusterServices(@Nonnull StackDto stackDto, Map<String, String> candidateAddresses) {
         try {
-            Set<Node> allNodes = stackUtil.collectNodes(stack);
-            Set<Node> reachableNodes = stackUtil.collectAndCheckReachableNodes(stack, candidateAddresses.keySet());
-            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, reachableNodes);
-            executeRunClusterServices(stack, cluster, candidateAddresses, allNodes, reachableNodes, gatewayConfigs, grainsProperties);
+            Set<Node> allNodes = stackUtil.collectNodes(stackDto, emptySet());
+            Set<Node> reachableNodes = stackUtil.collectAndCheckReachableNodes(stackDto, candidateAddresses.keySet());
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
+            List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, stackDto, reachableNodes);
+            executeRunClusterServices(stackDto, candidateAddresses, allNodes, reachableNodes, gatewayConfigs, grainsProperties);
             return new NodeReachabilityResult(reachableNodes, Set.of());
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
@@ -271,18 +266,18 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public NodeReachabilityResult runTargetedClusterServices(@Nonnull Stack stack, @Nonnull Cluster cluster, Map<String, String> candidateAddresses) {
+    public NodeReachabilityResult runTargetedClusterServices(@Nonnull StackDto stackDto, Map<String, String> candidateAddresses) {
         try {
-            NodeReachabilityResult nodeReachabilityResult = stackUtil.collectReachableAndUnreachableCandidateNodes(stack, candidateAddresses.keySet());
-            addGatewaysToCandidatesIfNeeded(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata(), nodeReachabilityResult);
+            NodeReachabilityResult nodeReachabilityResult = stackUtil.collectReachableAndUnreachableCandidateNodes(stackDto, candidateAddresses.keySet());
+            addGatewaysToCandidatesIfNeeded(stackDto.getAllNodes(), nodeReachabilityResult);
             Set<Node> reachableCandidates = nodeReachabilityResult.getReachableNodes();
-            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
             List<GrainProperties> grainsProperties = grainPropertiesService
-                    .createGrainPropertiesForTargetedUpscale(gatewayConfigs, cluster, reachableCandidates);
+                    .createGrainPropertiesForTargetedUpscale(gatewayConfigs, stackDto, reachableCandidates);
             Set<String> reachableCandidateHostNames = nodeReachabilityResult.getReachableHosts();
             LOGGER.debug("We are about to execute cluster services (salt highstate, pre cluster manager recipe execution, mount disks, etc.) " +
                     "for reachable candidates (targeted operation): {}", Joiner.on(",").join(reachableCandidateHostNames));
-            executeRunClusterServices(stack, cluster, candidateAddresses, reachableCandidates, reachableCandidates, gatewayConfigs, grainsProperties);
+            executeRunClusterServices(stackDto, candidateAddresses, reachableCandidates, reachableCandidates, gatewayConfigs, grainsProperties);
             return nodeReachabilityResult;
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
@@ -291,28 +286,27 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void executeRunClusterServices(Stack stack, Cluster cluster, Map<String, String> candidateAddresses,
+    private void executeRunClusterServices(StackDto stackDto, Map<String, String> candidateAddresses,
             Set<Node> allNodes, Set<Node> reachableNodes, List<GatewayConfig> gatewayConfigs, List<GrainProperties> grainsProperties)
             throws IOException, CloudbreakOrchestratorException, CloudbreakException {
-        SaltConfig saltConfig = createSaltConfig(stack, cluster, grainsProperties);
-        ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-        modifyStartupMountRole(stack, reachableNodes, GrainOperation.ADD);
-        hostOrchestrator.initServiceRun(stack, gatewayConfigs, allNodes, reachableNodes, saltConfig,
+        SaltConfig saltConfig = createSaltConfig(stackDto, grainsProperties);
+        StackView stack = stackDto.getStack();
+        ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), stack.getClusterId());
+        modifyStartupMountRole(stackDto, reachableNodes, GrainOperation.ADD);
+        hostOrchestrator.initServiceRun(stackDto, gatewayConfigs, allNodes, reachableNodes, saltConfig,
                 exitCriteriaModel, stack.getCloudPlatform());
-        mountDisks(stack, candidateAddresses, allNodes, reachableNodes);
-        recipeEngine.executePreClusterManagerRecipes(stack, candidateAddresses, hostGroupService.getByClusterWithRecipes(cluster.getId()));
+        mountDisks(stackDto.getStack(), candidateAddresses, allNodes, reachableNodes);
+        recipeEngine.executePreClusterManagerRecipes(stackDto, candidateAddresses, hostGroupService.getByClusterWithRecipes(stack.getClusterId()));
         hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
-        modifyStartupMountRole(stack, reachableNodes, GrainOperation.REMOVE);
+        modifyStartupMountRole(stackDto, reachableNodes, GrainOperation.REMOVE);
     }
 
-    private void addGatewaysToCandidatesIfNeeded(List<InstanceMetaData> gwImds, NodeReachabilityResult nodeReachabilityResult) {
-        Set<String> gatewayHosts = gwImds.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+    private void addGatewaysToCandidatesIfNeeded(Set<Node> imNodes, NodeReachabilityResult nodeReachabilityResult) {
+        Set<String> gatewayHosts = imNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         Set<String> reachableCandidatesHosts = nodeReachabilityResult.getReachableHosts();
         if (!reachableCandidatesHosts.containsAll(gatewayHosts)) {
-            Set<Node> notAddedGatewayNodes = gwImds.stream()
-                    .filter(imd -> !reachableCandidatesHosts.contains(imd.getDiscoveryFQDN()))
-                    .map(imd -> new Node(imd.getPrivateIp(), imd.getPublicIp(), imd.getInstanceId(), imd.getInstanceGroup().getTemplate().getInstanceType(),
-                            imd.getDiscoveryFQDN(), imd.getInstanceGroupName()))
+            Set<Node> notAddedGatewayNodes = imNodes.stream()
+                    .filter(n -> !reachableCandidatesHosts.contains(n.getHostname()))
                     .collect(Collectors.toSet());
             // in case of upscale we should add gateways to candidates
             nodeReachabilityResult.getReachableNodes().addAll(notAddedGatewayNodes);
@@ -321,7 +315,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void mountDisks(Stack stack, Map<String, String> candidateAddresses, Set<Node> allNodes, Set<Node> reachableNodes) throws CloudbreakException {
+    private void mountDisks(StackView stack, Map<String, String> candidateAddresses, Set<Node> allNodes, Set<Node> reachableNodes) throws CloudbreakException {
         Set<String> reachableCandidateAddresses = reachableNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
         if (CollectionUtils.isEmpty(candidateAddresses) || CollectionUtils.isEmpty(reachableCandidateAddresses)) {
             mountDisks.mountAllDisks(stack.getId());
@@ -330,45 +324,45 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public void updateClusterConfigs(@Nonnull Stack stack, @Nonnull Cluster cluster) {
+    public void updateClusterConfigs(@Nonnull StackDto stackDto) {
         try {
-            Set<Node> allNodes = stackUtil.collectNodes(stack);
-            Set<Node> reachableNodes = stackUtil.collectReachableNodesByInstanceStates(stack);
-            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, reachableNodes);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, grainsProperties);
-            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            hostOrchestrator.initSaltConfig(stack, gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
+            Set<Node> allNodes = stackUtil.collectNodes(stackDto, emptySet());
+            Set<Node> reachableNodes = stackUtil.collectReachableNodesByInstanceStates(stackDto);
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
+            List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, stackDto, reachableNodes);
+            SaltConfig saltConfig = createSaltConfig(stackDto, grainsProperties);
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stackDto.getStack().getId(), stackDto.getCluster().getId());
+            hostOrchestrator.initSaltConfig(stackDto, gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
             hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
 
-    public NodeReachabilityResult addClusterServices(Stack stack, Cluster cluster, Map<String, Integer> hostGroupWithAdjustment, boolean repair) {
-        Map<String, String> candidates = collectUpscaleCandidates(cluster.getId(), hostGroupWithAdjustment);
-        Set<String> gatewayHosts = stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
-                .map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+    public NodeReachabilityResult addClusterServices(StackDto stackDto, Map<String, Integer> hostGroupWithAdjustment, boolean repair) {
+        Map<String, String> candidates = collectUpscaleCandidates(stackDto, hostGroupWithAdjustment);
+        Set<String> gatewayHosts = stackDto.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
+                .map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.toSet());
         boolean candidatesContainGatewayNode = candidates.keySet().stream().anyMatch(gatewayHosts::contains);
         NodeReachabilityResult nodeReachabilityResult;
-        if (!repair && !candidatesContainGatewayNode && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack)) {
-            nodeReachabilityResult = runTargetedClusterServices(stack, cluster, candidates);
+        if (!repair && !candidatesContainGatewayNode && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stackDto.getStack())) {
+            nodeReachabilityResult = runTargetedClusterServices(stackDto, candidates);
         } else {
-            nodeReachabilityResult = runClusterServices(stack, cluster, candidates);
+            nodeReachabilityResult = runClusterServices(stackDto, candidates);
         }
         return nodeReachabilityResult;
     }
 
-    public String changePrimaryGateway(Stack stack) throws CloudbreakException {
-        GatewayConfig formerPrimaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+    public String changePrimaryGateway(StackDto stackDto) throws CloudbreakException {
+        GatewayConfig formerPrimaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
         Optional<GatewayConfig> newPrimaryCandidate = gatewayConfigs.stream().filter(gc -> !gc.isPrimary()).findFirst();
         if (newPrimaryCandidate.isPresent()) {
             GatewayConfig newPrimary = newPrimaryCandidate.get();
-            Set<Node> allNodes = stackUtil.collectNodes(stack);
+            Set<Node> allNodes = stackUtil.collectNodes(stackDto);
             try {
                 hostOrchestrator.changePrimaryGateway(formerPrimaryGatewayConfig, newPrimary, gatewayConfigs,
-                        allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+                        allNodes, clusterDeletionBasedModel(stackDto.getStack().getId(), stackDto.getCluster().getId()));
                 return newPrimary.getHostname();
             } catch (CloudbreakOrchestratorException ex) {
                 throw new CloudbreakException(ex);
@@ -378,16 +372,16 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public void redeployGatewayCertificate(Stack stack, Cluster cluster) {
-        throwIfNull(stack, () -> new IllegalArgumentException("Stack should not be null"));
-        throwIfNull(cluster, () -> new IllegalArgumentException("Cluster should not be null"));
+    public void redeployGatewayCertificate(StackDto stackDto) {
+        throwIfNull(stackDto, () -> new IllegalArgumentException("Stack should not be null"));
+        throwIfNull(stackDto.getCluster(), () -> new IllegalArgumentException("Cluster should not be null"));
         try {
-            Set<Node> allNodes = stackUtil.collectNodes(stack);
-            Set<Node> reachableNodes = stackUtil.collectReachableNodes(stack);
-            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, reachableNodes);
-            SaltConfig saltConfig = createSaltConfig(stack, cluster, grainsProperties);
-            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            Set<Node> allNodes = stackUtil.collectNodes(stackDto);
+            Set<Node> reachableNodes = stackUtil.collectReachableNodes(stackDto);
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
+            List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, stackDto, reachableNodes);
+            SaltConfig saltConfig = createSaltConfig(stackDto, grainsProperties);
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stackDto.getStack().getId(), stackDto.getCluster().getId());
             hostOrchestrator.uploadGatewayPillar(gatewayConfigs, allNodes, exitCriteriaModel, saltConfig);
             hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
@@ -397,16 +391,17 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public void redeployGatewayPillarOnly(Stack stack, Cluster cluster) {
-        throwIfNull(stack, () -> new IllegalArgumentException("Stack should not be null"));
+    public void redeployGatewayPillarOnly(StackDto stackDto) {
+        ClusterView cluster = stackDto.getCluster();
+        throwIfNull(stackDto, () -> new IllegalArgumentException("Stack should not be null"));
         throwIfNull(cluster, () -> new IllegalArgumentException("Cluster should not be null"));
         try {
-            Set<Node> allNodes = stackUtil.collectNodes(stack);
-            Set<Node> reachableNodes = stackUtil.collectReachableNodes(stack);
-            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, reachableNodes);
-            SaltConfig saltConfig = createSaltConfigWithGatewayPillarOnly(stack, cluster, grainsProperties);
-            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            Set<Node> allNodes = stackUtil.collectNodes(stackDto);
+            Set<Node> reachableNodes = stackUtil.collectReachableNodes(stackDto);
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
+            List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, stackDto, reachableNodes);
+            SaltConfig saltConfig = createSaltConfigWithGatewayPillarOnly(stackDto, grainsProperties);
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stackDto.getId(), stackDto.getId());
             LOGGER.debug("Calling orchestrator to upload gateway pillar");
             hostOrchestrator.uploadGatewayPillar(gatewayConfigs, allNodes, exitCriteriaModel, saltConfig);
         } catch (CloudbreakOrchestratorCancelledException e) {
@@ -418,12 +413,13 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public void redeployStates(Stack stack, Cluster cluster) {
-        throwIfNull(stack, () -> new IllegalArgumentException("Stack should not be null"));
+    public void redeployStates(StackDto stackDto) {
+        ClusterView cluster = stackDto.getCluster();
+        throwIfNull(stackDto, () -> new IllegalArgumentException("Stack should not be null"));
         throwIfNull(cluster, () -> new IllegalArgumentException("Cluster should not be null"));
         try {
-            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
+            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stackDto.getId(), cluster.getId());
             LOGGER.debug("Calling orchestrator to upload states");
             hostOrchestrator.uploadStates(gatewayConfigs, exitCriteriaModel);
         } catch (CloudbreakOrchestratorCancelledException e) {
@@ -435,48 +431,48 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private SaltConfig createSaltConfig(Stack stack, Cluster cluster, List<GrainProperties> grainsProperties)
+    private SaltConfig createSaltConfig(StackDto stackDto, List<GrainProperties> grainsProperties)
             throws IOException, CloudbreakOrchestratorException {
-        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
+        StackView stack = stackDto.getStack();
+        ClusterView cluster = stackDto.getCluster();
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-        saveCustomNameservers(stack, kerberosConfig, servicePillar);
+        saveCustomNameservers(stackDto, kerberosConfig, servicePillar);
         servicePillar.putAll(createUnboundEliminationPillar(stack.getDomainDnsResolver()));
         addKerberosConfig(servicePillar, kerberosConfig);
-        servicePillar.putAll(hostAttributeDecorator.createHostAttributePillars(stack));
-        servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
+        servicePillar.putAll(hostAttributeDecorator.createHostAttributePillars(stackDto));
+        servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.getCloudPlatform())));
         String virtualGroupsEnvironmentCrn = environmentConfigProvider.getParentEnvironmentCrn(stack.getEnvironmentCrn());
         boolean deployedInChildEnvironment = !virtualGroupsEnvironmentCrn.equals(stack.getEnvironmentCrn());
-        Map<String, ? extends Serializable> clusterProperties = Map.of("name", stack.getCluster().getName(),
+        Map<String, ? extends Serializable> clusterProperties = Map.of("name", stackDto.getCluster().getName(),
                 "deployedInChildEnvironment", deployedInChildEnvironment);
         servicePillar.put("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
-        Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
+        Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
-        servicePillar.putAll(createGatewayPillar(primaryGatewayConfig, cluster, stack, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
+        servicePillar.putAll(createGatewayPillar(primaryGatewayConfig, stackDto, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
                 clouderaManagerRepo));
         saveIdBrokerPillar(cluster, servicePillar);
-        postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
+        postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stackDto);
 
-        addClouderaManagerConfig(stack, cluster, servicePillar, clouderaManagerRepo, primaryGatewayConfig);
+        addClouderaManagerConfig(stackDto, servicePillar, clouderaManagerRepo, primaryGatewayConfig);
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
         saveSssdAdPillar(servicePillar, kerberosConfig);
         servicePillar.putAll(saveSssdIpaPillar(kerberosConfig, serviceLocations, stack.getEnvironmentCrn()));
 
-        Map<String, Map<String, String>> mountPathMap = stack.getInstanceGroups().stream().flatMap(group -> group.getInstanceMetaDataSet().stream()
-                        .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
-                        .collect(Collectors.toMap(
-                                InstanceMetaData::getDiscoveryFQDN,
-                                node -> Map.of("mount_path", getMountPath(group),
-                                        "cloud_platform", stack.getCloudPlatform(),
-                                        "temporary_storage", group.getTemplate().getTemporaryStorage().name()),
-                                (l, r) -> Map.of("mount_path", getMountPath(group),
-                                        "cloud_platform", stack.getCloudPlatform(),
-                                        "temporary_storage", group.getTemplate().getTemporaryStorage().name()))).entrySet().stream())
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Map<String, String>> mountPathMap = new HashMap<>();
+        stackDto.getInstanceGroupDtos().forEach(group -> {
+            mountPathMap.putAll(group.getInstanceMetadataViews().stream()
+                    .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                    .collect(Collectors.toMap(
+                            InstanceMetadataView::getDiscoveryFQDN,
+                            node -> getMountPath(stack, group.getInstanceGroup()),
+                            (l, r) -> getMountPath(stack, group.getInstanceGroup()))));
+        });
         servicePillar.put("startup", new SaltPillarProperties("/mount/startup.sls", singletonMap("mount", mountPathMap)));
 
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
@@ -486,13 +482,14 @@ public class ClusterHostServiceRunner {
         return new SaltConfig(servicePillar, grainsProperties);
     }
 
-    private SaltConfig createSaltConfigWithGatewayPillarOnly(Stack stack, Cluster cluster, List<GrainProperties> grainsProperties)
+    private SaltConfig createSaltConfigWithGatewayPillarOnly(StackDto stackDto, List<GrainProperties> grainsProperties)
             throws IOException, CloudbreakOrchestratorException {
-
-        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        StackView stack = stackDto.getStack();
+        ClusterView cluster = stackDto.getCluster();
+        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
         String virtualGroupsEnvironmentCrn = environmentConfigProvider.getParentEnvironmentCrn(stack.getEnvironmentCrn());
         ClusterPreCreationApi connector = clusterApiConnectors.getConnector(cluster);
-        Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
+        Map<String, List<String>> serviceLocations = getServiceLocations(stackDto);
         LOGGER.debug("Getting LDAP config for Gateway pillar");
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
@@ -502,13 +499,19 @@ public class ClusterHostServiceRunner {
 
         LOGGER.debug("Creating gateway pillar");
         Map<String, SaltPillarProperties> servicePillar =
-                new HashMap<>(createGatewayPillar(primaryGatewayConfig, cluster, stack, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
+                new HashMap<>(createGatewayPillar(primaryGatewayConfig, stackDto, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
                         clouderaManagerRepo));
 
         return new SaltConfig(servicePillar, grainsProperties);
     }
 
-    private String getMountPath(InstanceGroup group) {
+    private Map<String, String> getMountPath(StackView stack, InstanceGroupView group) {
+        return Map.of("mount_path", getMountPath(group),
+                "cloud_platform", stack.getCloudPlatform(),
+                "temporary_storage", group.getTemplate().getTemporaryStorage().name());
+    }
+
+    private String getMountPath(InstanceGroupView group) {
         if (TemporaryStorage.EPHEMERAL_VOLUMES.equals(group.getTemplate().getTemporaryStorage())) {
             return "ephfs";
         }
@@ -540,8 +543,10 @@ public class ClusterHostServiceRunner {
                 && !kerberosDetailService.isClusterManagerManagedKrb5Config(kerberosConfig);
     }
 
-    private void addClouderaManagerConfig(Stack stack, Cluster cluster, Map<String, SaltPillarProperties> servicePillar,
+    private void addClouderaManagerConfig(StackDto stackDto, Map<String, SaltPillarProperties> servicePillar,
             ClouderaManagerRepo clouderaManagerRepo, GatewayConfig primaryGatewayConfig) throws CloudbreakOrchestratorFailedException {
+        StackView stack = stackDto.getStack();
+        ClusterView cluster = stackDto.getCluster();
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
         DataBusCredential dataBusCredential = null;
         if (StringUtils.isNotBlank(cluster.getDatabusCredential())) {
@@ -551,16 +556,16 @@ public class ClusterHostServiceRunner {
                 LOGGER.error("Cannot read DataBus secrets from cluster entity. Continue without databus secrets", e);
             }
         }
-        telemetryDecorator.decoratePillar(servicePillar, stack, telemetry, dataBusCredential);
+        telemetryDecorator.decoratePillar(servicePillar, stack, cluster, telemetry, dataBusCredential);
         decoratePillarWithTags(stack, servicePillar);
         decorateWithClouderaManagerEntrerpriseDetails(telemetry, servicePillar);
-        Optional<String> licenseOpt = decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
+        Optional<String> licenseOpt = decoratePillarWithClouderaManagerLicense(stack, servicePillar);
         decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, servicePillar, licenseOpt);
         decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
-        decoratePillarWithClouderaManagerCommunicationSettings(stack, cluster, servicePillar);
+        decoratePillarWithClouderaManagerCommunicationSettings(stackDto, servicePillar);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
-        csdParcelDecorator.decoratePillarWithCsdParcels(stack, servicePillar);
-        servicePillar.putAll(createPillarWithClouderaManagerSettings(clouderaManagerRepo, stack, primaryGatewayConfig));
+        csdParcelDecorator.decoratePillarWithCsdParcels(stackDto, servicePillar);
+        servicePillar.putAll(createPillarWithClouderaManagerSettings(clouderaManagerRepo, stackDto, primaryGatewayConfig));
     }
 
     private void saveSssdAdPillar(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
@@ -612,21 +617,21 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void decoratePillarWithClouderaManagerDatabase(Cluster cluster, Map<String, SaltPillarProperties> servicePillar)
+    private void decoratePillarWithClouderaManagerDatabase(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar)
             throws CloudbreakOrchestratorFailedException {
         RdsConfigWithoutCluster clouderaManagerRdsConfig = rdsConfigWithoutClusterService.findByClusterIdAndType(cluster.getId(), DatabaseType.CLOUDERA_MANAGER);
         if (clouderaManagerRdsConfig == null) {
-            throw new CloudbreakOrchestratorFailedException("Cloudera Manager RDSConfig is missing for stack");
+            throw new CloudbreakOrchestratorFailedException("Cloudera Manager RDSConfig is missing for stackDto");
         }
         RdsView rdsView = new RdsView(clouderaManagerRdsConfig);
         servicePillar.put("cloudera-manager-database",
                 new SaltPillarProperties("/cloudera-manager/database.sls", singletonMap("cloudera-manager", singletonMap("database", rdsView))));
     }
 
-    private void decoratePillarWithClouderaManagerCommunicationSettings(Stack stack, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
-        Boolean autoTls = cluster.isAutoTlsEnabled();
+    private void decoratePillarWithClouderaManagerCommunicationSettings(StackDto stackDto, Map<String, SaltPillarProperties> servicePillar) {
+        Boolean autoTls = stackDto.getCluster().getAutoTlsEnabled();
         Map<String, Object> communication = new HashMap<>();
-        Optional<String> san = loadBalancerSANProvider.getLoadBalancerSAN(stack);
+        Optional<String> san = loadBalancerSANProvider.getLoadBalancerSAN(stackDto.getStack().getId(), stackDto.getBlueprint());
         if (san.isPresent()) {
             communication.put("internal_loadbalancer_san", san.get());
         }
@@ -638,8 +643,8 @@ public class ClusterHostServiceRunner {
                         singletonMap("cloudera-manager", singletonMap("communication", communication))));
     }
 
-    private void decoratePillarWithClouderaManagerAutoTls(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
-        if (cluster.isAutoTlsEnabled()) {
+    private void decoratePillarWithClouderaManagerAutoTls(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar) {
+        if (cluster.getAutoTlsEnabled()) {
             Map<String, Object> autoTls = new HashMap<>();
             autoTls.put("keystore_password", cluster.getKeyStorePwd());
             autoTls.put("truststore_password", cluster.getTrustStorePwd());
@@ -648,8 +653,8 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public Optional<String> decoratePillarWithClouderaManagerLicense(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
-        String accountId = Crn.safeFromString(stackService.get(stackId).getResourceCrn()).getAccountId();
+    public Optional<String> decoratePillarWithClouderaManagerLicense(StackView stack, Map<String, SaltPillarProperties> servicePillar) {
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         Account account = umsClient.getAccountDetails(accountId, regionAwareInternalCrnGeneratorFactory);
         Optional<String> licenseOpt = Optional.ofNullable(account.getClouderaManagerLicenseKey());
         if (licenseOpt.isPresent() && isNotEmpty(licenseOpt.get())) {
@@ -681,11 +686,12 @@ public class ClusterHostServiceRunner {
         return pillarValues;
     }
 
-    public Map<String, SaltPillarProperties> createPillarWithClouderaManagerSettings(ClouderaManagerRepo clouderaManagerRepo, Stack stack,
+    public Map<String, SaltPillarProperties> createPillarWithClouderaManagerSettings(ClouderaManagerRepo clouderaManagerRepo, StackDto stackDto,
             GatewayConfig primaryGatewayConfig) {
-        ServiceLocationMap serviceLocations = clusterApiConnectors.getConnector(stack.getCluster()).getServiceLocations();
+        ServiceLocationMap serviceLocations = clusterApiConnectors.getConnector(stackDto.getCluster()).getServiceLocations();
         String cmVersion = clouderaManagerRepo.getVersion();
-        boolean disableAutoBundleCollection = entitlementService.cmAutoBundleCollectionDisabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
+        String resourceCrn = stackDto.getStack().getResourceCrn();
+        boolean disableAutoBundleCollection = entitlementService.cmAutoBundleCollectionDisabled(Crn.safeFromString(resourceCrn).getAccountId());
         return Map.of("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
                 singletonMap("cloudera-manager", Map.of(
                         "settings", Map.of(
@@ -699,7 +705,7 @@ public class ClusterHostServiceRunner {
                         "address", primaryGatewayConfig.getPrivateAddress()))));
     }
 
-    private void decoratePillarWithTags(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
+    private void decoratePillarWithTags(StackView stack, Map<String, SaltPillarProperties> servicePillarConfig) {
         if (stack.getTags() != null && isNotBlank(stack.getTags().getValue())) {
             try {
                 StackTags stackTags = stack.getTags().get(StackTags.class);
@@ -719,22 +725,22 @@ public class ClusterHostServiceRunner {
                 DnsResolverType.FREEIPA_FOR_ENV.equals(dnsResolverType))));
     }
 
-    private void saveCustomNameservers(Stack stack, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
+    private void saveCustomNameservers(StackDto stackDto, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {
         if (kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain()) && StringUtils.isNotBlank(kerberosConfig.getNameServers())) {
             List<String> ipList = Lists.newArrayList(kerberosConfig.getNameServers().split(","));
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
                     singletonMap("forwarder-zones", singletonMap(kerberosConfig.getDomain(), singletonMap("nameservers", ipList)))));
         } else if (kerberosConfig == null || (kerberosConfig.getType() != KerberosType.FREEIPA && kerberosConfig.getType() != KerberosType.ACTIVE_DIRECTORY)) {
-            saveDatalakeNameservers(stack, servicePillar);
+            saveDatalakeNameservers(stackDto, servicePillar);
         }
     }
 
-    private void saveDatalakeNameservers(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
-        Optional<Stack> datalakeStackOptional = datalakeService.getDatalakeStackByDatahubStack(stack);
+    private void saveDatalakeNameservers(StackDto stackDto, Map<String, SaltPillarProperties> servicePillar) {
+        Optional<Stack> datalakeStackOptional = datalakeService.getDatalakeStackByDatahubStack(stackDto.getStack());
         if (datalakeStackOptional.isPresent()) {
             Stack dataLakeStack = datalakeStackOptional.get();
             String datalakeDomain = dataLakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().get(0).getDomain();
-            List<String> ipList = dataLakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp)
+            List<String> ipList = dataLakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream().map(InstanceMetadataView::getPrivateIp)
                     .collect(Collectors.toList());
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
                     singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
@@ -742,7 +748,7 @@ public class ClusterHostServiceRunner {
     }
 
     @SuppressWarnings("ParameterNumber")
-    private Map<String, SaltPillarProperties> createGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Stack stack,
+    private Map<String, SaltPillarProperties> createGatewayPillar(GatewayConfig gatewayConfig, StackDto stackDto,
             VirtualGroupRequest virtualGroupRequest, ClusterPreCreationApi connector, KerberosConfig kerberosConfig, Map<String, List<String>> serviceLocations,
             ClouderaManagerRepo clouderaManagerRepo) throws IOException {
         Map<String, Object> gateway = new HashMap<>();
@@ -752,33 +758,34 @@ public class ClusterHostServiceRunner {
             LOGGER.debug("Checking if {} is an ip address. Result: {}", gatewayConfig.getPublicAddress(), addressIsIp);
             gateway.put("address_is_ip", addressIsIp);
         }
+        ClusterView cluster = stackDto.getCluster();
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
         gateway.put("enable_knox_ranger_authorizer", isRangerAuthorizerEnabled(clouderaManagerRepo));
-        gateway.put("enable_ccmv2", stack.getTunnel().useCcmV2OrJumpgate());
-        gateway.put("enable_ccmv2_jumpgate", stack.getTunnel().useCcmV2Jumpgate());
+        gateway.put("enable_ccmv2", stackDto.getTunnel().useCcmV2OrJumpgate());
+        gateway.put("enable_ccmv2_jumpgate", stackDto.getTunnel().useCcmV2Jumpgate());
 
-        gateway.putAll(createKnoxRelatedGatewayCofniguration(cluster, virtualGroupRequest, connector));
-        gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, cluster));
+        gateway.putAll(createKnoxRelatedGatewayCofniguration(stackDto, virtualGroupRequest, connector));
+        gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, stackDto));
         gateway.put("kerberos", kerberosConfig != null);
 
         ExposedService rangerService = exposedServiceCollector.getRangerService();
         List<String> rangerLocations = serviceLocations.get(rangerService.getServiceName());
         if (!CollectionUtils.isEmpty(rangerLocations)) {
-            List<String> rangerGatewayHosts = getRangerFqdn(cluster, gatewayConfig.getHostname(), rangerLocations);
+            List<String> rangerGatewayHosts = getRangerFqdn(stackDto, gatewayConfig.getHostname(), rangerLocations);
             serviceLocations.put(rangerService.getServiceName(), rangerGatewayHosts);
         }
         serviceLocations.put(exposedServiceCollector.getClouderaManagerService().getServiceName(), asList(gatewayConfig.getHostname()));
         gateway.put("location", serviceLocations);
-        if (stack.getNetwork() != null) {
-            gateway.put("cidrBlocks", stack.getNetwork().getNetworkCidrs());
+        if (stackDto.getNetwork() != null) {
+            gateway.put("cidrBlocks", stackDto.getNetwork().getNetworkCidrs());
         }
         return Map.of("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
     }
 
-    private Map<String, Object> createKnoxRelatedGatewayCofniguration(Cluster cluster, VirtualGroupRequest virtualGroupRequest, ClusterPreCreationApi connector)
-            throws IOException {
-        Gateway clusterGateway = cluster.getGateway();
+    private Map<String, Object> createKnoxRelatedGatewayCofniguration(StackDto stackDto, VirtualGroupRequest virtualGroupRequest,
+            ClusterPreCreationApi connector) throws IOException {
+        GatewayView clusterGateway = gatewayService.getByClusterId(stackDto.getCluster().getId()).orElse(null);
         Map<String, Object> gateway = new HashMap<>();
         if (clusterGateway != null) {
             gateway.put("path", clusterGateway.getPath());
@@ -788,13 +795,14 @@ public class ClusterHostServiceRunner {
             gateway.put("signcert", clusterGateway.getSignCert());
             gateway.put("signkey", clusterGateway.getSignKey());
             gateway.put("tokencert", clusterGateway.getTokenCert());
-            gateway.put("mastersecret", clusterGateway.getKnoxMasterSecret());
+            gateway.put("mastersecret", clusterGateway.getKnoxMaster());
             gateway.put("envAccessGroup", virtualGroupService.createOrGetVirtualGroup(virtualGroupRequest, UmsVirtualGroupRight.ENVIRONMENT_ACCESS));
-            List<Map<String, Object>> topologies = getTopologies(clusterGateway, cluster.getBlueprint().getStackVersion());
+            List<Map<String, Object>> topologies = getTopologies(clusterGateway, stackDto.getBlueprint().getStackVersion());
             gateway.put("topologies", topologies);
-            if (cluster.getBlueprint() != null) {
-                Boolean autoTlsEnabled = cluster.isAutoTlsEnabled();
-                Map<String, Integer> servicePorts = connector.getServicePorts(cluster.getBlueprint(), autoTlsEnabled);
+            if (stackDto.getBlueprint() != null) {
+                ClusterView cluster = stackDto.getCluster();
+                Boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
+                Map<String, Integer> servicePorts = connector.getServicePorts(stackDto.getBlueprint(), autoTlsEnabled);
                 gateway.put("ports", servicePorts);
                 gateway.put("protocol", autoTlsEnabled ? "https" : "http");
             }
@@ -820,8 +828,8 @@ public class ClusterHostServiceRunner {
                 clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
     }
 
-    private void saveIdBrokerPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
-        IdBroker clusterIdBroker = idBrokerService.getByCluster(cluster);
+    private void saveIdBrokerPillar(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar) {
+        IdBroker clusterIdBroker = idBrokerService.getByCluster(cluster.getId());
         Map<String, Object> idbroker = new HashMap<>();
 
         if (clusterIdBroker != null) {
@@ -834,17 +842,19 @@ public class ClusterHostServiceRunner {
         servicePillar.put("idbroker", new SaltPillarProperties("/idbroker/init.sls", singletonMap("idbroker", idbroker)));
     }
 
-    private Map<String, Object> createGatewayUserFacingCertAndFqdn(GatewayConfig gatewayConfig, Cluster cluster) {
+    private Map<String, Object> createGatewayUserFacingCertAndFqdn(GatewayConfig gatewayConfig, StackDto stackDto) {
         boolean userFacingCertHasBeenGenerated = isNotEmpty(gatewayConfig.getUserFacingCert())
                 && isNotEmpty(gatewayConfig.getUserFacingKey());
         Map<String, Object> gateway = new HashMap<>();
+        ClusterView cluster = stackDto.getCluster();
+        StackView stack = stackDto.getStack();
         if (userFacingCertHasBeenGenerated) {
             gateway.put("userfacingcert_configured", Boolean.TRUE);
-            gateway.put("userfacingkey", cluster.getStack().getSecurityConfig().getUserFacingKey());
-            gateway.put("userfacingcert", cluster.getStack().getSecurityConfig().getUserFacingCert());
+            gateway.put("userfacingkey", stackDto.getSecurityConfig().getUserFacingKey());
+            gateway.put("userfacingcert", stackDto.getSecurityConfig().getUserFacingCert());
         }
 
-        String fqdn = loadBalancerConfigService.getLoadBalancerUserFacingFQDN(cluster.getStack().getId());
+        String fqdn = loadBalancerConfigService.getLoadBalancerUserFacingFQDN(stack.getId());
         fqdn = isEmpty(fqdn) ? cluster.getFqdn() : fqdn;
 
         if (isNotEmpty(fqdn)) {
@@ -857,25 +867,25 @@ public class ClusterHostServiceRunner {
         return gateway;
     }
 
-    private Map<String, List<String>> getServiceLocations(Cluster cluster) {
+    private Map<String, List<String>> getServiceLocations(StackDto stackDto) {
         Set<String> serviceNames = exposedServiceCollector.getAllServiceNames();
-        Map<String, List<String>> componentLocation = componentLocator.getComponentLocation(cluster, serviceNames);
+        Map<String, List<String>> componentLocation = componentLocator.getComponentLocation(stackDto, serviceNames);
         ExposedService impalaService = exposedServiceCollector.getImpalaService();
         if (componentLocation.containsKey(impalaService.getServiceName())) {
             // IMPALA_DEBUG_UI role is not a valid role, but we need to distinguish the 2 roles in order to generate the Knox topology file
             componentLocation.put(exposedServiceCollector.getImpalaDebugUIService().getServiceName(),
                     List.copyOf(componentLocation.get(impalaService.getServiceName())));
-            Map<String, List<String>> impalaLocations = componentLocator.getImpalaCoordinatorLocations(cluster);
+            Map<String, List<String>> impalaLocations = componentLocator.getImpalaCoordinatorLocations(stackDto);
             List<String> locations = impalaLocations.values().stream().flatMap(List::stream).collect(Collectors.toList());
             componentLocation.replace(impalaService.getServiceName(), locations);
         }
         return componentLocation;
     }
 
-    private List<String> getRangerFqdn(Cluster cluster, String primaryGatewayFqdn, List<String> rangerLocations) {
+    private List<String> getRangerFqdn(StackDto stackDto, String primaryGatewayFqdn, List<String> rangerLocations) {
         if (rangerLocations.size() > 1) {
             // SDX HA has multiple ranger instances in different groups, in Knox we only want to expose the ones on the gateway.
-            InstanceGroup gatewayInstanceGroup = instanceGroupService.getPrimaryGatewayInstanceGroupByStackId(cluster.getStack().getId());
+            InstanceGroupView gatewayInstanceGroup = stackDto.getPrimaryGatewayGroup();
             String gatewayGroupName = gatewayInstanceGroup.getGroupName();
             List<String> hosts = rangerLocations.stream()
                     .filter(s -> s.contains(gatewayGroupName))
@@ -889,7 +899,7 @@ public class ClusterHostServiceRunner {
         return List.of(value);
     }
 
-    private List<Map<String, Object>> getTopologies(Gateway clusterGateway, String version) throws IOException {
+    private List<Map<String, Object>> getTopologies(GatewayView clusterGateway, String version) throws IOException {
         if (!CollectionUtils.isEmpty(clusterGateway.getTopologies())) {
             List<Map<String, Object>> topologyMaps = new ArrayList<>();
             for (GatewayTopology topology : clusterGateway.getTopologies()) {
@@ -922,21 +932,19 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public Map<String, String> collectUpscaleCandidates(Long clusterId, Map<String, Integer> hostGroupWithAdjustment, boolean includeCreatedOnly) {
+    public Map<String, String> collectUpscaleCandidates(StackDto stack, Map<String, Integer> hostGroupWithAdjustment, boolean includeCreatedOnly) {
         Map<String, String> hostNames = new HashMap<>();
         for (Map.Entry<String, Integer> entry : hostGroupWithAdjustment.entrySet()) {
-            String hostGroupName = entry.getKey();
+            String instanceGroupName = entry.getKey();
             Integer adjustment = entry.getValue();
-            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(clusterId, hostGroupName)
-                    .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
-            if (hostGroup.getInstanceGroup() != null) {
-                Long instanceGroupId = hostGroup.getInstanceGroup().getId();
-                Collection<InstanceMetaData> instanceMetaDataSet = includeCreatedOnly
-                        ? instanceMetaDataService.findUnusedHostsInInstanceGroup(instanceGroupId)
-                        : instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroupId);
+            InstanceGroupDto instanceGroupDto = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
+            if (instanceGroupDto != null) {
+                Collection<InstanceMetadataView> instanceMetaDataSet = includeCreatedOnly
+                        ? stack.getUnusedHostsInInstanceGroup(instanceGroupName)
+                        : stack.getAliveInstancesInInstanceGroup(instanceGroupName);
                 instanceMetaDataSet.stream()
                         .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
-                        .sorted(Comparator.comparing(InstanceMetaData::getStartDate).reversed())
+                        .sorted(Comparator.comparing(InstanceMetadataView::getStartDate).reversed())
                         .limit(adjustment.longValue())
                         .forEach(im -> hostNames.put(im.getDiscoveryFQDN(), im.getPrivateIp()));
             }
@@ -944,8 +952,8 @@ public class ClusterHostServiceRunner {
         return hostNames;
     }
 
-    public Map<String, String> collectUpscaleCandidates(Long clusterId, Map<String, Integer> hostGroupWithAdjustment) {
-        return collectUpscaleCandidates(clusterId, hostGroupWithAdjustment, true);
+    public Map<String, String> collectUpscaleCandidates(StackDto stackDto, Map<String, Integer> hostGroupWithAdjustment) {
+        return collectUpscaleCandidates(stackDto, hostGroupWithAdjustment, true);
     }
 
     private void putIfNotNull(Map<String, String> context, Object variable, String key) {
@@ -954,7 +962,7 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void decoratePillarWithJdbcConnectors(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
+    private void decoratePillarWithJdbcConnectors(ClusterView cluster, Map<String, SaltPillarProperties> servicePillar) {
         Set<RdsConfigWithoutCluster> rdsConfigs = rdsConfigWithoutClusterService.findByClusterId(cluster.getId());
         Map<String, Object> connectorJarUrlsByVendor = new HashMap<>();
         rdsConfigs.stream()
@@ -970,21 +978,24 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void modifyStartupMountRole(Stack stack, Set<Node> nodes, GrainOperation operation) throws CloudbreakOrchestratorFailedException {
-        OrchestratorGrainRunnerParams stateParams = createStartupMountGrainRunnerParams(stack, nodes, operation);
+    private void modifyStartupMountRole(StackDto stackDto, Set<Node> nodes, GrainOperation operation) throws CloudbreakOrchestratorFailedException {
+        OrchestratorGrainRunnerParams stateParams = createStartupMountGrainRunnerParams(stackDto, nodes, operation);
         LOGGER.debug("{} 'startup' role with params {}", operation.name().toLowerCase(), stateParams);
         hostOrchestrator.runOrchestratorGrainRunner(stateParams);
     }
 
-    private OrchestratorGrainRunnerParams createStartupMountGrainRunnerParams(Stack stack, Set<Node> nodes, GrainOperation operation) {
-        return createOrchestratorGrainRunnerParams(stack, stack.getCluster(), nodes, operation);
+    private OrchestratorGrainRunnerParams createStartupMountGrainRunnerParams(StackDto stackDto, Set<Node> nodes, GrainOperation operation) {
+        return createOrchestratorGrainRunnerParams(stackDto, nodes, operation);
     }
 
-    private OrchestratorGrainRunnerParams createOrchestratorGrainRunnerParams(Stack stack, Cluster cluster, Set<Node> nodes, GrainOperation grainOperation) {
+    private OrchestratorGrainRunnerParams createOrchestratorGrainRunnerParams(StackDto stackDto, Set<Node> nodes, GrainOperation grainOperation) {
         Set<String> reachableHostnames = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         OrchestratorGrainRunnerParams grainRunnerParams = new OrchestratorGrainRunnerParams();
-        InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
-        grainRunnerParams.setPrimaryGatewayConfig(gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().hasGateway()));
+        InstanceMetadataView gatewayInstance = stackDto.getPrimaryGatewayInstance();
+        StackView stack = stackDto.getStack();
+        ClusterView cluster = stackDto.getCluster();
+        grainRunnerParams.setPrimaryGatewayConfig(gatewayConfigService.getGatewayConfig(stack, stackDto.getSecurityConfig(), gatewayInstance,
+                stackDto.hasGateway()));
         grainRunnerParams.setTargetHostNames(reachableHostnames);
         grainRunnerParams.setAllNodes(nodes);
         grainRunnerParams.setExitCriteriaModel(ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId()));

@@ -11,14 +11,14 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.altus.service.AltusIAMService;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Service
 public class ClouderaManagerDatabusService {
@@ -46,7 +46,7 @@ public class ClouderaManagerDatabusService {
      * @param stack stack that is used to get user crn
      * @return credential
      */
-    AltusCredential createMachineUserAndGenerateKeys(Stack stack, Map<String, String> resourceRoles) {
+    AltusCredential createMachineUserAndGenerateKeys(StackDtoDelegate stack, Map<String, String> resourceRoles) {
         String machineUserName = getWAMachineUserName(stack);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
@@ -61,7 +61,7 @@ public class ClouderaManagerDatabusService {
      * Cleanup machine user related resources (access keys, role, user)
      * @param stack stack that is used to get user crn
      */
-    void cleanUpMachineUser(Stack stack) {
+    void cleanUpMachineUser(StackDtoDelegate stack) {
         try {
             String machineUserName = getWAMachineUserName(stack);
             ThreadBasedUserCrnProvider.doAsInternalActor(
@@ -76,7 +76,7 @@ public class ClouderaManagerDatabusService {
         }
     }
 
-    AltusCredential getAltusCredential(Stack stack, String sdxStackCrn) {
+    AltusCredential getAltusCredential(StackDtoDelegate stack, String sdxStackCrn) {
         Map<String, String> resourceRoles = calculateResourceRoles(sdxStackCrn);
         AltusCredential credential = createMachineUserAndGenerateKeys(stack, resourceRoles);
         String accessKey = credential.getAccessKey();
@@ -105,7 +105,7 @@ public class ClouderaManagerDatabusService {
         return new String(privateKey).trim().replace("\n", "\\n");
     }
 
-    private String getWAMachineUserName(Stack stack) {
+    private String getWAMachineUserName(StackDtoDelegate stack) {
         String machineUserSuffix = null;
         if (StringUtils.isNotEmpty(stack.getResourceCrn())) {
             machineUserSuffix = Crn.fromString(stack.getResourceCrn()).getResource();

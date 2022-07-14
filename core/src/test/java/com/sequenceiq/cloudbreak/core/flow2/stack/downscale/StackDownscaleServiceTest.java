@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -27,13 +28,14 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
 import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @ExtendWith(MockitoExtension.class)
 class StackDownscaleServiceTest {
@@ -59,6 +61,9 @@ class StackDownscaleServiceTest {
     @Mock
     private FreeIpaCleanupService freeIpaCleanupService;
 
+    @Mock
+    private InstanceMetaDataService instanceMetaDataService;
+
     @InjectMocks
     private StackDownscaleService stackDownscaleService;
 
@@ -69,16 +74,13 @@ class StackDownscaleServiceTest {
     public void finishStackDownscaleAndSaveVolumeFQDNTest() throws TransactionService.TransactionExecutionException {
         StackScalingFlowContext stackScalingFlowContext = mock(StackScalingFlowContext.class);
         Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(1L);
         when(stackScalingFlowContext.getStack()).thenReturn(stack);
         when(stackScalingFlowContext.isRepair()).thenReturn(true);
-        InstanceGroup masterGroup = new InstanceGroup();
-        masterGroup.setGroupName("master");
-        when(stack.getInstanceGroups()).thenReturn(Set.of(masterGroup));
         InstanceMetaData master = new InstanceMetaData();
         master.setInstanceId("i-1111");
         master.setDiscoveryFQDN("master1.cloudera.site");
-        master.setPrivateId(1L);
-        masterGroup.setInstanceMetaData(Set.of(master));
+        master.setPrivateId(123L);
         ArrayList<Resource> volumes = new ArrayList<>();
         Resource volume1 = new Resource();
         volumes.add(volume1);
@@ -86,7 +88,8 @@ class StackDownscaleServiceTest {
         doReturn(Optional.of(new VolumeSetAttributes("az1", false, "",
                 new ArrayList<>(), 50, "gp2"))).when(resourceAttributeUtil).getTypedAttributes(volume1, VolumeSetAttributes.class);
         when(resourceService.findByStackIdAndType(any(), any())).thenReturn(volumes);
-        stackDownscaleService.finishStackDownscale(stackScalingFlowContext, Set.of(1L));
+        when(instanceMetaDataService.getInstanceMetadataViewsByStackIdAndPrivateIds(1L, Set.of(123L))).thenReturn(List.of(master));
+        stackDownscaleService.finishStackDownscale(stackScalingFlowContext, Set.of(123L));
         verify(resourceService).saveAll(resourcesCaptor.capture());
         Iterable<Resource> resourcesCaptorValue = resourcesCaptor.getValue();
         Json attributes = resourcesCaptorValue.iterator().next().getAttributes();
@@ -96,17 +99,14 @@ class StackDownscaleServiceTest {
     @Test
     public void finishStackDownscaleAndDontSaveVolumeFQDNTest() throws TransactionService.TransactionExecutionException {
         StackScalingFlowContext stackScalingFlowContext = mock(StackScalingFlowContext.class);
-        Stack stack = mock(Stack.class);
+        StackView stack = mock(StackView.class);
         when(stackScalingFlowContext.getStack()).thenReturn(stack);
         when(stackScalingFlowContext.isRepair()).thenReturn(true);
-        InstanceGroup masterGroup = new InstanceGroup();
-        masterGroup.setGroupName("master");
-        when(stack.getInstanceGroups()).thenReturn(Set.of(masterGroup));
+        when(stack.getId()).thenReturn(1L);
         InstanceMetaData master = new InstanceMetaData();
         master.setInstanceId("i-1111");
-        master.setPrivateId(1L);
+        master.setPrivateId(123L);
         master.setDiscoveryFQDN("master1.cloudera.site");
-        masterGroup.setInstanceMetaData(Set.of(master));
         ArrayList<Resource> volumes = new ArrayList<>();
         Resource volume1 = new Resource();
         volumes.add(volume1);
@@ -117,7 +117,8 @@ class StackDownscaleServiceTest {
         volume1.setAttributes(Json.silent(volumeSetAttributes));
         doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(volume1, VolumeSetAttributes.class);
         when(resourceService.findByStackIdAndType(any(), any())).thenReturn(volumes);
-        stackDownscaleService.finishStackDownscale(stackScalingFlowContext, Set.of(1L));
+        when(instanceMetaDataService.getInstanceMetadataViewsByStackIdAndPrivateIds(1L, Set.of(123L))).thenReturn(List.of(master));
+        stackDownscaleService.finishStackDownscale(stackScalingFlowContext, Set.of(123L));
         verify(resourceService).saveAll(resourcesCaptor.capture());
         Iterable<Resource> resourcesCaptorValue = resourcesCaptor.getValue();
         Json attributes = resourcesCaptorValue.iterator().next().getAttributes();

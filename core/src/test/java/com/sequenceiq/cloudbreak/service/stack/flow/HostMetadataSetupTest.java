@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,7 +12,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,8 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -35,7 +31,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
@@ -47,7 +43,7 @@ public class HostMetadataSetupTest {
     private HostMetadataSetup hostMetadataSetup;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
@@ -58,19 +54,8 @@ public class HostMetadataSetupTest {
     @Mock
     private HostOrchestrator hostOrchestrator;
 
-    @Mock
-    private TransactionService transactionService;
-
     @Captor
     private ArgumentCaptor<Set<InstanceMetaData>> instanceMetadataCaptor;
-
-    @BeforeEach
-    public void setUp() throws TransactionExecutionException {
-        doAnswer(invocation -> {
-            invocation.getArgument(0, Runnable.class).run();
-            return null;
-        }).when(transactionService).required(any(Runnable.class));
-    }
 
     @Test
     @DisplayName("when multiple non-gateway instances are repaired and scaled we shouldn't make any changes")
@@ -79,7 +64,7 @@ public class HostMetadataSetupTest {
         InstanceMetaData im1 = createInstanceMetadata("id1", InstanceMetadataType.CORE, 1L, "10.0.0.1", "host1", false);
         InstanceMetaData im2 = createInstanceMetadata("id2", InstanceMetadataType.CORE, 2L, "10.0.0.2", "host2", false);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(Set.of(im1, im2));
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
         when(hostOrchestrator.getMembers(any(), any())).thenReturn(Map.of("10.0.0.1", "host1", "10.0.0.2", "host2"));
 
         hostMetadataSetup.setupNewHostMetadata(STACK_ID, List.of("10.0.0.1", "10.0.0.2"));
@@ -99,7 +84,7 @@ public class HostMetadataSetupTest {
         Stack stack = mock(Stack.class);
         InstanceMetaData im1 = createInstanceMetadata("id1", InstanceMetadataType.GATEWAY_PRIMARY, 1L, "10.0.0.1", "host1", true);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(Set.of(im1));
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
         when(hostOrchestrator.getMembers(any(), any())).thenReturn(Map.of("10.0.0.1", "host1"));
 
         hostMetadataSetup.setupNewHostMetadata(STACK_ID, List.of("10.0.0.1"));
@@ -118,7 +103,7 @@ public class HostMetadataSetupTest {
         InstanceMetaData im2 = createInstanceMetadata("id2", InstanceMetadataType.GATEWAY, 2L, "10.0.0.2", "host2", false);
         Set<InstanceMetaData> allNewInstances = Set.of(im1, im2);
         when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(allNewInstances);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
         when(hostOrchestrator.getMembers(any(), any())).thenReturn(Map.of("10.0.0.1", "host1", "10.0.0.2", "host2"));
 
         hostMetadataSetup.setupNewHostMetadata(STACK_ID, List.of("10.0.0.1", "10.0.0.2"));

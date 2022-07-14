@@ -7,8 +7,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
-
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,23 +15,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterServiceRunnerTest {
 
     @Mock
-    private Stack stack;
+    private StackDto stackDto;
 
     @Mock
     private Cluster cluster;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private ClusterService clusterService;
@@ -45,50 +42,33 @@ class ClusterServiceRunnerTest {
     private ClusterServiceRunner underTest;
 
     @Test
-    void testRedeployGatewayCertificateWhenClusterCouldNotBeFoundByStackId() {
-        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        when(stack.getCluster()).thenReturn(cluster);
-        when(clusterService.findOneWithLists(anyLong())).thenThrow(new NotFoundException("Cluster could not be found"));
-
-        Assertions.assertThrows(NotFoundException.class, () -> underTest.redeployGatewayCertificate(0L));
-    }
-
-    @Test
     void testRedeployGatewayCertificateWhenRedeployOnHostRunnerThrowRuntimeException() {
-        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        when(stack.getCluster()).thenReturn(cluster);
-        when(clusterService.findOneWithLists(anyLong())).thenReturn(Optional.of(cluster));
-        doThrow(new RuntimeException("Stg. failed")).when(hostRunner).redeployGatewayCertificate(any(), any());
+        when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
+        doThrow(new RuntimeException("Stg. failed")).when(hostRunner).redeployGatewayCertificate(any());
 
         Assertions.assertThrows(RuntimeException.class, () -> underTest.redeployGatewayCertificate(0L));
     }
 
     @Test
     void testRedeployGatewayCertificateHappyFlow() {
-        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        when(stack.getCluster()).thenReturn(cluster);
-        when(clusterService.findOneWithLists(anyLong())).thenReturn(Optional.of(cluster));
+        when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
 
         underTest.redeployGatewayCertificate(0L);
 
-        verify(hostRunner, times(1)).redeployGatewayCertificate(any(), any());
+        verify(hostRunner, times(1)).redeployGatewayCertificate(any());
     }
 
     @Test
     void testRedeployGatewayPillar() {
-        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        when(stack.getCluster()).thenReturn(cluster);
-        when(clusterService.findOneWithLists(any())).thenReturn(Optional.of(cluster));
+        when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
         underTest.redeployGatewayPillar(1L);
-        verify(hostRunner).redeployGatewayPillarOnly(stack, cluster);
+        verify(hostRunner).redeployGatewayPillarOnly(stackDto);
     }
 
     @Test
     void testRedeployStates() {
-        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        when(stack.getCluster()).thenReturn(cluster);
-        when(clusterService.findOneWithLists(any())).thenReturn(Optional.of(cluster));
+        when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
         underTest.redeployStates(1L);
-        verify(hostRunner).redeployStates(stack, cluster);
+        verify(hostRunner).redeployStates(stackDto);
     }
 }

@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -182,7 +183,7 @@ public class MetadataSetupService {
         }
     }
 
-    public int saveInstanceMetaData(Stack stack, Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
+    public int saveInstanceMetaData(StackView stack, Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
         try {
             LOGGER.info("Save instance metadata for stack: {}", stack.getName());
             int newInstances = 0;
@@ -370,7 +371,7 @@ public class MetadataSetupService {
         return new InstanceMetaData();
     }
 
-    public void saveLoadBalancerMetadata(Stack stack, Iterable<CloudLoadBalancerMetadata> cloudLoadBalancerMetadataList) {
+    public void saveLoadBalancerMetadata(StackView stack, Iterable<CloudLoadBalancerMetadata> cloudLoadBalancerMetadataList) {
         try {
             LOGGER.info("Save load balancer metadata for stack: {}", stack.getName());
 
@@ -434,7 +435,7 @@ public class MetadataSetupService {
     }
 
     private LoadBalancer createLoadBalancerMetadataIfAbsent(Iterable<LoadBalancer> allLoadBalancerMetadata,
-            Stack stack, LoadBalancerType type) {
+            StackView stack, LoadBalancerType type) {
         if (stack != null && type != null) {
             for (LoadBalancer loadBalancerMetadata : allLoadBalancerMetadata) {
                 if (Objects.equals(stack.getId(), loadBalancerMetadata.getStack().getId()) &&

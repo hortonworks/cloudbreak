@@ -63,7 +63,7 @@ public class UnboundRestartPatchService extends ExistingStackPatchService {
         try {
             boolean affected = false;
             if (AFFECTED_STACK_VERSION.equals(stack.getStackVersion())) {
-                Image image = stackImageService.getCurrentImage(stack);
+                Image image = stackImageService.getCurrentImage(stack.getId());
                 affected = AFFECTED_IMAGE_IDS.contains(image.getImageId());
                 LOGGER.debug("Stack {} with version {} and image {} is {} by unbound service restart bug",
                         stack.getResourceCrn(), stack.getStackVersion(), image.getImageId(), affected ? "affected" : "not affected");
@@ -82,7 +82,7 @@ public class UnboundRestartPatchService extends ExistingStackPatchService {
         if (isCmServerReachable(stack)) {
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(
                     internalCrnModifier.getInternalCrnWithAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId()),
-                    () -> clusterOperationService.updateSalt(stack));
+                    () -> clusterOperationService.updateSalt(stack.getId()));
             LOGGER.debug("Starting update salt for stack {} with flow {}", stack.getResourceCrn(), flowIdentifier.getPollableId());
             Boolean success = Polling.waitPeriodly(1, TimeUnit.MINUTES)
                     .run(() -> pollFlowState(flowIdentifier));

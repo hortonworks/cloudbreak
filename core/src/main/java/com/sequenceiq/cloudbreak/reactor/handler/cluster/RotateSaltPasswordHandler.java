@@ -8,11 +8,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordFailureResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordSuccessResponse;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -28,7 +28,7 @@ public class RotateSaltPasswordHandler extends ExceptionCatcherEventHandler<Rota
     private ClusterBootstrapper clusterBootstrapper;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Override
     public String selector() {
@@ -45,7 +45,7 @@ public class RotateSaltPasswordHandler extends ExceptionCatcherEventHandler<Rota
     protected Selectable doAccept(HandlerEvent<RotateSaltPasswordRequest> event) {
         Long stackId = event.getData().getResourceId();
         try {
-            Stack stack = stackService.getByIdWithLists(stackId);
+            StackDto stack = stackDtoService.getById(stackId);
             clusterBootstrapper.rotateSaltPassword(stack);
             return new RotateSaltPasswordSuccessResponse(stackId);
         } catch (Exception e) {

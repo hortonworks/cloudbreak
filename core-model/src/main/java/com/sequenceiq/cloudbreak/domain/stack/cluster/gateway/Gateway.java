@@ -28,11 +28,12 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
+import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 
 @Entity
-public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
+public class Gateway implements ProvisionEntity, WorkspaceAwareResource, GatewayView {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "gateway_generator")
@@ -155,6 +156,11 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
         return ssoProvider;
     }
 
+    @Override
+    public Secret getSignKeySecret() {
+        return signKey;
+    }
+
     public void setSsoProvider(String ssoProvider) {
         this.ssoProvider = ssoProvider;
     }
@@ -187,11 +193,16 @@ public class Gateway implements ProvisionEntity, WorkspaceAwareResource {
         return tokenCert;
     }
 
+    @Override
+    public Secret getKnoxMasterSecret() {
+        return knoxMasterSecret;
+    }
+
     public void setTokenCert(String tokenCert) {
         this.tokenCert = tokenCert;
     }
 
-    public String getKnoxMasterSecret() {
+    public String getKnoxMaster() {
         return knoxMasterSecret.getRaw();
     }
 

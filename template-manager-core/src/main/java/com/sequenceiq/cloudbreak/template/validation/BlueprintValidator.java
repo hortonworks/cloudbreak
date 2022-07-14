@@ -8,10 +8,11 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 public interface BlueprintValidator {
 
-    void validate(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups,
+    void validate(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroupView> instanceGroups,
         boolean validateServiceCardinality)
             throws BlueprintValidationException;
 

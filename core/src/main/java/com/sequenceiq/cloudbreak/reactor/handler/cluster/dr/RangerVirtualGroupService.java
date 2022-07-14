@@ -13,10 +13,10 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class RangerVirtualGroupService {
@@ -31,7 +31,7 @@ public class RangerVirtualGroupService {
     @Inject
     private EnvironmentConfigProvider environmentConfigProvider;
 
-    public String getRangerVirtualGroup(Stack stack) {
+    public String getRangerVirtualGroup(StackView stack) {
         if (CloudPlatform.MOCK.equalsIgnoreCase(stack.getCloudPlatform())) {
             return "mockGroup";
         }

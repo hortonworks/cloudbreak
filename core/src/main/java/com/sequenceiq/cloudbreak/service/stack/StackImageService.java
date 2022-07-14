@@ -24,12 +24,14 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class StackImageService {
@@ -51,7 +53,10 @@ public class StackImageService {
     @Inject
     private PlatformStringTransformer platformStringTransformer;
 
-    public void storeNewImageComponent(Stack stack, StatedImage targetImage) {
+    @Inject
+    private StackDtoService stackDtoService;
+
+    public void storeNewImageComponent(StackDtoDelegate stack, StatedImage targetImage) {
         try {
             replaceStackImageComponent(stack, targetImage);
         } catch (IllegalArgumentException e) {
@@ -60,12 +65,12 @@ public class StackImageService {
         }
     }
 
-    public Image getImageModelFromStatedImage(Stack stack, Image currentImage, StatedImage targetImage) {
+    public Image getImageModelFromStatedImage(StackView stack, Image currentImage, StatedImage targetImage) {
         try {
             ImageCatalogPlatform platformString = platformStringTransformer.getPlatformStringForImageCatalog(
                     stack.getCloudPlatform(),
                     stack.getPlatformVariant());
-            String cloudPlatform = platform(stack.cloudPlatform()).value().toLowerCase();
+            String cloudPlatform = platform(stack.getCloudPlatform()).value().toLowerCase();
             String newImageName = imageService.determineImageName(cloudPlatform, platformString, stack.getRegion(), targetImage.getImage());
             return new Image(newImageName, currentImage.getUserdata(), targetImage.getImage().getOs(), targetImage.getImage().getOsType(),
                     targetImage.getImageCatalogUrl(), targetImage.getImageCatalogName(), targetImage.getImage().getUuid(),
@@ -86,8 +91,8 @@ public class StackImageService {
         }
     }
 
-    public Image getCurrentImage(Stack stack) throws CloudbreakImageNotFoundException {
-            return componentConfigProviderService.getImage(stack.getId());
+    public Image getCurrentImage(Long stackId) throws CloudbreakImageNotFoundException {
+            return componentConfigProviderService.getImage(stackId);
     }
 
     public void changeImageCatalog(Stack stack, String imageCatalog) {
@@ -125,10 +130,11 @@ public class StackImageService {
         }
     }
 
-    private void replaceStackImageComponent(Stack stack, StatedImage targetImage) {
+    private void replaceStackImageComponent(StackDtoDelegate stack, StatedImage targetImage) {
         try {
-            Image newImage = getImageModelFromStatedImage(stack, componentConfigProviderService.getImage(stack.getId()), targetImage);
-            Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(newImage), stack);
+            Image newImage = getImageModelFromStatedImage(stack.getStack(), componentConfigProviderService.getImage(stack.getId()), targetImage);
+            Stack stackReference = stackDtoService.getStackReferenceById(stack.getId());
+            Component imageComponent = new Component(ComponentType.IMAGE, ComponentType.IMAGE.name(), new Json(newImage), stackReference);
             componentConfigProviderService.replaceImageComponentWithNew(imageComponent);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.info("Could not find image", e);
@@ -147,7 +153,7 @@ public class StackImageService {
                 () -> {
                     try {
                         return Optional.ofNullable(imageCatalogService.getImageByCatalogName(
-                                stack.getWorkspace().getId(), image.getImageId(), imageCatalog.getName()));
+                                stack.getWorkspaceId(), image.getImageId(), imageCatalog.getName()));
                     } catch (Exception e) {
                         LOGGER.warn("Error during obtaining image catalog", e);
                         return Optional.empty();
@@ -156,14 +162,14 @@ public class StackImageService {
     }
 
     public Optional<StatedImage> getStatedImageInternal(Stack stack) throws CloudbreakImageNotFoundException {
-        com.sequenceiq.cloudbreak.cloud.model.Image image = getCurrentImage(stack);
+        com.sequenceiq.cloudbreak.cloud.model.Image image = getCurrentImage(stack.getId());
         ImageCatalog imageCatalog = getImageCatalogFromStackAndImage(stack, image);
         return getStatedImageInternal(stack, image, imageCatalog);
     }
 
     public ImageCatalog getImageCatalogFromStackAndImage(Stack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         return ThreadBasedUserCrnProvider.doAs(getInternalUserCrn(stack),
-                () -> imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), image.getImageCatalogName()));
+                () -> imageCatalogService.getImageCatalogByName(stack.getWorkspaceId(), image.getImageCatalogName()));
     }
 
     private String getInternalUserCrn(Stack stack) {

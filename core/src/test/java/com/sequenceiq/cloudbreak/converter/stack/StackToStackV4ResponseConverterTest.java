@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyLong;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,12 +19,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -73,15 +74,18 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 
+@ExtendWith(MockitoExtension.class)
 public class StackToStackV4ResponseConverterTest extends AbstractEntityConverterTest<Stack> {
 
     @InjectMocks
@@ -150,27 +154,28 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
     @Mock
     private LoadBalancerToLoadBalancerResponseConverter loadBalancerToLoadBalancerResponseConverter;
 
+    @Mock
+    private HostGroupService hostGroupService;
+
     private CredentialResponse credentialResponse;
 
-    @Before
+    @BeforeEach
     public void setUp() throws CloudbreakImageNotFoundException {
-        underTest = new StackToStackV4ResponseConverter();
-        MockitoAnnotations.initMocks(this);
-        when(imageService.getImage(anyLong())).thenReturn(new Image("cb-centos66-amb200-2015-05-25", Collections.emptyMap(), "redhat6",
+        lenient().when(imageService.getImage(anyLong())).thenReturn(new Image("cb-centos66-amb200-2015-05-25", Collections.emptyMap(), "redhat6",
                 "redhat6", "", "default", "default-id", new HashMap<>()));
-        when(componentConfigProviderService.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
-        when(componentConfigProviderService.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
-        when(componentConfigProviderService.getTelemetry(anyLong())).thenReturn(new Telemetry());
-        Mockito.doAnswer(answer  -> {
+        lenient().when(componentConfigProviderService.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
+        lenient().when(componentConfigProviderService.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
+        lenient().when(componentConfigProviderService.getTelemetry(anyLong())).thenReturn(new Telemetry());
+        lenient().doAnswer(answer  -> {
             StackV4Response result = answer.getArgument(1, StackV4Response.class);
             result.setSharedService(new SharedServiceV4Response());
             return null;
-        }).when(datalakeService).addSharedServiceResponse(any(Stack.class), any(StackV4Response.class));
-        when(serviceEndpointCollector.filterByStackType(any(StackType.class), any(List.class))).thenReturn(new ArrayList());
+        }).when(datalakeService).addSharedServiceResponse(anyString(), any(StackV4Response.class));
+        lenient().when(serviceEndpointCollector.filterByStackType(any(StackType.class), any(List.class))).thenReturn(new ArrayList());
         credentialResponse = new CredentialResponse();
         credentialResponse.setName("cred-name");
         credentialResponse.setCrn("crn");
-        when(loadBalancerService.findByStackId(any())).thenReturn(Set.of());
+        lenient().when(loadBalancerService.findByStackId(any())).thenReturn(Set.of());
     }
 
     @Test
@@ -178,26 +183,26 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
 
         Stack source = getSource();
         // GIVEN
-        given(imageService.getImage(source.getId())).willReturn(mock(Image.class));
-        given(imageToStackImageV4ResponseConverter.convert(any(Image.class))).willReturn(new StackImageV4Response());
-        given(stackAuthenticationToStackAuthenticationV4ResponseConverter
-                .convert(any(StackAuthentication.class))).willReturn(new StackAuthenticationV4Response());
-        given(stackToCustomDomainsSettingsV4Response.convert(any())).willReturn(new CustomDomainSettingsV4Response());
-        given(clusterToClusterV4ResponseConverter.convert(any())).willReturn(new ClusterV4Response());
-        given(networkToNetworkV4ResponseConverter.convert(any())).willReturn(new NetworkV4Response());
-        given(workspaceToWorkspaceResourceV4ResponseConverter.convert(any())).willReturn(new WorkspaceResourceV4Response());
-        given(cloudbreakDetailsToCloudbreakDetailsV4ResponseConverter.convert(any())).willReturn(new CloudbreakDetailsV4Response());
-        given(stackToPlacementSettingsV4ResponseConverter.convert(any())).willReturn(new PlacementSettingsV4Response());
-        given(telemetryConverter.convert(any())).willReturn(new TelemetryResponse());
-        given(instanceGroupToInstanceGroupV4ResponseConverter.convert(any())).willReturn(new InstanceGroupV4Response());
-        given(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any(), any())).willReturn(new DatabaseResponse());
+        when(imageService.getImage(source.getId())).thenReturn(mock(Image.class));
+        when(imageToStackImageV4ResponseConverter.convert(any(Image.class))).thenReturn(new StackImageV4Response());
+        when(stackAuthenticationToStackAuthenticationV4ResponseConverter
+                .convert(any(StackAuthentication.class))).thenReturn(new StackAuthenticationV4Response());
+        when(stackToCustomDomainsSettingsV4Response.convert(any(StackView.class))).thenReturn(new CustomDomainSettingsV4Response());
+        when(clusterToClusterV4ResponseConverter.convert(any())).thenReturn(new ClusterV4Response());
+        when(networkToNetworkV4ResponseConverter.convert(any())).thenReturn(new NetworkV4Response());
+        when(workspaceToWorkspaceResourceV4ResponseConverter.convert(any())).thenReturn(new WorkspaceResourceV4Response());
+        when(cloudbreakDetailsToCloudbreakDetailsV4ResponseConverter.convert(any())).thenReturn(new CloudbreakDetailsV4Response());
+        when(stackToPlacementSettingsV4ResponseConverter.convert(any())).thenReturn(new PlacementSettingsV4Response());
+        when(telemetryConverter.convert(any())).thenReturn(new TelemetryResponse());
+        when(instanceGroupToInstanceGroupV4ResponseConverter.convert(any(), any(), any())).thenReturn(new InstanceGroupV4Response());
+        when(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any(), any())).thenReturn(new DatabaseResponse());
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
                 "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
 
-        verify(restRequestThreadLocalService).setWorkspace(source.getWorkspace());
+        verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspaceId());
     }
 
     @Test
@@ -205,17 +210,17 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         Stack source = getSource();
         // GIVEN
         getSource().setCluster(null);
-        given(imageService.getImage(source.getId())).willReturn(mock(Image.class));
-        given(imageToStackImageV4ResponseConverter.convert(any())).willReturn(new StackImageV4Response());
-        given(stackToCustomDomainsSettingsV4Response.convert(any())).willReturn(new CustomDomainSettingsV4Response());
-        given(stackAuthenticationToStackAuthenticationV4ResponseConverter.convert(any())).willReturn(new StackAuthenticationV4Response());
-        given(networkToNetworkV4ResponseConverter.convert(any())).willReturn(new NetworkV4Response());
-        given(workspaceToWorkspaceResourceV4ResponseConverter.convert(any())).willReturn(new WorkspaceResourceV4Response());
-        given(cloudbreakDetailsToCloudbreakDetailsV4ResponseConverter.convert(any())).willReturn(new CloudbreakDetailsV4Response());
-        given(stackToPlacementSettingsV4ResponseConverter.convert(any())).willReturn(new PlacementSettingsV4Response());
-        given(telemetryConverter.convert(any())).willReturn(new TelemetryResponse());
-        given(instanceGroupToInstanceGroupV4ResponseConverter.convert(any())).willReturn(new InstanceGroupV4Response());
-        given(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any(), any())).willReturn(new DatabaseResponse());
+        when(imageService.getImage(source.getId())).thenReturn(mock(Image.class));
+        when(imageToStackImageV4ResponseConverter.convert(any())).thenReturn(new StackImageV4Response());
+        when(stackToCustomDomainsSettingsV4Response.convert(any(StackView.class))).thenReturn(new CustomDomainSettingsV4Response());
+        when(stackAuthenticationToStackAuthenticationV4ResponseConverter.convert(any())).thenReturn(new StackAuthenticationV4Response());
+        when(networkToNetworkV4ResponseConverter.convert(any())).thenReturn(new NetworkV4Response());
+        when(workspaceToWorkspaceResourceV4ResponseConverter.convert(any())).thenReturn(new WorkspaceResourceV4Response());
+        when(cloudbreakDetailsToCloudbreakDetailsV4ResponseConverter.convert(any())).thenReturn(new CloudbreakDetailsV4Response());
+        when(stackToPlacementSettingsV4ResponseConverter.convert(any())).thenReturn(new PlacementSettingsV4Response());
+        when(telemetryConverter.convert(any())).thenReturn(new TelemetryResponse());
+        when(instanceGroupToInstanceGroupV4ResponseConverter.convert(any(), any(), any())).thenReturn(new InstanceGroupV4Response());
+        when(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any(), any())).thenReturn(new DatabaseResponse());
         // WHEN
         StackV4Response result = underTest.convert(source);
         // THEN
@@ -223,7 +228,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
                 "telemetry", "environmentName", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
 
         assertNull(result.getCluster());
-        verify(restRequestThreadLocalService).setWorkspace(source.getWorkspace());
+        verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspaceId());
     }
 
     @Test
@@ -232,18 +237,18 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
 
         Stack source = getSource();
         // GIVEN
-        given(imageService.getImage(source.getId())).willReturn(mock(Image.class));
-        given(imageToStackImageV4ResponseConverter.convert(any())).willReturn(new StackImageV4Response());
-        given(stackToCustomDomainsSettingsV4Response.convert(any())).willReturn(new CustomDomainSettingsV4Response());
-        given(stackAuthenticationToStackAuthenticationV4ResponseConverter.convert(any())).willReturn(new StackAuthenticationV4Response());
-        given(networkToNetworkV4ResponseConverter.convert(any())).willReturn(new NetworkV4Response());
-        given(workspaceToWorkspaceResourceV4ResponseConverter.convert(any())).willReturn(new WorkspaceResourceV4Response());
-        given(cloudbreakDetailsToCloudbreakDetailsV4ResponseConverter.convert(any())).willReturn(new CloudbreakDetailsV4Response());
-        given(stackToPlacementSettingsV4ResponseConverter.convert(any())).willReturn(new PlacementSettingsV4Response());
-        given(telemetryConverter.convert(any())).willReturn(new TelemetryResponse());
-        given(instanceGroupToInstanceGroupV4ResponseConverter.convert(any())).willReturn(new InstanceGroupV4Response());
-        given(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any(), any())).willReturn(new DatabaseResponse());
-        given(loadBalancerService.findByStackId(any())).willReturn(loadBalancers);
+        when(imageService.getImage(source.getId())).thenReturn(mock(Image.class));
+        when(imageToStackImageV4ResponseConverter.convert(any())).thenReturn(new StackImageV4Response());
+        when(stackToCustomDomainsSettingsV4Response.convert(any(StackView.class))).thenReturn(new CustomDomainSettingsV4Response());
+        when(stackAuthenticationToStackAuthenticationV4ResponseConverter.convert(any())).thenReturn(new StackAuthenticationV4Response());
+        when(networkToNetworkV4ResponseConverter.convert(any())).thenReturn(new NetworkV4Response());
+        when(workspaceToWorkspaceResourceV4ResponseConverter.convert(any())).thenReturn(new WorkspaceResourceV4Response());
+        when(cloudbreakDetailsToCloudbreakDetailsV4ResponseConverter.convert(any())).thenReturn(new CloudbreakDetailsV4Response());
+        when(stackToPlacementSettingsV4ResponseConverter.convert(any())).thenReturn(new PlacementSettingsV4Response());
+        when(telemetryConverter.convert(any())).thenReturn(new TelemetryResponse());
+        when(instanceGroupToInstanceGroupV4ResponseConverter.convert(any(), any(), any())).thenReturn(new InstanceGroupV4Response());
+        when(databaseAvailabilityTypeToDatabaseResponseConverter.convert(any(), any())).thenReturn(new DatabaseResponse());
+        when(loadBalancerService.findByStackId(any())).thenReturn(loadBalancers);
         // WHEN
         source.setLoadBalancers(loadBalancers);
         StackV4Response result = underTest.convert(source);
@@ -251,7 +256,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         assertNotNull(result.getLoadBalancers());
         assertTrue(result.isEnableLoadBalancer());
 
-        verify(restRequestThreadLocalService).setWorkspace(source.getWorkspace());
+        verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspaceId());
     }
 
     @Override
@@ -287,6 +292,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         stack.setEnvironmentCrn("");
         stack.setTerminated(100L);
         stack.setExternalDatabaseCreationType(DatabaseAvailabilityType.HA);
+        stack.setDatalakeCrn("");
         return stack;
     }
 }

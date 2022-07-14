@@ -11,11 +11,11 @@ import com.sequenceiq.cloudbreak.ccm.termination.CcmResourceTerminationListener;
 import com.sequenceiq.cloudbreak.ccm.termination.CcmV2AgentTerminationListener;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.CcmKeyDeregisterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.CcmKeyDeregisterSuccess;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -31,7 +31,7 @@ public class CcmKeyDeregisterHandler implements EventHandler<CcmKeyDeregisterReq
     private EventBus eventBus;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private CcmResourceTerminationListener ccmResourceTerminationListener;
@@ -44,7 +44,7 @@ public class CcmKeyDeregisterHandler implements EventHandler<CcmKeyDeregisterReq
         CcmKeyDeregisterRequest request = requestEvent.getData();
         Selectable result;
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
+            StackView stack = stackDtoService.getStackViewById(request.getResourceId());
             try {
                 if (request.getTunnel().useCcmV1()) {
                     LOGGER.debug("De-registering MinaSshdServiceId '{}' from CCM. Cluster CRN: {}", stack.getMinaSshdServiceId(), stack.getResourceCrn());

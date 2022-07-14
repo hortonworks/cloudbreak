@@ -113,7 +113,7 @@ public class MaintenanceModeValidationActions {
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                maintenanceModeValidationService.handleValidationFailure(context.getStackView().getId(),
+                maintenanceModeValidationService.handleValidationFailure(context.getStackId(),
                         payload.getException());
                 sendEvent(context, VALIDATION_FAIL_HANDLED_EVENT.event(), payload);
             }

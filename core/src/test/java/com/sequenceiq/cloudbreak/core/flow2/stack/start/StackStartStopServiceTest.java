@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_D
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -18,13 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
-import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @ExtendWith(MockitoExtension.class)
 class StackStartStopServiceTest {
@@ -44,14 +43,6 @@ class StackStartStopServiceTest {
     @InjectMocks
     private StackStartStopService underTest;
 
-    static Stream<Arguments> stackScenarios() {
-        return Stream.concat(
-                Arrays.stream(Status.values()).map(status -> Arguments.of(status.name(), stackWithStatus(status), isStopPossibleByStatus(status))),
-                Stream.of(Arguments.of("Null stack", null, false),
-                        Arguments.of("Null stack status", stackWithStatus(null), false))
-        );
-    }
-
     static Stream<Arguments> stackViewScenarios() {
         return Stream.concat(
                 Arrays.stream(Status.values()).map(status -> Arguments.of(status.name(), stackViewWithStatus(status), isStopPossibleByStatus(status))),
@@ -60,30 +51,19 @@ class StackStartStopServiceTest {
         );
     }
 
-    private static Stack stackWithStatus(Status status) {
-        Stack stack = new Stack();
-        StackStatus stackStatus = new StackStatus(stack, status, null, null);
-        stack.setStackStatus(stackStatus);
-        return stack;
-    }
-
     private static StackView stackViewWithStatus(Status status) {
-        StackStatusView stackStatusView = new StackStatusView();
-        stackStatusView.setStatus(status);
-        return new StackView(10L, "stackview", "platform", stackStatusView);
+        StackView stackView = spy(StackView.class);
+        when(stackView.getId()).thenReturn(10L);
+        when(stackView.getName()).thenReturn("stackview");
+        when(stackView.getCloudPlatform()).thenReturn("platform");
+        when(stackView.getStatus()).thenReturn(status);
+        return stackView;
     }
 
     private static boolean isStopPossibleByStatus(Status status) {
         return status == STOP_REQUESTED ||
                 status == STOP_IN_PROGRESS ||
                 status == EXTERNAL_DATABASE_STOP_FINISHED;
-    }
-
-    @ParameterizedTest(name = "{0} -> {2}")
-    @MethodSource("stackScenarios")
-    void isStopPossibleTest(String testName, Stack stack, boolean expected) {
-        boolean result = underTest.isStopPossible(stack);
-        assertThat(result).isEqualTo(expected);
     }
 
     @ParameterizedTest(name = "{0} -> {2}")

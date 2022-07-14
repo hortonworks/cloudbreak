@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @ExtendWith(MockitoExtension.class)
 public class CmSyncImageCollectorServiceTest {
@@ -166,9 +165,7 @@ public class CmSyncImageCollectorServiceTest {
     private void setupStack(boolean setupWorkspace, boolean setupCloudPlatform) {
         when(stack.getId()).thenReturn(STACK_ID);
         if (setupWorkspace) {
-            Workspace workspace = mock(Workspace.class);
-            when(workspace.getId()).thenReturn(WORKSPCE_ID);
-            when(stack.getWorkspace()).thenReturn(workspace);
+            when(stack.getWorkspaceId()).thenReturn(WORKSPCE_ID);
         }
         if (setupCloudPlatform) {
             when(stack.getCloudPlatform()).thenReturn(CURRENT_CLOUD_PLATFORM);

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 
 import static java.util.stream.Collectors.toMap;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -23,20 +22,22 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
+import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Configuration
 public class StackDownscaleActions {
@@ -59,7 +60,10 @@ public class StackDownscaleActions {
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     @Inject
-    private EnvironmentClientService environmentClientService;
+    private StackDtoService stackDtoService;
+
+    @Inject
+    private StackToCloudStackConverter stackToCloudStackConverter;
 
     @Bean(name = "DOWNSCALE_COLLECT_RESOURCES_STATE")
     public Action<?, ?> stackDownscaleCollectResourcesAction() {
@@ -67,31 +71,28 @@ public class StackDownscaleActions {
             @Override
             protected void doExecute(StackScalingFlowContext context, StackDownscaleTriggerEvent payload, Map<Object, Object> variables) {
                 stackDownscaleService.startStackDownscale(context, payload);
-                Stack stack = context.getStack();
-                LOGGER.debug("Assembling downscale stack event for stack: {}", stack);
-                List<CloudResource> resources = stack.getResources().stream()
-                        .map(r -> cloudResourceConverter.convert(r))
+                StackView stack = context.getStack();
+                LOGGER.debug("Assembling downscale stack event for stack: {}", stack.getName());
+                StackDto stackDto = stackDtoService.getById(stack.getId(), true);
+                List<CloudResource> resources = stackDto.getResources()
+                        .stream().map(r -> cloudResourceConverter.convert(r))
                         .collect(Collectors.toList());
                 variables.put(RESOURCES, resources);
-                List<CloudInstance> instances = new ArrayList<>();
-                final Set<InstanceMetaData> candidatesInstanceMetadata = stack.getNotTerminatedInstanceMetaDataSet()
+                final Set<InstanceMetadataView> candidatesInstanceMetadata = stackDto.getNotTerminatedInstanceMetaData()
                         .stream()
                         .filter(im -> context.getHostGroupWithPrivateIds().values().stream().anyMatch(privateIds -> privateIds.contains(im.getPrivateId())))
                         .collect(Collectors.toSet());
 
-                DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
-                candidatesInstanceMetadata.forEach(metaData -> {
-                    CloudInstance cloudInstance = metadataConverter.convert(metaData, environment, stack.getStackAuthentication());
-                    instances.add(cloudInstance);
-                });
+                List<CloudInstance> instances = metadataConverter.convert(candidatesInstanceMetadata, stack);
                 variables.put(INSTANCES, instances);
 
                 final Map<String, String> addressesByFqdn = candidatesInstanceMetadata.stream()
                         .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null && instanceMetaData.getPrivateIp() != null)
-                        .collect(toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getPrivateIp));
-                clusterPublicEndpointManagementService.downscale(stack, addressesByFqdn);
+                        .collect(toMap(InstanceMetadataView::getDiscoveryFQDN, InstanceMetadataView::getPrivateIp));
+                clusterPublicEndpointManagementService.downscale(stackDto, addressesByFqdn);
+                CloudStack cloudStack = stackToCloudStackConverter.convert(stackDto);
                 Selectable request = new DownscaleStackCollectResourcesRequest(context.getCloudContext(),
-                        context.getCloudCredential(), context.getCloudStack(), resources, instances);
+                        context.getCloudCredential(), cloudStack, resources, instances);
                 sendEvent(context, request);
             }
         };
@@ -102,7 +103,9 @@ public class StackDownscaleActions {
         return new AbstractStackDownscaleAction<>(DownscaleStackCollectResourcesResult.class) {
             @Override
             protected void doExecute(StackScalingFlowContext context, DownscaleStackCollectResourcesResult payload, Map<Object, Object> variables) {
-                Selectable request = new DownscaleStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
+                StackDto stackDto = stackDtoService.getById(context.getStackId());
+                CloudStack cloudStack = stackToCloudStackConverter.convert(stackDto);
+                Selectable request = new DownscaleStackRequest(context.getCloudContext(), context.getCloudCredential(), cloudStack,
                         (List<CloudResource>) variables.get(RESOURCES), (List<CloudInstance>) variables.get(INSTANCES), payload.getResourcesToScale());
                 sendEvent(context, request);
             }
@@ -138,7 +141,7 @@ public class StackDownscaleActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackDownscaleEvent.DOWNSCALE_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(StackDownscaleEvent.DOWNSCALE_FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

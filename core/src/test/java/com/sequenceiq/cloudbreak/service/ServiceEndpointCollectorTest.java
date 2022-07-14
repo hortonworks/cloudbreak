@@ -119,58 +119,58 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testGetCmServerUrlWithYarnOrchestrator() {
-        Cluster cluster = clusterkWithOrchestrator("YARN");
+        Stack stack = stackWithOrchestrator("YARN");
         String ambariIp = CLOUDERA_MANAGER_IP;
 
-        String result = underTest.getManagerServerUrl(cluster, ambariIp);
+        String result = underTest.getManagerServerUrl(stack, ambariIp);
         assertEquals("http://127.0.0.1:8080", result);
     }
 
     @Test
     public void testGetCmServerUrlWithNullGateway() {
-        Cluster cluster = clusterkWithOrchestrator("ANY");
-        cluster.setGateway(null);
+        Stack stack = stackWithOrchestrator("ANY");
+        stack.getCluster().setGateway(null);
 
-        String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
+        String result = underTest.getManagerServerUrl(stack, CLOUDERA_MANAGER_IP);
         assertEquals("https://127.0.0.1/clouderamanager/", result);
     }
 
     @Test
     public void testGetCmServerUrlWithNoAmbariInTopologies() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("ATLAS"), exposedService("ATLAS")},
+        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("ATLAS"), exposedService("ATLAS")},
                 new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.INDIVIDUAL);
 
-        String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
+        String result = underTest.getManagerServerUrl(stack, CLOUDERA_MANAGER_IP);
         assertEquals("https://127.0.0.1/", result);
     }
 
     @Test
     public void testGetCmServerUrlWithAmbariPresentInTopologiesWithCentralGateway() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("CLOUDERA_MANAGER_UI"), exposedService("ATLAS")},
+        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("CLOUDERA_MANAGER_UI"), exposedService("ATLAS")},
                 new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.CENTRAL);
 
-        String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
+        String result = underTest.getManagerServerUrl(stack, CLOUDERA_MANAGER_IP);
         assertEquals("/gateway-path/topology1/cmf/home/", result);
     }
 
     @Test
     public void testGetCmServerUrlWithAmbariPresentInTopologiesWithIndividualGateway() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("CLOUDERA_MANAGER_UI"), exposedService("ATLAS")},
+        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("CLOUDERA_MANAGER_UI"), exposedService("ATLAS")},
                 new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.INDIVIDUAL);
-        cluster.getGateway().setGatewayPort(443);
+        stack.getCluster().getGateway().setGatewayPort(443);
 
-        String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
+        String result = underTest.getManagerServerUrl(stack, CLOUDERA_MANAGER_IP);
         assertEquals("https://127.0.0.1/gateway-path/topology1/cmf/home/", result);
     }
 
     @Test
     public void testGetCmServerUrlInTopologiesWithIndividualGatewayOnPort8443() {
         ExposedService clouderaManagerUIService = getClouderaManagerUIService();
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{clouderaManagerUIService, exposedService("ATLAS")},
+        Stack stack = createStackWithComponents(new ExposedService[]{clouderaManagerUIService, exposedService("ATLAS")},
                 new ExposedService[]{exposedService("HIVE_SERVER")}, GatewayType.INDIVIDUAL);
-        cluster.getGateway().setGatewayPort(8443);
+        stack.getCluster().getGateway().setGatewayPort(8443);
 
-        String result = underTest.getManagerServerUrl(cluster, CLOUDERA_MANAGER_IP);
+        String result = underTest.getManagerServerUrl(stack, CLOUDERA_MANAGER_IP);
         assertEquals("https://127.0.0.1:8443/gateway-path/topology1/cmf/home/", result);
     }
 
@@ -183,15 +183,15 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testPrepareClusterExposedServices() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("ATLAS")},
+        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("ATLAS")},
                 new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
-        cluster.getGateway().setGatewayPort(443);
+        stack.getCluster().getGateway().setGatewayPort(443);
 
         mockBlueprintTextProcessor();
         mockComponentLocator(Lists.newArrayList("10.0.0.1"));
 
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
-                underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
+                underTest.prepareClusterExposedServices(stack, "10.0.0.1");
 
         assertEquals(4L, clusterExposedServicesMap.keySet().size());
 
@@ -231,16 +231,16 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testPrepareClusterExposedServicesByGeneratedBlueprint() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("ATLAS")},
+        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("ATLAS")},
                 new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
-        cluster.getGateway().setGatewayPort(443);
-        cluster.setExtendedBlueprintText("extended-blueprint");
+        stack.getCluster().getGateway().setGatewayPort(443);
+        stack.getCluster().setExtendedBlueprintText("extended-blueprint");
 
         mockBlueprintTextProcessor();
         mockComponentLocator(Lists.newArrayList("10.0.0.1"));
 
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
-                underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
+                underTest.prepareClusterExposedServices(stack, "10.0.0.1");
 
         assertEquals(4L, clusterExposedServicesMap.keySet().size());
 
@@ -280,18 +280,18 @@ public class ServiceEndpointCollectorTest {
 
     @Test
     public void testPrepareClusterExposedServicesIfBlueprintNull() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("ATLAS")},
+        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("ATLAS")},
                 new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
-        cluster.getGateway().setGatewayPort(443);
-        cluster.setExtendedBlueprintText("extended-blueprint");
+        stack.getCluster().getGateway().setGatewayPort(443);
+        stack.getCluster().setExtendedBlueprintText("extended-blueprint");
         Blueprint blueprint = new Blueprint();
         blueprint.setStackVersion("7.2.14");
-        cluster.setBlueprint(blueprint);
+        stack.getCluster().setBlueprint(blueprint);
         mockBlueprintTextProcessor();
         mockComponentLocator(Lists.newArrayList("10.0.0.1"));
 
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
-                underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
+                underTest.prepareClusterExposedServices(stack, "10.0.0.1");
 
         assertEquals(4L, clusterExposedServicesMap.keySet().size());
     }
@@ -300,15 +300,15 @@ public class ServiceEndpointCollectorTest {
     //If the private ip list is empty, cluster does not have any hostgroup.
     @Test
     public void testPrepareClusterExposedServicesIfPrivateIpsEmpty() {
-        Cluster cluster = createClusterWithComponents(new ExposedService[]{exposedService("ATLAS")},
+        Stack stack = createStackWithComponents(new ExposedService[]{exposedService("ATLAS")},
                 new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
-        cluster.getGateway().setGatewayPort(443);
-        cluster.setExtendedBlueprintText("extended-blueprint");
+        stack.getCluster().getGateway().setGatewayPort(443);
+        stack.getCluster().setExtendedBlueprintText("extended-blueprint");
         mockBlueprintTextProcessor();
         when(componentLocatorService.getComponentLocation(any(), any(), any())).thenReturn(emptyMap());
 
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
-                underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
+                underTest.prepareClusterExposedServices(stack, "10.0.0.1");
 
         assertEquals(4L, clusterExposedServicesMap.keySet().size());
     }
@@ -373,7 +373,7 @@ public class ServiceEndpointCollectorTest {
         return gatewayTopology;
     }
 
-    private Cluster clusterkWithOrchestrator(String orchestratorType) {
+    private Stack stackWithOrchestrator(String orchestratorType) {
         Cluster cluster = new Cluster();
         Stack stack = new Stack();
         Orchestrator orchestrator = new Orchestrator();
@@ -381,6 +381,7 @@ public class ServiceEndpointCollectorTest {
         Gateway gateway = new Gateway();
         gateway.setPath(GATEWAY_PATH);
         stack.setOrchestrator(orchestrator);
+        stack.setCluster(cluster);
         cluster.setStack(stack);
         cluster.setGateway(gateway);
         Blueprint blueprint = new Blueprint();
@@ -389,6 +390,7 @@ public class ServiceEndpointCollectorTest {
         tenant.setName("tenant");
         workspace.setTenant(tenant);
         cluster.setWorkspace(workspace);
+        stack.setWorkspace(workspace);
         try {
             String testBlueprint = FileReaderUtils.readFileFromClasspath("/test/defaults/blueprints/hdp26-data-science-spark2-text.bp");
             blueprint.setBlueprintText(testBlueprint);
@@ -396,11 +398,12 @@ public class ServiceEndpointCollectorTest {
             throw new RuntimeException(e);
         }
         cluster.setBlueprint(blueprint);
-        return cluster;
+        return stack;
     }
 
-    private Cluster createClusterWithComponents(ExposedService[] topology1Services, ExposedService[] topology2Services, GatewayType gatewayType) {
-        Cluster cluster = clusterkWithOrchestrator("ANY");
+    private Stack createStackWithComponents(ExposedService[] topology1Services, ExposedService[] topology2Services, GatewayType gatewayType) {
+        Stack stack = stackWithOrchestrator("ANY");
+        Cluster cluster = stack.getCluster();
         GatewayTopology topology1 = gatewayTopology("topology1", topology1Services);
         topology1.setGateway(cluster.getGateway());
         GatewayTopology topology2 = gatewayTopology("topology2", topology2Services);
@@ -412,6 +415,6 @@ public class ServiceEndpointCollectorTest {
         tenant.setName("tenant");
         workspace.setTenant(tenant);
         cluster.setWorkspace(workspace);
-        return cluster;
+        return stack;
     }
 }

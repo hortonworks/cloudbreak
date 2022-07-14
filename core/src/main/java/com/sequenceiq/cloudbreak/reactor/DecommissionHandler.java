@@ -30,12 +30,10 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -52,10 +50,13 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaOperationFailedException
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -71,7 +72,7 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
     private EventBus eventBus;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private RecipeEngine recipeEngine;
@@ -124,26 +125,28 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
         Set<String> hostNames = Collections.emptySet();
         boolean forced = request.getDetails() != null && request.getDetails().isForced();
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
-            hostNames = getHostNamesForPrivateIds(request, stack);
-            ClusterDecomissionService clusterDecomissionService = getClusterDecomissionService(stack);
-            Map<String, InstanceMetaData> hostsToRemove = new HashMap<>();
+            StackDto stackDto = stackDtoService.getById(request.getResourceId());
+            StackView stack = stackDto.getStack();
+            ClusterView cluster = stackDto.getCluster();
+            hostNames = getHostNamesForPrivateIds(request, stackDto);
+            ClusterDecomissionService clusterDecomissionService = getClusterDecomissionService(stackDto);
+            Map<String, InstanceMetadataView> hostsToRemove = new HashMap<>();
             Set<String> hostGroupNames = request.getHostGroupNames();
-            for (String hostGroup : hostGroupNames) {
-                hostsToRemove.putAll(getRemovableHosts(clusterDecomissionService, stack, hostGroup, hostNames));
+            for (String hostGroupName : hostGroupNames) {
+                hostsToRemove.putAll(getRemovableHosts(clusterDecomissionService, hostGroupName, hostNames));
             }
 
             updateInstancesToDeleteRequested(hostsToRemove.values());
             if (!hostsToRemove.isEmpty()) {
-                executePreTerminationRecipes(stack, hostsToRemove.keySet());
+                executePreTerminationRecipes(stackDto, hostsToRemove.keySet());
             }
 
-            Optional<String> runtimeVersion = runtimeVersionService.getRuntimeVersion(stack.getCluster().getId());
+            Optional<String> runtimeVersion = runtimeVersionService.getRuntimeVersion(cluster.getId());
             if (entitlementService.bulkHostsRemovalFromCMSupported(Crn.fromString(stack.getResourceCrn()).getAccountId()) &&
                     CMRepositoryVersionUtil.isCmBulkHostsRemovalAllowed(runtimeVersion)) {
-                result = bulkHostsRemoval(request, hostNames, forced, stack, clusterDecomissionService, hostsToRemove);
+                result = bulkHostsRemoval(request, hostNames, forced, stackDto, clusterDecomissionService, hostsToRemove);
             } else {
-                result = singleHostsRemoval(request, hostNames, forced, stack, clusterDecomissionService, hostsToRemove);
+                result = singleHostsRemoval(request, hostNames, forced, stackDto, clusterDecomissionService, hostsToRemove);
             }
         } catch (Exception e) {
             LOGGER.info("Exception occurred during decommission.", e);
@@ -161,25 +164,25 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
-    private DecommissionResult bulkHostsRemoval(DecommissionRequest request, Set<String> hostNames, boolean forced, Stack stack,
-            ClusterDecomissionService clusterDecomissionService, Map<String, InstanceMetaData> hostsToRemove)
+    private DecommissionResult bulkHostsRemoval(DecommissionRequest request, Set<String> hostNames, boolean forced, StackDto stackDto,
+            ClusterDecomissionService clusterDecomissionService, Map<String, InstanceMetadataView> hostsToRemove)
             throws CloudbreakOrchestratorFailedException, CloudbreakException {
         try {
             clusterDecomissionService.removeHostsFromCluster(Lists.newArrayList(hostsToRemove.values()));
         } catch (ClusterClientInitException e) {
             LOGGER.warn("Bulk host removal was unsuccessful, fallback to single host removal.");
-            return singleHostsRemoval(request, hostNames, forced, stack, clusterDecomissionService, hostsToRemove);
+            return singleHostsRemoval(request, hostNames, forced, stackDto, clusterDecomissionService, hostsToRemove);
         }
-        stopClusterManagerAgent(stack, hostsToRemove.keySet(), forced);
-        cleanUpFreeIpa(stack, hostsToRemove);
+        stopClusterManagerAgent(stackDto, hostsToRemove.keySet(), forced);
+        cleanUpFreeIpa(stackDto.getStack(), hostsToRemove);
         clusterDecomissionService.deleteUnusedCredentialsFromCluster();
         updateInstancesToDecommissioned(hostsToRemove.values());
         clusterDecomissionService.restartStaleServices(forced);
         return new DecommissionResult(request, hostsToRemove.keySet());
     }
 
-    private DecommissionResult singleHostsRemoval(DecommissionRequest request, Set<String> hostNames, boolean forced, Stack stack,
-            ClusterDecomissionService clusterDecomissionService, Map<String, InstanceMetaData> hostsToRemove)
+    private DecommissionResult singleHostsRemoval(DecommissionRequest request, Set<String> hostNames, boolean forced, StackDto stackDto,
+            ClusterDecomissionService clusterDecomissionService, Map<String, InstanceMetadataView> hostsToRemove)
             throws CloudbreakOrchestratorFailedException, CloudbreakException {
         Set<String> decommissionedHostNames;
         if (hostsToRemove.isEmpty() || forced) {
@@ -187,71 +190,73 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
         } else {
             decommissionedHostNames = clusterDecomissionService.decommissionClusterNodes(hostsToRemove);
         }
-        stopClusterManagerAgent(stack, decommissionedHostNames, forced);
-        cleanUpFreeIpa(stack, hostsToRemove);
-        List<InstanceMetaData> deletedHosts = deleteHosts(decommissionedHostNames, clusterDecomissionService, hostsToRemove);
-        clusterDecomissionService.deleteUnusedCredentialsFromCluster();
-        updateInstancesToDecommissioned(deletedHosts);
-        clusterDecomissionService.restartStaleServices(forced);
+        if (!decommissionedHostNames.isEmpty()) {
+            stopClusterManagerAgent(stackDto, decommissionedHostNames, forced);
+            cleanUpFreeIpa(stackDto.getStack(), hostsToRemove);
+            List<InstanceMetadataView> deletedHosts = deleteHosts(decommissionedHostNames, clusterDecomissionService, hostsToRemove);
+            clusterDecomissionService.deleteUnusedCredentialsFromCluster();
+            updateInstancesToDecommissioned(deletedHosts);
+            clusterDecomissionService.restartStaleServices(forced);
+        }
         return new DecommissionResult(request, decommissionedHostNames);
     }
 
-    private Set<String> getHostNamesForPrivateIds(DecommissionRequest request, Stack stack) {
+    private Set<String> getHostNamesForPrivateIds(DecommissionRequest request, StackDto stackDto) {
         return request.getPrivateIds().stream().map(privateId -> {
-            Optional<InstanceMetaData> instanceMetadata = stackService.getInstanceMetadata(stack.getInstanceMetaDataAsList(), privateId);
-            return instanceMetadata.map(InstanceMetaData::getDiscoveryFQDN).orElse(null);
+            Optional<InstanceMetadataView> instanceMetadata = stackDto.getInstanceMetadata(privateId);
+            return instanceMetadata.map(InstanceMetadataView::getDiscoveryFQDN).orElse(null);
         }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
     }
 
-    private ClusterDecomissionService getClusterDecomissionService(Stack stack) {
-        return clusterApiConnectors.getConnector(stack).clusterDecomissionService();
+    private ClusterDecomissionService getClusterDecomissionService(StackDto stackDto) {
+        return clusterApiConnectors.getConnector(stackDto).clusterDecomissionService();
     }
 
-    private Map<String, InstanceMetaData> getRemovableHosts(ClusterDecomissionService decomissionService, Stack stack, String hostGroupName,
+    private Map<String, InstanceMetadataView> getRemovableHosts(ClusterDecomissionService decomissionService, String hostGroupName,
             Set<String> hostNames) {
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName)
-                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
-        return decomissionService.collectHostsToRemove(hostGroup, hostNames);
+        return decomissionService.collectHostsToRemove(hostGroupName, hostNames);
     }
 
-    private void updateInstancesToDecommissioned(Collection<InstanceMetaData> instances) {
+    private void updateInstancesToDecommissioned(Collection<InstanceMetadataView> instances) {
         updateInstanceStatuses(instances, InstanceStatus.DECOMMISSIONED, "instance successfully downscaled");
     }
 
-    private void updateInstancesToDeleteRequested(Collection<InstanceMetaData> instances) {
+    private void updateInstancesToDeleteRequested(Collection<InstanceMetadataView> instances) {
         updateInstanceStatuses(instances, InstanceStatus.DELETE_REQUESTED, "delete requested for instance");
     }
 
-    private void updateInstanceStatuses(Collection<InstanceMetaData> instances, InstanceStatus instanceStatus, String statusReason) {
-        instances.forEach(instance -> instanceMetaDataService.updateInstanceStatus(instance, instanceStatus, statusReason));
+    private void updateInstanceStatuses(Collection<InstanceMetadataView> instances, InstanceStatus instanceStatus, String statusReason) {
+        List<Long> instanceIds = instances.stream().map(InstanceMetadataView::getId).collect(Collectors.toList());
+        instanceMetaDataService.updateAllInstancesToStatus(instanceIds, instanceStatus, statusReason);
     }
 
-    private void executePreTerminationRecipes(Stack stack, Set<String> hostNames) {
+    private void executePreTerminationRecipes(StackDto stackDto, Set<String> hostNames) {
         try {
-            Set<HostGroup> byClusterWithRecipes = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
-            recipeEngine.executePreTerminationRecipes(stack, byClusterWithRecipes, hostNames);
+            Set<HostGroup> byClusterWithRecipes = hostGroupService.getByClusterWithRecipes(stackDto.getCluster().getId());
+            recipeEngine.executePreTerminationRecipes(stackDto, byClusterWithRecipes, hostNames);
         } catch (Exception ex) {
             LOGGER.warn(ex.getLocalizedMessage(), ex);
         }
     }
 
-    private void stopClusterManagerAgent(Stack stack, Set<String> decommissionedHostNames, boolean forced) throws CloudbreakOrchestratorFailedException {
+    private void stopClusterManagerAgent(StackDto stackDto, Set<String> decommissionedHostNames, boolean forced) throws CloudbreakOrchestratorFailedException {
+        StackView stack = stackDto.getStack();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-        Set<Node> decommissionedNodes = stackUtil.collectNodesFromHostnames(stack, decommissionedHostNames);
-        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        Set<Node> allNodes = stackUtil.collectNodes(stack);
+        Set<Node> decommissionedNodes = stackUtil.collectNodes(stackDto, decommissionedHostNames);
+        GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
+        Set<Node> allNodes = stackUtil.collectNodes(stackDto);
         hostOrchestrator.stopClusterManagerAgent(
-                stack,
+                stackDto,
                 gatewayConfig,
                 allNodes,
                 decommissionedNodes,
-                clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()),
+                clusterDeletionBasedModel(stack.getId(), stackDto.getCluster().getId()),
                 new CmAgentStopFlags(kerberosDetailService.isAdJoinable(kerberosConfig),
-                    kerberosDetailService.isIpaJoinable(kerberosConfig),
-                    forced));
+                        kerberosDetailService.isIpaJoinable(kerberosConfig),
+                        forced));
     }
 
-    private void cleanUpFreeIpa(Stack stack, Map<String, InstanceMetaData> hostsToRemove) {
+    private void cleanUpFreeIpa(StackView stack, Map<String, InstanceMetadataView> hostsToRemove) {
         try {
             freeIpaCleanupService.cleanupOnScale(stack, hostsToRemove.keySet(), Set.of());
         } catch (FreeIpaOperationFailedException | CloudbreakServiceException e) {
@@ -259,9 +264,9 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
         }
     }
 
-    private List<InstanceMetaData> deleteHosts(Set<String> decommissionedHostNames, ClusterDecomissionService clusterDecomissionService,
-            Map<String, InstanceMetaData> hostsToRemove) {
-        List<InstanceMetaData> decommissionedInstances = decommissionedHostNames.stream()
+    private List<InstanceMetadataView> deleteHosts(Set<String> decommissionedHostNames, ClusterDecomissionService clusterDecomissionService,
+            Map<String, InstanceMetadataView> hostsToRemove) {
+        List<InstanceMetadataView> decommissionedInstances = decommissionedHostNames.stream()
                 .map(hostsToRemove::get)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());

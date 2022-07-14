@@ -5,6 +5,7 @@ import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -33,6 +34,7 @@ public class CheckFreeIpaExistsHandler extends ExceptionCatcherEventHandler<Chec
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
 
     @Inject
+    @Qualifier("stackViewServiceDeprecated")
     private StackViewService stackViewService;
 
     @Inject

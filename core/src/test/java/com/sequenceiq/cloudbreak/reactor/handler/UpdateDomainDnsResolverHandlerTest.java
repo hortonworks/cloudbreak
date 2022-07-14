@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.reactor.handler;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,8 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpdateDomainDnsResolverRequest;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 
 import reactor.bus.Event;
@@ -27,7 +31,7 @@ public class UpdateDomainDnsResolverHandlerTest {
     private EventBus eventBus;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
@@ -37,47 +41,51 @@ public class UpdateDomainDnsResolverHandlerTest {
 
     @Test
     public void testUpdateDuringUpscale() {
-        when(stackService.getByIdWithLists(any())).thenReturn(stack(DnsResolverType.FREEIPA_FOR_ENV));
+        StackDto stack = stack(DnsResolverType.FREEIPA_FOR_ENV);
+        when(stackDtoService.getById(any())).thenReturn(stack);
         when(targetedUpscaleSupportService.getActualDnsResolverType(any())).thenReturn(DnsResolverType.LOCAL_UNBOUND);
-        when(stackService.save(any())).thenReturn(new Stack());
 
         underTest.accept(new Event<>(new UpdateDomainDnsResolverRequest(1L)));
 
-        verify(stackService, times(1)).getByIdWithLists(any());
-        verify(stackService, times(1)).save(any());
+        verify(stackDtoService, times(1)).getById(any());
+        verify(stackDtoService, times(0)).updateDomainDnsResolver(anyLong(), eq(DnsResolverType.FREEIPA_FOR_ENV));
         verify(targetedUpscaleSupportService, times(1)).getActualDnsResolverType(any());
         verify(eventBus, times(1)).notify(any(Object.class), any(Event.class));
     }
 
     @Test
     public void testSkipUpdateDuringUpscale() {
-        when(stackService.getByIdWithLists(any())).thenReturn(stack(DnsResolverType.FREEIPA_FOR_ENV));
+        StackDto stack = stack(DnsResolverType.FREEIPA_FOR_ENV);
+        when(stackDtoService.getById(any())).thenReturn(stack);
         when(targetedUpscaleSupportService.getActualDnsResolverType(any())).thenReturn(DnsResolverType.FREEIPA_FOR_ENV);
 
         underTest.accept(new Event<>(new UpdateDomainDnsResolverRequest(1L)));
 
-        verify(stackService, times(1)).getByIdWithLists(any());
-        verify(stackService, times(0)).save(any());
+        verify(stackDtoService, times(1)).getById(any());
+        verify(stackDtoService, times(0)).updateDomainDnsResolver(anyLong(), eq(DnsResolverType.FREEIPA_FOR_ENV));
         verify(targetedUpscaleSupportService, times(1)).getActualDnsResolverType(any());
         verify(eventBus, times(1)).notify(any(Object.class), any(Event.class));
     }
 
     @Test
     public void testUpdateIfThereIsErrorDuringUpdate() {
-        when(stackService.getByIdWithLists(any())).thenReturn(new Stack());
+        StackDto stack = stack(DnsResolverType.UNKNOWN);
+        when(stackDtoService.getById(any())).thenReturn(stack);
         when(targetedUpscaleSupportService.getActualDnsResolverType(any())).thenThrow(new RuntimeException("whatever"));
 
         underTest.accept(new Event<>(new UpdateDomainDnsResolverRequest(1L)));
 
-        verify(stackService, times(1)).getByIdWithLists(any());
-        verify(stackService, times(0)).save(any());
+        verify(stackDtoService, times(1)).getById(any());
+        verify(stackDtoService, times(0)).updateDomainDnsResolver(anyLong(), eq(DnsResolverType.FREEIPA_FOR_ENV));
         verify(targetedUpscaleSupportService, times(1)).getActualDnsResolverType(any());
         verify(eventBus, times(1)).notify(any(Object.class), any(Event.class));
     }
 
-    private Stack stack(DnsResolverType dnsResolverType) {
+    private StackDto stack(DnsResolverType dnsResolverType) {
+        StackDto stackDto = mock(StackDto.class);
         Stack stack = new Stack();
         stack.setDomainDnsResolver(dnsResolverType);
-        return stack;
+        when(stackDto.getStack()).thenReturn(stack);
+        return stackDto;
     }
 }

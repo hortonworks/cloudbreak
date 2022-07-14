@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 public interface ClusterTemplateRepository extends WorkspaceResourceRepository<ClusterTemplate, Long> {
 
     @Override
-    <S extends ClusterTemplate> Iterable<S> saveAll(Iterable<S> entities);
+    <S extends ClusterTemplate> List<S> saveAll(Iterable<S> entities);
 
     @Query("SELECT c FROM ClusterTemplate c WHERE c.workspace.id= :workspaceId AND c.status <> 'DEFAULT_DELETED'")
     Set<ClusterTemplate> findAllByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);

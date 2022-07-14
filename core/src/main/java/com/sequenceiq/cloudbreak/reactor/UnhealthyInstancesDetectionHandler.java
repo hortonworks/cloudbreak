@@ -9,15 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.repair.CandidateUnhealthyInstanceSelector;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstancesFinalizer;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -31,7 +31,7 @@ public class UnhealthyInstancesDetectionHandler implements EventHandler<Unhealth
     private EventBus eventBus;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private CandidateUnhealthyInstanceSelector unhealthyInstanceSelector;
@@ -50,9 +50,9 @@ public class UnhealthyInstancesDetectionHandler implements EventHandler<Unhealth
         UnhealthyInstancesDetectionResult result;
 
         Long stackId = request.getResourceId();
-        Stack stack = stackService.getByIdWithTransaction(stackId);
+        StackView stack = stackDtoService.getStackViewById(stackId);
         try {
-            Set<InstanceMetaData> candidateUnhealthyInstances = unhealthyInstanceSelector.selectCandidateUnhealthyInstances(stack.getId());
+            Set<InstanceMetadataView> candidateUnhealthyInstances = unhealthyInstanceSelector.selectCandidateUnhealthyInstances(stack.getId());
             if (candidateUnhealthyInstances.isEmpty()) {
                 result = new UnhealthyInstancesDetectionResult(request, Collections.emptySet());
             } else {

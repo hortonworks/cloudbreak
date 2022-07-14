@@ -16,12 +16,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class DiskSpaceValidationService {
@@ -67,7 +67,7 @@ public class DiskSpaceValidationService {
         return hostOrchestrator.getFreeDiskSpaceByNodes(nodes, gatewayConfigs);
     }
 
-    private Map<String, String> getNotEligibleNodes(Map<String, String> freeDiskSpaceByNodes, long parcelSize, List<InstanceMetaData> gatewayInstances) {
+    private Map<String, String> getNotEligibleNodes(Map<String, String> freeDiskSpaceByNodes, long parcelSize, List<InstanceMetadataView> gatewayInstances) {
         Map<String, Long> nodesByRequiredFreeSpace = getNodesByRequiredFreeSpace(freeDiskSpaceByNodes, parcelSize, gatewayInstances);
         return nodesByRequiredFreeSpace.entrySet().stream()
                 .filter(node -> node.getValue() > Double.parseDouble(freeDiskSpaceByNodes.get(node.getKey())))
@@ -75,17 +75,17 @@ public class DiskSpaceValidationService {
     }
 
     private Map<String, Long> getNodesByRequiredFreeSpace(Map<String, String> freeDiskSpaceByNodes, long parcelSize,
-            List<InstanceMetaData> gatewayInstances) {
+            List<InstanceMetadataView> gatewayInstances) {
         return freeDiskSpaceByNodes.entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, map -> getRequiredFreeSpace(parcelSize, gatewayInstances, map.getKey())));
     }
 
-    private long getRequiredFreeSpace(long parcelSize, List<InstanceMetaData> gatewayInstances, String hostname) {
+    private long getRequiredFreeSpace(long parcelSize, List<InstanceMetadataView> gatewayInstances, String hostname) {
         return (long) (parcelSize * (isGatewayInstance(hostname, gatewayInstances) ? GATEWAY_NODE_PARCEL_SIZE_MULTIPLIER : PARCEL_SIZE_MULTIPLIER));
     }
 
-    private boolean isGatewayInstance(String hostname, List<InstanceMetaData> gatewayInstances) {
+    private boolean isGatewayInstance(String hostname, List<InstanceMetadataView> gatewayInstances) {
         return gatewayInstances.stream()
                 .anyMatch(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null && instanceMetaData.getDiscoveryFQDN().equals(hostname));
     }

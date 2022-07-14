@@ -8,7 +8,7 @@ import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Service
 class CmMgmtYarnConfigService implements CmConfigServiceDelegate {
@@ -18,7 +18,7 @@ class CmMgmtYarnConfigService implements CmConfigServiceDelegate {
     static final String SUPPRESSION_VALUE = "{\"critical\":\"never\",\"warning\":\"never\"}";
 
     @Override
-    public void setConfigs(Stack stack, ApiRoleList apiRoleList) {
+    public void setConfigs(StackDtoDelegate stack, ApiRoleList apiRoleList) {
         if (CloudPlatform.YARN.equalsIgnoreCase(stack.getCloudPlatform())) {
             apiRoleList.getItems().forEach(this::addSuppressionConfigs);
         }

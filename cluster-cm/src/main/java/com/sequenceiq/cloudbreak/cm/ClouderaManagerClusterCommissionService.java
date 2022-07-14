@@ -19,10 +19,10 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Service
 @Scope("prototype")
@@ -30,7 +30,7 @@ public class ClouderaManagerClusterCommissionService implements ClusterCommissio
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterCommissionService.class);
 
-    private final Stack stack;
+    private final StackDtoDelegate stack;
 
     private final HttpClientConfig clientConfig;
 
@@ -42,14 +42,14 @@ public class ClouderaManagerClusterCommissionService implements ClusterCommissio
 
     private ApiClient client;
 
-    public ClouderaManagerClusterCommissionService(Stack stack, HttpClientConfig clientConfig) {
+    public ClouderaManagerClusterCommissionService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
     }
 
     @PostConstruct
     public void initApiClient() throws ClusterClientInitException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {

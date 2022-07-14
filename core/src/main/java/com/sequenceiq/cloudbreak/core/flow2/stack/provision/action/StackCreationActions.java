@@ -53,9 +53,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.service.StackCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -66,8 +65,13 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserData
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
@@ -96,6 +100,12 @@ public class StackCreationActions {
     private EnvironmentClientService environmentClientService;
 
     @Inject
+    private ResourceService resourceService;
+
+    @Inject
+    private StackDtoService stackDtoService;
+
+    @Inject
     private CloudbreakEventService eventService;
 
     @Bean(name = "VALIDATION_STATE")
@@ -115,7 +125,9 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new ValidationRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack());
+                StackDto stack = stackDtoService.getById(context.getStackId());
+                CloudStack cloudStack = cloudStackConverter.convert(stack);
+                return new ValidationRequest(context.getCloudContext(), context.getCloudCredential(), cloudStack);
             }
         };
     }
@@ -131,7 +143,7 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new CreateUserDataRequest(context.getStack().getId());
+                return new CreateUserDataRequest(context.getStackId());
             }
         };
     }
@@ -141,14 +153,16 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(CreateUserDataSuccess.class) {
             @Override
             protected void doExecute(StackCreationContext context, CreateUserDataSuccess payload, Map<Object, Object> variables) {
-                stackCreationService.setupProvision(context.getStack());
+                stackCreationService.setupProvision(context.getStackId());
                 stackCreationService.setInstanceStoreCount(context);
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new SetupRequest<SetupResult>(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack());
+                StackDto stack = stackDtoService.getById(context.getStackId());
+                CloudStack cloudStack = cloudStackConverter.convert(stack);
+                return new SetupRequest<SetupResult>(context.getCloudContext(), context.getCloudCredential(), cloudStack);
             }
         };
     }
@@ -158,14 +172,15 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(SetupResult.class) {
             @Override
             protected void doExecute(StackCreationContext context, SetupResult payload, Map<Object, Object> variables) {
-                stackCreationService.prepareImage(context.getStack(), variables);
+                stackCreationService.prepareImage(context.getStackId(), variables);
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
                 try {
-                    CloudStack cloudStack = cloudStackConverter.convert(context.getStack());
+                    StackDto stack = stackDtoService.getById(context.getStackId());
+                    CloudStack cloudStack = cloudStackConverter.convert(stack);
                     Image image = imageService.getImage(context.getCloudContext().getId());
                     return new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image);
                 } catch (CloudbreakImageNotFoundException e) {
@@ -181,13 +196,15 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) {
                 variables.put(START_DATE, new Date());
-                stackCreationService.startProvisioning(context, variables);
+                StackDto stack = stackDtoService.getById(context.getStackId());
+                CloudStack cloudStack = cloudStackConverter.convert(stack);
+                stackCreationService.startProvisioning(stack, cloudStack, variables);
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new CreateCredentialRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack());
+                return new CreateCredentialRequest(context.getCloudContext(), context.getCloudCredential());
             }
         };
     }
@@ -202,8 +219,10 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                FailurePolicy policy = Optional.ofNullable(context.getStack().getFailurePolicy()).orElse(new FailurePolicy());
-                return new LaunchStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
+                StackDto stack = stackDtoService.getById(context.getStackId());
+                CloudStack cloudStack = cloudStackConverter.convert(stack);
+                FailurePolicy policy = Optional.ofNullable(stack.getFailurePolicy()).orElse(new FailurePolicy());
+                return new LaunchStackRequest(context.getCloudContext(), context.getCloudCredential(), cloudStack,
                         policy.getAdjustmentType(), policy.getThreshold());
             }
         };
@@ -219,7 +238,9 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new LaunchLoadBalancerRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack());
+                StackDto stack = stackDtoService.getById(context.getStackId());
+                CloudStack cloudStack = cloudStackConverter.convert(stack);
+                return new LaunchLoadBalancerRequest(context.getCloudContext(), context.getCloudCredential(), cloudStack);
             }
         };
     }
@@ -229,16 +250,15 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(LaunchLoadBalancerResult.class) {
             @Override
             protected void doExecute(StackCreationContext context, LaunchLoadBalancerResult payload, Map<Object, Object> variables) {
-                Stack stack = stackCreationService.loadBalancerProvisioningFinished(context, payload, variables);
-                StackCreationContext newContext = new StackCreationContext(context.getFlowParameters(), stack, context.getCloudContext(),
-                        context.getCloudCredential(), context.getCloudStack());
-                sendEvent(newContext);
+                stackCreationService.loadBalancerProvisioningFinished(context, payload, variables);
+                sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(context.getStack());
-                List<CloudResource> cloudResources = context.getStack().getResources().stream()
+                StackDto stack = stackDtoService.getById(context.getStackId());
+                List<CloudInstance> cloudInstances = cloudStackConverter.buildInstances(stack);
+                List<CloudResource> cloudResources = resourceService.getAllByStackId(stack.getId()).stream()
                         .map(r -> cloudResourceConverter.convert(r))
                         .collect(Collectors.toList());
                 return new CollectMetadataRequest(context.getCloudContext(), context.getCloudCredential(), cloudResources, cloudInstances, cloudInstances);
@@ -251,22 +271,21 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(CollectMetadataResult.class) {
             @Override
             protected void doExecute(StackCreationContext context, CollectMetadataResult payload, Map<Object, Object> variables) {
-                Stack stack = stackCreationService.setupMetadata(context, payload);
-                StackCreationContext newContext = new StackCreationContext(context.getFlowParameters(), stack, context.getCloudContext(),
-                        context.getCloudCredential(), context.getCloudStack());
-                sendEvent(newContext);
+                stackCreationService.setupMetadata(context.getStack(), payload);
+                sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(context.getStack().getId()).stream()
-                    .map(LoadBalancer::getType)
-                    .collect(Collectors.toList());
-                List<CloudResource> cloudResources = context.getStack().getResources().stream()
+                Long stackId = context.getStackId();
+                List<LoadBalancerType> loadBalancerTypes = loadBalancerPersistenceService.findByStackId(stackId).stream()
+                        .map(LoadBalancer::getType)
+                        .collect(Collectors.toList());
+                List<CloudResource> cloudResources = resourceService.getAllByStackId(stackId).stream()
                         .map(r -> cloudResourceConverter.convert(r))
                         .collect(Collectors.toList());
                 return new CollectLoadBalancerMetadataRequest(context.getCloudContext(), context.getCloudCredential(),
-                    loadBalancerTypes, cloudResources);
+                        loadBalancerTypes, cloudResources);
             }
         };
     }
@@ -276,24 +295,20 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(CollectLoadBalancerMetadataResult.class) {
             @Override
             protected void doExecute(StackCreationContext context, CollectLoadBalancerMetadataResult payload, Map<Object, Object> variables) {
-                Stack stack = stackCreationService.setupLoadBalancerMetadata(context, payload);
-                StackCreationContext newContext = new StackCreationContext(
-                        context.getFlowParameters(),
-                        stack,
-                        context.getCloudContext(),
-                        context.getCloudCredential(),
-                        context.getCloudStack());
-                if (newContext.getStack().getTunnel().useCcm()) {
+                StackView stack = context.getStack();
+                stackCreationService.setupLoadBalancerMetadata(stack, payload);
+                if (stack.getTunnel().useCcm()) {
                     GetTlsInfoResult getTlsInfoResult = new GetTlsInfoResult(context.getCloudContext().getId(), new TlsInfo(true));
-                    sendEvent(newContext, getTlsInfoResult.selector(), getTlsInfoResult);
+                    sendEvent(context, getTlsInfoResult.selector(), getTlsInfoResult);
                 } else {
-                    sendEvent(newContext);
+                    sendEvent(context);
                 }
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                CloudStack cloudStack = cloudStackConverter.convert(context.getStack());
+                StackDto stack = stackDtoService.getById(context.getStackId());
+                CloudStack cloudStack = cloudStackConverter.convert(stack);
                 return new GetTlsInfoRequest<GetTlsInfoResult>(context.getCloudContext(), context.getCloudCredential(), cloudStack);
             }
         };
@@ -304,22 +319,18 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(GetTlsInfoResult.class) {
             @Override
             protected void doExecute(StackCreationContext context, GetTlsInfoResult payload, Map<Object, Object> variables) {
-                Stack stack = stackCreationService.saveTlsInfo(context, payload.getTlsInfo());
-                StackCreationContext newContext = new StackCreationContext(
-                        context.getFlowParameters(),
-                        stack,
-                        context.getCloudContext(),
-                        context.getCloudCredential(),
-                        context.getCloudStack());
-                sendEvent(newContext);
+                StackDto stack = stackDtoService.getById(context.getStackId());
+                stackCreationService.saveTlsInfo(stack, payload.getTlsInfo());
+                sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                Stack stack = context.getStack();
-                InstanceMetaData gatewayMetaData = stack.getPrimaryGatewayInstance();
+                StackDto stack = stackDtoService.getById(context.getStackId());
+                InstanceMetadataView gatewayMetaData = stack.getPrimaryGatewayInstance();
+                InstanceGroupView instanceGroup = stack.getInstanceGroupByInstanceGroupName(gatewayMetaData.getInstanceGroupName()).getInstanceGroup();
                 DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
-                CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData, environment, stack.getStackAuthentication());
+                CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData, instanceGroup, environment, stack.getStackAuthentication());
                 return new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(), context.getCloudCredential(), gatewayInstance);
             }
         };
@@ -330,8 +341,9 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(GetSSHFingerprintsResult.class) {
             @Override
             protected void doExecute(StackCreationContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
-                if (!context.getStack().getTunnel().useCcm()) {
-                    stackCreationService.setupTls(context);
+                StackDto stackDto = stackDtoService.getById(context.getStackId());
+                if (!stackDto.getTunnel().useCcm()) {
+                    stackCreationService.setupTls(stackDto);
                 }
                 StackWithFingerprintsEvent fingerprintsEvent = new StackWithFingerprintsEvent(payload.getResourceId(), payload.getSshFingerprints());
                 sendEvent(context, StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), fingerprintsEvent);
@@ -345,14 +357,15 @@ public class StackCreationActions {
 
             @Override
             protected void doExecute(StackCreationContext context, StackWithFingerprintsEvent payload, Map<Object, Object> variables) {
-                stackCreationService.stackCreationFinished(context.getStack());
-                getMetricService().incrementMetricCounter(MetricType.STACK_CREATION_SUCCESSFUL, context.getStack());
+                stackCreationService.stackCreationFinished(context.getStackId());
+                StackView stackView = context.getStack();
+                getMetricService().incrementMetricCounter(MetricType.STACK_CREATION_SUCCESSFUL, stackView);
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new StackEvent(StackCreationEvent.STACK_CREATION_FINISHED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(StackCreationEvent.STACK_CREATION_FINISHED_EVENT.event(), context.getStackId());
             }
         };
     }
@@ -363,21 +376,22 @@ public class StackCreationActions {
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                stackCreationService.handleStackCreationFailure(context.getStackView(), payload.getException(), context.getProvisionType());
-                getMetricService().incrementMetricCounter(MetricType.STACK_CREATION_FAILED, context.getStackView(), payload.getException());
+                StackDto stackDto = stackDtoService.getById(context.getStackId());
+                stackCreationService.handleStackCreationFailure(stackDto, payload.getException(), context.getProvisionType());
+                getMetricService().incrementMetricCounter(MetricType.STACK_CREATION_FAILED, context.getStack(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackCreationEvent.STACKCREATION_FAILURE_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(StackCreationEvent.STACKCREATION_FAILURE_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }
 
     private void handleValidationWarnings(StackCreationContext context, ValidationResult payload) {
         if (!CollectionUtils.isEmpty(payload.getWarningMessages())) {
-            eventService.fireCloudbreakEvent(context.getStack().getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLOUD_PROVIDER_VALIDATION_WARNING,
+            eventService.fireCloudbreakEvent(context.getStackId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLOUD_PROVIDER_VALIDATION_WARNING,
                     payload.getWarningMessages());
         }
     }

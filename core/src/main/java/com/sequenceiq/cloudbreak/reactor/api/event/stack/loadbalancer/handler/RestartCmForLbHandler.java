@@ -11,13 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import reactor.bus.Event;
-
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -26,10 +22,16 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.RestartCmF
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.RestartCmForLbSuccess;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+
+import reactor.bus.Event;
 
 @Component
 public class RestartCmForLbHandler extends ExceptionCatcherEventHandler<RestartCmForLbRequest> {
@@ -48,6 +50,9 @@ public class RestartCmForLbHandler extends ExceptionCatcherEventHandler<RestartC
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private StackDtoService stackDtoService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(RestartCmForLbRequest.class);
@@ -61,12 +66,13 @@ public class RestartCmForLbHandler extends ExceptionCatcherEventHandler<RestartC
     @Override
     protected Selectable doAccept(HandlerEvent<RestartCmForLbRequest> event) {
         RestartCmForLbRequest request = event.getData();
-        Stack stack = request.getStack();
-        requireNonNull(stack);
+        StackDto stackDto = stackDtoService.getById(event.getData().getResourceId());
+        requireNonNull(stackDto.getStack());
+        requireNonNull(stackDto.getCluster());
         try {
             LOGGER.debug("Restarting CM server to pick up latest config changes");
-            restartCMServer(stack);
-            clusterApiConnectors.getConnector(stack).waitForServer(stack, false);
+            restartCMServer(stackDto);
+            clusterApiConnectors.getConnector(stackDto).waitForServer(false);
             LOGGER.debug("CM server restart was successful");
             return new RestartCmForLbSuccess(request.getResourceId());
         } catch (Exception e) {
@@ -75,12 +81,13 @@ public class RestartCmForLbHandler extends ExceptionCatcherEventHandler<RestartC
         }
     }
 
-    private void restartCMServer(Stack stack) throws Exception {
-        Cluster cluster = stack.getCluster();
-        InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
-        GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.hasGateway());
+    private void restartCMServer(StackDto stackDto) throws Exception {
+        ClusterView cluster = stackDto.getCluster();
+        StackView stack = stackDto.getStack();
+        InstanceMetadataView gatewayInstance = stackDto.getPrimaryGatewayInstance();
+        GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, stackDto.getSecurityConfig(), gatewayInstance, stackDto.hasGateway());
         Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
         ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stack.getId(), cluster.getId());
-        hostOrchestrator.restartClusterManagerOnMaster(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stack), exitModel);
+        hostOrchestrator.restartClusterManagerOnMaster(gatewayConfig, gatewayFQDN, stackUtil.collectReachableNodes(stackDto), exitModel);
     }
 }

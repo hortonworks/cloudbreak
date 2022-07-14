@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariGatherInstalledComponentsRequest;
@@ -60,7 +60,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.UpscaleCheckHostMeta
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UpscaleCheckHostMetadataResult;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -72,7 +74,7 @@ public class ClusterUpscaleActions {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Bean(name = "UPLOAD_UPSCALE_RECIPES_STATE")
     public Action<?, ?> uploadUpscaleRecipesAction() {
@@ -92,7 +94,8 @@ public class ClusterUpscaleActions {
             }
 
             private String getMasterHostname(ClusterScaleTriggerEvent payload) {
-                return gatewayConfigService.getPrimaryGatewayConfigWithoutLists(stackService.get(payload.getResourceId())).getHostname();
+                StackDto stackDto = stackDtoService.getById(payload.getResourceId());
+                return gatewayConfigService.getPrimaryGatewayConfig(stackDto).getHostname();
             }
 
             @Override
@@ -407,9 +410,9 @@ public class ClusterUpscaleActions {
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackView().getId(), payload.getException());
-                getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackView(), payload.getException());
-                ClusterUpscaleFailedConclusionRequest request = new ClusterUpscaleFailedConclusionRequest(context.getStackView().getId());
+                clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackId(), payload.getException());
+                getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStack(), payload.getException());
+                ClusterUpscaleFailedConclusionRequest request = new ClusterUpscaleFailedConclusionRequest(context.getStackId());
                 sendEvent(context, request.selector(), request);
             }
         };
@@ -447,7 +450,7 @@ public class ClusterUpscaleActions {
         static final String REPAIR = "REPAIR";
 
         @Inject
-        private StackService stackService;
+        private StackDtoService stackDtoService;
 
         AbstractClusterUpscaleAction(Class<P> payloadClass) {
             super(payloadClass);
@@ -462,9 +465,10 @@ public class ClusterUpscaleActions {
         protected ClusterUpscaleContext createFlowContext(FlowParameters flowParameters, StateContext<ClusterUpscaleState,
                 ClusterUpscaleEvent> stateContext, P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
-            StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
-            MDCBuilder.buildMdcContext(stack.getClusterView());
-            return new ClusterUpscaleContext(flowParameters, stack, getHostGroupWithAdjustment(variables), isSinglePrimaryGateway(variables),
+            StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
+            ClusterView cluster = stackDtoService.getClusterViewByStackId(payload.getResourceId());
+            MDCBuilder.buildMdcContext(cluster);
+            return new ClusterUpscaleContext(flowParameters, stack, cluster, getHostGroupWithAdjustment(variables), isSinglePrimaryGateway(variables),
                     getPrimaryGatewayHostName(variables), getClusterManagerType(variables), isRepair(variables), isRestartServices(variables));
         }
 

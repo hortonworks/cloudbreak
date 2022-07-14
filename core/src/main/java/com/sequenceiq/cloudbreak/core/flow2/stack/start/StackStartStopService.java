@@ -37,7 +37,9 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.OperationException;
@@ -64,10 +66,13 @@ public class StackStartStopService {
     @Inject
     private TransactionService transactionService;
 
+    @Inject
+    private StackService stackService;
+
     public void startStackStart(StackStartStopContext context) {
-        Stack stack = context.getStack();
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_IN_PROGRESS, "Cluster infrastructure is now starting.");
-        flowMessageService.fireEventAndLog(stack.getId(), Status.START_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_STARTING);
+        StackDto stackDto = context.getStack();
+        stackUpdater.updateStackStatus(stackDto.getId(), DetailedStackStatus.START_IN_PROGRESS, "Cluster infrastructure is now starting.");
+        flowMessageService.fireEventAndLog(stackDto.getId(), Status.START_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_STARTING);
     }
 
     public void validateStackStartResult(StackStartStopContext context, StartInstancesResult startInstancesResult) {
@@ -75,11 +80,13 @@ public class StackStartStopService {
     }
 
     public void finishStackStart(StackStartStopContext context, List<CloudVmMetaDataStatus> coreInstanceMetaData) {
-        Stack stack = context.getStack();
-        if (coreInstanceMetaData.size() != stack.getFullNodeCount()) {
+        StackDto stackDto = context.getStack();
+        if (coreInstanceMetaData.size() != stackDto.getFullNodeCount()) {
             LOGGER.debug("Size of the collected metadata set does not equal the node count of the stack. [metadata size={}] [nodecount={}]",
-                    coreInstanceMetaData.size(), stack.getFullNodeCount());
+                    coreInstanceMetaData.size(), stackDto.getFullNodeCount());
         }
+        //TODO: until the save is not refactored, we need to get the entity
+        Stack stack = stackService.get(stackDto.getId());
         metadatSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, SERVICES_RUNNING);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STACK_STARTED, "Cluster infrastructure started successfully.");
         flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_INFRASTRUCTURE_STARTED);
@@ -91,15 +98,15 @@ public class StackStartStopService {
     }
 
     public void startStackStop(StackStartStopContext context) {
-        Stack stack = context.getStack();
-        if (isStopPossible(stack)) {
+        StackDto stack = context.getStack();
+        if (isStopPossible(stack.getStack())) {
             stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.STOP_IN_PROGRESS, "Cluster infrastructure is now stopping.");
             flowMessageService.fireEventAndLog(stack.getId(), Status.STOP_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_STOPPING);
         }
     }
 
     public void finishStackStop(StackStartStopContext context, StopInstancesResult stopInstancesResult) {
-        Stack stack = context.getStack();
+        StackDto stack = context.getStack();
         try {
             transactionService.required(() -> updateInstancesToStopped(stack, stopInstancesResult.getResults().getResults()));
         } catch (TransactionExecutionException e) {
@@ -112,7 +119,7 @@ public class StackStartStopService {
         flowMessageService.fireEventAndLog(stack.getId(), STOPPED.name(), STACK_INFRASTRUCTURE_STOPPED);
     }
 
-    private void updateInstancesToStopped(Stack stack, Collection<CloudVmInstanceStatus> instanceStatuses) {
+    private void updateInstancesToStopped(StackDto stack, Collection<CloudVmInstanceStatus> instanceStatuses) {
         Set<InstanceMetaData> allInstanceMetadataSet = instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(stack.getId());
         for (InstanceMetaData metaData : allInstanceMetadataSet) {
             Optional<CloudVmInstanceStatus> status = instanceStatuses.stream()
@@ -135,15 +142,6 @@ public class StackStartStopService {
     }
 
     public boolean isStopPossible(StackView stack) {
-        if (stack != null && (stack.isStopInProgress() || stack.isExternalDatabaseStopped())) {
-            return true;
-        } else {
-            LOGGER.debug("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
-            return false;
-        }
-    }
-
-    public boolean isStopPossible(Stack stack) {
         if (stack != null && (stack.isStopInProgress() || stack.isExternalDatabaseStopped())) {
             return true;
         } else {

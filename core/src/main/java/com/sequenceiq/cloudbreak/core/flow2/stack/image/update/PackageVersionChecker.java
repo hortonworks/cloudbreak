@@ -5,11 +5,11 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_PACKAGE_VERS
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -22,11 +22,11 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.Package;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class PackageVersionChecker {
@@ -42,7 +42,7 @@ public class PackageVersionChecker {
     @Inject
     private CloudbreakMessagesService messagesService;
 
-    public CheckResult compareImageAndInstancesMandatoryPackageVersion(StatedImage newImage, Set<InstanceMetaData> instanceMetaDataSet) {
+    public CheckResult compareImageAndInstancesMandatoryPackageVersion(StatedImage newImage, Collection<InstanceMetadataView> instanceMetaDataSet) {
         Map<String, String> packageVersions = newImage.getImage().getPackageVersions();
         List<String> packagesToCompare;
         packagesToCompare = newImage.getImage().isPrewarmed()
@@ -83,7 +83,7 @@ public class PackageVersionChecker {
         return CheckResult.ok();
     }
 
-    public CheckResult checkInstancesHaveAllMandatoryPackageVersion(Set<InstanceMetaData> instanceMetaDataSet) {
+    public CheckResult checkInstancesHaveAllMandatoryPackageVersion(Collection<InstanceMetadataView> instanceMetaDataSet) {
         Map<String, List<String>> instancesWithMissingPackageVersions = instanceMetadataUpdater.collectInstancesWithMissingPackageVersions(instanceMetaDataSet);
         if (!instancesWithMissingPackageVersions.isEmpty()) {
             String message = messagesService.getMessage(CLUSTER_PACKAGE_VERSIONS_ON_INSTANCES_ARE_MISSING.getMessage(),
@@ -96,7 +96,7 @@ public class PackageVersionChecker {
         return CheckResult.ok();
     }
 
-    public CheckResult checkInstancesHaveMultiplePackageVersions(Set<InstanceMetaData> instanceMetaDataSet) {
+    public CheckResult checkInstancesHaveMultiplePackageVersions(Collection<InstanceMetadataView> instanceMetaDataSet) {
         List<String> packagesWithMultipleVersions = instanceMetadataUpdater.collectPackagesWithMultipleVersions(instanceMetaDataSet);
         if (!packagesWithMultipleVersions.isEmpty()) {
             String message = messagesService.getMessage(CLUSTER_PACKAGES_ON_INSTANCES_ARE_DIFFERENT.getMessage(),

@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.NODE_FAILURE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
@@ -32,15 +32,16 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4R
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -48,11 +49,15 @@ import com.sequenceiq.flow.api.model.FlowType;
 @ExtendWith(MockitoExtension.class)
 public class ClusterCommonServiceTest {
 
+    private static final String ACCOUNT_ID = "accountId";
+
+    private static final long STACK_ID = 1L;
+
     @InjectMocks
     private ClusterCommonService underTest;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private EnvironmentService environmentService;
@@ -69,41 +74,42 @@ public class ClusterCommonServiceTest {
 
     @Test
     public void testRotateAutoTlsCertificatesWithStoppedInstances() {
-        NameOrCrn cluster = NameOrCrn.ofName("cluster");
-        Stack stack = new Stack();
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
+        StackView stack = mock(StackView.class);
+        when(stack.isAvailable()).thenReturn(true);
         when(instanceMetaDataService.anyInstanceStopped(any())).thenReturn(true);
-        when(stackService.getByNameOrCrnInWorkspace(cluster, 1L)).thenReturn(stack);
+        when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
         CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.rotateAutoTlsCertificates(cluster, 1L, certificatesRotationV4Request));
+                () -> underTest.rotateAutoTlsCertificates(nameOrCrn, ACCOUNT_ID, certificatesRotationV4Request));
         assertEquals("Please start all stopped instances. Certificates rotation can only be made when all your nodes in running state.",
                 badRequestException.getMessage());
     }
 
     @Test
     public void testRotateAutoTls() {
-        NameOrCrn cluster = NameOrCrn.ofName("cluster");
-        Stack stack = new Stack();
-        stack.setName("cluster");
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
+        StackView stack = mock(StackView.class);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.isAvailable()).thenReturn(true);
+
         CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
-        when(clusterOperationService.rotateAutoTlsCertificates(stack, certificatesRotationV4Request)).thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
-        when(stackService.getByNameOrCrnInWorkspace(cluster, 1L)).thenReturn(stack);
-        underTest.rotateAutoTlsCertificates(cluster, 1L, certificatesRotationV4Request);
-        verify(clusterOperationService, times(1)).rotateAutoTlsCertificates(stack, certificatesRotationV4Request);
+        when(clusterOperationService.rotateAutoTlsCertificates(STACK_ID, certificatesRotationV4Request)).thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
+        when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
+        underTest.rotateAutoTlsCertificates(nameOrCrn, ACCOUNT_ID, certificatesRotationV4Request);
+        verify(clusterOperationService, times(1)).rotateAutoTlsCertificates(STACK_ID, certificatesRotationV4Request);
     }
 
     @Test
     public void testRotateAutoTlsCertificatesWithNodeFailure() {
-        NameOrCrn cluster = NameOrCrn.ofName("cluster");
-        Stack stack = new Stack();
-        stack.setName("cluster");
-        stack.setStackStatus(new StackStatus(stack, NODE_FAILURE));
-        when(stackService.getByNameOrCrnInWorkspace(cluster, 1L)).thenReturn(stack);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("cluster");
+        StackView stack = mock(StackView.class);
+        when(stack.getName()).thenReturn("cluster");
+        when(stack.getStatus()).thenReturn(Status.NODE_FAILURE);
+        when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
         CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.rotateAutoTlsCertificates(cluster, 1L, certificatesRotationV4Request));
+                () -> underTest.rotateAutoTlsCertificates(nameOrCrn, ACCOUNT_ID, certificatesRotationV4Request));
         assertEquals("Stack 'cluster' is currently in 'NODE_FAILURE' state. Certificates rotation can only be made when the underlying stack is 'AVAILABLE'.",
                 badRequestException.getMessage());
     }
@@ -202,16 +208,15 @@ public class ClusterCommonServiceTest {
 
     @Test
     public void testUpdateNodeCountWhenCheckCallEnvironmentCheck() {
-        Stack stack = new Stack();
-        stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
-
-        when(stackService.getByCrnWithLists("crn")).thenReturn(stack);
-        doThrow(RuntimeException.class).when(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackDtoService.getByCrn("crn")).thenReturn(stack);
+        doThrow(RuntimeException.class).when(environmentService).checkEnvironmentStatus(stackView, EnvironmentStatus.upscalable());
 
         UpdateClusterV4Request update = new UpdateClusterV4Request();
         update.setHostGroupAdjustment(new HostGroupAdjustmentV4Request());
         assertThrows(RuntimeException.class, () -> underTest.put("crn", update));
-        verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
+        verify(environmentService).checkEnvironmentStatus(stackView, EnvironmentStatus.upscalable());
     }
 }

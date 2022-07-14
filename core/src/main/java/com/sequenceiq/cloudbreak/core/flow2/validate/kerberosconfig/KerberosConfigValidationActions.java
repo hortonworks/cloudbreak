@@ -30,16 +30,16 @@ import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.CheckF
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.PollBindUserCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.StartBindUserCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.ValidateKerberosConfigEvent;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -56,6 +56,9 @@ public class KerberosConfigValidationActions {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Inject
     private KerberosConfigService kerberosConfigService;
@@ -100,8 +103,9 @@ public class KerberosConfigValidationActions {
 
             @Override
             protected void doExecute(StackCreationContext context, PollBindUserCreationEvent payload, Map<Object, Object> variables) {
+                StackView stack = context.getStack();
                 PollBindUserCreationEvent event = new PollBindUserCreationEvent(payload.getResourceId(), payload.getOperationId(),
-                        Crn.safeFromString(context.getStack().getResourceCrn()).getAccountId());
+                        Crn.safeFromString(stack.getResourceCrn()).getAccountId());
                 sendEvent(context, event);
             }
 
@@ -117,10 +121,11 @@ public class KerberosConfigValidationActions {
         return new AbstractStackCreationAction<>(ValidateKerberosConfigEvent.class) {
             @Override
             protected void doExecute(StackCreationContext context, ValidateKerberosConfigEvent payload, Map<Object, Object> variables) {
-                decorateStackWithCustomDomainIfAdOrIpaJoinable(context.getStack());
-                Cluster cluster = context.getStack().getCluster();
-                if ((cluster != null && Boolean.TRUE.equals(cluster.isAutoTlsEnabled())) || payload.isFreeipaExistsForEnv()) {
-                    boolean hasFreeIpaKerberosConfig = clusterCreationEnvironmentValidator.hasFreeIpaKerberosConfig(context.getStack());
+                StackView stack = context.getStack();
+                decorateStackWithCustomDomainIfAdOrIpaJoinable(stack);
+                ClusterView cluster = stackDtoService.getClusterViewByStackId(payload.getResourceId());
+                if ((cluster != null && Boolean.TRUE.equals(cluster.getAutoTlsEnabled())) || payload.isFreeipaExistsForEnv()) {
+                    boolean hasFreeIpaKerberosConfig = clusterCreationEnvironmentValidator.hasFreeIpaKerberosConfig(stack);
                     if (!hasFreeIpaKerberosConfig) {
                         throw new IllegalStateException("AutoTLS works only with FreeIPA. No FreeIPA Kerberos configuration is found.");
                     }
@@ -133,13 +138,13 @@ public class KerberosConfigValidationActions {
                 return new StackFailureEvent(KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FAILED_EVENT.selector(), payload.getResourceId(), ex);
             }
 
-            private void decorateStackWithCustomDomainIfAdOrIpaJoinable(Stack stack) {
-                Optional<KerberosConfig> kerberosConfig = measure(() -> kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()),
-                        LOGGER, "kerberosConfigService get {} ms");
+            private void decorateStackWithCustomDomainIfAdOrIpaJoinable(StackView stack) {
+                Optional<KerberosConfig> kerberosConfig = measure(() ->
+                                kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()), LOGGER, "kerberosConfigService get {} ms");
                 if (kerberosConfig.isPresent() && StringUtils.isNotBlank(kerberosConfig.get().getDomain())) {
-                    LOGGER.info("Setting custom domain [{}] for cluster [{}]", kerberosConfig.get().getDomain(), stack.getName());
-                    stack.setCustomDomain(kerberosConfig.get().getDomain());
-                    stackService.save(stack);
+                    String domain = kerberosConfig.get().getDomain();
+                    LOGGER.info("Setting custom domain [{}] for cluster [{}]", domain, stack.getName());
+                    stackService.updateCustomDomainByStackId(stack.getId(), domain);
                 } else {
                     LOGGER.info("No kerberos config or no  custom domain found");
                 }
@@ -155,22 +160,22 @@ public class KerberosConfigValidationActions {
             protected StackFailureContext createFlowContext(FlowParameters flowParameters,
                     StateContext<KerberosConfigValidationState, KerberosConfigValidationEvent> stateContext, StackFailureEvent payload) {
                 Flow flow = getFlow(flowParameters.getFlowId());
-                StackView stackView = stackService.getViewByIdWithoutAuth(payload.getResourceId());
-                MDCBuilder.buildMdcContext(stackView);
+                StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
+                MDCBuilder.buildMdcContext(stack);
                 flow.setFlowFailed(payload.getException());
-                return new StackFailureContext(flowParameters, stackView);
+                return new StackFailureContext(flowParameters, stack, stack.getId());
             }
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                stackUpdaterService.updateStatusAndSendEventWithArgs(context.getStackView().getId(), DetailedStackStatus.PROVISION_FAILED,
+                stackUpdaterService.updateStatusAndSendEventWithArgs(context.getStackId(), DetailedStackStatus.PROVISION_FAILED,
                         ResourceEvent.KERBEROS_CONFIG_VALIDATION_FAILED, payload.getException().getMessage(), payload.getException().getMessage());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FAILURE_HANDLED_EVENT.selector(), context.getStackView().getId());
+                return new StackEvent(KerberosConfigValidationEvent.VALIDATE_KERBEROS_CONFIG_FAILURE_HANDLED_EVENT.selector(), context.getStackId());
             }
         };
     }

@@ -91,7 +91,7 @@ public class LoadBalancerToLoadBalancerResponseConverterTest extends AbstractEnt
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(instanceGroupService.findByTargetGroupId(any())).thenReturn(Set.of(new InstanceGroup()));
+        when(instanceGroupService.findByTargetGroupId(any())).thenReturn(List.of(new InstanceGroup()));
         when(instanceMetaDataService.findAliveInstancesInInstanceGroup(any())).thenReturn(ceateInstanceMetadata());
         when(loadBalancerConfigService.getTargetGroupPortPairs(any())).thenReturn(Set.of(new TargetGroupPortPair(PORT, PORT)));
     }

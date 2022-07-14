@@ -47,6 +47,8 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
@@ -133,33 +135,33 @@ class InstanceMetaDataServiceTest {
             instanceMetaData.setSubnetId(subnetId);
             instanceMetaData.setAvailabilityZone(availabilityZone);
             return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class), any());
+        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroupDto.class), any(InstanceMetaData.class), any());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(0), 1), Map.of(groupName(0), new LinkedHashSet<>(hostnames)), save,
-                false, NetworkScaleDetails.getEmpty());
+        StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(0), 1), Map.of(groupName(0),
+                new LinkedHashSet<>(hostnames)), save, false, NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
-        Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
+        List<InstanceGroupDto> resultInstanceGroups = result.getInstanceGroupDtos();
         assertThat(resultInstanceGroups).isNotNull();
         assertThat(resultInstanceGroups).hasSize(INSTANCE_GROUP_COUNT);
         verifyInstances(resultInstanceGroups, hostnames, subnetId, availabilityZone, rackId, null, INSTANCE_GROUP_COUNT);
         verifyRepositorySave(resultInstanceGroups, save);
     }
 
-    private void verifyInstances(Set<InstanceGroup> resultInstanceGroups, List<String> hostnames, String expectedSubnetId, String expectedAvailabilityZone,
+    private void verifyInstances(List<InstanceGroupDto> resultInstanceGroups, List<String> hostnames, String expectedSubnetId, String expectedAvailabilityZone,
             String expectedRackId, InstanceMetaData instanceToIgnore, int expectedInstanceCount) {
         AtomicInteger instanceCount = new AtomicInteger();
         resultInstanceGroups.forEach(instanceGroup -> {
-            assertThat(instanceGroup.getAllInstanceMetaData()).isNotNull();
-            String groupName = instanceGroup.getGroupName();
+            assertThat(instanceGroup.getInstanceMetadataViews()).isNotNull();
+            String groupName = instanceGroup.getInstanceGroup().getGroupName();
             int idx = indexFromGroupName(groupName);
             assertThat(idx).overridingErrorMessage("Could not determine index from invalid group name '%s'", groupName).isGreaterThanOrEqualTo(0);
-            instanceGroup.getAllInstanceMetaData().forEach(instance -> {
+            instanceGroup.getInstanceMetadataViews().forEach(instance -> {
                 if (instance != instanceToIgnore) {
                     instanceCount.incrementAndGet();
                     assertThat(instance.getInstanceStatus()).isEqualTo(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.REQUESTED);
-                    assertThat(instance.getInstanceGroup()).isEqualTo(instanceGroup);
+                    assertThat(instance.getInstanceGroupId()).isEqualTo(instanceGroup.getInstanceGroup().getId());
                     assertThat(instance.getDiscoveryFQDN()).isEqualTo(idx < hostnames.size() ? hostnames.get(idx) : null);
                     assertThat(instance.getSubnetId()).isEqualTo(expectedSubnetId);
                     assertThat(instance.getAvailabilityZone()).isEqualTo(expectedAvailabilityZone);
@@ -170,15 +172,15 @@ class InstanceMetaDataServiceTest {
         assertThat(instanceCount.get()).isEqualTo(expectedInstanceCount);
     }
 
-    private void verifyRepositorySave(Set<InstanceGroup> resultInstanceGroups, boolean save) {
+    private void verifyRepositorySave(List<InstanceGroupDto> resultInstanceGroups, boolean save) {
         if (save) {
             verify(repository, times(INSTANCE_GROUP_COUNT)).save(instanceMetaDataCaptor.capture());
             List<InstanceMetaData> instancesCaptured = instanceMetaDataCaptor.getAllValues();
             assertThat(instancesCaptured).hasSize(INSTANCE_GROUP_COUNT);
             for (int i = 0; i < INSTANCE_GROUP_COUNT; i++) {
                 InstanceMetaData instanceCaptured = instancesCaptured.get(i);
-                InstanceGroup instanceGroup = findInstanceGroupByIndex(resultInstanceGroups, i);
-                boolean found = instanceGroup.getAllInstanceMetaData().stream()
+                InstanceGroupDto instanceGroup = findInstanceGroupByIndex(resultInstanceGroups, i);
+                boolean found = instanceGroup.getInstanceMetadataViews().stream()
                         .anyMatch(instance -> instance == instanceCaptured);
                 assertThat(found).overridingErrorMessage("Captured instance '%s' could not be found in group of index %d", instanceCaptured, i).isTrue();
             }
@@ -187,10 +189,10 @@ class InstanceMetaDataServiceTest {
         }
     }
 
-    private InstanceGroup findInstanceGroupByIndex(Set<InstanceGroup> instanceGroups, int idx) {
+    private InstanceGroupDto findInstanceGroupByIndex(List<InstanceGroupDto> instanceGroups, int idx) {
         String groupName = groupName(idx);
-        InstanceGroup result = instanceGroups.stream()
-                .filter(instanceGroup -> groupName.equals(instanceGroup.getGroupName()))
+        InstanceGroupDto result = instanceGroups.stream()
+                .filter(instanceGroup -> groupName.equals(instanceGroup.getInstanceGroup().getGroupName()))
                 .findFirst().orElse(null);
         assertThat(result).overridingErrorMessage("Group '%s' not found in stack", groupName).isNotNull();
         return result;
@@ -221,14 +223,14 @@ class InstanceMetaDataServiceTest {
             instanceMetaData.setSubnetId(subnetId);
             instanceMetaData.setAvailabilityZone(availabilityZone);
             return null;
-        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class), any());
+        }).when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroupDto.class), any(InstanceMetaData.class), any());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), INSTANCE_GROUP_COUNT),
+        StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), INSTANCE_GROUP_COUNT),
                 Map.of(groupName(INSTANCE_GROUP_COUNT - 1), new LinkedHashSet<>(hostnames)), save, false, NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
-        Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
+        List<InstanceGroupDto> resultInstanceGroups = result.getInstanceGroupDtos();
         assertThat(resultInstanceGroups).isNotNull();
         assertThat(resultInstanceGroups).hasSize(INSTANCE_GROUP_COUNT);
         verifyInstances(resultInstanceGroups, hostnames, subnetId, availabilityZone, rackId, existingInstance, INSTANCE_GROUP_COUNT);
@@ -257,11 +259,11 @@ class InstanceMetaDataServiceTest {
         Map<String, String> subnetAzPairs = Map.of();
         when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(3), 1), Map.of(groupName(3), new LinkedHashSet<>(hostnames)),
+        StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(3), 1), Map.of(groupName(3), new LinkedHashSet<>(hostnames)),
                 save, false, NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
-        Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
+        List<InstanceGroupDto> resultInstanceGroups = result.getInstanceGroupDtos();
         assertThat(resultInstanceGroups).isNotNull();
         assertThat(resultInstanceGroups).hasSize(INSTANCE_GROUP_COUNT);
         verifyInstances(resultInstanceGroups, hostnames, subnetId, availabilityZone, rackId, null, 0);
@@ -284,14 +286,14 @@ class InstanceMetaDataServiceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
-        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class), any());
+        doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroupDto.class), any(InstanceMetaData.class), any());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), INSTANCE_GROUP_COUNT),
+        StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), INSTANCE_GROUP_COUNT),
                 Map.of(groupName(INSTANCE_GROUP_COUNT - 1), new LinkedHashSet<>(hostnames)), save, false, NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
-        Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
+        List<InstanceGroupDto> resultInstanceGroups = result.getInstanceGroupDtos();
         assertThat(resultInstanceGroups).isNotNull();
         assertThat(resultInstanceGroups).hasSize(INSTANCE_GROUP_COUNT);
         verifyInstances(resultInstanceGroups, hostnames, subnetId, availabilityZone, rackId, null, INSTANCE_GROUP_COUNT);
@@ -306,18 +308,18 @@ class InstanceMetaDataServiceTest {
         when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(Map.of());
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), 0), Map.of(groupName(0), Set.of()), true,
-                false, NetworkScaleDetails.getEmpty());
+        StackDtoDelegate result = underTest.saveInstanceAndGetUpdatedStack(stack, Map.of(groupName(INSTANCE_GROUP_COUNT - 1), 0), Map.of(groupName(0),
+                Set.of()), true, false, NetworkScaleDetails.getEmpty());
 
         assertThat(result).isSameAs(stack);
 
-        Set<InstanceGroup> resultInstanceGroups = result.getInstanceGroups();
+        List<InstanceGroupDto> resultInstanceGroups = result.getInstanceGroupDtos();
         assertThat(resultInstanceGroups).isNotNull();
         assertThat(resultInstanceGroups).hasSize(1);
         verifyInstances(resultInstanceGroups, List.of(), null, null, null, null, 0);
         verifyRepositorySave(resultInstanceGroups, false);
 
-        verify(multiAzCalculatorService, never()).calculateByRoundRobin(anyMap(), any(InstanceGroup.class), any(InstanceMetaData.class), any());
+        verify(multiAzCalculatorService, never()).calculateByRoundRobin(anyMap(), any(InstanceGroupDto.class), any(InstanceMetaData.class), any());
         verify(multiAzCalculatorService, never()).determineRackId(anyString(), anyString());
     }
 
@@ -399,6 +401,7 @@ class InstanceMetaDataServiceTest {
     private InstanceGroup instanceGroup(int idx) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(groupName(idx));
+        instanceGroup.setId((long) idx);
         return instanceGroup;
     }
 

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.cluster;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -10,7 +11,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -24,18 +24,18 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterManagerUpscaleServiceTest {
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private ClusterHostServiceRunner clusterHostServiceRunner;
@@ -60,19 +60,21 @@ public class ClusterManagerUpscaleServiceTest {
 
     @Test
     public void testUpscaleIfTargetedUpscaleNotSupportedOrPrimaryGatewayChanged() throws ClusterClientInitException {
-        Stack stack = getStack();
-        when(stackService.getByIdWithListsInTransaction(any())).thenReturn(stack);
-        when(clusterService.findOneWithLists(1L)).thenReturn(Optional.of(stack.getCluster()));
-        when(clusterHostServiceRunner.addClusterServices(any(), any(), any(), anyBoolean())).thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
-        doNothing().when(clusterServiceRunner).updateAmbariClientConfig(any(), any());
+        StackDto stack = getStack();
+        when(stackDtoService.getById(any())).thenReturn(stack);
+        when(stack.getClusterManagerIp()).thenReturn("otherclusterIp");
+        when(clusterHostServiceRunner.addClusterServices(any(), any(), anyBoolean())).thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
+        when(clusterServiceRunner.updateAmbariClientConfig(stack)).thenReturn("clusterIp");
         doNothing().when(clusterService).updateInstancesToRunning(any(), any());
-        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
+        when(clusterApiConnectors.getConnector(stack, "clusterIp")).thenReturn(clusterApi);
 
         underTest.upscaleClusterManager(1L, Collections.singletonMap("hg", 1), true, false);
 
         verifyNoInteractions(targetedUpscaleSupportService);
 
         when(targetedUpscaleSupportService.targetedUpscaleOperationSupported(any())).thenReturn(Boolean.FALSE);
+
+        when(clusterApiConnectors.getConnector(stack, "otherclusterIp")).thenReturn(clusterApi);
 
         underTest.upscaleClusterManager(1L, Collections.singletonMap("hg", 1), false, false);
 
@@ -82,12 +84,12 @@ public class ClusterManagerUpscaleServiceTest {
 
     @Test
     public void testUpscaleIfTargetedUpscaleSupported() throws ClusterClientInitException {
-        Stack stack = getStack();
-        when(stackService.getByIdWithListsInTransaction(any())).thenReturn(stack);
-        when(clusterService.findOneWithLists(1L)).thenReturn(Optional.of(stack.getCluster()));
-        when(clusterHostServiceRunner.addClusterServices(any(), any(), any(), anyBoolean())).thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
+        StackDto stack = getStack();
+        when(stackDtoService.getById(any())).thenReturn(stack);
+        when(stack.getClusterManagerIp()).thenReturn("otherclusterIp");
+        when(clusterHostServiceRunner.addClusterServices(any(), any(), anyBoolean())).thenReturn(new NodeReachabilityResult(Set.of(), Set.of()));
         doNothing().when(clusterService).updateInstancesToRunning(any(), any());
-        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
+        when(clusterApiConnectors.getConnector(stack, "otherclusterIp")).thenReturn(clusterApi);
         when(targetedUpscaleSupportService.targetedUpscaleOperationSupported(any())).thenReturn(Boolean.TRUE);
 
         underTest.upscaleClusterManager(1L, Collections.singletonMap("hg", 1), false, false);
@@ -96,12 +98,11 @@ public class ClusterManagerUpscaleServiceTest {
         verify(clusterApi).waitForHosts(any());
     }
 
-    private Stack getStack() {
+    private StackDto getStack() {
+        StackDto stackDto = mock(StackDto.class);
         Stack stack = new Stack();
-        Cluster cluster = new Cluster();
-        cluster.setId(1L);
-        stack.setCluster(cluster);
-        return stack;
+        when(stackDto.getStack()).thenReturn(stack);
+        return stackDto;
 
     }
 

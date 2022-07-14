@@ -10,9 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.EmbeddedDatabaseService;
 import com.sequenceiq.cloudbreak.template.VolumeUtils;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class EmbeddedDatabaseConfigProvider {
@@ -43,13 +44,14 @@ public class EmbeddedDatabaseConfigProvider {
     @Inject
     private EmbeddedDatabaseService embeddedDatabaseService;
 
-    public Map<String, Object> collectEmbeddedDatabaseConfigs(Stack stack) {
+    public Map<String, Object> collectEmbeddedDatabaseConfigs(StackDto stackDto) {
         Map<String, Object> result = new HashMap<>();
+        StackView stack = stackDto.getStack();
         if (StringUtils.isNotBlank(stack.getExternalDatabaseEngineVersion())) {
             LOGGER.debug("Configuring embedded DB version to [{}]", stack.getExternalDatabaseEngineVersion());
             result.put(POSTGRES_VERSION, stack.getExternalDatabaseEngineVersion());
         }
-        if (embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stack)) {
+        if (embeddedDatabaseService.isAttachedDiskForEmbeddedDatabaseCreated(stackDto)) {
             LOGGER.info("Attached disk will be used to store data for postgres sql server");
             result.putAll(createEmbeddedDbOnAttachedDiskConfig());
         } else {

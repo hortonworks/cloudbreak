@@ -16,13 +16,13 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.action.AbstractExternalDatabaseStopAction;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.ExternalDatabaseStopEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.ExternalDatabaseStopState;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternalDatabaseFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -42,7 +42,7 @@ public class ExternalDatabaseStopActions {
 
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
-                Stack stack = context.getStack();
+                StackView stack = context.getStack();
                 return new StopExternalDatabaseRequest(stack.getId(), "StopExternalDatabaseRequest", stack.getName(), stack.getResourceCrn());
             }
         };
@@ -59,7 +59,7 @@ public class ExternalDatabaseStopActions {
 
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
-                return new StackEvent(ExternalDatabaseStopEvent.EXTERNAL_DATABASE_STOP_FINALIZED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ExternalDatabaseStopEvent.EXTERNAL_DATABASE_STOP_FINALIZED_EVENT.event(), context.getStackId());
             }
         };
     }
@@ -70,7 +70,7 @@ public class ExternalDatabaseStopActions {
 
             @Override
             protected void doExecute(ExternalDatabaseContext context, StopExternalDatabaseFailed payload, Map<Object, Object> variables) {
-                stackUpdaterService.updateStatus(context.getStack().getId(), DetailedStackStatus.EXTERNAL_DATABASE_STOP_FAILED,
+                stackUpdaterService.updateStatus(context.getStackId(), DetailedStackStatus.EXTERNAL_DATABASE_STOP_FAILED,
                         ResourceEvent.CLUSTER_EXTERNAL_DATABASE_STOP_FAILED, payload.getException().getMessage());
                 getMetricService().incrementMetricCounter(MetricType.EXTERNAL_DATABASE_STOP_FAILED, context.getStack());
                 sendEvent(context);
@@ -78,7 +78,7 @@ public class ExternalDatabaseStopActions {
 
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
-                return new StackEvent(ExternalDatabaseStopEvent.EXTERNAL_DATABASE_STOP_FAILURE_HANDLED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ExternalDatabaseStopEvent.EXTERNAL_DATABASE_STOP_FAILURE_HANDLED_EVENT.event(), context.getStackId());
             }
 
             @Override

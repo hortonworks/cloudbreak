@@ -101,9 +101,9 @@ public class ClusterServicesRestartService {
     }
 
     private void updateDatabaseConfiguration(Stack datalakeStack, Stack dataHubStack, String service, DatabaseType databaseType) {
-        Cluster cluster = clusterService.getById(datalakeStack.getCluster().getId());
+        Cluster cluster = clusterService.getByIdWithLists(datalakeStack.getCluster().getId());
         Optional<RdsConfigWithoutCluster> rdsConfig = postgresConfigService.createRdsConfigIfNeeded(datalakeStack, cluster, databaseType)
-                .stream().filter(config -> config.getType().equalsIgnoreCase(databaseType.toString()))
+                .stream().filter(config -> config.getType().toLowerCase().equals(databaseType.toString().toLowerCase()))
                 .findFirst();
         try {
             if (rdsConfig.isPresent()) {
@@ -119,7 +119,7 @@ public class ClusterServicesRestartService {
 
     private Map<String, String> getRdsConfigMap(RdsConfigWithoutCluster rdsConfig) {
         RdsView hiveRdsView = new RdsView(rdsConfig, dbCertificateProvider.getSslCertsFilePath());
-        Map<String, String> configs = new HashMap<>();
+        Map<String, String> configs = new HashMap<String, String>();
         configs.put(HIVE_METASTORE_DATABASE_HOST, hiveRdsView.getHost());
         configs.put(HIVE_METASTORE_DATABASE_NAME, hiveRdsView.getDatabaseName());
         configs.put(HIVE_METASTORE_DATABASE_PASSWORD, hiveRdsView.getConnectionPassword());

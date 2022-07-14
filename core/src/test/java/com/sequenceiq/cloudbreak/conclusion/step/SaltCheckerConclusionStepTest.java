@@ -30,9 +30,9 @@ import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -43,7 +43,7 @@ public class SaltCheckerConclusionStepTest {
     private NodeStatusService nodeStatusService;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private StackUtil stackUtil;
@@ -51,10 +51,13 @@ public class SaltCheckerConclusionStepTest {
     @InjectMocks
     private SaltCheckerConclusionStep underTest;
 
+    @Mock
+    private StackDto stackDto;
+
     @Test
     public void checkShouldFallbackIfNodeStatusCheckFailsAndBeSuccessfulIfNoUnreachableNodeFound() throws NodesUnreachableException {
         when(nodeStatusService.saltPing(eq(1L))).thenThrow(new CloudbreakServiceException("error"));
-        when(stackService.getByIdWithListsInTransaction(eq(1L))).thenReturn(new Stack());
+        when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         Set<Node> nodes = Set.of(createNode("host1"), createNode("host2"));
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
         when(stackUtil.collectAndCheckReachableNodes(any(), anyCollection())).thenReturn(nodes);
@@ -65,7 +68,7 @@ public class SaltCheckerConclusionStepTest {
         assertNull(stepResult.getDetails());
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).saltPing(eq(1L));
-        verify(stackService, times(1)).getByIdWithListsInTransaction(eq(1L));
+        verify(stackDtoService, times(1)).getById(eq(1L));
         verify(stackUtil, times(1)).collectNodes(any());
         verify(stackUtil, times(1)).collectAndCheckReachableNodes(any(), any());
     }
@@ -77,7 +80,7 @@ public class SaltCheckerConclusionStepTest {
         message.setMessage("rpc response");
         response.setMessages(List.of(message));
         when(nodeStatusService.saltPing(eq(1L))).thenReturn(response);
-        when(stackService.getByIdWithListsInTransaction(eq(1L))).thenReturn(new Stack());
+        when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         Set<Node> nodes = Set.of(createNode("host1"), createNode("host2"));
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
         when(stackUtil.collectAndCheckReachableNodes(any(), anyCollection())).thenReturn(nodes);
@@ -88,7 +91,7 @@ public class SaltCheckerConclusionStepTest {
         assertNull(stepResult.getDetails());
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).saltPing(eq(1L));
-        verify(stackService, times(1)).getByIdWithListsInTransaction(eq(1L));
+        verify(stackDtoService, times(1)).getById(eq(1L));
         verify(stackUtil, times(1)).collectNodes(any());
         verify(stackUtil, times(1)).collectAndCheckReachableNodes(any(), any());
     }
@@ -100,7 +103,7 @@ public class SaltCheckerConclusionStepTest {
         message.setMessage("rpc response");
         response.setMessages(List.of(message));
         when(nodeStatusService.saltPing(eq(1L))).thenReturn(response);
-        when(stackService.getByIdWithListsInTransaction(eq(1L))).thenReturn(new Stack());
+        when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         when(stackUtil.collectNodes(any())).thenReturn(Set.of(createNode("host1"), createNode("host2")));
         when(stackUtil.collectAndCheckReachableNodes(any(), anyCollection())).thenThrow(new NodesUnreachableException("error", Set.of("host1")));
         Conclusion stepResult = underTest.check(1L);
@@ -111,7 +114,7 @@ public class SaltCheckerConclusionStepTest {
         assertEquals("Unreachable salt minions: [host1]", stepResult.getDetails());
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).saltPing(eq(1L));
-        verify(stackService, times(1)).getByIdWithListsInTransaction(eq(1L));
+        verify(stackDtoService, times(1)).getById(eq(1L));
         verify(stackUtil, times(1)).collectNodes(any());
         verify(stackUtil, times(1)).collectAndCheckReachableNodes(any(), any());
     }
@@ -135,7 +138,7 @@ public class SaltCheckerConclusionStepTest {
 
         assertTrue(stepResult.isFailureFound());
         assertEquals("There are unhealthy services on master node: [salt-bootstrap]. " +
-                        "Please check the instances on your cloud provider for further details.", stepResult.getConclusion());
+                "Please check the instances on your cloud provider for further details.", stepResult.getConclusion());
         assertEquals("Unhealthy services on master: [salt-bootstrap]", stepResult.getDetails());
         assertEquals(SaltCheckerConclusionStep.class, stepResult.getConclusionStepClass());
         verify(nodeStatusService, times(1)).saltPing(eq(1L));

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Collection;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -23,4 +24,10 @@ public interface ClusterComponentViewRepository extends CrudRepository<ClusterCo
     Set<ClusterComponentView> findComponentViewsByClusterIdAndComponentType(
             @Param("clusterId") Long clusterId,
             @Param("componentType") ComponentType componentType);
+
+    @Query("SELECT cc FROM ClusterComponentView cc WHERE cc.clusterId = :clusterId")
+    Set<ClusterComponentView> findComponentViewByClusterId(@Param("clusterId") Long clusterId);
+
+    @Query("SELECT cc FROM ClusterComponentView cc WHERE cc.clusterId = :clusterId AND cc.componentType in :types")
+    Set<ClusterComponentView> findComponentsByClusterIdAndInComponentType(@Param("clusterId") Long clusterId, @Param("types") Collection<ComponentType> types);
 }

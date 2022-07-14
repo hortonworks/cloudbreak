@@ -21,7 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -36,7 +36,7 @@ class CleanupFreeIpaHandlerTest {
     private FreeIpaCleanupService freeIpaCleanupService;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @InjectMocks
     private CleanupFreeIpaHandler underTest;
@@ -48,7 +48,7 @@ class CleanupFreeIpaHandlerTest {
         Set<String> ips = Set.of("1.1.1.1");
         when(cleanupFreeIpaEvent.getData()).thenReturn(new CleanupFreeIpaEvent(1L, hostNames, ips, true));
         Stack stack = new Stack();
-        when(stackService.get(1L)).thenReturn(stack);
+        when(stackDtoService.getStackViewById(1L)).thenReturn(stack);
 
         underTest.accept(cleanupFreeIpaEvent);
 
@@ -64,7 +64,7 @@ class CleanupFreeIpaHandlerTest {
         Set<String> ips = Set.of("1.1.1.1");
         when(cleanupFreeIpaEvent.getData()).thenReturn(new CleanupFreeIpaEvent(1L, hostNames, ips, false));
         Stack stack = new Stack();
-        when(stackService.get(1L)).thenReturn(stack);
+        when(stackDtoService.getStackViewById(1L)).thenReturn(stack);
 
         underTest.accept(cleanupFreeIpaEvent);
 
@@ -77,7 +77,7 @@ class CleanupFreeIpaHandlerTest {
     public void testEventSentOnErrorNotRecover() {
         Event<CleanupFreeIpaEvent> cleanupFreeIpaEvent = mock(Event.class);
         when(cleanupFreeIpaEvent.getData()).thenReturn(new CleanupFreeIpaEvent(1L, Set.of(), Set.of(), false));
-        when(stackService.get(1L)).thenReturn(new Stack());
+        when(stackDtoService.getStackViewById(1L)).thenReturn(new Stack());
         doThrow(new RuntimeException()).when(freeIpaCleanupService).cleanupOnScale(any(Stack.class), anySet(), anySet());
 
         underTest.accept(cleanupFreeIpaEvent);
@@ -89,7 +89,7 @@ class CleanupFreeIpaHandlerTest {
     public void testEventSentOnErrorRecover() {
         Event<CleanupFreeIpaEvent> cleanupFreeIpaEvent = mock(Event.class);
         when(cleanupFreeIpaEvent.getData()).thenReturn(new CleanupFreeIpaEvent(1L, Set.of(), Set.of(), true));
-        when(stackService.get(1L)).thenReturn(new Stack());
+        when(stackDtoService.getStackViewById(1L)).thenReturn(new Stack());
         doThrow(new RuntimeException()).when(freeIpaCleanupService).cleanupOnRecover(any(Stack.class), anySet(), anySet());
 
         underTest.accept(cleanupFreeIpaEvent);

@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 
 public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaManagerPollerObject> extends ClusterBasedStatusCheckerTask<T> {
@@ -68,7 +68,7 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
         LOGGER.warn("{}.({}) Notification is sent to the UI.", getErrorMessage(pollerObject, e), e.getMessage());
         if (!connectExceptionOccurred) {
             connectExceptionOccurred = true;
-            Stack stack = pollerObject.getStack();
+            StackDtoDelegate stack = pollerObject.getStack();
             clusterEventService.fireCloudbreakEvent(stack, ResourceEvent.CLUSTER_CM_SECURITY_GROUP_TOO_STRICT, List.of(e.getMessage()));
         }
         return false;

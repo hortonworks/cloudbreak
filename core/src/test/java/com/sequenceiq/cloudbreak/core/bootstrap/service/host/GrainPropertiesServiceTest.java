@@ -38,6 +38,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GrainProperties;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
@@ -67,6 +69,9 @@ class GrainPropertiesServiceTest {
 
     private Cluster cluster = new Cluster();
 
+    @Mock
+    private StackDto stackDto;
+
     @BeforeEach
     public void init() {
         ExposedService namenode = new ExposedService();
@@ -76,12 +81,13 @@ class GrainPropertiesServiceTest {
         Stack stack = new Stack();
         stack.setId(1L);
         cluster.setStack(stack);
+        lenient().when(stackDto.getCluster()).thenReturn(cluster);
     }
 
     @Test
     public void testGwAddressSet() {
         List<GatewayConfig> gatewayConfigs = setupGwAddresses();
-        List<GrainProperties> result = underTest.createGrainProperties(gatewayConfigs, cluster, Set.of());
+        List<GrainProperties> result = underTest.createGrainProperties(gatewayConfigs, stackDto, Set.of());
         assertThat(result, hasItem(allOf(hasProperty("properties", allOf(
                 hasEntry("GWHOSTNAME", Map.of("gateway-address", "GWPUBADDR")),
                 hasEntry("GWHOSTNAME2", Map.of("gateway-address", "GWPUBADDR2"))
@@ -92,7 +98,7 @@ class GrainPropertiesServiceTest {
     @Test
     public void testGwAddressSetDuringTargetedUpscale() {
         List<GatewayConfig> gatewayConfigs = setupGwAddresses();
-        List<GrainProperties> result = underTest.createGrainPropertiesForTargetedUpscale(gatewayConfigs, cluster,
+        List<GrainProperties> result = underTest.createGrainPropertiesForTargetedUpscale(gatewayConfigs, stackDto,
                 Set.of(getNode("GWHOSTNAME", "GWPRIVADDR", "GWPUBADDR")));
         assertTrue(result.stream().filter(gp -> gp.getProperties().keySet().contains("GWHOSTNAME")).findFirst().isPresent());
         assertFalse(result.stream().filter(gp -> gp.getProperties().keySet().contains("GWHOSTNAME2")).findFirst().isPresent());
@@ -104,8 +110,8 @@ class GrainPropertiesServiceTest {
     }
 
     private List<GatewayConfig> setupGwAddresses() {
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(Map.of());
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(namenodeMatcher))).thenReturn(Map.of());
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
         GatewayConfig gwconfig = mock(GatewayConfig.class);
         when(gwconfig.getPublicAddress()).thenReturn("GWPUBADDR");
         lenient().when(gwconfig.getPrivateAddress()).thenReturn("GWPRIVADDR");
@@ -119,9 +125,9 @@ class GrainPropertiesServiceTest {
 
     @Test
     public void testNameNodeRoleSet() {
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(Map.of("NAMENODE", List.of("NMHOST")));
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
-        List<GrainProperties> result = underTest.createGrainProperties(List.of(), cluster, Set.of());
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(namenodeMatcher))).thenReturn(Map.of("NAMENODE", List.of("NMHOST")));
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
+        List<GrainProperties> result = underTest.createGrainProperties(List.of(), stackDto, Set.of());
         assertThat(result, not(hasItem(allOf(hasProperty("properties", allOf(hasValue(hasKey("gateway-address"))))))));
         assertThat(result, hasItem(allOf(hasProperty("properties", allOf(hasEntry("NMHOST", Map.of("roles", "namenode")))))));
         assertThat(result, not(hasItem(allOf(hasProperty("properties", allOf(hasValue(Map.of("roles", "knox"))))))));
@@ -129,10 +135,10 @@ class GrainPropertiesServiceTest {
 
     @Test
     public void testNameNodeRoleSetDuringTargetedUpscale() {
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(namenodeMatcher))).thenReturn(
                 Map.of("NAMENODE", List.of("NMHOST", "NMHOST2")));
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
-        List<GrainProperties> result = underTest.createGrainPropertiesForTargetedUpscale(List.of(), cluster,
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
+        List<GrainProperties> result = underTest.createGrainPropertiesForTargetedUpscale(List.of(), stackDto,
                 Set.of(getNode("NMHOST", null, null)));
         assertTrue(result.stream().filter(gp -> gp.getProperties().keySet().contains("NMHOST")).findFirst().isPresent());
         assertFalse(result.stream().filter(gp -> gp.getProperties().keySet().contains("NMHOST2")).findFirst().isPresent());
@@ -142,9 +148,9 @@ class GrainPropertiesServiceTest {
 
     @Test
     public void testKnoxGwRoleSet() {
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(Map.of());
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of("KNOX_GATEWAY", List.of("KWGHOST")));
-        List<GrainProperties> result = underTest.createGrainProperties(List.of(), cluster, Set.of());
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(namenodeMatcher))).thenReturn(Map.of());
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(knoxGatewayMatcher))).thenReturn(Map.of("KNOX_GATEWAY", List.of("KWGHOST")));
+        List<GrainProperties> result = underTest.createGrainProperties(List.of(), stackDto, Set.of());
         assertThat(result, not(hasItem(allOf(hasProperty("properties", allOf(hasValue(hasKey("gateway-address"))))))));
         assertThat(result, hasItem(allOf(hasProperty("properties", allOf(hasEntry("KWGHOST", Map.of("roles", "knox")))))));
         assertThat(result, not(hasItem(allOf(hasProperty("properties", allOf(hasValue(Map.of("roles", "namenode"))))))));
@@ -152,10 +158,10 @@ class GrainPropertiesServiceTest {
 
     @Test
     public void testKnoxGwRoleSetDuringTargetedUpscale() {
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(Map.of());
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of("KNOX_GATEWAY",
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(namenodeMatcher))).thenReturn(Map.of());
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(knoxGatewayMatcher))).thenReturn(Map.of("KNOX_GATEWAY",
                 List.of("KWGHOST", "KWGHOST2")));
-        List<GrainProperties> result = underTest.createGrainPropertiesForTargetedUpscale(List.of(), cluster,
+        List<GrainProperties> result = underTest.createGrainPropertiesForTargetedUpscale(List.of(), stackDto,
                 Set.of(getNode("KWGHOST", null, null)));
         assertTrue(result.stream().filter(gp -> gp.getProperties().keySet().contains("KWGHOST")).findFirst().isPresent());
         assertFalse(result.stream().filter(gp -> gp.getProperties().keySet().contains("KWGHOST2")).findFirst().isPresent());
@@ -165,11 +171,11 @@ class GrainPropertiesServiceTest {
 
     @Test
     public void testIdBrokerSetDuringTargetedUpscale() {
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(Map.of());
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(idBrokerMatcher))).thenReturn(Map.of("IDBROKER",
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(namenodeMatcher))).thenReturn(Map.of());
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(idBrokerMatcher))).thenReturn(Map.of("IDBROKER",
                 List.of("IDBH1", "IDBH2")));
-        List<GrainProperties> result = underTest.createGrainPropertiesForTargetedUpscale(List.of(), cluster,
+        List<GrainProperties> result = underTest.createGrainPropertiesForTargetedUpscale(List.of(), stackDto,
                 Set.of(getNode("IDBH1", null, null)));
         assertTrue(result.stream().filter(gp -> gp.getProperties().keySet().contains("IDBH1")).findFirst().isPresent());
         assertFalse(result.stream().filter(gp -> gp.getProperties().keySet().contains("IDBH2")).findFirst().isPresent());
@@ -179,8 +185,8 @@ class GrainPropertiesServiceTest {
 
     @Test
     public void testCloudIdentityRoleSet() {
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(Map.of());
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(namenodeMatcher))).thenReturn(Map.of());
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
         Node node1 = new Node("", "", "", "", "node1fqdn", "");
         Node node2 = new Node("", "", "", "", "node2fqdn", "");
         Node node3 = new Node("", "", "", "", "node3fqdn", "");
@@ -208,9 +214,13 @@ class GrainPropertiesServiceTest {
         InstanceMetaData im4 = new InstanceMetaData();
         im4.setDiscoveryFQDN("invalid");
 
-        when(instanceMetaDataService.getAllInstanceMetadataByStackId(1L)).thenReturn(Set.of(im1, im2, im3, im4));
+        when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(
+                new InstanceGroupDto(logIg, List.of(im1)),
+                new InstanceGroupDto(idBroker, List.of(im2)),
+                new InstanceGroupDto(noCloudIdentity, List.of(im3, im4))
+        ));
 
-        List<GrainProperties> result = underTest.createGrainProperties(List.of(), cluster, Set.of(node1, node2, node3, node4));
+        List<GrainProperties> result = underTest.createGrainProperties(List.of(), stackDto, Set.of(node1, node2, node3, node4));
 
         assertThat(result, not(hasItem(allOf(hasProperty("properties", allOf(hasValue(hasKey("gateway-address"))))))));
         assertThat(result, not(hasItem(allOf(hasProperty("properties", allOf(hasValue(Map.of("roles", "namenode"))))))));
@@ -224,8 +234,8 @@ class GrainPropertiesServiceTest {
 
     @Test
     public void testAllInOne() {
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(Map.of("NAMENODE", List.of("NMHOST")));
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of("KNOX_GATEWAY", List.of("KWGHOST")));
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(namenodeMatcher))).thenReturn(Map.of("NAMENODE", List.of("NMHOST")));
+        when(componentLocator.getComponentLocationByHostname(eq(stackDto), argThat(knoxGatewayMatcher))).thenReturn(Map.of("KNOX_GATEWAY", List.of("KWGHOST")));
         GatewayConfig gwconfig = mock(GatewayConfig.class);
         when(gwconfig.getPublicAddress()).thenReturn("GWPUBADDR");
         when(gwconfig.getHostname()).thenReturn("GWHOSTNAME");
@@ -235,10 +245,9 @@ class GrainPropertiesServiceTest {
         InstanceGroup logIg = new InstanceGroup();
         logIg.setAttributes(new Json("{}"));
         logIg.setCloudIdentityType(CloudIdentityType.LOG);
-        im1.setInstanceGroup(logIg);
-        when(instanceMetaDataService.getAllInstanceMetadataByStackId(1L)).thenReturn(Set.of(im1));
+        when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(new InstanceGroupDto(logIg, List.of(im1))));
 
-        List<GrainProperties> result = underTest.createGrainProperties(List.of(gwconfig), cluster, Set.of(node1));
+        List<GrainProperties> result = underTest.createGrainProperties(List.of(gwconfig), stackDto, Set.of(node1));
 
         assertThat(result, hasItem(allOf(hasProperty("properties", allOf(hasEntry("GWHOSTNAME", Map.of("gateway-address", "GWPUBADDR")))))));
         assertThat(result, hasItem(allOf(hasProperty("properties", allOf(hasEntry("NMHOST", Map.of("roles", "namenode")))))));

@@ -63,7 +63,25 @@ public class GatewayView {
         signPub = gateway.getSignPub();
         signCert = gateway.getSignCert();
         tokenCert = gateway.getTokenCert();
-        this.masterSecret = gateway.getKnoxMasterSecret();
+        this.masterSecret = gateway.getKnoxMaster();
+        this.signKey = signKey;
+    }
+
+    public GatewayView(@Nonnull com.sequenceiq.cloudbreak.view.GatewayView gateway, String signKey, Set<String> fullServiceList) {
+        gatewayType = gateway.getGatewayType();
+        path = gateway.getPath();
+        gatewayTopologies = CollectionUtils.isEmpty(gateway.getTopologies())
+                ? emptyMap()
+                : gateway.getTopologies().stream()
+                .collect(Collectors.toMap(GatewayTopology::getTopologyName,
+                        s -> convertToFullExposedServices(s.getExposedServices(), fullServiceList)));
+        ssoType = gateway.getSsoType();
+        ssoConfigured = SSOType.SSO_PROVIDER.equals(gateway.getSsoType());
+        ssoProvider = gateway.getSsoProvider();
+        signPub = gateway.getSignPub();
+        signCert = gateway.getSignCert();
+        tokenCert = gateway.getTokenCert();
+        this.masterSecret = gateway.getKnoxMaster();
         this.signKey = signKey;
     }
 

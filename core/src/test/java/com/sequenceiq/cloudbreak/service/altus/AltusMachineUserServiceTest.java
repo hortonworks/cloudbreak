@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.telemetry.model.Features;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -39,7 +39,7 @@ public class AltusMachineUserServiceTest {
     private AltusIAMService altusIAMService;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private ClusterService clusterService;
@@ -55,6 +55,8 @@ public class AltusMachineUserServiceTest {
 
     private Stack stack;
 
+    private Cluster cluster;
+
     private Telemetry telemetry;
 
     @Before
@@ -66,14 +68,14 @@ public class AltusMachineUserServiceTest {
         stack.setCreator(creator);
         stack.setType(StackType.WORKLOAD);
         stack.setResourceCrn(TEST_CRN);
-        Cluster cluster = new Cluster();
+        cluster = new Cluster();
         cluster.setId(1L);
         stack.setCluster(cluster);
         telemetry = new Telemetry();
         Features features = new Features();
         features.addClusterLogsCollection(true);
         telemetry.setFeatures(features);
-        underTest = new AltusMachineUserService(altusIAMService, stackService,
+        underTest = new AltusMachineUserService(altusIAMService, stackDtoService,
                 clusterService, componentConfigProviderService, regionAwareInternalCrnGeneratorFactory);
     }
 
@@ -99,7 +101,7 @@ public class AltusMachineUserServiceTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         doNothing().when(altusIAMService).clearMachineUser(any(), any(), any(), anyBoolean());
         // WHEN
-        underTest.clearFluentMachineUser(stack, telemetry);
+        underTest.clearFluentMachineUser(stack, cluster, telemetry);
 
         // THEN
         verify(altusIAMService, times(1)).clearMachineUser(any(), any(), any(), anyBoolean());

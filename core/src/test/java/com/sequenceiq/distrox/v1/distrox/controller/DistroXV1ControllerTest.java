@@ -1,5 +1,6 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
+import static com.sequenceiq.cloudbreak.util.TestConstants.ACCOUNT_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -55,6 +57,9 @@ class DistroXV1ControllerTest {
 
     @Mock
     private StackOperationService stackOperationService;
+
+    @Mock
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Captor
     private ArgumentCaptor<NameOrCrn> nameOrCrnArgumentCaptor;
@@ -115,11 +120,10 @@ class DistroXV1ControllerTest {
 
     @Test
     void testRotateSaltPasswordByCrn() {
-        when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
 
         distroXV1Controller.rotateSaltPasswordByCrn(CRN);
 
-        verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(CRN), WORKSPACE_ID);
+        verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(CRN), ACCOUNT_ID);
     }
 }

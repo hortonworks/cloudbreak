@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.service.StackCreationService;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -57,8 +57,8 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -86,7 +86,7 @@ public class StackImageUpdateActionsTest {
     private CloudbreakFlowMessageService flowMessageService;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private StackCreationService stackCreationService;
@@ -228,9 +228,13 @@ public class StackImageUpdateActionsTest {
         stack.setRegion("region");
         stack.setAvailabilityZone("az");
         stack.setResourceCrn("crn:cdp:datalake:us-west-1:tenant:cluster:1234");
-        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
-        when(stackService.getById(anyLong())).thenReturn(stack);
-        when(stackUtil.getCloudCredential(stack)).thenReturn(cloudCredential);
+        StackDto stackDto = spy(StackDto.class);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stackDto.getWorkspace()).thenReturn(workspace);
+        when(stackDto.getTenant()).thenReturn(tenant);
+        when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
+        when(stackDtoService.getStackViewById(anyLong())).thenReturn(stack);
+        when(stackUtil.getCloudCredential(anyString())).thenReturn(cloudCredential);
 
         variables.clear();
     }
@@ -243,13 +247,13 @@ public class StackImageUpdateActionsTest {
         StackImageUpdateTriggerEvent payload = new StackImageUpdateTriggerEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), 1L, "imageId");
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_IMAGE_VERSIONS_STATE);
-        when(stackImageUpdateService.isCbVersionOk(any(Stack.class))).thenReturn(true);
+        when(stackImageUpdateService.isCbVersionOk(any(StackDto.class))).thenReturn(true);
 
         checkImageAction.execute(stateContext);
 
         verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Status.UPDATE_IN_PROGRESS.name()),
                 eq(ResourceEvent.STACK_IMAGE_UPDATE_STARTED));
-        verify(stackImageUpdateService, times(1)).getNewImageIfVersionsMatch(any(Stack.class), anyString(), eq(null), eq(null));
+        verify(stackImageUpdateService, times(1)).getNewImageIfVersionsMatch(any(StackDto.class), anyString(), eq(null), eq(null));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.CHECK_IMAGE_VERESIONS_FINISHED_EVENT.event()), any(Event.class));
     }
 
@@ -261,7 +265,7 @@ public class StackImageUpdateActionsTest {
         StackImageUpdateTriggerEvent payload = new StackImageUpdateTriggerEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), 1L, "imageId");
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_IMAGE_VERSIONS_STATE);
-        when(stackImageUpdateService.isCbVersionOk(any(Stack.class))).thenReturn(false);
+        when(stackImageUpdateService.isCbVersionOk(any(StackDto.class))).thenReturn(false);
         checkImageAction.setFailureEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT);
 
         checkImageAction.execute(stateContext);
@@ -281,11 +285,11 @@ public class StackImageUpdateActionsTest {
         ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_EVENT.event(), 1L, statedImage);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_IMAGE_VERSIONS_STATE);
-        when(stackImageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.ok());
+        when(stackImageUpdateService.checkPackageVersions(any(StackDto.class), any(StatedImage.class))).thenReturn(CheckResult.ok());
 
         checkPackageVersionsAction.execute(stateContext);
 
-        verify(stackImageUpdateService, times(1)).checkPackageVersions(any(Stack.class), any(StatedImage.class));
+        verify(stackImageUpdateService, times(1)).checkPackageVersions(any(StackDto.class), any(StatedImage.class));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event()), any(Event.class));
     }
 
@@ -297,12 +301,12 @@ public class StackImageUpdateActionsTest {
         ImageUpdateEvent payload = new ImageUpdateEvent(StackImageUpdateEvent.CHECK_IMAGE_VERESIONS_FINISHED_EVENT.event(), 1L, statedImage);
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.CHECK_PACKAGE_VERSIONS_STATE);
-        when(stackImageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.failed(""));
+        when(stackImageUpdateService.checkPackageVersions(any(StackDto.class), any(StatedImage.class))).thenReturn(CheckResult.failed(""));
         checkPackageVersionsAction.setFailureEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT);
 
         checkPackageVersionsAction.execute(stateContext);
 
-        verify(stackImageUpdateService, times(1)).checkPackageVersions(any(Stack.class), any(StatedImage.class));
+        verify(stackImageUpdateService, times(1)).checkPackageVersions(any(StackDto.class), any(StatedImage.class));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.CHECK_PACKAGE_VERSIONS_FINISHED_EVENT.event()), any(Event.class));
         verify(eventBus, times(0)).notify(eq(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT.event()), any(Event.class));
     }
@@ -318,7 +322,7 @@ public class StackImageUpdateActionsTest {
 
         updateImageAction.execute(stateContext);
 
-        verify(stackImageService, times(1)).storeNewImageComponent(any(Stack.class), any(StatedImage.class));
+        verify(stackImageService, times(1)).storeNewImageComponent(any(StackDto.class), any(StatedImage.class));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT.event()), any(Event.class));
         assertTrue(variables.containsKey(AbstractStackImageUpdateAction.ORIGINAL_IMAGE));
     }
@@ -334,7 +338,7 @@ public class StackImageUpdateActionsTest {
 
         prepareImageAction.execute(stateContext);
 
-        verify(stackCreationService, times(1)).prepareImage(any(Stack.class), eq(variables));
+        verify(stackCreationService, times(1)).prepareImage(anyLong(), eq(variables));
         verify(eventBus, times(1)).notify(eq(CloudPlatformRequest.selector(PrepareImageRequest.class)), any(Event.class));
     }
 
@@ -381,7 +385,6 @@ public class StackImageUpdateActionsTest {
                 new StackFailureEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT.event(), 1L, new CloudbreakServiceException("test"));
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.STACK_IMAGE_UPDATE_FAILED_STATE);
-        when(stackService.getViewByIdWithoutAuth(anyLong())).thenReturn(new StackView(1L, null, null, null));
         when(runningFlows.get(anyString())).thenReturn(flow);
 
         handleImageUpdateFailureAction.execute(stateContext);

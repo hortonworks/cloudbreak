@@ -23,4 +23,8 @@ public class NotFoundException extends RuntimeException {
     public static NotFoundException notFoundException(String what, String which) {
         return new NotFoundException(String.format("%s '%s' not found.", what, which));
     }
+
+    public static Supplier<NotFoundException> notFound(String message) {
+        return () -> new NotFoundException(message);
+    }
 }

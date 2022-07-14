@@ -23,11 +23,11 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Service
 public class ClouderaManagerKerberosService {
@@ -57,9 +57,9 @@ public class ClouderaManagerKerberosService {
     @Inject
     private ClouderaManagerCommonCommandService clouderaManagerCommonCommandService;
 
-    public void configureKerberosViaApi(ApiClient client, HttpClientConfig clientConfig, Stack stack, KerberosConfig kerberosConfig)
+    public void configureKerberosViaApi(ApiClient client, HttpClientConfig clientConfig, StackDtoDelegate stack, KerberosConfig kerberosConfig)
             throws ApiException, CloudbreakException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         if (kerberosDetailService.isAdJoinable(kerberosConfig) || kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             ClouderaManagerModificationService modificationService = applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig);
             ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
@@ -76,8 +76,8 @@ public class ClouderaManagerKerberosService {
         }
     }
 
-    public void deleteCredentials(HttpClientConfig clientConfig, Stack stack) {
-        Cluster cluster = stack.getCluster();
+    public void deleteCredentials(HttpClientConfig clientConfig, StackDtoDelegate stack) {
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {

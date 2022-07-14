@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -44,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @ExtendWith(MockitoExtension.class)
 class VmStatusCheckerConclusionStepTest {
@@ -89,8 +92,8 @@ class VmStatusCheckerConclusionStepTest {
     @Test
     public void checkShouldBeSuccessfulIfCMIsRunningAndAllInstanceIsHealthy() {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong()))
-                .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong()))
+                .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(createExtendedHostStatuses(true));
 
         Conclusion conclusion = underTest.check(1L);
@@ -103,8 +106,8 @@ class VmStatusCheckerConclusionStepTest {
     @Test
     public void checkShouldFailIfCMIsRunningAndUnhealthyOrUnknownInstanceExists() {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong()))
-                .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2"), createInstanceMetadata("host3")));
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong()))
+                .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2"), createInstanceMetadata("host3")));
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(createExtendedHostStatuses(false));
 
         Conclusion conclusion = underTest.check(1L);
@@ -119,8 +122,8 @@ class VmStatusCheckerConclusionStepTest {
     @Test
     public void checkShouldBeSuccessfulIfCMIsNotRunningAndAllInstanceIsHealthy() {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong()))
-                .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong()))
+                .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
         when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
                 .thenReturn(List.of(createCloudVmInstanceStatus("host1", true), createCloudVmInstanceStatus("host2", true)));
 
@@ -134,8 +137,8 @@ class VmStatusCheckerConclusionStepTest {
     @Test
     public void checkShouldFailIfCMIsNotRunningAndUnhealthyInstanceExists() {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong()))
-                .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong()))
+                .thenReturn(List.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
         when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
                 .thenReturn(List.of(createCloudVmInstanceStatus("host1", false), createCloudVmInstanceStatus("host2", false)));
 
@@ -153,7 +156,8 @@ class VmStatusCheckerConclusionStepTest {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceId("1");
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
+        List<InstanceMetadataView> instanceMetaDataList = List.of(instanceMetaData);
+        when(instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(anyLong())).thenReturn(instanceMetaDataList);
         when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
                 .thenReturn(List.of(createCloudVmInstanceStatus("1", false)));
 
@@ -162,6 +166,7 @@ class VmStatusCheckerConclusionStepTest {
         assertNull(conclusion.getConclusion());
         assertNull(conclusion.getDetails());
         assertEquals(VmStatusCheckerConclusionStep.class, conclusion.getConclusionStepClass());
+        verify(cloudInstanceConverter).convert(eq(instanceMetaDataList), any());
     }
 
     private ExtendedHostStatuses createExtendedHostStatuses(boolean healthy) {
@@ -174,7 +179,7 @@ class VmStatusCheckerConclusionStepTest {
         return new ExtendedHostStatuses(hostStatuses);
     }
 
-    private InstanceMetaData createInstanceMetadata(String host) {
+    private InstanceMetadataView createInstanceMetadata(String host) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setDiscoveryFQDN(host);
         instanceMetaData.setInstanceId(host);

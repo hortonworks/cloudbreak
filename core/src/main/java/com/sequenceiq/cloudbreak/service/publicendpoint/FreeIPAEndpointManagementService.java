@@ -12,10 +12,11 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
@@ -40,7 +41,7 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
-    public void registerLoadBalancerDomainWithFreeIPA(Stack stack) {
+    public void registerLoadBalancerDomainWithFreeIPA(StackView stack) {
         Optional<LoadBalancer> loadBalancerOptional = getLoadBalancer(stack.getId());
         if (loadBalancerOptional.isPresent()) {
             LoadBalancer loadBalancer = loadBalancerOptional.get();
@@ -60,7 +61,7 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
         }
     }
 
-    private void sendAddDnsCnameRecordRequest(Stack stack, LoadBalancer loadBalancer) {
+    private void sendAddDnsCnameRecordRequest(StackView stack, LoadBalancer loadBalancer) {
         String targetFQDN = StringUtils.appendIfMissing(loadBalancer.getDns(), DOMAIN_PART_DELIMITER);
         String endpoint = loadBalancer.getEndpoint();
 
@@ -75,7 +76,7 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
                 () -> dnsV1Endpoint.addDnsCnameRecordInternal(accountId, request));
     }
 
-    private void sendAddDnsARecordRequest(Stack stack, LoadBalancer loadBalancer) {
+    private void sendAddDnsARecordRequest(StackView stack, LoadBalancer loadBalancer) {
         String ip = loadBalancer.getIp();
         String endpoint = loadBalancer.getEndpoint();
 
@@ -91,7 +92,7 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
                 () -> dnsV1Endpoint.addDnsARecordInternal(accountId, request));
     }
 
-    public void deleteLoadBalancerDomainFromFreeIPA(Stack stack) {
+    public void deleteLoadBalancerDomainFromFreeIPA(StackDtoDelegate stack) {
         Optional<LoadBalancer> loadBalancerOptional = getLoadBalancer(stack.getId());
         if (loadBalancerOptional.isPresent()) {
             try {
@@ -111,7 +112,7 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
         }
     }
 
-    private void sendDeleteDnsCnameRecordRequest(Stack stack, LoadBalancer loadBalancer) {
+    private void sendDeleteDnsCnameRecordRequest(StackDtoDelegate stack, LoadBalancer loadBalancer) {
         String endpoint = loadBalancer.getEndpoint();
         LOGGER.debug("Deleting load balancer with CNAME  {} from FreeIPA", endpoint);
         ThreadBasedUserCrnProvider.doAsInternalActor(
@@ -119,7 +120,7 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
                 () -> dnsV1Endpoint.deleteDnsCnameRecord(stack.getEnvironmentCrn(), null, endpoint));
     }
 
-    private void sendDeleteDnsARecordRequest(Stack stack, LoadBalancer loadBalancer) {
+    private void sendDeleteDnsARecordRequest(StackDtoDelegate stack, LoadBalancer loadBalancer) {
         String endpoint = loadBalancer.getEndpoint();
         LOGGER.debug("Deleting load balancer with A record {} from FreeIPA", endpoint);
         ThreadBasedUserCrnProvider.doAsInternalActor(

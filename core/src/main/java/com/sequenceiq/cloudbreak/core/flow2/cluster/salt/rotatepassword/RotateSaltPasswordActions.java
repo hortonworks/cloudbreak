@@ -41,14 +41,14 @@ public class RotateSaltPasswordActions {
 
             @Override
             protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Rotating salt password for stack {}", context.getStack().getResourceCrn());
-                saltUpdateService.rotateSaltPassword(context.getStack());
+                LOGGER.info("Rotating salt password for stack {}", context.getStackId());
+                saltUpdateService.rotateSaltPassword(context.getStackId());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new RotateSaltPasswordRequest(context.getStack().getId());
+                return new RotateSaltPasswordRequest(context.getStackId());
             }
         };
     }
@@ -59,7 +59,7 @@ public class RotateSaltPasswordActions {
 
             @Override
             protected void doExecute(StackCreationContext context, RotateSaltPasswordSuccessResponse payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.info("Rotating salt password for stack {} finished", context.getStack().getResourceCrn());
+                LOGGER.info("Rotating salt password for stack {} finished", context.getStackId());
                 stackUpdaterService.updateStatus(payload.getResourceId(), DetailedStackStatus.AVAILABLE,
                         CLUSTER_SALT_PASSWORD_ROTATE_FINISHED, "SaltStack user password rotated");
                 sendEvent(context);
@@ -67,7 +67,7 @@ public class RotateSaltPasswordActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new StackEvent(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_FINISHED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_FINISHED_EVENT.event(), context.getStackId());
             }
         };
     }
@@ -78,7 +78,7 @@ public class RotateSaltPasswordActions {
 
             @Override
             protected void doExecute(StackCreationContext context, RotateSaltPasswordFailureResponse payload, Map<Object, Object> variables) throws Exception {
-                LOGGER.warn("Rotating salt password for stack {} failed", context.getStack().getResourceCrn());
+                LOGGER.warn("Rotating salt password for stack {} failed", context.getStackId());
                 stackUpdaterService.updateStatusAndSendEventWithArgs(payload.getResourceId(), DetailedStackStatus.SALT_UPDATE_FAILED,
                         CLUSTER_SALT_PASSWORD_ROTATE_FAILED, "Failed to rotate SaltStack user password", payload.getException().getMessage());
                 sendEvent(context);
@@ -86,7 +86,7 @@ public class RotateSaltPasswordActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new StackEvent(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.update.userdata.UpdateUserDataEvents.UPDATE_USERDATA_FAILED_EVENT;
 
-import java.util.HashSet;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -22,11 +21,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateFailed;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -36,13 +34,10 @@ public abstract class AbstractUserDataUpdateAction<P extends Payload> extends Ab
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUserDataUpdateAction.class);
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private StackUtil stackUtil;
-
-    @Inject
-    private ResourceService resourceService;
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
@@ -53,8 +48,7 @@ public abstract class AbstractUserDataUpdateAction<P extends Payload> extends Ab
 
     @Override
     protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<UpdateUserDataState, UpdateUserDataEvents> stateContext, P payload) {
-        Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
-        stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
+        StackDto stack = stackDtoService.getById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
@@ -68,7 +62,7 @@ public abstract class AbstractUserDataUpdateAction<P extends Payload> extends Ab
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                 .withTenantId(stack.getWorkspace().getId())
                 .build();
-        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         return new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
     }

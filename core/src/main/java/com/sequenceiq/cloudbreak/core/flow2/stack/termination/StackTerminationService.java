@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -23,6 +22,7 @@ import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class StackTerminationService {
@@ -46,17 +46,16 @@ public class StackTerminationService {
     @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
-    public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload) {
+    public void finishStackTermination(StackView stack, boolean forced, TerminateStackResult payload) {
         LOGGER.debug("Terminate stack result: {}", payload);
-        Stack stack = context.getStack();
         clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.CLUSTER_DELETE_COMPLETED);
-        terminationService.finalizeTermination(stack.getId(), context.getTerminationType().isForced());
+        terminationService.finalizeTermination(stack.getId(), forced);
         flowMessageService.fireEventAndLog(stack.getId(), DELETE_COMPLETED.name(), STACK_DELETE_COMPLETED);
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }
 
-    public void handleStackTerminationError(StackView stackView, Exception errorDetails, boolean forced) {
-        Long stackId = stackView.getId();
+    public void handleStackTerminationError(StackView stack, Exception errorDetails, boolean forced) {
+        Long stackId = stack.getId();
         String stackUpdateMessage;
         ResourceEvent resourceEvent;
         DetailedStackStatus status;
@@ -74,7 +73,7 @@ public class StackTerminationService {
             resourceEvent = STACK_FORCED_DELETE_COMPLETED;
         }
         flowMessageService.fireEventAndLog(stackId, status.name(), resourceEvent, stackUpdateMessage);
-        metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_FAILED, stackView, errorDetails);
+        metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_FAILED, stack, errorDetails);
 
     }
 

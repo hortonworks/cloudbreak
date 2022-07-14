@@ -11,6 +11,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
@@ -30,19 +31,9 @@ public class RdsConfigToRdsDetailsConverterTest {
 
     @ParameterizedTest(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
     @MethodSource("databaseTypeAndVendorDataProvider")
-    public void testWhenSourceWorkspaceIdIsNotNullThenItsValueShouldBePassedBesideAllLogicIndependentData(DatabaseType databaseType, DatabaseVendor vendor) {
+    public void testWhenSourceThenItsValueShouldBePassedBesideAllLogicIndependentData(DatabaseType databaseType, DatabaseVendor vendor) {
         RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor);
-
-        RdsDetails result = underTest.convert(source);
-
-        assertThat(result).isNotNull();
-    }
-
-    @ParameterizedTest(name = "Current RDS type - Database vendor pair: [{0} - {1}]")
-    @MethodSource("databaseTypeAndVendorDataProvider")
-    public void testWhenSourceWorkspaceIdIsNullThenItsValueShouldBePassedBesideAllLogicIndependentData(DatabaseType databaseType, DatabaseVendor vendor) {
-        RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor);
-
+        when(source.getStatus()).thenReturn(ResourceStatus.DEFAULT);
         RdsDetails result = underTest.convert(source);
 
         assertThat(result).isNotNull();
@@ -52,6 +43,7 @@ public class RdsConfigToRdsDetailsConverterTest {
     @MethodSource("databaseTypeAndVendorDataProvider")
     public void testWhenDatabaseEngineIsEmbeddedThenIsExternalShouldBeFalseOtherwiseTrue(DatabaseType databaseType, DatabaseVendor vendor) {
         RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor);
+        when(source.getStatus()).thenReturn(ResourceStatus.DEFAULT);
 
         RdsDetails result = underTest.convert(source);
 
@@ -80,6 +72,7 @@ public class RdsConfigToRdsDetailsConverterTest {
     private void testWhenSslModeInternal(DatabaseType databaseType, DatabaseVendor vendor, RdsSslMode sslMode, String sslModeStringExpected) {
         RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor);
         when(source.getSslMode()).thenReturn(sslMode);
+        when(source.getStatus()).thenReturn(ResourceStatus.DEFAULT);
 
         RdsDetails result = underTest.convert(source);
 
@@ -91,6 +84,7 @@ public class RdsConfigToRdsDetailsConverterTest {
     @MethodSource("databaseTypeAndVendorDataProvider")
     public void testAllLogicIndependentDataArePassedProperly(DatabaseType databaseType, DatabaseVendor vendor) {
         RdsConfigWithoutCluster source = TestUtil.rdsConfigWithoutCluster(databaseType, vendor);
+        when(source.getStatus()).thenReturn(ResourceStatus.DEFAULT);
 
         RdsDetails result = underTest.convert(source);
 

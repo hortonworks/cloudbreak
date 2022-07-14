@@ -46,7 +46,7 @@ public class CmSyncImageCollectorService {
     public Set<Image> collectImages(String userCrn, Stack stack, Set<String> candidateImageUuids) {
         try {
             String imageCatalogName = imageService.getCurrentImageCatalogName(stack.getId());
-            Long workspaceId = stack.getWorkspace().getId();
+            Long workspaceId = stack.getWorkspaceId();
             return candidateImageUuids.isEmpty()
                     ? getAllImagesFromCatalog(userCrn, stack, imageCatalogName, workspaceId)
                     : getCurrentAndSelectedImagesFromCatalog(stack, candidateImageUuids, imageCatalogName, workspaceId);
@@ -61,7 +61,7 @@ public class CmSyncImageCollectorService {
         Set<Image> candidateImages = candidateImageUuids.stream()
                 .map(uuid -> getImage(imageCatalogName, workspaceId, uuid))
                 .collect(Collectors.toCollection(HashSet::new));
-        candidateImages.add(imageService.getCurrentImage(stack.getWorkspace().getId(), stack.getId()).getImage());
+        candidateImages.add(imageService.getCurrentImage(stack.getWorkspaceId(), stack.getId()).getImage());
         return candidateImages;
     }
 

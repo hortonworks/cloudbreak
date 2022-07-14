@@ -1,22 +1,5 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager;
 
-import static com.sequenceiq.cloudbreak.TestUtil.rdsConfigWithoutCluster;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_HOST;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_NAME;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_PASSWORD;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_TYPE;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_USER;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
-
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -25,6 +8,22 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static com.sequenceiq.cloudbreak.TestUtil.rdsConfigWithoutCluster;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_HOST;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_NAME;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_TYPE;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_USER;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_PASSWORD;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ProfilerMetricsRoleConfigProviderTest {

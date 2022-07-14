@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.PackageInfo;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
@@ -54,7 +55,7 @@ public class CmServerQueryService {
      * @param stack The stack, with metadata to be able to build the client to query package versions
      * @return The actual CM version, in format version-build number e.g. 7.2.2-13072522
      */
-    public Optional<String> queryCmVersion(Stack stack) {
+    public Optional<String> queryCmVersion(StackDtoDelegate stack) {
         try {
             Map<String, List<PackageInfo>> packageVersions = cmVersionQueryService.queryCmPackageInfo(stack);
             PackageInfo cmPackageInfo = cmVersionQueryService.checkCmPackageInfoConsistency(packageVersions);

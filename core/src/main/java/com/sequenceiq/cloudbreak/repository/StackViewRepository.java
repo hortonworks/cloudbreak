@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourc
 
 @EntityType(entityClass = StackView.class)
 @Transactional(TxType.REQUIRED)
+@Deprecated
 public interface StackViewRepository extends WorkspaceResourceRepository<StackView, Long> {
 
     @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.name LIKE :name")

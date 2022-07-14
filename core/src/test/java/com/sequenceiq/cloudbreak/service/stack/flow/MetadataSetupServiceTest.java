@@ -183,6 +183,12 @@ public class MetadataSetupServiceTest {
 
     @Test
     public void saveInstanceMetaDataTestShouldNotSaveInstancesWhenImageNotFound() throws CloudbreakImageNotFoundException {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setId(INSTANCE_GROUP_ID);
+        instanceGroup.setGroupName(GROUP_NAME);
+        Set<InstanceGroup> instanceGroupSet = new TreeSet<>();
+        instanceGroupSet.add(instanceGroup);
+        when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
         Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = getCloudVmMetaDataStatuses(InstanceStatus.CREATED);
         CloudbreakImageNotFoundException exception = new CloudbreakImageNotFoundException("Image does not exist");
         doThrow(exception).when(imageService).getImage(STACK_ID);
@@ -512,6 +518,11 @@ public class MetadataSetupServiceTest {
         String gw2DiscoveryFQDN = "gw2.example.com";
         gwInstanceMetadata3.setDiscoveryFQDN(gw2DiscoveryFQDN);
 
+        Set<InstanceGroup> instanceGroupSet = new TreeSet<>();
+        instanceGroupSet.add(gwInstanceGroup);
+        instanceGroupSet.add(workerInstanceGroup);
+
+        when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
         when(imageService.getImage(STACK_ID)).thenReturn(image);
         when(instanceMetaDataService.findNotTerminatedForStack(1L))
                 .thenReturn(Set.of(gwInstanceMetadata1, gwInstanceMetadata2, gwInstanceMetadata3));

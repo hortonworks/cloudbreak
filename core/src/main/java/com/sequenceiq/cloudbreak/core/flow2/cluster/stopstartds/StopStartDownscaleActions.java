@@ -46,15 +46,18 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StopStartDownscaleTriggerEvent
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -67,6 +70,9 @@ public class StopStartDownscaleActions {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
@@ -106,7 +112,7 @@ public class StopStartDownscaleActions {
             @Override
             protected void doExecute(StopStartDownscaleContext context, StopStartDownscaleDecommissionViaCMResult payload,
                     Map<Object, Object> variables) throws Exception {
-                Stack stack = context.getStack();
+                StackDtoDelegate stack = context.getStack();
 
                 if (payload.getNotDecommissionedHostFqdns().size() > 0) {
                     stopStartDownscaleFlowService.logCouldNotDecommission(stack.getId(), payload.getNotDecommissionedHostFqdns());
@@ -116,26 +122,26 @@ public class StopStartDownscaleActions {
                 stopStartDownscaleFlowService.clusterDownscalingStoppingInstances(stack.getId(), context.getHostGroupName(), decommissionedFqdns);
 
 
-                Set<Long> instancesToStop = stackService.getPrivateIdsForHostNames(
-                        stack.getNotDeletedAndNotZombieInstanceMetaDataList(), payload.getDecommissionedHostFqdns());
+                List<InstanceMetadataView> instanceMetaDataList = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
+                Set<Long> instancesToStop = stackService.getPrivateIdsForHostNames(instanceMetaDataList, payload.getDecommissionedHostFqdns());
 
-                List<InstanceMetaData> instanceMetaDataList = stack.getNotDeletedAndNotZombieInstanceMetaDataList();
-                List<InstanceMetaData> instanceMetaDataForHg = instanceMetaDataList.stream().filter(
+                List<InstanceMetadataView> instanceMetaDataForHg = instanceMetaDataList.stream().filter(
                         x -> x.getInstanceGroupName().equals(context.getHostGroupName())).collect(Collectors.toList());
 
                 LOGGER.debug("InstanceInfoPreStop. hostGroup={}, allInstanceCount={}, hgInstanceCount={}. AllNotDeletedInstances=[{}]",
-                        context.getHostGroupName(), instanceMetaDataList.size(), instanceMetaDataForHg.size(), instanceMetaDataList);
+                        context.getHostGroupName(), instanceMetaDataList.size(), instanceMetaDataForHg.size(),
+                        instanceMetaDataList.stream().map(InstanceMetadataView::getInstanceId).collect(Collectors.toList()));
 
-                List<InstanceMetaData> toStopInstanceMetadataList = new LinkedList<>();
-                for (InstanceMetaData instanceMetaData : instanceMetaDataForHg) {
+                List<InstanceMetadataView> toStopInstanceMetadataList = new LinkedList<>();
+                for (InstanceMetadataView instanceMetaData : instanceMetaDataForHg) {
                     if (instancesToStop.contains(instanceMetaData.getPrivateId())) {
                         toStopInstanceMetadataList.add(instanceMetaData);
                     }
                 }
                 LOGGER.debug("toStopInstanceMetadata: count={}, metadata=[{}]", toStopInstanceMetadataList.size(), toStopInstanceMetadataList);
 
-                List<CloudInstance> cloudInstancesToStop = instanceMetaDataToCloudInstanceConverter.convert(toStopInstanceMetadataList,
-                        context.getStack().getEnvironmentCrn(), context.getStack().getStackAuthentication());
+                List<CloudInstance> cloudInstancesToStop = instanceMetaDataToCloudInstanceConverter.convert(instanceMetaDataList,
+                        context.getStack().getStack());
 
                 StopStartDownscaleStopInstancesRequest request = new StopStartDownscaleStopInstancesRequest(context.getCloudContext(),
                         context.getCloudCredential(), context.getCloudStack(), cloudInstancesToStop);
@@ -159,14 +165,16 @@ public class StopStartDownscaleActions {
                         .filter(x -> x.getStatus() == InstanceStatus.STOPPED)
                         .map(x -> x.getCloudInstance().getInstanceId())
                         .collect(Collectors.toUnmodifiableSet());
-                List<InstanceMetaData> stoppedInstanceMetadata = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
-                        context.getStack(), context.getHostGroupName(), cloudInstanceIdsStopped);
-                stopStartDownscaleFlowService.instancesStopped(context.getStack().getId(), stoppedInstanceMetadata);
+                StackDtoDelegate stack = context.getStack();
+                List<InstanceMetadataView> instanceMetadataViews = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
+                List<InstanceMetadataView> stoppedInstanceMetadata = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
+                        instanceMetadataViews, context.getHostGroupName(), cloudInstanceIdsStopped);
+                stopStartDownscaleFlowService.instancesStopped(stack.getId(), stoppedInstanceMetadata);
 
                 handleNotStartedInstances(context, payload.getAffectedInstanceStatuses());
 
                 stopStartDownscaleFlowService.clusterDownscaleFinished(
-                        context.getStack().getId(), context.getHostGroupName(), stoppedInstanceMetadata);
+                        stack.getId(), context.getHostGroupName(), stoppedInstanceMetadata);
 
                 sendEvent(context, STOPSTART_DOWNSCALE_FINALIZED_EVENT.event(), payload);
             }
@@ -208,10 +216,14 @@ public class StopStartDownscaleActions {
                 sendEvent(context, STOPSTART_DOWNSCALE_FAILURE_EVENT.event(), new StackFailureEvent(payload.getResourceId(), payload.getErrorDetails()));
             }
 
-            private Set<String> getHostNamesForPrivateIds(Set<Long> hostIdsToRemove, Stack stack) {
+            private Set<String> getHostNamesForPrivateIds(Set<Long> hostIdsToRemove, StackDtoDelegate stack) {
                 return hostIdsToRemove.stream().map(privateId -> {
-                    Optional<InstanceMetaData> instanceMetadata = stackService.getInstanceMetadata(stack.getInstanceMetaDataAsList(), privateId);
-                    return instanceMetadata.map(InstanceMetaData::getDiscoveryFQDN).orElse(null);
+                    List<InstanceGroupDto> instanceGroups = stack.getInstanceGroupDtos();
+                    List<InstanceMetadataView> instanceMetaDataList = instanceGroups.stream()
+                            .flatMap(e -> e.getInstanceMetadataViews().stream())
+                            .collect(Collectors.toList());
+                    Optional<InstanceMetadataView> instanceMetadata = stackService.getInstanceMetadata(instanceMetaDataList, privateId);
+                    return instanceMetadata.map(InstanceMetadataView::getDiscoveryFQDN).orElse(null);
                 }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
             }
         };
@@ -239,13 +251,13 @@ public class StopStartDownscaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Handling a failure from Downscale via Instance Stop");
-                stopStartDownscaleFlowService.handleClusterDownscaleFailure(context.getStackView().getId(), payload.getException());
+                stopStartDownscaleFlowService.handleClusterDownscaleFailure(context.getStackId(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }
@@ -298,17 +310,15 @@ public class StopStartDownscaleActions {
                     .withPlatform(stack.getCloudPlatform())
                     .withVariant(stack.getPlatformVariant())
                     .withLocation(location)
-                    .withWorkspaceId(stack.getWorkspace().getId())
+                    .withWorkspaceId(stack.getWorkspaceId())
                     .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                     .withTenantId(stack.getTenant().getId())
                     .build();
-            CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
+            CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
             CloudStack cloudStack = cloudStackConverter.convert(stack);
 
-            return new StopStartDownscaleContext(flowParameters, stack, stackService.getViewByIdWithoutAuth(stack.getId()),
-                    cloudContext, cloudCredential, cloudStack,
-                    getHostgroupName(variables), getHostsToRemove(variables),
-                    ClusterManagerType.CLOUDERA_MANAGER);
+            return new StopStartDownscaleContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack,
+                    getHostgroupName(variables), getHostsToRemove(variables), ClusterManagerType.CLOUDERA_MANAGER);
         }
 
         private String getHostgroupName(Map<Object, Object> variables) {

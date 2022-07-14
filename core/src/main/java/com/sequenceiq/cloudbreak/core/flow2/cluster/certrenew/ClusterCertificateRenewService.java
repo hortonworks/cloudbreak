@@ -13,9 +13,9 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.converter.util.ExceptionMessageFormatterUtil;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ClusterCertificateRenewService {
@@ -47,9 +47,9 @@ public class ClusterCertificateRenewService {
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), ResourceEvent.CLUSTER_CERTIFICATE_RENEWAL_FINISHED);
     }
 
-    void certificateRenewalFailed(StackView stackView, Exception exception) {
-        if (stackView.getClusterView() != null) {
-            Long stackId = stackView.getId();
+    void certificateRenewalFailed(StackView stack, Exception exception) {
+        if (stack.getClusterId() != null) {
+            Long stackId = stack.getId();
             String errorMessage = ExceptionMessageFormatterUtil.getErrorMessageFromException(exception);
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CERTIFICATE_RENEWAL_FAILED, errorMessage);
             flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CERTIFICATE_RENEWAL_FAILED, errorMessage);

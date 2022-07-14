@@ -21,9 +21,9 @@ import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetai
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.node.status.NodeStatusService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -36,7 +36,7 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
     private NodeStatusService nodeStatusService;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private StackUtil stackUtil;
@@ -70,10 +70,10 @@ public class SaltCheckerConclusionStep extends ConclusionStep {
     }
 
     private Conclusion checkUnreachableNodes(Long resourceId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(resourceId);
-        Set<String> allNodes = stackUtil.collectNodes(stack).stream().map(Node::getHostname).collect(Collectors.toSet());
+        StackDto stackDto = stackDtoService.getById(resourceId);
+        Set<String> allNodes = stackUtil.collectNodes(stackDto).stream().map(Node::getHostname).collect(Collectors.toSet());
         try {
-            stackUtil.collectAndCheckReachableNodes(stack, allNodes);
+            stackUtil.collectAndCheckReachableNodes(stackDto, allNodes);
         } catch (NodesUnreachableException e) {
             Set<String> unreachableNodes = e.getUnreachableNodes();
             String conclusion = String.format("Unreachable nodes: %s. We detected that cluster members can’t communicate with each other. " +

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,9 +24,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class UnhealthyInstancesFinalizer {
@@ -39,7 +40,7 @@ public class UnhealthyInstancesFinalizer {
     @Inject
     private StackUtil stackUtil;
 
-    public Set<String> finalizeUnhealthyInstances(Stack stack, Iterable<InstanceMetaData> candidateUnhealthyInstances) {
+    public Set<String> finalizeUnhealthyInstances(StackView stack, Collection<InstanceMetadataView> candidateUnhealthyInstances) {
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(stack.getId())
@@ -48,13 +49,12 @@ public class UnhealthyInstancesFinalizer {
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
+                .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
-                .withTenantId(stack.getTenant().getId())
+                .withTenantId(stack.getTenantId())
                 .build();
-        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
-        List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(candidateUnhealthyInstances, stack.getEnvironmentCrn(),
-                stack.getStackAuthentication());
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
+        List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(candidateUnhealthyInstances, stack);
 
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = instanceStateQuery.getCloudVmInstanceStatuses(
                 cloudCredential, cloudContext, cloudInstances);
@@ -62,7 +62,7 @@ public class UnhealthyInstancesFinalizer {
         cloudVmInstanceStatuses.forEach(c -> cloudVmInstanceStatusesById.put(c.getCloudInstance().getInstanceId(), c));
 
         Set<String> unhealthyInstances = new HashSet<>();
-        for (InstanceMetaData i : candidateUnhealthyInstances) {
+        for (InstanceMetadataView i : candidateUnhealthyInstances) {
             CloudVmInstanceStatus instanceStatus = cloudVmInstanceStatusesById.get(i.getInstanceId());
             if ((instanceStatus == null) || (instanceStatus.getStatus().equals(InstanceStatus.TERMINATED))) {
                 unhealthyInstances.add(i.getInstanceId());

@@ -10,10 +10,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class HostGroupDecorator {
@@ -22,18 +21,18 @@ public class HostGroupDecorator {
     @Inject
     private RecipeService recipeService;
 
-    public HostGroup decorate(HostGroup subject, HostGroupV4Request hostGroupV4Request, Stack stack) {
+    public HostGroup decorate(HostGroup subject, HostGroupV4Request hostGroupV4Request, StackView stack) {
         Set<String> recipeNames = hostGroupV4Request.getRecipeNames();
         LOGGER.debug("Decorating hostgroup {} on request.", subject.getName());
         subject.getRecipes().clear();
         if (recipeNames != null && !recipeNames.isEmpty()) {
-            prepareRecipesByName(subject, stack.getWorkspace(), recipeNames);
+            prepareRecipesByName(subject, stack.getWorkspaceId(), recipeNames);
         }
         return subject;
     }
 
-    private void prepareRecipesByName(HostGroup subject, Workspace workspace, Set<String> recipeNames) {
-        Set<Recipe> recipes = recipeService.getRecipesByNamesForWorkspace(workspace, recipeNames);
+    private void prepareRecipesByName(HostGroup subject, Long workspaceId, Set<String> recipeNames) {
+        Set<Recipe> recipes = recipeService.getRecipesByNamesForWorkspace(workspaceId, recipeNames);
         subject.getRecipes().addAll(recipes);
     }
 

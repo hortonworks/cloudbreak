@@ -28,9 +28,9 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ClouderaManagerLdapService {
@@ -57,7 +57,7 @@ public class ClouderaManagerLdapService {
     @Inject
     private VirtualGroupService virtualGroupService;
 
-    public void setupLdap(Stack stack, Cluster cluster, HttpClientConfig clientConfig, LdapView ldapView, VirtualGroupRequest virtualGroupRequest)
+    public void setupLdap(StackView stack, ClusterView cluster, HttpClientConfig clientConfig, LdapView ldapView, VirtualGroupRequest virtualGroupRequest)
             throws ApiException, ClouderaManagerClientInitException {
         if (ldapView != null) {
             String user = cluster.getCloudbreakAmbariUser();

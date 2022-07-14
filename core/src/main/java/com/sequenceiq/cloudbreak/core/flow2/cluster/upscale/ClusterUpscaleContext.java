@@ -5,7 +5,8 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public class ClusterUpscaleContext extends ClusterViewContext {
@@ -21,9 +22,9 @@ public class ClusterUpscaleContext extends ClusterViewContext {
 
     private final Boolean restartServices;
 
-    public ClusterUpscaleContext(FlowParameters flowParameters, StackView stack, Map<String, Integer> hostGroupWithAdjustment, Boolean singlePrimaryGateway,
-            String hostName, ClusterManagerType clusterManagerType, Boolean repair, Boolean restartServices) {
-        super(flowParameters, stack);
+    public ClusterUpscaleContext(FlowParameters flowParameters, StackView stack, ClusterView cluster, Map<String, Integer> hostGroupWithAdjustment,
+            Boolean singlePrimaryGateway, String hostName, ClusterManagerType clusterManagerType, Boolean repair, Boolean restartServices) {
+        super(flowParameters, stack, cluster);
         this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.singlePrimaryGateway = singlePrimaryGateway;
         this.primaryGatewayHostName = hostName;

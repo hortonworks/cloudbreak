@@ -74,14 +74,16 @@ public class SpiStoreService {
     }
 
     public List<CloudVmMetaDataStatus> resize(String mockUuid, List<Group> groups) {
+        long start = System.currentTimeMillis();
         LOGGER.info("Resize {}", mockUuid);
         SpiDto spiDto = read(mockUuid);
         if (spiDto.isAddInstanceDisabled()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Add instance disabled");
         }
         List<CloudVmMetaDataStatus> instances = defaultModelService.createInstances(mockUuid, spiDto, groups);
-        LOGGER.info("{} will be resized with {}", mockUuid, instances);
+        LOGGER.info("{} will be resized with {}", mockUuid, instances.size());
         spiDto.getVmMetaDataStatuses().addAll(instances);
+        LOGGER.info("Instances added in {} ms", System.currentTimeMillis() - start);
         return instances;
     }
 

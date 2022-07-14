@@ -18,7 +18,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -37,12 +36,12 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class StackSyncService {
@@ -65,12 +64,12 @@ public class StackSyncService {
     @Inject
     private ImageService imageService;
 
-    public void updateInstances(Stack stack, Iterable<InstanceMetaData> instanceMetaDataList, Collection<CloudVmInstanceStatus> instanceStatuses,
-            SyncConfig syncConfig) {
+    public void updateInstances(StackView stack, Iterable<InstanceMetadataView> instanceMetaDataList,
+            Collection<CloudVmInstanceStatus> instanceStatuses, SyncConfig syncConfig) {
         try {
             Map<InstanceSyncState, Integer> counts = initInstanceStateCounts();
             Json imageJson = new Json(imageService.getImage(stack.getId()));
-            for (InstanceMetaData metaData : instanceMetaDataList) {
+            for (InstanceMetadataView metaData : instanceMetaDataList) {
                 Optional<CloudVmInstanceStatus> status = instanceStatuses.stream()
                         .filter(is -> is != null && is.getCloudInstance().getInstanceId() != null
                                 && is.getCloudInstance().getInstanceId().equals(metaData.getInstanceId()))
@@ -98,13 +97,13 @@ public class StackSyncService {
         }
     }
 
-    public void autoSync(Stack stack, Collection<InstanceMetaData> instances, List<CloudVmInstanceStatus> instanceStatuses,
+    public void autoSync(StackView stack, Collection<InstanceMetadataView> instances, List<CloudVmInstanceStatus> instanceStatuses,
             InstanceSyncState defaultState, SyncConfig syncConfig) {
         Map<String, InstanceSyncState> instanceSyncStates = instanceStatuses.stream()
                 .collect(Collectors.toMap(i -> i.getCloudInstance().getInstanceId(), i -> InstanceSyncState.getInstanceSyncState(i.getStatus())));
         Map<InstanceSyncState, Integer> instanceStateCounts = initInstanceStateCounts();
 
-        for (InstanceMetaData instance : instances) {
+        for (InstanceMetadataView instance : instances) {
             try {
                 InstanceSyncState instanceSyncState = calculateInstanceSyncState(defaultState, instanceSyncStates, instance);
                 syncInstanceStatusByState(stack, instanceStateCounts, instance, instanceSyncState);
@@ -124,7 +123,7 @@ public class StackSyncService {
     }
 
     private InstanceSyncState calculateInstanceSyncState(InstanceSyncState defaultState, Map<String, InstanceSyncState> instanceSyncStates,
-            InstanceMetaData instance) {
+            InstanceMetadataView instance) {
         InstanceSyncState instanceSyncState;
         if (instance.getInstanceId() == null) {
             instanceSyncState = InstanceSyncState.DELETED_ON_PROVIDER_SIDE;
@@ -134,16 +133,16 @@ public class StackSyncService {
         return instanceSyncState;
     }
 
-    private void syncInstance(InstanceMetaData instanceMetaData, CloudInstance cloudInstance, Json imageJson) {
+    private void syncInstance(InstanceMetadataView instanceMetaData, CloudInstance cloudInstance, Json imageJson) {
         String instanceName = cloudInstance.getStringParameter(INSTANCE_NAME);
-        instanceMetaData.setInstanceName(instanceName);
         if (instanceMetaData.getImage() == null) {
-            instanceMetaData.setImage(imageJson);
+            instanceMetaDataService.updateInstanceNameAndImageByInstanceMetadataId(instanceMetaData.getId(), instanceName, imageJson);
+        } else {
+            instanceMetaDataService.updateInstanceNameByInstanceMetadataId(instanceMetaData.getId(), instanceName);
         }
-        instanceMetaDataService.save(instanceMetaData);
     }
 
-    private void syncInstanceStatusByState(Stack stack, Map<InstanceSyncState, Integer> counts, InstanceMetaData metaData, InstanceSyncState state) {
+    private void syncInstanceStatusByState(StackView stack, Map<InstanceSyncState, Integer> counts, InstanceMetadataView metaData, InstanceSyncState state) {
         if (InstanceSyncState.DELETED.equals(state)
                 || InstanceSyncState.DELETED_ON_PROVIDER_SIDE.equals(state)
                 || InstanceSyncState.DELETED_BY_PROVIDER.equals(state)) {
@@ -157,7 +156,7 @@ public class StackSyncService {
         }
     }
 
-    private void syncStoppedInstance(Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
+    private void syncStoppedInstance(Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetadataView instance) {
         incrementInstanceStateCount(instanceStateCounts, InstanceSyncState.STOPPED);
         if (!instance.isTerminated() && instance.getInstanceStatus() != InstanceStatus.STOPPED) {
             LOGGER.debug("Instance '{}' is reported as stopped on the cloud provider, setting its state to STOPPED.", instance.getInstanceId());
@@ -165,7 +164,7 @@ public class StackSyncService {
         }
     }
 
-    private void syncRunningInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance) {
+    private void syncRunningInstance(StackView stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetadataView instance) {
         incrementInstanceStateCount(instanceStateCounts, InstanceSyncState.RUNNING);
         if (stack.getStatus() == WAIT_FOR_SYNC && instance.isCreated()) {
             LOGGER.debug("Instance '{}' is reported as created on the cloud provider but not member of the cluster, setting its state to FAILED.",
@@ -177,7 +176,7 @@ public class StackSyncService {
         }
     }
 
-    private void syncDeletedInstance(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetaData instance,
+    private void syncDeletedInstance(StackView stack, Map<InstanceSyncState, Integer> instanceStateCounts, InstanceMetadataView instance,
             InstanceSyncState state) {
         if (!instance.isTerminated() || !instance.isDeletedOnProvider()) {
             if (instance.getInstanceId() == null) {
@@ -205,15 +204,15 @@ public class StackSyncService {
         }
     }
 
-    private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig) {
+    private void handleSyncResult(StackView stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig) {
         if (syncConfig.isStackStatusUpdateEnabled()) {
-            Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(stack.getId());
+            List<InstanceMetadataView> instances = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
             handleSyncResult(stack, instanceStateCounts, syncConfig, instances);
         }
     }
 
-    void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig,
-            Set<InstanceMetaData> instances) {
+    void handleSyncResult(StackView stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig,
+            List<InstanceMetadataView> instances) {
         Status status = stack.getStatus();
         if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
             if (syncConfig.isCmServerRunning()) {
@@ -255,24 +254,24 @@ public class StackSyncService {
         stackUpdater.updateStackStatus(stackId, status, statusReason);
     }
 
-    private void updateMetaDataToDeletedOnProviderSide(Stack stack, InstanceMetaData instanceMetaData) {
+    private void updateMetaDataToDeletedOnProviderSide(StackView stack, InstanceMetadataView instanceMetaData) {
         instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.DELETED_ON_PROVIDER_SIDE);
         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_DELETED_CBMETADATA,
                 Collections.singletonList(getInstanceName(instanceMetaData)));
     }
 
-    private void updateMetaDataToDeletedByProvider(Stack stack, InstanceMetaData instanceMetaData) {
+    private void updateMetaDataToDeletedByProvider(StackView stack, InstanceMetadataView instanceMetaData) {
         instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.DELETED_BY_PROVIDER);
         eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_SYNC_INSTANCE_DELETED_BY_PROVIDER_CBMETADATA,
                 Collections.singletonList(getInstanceName(instanceMetaData)));
     }
 
-    private void updateMetaDataToRunning(InstanceMetaData instanceMetaData) {
+    private void updateMetaDataToRunning(InstanceMetadataView instanceMetaData) {
         LOGGER.info("Instance '{}' state to RUNNING.", instanceMetaData.getInstanceId());
         instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.SERVICES_RUNNING, "Services running");
     }
 
-    private String getInstanceName(InstanceMetaData instanceMetaData) {
+    private String getInstanceName(InstanceMetadataView instanceMetaData) {
         return instanceMetaData.getDiscoveryFQDN() == null
                 ? instanceMetaData.getInstanceId()
                 : String.format("%s (%s)", instanceMetaData.getInstanceId(), instanceMetaData.getDiscoveryFQDN());

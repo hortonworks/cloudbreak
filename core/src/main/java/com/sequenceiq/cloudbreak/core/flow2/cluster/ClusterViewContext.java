@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster;
 
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -9,17 +9,16 @@ public class ClusterViewContext extends CommonContext {
 
     private final StackView stack;
 
-    public ClusterViewContext(FlowParameters flowParameters, StackView stack) {
+    private final ClusterView cluster;
+
+    public ClusterViewContext(FlowParameters flowParameters, StackView stack, ClusterView cluster) {
         super(flowParameters);
         this.stack = stack;
+        this.cluster = cluster;
     }
 
     public StackView getStack() {
         return stack;
-    }
-
-    public ClusterView getClusterView() {
-        return stack.getClusterView();
     }
 
     public long getStackId() {
@@ -27,6 +26,10 @@ public class ClusterViewContext extends CommonContext {
     }
 
     public long getClusterId() {
-        return getClusterView().getId();
+        return getCluster().getId();
+    }
+
+    public ClusterView getCluster() {
+        return cluster;
     }
 }

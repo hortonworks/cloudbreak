@@ -12,7 +12,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 public class BlueprintValidatorUtil {
 
@@ -32,7 +32,7 @@ public class BlueprintValidatorUtil {
         }
     }
 
-    public static void validateInstanceGroups(Collection<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups) {
+    public static void validateInstanceGroups(Collection<HostGroup> hostGroups, Collection<InstanceGroupView> instanceGroups) {
         if (!instanceGroups.isEmpty()) {
             Collection<String> instanceGroupNames = new HashSet<>();
             for (HostGroup hostGroup : hostGroups) {

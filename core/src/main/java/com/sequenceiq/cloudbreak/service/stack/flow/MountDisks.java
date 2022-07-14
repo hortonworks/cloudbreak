@@ -68,7 +68,7 @@ public class MountDisks {
 
     public void mountAllDisks(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
+        stack.setResources(new HashSet<>(resourceService.findAllByStackIdAndResourceTypeIn(stackId, List.of(stack.getDiskResourceType()))));
         if (!StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(stack.getPlatformVariant())) {
             return;
         }
@@ -80,7 +80,7 @@ public class MountDisks {
 
     public void mountDisksOnNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Set<Node> allNodes) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        stack.setResources(new HashSet<>(resourceService.getAllByStackId(stackId)));
+        stack.setResources(new HashSet<>(resourceService.findAllByStackIdAndResourceTypeIn(stackId, List.of(stack.getDiskResourceType()))));
         if (!StackService.REATTACH_COMPATIBLE_PLATFORMS.contains(stack.getPlatformVariant())) {
             return;
         }

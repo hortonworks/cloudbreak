@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_VARIANT;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 @Component
 public class MultiAzValidator {
@@ -50,9 +52,9 @@ public class MultiAzValidator {
 
     public void validateMultiAzForStack(
         String variant,
-        Iterable<InstanceGroup> instanceGroups,
+        Collection<InstanceGroup> instanceGroups,
         ValidationResult.ValidationResultBuilder validationBuilder) {
-        Set<String> allSubnetIds = collectSubnetIds(instanceGroups);
+        Set<String> allSubnetIds = collectSubnetIds(new ArrayList<>(instanceGroups));
         if (allSubnetIds.size() > 1 && !supportedVariant(variant)) {
                 validationBuilder.error(String.format("Multiple Availability Zone feature is not supported for %s variant", variant));
         }
@@ -62,16 +64,16 @@ public class MultiAzValidator {
         return !Strings.isNullOrEmpty(variant) && supportedMultiAzVariants.contains(variant);
     }
 
-    public boolean supportedForInstanceMetadataGeneration(InstanceGroup instanceGroup) {
+    public boolean supportedForInstanceMetadataGeneration(InstanceGroupView instanceGroup) {
         if (instanceGroup.getInstanceGroupNetwork() != null) {
             return supportedInstanceMetadataPlatforms.contains(instanceGroup.getInstanceGroupNetwork().cloudPlatform());
         }
         return false;
     }
 
-    public Set<String> collectSubnetIds(Iterable<InstanceGroup> instanceGroups) {
+    public Set<String> collectSubnetIds(Iterable<InstanceGroupView> instanceGroups) {
         Set<String> allSubnetIds = new HashSet<>();
-        for (InstanceGroup instanceGroup : instanceGroups) {
+        for (InstanceGroupView instanceGroup : instanceGroups) {
             InstanceGroupNetwork instanceGroupNetwork = instanceGroup.getInstanceGroupNetwork();
             if (instanceGroupNetwork != null) {
                 Json attributes = instanceGroupNetwork.getAttributes();

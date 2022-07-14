@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.CcmKeyDeregisterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.CcmKeyDeregisterSuccess;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.common.api.type.Tunnel;
 
 import reactor.bus.Event;
@@ -53,7 +53,7 @@ class CcmKeyDeregisterHandlerTest {
     private EventBus eventBus;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private CcmResourceTerminationListener ccmResourceTerminationListener;
@@ -158,7 +158,7 @@ class CcmKeyDeregisterHandlerTest {
 
         doAnswer(a -> {
             throw new Exception("failed");
-        }).when(stackService).getByIdWithListsInTransaction(anyLong());
+        }).when(stackDtoService).getStackViewById(anyLong());
         underTest.accept(event);
 
         verifyNoMoreInteractions(ccmResourceTerminationListener);
@@ -170,7 +170,7 @@ class CcmKeyDeregisterHandlerTest {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setResourceCrn("resourceCrn");
-        when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
+        when(stackDtoService.getStackViewById(anyLong())).thenReturn(stack);
         return stack;
     }
 

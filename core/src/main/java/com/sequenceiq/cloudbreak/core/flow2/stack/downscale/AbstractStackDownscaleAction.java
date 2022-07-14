@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.ContextKeys.PRIVATE_IDS;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,22 +24,21 @@ import org.springframework.statemachine.StateContext;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
-import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -71,16 +69,10 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     private static final String HOST_GROUP_WITH_HOSTNAMES = "HOST_GROUP_WITH_HOSTNAMES";
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private ResourceService resourceService;
-
-    @Inject
-    private StackToCloudStackConverter cloudStackConverter;
 
     @Inject
     private StackUtil stackUtil;
@@ -97,22 +89,20 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
             P payload) {
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         LOGGER.info("Variables in AbstractStackDownscaleAction: {}", variables);
-        Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
-        stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
+        StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = getCloudContext(stack, location);
-        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
-        CloudStack cloudStack = cloudStackConverter.convert(stack);
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
         if (payload instanceof StackDownscaleTriggerEvent) {
             return createStackScalingFlowContextFromPayload(flowParameters, (StackDownscaleTriggerEvent) payload, variables, stack, cloudContext,
-                    cloudCredential, cloudStack);
+                    cloudCredential);
         } else {
-            return createStackScalingFlowContextFromVariables(flowParameters, variables, stack, cloudContext, cloudCredential, cloudStack);
+            return createStackScalingFlowContextFromVariables(flowParameters, variables, stack, cloudContext, cloudCredential);
         }
     }
 
-    private CloudContext getCloudContext(Stack stack, Location location) {
+    private CloudContext getCloudContext(StackView stack, Location location) {
         return CloudContext.Builder.builder()
                 .withId(stack.getId())
                 .withName(stack.getName())
@@ -120,14 +110,14 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
+                .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
-                .withTenantId(stack.getTenant().getId())
+                .withTenantId(stack.getTenantId())
                 .build();
     }
 
     private StackScalingFlowContext createStackScalingFlowContextFromPayload(FlowParameters flowParameters, StackDownscaleTriggerEvent payload,
-            Map<Object, Object> variables, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack) {
+            Map<Object, Object> variables, StackView stack, CloudContext cloudContext, CloudCredential cloudCredential) {
         LOGGER.info("Payload type is StackDownscaleTriggerEvent");
         boolean repair = payload.isRepair();
 
@@ -137,38 +127,45 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         variables.put(REPAIR, repair);
         variables.put(HOST_GROUP_WITH_ADJUSTMENT, hostGroupsWithAdjustment);
         variables.put(HOST_GROUP_WITH_HOSTNAMES, hostgroupsWithHostnames);
+        List<InstanceGroupDto> instanceGroupDtos = stackDtoService.getInstanceMetadataByInstanceGroup(stack.getId());
         if (MapUtils.isEmpty(hostGroupsWithPrivateIds) && variables.get(PRIVATE_IDS) != null) {
-            hostGroupsWithPrivateIds = getHostGroupsWithPrivateIdsFromVariables(variables, stack);
+            hostGroupsWithPrivateIds = getHostGroupsWithPrivateIdsFromVariables(variables, instanceGroupDtos);
         }
         if (hostGroupsWithPrivateIds.values().stream().mapToLong(Collection::size).sum() == 0) {
-            hostGroupsWithPrivateIds = createHostGroupsWithPrivateIdsFromUnusedPrivateIds(stack, hostGroupsWithAdjustment);
+            hostGroupsWithPrivateIds = createHostGroupsWithPrivateIdsFromUnusedPrivateIds(instanceGroupDtos, hostGroupsWithAdjustment);
         }
         variables.put(HOST_GROUP_WITH_PRIVATE_IDS, hostGroupsWithPrivateIds);
         LOGGER.info("Variables in AbstractStackDownscaleAction: {}", variables);
-        return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack,
+        return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential,
                 hostGroupsWithAdjustment, hostGroupsWithPrivateIds, hostgroupsWithHostnames, repair,
                 new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, null));
     }
 
-    private Map<String, Set<Long>> createHostGroupsWithPrivateIdsFromUnusedPrivateIds(Stack stack, Map<String, Integer> hostGroupsWithAdjustment) {
+    private Map<String, Set<Long>> createHostGroupsWithPrivateIdsFromUnusedPrivateIds(List<InstanceGroupDto> instanceGroupDtos,
+            Map<String, Integer> hostGroupsWithAdjustment) {
         Map<String, Set<Long>> hostGroupsWithPrivateIds;
         LOGGER.info("No private ids for hostgroups, lets fill it with unused ones");
         hostGroupsWithPrivateIds = new HashMap<>();
         for (Map.Entry<String, Integer> hostGroupWithAdjustment : hostGroupsWithAdjustment.entrySet()) {
-            String hostGroup = hostGroupWithAdjustment.getKey();
-            Set<Long> unusedInstanceIds = stackScalingService.getUnusedPrivateIds(hostGroup, hostGroupWithAdjustment.getValue(), stack);
-            hostGroupsWithPrivateIds.put(hostGroup, unusedInstanceIds);
+            String hostGroupName = hostGroupWithAdjustment.getKey();
+            InstanceGroupDto instanceGroupDto = instanceGroupDtos.stream()
+                    .filter(ig -> ig.getInstanceGroup().getGroupName().equals(hostGroupName))
+                    .findFirst()
+                    .orElseThrow(NotFoundException.notFound("Instance group doesn't found with name: " + hostGroupName));
+            Set<Long> unusedInstanceIds = stackScalingService.getUnusedPrivateIds(instanceGroupDto, hostGroupWithAdjustment.getValue());
+            hostGroupsWithPrivateIds.put(hostGroupName, unusedInstanceIds);
         }
         return hostGroupsWithPrivateIds;
     }
 
-    private Map<String, Set<Long>> getHostGroupsWithPrivateIdsFromVariables(Map<Object, Object> variables, Stack stack) {
+    private Map<String, Set<Long>> getHostGroupsWithPrivateIdsFromVariables(Map<Object, Object> variables, List<InstanceGroupDto> instanceGroupDtos) {
         Map<String, Set<Long>> hostGroupsWithPrivateIds;
         Set<Long> privateIds = (Set<Long>) variables.get(PRIVATE_IDS);
         LOGGER.info("Private ids filled from variables: {}", privateIds);
-        hostGroupsWithPrivateIds = stack.getInstanceGroups().stream().collect(Collectors.toMap(InstanceGroup::getGroupName,
-                instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream()
-                                    .map(InstanceMetaData::getPrivateId)
+
+        hostGroupsWithPrivateIds = instanceGroupDtos.stream().collect(Collectors.toMap(ig -> ig.getInstanceGroup().getGroupName(),
+                instanceGroup -> instanceGroup.getInstanceMetadataViews().stream()
+                                    .map(InstanceMetadataView::getPrivateId)
                                     .filter(privateIds::contains)
                                     .collect(Collectors.toSet())
                 )).entrySet().stream().filter(entry -> entry.getValue().size() > 0)
@@ -176,12 +173,12 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         return hostGroupsWithPrivateIds;
     }
 
-    private StackScalingFlowContext createStackScalingFlowContextFromVariables(FlowParameters flowParameters, Map<Object, Object> variables, Stack stack,
-            CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack) {
+    private StackScalingFlowContext createStackScalingFlowContextFromVariables(FlowParameters flowParameters, Map<Object, Object> variables, StackView stack,
+            CloudContext cloudContext, CloudCredential cloudCredential) {
         Map<String, Integer> hostGroupWithAdjustment = getHostGroupWithAdjustment(variables);
         Map<String, Set<Long>> hostGroupWithPrivateIds = getHostGroupWithPrivateIds(stack.getId(), variables);
         Map<String, Set<String>> hostgroupWithHostnames = getHostGroupWithHostnames(stack.getId(), variables);
-        return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack,
+        return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential,
                 hostGroupWithAdjustment, hostGroupWithPrivateIds, hostgroupWithHostnames, isRepair(variables),
                 new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, null));
     }

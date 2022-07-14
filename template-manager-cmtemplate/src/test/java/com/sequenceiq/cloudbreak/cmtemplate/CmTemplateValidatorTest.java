@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidationException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -77,7 +78,7 @@ public class CmTemplateValidatorTest {
                 hostGroup("worker", 3),
                 hostGroup("compute", 0)
         );
-        Collection<InstanceGroup> instanceGroups = hostGroups.stream()
+        Collection<InstanceGroupView> instanceGroups = hostGroups.stream()
                 .map(HostGroup::getInstanceGroup)
                 .collect(toSet());
         subject.validate(blueprint, hostGroups, instanceGroups, true);
@@ -91,7 +92,7 @@ public class CmTemplateValidatorTest {
                 hostGroup("worker", 3),
                 hostGroup("compute", 0)
         );
-        Collection<InstanceGroup> instanceGroups = hostGroups.stream()
+        Collection<InstanceGroupView> instanceGroups = hostGroups.stream()
                 .map(HostGroup::getInstanceGroup)
                 .collect(toSet());
         subject.validate(blueprint, hostGroups, instanceGroups, true);
@@ -104,7 +105,7 @@ public class CmTemplateValidatorTest {
                 hostGroup("master", 1),
                 hostGroup("worker", 3)
         );
-        Collection<InstanceGroup> instanceGroups = hostGroups.stream()
+        Collection<InstanceGroupView> instanceGroups = hostGroups.stream()
                 .map(HostGroup::getInstanceGroup)
                 .collect(toSet());
 

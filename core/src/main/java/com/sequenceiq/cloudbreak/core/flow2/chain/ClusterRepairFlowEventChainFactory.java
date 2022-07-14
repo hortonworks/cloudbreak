@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.HashMultimap;
@@ -54,6 +55,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -71,6 +73,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     private StackService stackService;
 
     @Inject
+    @Qualifier("stackViewServiceDeprecated")
     private StackViewService stackViewService;
 
     @Inject
@@ -155,7 +158,8 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     private void repairOneNodeFromEachHostGroupAtOnce(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers,
             Map<String, Set<String>> repairableGroupsWithHostNames) {
-        Optional<String> primaryGwFQDN = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(event.getStackId()).map(InstanceMetaData::getDiscoveryFQDN);
+        Optional<String> primaryGwFQDN = instanceMetaDataService.getPrimaryGatewayInstanceMetadata(event.getStackId())
+                .map(InstanceMetadataView::getDiscoveryFQDN);
         HashMultimap<String, String> repairableGroupsWithHostNameMultimap = HashMultimap.create();
         repairableGroupsWithHostNames.forEach(repairableGroupsWithHostNameMultimap::putAll);
         LinkedListMultimap<String, String> hostsByHostGroupAndSortedByPgw =

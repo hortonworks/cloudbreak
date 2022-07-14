@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
@@ -100,9 +101,13 @@ public class FreeIpaCleanupServiceTest {
 
     @Test
     public void shouldSendCleanupRequestInCaseOfKeytabNeedsToBeUpdated() {
+        StackDto stackDto = mock(StackDto.class);
         Stack stack = aStack();
+
         Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
         OperationStatus operationStatus = new OperationStatus(null, OperationType.CLEANUP, null, null, null, null, 0L, null);
+
+        when(stackDto.getStack()).thenReturn(stack);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
@@ -111,41 +116,47 @@ public class FreeIpaCleanupServiceTest {
         when(freeIpaV1Endpoint.internalCleanup(any(CleanupRequest.class), anyString())).thenReturn(operationStatus);
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
 
-        victim.cleanupButIp(stack);
+        victim.cleanupButIp(stackDto);
 
         verify(freeIpaV1Endpoint).internalCleanup(any(), anyString());
     }
 
     @Test
     public void shouldNotSendCleanupRequestInCaseOfKeytabDoesNotNeedToBeUpdated() {
+        StackDto stackDto = mock(StackDto.class);
         Stack stack = aStack();
         Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
 
+        when(stackDto.getStack()).thenReturn(stack);
         when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(true);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, true, kerberosConfig)).thenReturn(false);
 
-        victim.cleanupButIp(stack);
+        victim.cleanupButIp(stackDto);
 
         verifyNoMoreInteractions(freeIpaV1Endpoint);
     }
 
     @Test
     public void testCleanup() {
-        Stack stack = spy(aStack());
+        StackDto stackDto = mock(StackDto.class);
+        Stack stack = aStack();
         Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
+
+        when(stackDto.getStack()).thenReturn(stack);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(false);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
-        when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(createInstanceMetadata("asdf", "1.1.1.1"), createInstanceMetadata("qwer", "1.1.1.2")));
+        when(stackDto.getNotTerminatedInstanceMetaData())
+                .thenReturn(List.of(createInstanceMetadata("asdf", "1.1.1.1"), createInstanceMetadata("qwer", "1.1.1.2")));
         OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
         ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
         when(freeIpaV1Endpoint.internalCleanup(captor.capture(), anyString())).thenReturn(operationStatus);
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
 
-        victim.cleanupButIp(stack);
+        victim.cleanupButIp(stackDto);
 
         CleanupRequest cleanupRequest = captor.getValue();
         assertEquals(STACK_NAME, cleanupRequest.getClusterName());
@@ -160,14 +171,18 @@ public class FreeIpaCleanupServiceTest {
 
     @Test
     public void testCleanupPollFailed() {
+        StackDto stackDto = mock(StackDto.class);
         Stack stack = spy(aStack());
         Optional<KerberosConfig> kerberosConfig = Optional.of(mock(KerberosConfig.class));
+
+        when(stackDto.getStack()).thenReturn(stack);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         when(kerberosConfigService.get(ENVIRONMENT_CRN, STACK_NAME)).thenReturn(kerberosConfig);
         when(environmentConfigProvider.isChildEnvironment(ENVIRONMENT_CRN)).thenReturn(false);
         when(kerberosDetailService.keytabsShouldBeUpdated(CLOUD_PLATFORM, false, kerberosConfig)).thenReturn(true);
-        when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(createInstanceMetadata("asdf", "1.1.1.1"), createInstanceMetadata("qwer", "1.1.1.2")));
+        when(stackDto.getNotTerminatedInstanceMetaData())
+                .thenReturn(List.of(createInstanceMetadata("asdf", "1.1.1.1"), createInstanceMetadata("qwer", "1.1.1.2")));
         OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
         ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
         when(freeIpaV1Endpoint.internalCleanup(captor.capture(), anyString())).thenReturn(operationStatus);
@@ -177,7 +192,7 @@ public class FreeIpaCleanupServiceTest {
                 .build();
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(extendedPollingResult);
 
-        assertThrows(FreeIpaOperationFailedException.class, () -> victim.cleanupButIp(stack));
+        assertThrows(FreeIpaOperationFailedException.class, () -> victim.cleanupButIp(stackDto));
 
         CleanupRequest cleanupRequest = captor.getValue();
         assertEquals(STACK_NAME, cleanupRequest.getClusterName());

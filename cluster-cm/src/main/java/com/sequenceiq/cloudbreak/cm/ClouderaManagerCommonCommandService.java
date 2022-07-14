@@ -16,7 +16,7 @@ import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandPollerConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.cloudbreak.util.CheckedFunction;
@@ -37,7 +37,7 @@ public class ClouderaManagerCommonCommandService {
 
     }
 
-    protected BigDecimal getDeployClientConfigCommandId(Stack stack, ClustersResourceApi clustersResourceApi, List<ApiCommand> commands)
+    protected BigDecimal getDeployClientConfigCommandId(StackDtoDelegate stack, ClustersResourceApi clustersResourceApi, List<ApiCommand> commands)
             throws ApiException, CloudbreakException {
         BigDecimal deployClientConfigCommandId;
         if (syncApiCommandPollerConfig.isSyncApiCommandPollingEnaabled(stack.getResourceCrn())) {
@@ -71,14 +71,14 @@ public class ClouderaManagerCommonCommandService {
         return command;
     }
 
-    private BigDecimal getSyncDeployClientConfigCommandId(Stack stack, ClustersResourceApi clustersResourceApi, List<ApiCommand> commands)
+    private BigDecimal getSyncDeployClientConfigCommandId(StackDtoDelegate stack, ClustersResourceApi clustersResourceApi, List<ApiCommand> commands)
             throws CloudbreakException, ApiException {
         return clouderaManagerSyncApiCommandIdProvider.executeSyncApiCommandAndGetCommandId(
                 syncApiCommandPollerConfig.getDeployClusterClientConfigCommandName(), clustersResourceApi, stack, commands,
                 deployClientConfigCall(stack, clustersResourceApi));
     }
 
-    private Callable<ApiCommand> deployClientConfigCall(Stack stack, ClustersResourceApi clustersResourceApi) {
+    private Callable<ApiCommand> deployClientConfigCall(StackDtoDelegate stack, ClustersResourceApi clustersResourceApi) {
         return () -> clustersResourceApi.deployClientConfig(stack.getName());
     }
 }

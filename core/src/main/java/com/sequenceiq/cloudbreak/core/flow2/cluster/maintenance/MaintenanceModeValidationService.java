@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.CheckResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.json.JsonHelper;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -122,7 +122,7 @@ public class MaintenanceModeValidationService {
         return warnings;
     }
 
-    public List<Warning> validateImageCatalog(Stack stack) {
+    public List<Warning> validateImageCatalog(StackDtoDelegate stack) {
         List<Warning> warnings = new ArrayList<>();
         try {
             Image image = componentConfigProviderService.getImage(stack.getId());

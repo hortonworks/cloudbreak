@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 
 @Component
@@ -35,42 +35,42 @@ public class StackLoadBalancerUpdateService {
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
 
-    public void creatingLoadBalancerEntity(Stack stack) {
+    public void creatingLoadBalancerEntity(StackDtoDelegate stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CREATE_LOAD_BALANCER_ENTITY);
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_LB_CREATE_ENTITY);
     }
 
-    public void creatingCloudResources(Stack stack) {
+    public void creatingCloudResources(StackDtoDelegate stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CREATE_CLOUD_LOAD_BALANCER);
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_LB_CREATE_CLOUD_RESOURCE);
     }
 
-    public void collectingMetadata(Stack stack) {
+    public void collectingMetadata(StackDtoDelegate stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.COLLECT_LOAD_BALANCER_METADATA);
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_LB_COLLECT_METADATA);
     }
 
-    public void registeringPublicDns(Stack stack) {
+    public void registeringPublicDns(StackDtoDelegate stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.LOAD_BALANCER_REGISTER_PUBLIC_DNS);
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_LB_REGISTER_PUBLIC_DNS);
     }
 
-    public void registeringFreeIpaDns(Stack stack) {
+    public void registeringFreeIpaDns(StackDtoDelegate stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.LOAD_BALANCER_REGISTER_FREEIPA_DNS);
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_LB_REGISTER_FREEIPA_DNS);
     }
 
-    public void updatingCmConfig(Stack stack) {
+    public void updatingCmConfig(StackDtoDelegate stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.LOAD_BALANCER_UPDATE_CM_CONFIG);
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_LB_UPDATE_CM_CONFIG);
     }
 
-    public void restartingCm(Stack stack) {
+    public void restartingCm(StackDtoDelegate stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.LOAD_BALANCER_RESTART_CM);
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_LB_RESTART_CM);
     }
 
-    public void updateFinished(Stack stack) {
+    public void updateFinished(StackDtoDelegate stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.LOAD_BALANCER_UPDATE_FINISHED, "Load balancer has been created");
         flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_LB_UPDATE_FINISHED);
     }

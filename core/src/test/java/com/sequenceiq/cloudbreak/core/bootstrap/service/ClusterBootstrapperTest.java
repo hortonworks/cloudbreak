@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -30,7 +29,6 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabilityCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
@@ -39,11 +37,11 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -55,13 +53,13 @@ import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterBootstrapperTest {
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private OrchestratorService orchestratorService;
@@ -97,7 +95,7 @@ public class ClusterBootstrapperTest {
     private ClusterBootstrapper underTest;
 
     @Mock
-    private Stack stack;
+    private StackDto stack;
 
     @Mock
     private Image image;
@@ -115,9 +113,6 @@ public class ClusterBootstrapperTest {
     private ResourceService resourceService;
 
     @Mock
-    private TransactionService transactionService;
-
-    @Mock
     private SecurityConfigService securityConfigService;
 
     @Mock
@@ -131,11 +126,7 @@ public class ClusterBootstrapperTest {
 
     @Test
     public void shouldUseReachableInstances() throws Exception {
-        doAnswer(invocation -> {
-            invocation.getArgument(0, Runnable.class).run();
-            return null;
-        }).when(transactionService).required(any(Runnable.class));
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stack);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setPrivateIp("1.1.1.1");
         instanceMetaData.setPublicIp("2.2.2.2");
@@ -169,11 +160,7 @@ public class ClusterBootstrapperTest {
 
     @Test
     public void doNotThrowDuplicateKeyNullIfVolumeResourceDontHaveInstanceId() throws Exception {
-        doAnswer(invocation -> {
-            invocation.getArgument(0, Runnable.class).run();
-            return null;
-        }).when(transactionService).required(any(Runnable.class));
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stack);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setPrivateIp("1.1.1.1");
         instanceMetaData.setPublicIp("2.2.2.2");
@@ -207,11 +194,7 @@ public class ClusterBootstrapperTest {
 
     @Test
     public void testcleanupOldSaltState() throws Exception {
-        doAnswer(invocation -> {
-            invocation.getArgument(0, Runnable.class).run();
-            return null;
-        }).when(transactionService).required(any(Runnable.class));
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stack);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setPrivateIp("1.1.1.1");
         instanceMetaData.setPublicIp("2.2.2.2");
@@ -247,11 +230,7 @@ public class ClusterBootstrapperTest {
 
     @Test
     public void testcleanupOldSaltStateBothMasterRepaired() throws Exception {
-        doAnswer(invocation -> {
-            invocation.getArgument(0, Runnable.class).run();
-            return null;
-        }).when(transactionService).required(any(Runnable.class));
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stackDtoService.getById(1L)).thenReturn(stack);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setPrivateIp("1.1.1.1");
         instanceMetaData.setPublicIp("2.2.2.2");
@@ -328,7 +307,7 @@ public class ClusterBootstrapperTest {
     public void testRotateSaltPasswordOnStackWithOldSBVersion() {
         when(stack.isAvailable()).thenReturn(true);
 
-        when(stack.getNotTerminatedGatewayInstanceMetadata()).thenReturn(List.of(new InstanceMetaData()));
+        when(stack.getAllAvailableGatewayInstances()).thenReturn(List.of(new InstanceMetaData()));
         when(saltBootstrapVersionChecker.isChangeSaltuserPasswordSupported(any())).thenReturn(false);
 
         Assertions.assertThatThrownBy(() -> underTest.rotateSaltPassword(stack))

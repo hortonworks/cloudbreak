@@ -160,7 +160,7 @@ public class StackProvisionActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new CreateCredentialRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack());
+                return new CreateCredentialRequest(context.getCloudContext(), context.getCloudCredential());
             }
         };
     }

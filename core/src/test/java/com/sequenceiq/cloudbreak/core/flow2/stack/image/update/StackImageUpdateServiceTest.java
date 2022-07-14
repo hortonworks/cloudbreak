@@ -1,24 +1,27 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -33,10 +36,10 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
+@ExtendWith(MockitoExtension.class)
 public class StackImageUpdateServiceTest {
 
     private static final Long WORKSPACE_ID = 123L;
@@ -49,9 +52,6 @@ public class StackImageUpdateServiceTest {
 
     @Mock
     private ImageService imageService;
-
-    @Mock
-    private StackService stackService;
 
     @Mock
     private StackImageService stackImageService;
@@ -76,9 +76,8 @@ public class StackImageUpdateServiceTest {
 
     private final Map<String, String> packageVersions = Collections.singletonMap("package", "version");
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         Workspace workspace = new Workspace();
         workspace.setId(WORKSPACE_ID);
 
@@ -93,10 +92,10 @@ public class StackImageUpdateServiceTest {
                 Collections.singletonMap("AWS", Collections.emptyMap()), null, "centos", packageVersions,
                 Collections.emptyList(), Collections.emptyList(), "1", true, null, null);
         statedImage = StatedImage.statedImage(image, "url", "name");
-        when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anySet())).thenReturn(CheckResult.ok());
-        when(packageVersionChecker.checkInstancesHaveMultiplePackageVersions(anySet())).thenReturn(CheckResult.ok());
-        when(packageVersionChecker.compareImageAndInstancesMandatoryPackageVersion(any(StatedImage.class), anySet())).thenReturn(CheckResult.ok());
-        when(messagesService.getMessage(anyString(), anyCollection())).thenReturn("message");
+        lenient().when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anyList())).thenReturn(CheckResult.ok());
+        lenient().when(packageVersionChecker.checkInstancesHaveMultiplePackageVersions(anyList())).thenReturn(CheckResult.ok());
+        lenient().when(packageVersionChecker.compareImageAndInstancesMandatoryPackageVersion(any(StatedImage.class), anyList())).thenReturn(CheckResult.ok());
+        lenient().when(messagesService.getMessage(anyString(), anyCollection())).thenReturn("message");
     }
 
     @Test
@@ -114,38 +113,37 @@ public class StackImageUpdateServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
                 new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(null);
-        when(stackImageService.getCurrentImage(stack)).thenReturn(imageInComponent);
+        when(stackImageService.getCurrentImage(anyLong())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
 
         StatedImage newImageIfVersionsMatch = underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
         assertNotNull(newImageIfVersionsMatch);
-        verify(restRequestThreadLocalService).setWorkspace(stack.getWorkspace());
+        verify(restRequestThreadLocalService).setWorkspaceId(stack.getWorkspaceId());
     }
 
-    @Test(expected = OperationException.class)
+    @Test
     public void testGetNewImageIfOsVersionsMatchFail() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
                 new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos6", "centos",
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
-        when(stackImageService.getCurrentImage(stack)).thenReturn(imageInComponent);
+        when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
-        underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
+        assertThrows(OperationException.class, () -> underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl"));
 
-        verify(restRequestThreadLocalService).setWorkspace(stack.getWorkspace());
+        verify(restRequestThreadLocalService).setWorkspaceId(stack.getWorkspaceId());
     }
 
-    @Test(expected = OperationException.class)
+    @Test
     public void testGetNewImageIfCloudPlatformMatchFail() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         stack.setCloudPlatform("GCP");
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
                 new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
-        when(stackImageService.getCurrentImage(stack)).thenReturn(imageInComponent);
+        when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
-        underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl");
+        assertThrows(OperationException.class, () -> underTest.getNewImageIfVersionsMatch(stack, "newimageid", "imagecatalogname", "imagecatalogurl"));
 
-        verify(restRequestThreadLocalService).setWorkspace(stack.getWorkspace());
+        verify(restRequestThreadLocalService).setWorkspaceId(stack.getWorkspaceId());
     }
 
     @Test
@@ -153,7 +151,7 @@ public class StackImageUpdateServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
                 new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos7", "centos",
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
-        when(stackImageService.getCurrentImage(stack)).thenReturn(imageInComponent);
+        when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         CloudbreakDetails cloudbreakDetails = new CloudbreakDetails();
         cloudbreakDetails.setVersion(StackImageUpdateService.MIN_VERSION);
@@ -167,10 +165,10 @@ public class StackImageUpdateServiceTest {
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
                 new com.sequenceiq.cloudbreak.cloud.model.Image("imageOldName", Collections.emptyMap(), "centos6", "centos",
                         statedImage.getImageCatalogUrl(), statedImage.getImageCatalogName(), "uuid2", packageVersions);
-        when(stackImageService.getCurrentImage(stack)).thenReturn(imageInComponent);
+        when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
         CloudbreakDetails cloudbreakDetails = new CloudbreakDetails();
-        cloudbreakDetails.setVersion("2.4.0");
+        cloudbreakDetails.setVersion("2.9.0");
         when(componentConfigProviderService.getCloudbreakDetails(stack.getId())).thenReturn(cloudbreakDetails);
         boolean validImage = underTest.isValidImage(stack, "imageId", "imageCatalogName", "imageCatalogUrl");
         assertFalse(validImage);
@@ -186,9 +184,9 @@ public class StackImageUpdateServiceTest {
         cloudbreakDetails.setVersion(StackImageUpdateService.MIN_VERSION);
 
         when(componentConfigProviderService.getCloudbreakDetails(stack.getId())).thenReturn(cloudbreakDetails);
-        when(stackImageService.getCurrentImage(stack)).thenReturn(imageInComponent);
+        when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
-        when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anySet())).thenReturn(CheckResult.failed(
+        when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anyList())).thenReturn(CheckResult.failed(
                 "Instance ID: instance-id Packages without version: salt"));
 
         boolean validImage = underTest.isValidImage(stack, "imageId", "imageCatalogName", "imageCatalogUrl");
@@ -206,9 +204,9 @@ public class StackImageUpdateServiceTest {
         cloudbreakDetails.setVersion(StackImageUpdateService.MIN_VERSION);
 
         when(componentConfigProviderService.getCloudbreakDetails(stack.getId())).thenReturn(cloudbreakDetails);
-        when(stackImageService.getCurrentImage(stack)).thenReturn(imageInComponent);
+        when(stackImageService.getCurrentImage(stack.getId())).thenReturn(imageInComponent);
         when(imageCatalogService.getImage(anyLong(), anyString(), anyString(), anyString())).thenReturn(statedImage);
-        when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anySet())).thenReturn(CheckResult.ok());
+        when(packageVersionChecker.checkInstancesHaveAllMandatoryPackageVersion(anyList())).thenReturn(CheckResult.ok());
 
         boolean validImage = underTest.isValidImage(stack, "imageId", "imageCatalogName", "imageCatalogUrl");
         assertFalse(validImage);

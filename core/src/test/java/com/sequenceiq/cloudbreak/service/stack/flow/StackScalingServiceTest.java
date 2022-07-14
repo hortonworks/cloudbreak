@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -14,9 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 
 @ExtendWith(MockitoExtension.class)
 public class StackScalingServiceTest {
@@ -26,9 +26,7 @@ public class StackScalingServiceTest {
 
     @Test
     public void testGetUnusedInstanceIds() {
-        Stack stack = mock(Stack.class);
-        InstanceGroup instanceGroup = mock(InstanceGroup.class);
-        when(stack.getInstanceGroupByInstanceGroupName("worker")).thenReturn(instanceGroup);
+        InstanceGroupDto instanceGroup = mock(InstanceGroupDto.class);
         Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
         InstanceMetaData instanceMetaData1 = new InstanceMetaData();
         instanceMetaData1.setStartDate(1L);
@@ -55,9 +53,9 @@ public class StackScalingServiceTest {
         instanceMetaData4.setDiscoveryFQDN("fqdn4");
         instanceMetaDataSet.add(instanceMetaData4);
         instanceMetaDataSet.add(new InstanceMetaData());
-        when(instanceGroup.getUnattachedInstanceMetaDataSet()).thenReturn(instanceMetaDataSet);
+        when(instanceGroup.getUnattachedInstanceMetaData()).thenReturn(new ArrayList<>(instanceMetaDataSet));
 
-        Set<Long> unusedPrivateIds = stackScalingService.getUnusedPrivateIds("worker", -3, stack);
+        Set<Long> unusedPrivateIds = stackScalingService.getUnusedPrivateIds(instanceGroup, -3);
         assertTrue(unusedPrivateIds.contains(1L));
         assertTrue(unusedPrivateIds.contains(2L));
         assertTrue(unusedPrivateIds.contains(3L));
@@ -66,8 +64,8 @@ public class StackScalingServiceTest {
 
     @Test
     public void testGetUnusedInstanceIdsButWithPositiveScalingAdjustment() {
-        Stack stack = mock(Stack.class);
-        Set<Long> unusedPrivateIds = stackScalingService.getUnusedPrivateIds("worker", 5, stack);
+        InstanceGroupDto instanceGroup = mock(InstanceGroupDto.class);
+        Set<Long> unusedPrivateIds = stackScalingService.getUnusedPrivateIds(instanceGroup, 5);
         assertEquals(0, unusedPrivateIds.size());
     }
 

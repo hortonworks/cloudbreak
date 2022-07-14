@@ -31,8 +31,8 @@ public class IdBrokerService {
         return repository.save(idBroker);
     }
 
-    public IdBroker getByCluster(Cluster cluster) {
-        return repository.findByClusterId(cluster.getId());
+    public IdBroker getByCluster(Long clusterId) {
+        return repository.findByClusterId(clusterId);
     }
 
     public void generateIdBrokerSignKey(Long stackId) {
@@ -40,7 +40,7 @@ public class IdBrokerService {
         IdBroker idBroker = repository.findByClusterId(cluster.getId());
         if (idBroker == null) {
             LOGGER.debug("Generate IdBroker sign keys for the cluster");
-            idBroker = idBrokerConverterUtil.generateIdBrokerSignKeys(cluster);
+            idBroker = idBrokerConverterUtil.generateIdBrokerSignKeys(cluster.getId(), cluster.getWorkspace());
             repository.save(idBroker);
         } else {
             LOGGER.debug("IdBroker sign keysh have already been created");

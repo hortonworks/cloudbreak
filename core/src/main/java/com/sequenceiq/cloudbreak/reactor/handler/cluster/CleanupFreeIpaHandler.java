@@ -8,11 +8,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -31,7 +31,7 @@ public class CleanupFreeIpaHandler implements EventHandler<CleanupFreeIpaEvent> 
     private FreeIpaCleanupService freeIpaCleanupService;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Override
     public String selector() {
@@ -43,7 +43,7 @@ public class CleanupFreeIpaHandler implements EventHandler<CleanupFreeIpaEvent> 
         CleanupFreeIpaEvent event = cleanupFreeIpaEvent.getData();
         try {
             LOGGER.debug("Handle cleanup request for hosts: {} and IPs: {}", event.getHostNames(), event.getIps());
-            Stack stack = stackService.get(event.getResourceId());
+            StackView stack = stackDtoService.getStackViewById(event.getResourceId());
             if (event.isRecover()) {
                 LOGGER.debug("Invoke cleanup on recover");
                 freeIpaCleanupService.cleanupOnRecover(stack, event.getHostNames(), event.getIps());

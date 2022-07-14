@@ -211,7 +211,6 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
 
     private Set<RdsConfigWithoutCluster> getRdsConfigs(StackV4Request source, Workspace workspace) {
         return rdsConfigWithoutClusterService.findAllByNamesAndWorkspaceId(source.getCluster().getDatabases(), workspace);
-
     }
 
     private BaseFileSystemConfigurationsView getFileSystemConfigurationView(StackV4Request source, Json credentialAttributes)

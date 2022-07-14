@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.converter.BlueprintToBlueprintDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.converter.ClusterToClusterDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.converter.StackToStackDetailsConverter;
@@ -29,7 +29,7 @@ import com.sequenceiq.flow.ha.NodeConfig;
 public class StructuredFlowEventFactoryTest {
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private Clock clock;
@@ -60,9 +60,11 @@ public class StructuredFlowEventFactoryTest {
         stack.setCluster(cluster);
         BlueprintDetails blueprintDetails = new BlueprintDetails();
         blueprintDetails.setBlueprintName(bpName);
-        when(stackToStackDetailsConverter.convert(any())).thenReturn(null);
+        when(stackDtoService.getBlueprint(any())).thenReturn(blueprint);
+        when(stackDtoService.getClusterViewByStackId(any())).thenReturn(cluster);
+        when(stackToStackDetailsConverter.convert(any(), any(), any())).thenReturn(null);
         when(blueprintToBlueprintDetailsConverter.convert(blueprint)).thenReturn(blueprintDetails);
-        when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
+        when(stackDtoService.getStackViewById(1L)).thenReturn(stack);
         StructuredFlowEvent result = baseLegacyStructuredFlowEventFactory.createStucturedFlowEvent(1L, new FlowDetails(), true);
         assertNull(result.getException());
         assertEquals(bpName, result.getBlueprintDetails().getBlueprintName());

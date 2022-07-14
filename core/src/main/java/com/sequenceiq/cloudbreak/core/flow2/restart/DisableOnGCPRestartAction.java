@@ -7,18 +7,18 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
-import com.sequenceiq.flow.core.FlowLogService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Component("DisableOnGCPRestartAction")
 public class DisableOnGCPRestartAction extends FillInMemoryStateStoreRestartAction {
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private FlowLogService flowLogService;
@@ -26,7 +26,7 @@ public class DisableOnGCPRestartAction extends FillInMemoryStateStoreRestartActi
     @Override
     public void restart(FlowParameters flowParameters, String flowChainId, String event, Object payload) {
         Payload stackPayload = (Payload) payload;
-        Stack stack = stackService.getByIdWithTransaction(stackPayload.getResourceId());
+        StackView stack = stackDtoService.getStackViewById(stackPayload.getResourceId());
         if (stack.getPlatformVariant().equals(GCP)) {
             try {
                 flowLogService.terminate(stackPayload.getResourceId(), flowParameters.getFlowId());

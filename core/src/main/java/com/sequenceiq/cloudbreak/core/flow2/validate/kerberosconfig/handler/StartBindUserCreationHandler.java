@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -26,6 +27,7 @@ public class StartBindUserCreationHandler extends ExceptionCatcherEventHandler<S
     private static final Logger LOGGER = LoggerFactory.getLogger(StartBindUserCreationHandler.class);
 
     @Inject
+    @Qualifier("stackViewServiceDeprecated")
     private StackViewService stackViewService;
 
     @Inject

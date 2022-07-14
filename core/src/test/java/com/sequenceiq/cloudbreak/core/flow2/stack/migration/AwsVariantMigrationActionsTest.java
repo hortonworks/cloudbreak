@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.migration;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_UPDATE_FAILED;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +29,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
@@ -91,9 +93,11 @@ public class AwsVariantMigrationActionsTest {
     public void testChangeVariantWhenCFTemplateDeleted() throws Exception {
         DeleteCloudFormationResult payload = new DeleteCloudFormationResult(STACK_ID, true);
         Map<Object, Object> variables = new HashMap<>();
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
         new AbstractActionTestSupport<>(getChangeVariantAction()).doExecute(context, payload, variables);
         verify(stackUpdater).updateVariant(payload.getResourceId(), CloudConstants.AWS_NATIVE);
-        verify(metricService).incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_SUCCESSFUL, stack);
+        verify(metricService).incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_SUCCESSFUL, stackView);
     }
 
     @Test
@@ -106,13 +110,14 @@ public class AwsVariantMigrationActionsTest {
 
     @Test
     public void testMigrationFailed() throws Exception {
+        StackView stackView = mock(StackView.class);
         String errorReason = "error reason";
         StackFailureEvent payload = new StackFailureEvent(STACK_ID, new Exception(errorReason));
-        StackFailureContext stackFailureContext = new StackFailureContext(flowParameters, new StackView());
+        StackFailureContext stackFailureContext = new StackFailureContext(flowParameters, stackView, STACK_ID);
         Map<Object, Object> variables = new HashMap<>();
         new AbstractActionTestSupport<>(getMigrationFailedAction()).doExecute(stackFailureContext, payload, variables);
         verify(flowMessageService).fireEventAndLog(STACK_ID, UPDATE_FAILED.name(), STACK_INFRASTRUCTURE_UPDATE_FAILED, errorReason);
-        verify(metricService).incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_FAILED, stackFailureContext.getStackView(), payload.getException());
+        verify(metricService).incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_FAILED, stackFailureContext.getStack(), payload.getException());
     }
 
     private AbstractAwsVariantMigrationAction<DeleteCloudFormationResult> getChangeVariantAction() {

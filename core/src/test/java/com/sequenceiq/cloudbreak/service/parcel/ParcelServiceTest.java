@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.service.parcel;
 
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-
-import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 
 import java.util.Collections;
 import java.util.Set;
@@ -26,7 +25,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
@@ -77,7 +76,7 @@ public class ParcelServiceTest {
     void testRemoveUnusedComponents() throws CloudbreakException {
         Stack stack = createStack();
         Set<String> parcelNames = Set.of(PARCEL_NAME);
-        Set<ClusterComponent> clusterComponentsByBlueprint = Collections.emptySet();
+        Set<ClusterComponentView> clusterComponentsByBlueprint = Collections.emptySet();
         ParcelOperationStatus removalStatus = new ParcelOperationStatus();
 
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
@@ -97,7 +96,7 @@ public class ParcelServiceTest {
         Stack stack = createStack();
         ClouderaManagerProduct cdhParcel = createClouderaManagerProduct("CDH");
         Set<ClouderaManagerProduct> parcelsInImage = Set.of(cdhParcel, createClouderaManagerProduct("FLINK"));
-        when(clusterComponentConfigProvider.getComponentsByClusterId(CLUSTER_ID)).thenReturn(
+        when(clusterComponentConfigProvider.getComponentListByType(CLUSTER_ID, CDH_PRODUCT_DETAILS)).thenReturn(
                 Set.of(createClusterComponent("CDH"), createClusterComponent("FLINK")));
         when(clouderaManagerProductTransformer.transform(image, true, true)).thenReturn(parcelsInImage);
         when(parcelFilterService.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, parcelsInImage, BLUEPRINT)).thenReturn(Collections.singleton(cdhParcel));
@@ -106,7 +105,7 @@ public class ParcelServiceTest {
 
         assertEquals(1, actual.size());
         assertTrue(actual.contains(cdhParcel));
-        verify(clusterComponentConfigProvider).getComponentsByClusterId(CLUSTER_ID);
+        verify(clusterComponentConfigProvider).getComponentListByType(CLUSTER_ID, CDH_PRODUCT_DETAILS);
         verify(clouderaManagerProductTransformer, times(2)).transform(image, true, true);
         verify(parcelFilterService).filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, parcelsInImage, BLUEPRINT);
     }
@@ -115,8 +114,8 @@ public class ParcelServiceTest {
         return new ClouderaManagerProduct().withName(name);
     }
 
-    private ClusterComponent createClusterComponent(String name) {
-        ClusterComponent clusterComponent = new ClusterComponent();
+    private ClusterComponentView createClusterComponent(String name) {
+        ClusterComponentView clusterComponent = new ClusterComponentView();
         clusterComponent.setName(name);
         clusterComponent.setComponentType(CDH_PRODUCT_DETAILS);
         return clusterComponent;

@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,6 +59,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
@@ -105,10 +107,7 @@ public class OpdbServiceEndpointCollectorTest {
 
     @InjectMocks
     private final GatewayTopologyV4RequestToExposedServicesConverter exposedServicesConverter =
-    new GatewayTopologyV4RequestToExposedServicesConverter();
-
-    @Mock
-    private Workspace workspace;
+            new GatewayTopologyV4RequestToExposedServicesConverter();
 
     private static MultiValuedMap<String, ExposedService> parseExposedServices() {
         MultiValuedMap<String, ExposedService> services = new ArrayListValuedHashMap<>();
@@ -140,8 +139,7 @@ public class OpdbServiceEndpointCollectorTest {
     public void setup() {
         ReflectionTestUtils.setField(underTest, "httpsPort", "443");
         // Called implicitly in ServiceEndpointCollector
-        when(exposedServiceCollector.getClouderaManagerUIService()).thenReturn(
-            getExposedServiceOrFail("CLOUDERA_MANAGER_UI"));
+        when(exposedServiceCollector.getClouderaManagerUIService()).thenReturn(getExposedServiceOrFail("CLOUDERA_MANAGER_UI"));
         when(exposedServiceCollector.getImpalaService()).thenReturn(getExposedServiceOrFail("IMPALA"));
         when(exposedServiceCollector.getHBaseUIService()).thenReturn(getExposedServiceOrFail("HBASE_UI"));
         when(exposedServiceCollector.getHBaseJarsService()).thenReturn(getExposedServiceOrFail("HBASEJARS"));
@@ -153,7 +151,7 @@ public class OpdbServiceEndpointCollectorTest {
         services.add("CM-UI");
         services.add("CM-API");
         when(exposedServiceCollector.getFullServiceListBasedOnList(any(), any())).thenReturn(services);
-        when(entitlementService.getEntitlements(anyString())).thenReturn(new ArrayList<>());
+        lenient().when(entitlementService.getEntitlements(anyString())).thenReturn(new ArrayList<>());
         when(serviceEndpointCollectorEntitlementComparator.entitlementSupported(anyList(), eq(null))).thenReturn(true);
         // Skip exposed service validation
         when(exposedServiceListValidator.validate(any())).thenReturn(ValidationResult.builder().build());
@@ -177,13 +175,13 @@ public class OpdbServiceEndpointCollectorTest {
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         when(cmTemplateProcessorFactory.get(any())).thenReturn(cmTemplateProcessor);
         when(cmTemplateProcessor.getAllComponents()).thenReturn(new HashSet<>(Arrays.asList(
-            ServiceComponent.of("HBASE", "MASTER"),
-            ServiceComponent.of("HBASE", "REGIONSERVER"),
-            ServiceComponent.of("HBASE", "HBASERESTSERVER"),
-            ServiceComponent.of("PHOENIX", "PHOENIX_QUERY_SERVER"),
-            ServiceComponent.of("CLOUDERA_MANAGER", "CM-API"),
-            ServiceComponent.of("CLOUDERA_MANAGER_UI", "CM-UI")
-            )));
+                ServiceComponent.of("HBASE", "MASTER"),
+                ServiceComponent.of("HBASE", "REGIONSERVER"),
+                ServiceComponent.of("HBASE", "HBASERESTSERVER"),
+                ServiceComponent.of("PHOENIX", "PHOENIX_QUERY_SERVER"),
+                ServiceComponent.of("CLOUDERA_MANAGER", "CM-API"),
+                ServiceComponent.of("CLOUDERA_MANAGER_UI", "CM-UI")
+        )));
     }
 
     private void mockComponentLocator(List<String> privateIps) {
@@ -199,14 +197,13 @@ public class OpdbServiceEndpointCollectorTest {
 
     @Test
     public void testPrepareClusterExposedServices() {
-        Cluster cluster = createClusterWithComponents(GatewayType.INDIVIDUAL);
-        cluster.getGateway().setGatewayPort(443);
+        StackDto stack = createStackDtoWithComponents(GatewayType.INDIVIDUAL, 443);
 
         mockTemplateComponents();
         mockComponentLocator(Lists.newArrayList("10.0.0.1"));
 
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
-                underTest.prepareClusterExposedServices(cluster, "10.0.0.1");
+                underTest.prepareClusterExposedServices(stack, "10.0.0.1");
 
         assertEquals(clusterExposedServicesMap.toString(), 2L, clusterExposedServicesMap.keySet().size());
 
@@ -217,9 +214,9 @@ public class OpdbServiceEndpointCollectorTest {
         assertNotNull("Topology proxy API services was null", proxyApiServices);
 
         Set<String> proxyServiceNames = proxyServices.stream()
-            .map(ClusterExposedServiceV4Response::getKnoxService).collect(Collectors.toSet());
+                .map(ClusterExposedServiceV4Response::getKnoxService).collect(Collectors.toSet());
         Set<String> proxyApiServiceNames = proxyApiServices.stream()
-            .map(ClusterExposedServiceV4Response::getKnoxService).collect(Collectors.toSet());
+                .map(ClusterExposedServiceV4Response::getKnoxService).collect(Collectors.toSet());
 
         assertEquals(proxyServiceNames.toString(), 2, proxyServiceNames.size());
         assertEquals(proxyApiServiceNames.toString(), 4, proxyApiServiceNames.size());
@@ -268,17 +265,23 @@ public class OpdbServiceEndpointCollectorTest {
         return cluster;
     }
 
-    private Cluster createClusterWithComponents(GatewayType gatewayType) {
+    private StackDto createStackDtoWithComponents(GatewayType gatewayType, int gatewayPort) {
         Cluster cluster = clusterWithOrchestrator("ANY");
         GatewayTopology topology1 = gatewayTopology("proxy");
         topology1.setGateway(cluster.getGateway());
         cluster.getGateway().setTopologies(Collections.singleton(topology1));
         cluster.getGateway().setGatewayType(gatewayType);
+        cluster.getGateway().setGatewayPort(gatewayPort);
         Workspace workspace = new Workspace();
         Tenant tenant = new Tenant();
         tenant.setName("tenant");
         workspace.setTenant(tenant);
         cluster.setWorkspace(workspace);
-        return cluster;
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getCluster()).thenReturn(cluster);
+        when(stackDto.getGateway()).thenReturn(cluster.getGateway());
+        when(stackDto.getBlueprint()).thenReturn(cluster.getBlueprint());
+        when(stackDto.getOrchestrator()).thenReturn(cluster.getStack().getOrchestrator());
+        return stackDto;
     }
 }

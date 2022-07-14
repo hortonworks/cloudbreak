@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackPlatformVariantView;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
+import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
@@ -41,6 +43,10 @@ import com.sequenceiq.common.api.type.Tunnel;
 @EntityType(entityClass = Stack.class)
 @Transactional(TxType.REQUIRED)
 public interface StackRepository extends WorkspaceResourceRepository<Stack, Long>, JobResourceRepository<Stack, Long> {
+
+    @Override
+    @Query("SELECT s FROM Stack s WHERE s.workspace.id = :workspaceId")
+    Set<Stack> findAllByWorkspaceId(@Param("workspaceId") Long workspaceId);
 
     @Query("SELECT s.id as id, s.name as name, s.resourceCrn as crn from Stack s "
             + "WHERE s.cluster.clusterManagerIp= :clusterManagerIp AND s.terminated = null "
@@ -441,6 +447,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     List<ResourceBasicView> findAllResourceBasicViewByNamesAndWorkspaceId(@Param("names") Collection<String> names, @Param("workspaceId") Long workspaceId);
 
     @Modifying
+    @Query("UPDATE Stack s SET s.domainDnsResolver = :domainDnsResolver WHERE s.id = :stackId")
+    int updateDomainDnsResolverByStackId(@Param("stackId") Long stackId, @Param("domainDnsResolver") DnsResolverType domainDnsResolver);
+
+    @Modifying
     @Query("UPDATE Stack s SET s.tunnel = :tunnel WHERE s.id = :id")
     int setTunnelByStackId(@Param("id") Long id, @Param("tunnel") Tunnel tunnel);
 
@@ -450,4 +460,16 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             "AND s.terminated IS NULL " +
             "AND tunnel <> :latestTunnel")
     int getNotUpgradedStackCount(@Param("envCrn") String envCrn, @Param("latestTunnel") Tunnel latestTunnel);
+
+    @Modifying
+    @Query("UPDATE Stack s SET s.securityConfig = :securityConfig WHERE s.id = :stackId")
+    void updateSecurityConfigByStackId(@Param("stackId") Long stackId, @Param("securityConfig") SecurityConfig securityConfig);
+
+    @Modifying
+    @Query("UPDATE Stack s SET s.customDomain = :customDomain WHERE s.id = :stackId")
+    void updateCustomDomainByStackId(@Param("stackId") Long stackId, @Param("customDomain") String customDomain);
+
+    @Modifying
+    @Query("UPDATE Stack s SET s.stackVersion = :stackVersion WHERE s.id = :stackId")
+    void updateStackVersion(@Param("stackId") Long stackId, @Param("stackVersion") String stackVersion);
 }

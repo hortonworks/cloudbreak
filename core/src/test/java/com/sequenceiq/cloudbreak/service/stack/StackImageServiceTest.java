@@ -88,6 +88,9 @@ public class StackImageServiceTest {
     @Mock
     private PlatformStringTransformer platformStringTransformer;
 
+    @Mock
+    private StackDtoService stackDtoService;
+
     @Captor
     private ArgumentCaptor<Component> componentArgumentCaptor;
 

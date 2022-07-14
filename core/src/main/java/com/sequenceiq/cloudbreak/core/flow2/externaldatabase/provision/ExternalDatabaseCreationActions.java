@@ -16,13 +16,13 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.action.AbstractExternalDatabaseCreationAction;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.config.ExternalDatabaseCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.config.ExternalDatabaseCreationState;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -42,7 +42,7 @@ public class ExternalDatabaseCreationActions {
 
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
-                Stack stack = context.getStack();
+                StackView stack = context.getStack();
                 return new CreateExternalDatabaseRequest(stack.getId(), "CreateExternalDatabaseRequest", stack.getName(), stack.getResourceCrn());
             }
         };
@@ -59,7 +59,7 @@ public class ExternalDatabaseCreationActions {
 
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
-                return new StackEvent(ExternalDatabaseCreationEvent.EXTERNAL_DATABASE_CREATION_FINISHED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ExternalDatabaseCreationEvent.EXTERNAL_DATABASE_CREATION_FINISHED_EVENT.event(), context.getStackId());
             }
         };
     }
@@ -70,7 +70,7 @@ public class ExternalDatabaseCreationActions {
 
             @Override
             protected void doExecute(ExternalDatabaseContext context, CreateExternalDatabaseFailed payload, Map<Object, Object> variables) {
-                stackUpdaterService.updateStatus(context.getStack().getId(), DetailedStackStatus.EXTERNAL_DATABASE_CREATION_FAILED,
+                stackUpdaterService.updateStatus(context.getStackId(), DetailedStackStatus.EXTERNAL_DATABASE_CREATION_FAILED,
                         ResourceEvent.CLUSTER_EXTERNAL_DATABASE_CREATION_FAILED, payload.getException().getMessage());
                 getMetricService().incrementMetricCounter(MetricType.EXTERNAL_DATABASE_CREATION_FAILED, context.getStack());
                 sendEvent(context);
@@ -78,7 +78,7 @@ public class ExternalDatabaseCreationActions {
 
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
-                return new StackEvent(ExternalDatabaseCreationEvent.EXTERNAL_DATABASE_CREATION_FAILURE_HANDLED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ExternalDatabaseCreationEvent.EXTERNAL_DATABASE_CREATION_FAILURE_HANDLED_EVENT.event(), context.getStackId());
             }
 
             @Override
