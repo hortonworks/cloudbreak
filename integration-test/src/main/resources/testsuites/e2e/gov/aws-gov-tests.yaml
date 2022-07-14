@@ -1,8 +1,17 @@
 name: "aws-gov-tests"
 tests:
   - name: "aws_gov_tests"
+    excludedGroups: [ azure_singlerg ]
     classes:
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.gov.BasicFreeIpaTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.gov.BasicEnvironmentTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.gov.BasicSdxTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.gov.BasicDistroXTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaScalingTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXEncryptedVolumeTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRepairTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.PrewarmImageValidatorE2ETest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxImagesTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxSecurityTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRecipeTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRangerRazEnabledTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.InternalSdxRepairWithRecipeTest
