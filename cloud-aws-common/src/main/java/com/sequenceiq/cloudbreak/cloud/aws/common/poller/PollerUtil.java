@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.poller;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -56,14 +59,17 @@ public class PollerUtil {
             return pollingOptions.run(process(authenticatedContext, instances, completedStatuses));
         } catch (PollerStoppedException e) {
             List<CloudVmInstanceStatus> currentInstances = awsInstanceConnector.check(authenticatedContext, instances);
+            Map<String, InstanceStatus> instancesWithStatuses =
+                    currentInstances.stream().collect(Collectors.toMap(vmInstanceStatus -> vmInstanceStatus.getCloudInstance().getInstanceId(),
+                    CloudVmInstanceStatus::getStatus));
             long duration = System.currentTimeMillis() - start;
             if (e.getCause() == null) {
-                String message = String.format("%s operation cannot be finished in time. Duration: %s. Instances: %s",
-                        getOperation(waitStatus), duration, currentInstances);
+                String message = String.format("%s operation cannot be finished in time, please check AWS console. Duration: %s. Instance statuses on AWS: %s",
+                        getOperation(waitStatus), duration, instancesWithStatuses.entrySet().stream().map(Objects::toString).collect(Collectors.joining(", ")));
                 LOGGER.error(message);
                 throw new PollerStoppedException(message);
             }
-            LOGGER.error("{} operation cannot be finished on {}. Duration: {}", getOperation(waitStatus), currentInstances, duration, e);
+            LOGGER.error("{} operation cannot be finished on {}. Duration: {}", getOperation(waitStatus), instancesWithStatuses, duration, e);
             throw e;
         }
     }
