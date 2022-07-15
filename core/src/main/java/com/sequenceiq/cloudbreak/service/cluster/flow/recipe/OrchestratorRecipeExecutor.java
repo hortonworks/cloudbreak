@@ -100,7 +100,8 @@ class OrchestratorRecipeExecutor {
     }
 
     public void postClusterInstallOnTargets(StackDto stack, Map<String, String> candidateAddresses) throws CloudbreakException {
-        executePostClusterInstall(stack, () -> stackUtil.collectReachableAndUnreachableCandidateNodes(stack, candidateAddresses.keySet()).getReachableNodes());
+        executePostClusterInstall(stack, () -> stackUtil.collectReachableAndUnreachableCandidateNodes(stack,
+                candidateAddresses.keySet()).getReachableNodes());
     }
 
     public void preTerminationRecipes(StackDto stack, boolean forced) throws CloudbreakException {

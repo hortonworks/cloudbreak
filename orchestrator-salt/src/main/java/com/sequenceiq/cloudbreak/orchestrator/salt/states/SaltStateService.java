@@ -27,9 +27,11 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.common.model.PackageInfo;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltActionType;
@@ -209,10 +211,10 @@ public class SaltStateService {
         }
     }
 
-    public Set<String> collectMinionIpAddresses(Retry retry, SaltConnector sc) {
+    public Set<String> collectMinionIpAddresses(Optional<Set<Node>> saltTargetNodes, Retry retry, SaltConnector sc) {
         Set<String> minionIpAddresses = new HashSet<>();
         try {
-            return collectMinionIpAddressesWithRetry(retry, sc, minionIpAddresses);
+            return collectMinionIpAddressesWithRetry(saltTargetNodes, retry, sc, minionIpAddresses);
         } catch (Retry.ActionFailedException e) {
             if ("Unreachable nodes found.".equals(e.getMessage())) {
                 return minionIpAddresses;
@@ -222,10 +224,10 @@ public class SaltStateService {
         }
     }
 
-    private Set<String> collectMinionIpAddressesWithRetry(Retry retry, SaltConnector sc, Set<String> minionIpAddresses) {
+    private Set<String> collectMinionIpAddressesWithRetry(Optional<Set<Node>> saltTargetNodes, Retry retry, SaltConnector sc, Set<String> minionIpAddresses) {
         return retry.testWith1SecDelayMax5Times(() -> {
             try {
-                return collectMinionIpAddressesAndHandleUnreachableNodes(sc, minionIpAddresses);
+                return collectMinionIpAddressesAndHandleUnreachableNodes(saltTargetNodes, sc, minionIpAddresses);
             } catch (Retry.ActionFailedException e) {
                 throw e;
             } catch (RuntimeException e) {
@@ -235,8 +237,10 @@ public class SaltStateService {
         });
     }
 
-    private Set<String> collectMinionIpAddressesAndHandleUnreachableNodes(SaltConnector sc, Set<String> minionIpAddresses) {
-        MinionIpAddressesResponse minionIpAddressesResponse = collectMinionIpAddresses(sc);
+    private Set<String> collectMinionIpAddressesAndHandleUnreachableNodes(Optional<Set<Node>> saltTargetNodes, SaltConnector sc, Set<String> minionIpAddresses) {
+        MinionIpAddressesResponse minionIpAddressesResponse = saltTargetNodes.isPresent() ?
+                collectMinionIpAddresses(sc, Optional.of(saltTargetNodes.get().stream().map(Node::getHostname).collect(Collectors.toSet()))) :
+                collectMinionIpAddresses(sc);
         if (minionIpAddressesResponse == null) {
             LOGGER.debug("Minions ip address collection returned null value");
             throw new Retry.ActionFailedException("Minions ip address collection returned null value");
@@ -250,7 +254,12 @@ public class SaltStateService {
     }
 
     public MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc) {
-        MinionIpAddressesResponse minionIpAddressesResponse = measure(() -> sc.run(Glob.ALL, "network.ipaddrs", LOCAL,
+        return collectMinionIpAddresses(sc, Optional.empty());
+    }
+
+    public MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc, Optional<Set<String>> targets) {
+        Target<String> runTargets = targets.map(strings -> new Glob(Joiner.on(",").join(strings))).orElse(Glob.ALL);
+        MinionIpAddressesResponse minionIpAddressesResponse = measure(() -> sc.run(runTargets, "network.ipaddrs", LOCAL,
                         MinionIpAddressesResponse.class, NETWORK_IPADDRS_TIMEOUT),
                 LOGGER, "Network IP address call took {}ms");
         LOGGER.debug("Minion ip response: {}", minionIpAddressesResponse);

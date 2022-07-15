@@ -39,6 +39,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
@@ -316,9 +317,10 @@ class ClusterHostServiceRunnerTest {
     @Test
     void testDecoratePillarWithMountInfoAndTargetedSaltCall() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
-        Set<Node> nodes = Sets.newHashSet(node("fqdn3"), node("gateway1"), node("gateway3"));
-        Set<Node> gwNodes = Sets.newHashSet(node("gateway1"), node("gateway2"), node("1.1.3.1"), node("1.1.3.2"));
-        when(stack.getAllPrimaryGatewayInstanceNodes()).thenReturn(gwNodes);
+        Set<Node> nodes = Sets.newHashSet(node("fqdn3"), node("gateway1"), node("gateway2"), node("gateway3"));
+        List<InstanceMetadataView> gwNodes = Lists.newArrayList(createInstanceMetadata("gateway1"), createInstanceMetadata("gateway2"),
+                createInstanceMetadata("1.1.3.1"), createInstanceMetadata("1.1.3.2"));
+        when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(gwNodes);
         when(stackUtil.collectReachableAndUnreachableCandidateNodes(any(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
         underTest.runTargetedClusterServices(stack, Map.of("fqdn3", "1.1.1.1"));
 
@@ -428,7 +430,7 @@ class ClusterHostServiceRunnerTest {
         ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "1");
     }
 
-    private InstanceGroup createInstanceGroup(Template template, List<InstanceGroupDto> instanceGroups, String fqdn1, String fqdn2,
+    private void createInstanceGroup(Template template, List<InstanceGroupDto> instanceGroups, String fqdn1, String fqdn2,
             String privateIp1, String privateIp2) {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setTemplate(template);
@@ -437,7 +439,6 @@ class ClusterHostServiceRunnerTest {
         instanceMetaDataSet.add(createInstanceMetadata(fqdn1, instanceGroup, privateIp1));
         instanceMetaDataSet.add(createInstanceMetadata(fqdn2, instanceGroup, privateIp2));
         instanceGroups.add(new InstanceGroupDto(instanceGroup, instanceMetaDataSet));
-        return instanceGroup;
     }
 
     private InstanceMetaData createInstanceMetadata(String fqdn, InstanceGroup instanceGroup, String privateIp) {
@@ -445,6 +446,12 @@ class ClusterHostServiceRunnerTest {
         imd1.setDiscoveryFQDN(fqdn);
         imd1.setInstanceGroup(instanceGroup);
         imd1.setPrivateIp(privateIp);
+        return imd1;
+    }
+
+    private InstanceMetaData createInstanceMetadata(String fqdn) {
+        InstanceMetaData imd1 = new InstanceMetaData();
+        imd1.setDiscoveryFQDN(fqdn);
         return imd1;
     }
 

@@ -407,7 +407,7 @@ class SaltOrchestratorTest {
         responsiveAddresses.add("10.0.0.1");
         responsiveAddresses.add("10.0.0.2");
         responsiveAddresses.add("10.0.0.3");
-        when(saltStateService.collectMinionIpAddresses(any(), any())).thenReturn(responsiveAddresses);
+        when(saltStateService.collectMinionIpAddresses(any(), any(Retry.class), any())).thenReturn(responsiveAddresses);
 
         Set<Node> allNodes = new HashSet<>();
         allNodes.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg", "fqdn3", null));
