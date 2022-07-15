@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -40,6 +41,7 @@ import org.springframework.util.CollectionUtils;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
@@ -268,8 +270,10 @@ public class ClusterHostServiceRunner {
 
     public NodeReachabilityResult runTargetedClusterServices(@Nonnull StackDto stackDto, Map<String, String> candidateAddresses) {
         try {
-            NodeReachabilityResult nodeReachabilityResult = stackUtil.collectReachableAndUnreachableCandidateNodes(stackDto, candidateAddresses.keySet());
-            addGatewaysToCandidatesIfNeeded(stackDto.getAllPrimaryGatewayInstanceNodes(), nodeReachabilityResult);
+            Set<String> notTerminatedAndNotZombieGateways = stackDto.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
+                    .map(InstanceMetadataView::getDiscoveryFQDN).filter(Objects::nonNull).collect(Collectors.toSet());
+            NodeReachabilityResult nodeReachabilityResult = stackUtil.collectReachableAndUnreachableCandidateNodes(stackDto,
+                    Sets.union(candidateAddresses.keySet(), notTerminatedAndNotZombieGateways));
             Set<Node> reachableCandidates = nodeReachabilityResult.getReachableNodes();
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
             List<GrainProperties> grainsProperties = grainPropertiesService
@@ -299,20 +303,6 @@ public class ClusterHostServiceRunner {
         recipeEngine.executePreClusterManagerRecipes(stackDto, candidateAddresses, hostGroupService.getByClusterWithRecipes(stack.getClusterId()));
         hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
         modifyStartupMountRole(stackDto, reachableNodes, GrainOperation.REMOVE);
-    }
-
-    private void addGatewaysToCandidatesIfNeeded(Set<Node> imNodes, NodeReachabilityResult nodeReachabilityResult) {
-        Set<String> gatewayHosts = imNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-        Set<String> reachableCandidatesHosts = nodeReachabilityResult.getReachableHosts();
-        if (!reachableCandidatesHosts.containsAll(gatewayHosts)) {
-            Set<Node> notAddedGatewayNodes = imNodes.stream()
-                    .filter(n -> !reachableCandidatesHosts.contains(n.getHostname()))
-                    .collect(Collectors.toSet());
-            // in case of upscale we should add gateways to candidates
-            nodeReachabilityResult.getReachableNodes().addAll(notAddedGatewayNodes);
-            LOGGER.debug("{} gateway nodes has been added to targets of targeted operation, since we need those to update certain pillars and configurations.",
-                    Joiner.on(",").join(gatewayHosts));
-        }
     }
 
     private void mountDisks(StackView stack, Map<String, String> candidateAddresses, Set<Node> allNodes, Set<Node> reachableNodes) throws CloudbreakException {
