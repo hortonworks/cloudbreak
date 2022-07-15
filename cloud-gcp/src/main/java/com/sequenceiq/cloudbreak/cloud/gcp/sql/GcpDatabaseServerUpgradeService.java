@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -45,7 +44,7 @@ public class GcpDatabaseServerUpgradeService extends GcpDatabaseServerBaseServic
     private GcpStackUtil gcpStackUtil;
 
     @Override
-    public List<CloudResource> upgrade(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier resourceNotifier, TargetMajorVersion databaseVersion)
+    public void upgrade(AuthenticatedContext ac, DatabaseStack stack, PersistenceNotifier resourceNotifier, TargetMajorVersion databaseVersion)
             throws Exception {
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
         String deploymentName = databaseServerView.getDbServerName();
@@ -62,7 +61,7 @@ public class GcpDatabaseServerUpgradeService extends GcpDatabaseServerBaseServic
                 Pair<String, Integer> dbEngineAndVersion = parseDatabaseEngineAndVersion(dbInstance.getDatabaseVersion());
                 validateDatabaseEngine(dbEngineAndVersion.getLeft());
                 if (isDatabaseUpgradeNeeded(dbEngineAndVersion.getRight(), databaseVersion)) {
-                    dbInstance.setDatabaseVersion(databaseServerView.getDatabaseType() + "_" + databaseVersion.getVersion());
+                    dbInstance.setDatabaseVersion(databaseServerView.getDatabaseType() + "_" + databaseVersion.getMajorVersion());
                     SQLAdmin.Instances.Patch patch = sqlAdmin.instances().patch(projectId, dbInstance.getName(), dbInstance);
                     patch.setPrettyPrint(Boolean.TRUE);
                     Operation operation = patch.execute();
@@ -70,7 +69,6 @@ public class GcpDatabaseServerUpgradeService extends GcpDatabaseServerBaseServic
                     CloudResource operationAwareCloudResource = createOperationAwareCloudResource(databaseCloudResource, operation);
                     databasePollerService.upgradeDatabasePoller(ac, List.of(operationAwareCloudResource));
                     buildableResource.forEach(dbr -> resourceNotifier.notifyUpdate(dbr, ac.getCloudContext()));
-                    return Collections.singletonList(operationAwareCloudResource);
                 }
             } else {
                 String message = "Deployment does not exist: {}" + deploymentName;
@@ -80,7 +78,6 @@ public class GcpDatabaseServerUpgradeService extends GcpDatabaseServerBaseServic
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), databaseCloudResource.getName());
         }
-        return List.of();
     }
 
     private void validateDatabaseInstance(DatabaseInstance databaseInstance) {
@@ -112,7 +109,7 @@ public class GcpDatabaseServerUpgradeService extends GcpDatabaseServerBaseServic
     }
 
     private boolean isDatabaseUpgradeNeeded(Integer databaseEngineVersion, TargetMajorVersion targetMajorVersion) {
-        Integer targetEngineVersion = Integer.valueOf(targetMajorVersion.getVersion());
+        Integer targetEngineVersion = Integer.valueOf(targetMajorVersion.getMajorVersion());
         if (databaseEngineVersion.compareTo(targetEngineVersion) > 0) {
             String message = "Database upgrade is not possible from " + databaseEngineVersion + " to " + targetEngineVersion;
             LOGGER.warn(message);

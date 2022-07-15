@@ -42,7 +42,7 @@ public class UpgradeEmbeddedDBStateParamsProvider {
         upgradeParams.put(ORIGINAL_POSTGRES_VERSION_KEY, originalVersion);
         upgradeParams.put(ORIGINAL_POSTGRES_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + "/" + ORIGINAL_POSTGRES_SUBDIRECTORY);
         upgradeParams.put(ORIGINAL_POSTGRES_BINARIES_KEY, VolumeUtils.DATABASE_VOLUME + "/" + ORIGINAL_POSTGRES_BINARIES_SUBDIRECTORY_PREFIX + originalVersion);
-        upgradeParams.put(NEW_POSTGRES_VERSION_KEY, targetMajorVersion.getVersion());
+        upgradeParams.put(NEW_POSTGRES_VERSION_KEY, targetMajorVersion.getMajorVersion());
         return params;
     }
 }

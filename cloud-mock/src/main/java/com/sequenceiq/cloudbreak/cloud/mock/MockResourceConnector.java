@@ -110,9 +110,8 @@ public class MockResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-            PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) throws Exception {
-        return null;
+    public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) {
     }
 
     @Override

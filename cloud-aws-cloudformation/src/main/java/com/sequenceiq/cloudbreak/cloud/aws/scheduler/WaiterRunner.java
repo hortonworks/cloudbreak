@@ -39,6 +39,7 @@ public class WaiterRunner {
                     .withPollingStrategy(getBackoffCancellablePollingStrategy(cancellationCheck))
             );
         } catch (Exception e) {
+            LOGGER.warn("Exception in AWS RDS waiter: ", e);
             List<String> messages = new ArrayList<>();
             if (StringUtils.hasText(exceptionMessage)) {
                 messages.add(exceptionMessage);

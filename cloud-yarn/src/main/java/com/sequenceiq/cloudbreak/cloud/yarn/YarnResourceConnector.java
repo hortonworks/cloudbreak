@@ -108,8 +108,8 @@ public class YarnResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
-            PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) throws Exception {
+    public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+            PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) {
         throw new UnsupportedOperationException("Database server upgrade is not supported for " + getClass().getName());
     }
 

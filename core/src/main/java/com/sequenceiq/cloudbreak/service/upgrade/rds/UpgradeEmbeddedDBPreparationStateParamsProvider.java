@@ -38,7 +38,7 @@ public class UpgradeEmbeddedDBPreparationStateParamsProvider {
         upgradeParams.put(ORIGINAL_POSTGRES_VERSION_KEY, originalVersion);
         upgradeParams.put(ORIGINAL_POSTGRES_BINARIES_KEY, "/usr/pgsql-" + originalVersion);
         upgradeParams.put(TEMP_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + "/tmp");
-        upgradeParams.put(NEW_POSTGRES_VERSION_KEY, targetMajorVersion.getVersion());
+        upgradeParams.put(NEW_POSTGRES_VERSION_KEY, targetMajorVersion.getMajorVersion());
         return params;
     }
 }

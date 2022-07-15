@@ -55,7 +55,7 @@ public class RdsUpgradeService {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("RDS upgrade has been initiated for stack {}", nameOrCrn.getNameOrCrn());
 
-        if (getCurrentRdsVersion(nameOrCrn).equals(targetMajorVersion.getVersion())) {
+        if (getCurrentRdsVersion(nameOrCrn).equals(targetMajorVersion.getMajorVersion())) {
             return alreadyOnLatestAnswer(targetMajorVersion);
         } else {
             return checkStackStatusAndTrigger(stack, targetMajorVersion);
@@ -66,14 +66,14 @@ public class RdsUpgradeService {
         StackDatabaseServerResponse databaseServer = databaseService.getDatabaseServer(nameOrCrn);
         return Optional.ofNullable(databaseServer)
                 .map(StackDatabaseServerResponse::getMajorVersion)
-                .map(MajorVersion::getVersion)
-                .orElse(MajorVersion.VERSION_10.getVersion());
+                .map(MajorVersion::getMajorVersion)
+                .orElse(MajorVersion.VERSION_10.getMajorVersion());
     }
 
     private RdsUpgradeV4Response alreadyOnLatestAnswer(TargetMajorVersion targetMajorVersion) {
         LOGGER.info("External database is already on version {}", targetMajorVersion);
         return new RdsUpgradeV4Response(RdsUpgradeResponseType.SKIP, FlowIdentifier.notTriggered(),
-                getMessage(CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED, List.of(targetMajorVersion.getVersion())), targetMajorVersion);
+                getMessage(CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED, List.of(targetMajorVersion.getMajorVersion())), targetMajorVersion);
     }
 
     private RdsUpgradeV4Response checkStackStatusAndTrigger(StackView stack, TargetMajorVersion targetMajorVersion) {
@@ -83,7 +83,7 @@ public class RdsUpgradeService {
                     getMessage(CLUSTER_RDS_UPGRADE_NOT_AVAILABLE), targetMajorVersion);
         }
 
-        LOGGER.info("External database for stack {} will be upgraded to version {}", stack.getName(), targetMajorVersion.getVersion());
+        LOGGER.info("External database for stack {} will be upgraded to version {}", stack.getName(), targetMajorVersion.getMajorVersion());
         return triggerRdsUpgradeFlow(stack, targetMajorVersion);
     }
 

@@ -17,9 +17,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -105,9 +106,12 @@ public class GcpDatabaseServerUpgradeServiceTest {
 
         doNothing().when(databasePollerService).upgradeDatabasePoller(any(AuthenticatedContext.class), anyList());
 
-        List<CloudResource> upgrade = underTest.upgrade(authenticatedContext, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11);
-        Assert.assertEquals(1, upgrade.size());
-        Assert.assertEquals("server-1", upgrade.get(0).getName());
+        underTest.upgrade(authenticatedContext, databaseStack, persistenceNotifier, TargetMajorVersion.VERSION_11);
+
+        ArgumentCaptor<CloudResource> notifyUpdateArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
+        verify(persistenceNotifier).notifyUpdate(notifyUpdateArgumentCaptor.capture(), any());
+        CloudResource updatedResource = notifyUpdateArgumentCaptor.getValue();
+        Assertions.assertEquals("server-1", updatedResource.getName());
     }
 
     @Test

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsVersionOperations;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsDbParameterGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsDbSubnetGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsRdsInstanceView;
@@ -56,6 +57,9 @@ public class AwsStackRequestHelper {
 
     @Inject
     private AwsCloudFormationClient awsClient;
+
+    @Inject
+    private AwsRdsVersionOperations awsRdsVersionOperations;
 
     public CreateStackRequest createCreateStackRequest(AuthenticatedContext ac, CloudStack stack, String cFStackName, String subnet, String cfTemplate) {
         return new CreateStackRequest()
@@ -226,7 +230,7 @@ public class AwsStackRequestHelper {
         AwsRdsInstanceView awsRdsInstanceView = new AwsRdsInstanceView(databaseServer);
         AwsRdsDbSubnetGroupView awsRdsDbSubnetGroupView = new AwsRdsDbSubnetGroupView(databaseServer);
         AwsRdsVpcSecurityGroupView awsRdsVpcSecurityGroupView = new AwsRdsVpcSecurityGroupView(databaseServer);
-        AwsRdsDbParameterGroupView awsRdsDbParameterGroupView = new AwsRdsDbParameterGroupView(databaseServer);
+        AwsRdsDbParameterGroupView awsRdsDbParameterGroupView = new AwsRdsDbParameterGroupView(databaseServer, awsRdsVersionOperations);
         List<Parameter> parameters = new ArrayList<>(asList(
                 new Parameter().withParameterKey("DBInstanceClassParameter").withParameterValue(awsRdsInstanceView.getDBInstanceClass()),
                 new Parameter().withParameterKey("DBInstanceIdentifierParameter").withParameterValue(awsRdsInstanceView.getDBInstanceIdentifier()),
