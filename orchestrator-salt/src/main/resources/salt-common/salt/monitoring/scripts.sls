@@ -28,3 +28,10 @@
     - group: root
     - mode: 600
     - source: salt://monitoring/cron/cdp_resources_check
+
+/opt/salt/scripts/instanceid_retriever.py:
+  file.managed:
+    - user: root
+    - group: root
+    - mode: 700
+    - source: salt://monitoring/scripts/instanceid_retriever.py
