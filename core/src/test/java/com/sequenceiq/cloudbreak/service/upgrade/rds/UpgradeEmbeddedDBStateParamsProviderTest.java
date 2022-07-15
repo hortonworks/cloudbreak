@@ -34,7 +34,7 @@ class UpgradeEmbeddedDBStateParamsProviderTest {
         Assertions.assertEquals(upgradeParams.get("original_postgres_version"), "version");
         Assertions.assertEquals(upgradeParams.get("original_postgres_binaries"), "/dbfs/tmp/pgsql-version");
         Assertions.assertEquals(upgradeParams.get("original_postgres_directory"), "/dbfs/pgsql");
-        Assertions.assertEquals(upgradeParams.get("new_postgres_version"), TargetMajorVersion.VERSION_11.getVersion());
+        Assertions.assertEquals(upgradeParams.get("new_postgres_version"), TargetMajorVersion.VERSION_11.getMajorVersion());
     }
 
     @Test

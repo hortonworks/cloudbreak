@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.common.database;
 
-public enum TargetMajorVersion {
+/**
+ * Represents the RDS major versions that are available as upgrade targets in CDP.
+ */
+public enum TargetMajorVersion implements Version {
 
     VERSION_11("11");
 
@@ -10,7 +13,8 @@ public enum TargetMajorVersion {
         this.version = version;
     }
 
-    public String getVersion() {
+    @Override
+    public String getMajorVersion() {
         return version;
     }
 

@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.common.type.Versioned;
 
 public class VersionComparator implements Comparator<Versioned>, Serializable {
 
-    private static final String VERSION_SPLITTER_REGEX = "[\\.\\-]|(?<=b)(?=\\d)";
+    public static final String VERSION_SPLITTER_REGEX = "[\\.\\-]|(?<=b)(?=\\d)";
 
     @Override
     public int compare(Versioned o1, Versioned o2) {

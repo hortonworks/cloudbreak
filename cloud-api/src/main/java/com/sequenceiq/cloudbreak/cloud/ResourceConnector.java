@@ -106,10 +106,9 @@ public interface ResourceConnector {
      * @param authenticatedContext the authenticated context which holds the client object
      * @param stack                contains the full description of infrastructure
      * @param persistenceNotifier  notifier for when a resource is allocated on the cloud platfrom
-     * @return the status of resources allocated on the cloud platform
      * @throws Exception in case of any error
      */
-    List<CloudResourceStatus> upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
+    void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack, PersistenceNotifier persistenceNotifier,
             TargetMajorVersion targetMajorVersion) throws Exception;
 
     /**

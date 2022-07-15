@@ -130,12 +130,9 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
+    public void upgradeDatabaseServer(AuthenticatedContext authenticatedContext, DatabaseStack stack,
             PersistenceNotifier persistenceNotifier, TargetMajorVersion targetMajorVersion) throws Exception {
-        List<CloudResource> cloudResources = databaseServerUpgradeService.upgrade(authenticatedContext, stack, persistenceNotifier, targetMajorVersion);
-        return cloudResources.stream()
-                .map(e -> new CloudResourceStatus(e, ResourceStatus.CREATED))
-                .collect(Collectors.toList());
+        databaseServerUpgradeService.upgrade(authenticatedContext, stack, persistenceNotifier, targetMajorVersion);
     }
 
     @Override

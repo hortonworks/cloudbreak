@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -37,6 +38,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation.AwsRdsVersionOperations;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -61,6 +63,9 @@ public class AwsStackRequestHelperTest {
 
     @Mock
     private AwsCloudFormationClient awsClient;
+
+    @Mock
+    private AwsRdsVersionOperations awsRdsVersionOperations;
 
     @Mock
     private AuthenticatedContext authenticatedContext;
@@ -168,6 +173,8 @@ public class AwsStackRequestHelperTest {
     void testGetStackParametersDb(String testCaseName, String sslCertificateIdentifier, boolean sslCertificateIdentifierParameterDefinedExpected,
             String sslCertificateIdentifierParameterExpected, String engineVersion, String expectedEngineVersion, String expectedFamily) {
         when(network.getStringParameter("subnetId")).thenReturn("subnet-1234");
+        when(databaseServer.getEngine()).thenReturn(DatabaseEngine.POSTGRESQL);
+        when(awsRdsVersionOperations.getDBParameterGroupFamily(eq(DatabaseEngine.POSTGRESQL), anyString())).thenReturn("postgres10");
 
         when(databaseServer.getStorageSize()).thenReturn(50L);
         when(databaseServer.getParameter("backupRetentionPeriod", Integer.class)).thenReturn(1);

@@ -80,7 +80,7 @@ public class UpgradeRdsService {
         InMemoryStateStore.deleteCluster(clusterId);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, statusReason);
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), ResourceEvent.CLUSTER_RDS_UPGRADE_FINISHED);
-        stackUpdater.updateExternalDatabaseEngineVersion(stackId, targetMajorVersion.getVersion());
+        stackUpdater.updateExternalDatabaseEngineVersion(stackId, targetMajorVersion.getMajorVersion());
     }
 
     public void rdsUpgradeFailed(Long stackId, Long clusterId, Exception exception) {

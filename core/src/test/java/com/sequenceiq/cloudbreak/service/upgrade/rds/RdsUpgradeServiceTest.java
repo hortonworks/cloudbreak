@@ -118,7 +118,7 @@ class RdsUpgradeServiceTest {
         when(databaseService.getDatabaseServer(eq(STACK_NAME_OR_CRN))).thenReturn(createDatabaseServerResponse(MajorVersion.VERSION_11));
         when(stackDtoService.getStackViewByNameOrCrn(eq(NameOrCrn.ofCrn(STACK_CRN)), any())).thenReturn(stack);
         when(messagesService.getMessage(CLUSTER_RDS_UPGRADE_ALREADY_UPGRADED.getMessage(),
-                List.of(MajorVersion.VERSION_11.getVersion()))).thenReturn(ERROR_REASON);
+                List.of(MajorVersion.VERSION_11.getMajorVersion()))).thenReturn(ERROR_REASON);
 
         RdsUpgradeV4Response response = underTest.upgradeRds(NameOrCrn.ofCrn(STACK_CRN), TARGET_VERSION);
 
