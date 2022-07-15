@@ -113,14 +113,18 @@ public class PollerUtilTest {
 
         CloudCredential cloudCredential = new CloudCredential(STACK_ID.toString(), "", "account");
         AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
-        CloudInstance cloudInstance = new CloudInstance("instanceId", null, null, "subnet-1", "az1");
-        List<CloudInstance> instances = List.of(cloudInstance);
+        CloudInstance cloudInstance1 = new CloudInstance("instanceId1", null, null, "subnet-1", "az1");
+        CloudInstance cloudInstance2 = new CloudInstance("instanceId2", null, null, "subnet-1", "az1");
+        List<CloudInstance> instances = List.of(cloudInstance1, cloudInstance2);
 
-        when(awsInstanceConnector.check(ac, instances)).thenReturn(List.of(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.FAILED)));
+        when(awsInstanceConnector.check(ac, instances)).thenReturn(
+                List.of(new CloudVmInstanceStatus(cloudInstance1, InstanceStatus.FAILED),
+                        new CloudVmInstanceStatus(cloudInstance2, InstanceStatus.IN_PROGRESS)));
 
         PollerStoppedException actual = assertThrows(PollerStoppedException.class, () -> underTest.waitFor(ac, instances, Set.of(InstanceStatus.STARTED), ""));
 
-        Pattern regexp = Pattern.compile("unknown operation cannot be finished in time. Duration: .*. Instances: .*");
+        Pattern regexp = Pattern.compile("unknown operation cannot be finished in time, please check AWS console. Duration: .*. Instance statuses on AWS: " +
+                "instanceId1=FAILED, instanceId2=IN_PROGRESS");
         assertTrue(regexp.matcher(actual.getMessage()).matches());
     }
 
