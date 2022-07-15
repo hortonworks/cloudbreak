@@ -7,6 +7,8 @@ import com.amazonaws.services.rds.model.Certificate;
 import com.amazonaws.services.rds.model.DBInstance;
 import com.amazonaws.services.rds.model.DescribeCertificatesRequest;
 import com.amazonaws.services.rds.model.DescribeCertificatesResult;
+import com.amazonaws.services.rds.model.DescribeDBEngineVersionsRequest;
+import com.amazonaws.services.rds.model.DescribeDBEngineVersionsResult;
 import com.amazonaws.services.rds.model.DescribeDBInstancesRequest;
 import com.amazonaws.services.rds.model.DescribeDBInstancesResult;
 import com.amazonaws.services.rds.model.ModifyDBInstanceRequest;
@@ -57,6 +59,10 @@ public class AmazonRdsClient extends AmazonClient {
                 DescribeCertificatesResult::getCertificates,
                 DescribeCertificatesResult::getMarker,
                 DescribeCertificatesRequest::setMarker);
+    }
+
+    public DescribeDBEngineVersionsResult describeDBEngineVersions(DescribeDBEngineVersionsRequest describeDBEngineVersionsRequest) {
+        return client.describeDBEngineVersions(describeDBEngineVersionsRequest);
     }
 
     private DescribeCertificatesResult describeCertificatesInternal(DescribeCertificatesRequest request) {
