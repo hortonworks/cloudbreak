@@ -25,4 +25,12 @@ fi
 
 chmod +x cbd
 mkdir etc
-cp ../../mock-thunderhead/src/test/resources/etc/license.txt etc/license.txt
+
+if [ -n "$CM_LICENSE_FILE" ] ; then
+    echo "CM_LICENSE_FILE variable is not empty, creating license file from it's content under etc/license.txt";
+    cp -Rv $CM_LICENSE_FILE etc/
+    sudo chmod -R 755 ./etc
+else
+    echo "CM_LICENSE_FILE variable is empty, copying the license from mock-thunderhead source"
+    cp ../../mock-thunderhead/src/test/resources/etc/license.txt etc/license.txt
+fi
