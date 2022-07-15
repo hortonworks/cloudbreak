@@ -1,8 +1,15 @@
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {%- from 'monitoring/settings.sls' import monitoring with context %}
-{%- set hostname = salt['grains.get']('fqdn') %}
 {%- set hostgroup = salt['grains.get']('hostgroup') %}
 {%- set cdp_prometheus_installed = salt['file.directory_exists' ]('/opt/cdp-prometheus') %}
+{%- set instance_name = salt['grains.get']('fqdn') %}
+{%- if telemetry.platform in ["AWS", "AZURE", "GCP"]  %}
+  {%- set get_instance_cmd = "python3 /opt/salt/scripts/instanceid_retriever.py " +  telemetry.platform %}
+  {%- set instance_cmd_output = salt.cmd.run(get_instance_cmd) %}
+  {%- if instance_cmd_output %}
+    {%- set instance_name = instance_cmd_output %}
+  {%- endif %}
+{%- endif %}
 global:
   scrape_interval: {{ monitoring.scrapeIntervalSeconds }}s
 {%- if cdp_prometheus_installed %}
@@ -44,7 +51,7 @@ scrape_configs:
 {%- endif %}
     relabel_configs:
       - target_label: instance
-        replacement: {{ hostname }}:{{ monitoring.nodeExporterPort }}
+        replacement: {{ instance_name }}:{{ monitoring.nodeExporterPort }}
 {%- if monitoring.localPassword %}
     basic_auth:
       username: {{ monitoring.nodeExporterUser }}
@@ -75,7 +82,7 @@ scrape_configs:
       - target_label: __address__
         replacement: 127.0.0.1:{{ monitoring.blackboxExporterPort }}
       - target_label: instance
-        replacement: {{ hostname }}:{{ monitoring.blackboxExporterPort }}
+        replacement: {{ instance_name }}:{{ monitoring.blackboxExporterPort }}
 {%- if monitoring.localPassword %}
     basic_auth:
       username: {{ monitoring.blackboxExporterUser }}
@@ -93,7 +100,7 @@ scrape_configs:
           platform: {{ telemetry.platform }}
     relabel_configs:
       - target_label: instance
-        replacement: {{ hostname }}:{{ monitoring.cmMetricsExporterPort }}
+        replacement: {{ instance_name }}:{{ monitoring.cmMetricsExporterPort }}
     basic_auth:
       username: {{ monitoring.cmUsername }}
       password: {{ monitoring.cmPassword }}
