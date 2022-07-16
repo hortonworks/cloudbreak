@@ -69,11 +69,11 @@ public class LoadBalancerServiceTest {
     @Test
     public void testRemoveLoadBalancerTargetsWhenDeregisterCalled() {
         CloudResource instanceToRemove = CloudResource.builder()
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .name("name")
-                .instanceId("instanceId")
-                .params(Collections.emptyMap())
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
+                .withInstanceId("instanceId")
+                .withParams(Collections.emptyMap())
                 .build();
 
         ArgumentCaptor<DeregisterTargetsRequest> argumentCaptor = ArgumentCaptor.forClass(DeregisterTargetsRequest.class);

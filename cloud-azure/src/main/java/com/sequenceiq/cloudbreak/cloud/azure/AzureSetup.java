@@ -104,7 +104,7 @@ public class AzureSetup implements Setup {
     @Override
     public void prerequisites(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(ac.getCloudContext(), stack);
-        CloudResource cloudResource = new Builder().type(ResourceType.ARM_TEMPLATE).name(resourceGroupName).build();
+        CloudResource cloudResource = new Builder().withType(ResourceType.ARM_TEMPLATE).withName(resourceGroupName).build();
         String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
             AzureClient client = ac.getParameter(AzureClient.class);

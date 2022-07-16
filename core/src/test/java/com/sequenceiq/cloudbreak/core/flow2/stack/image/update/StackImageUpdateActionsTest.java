@@ -354,7 +354,7 @@ public class StackImageUpdateActionsTest {
         when(resourceService.getAllByStackId(anyLong()))
                 .thenReturn(Collections.singletonList(new Resource(ResourceType.CLOUDFORMATION_STACK, "cf", stack, "az1")));
         when(resourceToCloudResourceConverter.convert(any(Resource.class)))
-                .thenReturn(CloudResource.builder().type(ResourceType.CLOUDFORMATION_STACK).name("cfresource").build());
+                .thenReturn(CloudResource.builder().withType(ResourceType.CLOUDFORMATION_STACK).withName("cfresource").build());
 
         setImageAction.execute(stateContext);
 

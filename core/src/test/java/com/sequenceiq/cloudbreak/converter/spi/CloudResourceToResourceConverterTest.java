@@ -21,10 +21,10 @@ class CloudResourceToResourceConverterTest {
     @Test
     void convertPartial() {
         Resource convertedResource = underTest.convert(CloudResource.builder()
-                .type(ResourceType.AWS_ENCRYPTED_AMI)
-                .status(CommonStatus.REQUESTED)
-                .name("ami-01231h231")
-                .params(Map.of())
+                .withType(ResourceType.AWS_ENCRYPTED_AMI)
+                .withStatus(CommonStatus.REQUESTED)
+                .withName("ami-01231h231")
+                .withParams(Map.of())
                 .build());
 
         assertEquals(ResourceType.AWS_ENCRYPTED_AMI, convertedResource.getResourceType());
@@ -41,13 +41,13 @@ class CloudResourceToResourceConverterTest {
         Map<String, Object> parameters = Map.of("key", "test");
         Json attributes = new Json(parameters);
         Resource convertedResource = underTest.convert(CloudResource.builder()
-                .type(ResourceType.AWS_ENCRYPTED_AMI)
-                .status(CommonStatus.REQUESTED)
-                .name("ami-01231h231")
-                .group("group")
-                .instanceId("id")
-                .params(Map.of(CloudResource.ATTRIBUTES, Map.of("key", "test")))
-                .reference("ref")
+                .withType(ResourceType.AWS_ENCRYPTED_AMI)
+                .withStatus(CommonStatus.REQUESTED)
+                .withName("ami-01231h231")
+                .withGroup("group")
+                .withInstanceId("id")
+                .withParams(Map.of(CloudResource.ATTRIBUTES, Map.of("key", "test")))
+                .withReference("ref")
                 .build());
 
         assertEquals(ResourceType.AWS_ENCRYPTED_AMI, convertedResource.getResourceType());

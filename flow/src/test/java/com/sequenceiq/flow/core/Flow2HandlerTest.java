@@ -657,7 +657,7 @@ public class Flow2HandlerTest {
 
     private static class MockPayload implements Payload, Acceptable {
 
-        private Promise<AcceptResult> accepted;
+        private final Promise<AcceptResult> accepted;
 
         MockPayload(Promise<AcceptResult> promise) {
             accepted = promise;

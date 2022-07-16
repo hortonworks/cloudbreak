@@ -105,11 +105,11 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.deleteDatabaseServer(any(), anyString(), anyBoolean())).thenReturn(Optional.empty());
         List<CloudResource> cloudResources = List.of(
                 CloudResource.builder()
-                        .type(AZURE_DATABASE)
-                        .reference("dbReference")
-                        .name("dbName")
-                        .status(CommonStatus.CREATED)
-                        .params(Map.of())
+                        .withType(AZURE_DATABASE)
+                        .withReference("dbReference")
+                        .withName("dbName")
+                        .withStatus(CommonStatus.CREATED)
+                        .withParams(Map.of())
                         .build());
 
         List<CloudResourceStatus> resourceStatuses = victim.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);
@@ -131,11 +131,11 @@ class AzureDatabaseResourceServiceTest {
         when(azureUtils.deleteResourceGroup(any(), anyString(), anyBoolean())).thenReturn(Optional.empty());
         List<CloudResource> cloudResources = List.of(
                 CloudResource.builder()
-                        .type(AZURE_DATABASE)
-                        .reference("dbReference")
-                        .name("dbName")
-                        .status(CommonStatus.CREATED)
-                        .params(Map.of())
+                        .withType(AZURE_DATABASE)
+                        .withReference("dbReference")
+                        .withName("dbName")
+                        .withStatus(CommonStatus.CREATED)
+                        .withParams(Map.of())
                         .build());
 
         List<CloudResourceStatus> resourceStatuses = victim.terminateDatabaseServer(ac, databaseStack, cloudResources, false, persistenceNotifier);

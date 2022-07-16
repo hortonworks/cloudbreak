@@ -608,7 +608,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     public List<InstanceMetaData> getInstanceMetaDataAsList() {
         return instanceGroups.stream()
-                .flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
+                .flatMap(instanceGroup -> instanceGroup.getInstanceMetaData().stream())
                 .collect(Collectors.toList());
     }
 

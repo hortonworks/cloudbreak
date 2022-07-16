@@ -27,9 +27,9 @@ public abstract class AbstractGcpBaseResourceChecker {
 
     protected CloudResource createNamedResource(ResourceType type, String name, String zone) {
         return new Builder()
-                .type(type)
-                .name(name)
-                .availabilityZone(zone)
+                .withType(type)
+                .withName(name)
+                .withAvailabilityZone(zone)
                 .build();
     }
 

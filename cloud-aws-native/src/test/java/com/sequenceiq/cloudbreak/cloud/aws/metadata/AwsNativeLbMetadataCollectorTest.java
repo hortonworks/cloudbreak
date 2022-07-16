@@ -77,18 +77,18 @@ public class AwsNativeLbMetadataCollectorTest {
         List<CloudResource> resources = new ArrayList<>();
         for (int i = 0; i < numPorts; i++) {
             CloudResource targetGroup = CloudResource.builder()
-                .type(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP)
-                .instanceId(LOAD_BALANCER_ARN)
-                .reference(TARGET_GROUP_ARN + i + "Internal")
-                .name(String.format(TARGET_GROUP_NAME, i))
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP)
+                .withInstanceId(LOAD_BALANCER_ARN)
+                .withReference(TARGET_GROUP_ARN + i + "Internal")
+                .withName(String.format(TARGET_GROUP_NAME, i))
                 .build();
             resources.add(targetGroup);
             if (includeListener) {
                 CloudResource listener = CloudResource.builder()
-                    .type(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER)
-                    .instanceId(LOAD_BALANCER_ARN)
-                    .reference(LISTENER_ARN + i + "Internal")
-                    .name(String.format(TARGET_GROUP_NAME, i))
+                    .withType(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER)
+                    .withInstanceId(LOAD_BALANCER_ARN)
+                    .withReference(LISTENER_ARN + i + "Internal")
+                    .withName(String.format(TARGET_GROUP_NAME, i))
                     .build();
                 resources.add(listener);
             }

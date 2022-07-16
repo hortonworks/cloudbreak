@@ -99,64 +99,64 @@ public class AzureCloudResourceService {
         CloudResource.Builder cloudResourceBuilder = CloudResource.builder();
         switch (targetResource.resourceType()) {
             case "Microsoft.Compute/availabilitySets":
-                cloudResourceBuilder.type(ResourceType.AZURE_AVAILABILITY_SET);
+                cloudResourceBuilder.withType(ResourceType.AZURE_AVAILABILITY_SET);
                 break;
             case "Microsoft.Compute/virtualMachines":
-                cloudResourceBuilder.type(ResourceType.AZURE_INSTANCE);
-                cloudResourceBuilder.instanceId(targetResource.resourceName());
+                cloudResourceBuilder.withType(ResourceType.AZURE_INSTANCE);
+                cloudResourceBuilder.withInstanceId(targetResource.resourceName());
                 break;
             case "Microsoft.Network/networkSecurityGroups":
-                cloudResourceBuilder.type(ResourceType.AZURE_SECURITY_GROUP);
+                cloudResourceBuilder.withType(ResourceType.AZURE_SECURITY_GROUP);
                 break;
             case "Microsoft.Network/publicIPAddresses":
-                cloudResourceBuilder.type(ResourceType.AZURE_PUBLIC_IP);
+                cloudResourceBuilder.withType(ResourceType.AZURE_PUBLIC_IP);
                 break;
             case "Microsoft.Network/networkInterfaces":
-                cloudResourceBuilder.type(ResourceType.AZURE_NETWORK_INTERFACE);
+                cloudResourceBuilder.withType(ResourceType.AZURE_NETWORK_INTERFACE);
                 break;
             case "Microsoft.Network/virtualNetworks":
-                cloudResourceBuilder.type(ResourceType.AZURE_NETWORK);
+                cloudResourceBuilder.withType(ResourceType.AZURE_NETWORK);
                 break;
             case "Microsoft.Network/privateEndpoints":
-                cloudResourceBuilder.type(ResourceType.AZURE_PRIVATE_ENDPOINT);
+                cloudResourceBuilder.withType(ResourceType.AZURE_PRIVATE_ENDPOINT);
                 break;
             case "Microsoft.DBforPostgreSQL/servers":
-                cloudResourceBuilder.type(ResourceType.AZURE_DATABASE);
+                cloudResourceBuilder.withType(ResourceType.AZURE_DATABASE);
                 break;
             case "Microsoft.DBforPostgreSQL/servers/securityAlertPolicies":
-                cloudResourceBuilder.type(ResourceType.AZURE_DATABASE_SECURITY_ALERT_POLICY);
+                cloudResourceBuilder.withType(ResourceType.AZURE_DATABASE_SECURITY_ALERT_POLICY);
                 break;
             case "Microsoft.Compute/images":
-                cloudResourceBuilder.type(ResourceType.AZURE_MANAGED_IMAGE);
+                cloudResourceBuilder.withType(ResourceType.AZURE_MANAGED_IMAGE);
                 break;
             case "Microsoft.Compute/disks":
-                cloudResourceBuilder.type(ResourceType.AZURE_DISK);
+                cloudResourceBuilder.withType(ResourceType.AZURE_DISK);
                 break;
             case "Microsoft.Storage/storageAccounts":
-                cloudResourceBuilder.type(ResourceType.AZURE_STORAGE);
+                cloudResourceBuilder.withType(ResourceType.AZURE_STORAGE);
                 break;
             case "Microsoft.Network/privateDnsZones":
-                cloudResourceBuilder.type(ResourceType.AZURE_PRIVATE_DNS_ZONE);
+                cloudResourceBuilder.withType(ResourceType.AZURE_PRIVATE_DNS_ZONE);
                 break;
             case "Microsoft.Network/privateEndpoints/privateDnsZoneGroups":
-                cloudResourceBuilder.type(ResourceType.AZURE_DNS_ZONE_GROUP);
+                cloudResourceBuilder.withType(ResourceType.AZURE_DNS_ZONE_GROUP);
                 break;
             case "Microsoft.Network/privateDnsZones/virtualNetworkLinks":
-                cloudResourceBuilder.type(ResourceType.AZURE_VIRTUAL_NETWORK_LINK);
+                cloudResourceBuilder.withType(ResourceType.AZURE_VIRTUAL_NETWORK_LINK);
                 break;
             case "Microsoft.Network/loadBalancers":
-                cloudResourceBuilder.type(ResourceType.AZURE_LOAD_BALANCER);
+                cloudResourceBuilder.withType(ResourceType.AZURE_LOAD_BALANCER);
                 break;
             default:
                 LOGGER.info("Unknown resource type {}", targetResource.resourceType());
                 return null;
         }
         CloudResource cloudResource = cloudResourceBuilder
-                .name(targetResource.resourceName())
-                .reference(targetResource.id())
-                .status(CommonStatus.CREATED)
-                .persistent(true)
-                .status(commonStatus)
+                .withName(targetResource.resourceName())
+                .withReference(targetResource.id())
+                .withStatus(CommonStatus.CREATED)
+                .withPersistent(true)
+                .withStatus(commonStatus)
                 .build();
         LOGGER.debug("Cloud resource built {}, original Azure resource name: {}, type: {}",
                 cloudResource,
@@ -195,23 +195,23 @@ public class AzureCloudResourceService {
     public CloudResource buildCloudResource(String name, String id, ResourceType type) {
         LOGGER.debug("{} {} is being created with id {}", type.name(), name, id);
         return CloudResource.builder()
-                .name(name)
-                .status(CommonStatus.CREATED)
-                .persistent(true)
-                .reference(id)
-                .type(type)
+                .withName(name)
+                .withStatus(CommonStatus.CREATED)
+                .withPersistent(true)
+                .withReference(id)
+                .withType(type)
                 .build();
     }
 
     private CloudResource buildVm(CloudResource sourceResource, Long privateId, String instanceGroupName, String resourceGroupName) {
         return CloudResource.builder()
-                .type(sourceResource.getType())
-                .instanceId(sourceResource.getInstanceId())
-                .name(sourceResource.getName())
-                .group(instanceGroupName)
-                .status(sourceResource.getStatus())
-                .persistent(sourceResource.isPersistent())
-                .params(Map.of(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName, PRIVATE_ID, privateId))
+                .withType(sourceResource.getType())
+                .withInstanceId(sourceResource.getInstanceId())
+                .withName(sourceResource.getName())
+                .withGroup(instanceGroupName)
+                .withStatus(sourceResource.getStatus())
+                .withPersistent(sourceResource.isPersistent())
+                .withParams(Map.of(RESOURCE_GROUP_NAME_PARAMETER, resourceGroupName, PRIVATE_ID, privateId))
                 .build();
     }
 
@@ -221,12 +221,12 @@ public class AzureCloudResourceService {
         OSDisk osDisk = storageProfile.osDisk();
         LOGGER.debug("OS disk {} found for VM {}", osDisk.name(), virtualMachine.name());
         return CloudResource.builder()
-                .name(osDisk.name())
-                .instanceId(instanceId)
-                .status(CommonStatus.CREATED)
-                .persistent(true)
-                .reference(osDisk.managedDisk().id())
-                .type(ResourceType.AZURE_DISK)
+                .withName(osDisk.name())
+                .withInstanceId(instanceId)
+                .withStatus(CommonStatus.CREATED)
+                .withPersistent(true)
+                .withReference(osDisk.managedDisk().id())
+                .withType(ResourceType.AZURE_DISK)
                 .build();
     }
 
@@ -274,22 +274,22 @@ public class AzureCloudResourceService {
             }
         }
         CloudResource resourceGroupResource = CloudResource.builder().
-                name(resourceGroupName).
-                type(ResourceType.AZURE_RESOURCE_GROUP).
+                withName(resourceGroupName).
+                withType(ResourceType.AZURE_RESOURCE_GROUP).
                 build();
         resources.add(resourceGroupResource);
         notifier.notifyAllocation(resourceGroupResource, cloudContext);
 
         CloudResource networkResource = CloudResource.builder().
-                name(networkName).
-                type(ResourceType.AZURE_NETWORK).
+                withName(networkName).
+                withType(ResourceType.AZURE_NETWORK).
                 build();
         resources.add(networkResource);
         notifier.notifyAllocation(networkResource, cloudContext);
         for (String subnetName : subnetNameList) {
             CloudResource subnetResource = CloudResource.builder().
-                    name(subnetName).
-                    type(ResourceType.AZURE_SUBNET).
+                    withName(subnetName).
+                    withType(ResourceType.AZURE_SUBNET).
                     build();
             resources.add(subnetResource);
             notifier.notifyAllocation(subnetResource, cloudContext);

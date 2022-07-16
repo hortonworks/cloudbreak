@@ -75,10 +75,10 @@ public class CloudResourceRetrieverServiceTest {
 
     private CloudResource createCloudResource() {
         return CloudResource.builder()
-                .name(RESOURCE)
-                .type(AZURE_MANAGED_IMAGE)
-                .status(REQUESTED)
-                .params(Collections.emptyMap())
+                .withName(RESOURCE)
+                .withType(AZURE_MANAGED_IMAGE)
+                .withStatus(REQUESTED)
+                .withParams(Collections.emptyMap())
                 .build();
     }
 }

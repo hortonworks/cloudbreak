@@ -208,10 +208,10 @@ public class AwsLoadBalancerLaunchService {
         }
 
         CloudResource.Builder cloudResource = new CloudResource.Builder()
-            .status(createSuccess ? CommonStatus.CREATED : CommonStatus.FAILED)
-            .type(ELASTIC_LOAD_BALANCER)
-            .availabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
-            .name(loadBalancer.getName());
+            .withStatus(createSuccess ? CommonStatus.CREATED : CommonStatus.FAILED)
+            .withType(ELASTIC_LOAD_BALANCER)
+            .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
+            .withName(loadBalancer.getName());
 
         return new CloudResourceStatus(cloudResource.build(),
                 createSuccess ? com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED :

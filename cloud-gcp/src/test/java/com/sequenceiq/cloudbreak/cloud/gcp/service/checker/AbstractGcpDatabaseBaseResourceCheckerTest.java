@@ -16,10 +16,10 @@ public class AbstractGcpDatabaseBaseResourceCheckerTest {
     @Test
     public void testCreateOperationAwareCloudResource() {
         CloudResource cloudResource = CloudResource.builder()
-                .type(ResourceType.GCP_DATABASE)
-                .name("test-image")
-                .status(CommonStatus.REQUESTED)
-                .params(Map.of())
+                .withType(ResourceType.GCP_DATABASE)
+                .withName("test-image")
+                .withStatus(CommonStatus.REQUESTED)
+                .withParams(Map.of())
                 .build();
         com.google.api.services.sqladmin.model.Operation operation = new com.google.api.services.sqladmin.model.Operation();
         operation.setName("op1");

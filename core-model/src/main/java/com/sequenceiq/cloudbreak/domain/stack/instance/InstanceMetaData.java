@@ -176,8 +176,22 @@ public class InstanceMetaData implements ProvisionEntity, OrchestrationNode, Ins
         return getClusterManagerServer() != null ? getClusterManagerServer() : ambariServer;
     }
 
+    /**
+     * Need this for Jackson serialization
+     */
+    public Boolean isAmbariServer() {
+        return getAmbariServer();
+    }
+
     public Boolean getClusterManagerServer() {
         return clusterManagerServer;
+    }
+
+    /**
+     * Need this for Jackson serialization
+     */
+    public Boolean isClusterManagerServer() {
+        return getClusterManagerServer();
     }
 
     public void setAmbariServer(Boolean ambariServer) {

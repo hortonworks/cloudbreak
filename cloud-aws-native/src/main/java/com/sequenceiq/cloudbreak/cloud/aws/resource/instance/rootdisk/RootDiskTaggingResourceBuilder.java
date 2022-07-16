@@ -40,11 +40,11 @@ public class RootDiskTaggingResourceBuilder extends AbstractAwsNativeComputeBuil
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), auth.getCloudContext().getId(), group.getName(),
                 privateId);
         return singletonList(CloudResource.builder()
-                .group(group.getName())
-                .type(resourceType())
-                .status(CREATED)
-                .name(resourceName)
-                .persistent(true)
+                .withGroup(group.getName())
+                .withType(resourceType())
+                .withStatus(CREATED)
+                .withName(resourceName)
+                .withPersistent(true)
                 .build());
     }
 

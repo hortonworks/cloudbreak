@@ -42,7 +42,7 @@ public class SecurityGroupRecreatorService implements ResourceRecreator {
         Group group = getGroupByName(cloudStack.getGroups(), hostGroupName);
         CloudResource createdSecurityGroup = awsSecurityGroupResourceBuilder.create(awsContext, ac, group, network);
         if (createdSecurityGroup != null) {
-            createdSecurityGroup = CloudResource.builder().cloudResource(createdSecurityGroup).group(group.getName()).build();
+            createdSecurityGroup = CloudResource.builder().cloudResource(createdSecurityGroup).withGroup(group.getName()).build();
             ResourcePersisted resourcePersisted = persistenceNotifier.notifyAllocation(createdSecurityGroup, cloudContext);
             if (resourcePersisted.getException() != null) {
                 LOGGER.error("Cannot create security group resource in the db: {}", resourcePersisted.getStatusReason(), resourcePersisted.getException());

@@ -199,10 +199,10 @@ public class AzureVolumeResourceBuilderTest {
 
     @Test
     public void testWhenDetachedReattachableVolumeExistsThenItShouldReturn() {
-        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.DETACHED)
-                .name(VOLUME_NAME).params(Map.of()).build();
-        CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
-                .name("instance").params(Map.of()).build();
+        CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.DETACHED)
+                .withName(VOLUME_NAME).withParams(Map.of()).build();
+        CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
+                .withName("instance").withParams(Map.of()).build();
         when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(volumeSetResource, newInstance));
 
         List<CloudResource> result = underTest.create(context, cloudInstance, PRIVATE_ID, auth, group, image);
@@ -214,10 +214,10 @@ public class AzureVolumeResourceBuilderTest {
 
     @Test
     public void testWhenReattachableVolumeWithInstanceIdExistsThenItShouldReturn() {
-        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED).instanceId("instanceid")
-                .name(VOLUME_NAME).params(Map.of()).build();
-        CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
-                .name("instance").params(Map.of()).build();
+        CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.CREATED)
+                .withInstanceId("instanceid").withName(VOLUME_NAME).withParams(Map.of()).build();
+        CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
+                .withName("instance").withParams(Map.of()).build();
         when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(volumeSetResource, newInstance));
 
         List<CloudResource> result = underTest.create(context, cloudInstance, PRIVATE_ID, auth, group, image);
@@ -229,10 +229,10 @@ public class AzureVolumeResourceBuilderTest {
 
     @Test
     public void testWhenReattachableDoesNotExistsThenNewlyBuildedInstanceShouldBeCreated() {
-        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED)
-                .name(VOLUME_NAME).params(Map.of()).build();
-        CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
-                .name("instance").params(Map.of()).build();
+        CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.CREATED)
+                .withName(VOLUME_NAME).withParams(Map.of()).build();
+        CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
+                .withName("instance").withParams(Map.of()).build();
         when(context.getComputeResources(PRIVATE_ID)).thenReturn(List.of(volumeSetResource, newInstance));
 
         List<CloudResource> result = underTest.create(context, cloudInstance, PRIVATE_ID, auth, group, image);
@@ -244,13 +244,13 @@ public class AzureVolumeResourceBuilderTest {
 
     @Test
     public void deleteTestWhenDiskIsDeletedOnAzure() throws PreserveResourceException {
-        CloudResource mock = CloudResource.builder().type(ResourceType.AZURE_RESOURCE_GROUP).name("resource-group").build();
+        CloudResource mock = CloudResource.builder().withType(ResourceType.AZURE_RESOURCE_GROUP).withName("resource-group").build();
         when(context.getNetworkResources()).thenReturn(List.of(mock));
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
         volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, DEVICE, VOLUME_SIZE, "ssd", CloudVolumeUsageType.GENERAL));
-        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED)
-                .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, "", volumes, VOLUME_SIZE, "ssd")))
-                .name(VOLUME_NAME).build();
+        CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.CREATED)
+                .withParams(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, "", volumes, VOLUME_SIZE, "ssd")))
+                .withName(VOLUME_NAME).build();
         PagedList<Disk> pagedList = mock(PagedList.class);
         when(azureClient.listDisksByResourceGroup(eq("resource-group"))).thenReturn(pagedList);
 
@@ -261,15 +261,15 @@ public class AzureVolumeResourceBuilderTest {
 
     @Test
     public void deleteTestWhenDiskIsOnAzureAndNotAttached() throws PreserveResourceException {
-        CloudResource mock = CloudResource.builder().type(ResourceType.AZURE_RESOURCE_GROUP).name("resource-group").build();
+        CloudResource mock = CloudResource.builder().withType(ResourceType.AZURE_RESOURCE_GROUP).withName("resource-group").build();
         when(context.getNetworkResources()).thenReturn(List.of(mock));
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
         volumes.add(new VolumeSetAttributes.Volume("vol1", DEVICE, VOLUME_SIZE, "ssd", CloudVolumeUsageType.GENERAL));
-        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED)
-                .params(Map.of(
+        CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.CREATED)
+                .withParams(Map.of(
                         CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, "", volumes, VOLUME_SIZE, "ssd")
                 ))
-                .name(VOLUME_NAME).build();
+                .withName(VOLUME_NAME).build();
         List<Disk> diskList = new ArrayList<>();
         Disk disk1 = mock(Disk.class);
         when(disk1.id()).thenReturn("vol1");
@@ -298,16 +298,16 @@ public class AzureVolumeResourceBuilderTest {
 
     @Test
     public void deleteTestWhenDiskIsOnAzureAndAttached() throws PreserveResourceException {
-        CloudResource mock = CloudResource.builder().type(ResourceType.AZURE_RESOURCE_GROUP).name("resource-group").build();
+        CloudResource mock = CloudResource.builder().withType(ResourceType.AZURE_RESOURCE_GROUP).withName("resource-group").build();
         when(context.getNetworkResources()).thenReturn(List.of(mock));
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
         volumes.add(new VolumeSetAttributes.Volume("vol1", DEVICE, VOLUME_SIZE, "ssd", CloudVolumeUsageType.GENERAL));
-        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED)
-                .params(Map.of(
+        CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.CREATED)
+                .withParams(Map.of(
                         CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, "", volumes, VOLUME_SIZE, "ssd")
                 ))
-                .instanceId("instance1")
-                .name(VOLUME_NAME).build();
+                .withInstanceId("instance1")
+                .withName(VOLUME_NAME).build();
         List<Disk> diskList = new ArrayList<>();
         Disk disk1 = mock(Disk.class);
         when(disk1.id()).thenReturn("vol1");
@@ -354,9 +354,9 @@ public class AzureVolumeResourceBuilderTest {
     void buildTestWhenVolumeSetExistsAndCreated() throws Exception {
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
         volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, DEVICE, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
-        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.CREATED)
-                .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
-                .name(VOLUME_NAME).build();
+        CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.CREATED)
+                .withParams(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
+                .withName(VOLUME_NAME).build();
 
         List<CloudResource> result = underTest.build(context, cloudInstance, PRIVATE_ID, auth, group, List.of(volumeSetResource), cloudStack);
 
@@ -374,9 +374,9 @@ public class AzureVolumeResourceBuilderTest {
 
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
         volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, DEVICE, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
-        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.REQUESTED)
-                .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
-                .name(VOLUME_NAME).build();
+        CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.REQUESTED)
+                .withParams(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
+                .withName(VOLUME_NAME).build();
 
         when(azureClient.getDiskByName(RESOURCE_GROUP, VOLUME_ID)).thenReturn(disk);
 
@@ -396,9 +396,9 @@ public class AzureVolumeResourceBuilderTest {
 
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
         volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, DEVICE, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
-        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.REQUESTED)
-                .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
-                .name(VOLUME_NAME).build();
+        CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.REQUESTED)
+                .withParams(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
+                .withName(VOLUME_NAME).build();
 
         when(azureClient.createManagedDisk(VOLUME_ID, VOLUME_SIZE, AzureDiskType.STANDARD_SSD_LRS, REGION, RESOURCE_GROUP, Map.of(), null)).thenReturn(disk);
 
@@ -416,9 +416,9 @@ public class AzureVolumeResourceBuilderTest {
 
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
         volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, DEVICE, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
-        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.REQUESTED)
-                .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
-                .name(VOLUME_NAME).build();
+        CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.REQUESTED)
+                .withParams(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
+                .withName(VOLUME_NAME).build();
 
         when(instanceTemplate.getStringParameter(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).thenReturn(DISK_ENCRYPTION_SET_ID);
 
@@ -438,9 +438,9 @@ public class AzureVolumeResourceBuilderTest {
 
         ArrayList<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
         volumes.add(new VolumeSetAttributes.Volume(VOLUME_ID, DEVICE, VOLUME_SIZE, VOLUME_TYPE, CloudVolumeUsageType.GENERAL));
-        CloudResource volumeSetResource = CloudResource.builder().type(ResourceType.AZURE_VOLUMESET).status(CommonStatus.REQUESTED)
-                .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
-                .name(VOLUME_NAME).build();
+        CloudResource volumeSetResource = CloudResource.builder().withType(ResourceType.AZURE_VOLUMESET).withStatus(CommonStatus.REQUESTED)
+                .withParams(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, VOLUME_SIZE, VOLUME_TYPE)))
+                .withName(VOLUME_NAME).build();
 
         when(instanceTemplate.getParameter(AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED, Object.class)).thenReturn(true);
         when(instanceTemplate.getStringParameter(AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID)).thenReturn(DISK_ENCRYPTION_SET_ID);

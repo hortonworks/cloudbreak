@@ -49,10 +49,10 @@ public class ResourceServiceTest {
         List<Resource> resources = Collections.singletonList(resource);
 
         CloudResource cloudResource = CloudResource.builder()
-                .type(ResourceType.CLOUDFORMATION_STACK)
-                .status(CommonStatus.CREATED)
-                .name("name")
-                .params(Collections.emptyMap())
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
+                .withParams(Collections.emptyMap())
                 .build();
 
         Mockito.when(resourceRepository.findAllByStackId(1L)).thenReturn(resources);

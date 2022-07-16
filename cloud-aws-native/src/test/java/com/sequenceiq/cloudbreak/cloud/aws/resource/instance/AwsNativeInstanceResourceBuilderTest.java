@@ -111,20 +111,20 @@ public class AwsNativeInstanceResourceBuilderTest {
         InstanceAuthentication authentication = mock(InstanceAuthentication.class);
         Instance instance = new Instance().withInstanceId("instanceId");
         CloudResource cloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .group("groupName")
-                .params(emptyMap())
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("groupName")
+                .withParams(emptyMap())
                 .build();
 
         CloudResource securityGroupCloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_SECURITY_GROUP)
-                .status(CommonStatus.CREATED)
-                .reference("sg-id")
-                .group("groupName")
-                .params(emptyMap())
+                .withName("name")
+                .withType(ResourceType.AWS_SECURITY_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withReference("sg-id")
+                .withGroup("groupName")
+                .withParams(emptyMap())
                 .build();
 
         Image image = mock(Image.class);
@@ -154,10 +154,10 @@ public class AwsNativeInstanceResourceBuilderTest {
     @Test
     public void testBuildWhenInstanceExistAndRunning() throws Exception {
         CloudResource cloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .params(emptyMap())
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withParams(emptyMap())
                 .build();
         long privateId = 0;
         Instance instance = new Instance().withInstanceId("instanceId")
@@ -172,10 +172,10 @@ public class AwsNativeInstanceResourceBuilderTest {
     @Test
     public void testBuildWhenInstanceExistAndNotRunningButNotTerminated() throws Exception {
         CloudResource cloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .params(emptyMap())
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withParams(emptyMap())
                 .build();
         long privateId = 0;
         Instance instance = new Instance().withInstanceId("instanceId")
@@ -197,20 +197,20 @@ public class AwsNativeInstanceResourceBuilderTest {
                 .withState(new InstanceState().withCode(AwsNativeInstanceResourceBuilder.AWS_INSTANCE_TERMINATED_CODE));
         Instance instance = new Instance().withInstanceId("instanceId");
         CloudResource cloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .group("groupName")
-                .params(emptyMap())
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("groupName")
+                .withParams(emptyMap())
                 .build();
 
         CloudResource securityGroupCloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_SECURITY_GROUP)
-                .status(CommonStatus.CREATED)
-                .reference("sg-id")
-                .group("groupName")
-                .params(emptyMap())
+                .withName("name")
+                .withType(ResourceType.AWS_SECURITY_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withReference("sg-id")
+                .withGroup("groupName")
+                .withParams(emptyMap())
                 .build();
 
         Image image = mock(Image.class);
@@ -336,10 +336,10 @@ public class AwsNativeInstanceResourceBuilderTest {
     @Test
     public void testIsFinishedWhenTheInstanceIdIsEmptyOnTheResourceShouldReturnAsFinished() {
         CloudResource cloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .params(emptyMap())
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withParams(emptyMap())
                 .build();
 
         when(awsContext.isBuild()).thenReturn(false);
@@ -387,8 +387,8 @@ public class AwsNativeInstanceResourceBuilderTest {
     @Test
     public void testGetSecurityGroupIdWhenHasMoreThanOneSecurityGroupButNeedToSelectTheSecond() {
 
-        CloudResource secGroupResource1 = getSecurityGroupResourceBuilder().group("groupName1").reference("ref1").build();
-        CloudResource secGroupResource2 = getSecurityGroupResourceBuilder().group("groupName2").reference("ref2").build();
+        CloudResource secGroupResource1 = getSecurityGroupResourceBuilder().withGroup("groupName1").withReference("ref1").build();
+        CloudResource secGroupResource2 = getSecurityGroupResourceBuilder().withGroup("groupName2").withReference("ref2").build();
 
         when(group.getName()).thenReturn("groupName2");
         when(awsContext.getGroupResources("groupName2")).thenReturn(List.of(secGroupResource1, secGroupResource2));
@@ -398,21 +398,21 @@ public class AwsNativeInstanceResourceBuilderTest {
 
     private CloudResource.Builder getSecurityGroupResourceBuilder() {
         return CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_SECURITY_GROUP)
-                .status(CommonStatus.CREATED)
-                .reference("sg-id")
-                .group("groupName")
-                .params(emptyMap());
+                .withName("name")
+                .withType(ResourceType.AWS_SECURITY_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withReference("sg-id")
+                .withGroup("groupName")
+                .withParams(emptyMap());
     }
 
     private CloudResource createInstanceResource() {
         return CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .params(emptyMap())
-                .instanceId("i-aninstanceid")
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withParams(emptyMap())
+                .withInstanceId("i-aninstanceid")
                 .build();
     }
 }

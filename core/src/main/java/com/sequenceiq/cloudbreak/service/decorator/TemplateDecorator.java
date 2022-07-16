@@ -83,7 +83,7 @@ public class TemplateDecorator {
 
     private VolumeParameterConfig resolveVolumeParameterConfig(Template template, VolumeTemplate volumeTemplate,
             PlatformDisks platformDisks, CloudVmTypes vmTypesV2, String locationString) {
-        Platform platform = Platform.platform(template.cloudPlatform());
+        Platform platform = Platform.platform(template.getCloudPlatform());
         Map<String, VolumeParameterType> map = platformDisks.getDiskMappings().get(platform);
         VolumeParameterType volumeParameterType = map.get(volumeTemplate.getVolumeType());
 
@@ -100,8 +100,8 @@ public class TemplateDecorator {
 
     private void setRootVolumeSize(Template template) {
         if (template.getRootVolumeSize() == null) {
-            LOGGER.debug("No root volume size was set in the request. Getting default value for platform '{}'", template.cloudPlatform());
-            template.setRootVolumeSize(defaultRootVolumeSizeProvider.getForPlatform(template.cloudPlatform()));
+            LOGGER.debug("No root volume size was set in the request. Getting default value for platform '{}'", template.getCloudPlatform());
+            template.setRootVolumeSize(defaultRootVolumeSizeProvider.getForPlatform(template.getCloudPlatform()));
         }
     }
 }

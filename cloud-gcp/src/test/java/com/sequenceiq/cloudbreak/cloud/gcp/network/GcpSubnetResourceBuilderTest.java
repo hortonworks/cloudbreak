@@ -70,13 +70,13 @@ public class GcpSubnetResourceBuilderTest {
     @Test
     public void testDeleteWhenEverythingGoesFine() throws Exception {
         CloudResource resource = new CloudResource.Builder()
-                .type(ResourceType.GCP_NETWORK)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("super")
-                .instanceId("id-123")
-                .params(new HashMap<>())
-                .persistent(true)
+                .withType(ResourceType.GCP_NETWORK)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withInstanceId("id-123")
+                .withParams(new HashMap<>())
+                .withPersistent(true)
                 .build();
         GcpContext gcpContext = mock(GcpContext.class);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
@@ -109,13 +109,13 @@ public class GcpSubnetResourceBuilderTest {
     @Test
     public void testDeleteWhenExistingEverythingGoesFineShouldReturnNull() throws Exception {
         CloudResource resource = new CloudResource.Builder()
-                .type(ResourceType.GCP_NETWORK)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("super")
-                .instanceId("id-123")
-                .params(new HashMap<>())
-                .persistent(true)
+                .withType(ResourceType.GCP_NETWORK)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withInstanceId("id-123")
+                .withParams(new HashMap<>())
+                .withPersistent(true)
                 .build();
         GcpContext gcpContext = mock(GcpContext.class);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);

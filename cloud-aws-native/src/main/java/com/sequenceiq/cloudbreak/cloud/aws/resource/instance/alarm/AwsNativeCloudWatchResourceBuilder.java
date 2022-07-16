@@ -49,12 +49,12 @@ public class AwsNativeCloudWatchResourceBuilder extends AbstractAwsNativeCompute
         String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), auth.getCloudContext().getId(), group.getName(),
                 privateId);
         return singletonList(CloudResource.builder()
-                .group(group.getName())
-                .type(resourceType())
-                .status(CREATED)
-                .name(resourceName)
-                .instanceId(instanceResourceOpt.get().getInstanceId())
-                .persistent(true)
+                .withGroup(group.getName())
+                .withType(resourceType())
+                .withStatus(CREATED)
+                .withName(resourceName)
+                .withInstanceId(instanceResourceOpt.get().getInstanceId())
+                .withPersistent(true)
                 .build());
     }
 

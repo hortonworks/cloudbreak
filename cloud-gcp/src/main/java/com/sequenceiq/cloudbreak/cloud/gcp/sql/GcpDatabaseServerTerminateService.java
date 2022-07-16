@@ -48,9 +48,9 @@ public class GcpDatabaseServerTerminateService extends GcpDatabaseServerBaseServ
         String projectId = gcpStackUtil.getProjectId(ac.getCloudCredential());
         List<CloudResource> buildableResource = List.of(
                 new CloudResource.Builder()
-                .type(ResourceType.GCP_DATABASE)
-                .name(deploymentName)
-                .availabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
+                .withType(ResourceType.GCP_DATABASE)
+                .withName(deploymentName)
+                .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
                 .build());
 
         try {

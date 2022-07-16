@@ -84,7 +84,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         Template result = underTest.convert(source);
 
         assertThat(result.getStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
-        assertThat(result.cloudPlatform()).isEqualTo(source.getCloudPlatform().name());
+        assertThat(result.getCloudPlatform()).isEqualTo(source.getCloudPlatform().name());
         assertThat(result.getRootVolumeSize()).isEqualTo(source.getRootVolume().getSize());
         assertThat(result.getInstanceType()).isEqualTo(source.getInstanceType());
 
@@ -112,7 +112,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         Template result = underTest.convert(source);
 
         assertThat(result.getStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
-        assertThat(result.cloudPlatform()).isEqualTo(source.getCloudPlatform().name());
+        assertThat(result.getCloudPlatform()).isEqualTo(source.getCloudPlatform().name());
         assertThat(result.getInstanceType()).isEqualTo(source.getInstanceType());
 
         assertThat(result.getAttributes()).isNotNull();
@@ -142,7 +142,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
         Template result = underTest.convert(source);
 
         assertThat(result.getStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
-        assertThat(result.cloudPlatform()).isEqualTo(source.getCloudPlatform().name());
+        assertThat(result.getCloudPlatform()).isEqualTo(source.getCloudPlatform().name());
         assertThat(result.getInstanceType()).isEqualTo(source.getInstanceType());
 
         assertThat(result.getAttributes()).isNotNull();
@@ -193,7 +193,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
 
     private void assertGcpEncryptionConvertResult(InstanceTemplateV4Request source, Template result) {
         assertThat(result.getStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
-        assertThat(result.cloudPlatform()).isEqualTo(source.getCloudPlatform().name());
+        assertThat(result.getCloudPlatform()).isEqualTo(source.getCloudPlatform().name());
         assertThat(result.getRootVolumeSize()).isEqualTo(source.getRootVolume().getSize());
         assertThat(result.getInstanceType()).isEqualTo(source.getInstanceType());
 
@@ -248,7 +248,7 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
 
     private void assertAwsEncryptionConvertResult(InstanceTemplateV4Request source, Template result) {
         assertThat(result.getStatus()).isEqualTo(ResourceStatus.USER_MANAGED);
-        assertThat(result.cloudPlatform()).isEqualTo(source.getCloudPlatform().name());
+        assertThat(result.getCloudPlatform()).isEqualTo(source.getCloudPlatform().name());
         assertThat(result.getRootVolumeSize()).isEqualTo(source.getRootVolume().getSize());
         assertThat(result.getInstanceType()).isEqualTo(source.getInstanceType());
 

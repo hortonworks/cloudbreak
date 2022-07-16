@@ -115,10 +115,10 @@ public class AwsTerminateServiceTest {
         when(retryService.testWith2SecDelayMax5Times(any(Supplier.class))).thenReturn(Boolean.TRUE);
         when(retryService.testWith2SecDelayMax15Times(any())).thenReturn(true);
 
-        List<CloudResource> resources = List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
-                new Builder().name("snap-1234567812345678").type(ResourceType.AWS_SNAPSHOT).build(),
-                new Builder().name("vol-1234567812345678").type(ResourceType.AWS_ENCRYPTED_VOLUME).build(),
-                new Builder().name("cfn-12345678").type(ResourceType.CLOUDFORMATION_STACK).build());
+        List<CloudResource> resources = List.of(new Builder().withName("ami-87654321").withType(ResourceType.AWS_ENCRYPTED_AMI).build(),
+                new Builder().withName("snap-1234567812345678").withType(ResourceType.AWS_SNAPSHOT).build(),
+                new Builder().withName("vol-1234567812345678").withType(ResourceType.AWS_ENCRYPTED_VOLUME).build(),
+                new Builder().withName("cfn-12345678").withType(ResourceType.CLOUDFORMATION_STACK).build());
 
         underTest.terminate(authenticatedContext(), cloudStack, resources);
 
@@ -148,7 +148,7 @@ public class AwsTerminateServiceTest {
     @Test
     public void testTerminateWhenResourcesHasNoCf() {
         List<CloudResourceStatus> result = underTest
-                .terminate(authenticatedContext(), cloudStack, List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build()));
+                .terminate(authenticatedContext(), cloudStack, List.of(new Builder().withName("ami-87654321").withType(ResourceType.AWS_ENCRYPTED_AMI).build()));
         verify(awsResourceConnector, times(1)).check(any(), any());
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
         verify(cloudFormationRetryClient, never()).deleteStack(any());
@@ -158,8 +158,8 @@ public class AwsTerminateServiceTest {
 
     @Test
     public void testTerminateWhenResourcesHasNoCfButStackNotExist() {
-        CloudResource cf = new Builder().name("cfn-87654321").type(ResourceType.CLOUDFORMATION_STACK).build();
-        CloudResource lc = new Builder().name("lc-87654321").type(ResourceType.AWS_LAUNCHCONFIGURATION).build();
+        CloudResource cf = new Builder().withName("cfn-87654321").withType(ResourceType.CLOUDFORMATION_STACK).build();
+        CloudResource lc = new Builder().withName("lc-87654321").withType(ResourceType.AWS_LAUNCHCONFIGURATION).build();
         Group group = new Group("alma", InstanceGroupType.GATEWAY, List.of(), null, null, null, null,
                 "", 0, Optional.empty(), createGroupNetwork(), emptyMap());
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
@@ -171,7 +171,7 @@ public class AwsTerminateServiceTest {
         when(retryService.testWith2SecDelayMax15Times(any())).thenReturn(false);
 
         List<CloudResourceStatus> result = underTest.terminate(authenticatedContext(), cloudStack, List.of(
-                new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(), cf, lc
+                new Builder().withName("ami-87654321").withType(ResourceType.AWS_ENCRYPTED_AMI).build(), cf, lc
         ));
         verify(awsResourceConnector, times(1)).check(any(), any());
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
@@ -183,8 +183,8 @@ public class AwsTerminateServiceTest {
 
     @Test
     public void testTerminateWhenResourcesHasCf() {
-        CloudResource cf = new Builder().name("cfn-87654321").type(ResourceType.CLOUDFORMATION_STACK).build();
-        CloudResource lc = new Builder().name("lc-87654321").type(ResourceType.AWS_LAUNCHCONFIGURATION).build();
+        CloudResource cf = new Builder().withName("cfn-87654321").withType(ResourceType.CLOUDFORMATION_STACK).build();
+        CloudResource lc = new Builder().withName("lc-87654321").withType(ResourceType.AWS_LAUNCHCONFIGURATION).build();
         Group group = new Group("alma", InstanceGroupType.GATEWAY, List.of(), null, null, null, null,
                 "", 0, Optional.empty(), createGroupNetwork(), emptyMap());
         DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult = new DescribeAutoScalingGroupsResult();
@@ -201,7 +201,7 @@ public class AwsTerminateServiceTest {
         when(retryService.testWith2SecDelayMax15Times(any())).thenReturn(true);
 
         List<CloudResourceStatus> result = underTest.terminate(authenticatedContext(), cloudStack, List.of(
-                new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(), cf, lc
+                new Builder().withName("ami-87654321").withType(ResourceType.AWS_ENCRYPTED_AMI).build(), cf, lc
         ));
 
         verify(awsResourceConnector, times(1)).check(any(), any());

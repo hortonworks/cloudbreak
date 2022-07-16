@@ -122,12 +122,12 @@ public class AzureImageService {
 
     private CloudResource buildCloudResource(String name, String id, CommonStatus status) {
         return CloudResource.builder()
-                .name(name)
-                .status(status)
-                .persistent(true)
-                .reference(id)
-                .type(ResourceType.AZURE_MANAGED_IMAGE)
-                .stackAware(false)
+                .withName(name)
+                .withStatus(status)
+                .withPersistent(true)
+                .withReference(id)
+                .withType(ResourceType.AZURE_MANAGED_IMAGE)
+                .withStackAware(false)
                 .build();
     }
 

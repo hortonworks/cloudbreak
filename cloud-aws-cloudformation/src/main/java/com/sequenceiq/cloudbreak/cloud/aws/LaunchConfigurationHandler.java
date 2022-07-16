@@ -47,10 +47,10 @@ public class LaunchConfigurationHandler {
                 createLaunchConfigurationRequest.getLaunchConfigurationName(), imageName);
         autoScalingClient.createLaunchConfiguration(createLaunchConfigurationRequest);
         CloudResource cloudResource = CloudResource.builder()
-                .type(ResourceType.AWS_LAUNCHCONFIGURATION)
-                .params(Collections.emptyMap())
-                .name(createLaunchConfigurationRequest.getLaunchConfigurationName())
-                .availabilityZone(cloudContext.getLocation().getAvailabilityZone().value())
+                .withType(ResourceType.AWS_LAUNCHCONFIGURATION)
+                .withParams(Collections.emptyMap())
+                .withName(createLaunchConfigurationRequest.getLaunchConfigurationName())
+                .withAvailabilityZone(cloudContext.getLocation().getAvailabilityZone().value())
                 .build();
         resourceNotifier.notifyAllocation(cloudResource, cloudContext);
         return createLaunchConfigurationRequest.getLaunchConfigurationName();
@@ -70,9 +70,9 @@ public class LaunchConfigurationHandler {
         autoScalingClient.deleteLaunchConfiguration(
                 new DeleteLaunchConfigurationRequest().withLaunchConfigurationName(oldLaunchConfiguration.getLaunchConfigurationName()));
         CloudResource cloudResource = CloudResource.builder()
-                .name(oldLaunchConfiguration.getLaunchConfigurationName())
-                .availabilityZone(cloudContext.getLocation().getAvailabilityZone().value())
-                .type(ResourceType.AWS_LAUNCHCONFIGURATION)
+                .withName(oldLaunchConfiguration.getLaunchConfigurationName())
+                .withAvailabilityZone(cloudContext.getLocation().getAvailabilityZone().value())
+                .withType(ResourceType.AWS_LAUNCHCONFIGURATION)
                 .build();
         resourceNotifier.notifyDeletion(cloudResource, cloudContext);
     }

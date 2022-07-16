@@ -82,11 +82,11 @@ public class InstanceMetadataServiceComponentTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:freeipa:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, Map.of("worker", 42), Map.of(), false, false, null);
-        Map<String, List<InstanceMetaData>> groupBySub = workerInstanceGroup.getInstanceMetaDataSet().stream()
+        Map<String, List<InstanceMetaData>> groupBySub = workerInstanceGroup.getInstanceMetaData().stream()
                 .collect(Collectors.groupingBy(
                         InstanceMetaData::getSubnetId,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
-        Map<String, List<InstanceMetaData>> groupByAz = workerInstanceGroup.getInstanceMetaDataSet().stream()
+        Map<String, List<InstanceMetaData>> groupByAz = workerInstanceGroup.getInstanceMetaData().stream()
                 .collect(Collectors.groupingBy(
                         InstanceMetaData::getAvailabilityZone,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
@@ -131,11 +131,11 @@ public class InstanceMetadataServiceComponentTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, Map.of("worker", 42), Map.of(), false, false, networkScaleDetails);
 
-        Map<String, List<InstanceMetaData>> groupBySub = workerInstanceGroup.getInstanceMetaDataSet().stream()
+        Map<String, List<InstanceMetaData>> groupBySub = workerInstanceGroup.getInstanceMetaData().stream()
                 .collect(Collectors.groupingBy(
                         InstanceMetaData::getSubnetId,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
-        Map<String, List<InstanceMetaData>> groupByAz = workerInstanceGroup.getInstanceMetaDataSet().stream()
+        Map<String, List<InstanceMetaData>> groupByAz = workerInstanceGroup.getInstanceMetaData().stream()
                 .collect(Collectors.groupingBy(
                         InstanceMetaData::getAvailabilityZone,
                         Collectors.mapping(Function.identity(), Collectors.toList())));

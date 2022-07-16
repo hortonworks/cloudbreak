@@ -119,10 +119,10 @@ public class ClusterDownscaleServiceTest {
         StackDto stackDto = spy(StackDto.class);
         InstanceGroup instanceGroup = stack.getInstanceGroups().iterator().next();
         instanceGroup.setGroupName(HOST_GROUP_NAME);
-        instanceGroup.getInstanceMetaDataSet().iterator().next().setInstanceStatus(InstanceStatus.ZOMBIE);
+        instanceGroup.getInstanceMetaData().iterator().next().setInstanceStatus(InstanceStatus.ZOMBIE);
         when(stackDto.getStack()).thenReturn(stack);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        when(stackDto.getZombieInstanceMetaData()).thenReturn(new ArrayList<>(instanceGroup.getInstanceMetaDataSet()));
+        when(stackDto.getZombieInstanceMetaData()).thenReturn(new ArrayList<>(instanceGroup.getInstanceMetaData()));
 
         underTest.clusterDownscaleStarted(STACK_ID, new ClusterDownscaleTriggerEvent(null, STACK_ID, Set.of(HOST_GROUP_NAME), null, details));
 

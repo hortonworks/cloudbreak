@@ -122,21 +122,21 @@ public class GcpBackendServiceResourceBuilderTest {
         parameters.put("trafficport", 80);
 
         CloudResource hcResource = new CloudResource.Builder()
-                .type(ResourceType.GCP_HEALTH_CHECK)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("hcsuper")
-                .params(parameters)
-                .persistent(true)
+                .withType(ResourceType.GCP_HEALTH_CHECK)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("hcsuper")
+                .withParams(parameters)
+                .withPersistent(true)
                 .build();
 
         CloudResource resource = new CloudResource.Builder()
-                .type(ResourceType.GCP_BACKEND_SERVICE)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("super")
-                .params(parameters)
-                .persistent(true)
+                .withType(ResourceType.GCP_BACKEND_SERVICE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withParams(parameters)
+                .withPersistent(true)
                 .build();
 
         when(group.getName()).thenReturn("master");
@@ -180,21 +180,21 @@ public class GcpBackendServiceResourceBuilderTest {
         parameters.put("trafficports", List.of(443, 11443));
 
         CloudResource hcResource = new CloudResource.Builder()
-                .type(ResourceType.GCP_HEALTH_CHECK)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("hcsuper")
-                .params(parameters)
-                .persistent(true)
+                .withType(ResourceType.GCP_HEALTH_CHECK)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("hcsuper")
+                .withParams(parameters)
+                .withPersistent(true)
                 .build();
 
         CloudResource resource = new CloudResource.Builder()
-                .type(ResourceType.GCP_BACKEND_SERVICE)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("super")
-                .params(parameters)
-                .persistent(true)
+                .withType(ResourceType.GCP_BACKEND_SERVICE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withParams(parameters)
+                .withPersistent(true)
                 .build();
 
         when(group.getName()).thenReturn("master");
@@ -241,12 +241,12 @@ public class GcpBackendServiceResourceBuilderTest {
         parameters.put("trafficport", 80);
 
         CloudResource resource = new CloudResource.Builder()
-                .type(ResourceType.GCP_BACKEND_SERVICE)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("super")
-                .params(parameters)
-                .persistent(true)
+                .withType(ResourceType.GCP_BACKEND_SERVICE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withParams(parameters)
+                .withPersistent(true)
                 .build();
 
         Compute.RegionBackendServices.Delete delete = mock(Compute.RegionBackendServices.Delete.class);

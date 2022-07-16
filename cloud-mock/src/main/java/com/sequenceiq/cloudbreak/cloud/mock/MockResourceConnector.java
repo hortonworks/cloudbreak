@@ -91,16 +91,16 @@ public class MockResourceConnector implements ResourceConnector<Object> {
             PersistenceNotifier persistenceNotifier) {
         List<CloudResource> cloudResources = List.of(
                 new Builder()
-                        .type(ResourceType.RDS_HOSTNAME)
-                        .status(CommonStatus.CREATED)
-                        .name(MOCK_RDS_HOST)
-                        .persistent(true)
+                        .withType(ResourceType.RDS_HOSTNAME)
+                        .withStatus(CommonStatus.CREATED)
+                        .withName(MOCK_RDS_HOST)
+                        .withPersistent(true)
                         .build(),
                 new Builder()
-                        .type(ResourceType.RDS_PORT)
-                        .status(CommonStatus.CREATED)
-                        .name(MOCK_RDS_PORT)
-                        .persistent(true)
+                        .withType(ResourceType.RDS_PORT)
+                        .withStatus(CommonStatus.CREATED)
+                        .withName(MOCK_RDS_PORT)
+                        .withPersistent(true)
                         .build()
         );
         persistenceNotifier.notifyAllocations(cloudResources, authenticatedContext.getCloudContext());
@@ -203,13 +203,13 @@ public class MockResourceConnector implements ResourceConnector<Object> {
 
     private CloudResource generateResource(String name, CloudInstance cloudInstance, String instanceId, ResourceType type) {
         CloudResource resource = new Builder()
-                .type(type)
-                .status(CommonStatus.CREATED)
-                .group(cloudInstance.getTemplate().getGroupName())
-                .name(name)
-                .instanceId(instanceId)
-                .params(cloudInstance.getParameters())
-                .persistent(true)
+                .withType(type)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup(cloudInstance.getTemplate().getGroupName())
+                .withName(name)
+                .withInstanceId(instanceId)
+                .withParams(cloudInstance.getParameters())
+                .withPersistent(true)
                 .build();
         return resource;
     }

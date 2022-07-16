@@ -353,8 +353,8 @@ class CloudFailureHandlerTest {
     }
 
     private CloudResource newResource(String s, ResourceType awsVolumeset, CommonStatus created) {
-        return CloudResource.builder().name(s).type(awsVolumeset).status(created)
-                .params(new HashMap<>()).build();
+        return CloudResource.builder().withName(s).withType(awsVolumeset).withStatus(created)
+                .withParams(new HashMap<>()).build();
     }
 
 }

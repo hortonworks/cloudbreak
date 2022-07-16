@@ -2,11 +2,15 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class GroupSubnet {
 
     private final String subnetId;
 
-    public GroupSubnet(String subnetId) {
+    @JsonCreator
+    public GroupSubnet(@JsonProperty("subnetId") String subnetId) {
         this.subnetId = subnetId;
     }
 

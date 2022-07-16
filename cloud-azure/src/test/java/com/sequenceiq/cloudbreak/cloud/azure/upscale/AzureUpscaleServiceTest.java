@@ -123,8 +123,8 @@ public class AzureUpscaleServiceTest {
         when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
                 .thenReturn(templateDeployment);
         when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
-        CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
-                .name("instance").params(Map.of()).build();
+        CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
+                .withName("instance").withParams(Map.of()).build();
         List<CloudResource> newInstances = List.of(newInstance);
         when(azureCloudResourceService.getDeploymentCloudResources(templateDeployment)).thenReturn(newInstances);
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
@@ -202,8 +202,8 @@ public class AzureUpscaleServiceTest {
         when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
                 .thenReturn(templateDeployment);
         when(templateDeployment.exportTemplate()).thenReturn(mock(DeploymentExportResult.class));
-        CloudResource newInstance = CloudResource.builder().instanceId("instanceid").type(ResourceType.AZURE_INSTANCE).status(CommonStatus.CREATED)
-                .name("instance").params(Map.of()).build();
+        CloudResource newInstance = CloudResource.builder().withInstanceId("instanceid").withType(ResourceType.AZURE_INSTANCE).withStatus(CommonStatus.CREATED)
+                .withName("instance").withParams(Map.of()).build();
         List<CloudResource> newInstances = List.of(newInstance);
         when(azureCloudResourceService.getDeploymentCloudResources(templateDeployment)).thenReturn(newInstances);
         when(azureCloudResourceService.getInstanceCloudResources(STACK_NAME, newInstances, scaledGroups, RESOURCE_GROUP)).thenReturn(newInstances);
@@ -263,11 +263,11 @@ public class AzureUpscaleServiceTest {
 
     private CloudResource createCloudResource(String name, ResourceType resourceType, CommonStatus status, String instanceId) {
         return new CloudResource.Builder()
-                .name(name)
-                .status(status)
-                .type(resourceType)
-                .instanceId(instanceId)
-                .params(PARAMETERS)
+                .withName(name)
+                .withStatus(status)
+                .withType(resourceType)
+                .withInstanceId(instanceId)
+                .withParams(PARAMETERS)
                 .build();
     }
 }

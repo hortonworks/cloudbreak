@@ -66,7 +66,7 @@ public class YarnLoadBalancerLaunchService {
         }
 
         // Create an object for the new loadbalancer application and persist it in the resources table.
-        CloudResource loadBalancerApplication = new Builder().type(YARN_LOAD_BALANCER).name(applicationName).build();
+        CloudResource loadBalancerApplication = new Builder().withType(YARN_LOAD_BALANCER).withName(applicationName).build();
         LOGGER.debug("Persisting the new Yarn load balancer resource in the resources table.");
         persistenceNotifier.notifyAllocation(loadBalancerApplication, authenticatedContext.getCloudContext());
         return loadBalancerApplication;

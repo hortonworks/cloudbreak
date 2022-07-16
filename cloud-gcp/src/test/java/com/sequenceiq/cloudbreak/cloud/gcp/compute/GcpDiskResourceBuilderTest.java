@@ -136,7 +136,7 @@ class GcpDiskResourceBuilderTest {
         String projectId = "projectId";
         String serviceAccountId = "serviceAccountId";
         context = new GcpContext(cloudContext.getName(), location, projectId, serviceAccountId, compute, false, 30, false);
-        List<CloudResource> networkResources = Collections.singletonList(new Builder().type(ResourceType.GCP_NETWORK).name("network-test").build());
+        List<CloudResource> networkResources = Collections.singletonList(new Builder().withType(ResourceType.GCP_NETWORK).withName("network-test").build());
         context.addNetworkResources(networkResources);
 
         privateId = 1L;
@@ -166,10 +166,10 @@ class GcpDiskResourceBuilderTest {
         group = createGroup(50);
 
         buildableResource = List.of(CloudResource.builder()
-                .type(ResourceType.GCP_DISK)
-                .status(CommonStatus.REQUESTED)
-                .name("disk")
-                .params(Map.of())
+                .withType(ResourceType.GCP_DISK)
+                .withStatus(CommonStatus.REQUESTED)
+                .withName("disk")
+                .withParams(Map.of())
                 .build());
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");

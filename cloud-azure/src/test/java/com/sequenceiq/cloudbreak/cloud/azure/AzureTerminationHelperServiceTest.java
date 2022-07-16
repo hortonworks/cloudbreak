@@ -169,11 +169,11 @@ class AzureTerminationHelperServiceTest {
 
     private CloudResource createCloudResource(ResourceType resourceType, String name, String reference) {
         return CloudResource.builder()
-                .type(resourceType)
-                .status(CommonStatus.CREATED)
-                .name(name)
-                .reference(reference)
-                .params(Map.of())
+                .withType(resourceType)
+                .withStatus(CommonStatus.CREATED)
+                .withName(name)
+                .withReference(reference)
+                .withParams(Map.of())
                 .build();
     }
 

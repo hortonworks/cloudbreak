@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,7 +22,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -35,6 +35,8 @@ import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 
 public class FlowPayloadSerializabilityChecker {
 
+    private static final String BASE_PACKAGE = "com.sequenceiq.";
+
     private final Set<Class<?>> checked = new HashSet<>();
 
     private final List<String> validationErrors = new ArrayList<>();
@@ -42,15 +44,20 @@ public class FlowPayloadSerializabilityChecker {
     private final Deque<String> parentClasses = new ArrayDeque<>();
 
     public void checkAcceptableClasses() {
-        Reflections reflections = new Reflections("com.sequenceiq", new SubTypesScanner(true));
-        Set<Class<? extends Acceptable>> eventClasses = reflections.getSubTypesOf(Acceptable.class);
-        eventClasses.stream()
-                .filter(c -> !c.isInterface() && !isAbstract(c) && !c.isAnonymousClass() && !c.isLocalClass() && !c.isMemberClass())
-                .filter(c -> !c.getName().endsWith("Test") && !c.getName().endsWith("Builder"))
-                .forEach(this::performChecksCache);
+        Reflections reflections = new Reflections(BASE_PACKAGE, new SubTypesScanner(true));
+        Set<Class<? extends Acceptable>> acceptableClasses = reflections.getSubTypesOf(Acceptable.class);
+        Set<Class<?>> filteredAcceptables = getClassesToCheck(acceptableClasses);
+        filteredAcceptables.forEach(this::performChecksCache);
         if (!validationErrors.isEmpty()) {
             fail("There are " + validationErrors.size() + " violations:\n" + String.join("\n", validationErrors));
         }
+    }
+
+    private <T> Set<Class<?>> getClassesToCheck(Set<Class<? extends T>> eventClasses) {
+        return eventClasses.stream()
+                .filter(c -> !c.isInterface() && !isAbstract(c) && !c.isAnonymousClass() && !c.isLocalClass() && !c.isMemberClass())
+                .filter(c -> !c.getName().endsWith("Test") && !c.getName().endsWith("Builder"))
+                .collect(Collectors.toSet());
     }
 
     private void performChecksCache(Class<?> clazz) {
@@ -68,40 +75,39 @@ public class FlowPayloadSerializabilityChecker {
         checkSoloBuilder(clazz, constructors);
         boolean hasDefaultConstructor = hasDefaultConstructor(constructors);
         if (hasDefaultConstructor) {
-            checkPrivateFieldsRecursive(clazz);
+            checkPrivateFields(clazz);
         }
         if (!hasDeserializeAttributeWithBuilder && !hasDefaultConstructor) {
             checkJacksonCreatorAnnotation(clazz, constructors);
         }
-        checkParametersRecursive(constructors);
+        checkParameters(clazz, constructors);
     }
 
-    private void checkPrivateFieldsRecursive(Class<?> clazz) {
+    private void checkPrivateFields(Class<?> clazz) {
         for (Field f : clazz.getDeclaredFields()) {
-            if (!Modifier.isFinal(f.getModifiers()) &&
-                    f.getType().getPackageName().startsWith("com.sequenceiq.") &&
-                    !f.getType().isEnum() && !f.getType().isInterface() &&
-                    !ClassUtils.isPrimitiveOrWrapper(f.getType())) {
-                parentClasses.add(clazz.getName());
-                performChecksCache(f.getType());
+            if (!Modifier.isFinal(f.getModifiers())) {
+                checkClassRecursive(clazz, f.getGenericType());
+            }
+        }
+    }
+
+    private void checkParameters(Class<?> clazz, Constructor<?>[] constructors) {
+        Set<Type> paramTypes = getAllConstructorParams(constructors);
+        for (Type paramType : paramTypes) {
+            checkClassRecursive(clazz, paramType);
+        }
+    }
+
+    private void checkClassRecursive(Class<?> ownerClass, Type paramType) {
+        Set<Class<?>> paramClasses = GenericParameterTypeParser.parse(BASE_PACKAGE, paramType);
+        paramClasses.forEach(paramClass -> {
+            if (paramClass.getPackageName().startsWith(BASE_PACKAGE) &&
+                    !paramClass.isEnum() && !paramClass.isInterface() && !paramClass.getName().endsWith("Builder")) {
+                parentClasses.add(ownerClass.getName());
+                performChecksCache(paramClass);
                 parentClasses.removeLast();
             }
-        }
-    }
-
-    private void checkParametersRecursive(Constructor<?>[] constructors) {
-        Optional<Constructor<?>> maxParamCtor = getConstructorWithMaximalPositiveParameterCount(constructors);
-        if (maxParamCtor.isPresent()) {
-            for (Class<?> paramType : maxParamCtor.get().getParameterTypes()) {
-                if (paramType.getPackageName().startsWith("com.sequenceiq.") &&
-                        !paramType.isEnum() &&
-                        !ClassUtils.isPrimitiveOrWrapper(paramType)) {
-                    parentClasses.add(maxParamCtor.get().getDeclaringClass().getName());
-                    performChecksCache(paramType);
-                    parentClasses.removeLast();
-                }
-            }
-        }
+        });
     }
 
     private boolean checkJacksonDeserializeAnnotationForBuilder(Class<?> clazz) {
@@ -111,13 +117,13 @@ public class FlowPayloadSerializabilityChecker {
             Optional<Class<?>> builderClassOpt = getBuilderClass(clazz);
             if (builderClassOpt.isEmpty()) {
                 validationErrors.add(decorateWitParentClasses(String.format(
-                        "Class %s has @JsonDeserialize attribute with Builder %s but it does not have a nested builder class",
+                        "Class %s has @JsonDeserialize attribute with Builder %s but it does not have a nested builder class.",
                         clazz.getName(), deserializerClass.getName())));
                 return false;
             }
             if (!builderClassOpt.get().equals(deserializerClass)) {
                 validationErrors.add(decorateWitParentClasses(String.format(
-                        "Class %s has @JsonDeserialize attribute with Builder %s but it does not match the nested builder class %s",
+                        "Class %s has @JsonDeserialize attribute with Builder %s but it does not match the nested builder class %s.",
                         clazz.getName(), deserializerClass.getName(), builderClassOpt.get().getName())));
                 return false;
             }
@@ -130,10 +136,10 @@ public class FlowPayloadSerializabilityChecker {
     private void checkJacksonCreatorAnnotation(Class<?> clazz, Constructor<?>[] constructors) {
         Set<Constructor<?>> creators = Arrays.stream(constructors).filter(c -> c.getAnnotation(JsonCreator.class) != null).collect(Collectors.toSet());
         if (creators.isEmpty()) {
-            validationErrors.add(decorateWitParentClasses(String.format("Class %s has no constructor with @JsonCreator attribute", clazz.getName())));
+            validationErrors.add(decorateWitParentClasses(String.format("Class %s has no constructor with @JsonCreator attribute.", clazz.getName())));
         } else if (creators.size() > 1) {
             validationErrors.add(decorateWitParentClasses(
-                    String.format("Class %s has more than 1 constructors with @JsonCreator attribute, ambiguity", clazz.getName())));
+                    String.format("Class %s has more than 1 constructors with @JsonCreator attribute, ambiguity.", clazz.getName())));
         } else {
             Constructor<?> creator = creators.iterator().next();
             checkCreator(clazz, creator);
@@ -168,7 +174,7 @@ public class FlowPayloadSerializabilityChecker {
         if (!missingJsonPropertyParams.isEmpty()) {
             validationErrors.add(decorateWitParentClasses(String.format(
                     "Class %s has a @JsonCreator constructor with parameters [%s] missing the @JsonProperty annotation.",
-                            clazz.getName(), String.join(",", missingJsonPropertyParams))));
+                    clazz.getName(), String.join(",", missingJsonPropertyParams))));
         }
         if (uniqueNamesCheck.size() != jsonPropertyCount) {
             validationErrors.add(decorateWitParentClasses(String.format("Class %s has a @JsonCreator constructor with duplicate @JsonProperty values [%s].",
@@ -176,8 +182,8 @@ public class FlowPayloadSerializabilityChecker {
         }
         if (!missingGetters.isEmpty()) {
             validationErrors.add(decorateWitParentClasses(String.format(
-                            "Class %s has a @JsonCreator constructor with @JsonProperty but no matching getters for values [%s].",
-                            clazz.getName(), String.join(",", missingGetters))));
+                    "Class %s has a @JsonCreator constructor with @JsonProperty but no matching getters for values [%s].",
+                    clazz.getName(), String.join(",", missingGetters))));
         }
     }
 
@@ -231,20 +237,16 @@ public class FlowPayloadSerializabilityChecker {
                 constructors[0].getParameterTypes()[0].equals(getBuilderClass(clazz).get())) {
 
             validationErrors.add(decorateWitParentClasses(String.format(
-                    "Class %s has only a constructor for its builder thus it cannot be deserialized without proper annotation", clazz.getName())));
+                    "Class %s has only a constructor for its builder thus it cannot be deserialized without proper annotation.", clazz.getName())));
         }
     }
 
-    private Optional<Constructor<?>> getConstructorWithMaximalPositiveParameterCount(Constructor<?>[] constructors) {
-        int maxParam = 0;
-        Constructor<?> maxParamCtor = null;
+    private Set<Type> getAllConstructorParams(Constructor<?>[] constructors) {
+        Set<Type> paramTypes = new HashSet<>();
         for (Constructor<?> c : constructors) {
-            if (c.getParameterCount() > maxParam) {
-                maxParam = c.getParameterCount();
-                maxParamCtor = c;
-            }
+            paramTypes.addAll(Arrays.stream(c.getGenericParameterTypes()).collect(Collectors.toSet()));
         }
-        return Optional.ofNullable(maxParamCtor);
+        return paramTypes;
     }
 
     private Optional<Class<?>> getBuilderClass(Class<?> clazz) {

@@ -91,9 +91,9 @@ class AwsDownscaleServiceTest {
     @Test
     void downscaleASG() {
         CloudStack stack = mock(CloudStack.class);
-        List<CloudResource> resources = List.of(new CloudResource.Builder().name("i-1").type(ResourceType.AWS_INSTANCE).build(),
-                new CloudResource.Builder().name("i-2").type(ResourceType.AWS_INSTANCE).build(),
-                new CloudResource.Builder().name("i-3").type(ResourceType.AWS_INSTANCE).build());
+        List<CloudResource> resources = List.of(new CloudResource.Builder().withName("i-1").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-2").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-3").withType(ResourceType.AWS_INSTANCE).build());
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<CloudInstance> cloudInstances = new ArrayList<>();
         InstanceTemplate workerTemplate = mock(InstanceTemplate.class);
@@ -159,9 +159,9 @@ class AwsDownscaleServiceTest {
     @Test
     void downscaleASGWhenAllInstancesHaveBeenRemovedFromASG() {
         CloudStack stack = mock(CloudStack.class);
-        List<CloudResource> resources = List.of(new CloudResource.Builder().name("i-1").type(ResourceType.AWS_INSTANCE).build(),
-                new CloudResource.Builder().name("i-2").type(ResourceType.AWS_INSTANCE).build(),
-                new CloudResource.Builder().name("i-3").type(ResourceType.AWS_INSTANCE).build());
+        List<CloudResource> resources = List.of(new CloudResource.Builder().withName("i-1").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-2").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-3").withType(ResourceType.AWS_INSTANCE).build());
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<CloudInstance> cloudInstances = new ArrayList<>();
         InstanceTemplate workerTemplate = mock(InstanceTemplate.class);
@@ -219,7 +219,7 @@ class AwsDownscaleServiceTest {
         //amazonASClient.updateAutoScalingGroup(...);
 
         CloudStack stack = mock(CloudStack.class);
-        List<CloudResource> resources = List.of(new CloudResource.Builder().name("i-1").type(ResourceType.AWS_INSTANCE).build());
+        List<CloudResource> resources = List.of(new CloudResource.Builder().withName("i-1").withType(ResourceType.AWS_INSTANCE).build());
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<CloudInstance> cloudInstances = new ArrayList<>();
         InstanceTemplate workerTemplate = mock(InstanceTemplate.class);
@@ -320,10 +320,10 @@ class AwsDownscaleServiceTest {
     @Test
     public void downscaleButInstanceNotFoundOnAWS() {
         CloudStack stack = mock(CloudStack.class);
-        List<CloudResource> resources = List.of(new CloudResource.Builder().name("i-1").type(ResourceType.AWS_INSTANCE).build(),
-                new CloudResource.Builder().name("i-2").type(ResourceType.AWS_INSTANCE).build(),
-                new CloudResource.Builder().name("i-3").type(ResourceType.AWS_INSTANCE).build(),
-                new CloudResource.Builder().name("i-4").type(ResourceType.AWS_INSTANCE).build());
+        List<CloudResource> resources = List.of(new CloudResource.Builder().withName("i-1").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-2").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-3").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-4").withType(ResourceType.AWS_INSTANCE).build());
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<CloudInstance> cloudInstances = new ArrayList<>();
         InstanceTemplate workerTemplate = mock(InstanceTemplate.class);
@@ -419,10 +419,10 @@ class AwsDownscaleServiceTest {
     @Test
     public void downscaleNoWaiterIfNoInstanceLeftOnAWS() {
         CloudStack stack = mock(CloudStack.class);
-        List<CloudResource> resources = List.of(new CloudResource.Builder().name("i-1").type(ResourceType.AWS_INSTANCE).build(),
-                new CloudResource.Builder().name("i-2").type(ResourceType.AWS_INSTANCE).build(),
-                new CloudResource.Builder().name("i-3").type(ResourceType.AWS_INSTANCE).build(),
-                new CloudResource.Builder().name("i-4").type(ResourceType.AWS_INSTANCE).build());
+        List<CloudResource> resources = List.of(new CloudResource.Builder().withName("i-1").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-2").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-3").withType(ResourceType.AWS_INSTANCE).build(),
+                new CloudResource.Builder().withName("i-4").withType(ResourceType.AWS_INSTANCE).build());
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         List<CloudInstance> cloudInstances = new ArrayList<>();
         InstanceTemplate workerTemplate = mock(InstanceTemplate.class);

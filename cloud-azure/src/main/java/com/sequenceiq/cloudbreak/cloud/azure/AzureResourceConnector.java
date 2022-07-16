@@ -165,8 +165,8 @@ public class AzureResourceConnector extends AbstractResourceConnector {
         }
 
         CloudResource cloudResource = new Builder()
-                .type(ResourceType.ARM_TEMPLATE)
-                .name(resourceGroupName)
+                .withType(ResourceType.ARM_TEMPLATE)
+                .withName(resourceGroupName)
                 .build();
         List<CloudResourceStatus> resources = check(ac, Collections.singletonList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);

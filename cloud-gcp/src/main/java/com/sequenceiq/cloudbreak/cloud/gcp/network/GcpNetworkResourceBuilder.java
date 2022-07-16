@@ -58,7 +58,7 @@ public class GcpNetworkResourceBuilder extends AbstractGcpNetworkBuilder {
             }
         }
         context.putParameter(NETWORK_NAME, resource.getName());
-        return new Builder().cloudResource(resource).persistent(false).build();
+        return new Builder().cloudResource(resource).withPersistent(false).build();
     }
 
     @Override

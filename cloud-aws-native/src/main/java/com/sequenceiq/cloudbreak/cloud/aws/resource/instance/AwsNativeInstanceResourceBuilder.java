@@ -84,13 +84,13 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         CloudContext cloudContext = auth.getCloudContext();
         String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getName(), group.getName(), cloudContext.getId(), privateId);
         return singletonList(CloudResource.builder()
-                .group(group.getName())
-                .type(resourceType())
-                .status(CommonStatus.CREATED)
-                .availabilityZone(instance.getAvailabilityZone())
-                .name(resourceName)
-                .persistent(true)
-                .reference(String.valueOf(privateId))
+                .withGroup(group.getName())
+                .withType(resourceType())
+                .withStatus(CommonStatus.CREATED)
+                .withAvailabilityZone(instance.getAvailabilityZone())
+                .withName(resourceName)
+                .withPersistent(true)
+                .withReference(String.valueOf(privateId))
                 .build());
     }
 

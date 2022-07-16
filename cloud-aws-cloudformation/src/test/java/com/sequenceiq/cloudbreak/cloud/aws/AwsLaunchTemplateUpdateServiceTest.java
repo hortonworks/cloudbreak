@@ -121,8 +121,8 @@ public class AwsLaunchTemplateUpdateServiceTest {
         // GIVEN
         String cfStackName = "cf";
         CloudResource cfResource = CloudResource.builder()
-                .type(ResourceType.CLOUDFORMATION_STACK)
-                .name(cfStackName)
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withName(cfStackName)
                 .build();
 
         String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");
@@ -150,8 +150,8 @@ public class AwsLaunchTemplateUpdateServiceTest {
         // GIVEN
         String cfStackName = "cf";
         CloudResource cfResource = CloudResource.builder()
-                .type(ResourceType.CLOUDFORMATION_STACK)
-                .name(cfStackName)
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withName(cfStackName)
                 .build();
 
         String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");
@@ -180,8 +180,8 @@ public class AwsLaunchTemplateUpdateServiceTest {
         // GIVEN
         String cfStackName = "cf";
         CloudResource cfResource = CloudResource.builder()
-                .type(ResourceType.CLOUDFORMATION_STACK)
-                .name(cfStackName)
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withName(cfStackName)
                 .build();
 
         String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");
@@ -210,8 +210,8 @@ public class AwsLaunchTemplateUpdateServiceTest {
         // GIVEN
         String cfStackName = "cf";
         CloudResource cfResource = CloudResource.builder()
-                .type(ResourceType.CLOUDFORMATION_STACK)
-                .name(cfStackName)
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withName(cfStackName)
                 .build();
 
         String template = FileReaderUtils.readFileFromClasspath("json/aws-cf-template.json");

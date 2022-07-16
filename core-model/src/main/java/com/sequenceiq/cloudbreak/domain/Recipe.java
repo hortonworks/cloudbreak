@@ -127,6 +127,14 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
         return content.getSecret();
     }
 
+    public boolean isArchived() {
+        return archived;
+    }
+
+    public Long getDeletionTimestamp() {
+        return deletionTimestamp;
+    }
+
     public void setContent(String content) {
         this.content = new Secret(content);
     }

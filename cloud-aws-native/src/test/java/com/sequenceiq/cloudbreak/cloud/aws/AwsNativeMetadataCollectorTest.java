@@ -442,10 +442,10 @@ class AwsNativeMetadataCollectorTest {
 
     private CloudResource getCloudResource(String reference, String name, String instanceId, ResourceType resourceType) {
         return new CloudResource.Builder()
-                .type(resourceType)
-                .reference(reference)
-                .name(name)
-                .instanceId(instanceId)
+                .withType(resourceType)
+                .withReference(reference)
+                .withName(name)
+                .withInstanceId(instanceId)
                 .build();
     }
 

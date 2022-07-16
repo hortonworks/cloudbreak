@@ -101,7 +101,7 @@ public class InstanceMetaDataToCloudInstanceConverter {
         Map<String, Object> cloudInstanceParameters = stackToCloudStackConverter.buildCloudInstanceParameters(
                 environment,
                 metaDataEntity,
-                CloudPlatform.valueOf(template.cloudPlatform()));
+                CloudPlatform.valueOf(template.getCloudPlatform()));
         params.putAll(cloudInstanceParameters);
 
         return new CloudInstance(

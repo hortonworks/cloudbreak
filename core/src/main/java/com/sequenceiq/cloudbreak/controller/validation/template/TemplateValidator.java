@@ -90,7 +90,7 @@ public class TemplateValidator {
             validateCustomInstanceType(value, validationBuilder);
         } else {
             VmType vmType = null;
-            Platform platform = Platform.platform(value.cloudPlatform());
+            Platform platform = Platform.platform(value.getCloudPlatform());
             Map<String, Set<VmType>> machines = cloudVmTypes.getCloudVmResponses();
             String locationString = locationService.location(stack.getRegion(), stack.getAvailabilityZone());
             if (machines.containsKey(locationString) && !machines.get(locationString).isEmpty()) {
@@ -130,7 +130,7 @@ public class TemplateValidator {
 
     private void validateCustomInstanceType(Template template, ValidationResult.ValidationResultBuilder validationBuilder) {
         Map<String, Object> params = template.getAttributes().getMap();
-        Platform platform = Platform.platform(template.cloudPlatform());
+        Platform platform = Platform.platform(template.getCloudPlatform());
         PlatformParameters pps = platformParameters.get().get(platform);
         if (pps != null) {
             Boolean customInstanceType = pps.specialParameters().getSpecialParameters().get(PlatformParametersConsts.CUSTOM_INSTANCETYPE);
@@ -138,10 +138,10 @@ public class TemplateValidator {
                 if (params.get(PlatformParametersConsts.CUSTOM_INSTANCETYPE_CPUS) == null
                         || params.get(PlatformParametersConsts.CUSTOM_INSTANCETYPE_MEMORY) == null) {
                     validationBuilder.error(String.format("Missing 'cpus' or 'memory' param for custom instancetype on %s platform",
-                            template.cloudPlatform()));
+                            template.getCloudPlatform()));
                 }
             } else {
-                validationBuilder.error(String.format("Custom instancetype is not supported on %s platform", template.cloudPlatform()));
+                validationBuilder.error(String.format("Custom instancetype is not supported on %s platform", template.getCloudPlatform()));
             }
         }
     }
@@ -163,7 +163,7 @@ public class TemplateValidator {
                 if (Integer.parseInt(maxSize.toString()) < fullSize) {
                     validationBuilder.error(
                             String.format("The %s platform does not support %s Gb full volume size. The maximum size of disks could be %s Gb.",
-                                    value.cloudPlatform(), fullSize, maxSize));
+                                    value.getCloudPlatform(), fullSize, maxSize));
                 }
             }
         }

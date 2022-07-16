@@ -104,7 +104,7 @@ public class ClusterBootstrapperErrorHandlerTest {
                     for (InstanceMetaData instanceMetaData : stack.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
                         if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
                             InstanceGroup instanceGroup = instanceMetaData.getInstanceGroup();
-                            instanceGroup.getInstanceMetaDataSet().forEach(im -> im.setInstanceStatus(InstanceStatus.TERMINATED));
+                            instanceGroup.getInstanceMetaData().forEach(im -> im.setInstanceStatus(InstanceStatus.TERMINATED));
                             return Optional.of(instanceGroup);
                         }
                     }

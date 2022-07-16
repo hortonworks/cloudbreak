@@ -104,9 +104,9 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         AwsLoadBalancer loadBalancer = mock(AwsLoadBalancer.class);
 
         CloudResource loadBalancerResource = CloudResource.builder()
-                .name("aLoadBalancerName")
-                .reference("aLoadBalancerArn")
-                .type(ResourceType.ELASTIC_LOAD_BALANCER)
+                .withName("aLoadBalancerName")
+                .withReference("aLoadBalancerArn")
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER)
                 .build();
         when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(eq(ResourceType.ELASTIC_LOAD_BALANCER), eq(CommonStatus.CREATED), any()))
                 .thenReturn(Optional.of(loadBalancerResource));
@@ -397,9 +397,9 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancerCommonService.getAwsLoadBalancers(any(), any(), any())).thenReturn(List.of(getAwsLoadBalancer()));
         String aLoadBalancerName = "aLoadBalancerName";
         CloudResource loadBalancerResource = CloudResource.builder()
-                .name(aLoadBalancerName)
-                .reference("aLoadBalancerArn")
-                .type(ResourceType.ELASTIC_LOAD_BALANCER)
+                .withName(aLoadBalancerName)
+                .withReference("aLoadBalancerArn")
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER)
                 .build();
         when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(eq(ResourceType.ELASTIC_LOAD_BALANCER), eq(CommonStatus.CREATED), any()))
                 .thenReturn(Optional.of(loadBalancerResource));
@@ -448,9 +448,9 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         CreateLoadBalancerResult loadBalancerResult = new CreateLoadBalancerResult().withLoadBalancers(loadBalancer);
         when(loadBalancingClient.registerLoadBalancer(any())).thenReturn(loadBalancerResult);
         CloudResource targetGroupResource = CloudResource.builder()
-                .name("aTargetTG443Master")
-                .type(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP)
-                .reference("aTargetGroupArn")
+                .withName("aTargetTG443Master")
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP)
+                .withReference("aTargetGroupArn")
                 .build();
         when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(eq(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP), eq(CommonStatus.CREATED), any()))
                 .thenReturn(Optional.of(targetGroupResource));
@@ -501,9 +501,9 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .withTargetGroups(List.of(targetGroup));
         when(loadBalancingClient.createTargetGroup(any())).thenReturn(createTargetGroupResult);
         CloudResource listenerResource = CloudResource.builder()
-                .name(aLoadBalancerTGName)
-                .type(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER)
-                .reference("aListenerArn")
+                .withName(aLoadBalancerTGName)
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER)
+                .withReference("aListenerArn")
                 .build();
         when(persistenceRetriever.retrieveFirstByTypeAndStatusForStack(eq(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER), eq(CommonStatus.CREATED), any()))
                 .thenReturn(Optional.of(listenerResource));

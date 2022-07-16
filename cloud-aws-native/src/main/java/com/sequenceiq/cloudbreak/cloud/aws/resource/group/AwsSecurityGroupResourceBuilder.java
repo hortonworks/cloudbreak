@@ -58,7 +58,7 @@ public class AwsSecurityGroupResourceBuilder extends AbstractAwsNativeGroupBuild
                 .createSecurityGroup(network, group, amazonEc2Client, auth.getCloudContext(), auth);
         LOGGER.info("Security group successfully created with id: {}", securityGroupId);
         return CloudResource.builder().cloudResource(resource)
-                .reference(securityGroupId)
+                .withReference(securityGroupId)
                 .build();
     }
 

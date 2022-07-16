@@ -211,7 +211,7 @@ public class SdxBackupRestoreService {
                 BackupV4Response backupV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(
                         regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString(),
                         () -> stackV4Endpoint.backupDatabaseByNameInternal(0L, sdxCluster.getClusterName(),
-                        backupRequest.getBackupId(), backupRequest.getBackupLocation(), backupRequest.getCloseConnections(), initiatorUserCrn));
+                        backupRequest.getBackupId(), backupRequest.getBackupLocation(), backupRequest.isCloseConnections(), initiatorUserCrn));
                 updateSuccessStatus(drStatus.getOperationId(), sdxCluster, backupV4Response.getFlowIdentifier(),
                         SdxOperationStatus.TRIGGERRED);
             }, () -> {

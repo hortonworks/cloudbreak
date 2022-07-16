@@ -193,13 +193,13 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             String targetAvailabilityZone = getAvailabilityZoneFromSubnet(auth, subnetId, availabilityZone);
             LOGGER.info("Selected availability zone for volumeset: {}, group: {}", targetAvailabilityZone, groupName);
             return new Builder()
-                    .persistent(true)
-                    .type(resourceType())
-                    .name(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId))
-                    .availabilityZone(targetAvailabilityZone)
-                    .group(group.getName())
-                    .status(CommonStatus.REQUESTED)
-                    .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
+                    .withPersistent(true)
+                    .withType(resourceType())
+                    .withName(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId))
+                    .withAvailabilityZone(targetAvailabilityZone)
+                    .withGroup(group.getName())
+                    .withStatus(CommonStatus.REQUESTED)
+                    .withParams(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                             .withAvailabilityZone(targetAvailabilityZone)
                             .withDeleteOnTermination(Boolean.TRUE)
                             .withVolumes(template.getVolumes().stream()
@@ -307,13 +307,13 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     private Function<CloudResource, CloudResource> copyResourceWithCreatedStatus(String defaultAvailabilityZone) {
         return resource -> new Builder()
-                .persistent(true)
-                .group(resource.getGroup())
-                .type(resource.getType())
-                .status(CommonStatus.CREATED)
-                .name(resource.getName())
-                .availabilityZone(resource.getAvailabilityZone() == null ? defaultAvailabilityZone : resource.getAvailabilityZone())
-                .params(resource.getParameters())
+                .withPersistent(true)
+                .withGroup(resource.getGroup())
+                .withType(resource.getType())
+                .withStatus(CommonStatus.CREATED)
+                .withName(resource.getName())
+                .withAvailabilityZone(resource.getAvailabilityZone() == null ? defaultAvailabilityZone : resource.getAvailabilityZone())
+                .withParams(resource.getParameters())
                 .build();
     }
 

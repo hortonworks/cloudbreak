@@ -182,10 +182,10 @@ public class AzureMetadataCollectorTest {
 
     private CloudResource createCloudResource() {
         return new CloudResource.Builder()
-                .type(ResourceType.AZURE_NETWORK)
-                .status(CommonStatus.CREATED)
-                .name(RESOURCE_GROUP_NAME)
-                .params(Collections.emptyMap())
+                .withType(ResourceType.AZURE_NETWORK)
+                .withStatus(CommonStatus.CREATED)
+                .withName(RESOURCE_GROUP_NAME)
+                .withParams(Collections.emptyMap())
                 .build();
     }
 

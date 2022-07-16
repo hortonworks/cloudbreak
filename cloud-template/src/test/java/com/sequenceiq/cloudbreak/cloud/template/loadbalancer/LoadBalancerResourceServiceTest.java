@@ -94,7 +94,7 @@ public class LoadBalancerResourceServiceTest {
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         context = new ResourceBuilderContext(cloudContext.getName(), location, 30, false);
         List<CloudResource> networkResources = Collections.singletonList(new CloudResource.Builder()
-                .type(ResourceType.GCP_NETWORK).name("network-test").build());
+                .withType(ResourceType.GCP_NETWORK).withName("network-test").build());
         context.addNetworkResources(networkResources);
         Network network = new Network(null);
         cloudStack = new CloudStack(Collections.emptyList(), network, image, emptyMap(), emptyMap(), null,
@@ -111,9 +111,9 @@ public class LoadBalancerResourceServiceTest {
     @Test
     public void variantHasNoDeleters() throws Exception {
         CloudResource instance = CloudResource.builder()
-                .type(GCP_HEALTH_CHECK)
-                .status(CommonStatus.CREATED)
-                .name("name")
+                .withType(GCP_HEALTH_CHECK)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
                 .build();
         when(resourceBuilders.loadBalancer(any())).thenReturn(List.of());
         List<CloudResourceStatus> statuses = underTest.deleteResources(context, authenticatedContext, List.of(instance), false);
@@ -124,9 +124,9 @@ public class LoadBalancerResourceServiceTest {
     @Test
     public void variantHasNullDeleter() throws Exception {
         CloudResource instance = CloudResource.builder()
-                .type(GCP_HEALTH_CHECK)
-                .status(CommonStatus.CREATED)
-                .name("name")
+                .withType(GCP_HEALTH_CHECK)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
                 .build();
         MockLoadBalancerResourceBuilder mockLoadBalancerResourceBuilder = new MockLoadBalancerResourceBuilder() {
             @Override
@@ -168,9 +168,9 @@ public class LoadBalancerResourceServiceTest {
     @Test
     public void variantHasErrorDeleter() throws Exception {
         CloudResource instance = CloudResource.builder()
-                .type(GCP_HEALTH_CHECK)
-                .status(CommonStatus.CREATED)
-                .name("name")
+                .withType(GCP_HEALTH_CHECK)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
                 .build();
         MockLoadBalancerResourceBuilder mockLoadBalancerResourceBuilder = new MockLoadBalancerResourceBuilder() {
             @Override

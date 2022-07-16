@@ -202,11 +202,11 @@ public class AzureCloudResourceServiceTest {
 
     private CloudResource createCloudResource(String name, ResourceType resourceType, CommonStatus status, String instanceId) {
         return new CloudResource.Builder()
-                .name(name)
-                .status(status)
-                .type(resourceType)
-                .instanceId(instanceId)
-                .params(Collections.emptyMap())
+                .withName(name)
+                .withStatus(status)
+                .withType(resourceType)
+                .withInstanceId(instanceId)
+                .withParams(Collections.emptyMap())
                 .build();
     }
 

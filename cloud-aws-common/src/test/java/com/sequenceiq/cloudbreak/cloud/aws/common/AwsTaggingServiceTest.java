@@ -65,7 +65,7 @@ public class AwsTaggingServiceTest {
     @Test
     public void tesTagRootVolumesForSingleInstance() {
         CloudResource instance = CloudResource.builder()
-                .type(ResourceType.AWS_INSTANCE).instanceId(INSTANCE_ID).name(INSTANCE_ID).status(CommonStatus.CREATED).build();
+                .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED).build();
 
         DescribeInstancesResult describeResult = new DescribeInstancesResult()
                 .withReservations(new Reservation()
@@ -101,7 +101,7 @@ public class AwsTaggingServiceTest {
     @Test
     public void tesTagRootVolumesWhenNoInstancesReturned() {
         CloudResource instance = CloudResource.builder()
-                .type(ResourceType.AWS_INSTANCE).instanceId(INSTANCE_ID).name(INSTANCE_ID).status(CommonStatus.CREATED).build();
+                .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED).build();
 
         DescribeInstancesResult describeResult = new DescribeInstancesResult()
                 .withReservations(new Reservation());
@@ -119,7 +119,7 @@ public class AwsTaggingServiceTest {
         int instanceCount = 1200;
 
         CloudResource instance = CloudResource.builder()
-                .type(ResourceType.AWS_INSTANCE).instanceId(INSTANCE_ID).name(INSTANCE_ID).status(CommonStatus.CREATED).build();
+                .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED).build();
 
         Instance awsInstance = new Instance()
                 .withInstanceId(INSTANCE_ID)
@@ -153,7 +153,7 @@ public class AwsTaggingServiceTest {
         int instanceCount = 1200;
 
         CloudResource instance = CloudResource.builder()
-                .type(ResourceType.AWS_INSTANCE).instanceId(INSTANCE_ID).name(INSTANCE_ID).status(CommonStatus.CREATED).build();
+                .withType(ResourceType.AWS_INSTANCE).withInstanceId(INSTANCE_ID).withName(INSTANCE_ID).withStatus(CommonStatus.CREATED).build();
 
         Instance awsInstance = new Instance()
                 .withInstanceId(INSTANCE_ID)

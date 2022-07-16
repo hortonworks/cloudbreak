@@ -329,10 +329,10 @@ public class GCPLoadBalancerMetadataCollectorTest {
 
     static CloudResource createCloudResource(String name, ResourceType type) {
         return CloudResource.builder()
-                .name(name)
-                .type(type)
-                .status(CommonStatus.CREATED)
-                .params(Collections.emptyMap())
+                .withName(name)
+                .withType(type)
+                .withStatus(CommonStatus.CREATED)
+                .withParams(Collections.emptyMap())
                 .build();
     }
 

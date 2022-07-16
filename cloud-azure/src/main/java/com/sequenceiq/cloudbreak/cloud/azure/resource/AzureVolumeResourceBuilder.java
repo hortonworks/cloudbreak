@@ -112,12 +112,12 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
             String availabilityZone = getAvailabilityZone(auth, vm);
 
             return new Builder()
-                    .persistent(true)
-                    .type(resourceType())
-                    .name(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, stackCrn))
-                    .group(group.getName())
-                    .status(CommonStatus.REQUESTED)
-                    .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
+                    .withPersistent(true)
+                    .withType(resourceType())
+                    .withName(resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, stackCrn))
+                    .withGroup(group.getName())
+                    .withStatus(CommonStatus.REQUESTED)
+                    .withParams(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                             .withAvailabilityZone(availabilityZone)
                             .withDeleteOnTermination(Boolean.TRUE)
                             .withVolumes(
@@ -205,12 +205,12 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
 
     private Function<CloudResource, CloudResource> copyResourceWithNewStatus(CommonStatus status) {
         return resource -> new Builder()
-                .persistent(true)
-                .group(resource.getGroup())
-                .type(resource.getType())
-                .status(status)
-                .name(resource.getName())
-                .params(resource.getParameters())
+                .withPersistent(true)
+                .withGroup(resource.getGroup())
+                .withType(resource.getType())
+                .withStatus(status)
+                .withName(resource.getName())
+                .withParams(resource.getParameters())
                 .build();
     }
 

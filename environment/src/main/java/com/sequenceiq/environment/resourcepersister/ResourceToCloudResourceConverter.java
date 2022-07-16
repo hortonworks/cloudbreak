@@ -14,10 +14,10 @@ public class ResourceToCloudResourceConverter {
 
     public CloudResource convert(Resource resource) {
         return new Builder()
-                .type(resource.getResourceType())
-                .name(resource.getResourceName())
-                .reference(resource.getResourceReference())
-                .status(resource.getResourceStatus())
+                .withType(resource.getResourceType())
+                .withName(resource.getResourceName())
+                .withReference(resource.getResourceReference())
+                .withStatus(resource.getResourceStatus())
                 .build();
     }
 }

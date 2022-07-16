@@ -131,12 +131,12 @@ public class InstanceMetadataUpdaterTest {
         verify(cloudbreakEventService, times(2)).fireCloudbreakEvent(anyLong(), anyString(),
                 any(ResourceEvent.class), anyCollection());
         assertEquals(SERVICES_UNHEALTHY, stack.getInstanceGroups().stream()
-                .filter(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream()
+                .filter(instanceGroup -> instanceGroup.getInstanceMetaData().stream()
                         .filter(instanceMetaData -> StringUtils.equals(instanceMetaData.getDiscoveryFQDN(), "hostByCmd"))
                         .findFirst()
                         .isPresent())
                 .findFirst()
-                .get().getInstanceMetaDataSet().iterator().next().getInstanceStatus());
+                .get().getInstanceMetaData().iterator().next().getInstanceStatus());
     }
 
     @Test

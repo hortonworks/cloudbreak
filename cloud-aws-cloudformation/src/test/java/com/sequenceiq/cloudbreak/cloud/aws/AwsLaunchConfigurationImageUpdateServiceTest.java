@@ -90,8 +90,8 @@ public class AwsLaunchConfigurationImageUpdateServiceTest {
     public void shouldUpdateImage() {
         String lcName = "lcName";
         CloudResource cfResource = CloudResource.builder()
-                .type(ResourceType.CLOUDFORMATION_STACK)
-                .name("cf")
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withName("cf")
                 .build();
         String autoScalingGroupName = "autoScalingGroupName";
         Map<AutoScalingGroup, String> scalingGroupStringMap =

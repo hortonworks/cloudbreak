@@ -11,10 +11,10 @@ public class DbResourceTocloudResourceConverter {
 
     public CloudResource convert(DBResource source) {
         return new Builder()
-                .type(source.getResourceType())
-                .name(source.getResourceName())
-                .reference(source.getResourceReference())
-                .status(source.getResourceStatus())
+                .withType(source.getResourceType())
+                .withName(source.getResourceName())
+                .withReference(source.getResourceReference())
+                .withStatus(source.getResourceStatus())
                 .build();
     }
 }

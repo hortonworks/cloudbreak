@@ -158,10 +158,10 @@ public class AwsNativeLoadBalancerLaunchService {
                     .getLoadBalancerArn();
             context.setLoadBalancerArn(loadBalancerArn);
             loadBalancerResource = new CloudResource.Builder()
-                    .name(loadBalancerName)
-                    .type(ResourceType.ELASTIC_LOAD_BALANCER)
-                    .reference(loadBalancerArn)
-                    .status(CommonStatus.CREATED)
+                    .withName(loadBalancerName)
+                    .withType(ResourceType.ELASTIC_LOAD_BALANCER)
+                    .withReference(loadBalancerArn)
+                    .withStatus(CommonStatus.CREATED)
                     .build();
             context.getPersistenceNotifier().notifyAllocation(loadBalancerResource, context.getCloudContext());
         }
@@ -226,11 +226,11 @@ public class AwsNativeLoadBalancerLaunchService {
                     .getTargetGroupArn();
             targetGroup.setArn(targetGroupArn);
             targetGroupResource = new CloudResource.Builder()
-                    .name(targetGroupName)
-                    .type(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP)
-                    .reference(targetGroupArn)
-                    .status(CommonStatus.CREATED)
-                    .instanceId(loadBalancerArn)
+                    .withName(targetGroupName)
+                    .withType(ResourceType.ELASTIC_LOAD_BALANCER_TARGET_GROUP)
+                    .withReference(targetGroupArn)
+                    .withStatus(CommonStatus.CREATED)
+                    .withInstanceId(loadBalancerArn)
                     .build();
             context.getPersistenceNotifier().notifyAllocation(targetGroupResource, context.getCloudContext());
         }
@@ -288,11 +288,11 @@ public class AwsNativeLoadBalancerLaunchService {
                     .orElseThrow()
                     .getListenerArn();
             listenerResource = new CloudResource.Builder()
-                    .name(context.getTargetGroupName())
-                    .type(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER)
-                    .reference(listenerArn)
-                    .status(CommonStatus.CREATED)
-                    .instanceId(loadBalancerArn)
+                    .withName(context.getTargetGroupName())
+                    .withType(ResourceType.ELASTIC_LOAD_BALANCER_LISTENER)
+                    .withReference(listenerArn)
+                    .withStatus(CommonStatus.CREATED)
+                    .withInstanceId(loadBalancerArn)
                     .build();
             context.getPersistenceNotifier().notifyAllocation(listenerResource, context.getCloudContext());
         }

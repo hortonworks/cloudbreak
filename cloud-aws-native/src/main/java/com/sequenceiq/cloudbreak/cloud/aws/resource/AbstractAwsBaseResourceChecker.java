@@ -7,9 +7,9 @@ public abstract class AbstractAwsBaseResourceChecker {
 
     protected CloudResource createNamedResource(ResourceType type, String name, String availabilityZone) {
         return new CloudResource.Builder()
-                .type(type)
-                .name(name)
-                .availabilityZone(availabilityZone)
+                .withType(type)
+                .withName(name)
+                .withAvailabilityZone(availabilityZone)
                 .build();
     }
 }

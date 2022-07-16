@@ -122,7 +122,7 @@ class CustomConfigurationsServiceTest {
         Set<CustomConfigurationProperty> capturedValue = argumentCaptor.getValue();
         Set<CustomConfigurationProperty> expectedValue = customConfigurations.getConfigurations();
         assertEquals(expectedValue, capturedValue);
-        assertEquals(customConfigurations, new ArrayList<>(expectedValue).get(0).getCustomConfigs());
+        assertEquals(customConfigurations, new ArrayList<>(expectedValue).get(0).getCustomConfigurations());
     }
 
     @Test

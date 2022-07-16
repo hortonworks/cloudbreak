@@ -106,12 +106,12 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                 .withDeleteOnTermination(Boolean.TRUE)
                 .withVolumes(volumes).build()));
         return new Builder()
-                .type(resourceType())
-                .status(CommonStatus.REQUESTED)
-                .name(resourceName)
-                .group(groupName)
-                .availabilityZone(instance.getAvailabilityZone())
-                .params(attributes)
+                .withType(resourceType())
+                .withStatus(CommonStatus.REQUESTED)
+                .withName(resourceName)
+                .withGroup(groupName)
+                .withAvailabilityZone(instance.getAvailabilityZone())
+                .withParams(attributes)
                 .build();
     }
 
@@ -158,8 +158,8 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             }
             volumeSetResource.putParameter(OPERATION_ID, operations);
             result.add(new Builder().cloudResource(volumeSetResource)
-                    .status(CommonStatus.CREATED)
-                    .params(volumeSetResource.getParameters())
+                    .withStatus(CommonStatus.CREATED)
+                    .withParams(volumeSetResource.getParameters())
                     .build());
         }
 

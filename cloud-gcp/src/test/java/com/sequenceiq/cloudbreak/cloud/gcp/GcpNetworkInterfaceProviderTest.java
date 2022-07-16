@@ -163,10 +163,10 @@ public class GcpNetworkInterfaceProviderTest {
 
     private CloudResource createCloudResource(String name) {
         return CloudResource.builder()
-                .name(name)
-                .type(ResourceType.GCP_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .params(Collections.emptyMap())
+                .withName(name)
+                .withType(ResourceType.GCP_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withParams(Collections.emptyMap())
                 .build();
     }
 
