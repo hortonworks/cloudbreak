@@ -4,11 +4,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.common.event.FlowPayload;
 
-public class DownscaleStackResult extends CloudPlatformResult {
+public class DownscaleStackResult extends CloudPlatformResult implements FlowPayload {
 
     private final List<CloudResource> downscaledResources;
 
@@ -17,7 +20,11 @@ public class DownscaleStackResult extends CloudPlatformResult {
         this.downscaledResources = ImmutableList.copyOf(downscaledResources);
     }
 
-    public DownscaleStackResult(String statusReason, Exception errorDetails, Long resourceId) {
+    @JsonCreator
+    public DownscaleStackResult(
+            @JsonProperty("statusReason") String statusReason,
+            @JsonProperty("errorDetails") Exception errorDetails,
+            @JsonProperty("resourceId") Long resourceId) {
         super(statusReason, errorDetails, resourceId);
         downscaledResources = Collections.emptyList();
     }

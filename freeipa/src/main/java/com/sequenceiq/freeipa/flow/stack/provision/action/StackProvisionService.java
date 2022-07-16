@@ -106,7 +106,7 @@ public class StackProvisionService {
     }
 
     public Stack saveTlsInfo(StackContext context, TlsInfo tlsInfo) {
-        boolean usePrivateIpToTls = tlsInfo.usePrivateIpToTls();
+        boolean usePrivateIpToTls = tlsInfo.isUsePrivateIpToTls();
         Stack stack = context.getStack();
         if (usePrivateIpToTls) {
             SecurityConfig securityConfig = stack.getSecurityConfig();

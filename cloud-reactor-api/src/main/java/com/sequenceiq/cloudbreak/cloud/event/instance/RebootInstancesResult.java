@@ -2,13 +2,16 @@ package com.sequenceiq.cloudbreak.cloud.event.instance;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.common.event.FlowPayload;
 
-public class RebootInstancesResult extends CloudPlatformResult {
+public class RebootInstancesResult extends CloudPlatformResult implements FlowPayload {
 
-    private InstancesStatusResult results;
+    private final InstancesStatusResult results;
 
-    private List<String> instanceIds;
+    private final List<String> instanceIds;
 
     public RebootInstancesResult(Long resourceId, InstancesStatusResult results, List<String> instanceIds) {
         super(resourceId);
@@ -16,9 +19,15 @@ public class RebootInstancesResult extends CloudPlatformResult {
         this.instanceIds = instanceIds;
     }
 
-    public RebootInstancesResult(String statusReason, Exception errorDetails, Long resourceId, List<String> instanceIds) {
+    @JsonCreator
+    public RebootInstancesResult(
+            @JsonProperty("statusReason") String statusReason,
+            @JsonProperty("errorDetails") Exception errorDetails,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("instanceIds") List<String> instanceIds) {
         super(statusReason, errorDetails, resourceId);
         this.instanceIds = instanceIds;
+        this.results = null;
     }
 
     public InstancesStatusResult getResults() {

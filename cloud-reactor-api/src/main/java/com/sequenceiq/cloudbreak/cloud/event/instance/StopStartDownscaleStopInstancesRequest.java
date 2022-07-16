@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.event.instance;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CloudStackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -12,8 +14,12 @@ public class StopStartDownscaleStopInstancesRequest extends CloudStackRequest<St
 
     private final List<CloudInstance> cloudInstancesToStop;
 
-    public StopStartDownscaleStopInstancesRequest(CloudContext cloudContext, CloudCredential cloudCredential,
-            CloudStack cloudStack, List<CloudInstance> cloudInstancesToStop) {
+    @JsonCreator
+    public StopStartDownscaleStopInstancesRequest(
+            @JsonProperty("cloudContext") CloudContext cloudContext,
+            @JsonProperty("cloudCredential") CloudCredential cloudCredential,
+            @JsonProperty("cloudStack") CloudStack cloudStack,
+            @JsonProperty("cloudInstancesToStop") List<CloudInstance> cloudInstancesToStop) {
         super(cloudContext, cloudCredential, cloudStack);
         this.cloudInstancesToStop = cloudInstancesToStop;
     }

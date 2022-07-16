@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.common.api.type.LoadBalancerType;
-import java.util.Map;
 
 public class CloudLoadBalancerMetadata extends DynamicModel {
 
@@ -16,8 +19,15 @@ public class CloudLoadBalancerMetadata extends DynamicModel {
 
     private final String name;
 
-    private CloudLoadBalancerMetadata(LoadBalancerType type, String cloudDns, String hostedZoneId, String ip, String name,
-            Map<String, Object> parameters) {
+    @JsonCreator
+    private CloudLoadBalancerMetadata(
+            @JsonProperty("type") LoadBalancerType type,
+            @JsonProperty("cloudDns") String cloudDns,
+            @JsonProperty("hostedZoneId") String hostedZoneId,
+            @JsonProperty("ip") String ip,
+            @JsonProperty("name") String name,
+            @JsonProperty("parameters") Map<String, Object> parameters) {
+
         super(parameters);
         this.type = type;
         this.cloudDns = cloudDns;

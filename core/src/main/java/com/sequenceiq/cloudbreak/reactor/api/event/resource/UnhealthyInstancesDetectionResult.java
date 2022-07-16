@@ -4,9 +4,12 @@ import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.common.event.FlowPayload;
 import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformResult;
 
-public class UnhealthyInstancesDetectionResult extends ClusterPlatformResult<UnhealthyInstancesDetectionRequest> {
+public class UnhealthyInstancesDetectionResult extends ClusterPlatformResult<UnhealthyInstancesDetectionRequest> implements FlowPayload {
 
     private final Set<String> unhealthyInstanceIds;
 
@@ -15,7 +18,11 @@ public class UnhealthyInstancesDetectionResult extends ClusterPlatformResult<Unh
         this.unhealthyInstanceIds = unhealthyInstanceIds;
     }
 
-    public UnhealthyInstancesDetectionResult(String statusReason, Exception errorDetails, UnhealthyInstancesDetectionRequest request) {
+    @JsonCreator
+    public UnhealthyInstancesDetectionResult(
+            @JsonProperty("statusReason") String statusReason,
+            @JsonProperty("errorDetails") Exception errorDetails,
+            @JsonProperty("request") UnhealthyInstancesDetectionRequest request) {
         super(statusReason, errorDetails, request);
         unhealthyInstanceIds = Collections.emptySet();
     }

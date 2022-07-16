@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.event.setup;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.common.event.FlowPayload;
 import com.sequenceiq.common.api.type.ImageStatus;
 
-public class CheckImageResult extends CloudPlatformResult {
+public class CheckImageResult extends CloudPlatformResult implements FlowPayload {
 
     private final ImageStatus imageStatus;
 
@@ -19,7 +22,12 @@ public class CheckImageResult extends CloudPlatformResult {
         this(errorDetails.getMessage(), errorDetails, resourceId, imageStatus);
     }
 
-    public CheckImageResult(String statusReason, Exception errorDetails, Long resourceId, ImageStatus imageStatus) {
+    @JsonCreator
+    public CheckImageResult(
+            @JsonProperty("statusReason") String statusReason,
+            @JsonProperty("errorDetails") Exception errorDetails,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("imageStatus") ImageStatus imageStatus) {
         super(statusReason, errorDetails, resourceId);
         this.imageStatus = imageStatus;
         statusProgressValue = null;

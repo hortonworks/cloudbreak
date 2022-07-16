@@ -16,6 +16,10 @@ public abstract class ClusterPlatformRequest implements Selectable {
         return stackId;
     }
 
+    public Long getStackId() {
+        return stackId;
+    }
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(getClass());
