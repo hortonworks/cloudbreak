@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -317,7 +318,17 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     private synchronized Iterable<Blueprint> saveDefaultsWithReadRight(Iterable<Blueprint> blueprints, Workspace workspace) {
         blueprints.forEach(bp -> bp.setWorkspace(workspace));
-        return blueprintRepository.saveAll(blueprints);
+        return IterableUtils.toList(blueprints).stream()
+                .map(b -> {
+                    // sometimes the blueprinttext is null during the save, but why?
+                    try {
+                        return blueprintRepository.save(b);
+                    } catch (Exception e) {
+                        LOGGER.debug("Cannot update the blueprint: {}, blueprinttext is null: {}", b.getName(), b.getBlueprintText() == null, e);
+                        throw e;
+                    }
+                })
+                .collect(Collectors.toList());
     }
 
     public boolean isClouderaManagerTemplate(Blueprint blueprint) {

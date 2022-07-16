@@ -78,10 +78,6 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     void updateCreationFinishedAndUpSinceByClusterId(@Param("clusterId") Long clusterId, @Param("now") long now);
 
     @Modifying
-    @Query("UPDATE Cluster c SET c.databusCredential = :databusCredential WHERE c.id = :clusterId")
-    void updateDatabusCredentialByClusterId(@Param("clusterId") Long clusterId, @Param("databusCredential") String databusCredentialJsonString);
-
-    @Modifying
     @Query(value = "INSERT INTO cluster_rdsconfig(clusters_id, rdsconfigs_id) VALUES (:clusterId, :rdsConfigId)", nativeQuery = true)
     void addRdsConfigToCluster(@Param("clusterId") Long clusterId, @Param("rdsConfigId") Long rdsConfigId);
 
