@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -19,7 +21,11 @@ public class CloudLoadBalancer {
         this(type, LoadBalancerSku.getDefault());
     }
 
-    public CloudLoadBalancer(LoadBalancerType type, LoadBalancerSku sku) {
+    @JsonCreator
+    public CloudLoadBalancer(
+            @JsonProperty("type") LoadBalancerType type,
+            @JsonProperty("sku") LoadBalancerSku sku) {
+
         this.type = type;
         this.sku = sku;
         portToTargetGroupMapping = new HashMap<>();

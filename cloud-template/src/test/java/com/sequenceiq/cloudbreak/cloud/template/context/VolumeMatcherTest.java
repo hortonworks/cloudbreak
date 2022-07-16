@@ -36,42 +36,42 @@ class VolumeMatcherTest {
     @Test
     public void addVolumeResourcesToContextTest() {
         List<CloudResource> workerInstanceResources = new ArrayList<>();
-        workerInstanceResources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker1")
-                .group("worker").params(Map.of("privateId", 1L)).build());
-        workerInstanceResources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker2")
-                .group("worker").params(Map.of("privateId", 2L)).build());
-        workerInstanceResources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker3")
-                .group("worker").params(Map.of("privateId", 3L)).build());
+        workerInstanceResources.add(CloudResource.builder().withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.REQUESTED).withName("worker1")
+                .withGroup("worker").withParams(Map.of("privateId", 1L)).build());
+        workerInstanceResources.add(CloudResource.builder().withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.REQUESTED).withName("worker2")
+                .withGroup("worker").withParams(Map.of("privateId", 2L)).build());
+        workerInstanceResources.add(CloudResource.builder().withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.REQUESTED).withName("worker3")
+                .withGroup("worker").withParams(Map.of("privateId", 3L)).build());
         List<CloudResource> computeInstanceResources = new ArrayList<>();
-        computeInstanceResources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("compute2")
-                .group("compute").params(Map.of("privateId", 5L)).build());
-        computeInstanceResources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("compute3")
-                .group("compute").params(Map.of("privateId", 6L)).build());
-        computeInstanceResources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("compute4")
-                .group("compute").params(Map.of("privateId", 7L)).build());
+        computeInstanceResources.add(CloudResource.builder().withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.REQUESTED).withName("compute2")
+                .withGroup("compute").withParams(Map.of("privateId", 5L)).build());
+        computeInstanceResources.add(CloudResource.builder().withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.REQUESTED).withName("compute3")
+                .withGroup("compute").withParams(Map.of("privateId", 6L)).build());
+        computeInstanceResources.add(CloudResource.builder().withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.REQUESTED).withName("compute4")
+                .withGroup("compute").withParams(Map.of("privateId", 7L)).build());
 
         List<CloudResource> workerVolumeResources = new ArrayList<>();
 
         VolumeSetAttributes volume1attributes = new VolumeSetAttributes("az1", false, "fstab", new ArrayList<>(), 100, "general");
         volume1attributes.setDiscoveryFQDN("worker3.example.com");
-        workerVolumeResources.add(CloudResource.builder().type(ResourceType.AWS_VOLUMESET).status(CommonStatus.REQUESTED).name("volume1").group("worker")
-                .params(Map.of("attributes", volume1attributes)).build());
+        workerVolumeResources.add(CloudResource.builder().withType(ResourceType.AWS_VOLUMESET).withStatus(CommonStatus.REQUESTED).withName("volume1")
+                .withGroup("worker").withParams(Map.of("attributes", volume1attributes)).build());
 
         List<CloudResource> computeVolumeResources = new ArrayList<>();
 
         VolumeSetAttributes volume2attributes = new VolumeSetAttributes("az1", false, "fstab", new ArrayList<>(), 100, "general");
         volume2attributes.setDiscoveryFQDN("compute2.example.com");
-        computeVolumeResources.add(CloudResource.builder().type(ResourceType.AWS_VOLUMESET).status(CommonStatus.REQUESTED).name("volume3").group("compute")
-                .params(Map.of("attributes", volume2attributes)).build());
+        computeVolumeResources.add(CloudResource.builder().withType(ResourceType.AWS_VOLUMESET).withStatus(CommonStatus.REQUESTED).withName("volume3")
+                .withGroup("compute").withParams(Map.of("attributes", volume2attributes)).build());
 
         VolumeSetAttributes volume3attributes = new VolumeSetAttributes("az1", false, "fstab", new ArrayList<>(), 100, "general");
         volume3attributes.setDiscoveryFQDN("compute3.example.com");
-        computeVolumeResources.add(CloudResource.builder().type(ResourceType.AWS_VOLUMESET).status(CommonStatus.REQUESTED).name("volume4").group("compute")
-                .params(Map.of("attributes", volume3attributes)).build());
+        computeVolumeResources.add(CloudResource.builder().withType(ResourceType.AWS_VOLUMESET).withStatus(CommonStatus.REQUESTED).withName("volume4")
+                .withGroup("compute").withParams(Map.of("attributes", volume3attributes)).build());
 
         VolumeSetAttributes volume4attributes = new VolumeSetAttributes("az1", false, "fstab", new ArrayList<>(), 100, "general");
-        computeVolumeResources.add(CloudResource.builder().type(ResourceType.AWS_VOLUMESET).status(CommonStatus.REQUESTED).name("volume5").group("compute")
-                .params(Map.of("attributes", volume4attributes)).build());
+        computeVolumeResources.add(CloudResource.builder().withType(ResourceType.AWS_VOLUMESET).withStatus(CommonStatus.REQUESTED).withName("volume5")
+                .withGroup("compute").withParams(Map.of("attributes", volume4attributes)).build());
 
         List<CloudInstance> workerInstances = new ArrayList<>();
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(2L, "worker"), mock(InstanceAuthentication.class), "subnet1", "az1",
@@ -118,19 +118,19 @@ class VolumeMatcherTest {
     @Test
     public void addVolumeResourcesToContextThrowsException() {
         List<CloudResource> workerInstanceResources = new ArrayList<>();
-        workerInstanceResources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker1")
-                .group("worker").params(Map.of("privateId", 1L)).build());
-        workerInstanceResources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker2")
-                .group("worker").params(Map.of("privateId", 10L)).build());
-        workerInstanceResources.add(CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.REQUESTED).name("worker3")
-                .group("worker").params(Map.of("privateId", 11L)).build());
+        workerInstanceResources.add(CloudResource.builder().withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.REQUESTED).withName("worker1")
+                .withGroup("worker").withParams(Map.of("privateId", 1L)).build());
+        workerInstanceResources.add(CloudResource.builder().withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.REQUESTED).withName("worker2")
+                .withGroup("worker").withParams(Map.of("privateId", 10L)).build());
+        workerInstanceResources.add(CloudResource.builder().withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.REQUESTED).withName("worker3")
+                .withGroup("worker").withParams(Map.of("privateId", 11L)).build());
 
         List<CloudResource> workerVolumeResources = new ArrayList<>();
 
         VolumeSetAttributes volume1attributes = new VolumeSetAttributes("az1", false, "fstab", new ArrayList<>(), 100, "general");
         volume1attributes.setDiscoveryFQDN("worker3.example.com");
-        workerVolumeResources.add(CloudResource.builder().type(ResourceType.AWS_VOLUMESET).status(CommonStatus.REQUESTED).name("volume1").group("worker")
-                .params(Map.of("attributes", volume1attributes)).build());
+        workerVolumeResources.add(CloudResource.builder().withType(ResourceType.AWS_VOLUMESET).withStatus(CommonStatus.REQUESTED).withName("volume1")
+                .withGroup("worker").withParams(Map.of("attributes", volume1attributes)).build());
 
         List<CloudInstance> workerInstances = new ArrayList<>();
         workerInstances.add(new CloudInstance(null, getInstanceTemplate(2L, "worker"), mock(InstanceAuthentication.class), "subnet1", "az1",

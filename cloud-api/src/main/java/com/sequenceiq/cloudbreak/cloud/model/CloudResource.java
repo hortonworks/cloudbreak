@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -13,6 +15,7 @@ import com.sequenceiq.common.api.type.ResourceType;
 /**
  * Cloudbreak handles the entities on the Cloud provider side as Generic resources, and this class represent a generic resource.
  */
+@JsonDeserialize(builder = CloudResource.Builder.class)
 public class CloudResource extends DynamicModel {
 
     public static final String IMAGE = "IMAGE";
@@ -31,7 +34,7 @@ public class CloudResource extends DynamicModel {
 
     private final String name;
 
-    private String reference;
+    private final String reference;
 
     private final String group;
 
@@ -121,6 +124,7 @@ public class CloudResource extends DynamicModel {
                 .toString();
     }
 
+    @JsonPOJOBuilder
     public static class Builder {
         private ResourceType type;
 
@@ -155,52 +159,52 @@ public class CloudResource extends DynamicModel {
             return this;
         }
 
-        public Builder type(ResourceType type) {
+        public Builder withType(ResourceType type) {
             this.type = type;
             return this;
         }
 
-        public Builder status(CommonStatus status) {
+        public Builder withStatus(CommonStatus status) {
             this.status = status;
             return this;
         }
 
-        public Builder name(String name) {
+        public Builder withName(String name) {
             this.name = name;
             return this;
         }
 
-        public Builder reference(String reference) {
+        public Builder withReference(String reference) {
             this.reference = reference;
             return this;
         }
 
-        public Builder persistent(boolean persistent) {
+        public Builder withPersistent(boolean persistent) {
             this.persistent = persistent;
             return this;
         }
 
-        public Builder params(Map<String, Object> parameters) {
+        public Builder withParams(Map<String, Object> parameters) {
             this.parameters = parameters;
             return this;
         }
 
-        public Builder group(String group) {
+        public Builder withGroup(String group) {
             this.group = group;
             return this;
         }
 
-        public Builder instanceId(String instanceId) {
+        public Builder withInstanceId(String instanceId) {
             this.instanceId = instanceId;
             return this;
         }
 
-        public Builder stackAware(boolean stackAware) {
+        public Builder withStackAware(boolean stackAware) {
             this.stackAware = stackAware;
             return this;
         }
 
-        public Builder availabilityZone(String availabilityZone) {
+        public Builder withAvailabilityZone(String availabilityZone) {
             this.availabilityZone = availabilityZone;
             return this;
         }

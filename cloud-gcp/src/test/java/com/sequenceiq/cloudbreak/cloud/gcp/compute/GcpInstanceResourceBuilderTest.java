@@ -194,7 +194,7 @@ public class GcpInstanceResourceBuilderTest {
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn(projectId);
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         context = new GcpContext(cloudContext.getName(), location, projectId, serviceAccountId, compute, false, 30, false);
-        List<CloudResource> networkResources = Collections.singletonList(new Builder().type(ResourceType.GCP_NETWORK).name("network-test").build());
+        List<CloudResource> networkResources = Collections.singletonList(new Builder().withType(ResourceType.GCP_NETWORK).withName("network-test").build());
         context.addNetworkResources(networkResources);
         operation = new Operation();
         operation.setName("operation");
@@ -385,7 +385,7 @@ public class GcpInstanceResourceBuilderTest {
         Group group = newGroupWithParams(ImmutableMap.of());
         List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
         List<CloudResource> resourcesWithGroup = buildableResources.stream()
-                .map(b -> CloudResource.builder().cloudResource(b).group(group.getName()).build())
+                .map(b -> CloudResource.builder().cloudResource(b).withGroup(group.getName()).build())
                 .collect(Collectors.toList());
         context.addComputeResources(0L, buildableResources);
 
@@ -401,10 +401,10 @@ public class GcpInstanceResourceBuilderTest {
         addOperation.setHttpErrorMessage("Not Authorized");
         addOperation.setError(new Operation.Error());
         CloudResource instanceGroup = CloudResource.builder()
-                .type(ResourceType.GCP_INSTANCE_GROUP)
-                .status(CommonStatus.CREATED)
-                .name(group.getName())
-                .group(group.getName())
+                .withType(ResourceType.GCP_INSTANCE_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withName(group.getName())
+                .withGroup(group.getName())
                 .build();
         context.addGroupResources(group.getName(), Collections.singletonList(instanceGroup));
         when(compute.instanceGroups()).thenReturn(instanceGroups);
@@ -441,25 +441,25 @@ public class GcpInstanceResourceBuilderTest {
         Operation addOperation = new Operation();
         addOperation.setName("operation");
         CloudResource instanceGroup = CloudResource.builder()
-                .type(ResourceType.GCP_INSTANCE_GROUP)
-                .status(CommonStatus.CREATED)
-                .name(group.getName())
-                .group(group.getName())
+                .withType(ResourceType.GCP_INSTANCE_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withName(group.getName())
+                .withGroup(group.getName())
                 .build();
         CloudResource instanceGroup2 = CloudResource.builder()
-                .type(ResourceType.GCP_INSTANCE_GROUP)
-                .status(CommonStatus.CREATED)
-                .name("gateway")
+                .withType(ResourceType.GCP_INSTANCE_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withName("gateway")
                 .build();
         CloudResource instanceGroup3 = CloudResource.builder()
-                .type(ResourceType.GCP_INSTANCE_GROUP)
-                .status(CommonStatus.CREATED)
-                .name("idbroker")
+                .withType(ResourceType.GCP_INSTANCE_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withName("idbroker")
                 .build();
         CloudResource instanceGroup4 = CloudResource.builder()
-                .type(ResourceType.GCP_INSTANCE_GROUP)
-                .status(CommonStatus.CREATED)
-                .name("free-master0")
+                .withType(ResourceType.GCP_INSTANCE_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withName("free-master0")
                 .build();
         context.addGroupResources(group.getName(), List.of(instanceGroup4, instanceGroup2, instanceGroup, instanceGroup3));
         when(compute.instanceGroups()).thenReturn(instanceGroups);
@@ -632,9 +632,9 @@ public class GcpInstanceResourceBuilderTest {
     private void doTestDiskEncryption(String encryptionKey, ImmutableMap<String, Object> templateParams) throws Exception {
         Group group = newGroupWithParams(templateParams);
         CloudResource requestedDisk = CloudResource.builder()
-                .type(ResourceType.GCP_DISK)
-                .status(CommonStatus.REQUESTED)
-                .name("dasdisk")
+                .withType(ResourceType.GCP_DISK)
+                .withStatus(CommonStatus.REQUESTED)
+                .withName("dasdisk")
                 .build();
         List<CloudResource> buildableResources = List.of(requestedDisk);
         context.addComputeResources(0L, buildableResources);

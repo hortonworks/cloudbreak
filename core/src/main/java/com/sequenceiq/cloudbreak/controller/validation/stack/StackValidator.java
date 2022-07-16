@@ -102,13 +102,13 @@ public class StackValidator {
 
     private EncryptionType getEncryptionType(Template template) {
         try {
-            if (template.cloudPlatform() != null && template.getAttributes() != null) {
-                if (template.cloudPlatform().equals(CloudPlatform.AWS.name())) {
+            if (template.getCloudPlatform() != null && template.getAttributes() != null) {
+                if (template.getCloudPlatform().equals(CloudPlatform.AWS.name())) {
                     AwsInstanceTemplateV4Parameters parameters = template.getAttributes().get(AwsInstanceTemplateV4Parameters.class);
                     if (parameters != null && parameters.getEncryption() != null) {
                         return parameters.getEncryption().getType();
                     }
-                } else if (template.cloudPlatform().equals(CloudPlatform.GCP.name())) {
+                } else if (template.getCloudPlatform().equals(CloudPlatform.GCP.name())) {
                     GcpInstanceTemplateV4Parameters parameters = template.getAttributes().get(GcpInstanceTemplateV4Parameters.class);
                     if (parameters != null && parameters.getEncryption() != null) {
                         return parameters.getEncryption().getType();
@@ -136,13 +136,13 @@ public class StackValidator {
 
     private String getEncryptionKey(Template template) {
         try {
-            if (template.cloudPlatform() != null && template.getAttributes() != null) {
-                if (template.cloudPlatform().equals(CloudPlatform.AWS.name())) {
+            if (template.getCloudPlatform() != null && template.getAttributes() != null) {
+                if (template.getCloudPlatform().equals(CloudPlatform.AWS.name())) {
                     AwsInstanceTemplateV4Parameters parameters = template.getAttributes().get(AwsInstanceTemplateV4Parameters.class);
                     if (parameters != null && parameters.getEncryption() != null) {
                         return parameters.getEncryption().getKey();
                     }
-                } else if (template.cloudPlatform().equals(CloudPlatform.GCP.name())) {
+                } else if (template.getCloudPlatform().equals(CloudPlatform.GCP.name())) {
                     GcpInstanceTemplateV4Parameters parameters = template.getAttributes().get(GcpInstanceTemplateV4Parameters.class);
                     if (parameters != null && parameters.getEncryption() != null) {
                         return parameters.getEncryption().getKey();

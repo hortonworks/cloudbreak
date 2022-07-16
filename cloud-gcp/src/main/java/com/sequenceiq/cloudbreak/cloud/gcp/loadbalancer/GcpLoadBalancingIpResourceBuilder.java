@@ -43,8 +43,8 @@ public class GcpLoadBalancingIpResourceBuilder extends AbstractGcpLoadBalancerBu
         if (!context.getNoPublicIp()) {
             String resourceName =
                     getResourceNameService().resourceName(resourceType(), auth.getCloudContext().getName(), loadBalancer.getType(), hcPort.toString());
-            return List.of(new CloudResource.Builder().type(resourceType())
-                .name(resourceName)
+            return List.of(new CloudResource.Builder().withType(resourceType())
+                .withName(resourceName)
                 .build());
         }
         return List.of();

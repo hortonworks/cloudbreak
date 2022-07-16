@@ -328,7 +328,7 @@ class AwsVolumeResourceBuilderTest {
         Group group = mock(Group.class);
         when(group.getName()).thenReturn("groupName");
         CloudResource instanceResource = createAwsInstance();
-        CloudResource volumeSet = CloudResource.builder().cloudResource(createVolumeSet(emptyList())).instanceId("instanceId").build();
+        CloudResource volumeSet = CloudResource.builder().cloudResource(createVolumeSet(emptyList())).withInstanceId("instanceId").build();
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
                 any(), eq("groupName"))).thenReturn(List.of());
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
@@ -348,7 +348,7 @@ class AwsVolumeResourceBuilderTest {
         Group group = mock(Group.class);
         when(group.getName()).thenReturn("groupName");
         CloudResource instanceResource = createAwsInstance();
-        CloudResource volumeSet = CloudResource.builder().cloudResource(createVolumeSet(emptyList())).instanceId("instanceId").build();
+        CloudResource volumeSet = CloudResource.builder().cloudResource(createVolumeSet(emptyList())).withInstanceId("instanceId").build();
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
                 any(), eq("groupName"))).thenReturn(List.of(volumeSet));
         Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(0L, authenticatedContext, group, List.of(instanceResource));
@@ -444,10 +444,10 @@ class AwsVolumeResourceBuilderTest {
 
     private CloudResource createVolumeSet(List<VolumeSetAttributes.Volume> volumes) {
         return CloudResource.builder()
-                .type(ResourceType.AWS_VOLUMESET)
-                .name(VOLUME_SET_NAME)
-                .status(CommonStatus.REQUESTED)
-                .params(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
+                .withType(ResourceType.AWS_VOLUMESET)
+                .withName(VOLUME_SET_NAME)
+                .withStatus(CommonStatus.REQUESTED)
+                .withParams(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                         .withAvailabilityZone(AVAILABILITY_ZONE)
                         .withVolumes(volumes)
                         .build()))
@@ -456,10 +456,10 @@ class AwsVolumeResourceBuilderTest {
 
     private CloudResource createAwsInstance() {
         return CloudResource.builder()
-                .type(ResourceType.AWS_INSTANCE)
-                .name("name")
-                .instanceId("instanceId")
-                .status(CommonStatus.CREATED)
+                .withType(ResourceType.AWS_INSTANCE)
+                .withName("name")
+                .withInstanceId("instanceId")
+                .withStatus(CommonStatus.CREATED)
                 .build();
     }
 

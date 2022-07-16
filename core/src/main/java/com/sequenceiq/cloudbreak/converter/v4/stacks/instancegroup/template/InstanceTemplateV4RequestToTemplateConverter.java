@@ -94,6 +94,6 @@ public class InstanceTemplateV4RequestToTemplateConverter {
         }
         template.setRootVolumeSize(rootVolume.map(RootVolumeV4Request::getSize).isPresent()
                 ? rootVolume.get().getSize()
-                : defaultRootVolumeSizeProvider.getForPlatform(template.cloudPlatform()));
+                : defaultRootVolumeSizeProvider.getForPlatform(template.getCloudPlatform()));
     }
 }

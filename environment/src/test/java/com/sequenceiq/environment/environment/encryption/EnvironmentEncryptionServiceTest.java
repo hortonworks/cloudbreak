@@ -254,10 +254,10 @@ class EnvironmentEncryptionServiceTest {
                 .withAccountId(ACCOUNT_ID)
                 .build();
         CloudResource desCloudResource = CloudResource.builder()
-                .name(DISK_ENCRYPTION_SET_NAME)
-                .type(ResourceType.AZURE_DISK_ENCRYPTION_SET)
-                .reference(DISK_ENCRYPTION_SET_ID)
-                .status(CommonStatus.CREATED)
+                .withName(DISK_ENCRYPTION_SET_NAME)
+                .withType(ResourceType.AZURE_DISK_ENCRYPTION_SET)
+                .withReference(DISK_ENCRYPTION_SET_ID)
+                .withStatus(CommonStatus.CREATED)
                 .build();
         when(resourceRetriever.findByEnvironmentIdAndType(ENVIRONMENT_ID, ResourceType.AZURE_DISK_ENCRYPTION_SET))
                 .thenReturn(Optional.of(desCloudResource));
@@ -322,10 +322,10 @@ class EnvironmentEncryptionServiceTest {
                 .withCredential(credential)
                 .build();
         CloudResource desCloudResource = CloudResource.builder()
-                .name(DISK_ENCRYPTION_SET_NAME)
-                .type(ResourceType.AZURE_DISK_ENCRYPTION_SET)
-                .reference(DISK_ENCRYPTION_SET_ID)
-                .status(CommonStatus.CREATED)
+                .withName(DISK_ENCRYPTION_SET_NAME)
+                .withType(ResourceType.AZURE_DISK_ENCRYPTION_SET)
+                .withReference(DISK_ENCRYPTION_SET_ID)
+                .withStatus(CommonStatus.CREATED)
                 .build();
         when(resourceRetriever.findByEnvironmentIdAndType(ENVIRONMENT_ID, ResourceType.AZURE_DISK_ENCRYPTION_SET))
                 .thenReturn(Optional.of(desCloudResource));
@@ -362,16 +362,16 @@ class EnvironmentEncryptionServiceTest {
                 .withCredential(credential)
                 .build();
         CloudResource desCloudResource = CloudResource.builder()
-                .name(DISK_ENCRYPTION_SET_NAME)
-                .type(ResourceType.AZURE_DISK_ENCRYPTION_SET)
-                .reference(DISK_ENCRYPTION_SET_ID)
-                .status(CommonStatus.CREATED)
+                .withName(DISK_ENCRYPTION_SET_NAME)
+                .withType(ResourceType.AZURE_DISK_ENCRYPTION_SET)
+                .withReference(DISK_ENCRYPTION_SET_ID)
+                .withStatus(CommonStatus.CREATED)
                 .build();
         CloudResource rgCloudResource = CloudResource.builder()
-                .name("dummyenv-CDP_DES-ResourceGroup")
-                .type(ResourceType.AZURE_RESOURCE_GROUP)
-                .reference("uniqueDummyId")
-                .status(CommonStatus.CREATED)
+                .withName("dummyenv-CDP_DES-ResourceGroup")
+                .withType(ResourceType.AZURE_RESOURCE_GROUP)
+                .withReference("uniqueDummyId")
+                .withStatus(CommonStatus.CREATED)
                 .build();
         when(resourceRetriever.findByEnvironmentIdAndType(ENVIRONMENT_ID, ResourceType.AZURE_DISK_ENCRYPTION_SET))
                 .thenReturn(Optional.of(desCloudResource));

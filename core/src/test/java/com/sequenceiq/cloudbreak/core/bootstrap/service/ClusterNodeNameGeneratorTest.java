@@ -165,7 +165,7 @@ public class ClusterNodeNameGeneratorTest {
                 nodeIndex -> {
                     InstanceMetaData instanceMetaData = new InstanceMetaData();
                     instanceMetaData.setInstanceGroup(instanceGroup);
-                    instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
+                    instanceGroup.getInstanceMetaData().add(instanceMetaData);
 
                     if (!fqdns.get(nodeIndex).isBlank()) {
                         instanceMetaData.setDiscoveryFQDN(fqdns.get(nodeIndex));

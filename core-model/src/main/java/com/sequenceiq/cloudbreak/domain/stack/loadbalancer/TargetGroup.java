@@ -46,6 +46,14 @@ public class TargetGroup implements ProvisionEntity {
         return id;
     }
 
+    /**
+     * Need this for Jackson deserialization
+     * @param id entity id
+     */
+    private void setId(Long id) {
+        this.id = id;
+    }
+
     public TargetGroupType getType() {
         return type;
     }

@@ -80,9 +80,9 @@ public abstract class AbstractGcpDatabaseServerStartStopService extends GcpDatab
         GcpDatabaseServerView databaseServerView = new GcpDatabaseServerView(stack.getDatabaseServer());
 
         return List.of(new CloudResource.Builder()
-                .type(ResourceType.GCP_DATABASE)
-                .name(databaseServerView.getDbServerName())
-                .availabilityZone(availabilityZone)
+                .withType(ResourceType.GCP_DATABASE)
+                .withName(databaseServerView.getDbServerName())
+                .withAvailabilityZone(availabilityZone)
                 .build());
     }
 }

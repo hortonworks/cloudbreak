@@ -45,7 +45,7 @@ public class TemplateToInstanceTemplateV4ResponseConverter {
             ofNullable(source.getSecretAttributes()).ifPresent(attr -> parameters.putAll(new Json(attr).getMap()));
             providerParameterCalculator.parse(parameters, response);
         }
-        response.setCloudPlatform(CloudPlatform.valueOf(source.cloudPlatform()));
+        response.setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
         return response;
     }
 

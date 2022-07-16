@@ -204,7 +204,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
                 .collect(Collectors.toSet());
     }
 
-    public Set<InstanceMetaData> getInstanceMetaDataSet() {
+    public Set<InstanceMetaData> getInstanceMetaData() {
         return instanceMetaData;
     }
 

@@ -101,7 +101,7 @@ public class InstanceGroupService {
                         instanceGroupNetworkService.savePure(ig.getInstanceGroupNetwork());
                     }
                     InstanceGroup instanceGroup = repository.save(ig);
-                    ig.getInstanceMetaDataSet().forEach(instanceMetaDataService::save);
+                    ig.getInstanceMetaData().forEach(instanceMetaDataService::save);
                     return instanceGroup;
                 }).collect(Collectors.toSet());
     }

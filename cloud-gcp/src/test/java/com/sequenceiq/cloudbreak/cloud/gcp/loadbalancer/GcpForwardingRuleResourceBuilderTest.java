@@ -121,29 +121,29 @@ public class GcpForwardingRuleResourceBuilderTest {
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 8080);
         resource = new CloudResource.Builder()
-                .type(ResourceType.GCP_FORWARDING_RULE)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("super")
-                .params(parameters)
-                .persistent(true)
+                .withType(ResourceType.GCP_FORWARDING_RULE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withParams(parameters)
+                .withPersistent(true)
                 .build();
 
         backendResource = new CloudResource.Builder()
-                .type(ResourceType.GCP_BACKEND_SERVICE)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("backendsuper")
-                .params(parameters)
-                .persistent(true)
+                .withType(ResourceType.GCP_BACKEND_SERVICE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("backendsuper")
+                .withParams(parameters)
+                .withPersistent(true)
                 .build();
 
         ipResource = new CloudResource.Builder()
-                .type(ResourceType.GCP_RESERVED_IP)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("ipsuper")
-                .persistent(true)
+                .withType(ResourceType.GCP_RESERVED_IP)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("ipsuper")
+                .withPersistent(true)
                 .build();
     }
 
@@ -198,21 +198,21 @@ public class GcpForwardingRuleResourceBuilderTest {
         parameters.put("hcport", 8443);
         parameters.put("trafficports", List.of(443, 11443));
         resource = new CloudResource.Builder()
-                .type(ResourceType.GCP_FORWARDING_RULE)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("super")
-                .params(parameters)
-                .persistent(true)
+                .withType(ResourceType.GCP_FORWARDING_RULE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withParams(parameters)
+                .withPersistent(true)
                 .build();
 
         backendResource = new CloudResource.Builder()
-                .type(ResourceType.GCP_BACKEND_SERVICE)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("backendsuper")
-                .params(parameters)
-                .persistent(true)
+                .withType(ResourceType.GCP_BACKEND_SERVICE)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("backendsuper")
+                .withParams(parameters)
+                .withPersistent(true)
                 .build();
 
         mockCalls(LoadBalancerType.PRIVATE);

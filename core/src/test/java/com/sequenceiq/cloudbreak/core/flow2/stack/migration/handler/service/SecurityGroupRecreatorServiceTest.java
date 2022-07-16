@@ -72,10 +72,10 @@ public class SecurityGroupRecreatorServiceTest {
         String hostGroupName = "hostGroupName";
         CreateResourcesRequest request = new CreateResourcesRequest(cloudContext, cloudCredential, cloudStack, hostGroupName);
         CloudResource cloudResource = CloudResource.builder()
-                .type(ResourceType.AWS_SECURITY_GROUP)
-                .status(CommonStatus.CREATED)
-                .name("name")
-                .params(Collections.emptyMap())
+                .withType(ResourceType.AWS_SECURITY_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
+                .withParams(Collections.emptyMap())
                 .build();
 
         when(group.getName()).thenReturn(hostGroupName);
@@ -98,10 +98,10 @@ public class SecurityGroupRecreatorServiceTest {
         String hostGroupName = "hostGroupName";
         CreateResourcesRequest request = new CreateResourcesRequest(cloudContext, cloudCredential, cloudStack, hostGroupName);
         CloudResource cloudResource = CloudResource.builder()
-                .type(ResourceType.AWS_SECURITY_GROUP)
-                .status(CommonStatus.CREATED)
-                .name("name")
-                .params(Collections.emptyMap())
+                .withType(ResourceType.AWS_SECURITY_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
+                .withParams(Collections.emptyMap())
                 .build();
 
         when(group.getName()).thenReturn(hostGroupName);
@@ -121,10 +121,10 @@ public class SecurityGroupRecreatorServiceTest {
         String hostGroupName = "hostGroupName";
         CreateResourcesRequest request = new CreateResourcesRequest(cloudContext, cloudCredential, cloudStack, hostGroupName);
         CloudResource cloudResource = CloudResource.builder()
-                .type(ResourceType.AWS_SECURITY_GROUP)
-                .status(CommonStatus.CREATED)
-                .name("name")
-                .params(Collections.emptyMap())
+                .withType(ResourceType.AWS_SECURITY_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
+                .withParams(Collections.emptyMap())
                 .build();
 
         when(group.getName()).thenReturn(hostGroupName);

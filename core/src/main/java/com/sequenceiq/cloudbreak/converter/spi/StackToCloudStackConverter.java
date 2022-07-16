@@ -428,7 +428,7 @@ public class StackToCloudStackConverter {
         Template template = instanceGroup.getTemplate();
         Integer rootVolumeSize = template.getRootVolumeSize();
         if (Objects.isNull(rootVolumeSize)) {
-            rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(template.cloudPlatform());
+            rootVolumeSize = defaultRootVolumeSizeProvider.getForPlatform(template.getCloudPlatform());
         }
         return rootVolumeSize;
     }

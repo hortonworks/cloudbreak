@@ -1,12 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class PortDefinition {
 
     private final String from;
 
     private final String to;
 
-    public PortDefinition(String from, String to) {
+    @JsonCreator
+    public PortDefinition(
+            @JsonProperty("from") String from,
+            @JsonProperty("to") String to) {
+
         this.to = to;
         this.from = from;
     }

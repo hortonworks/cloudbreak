@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.model.filesystem;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 import com.sequenceiq.common.model.CloudIdentityType;
-
-import java.util.List;
 
 public abstract class CloudFileSystemView {
 
@@ -14,7 +16,8 @@ public abstract class CloudFileSystemView {
 
     private List<StorageLocationBase> locations;
 
-    protected CloudFileSystemView(CloudIdentityType cloudIdentityType) {
+    @JsonCreator
+    protected CloudFileSystemView(@JsonProperty("cloudIdentityType") CloudIdentityType cloudIdentityType) {
         this.cloudIdentityType = cloudIdentityType;
     }
 

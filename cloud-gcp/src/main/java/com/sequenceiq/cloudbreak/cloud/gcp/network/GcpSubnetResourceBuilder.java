@@ -70,7 +70,7 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
             }
         }
         context.putParameter(SUBNET_NAME, resource.getName());
-        return new Builder().cloudResource(resource).persistent(false).build();
+        return new Builder().cloudResource(resource).withPersistent(false).build();
     }
 
     @Override

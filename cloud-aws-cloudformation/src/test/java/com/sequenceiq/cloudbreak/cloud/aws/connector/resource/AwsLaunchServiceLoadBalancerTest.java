@@ -552,12 +552,12 @@ class AwsLaunchServiceLoadBalancerTest {
 
     private List<CloudResource> createInstances() {
         return List.of(CloudResource.builder()
-                .name(INSTANCE_NAME)
-                .instanceId(INSTANCE_ID)
-                .type(AWS_INSTANCE)
-                .status(CREATED)
-                .params(Map.of())
-                .group(INSTANCE_NAME)
+                .withName(INSTANCE_NAME)
+                .withInstanceId(INSTANCE_ID)
+                .withType(AWS_INSTANCE)
+                .withStatus(CREATED)
+                .withParams(Map.of())
+                .withGroup(INSTANCE_NAME)
                 .build());
     }
 

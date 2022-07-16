@@ -311,8 +311,8 @@ public class AwsRepairTest {
         CloudStack stack = componentTestUtil.getStack(InstanceStatus.CREATE_REQUESTED, InstanceStatus.STARTED);
         List<CloudResource> cloudResources = List.of(
                 CloudResource.builder()
-                        .name(AWS_SUBNET_ID)
-                        .type(ResourceType.AWS_SUBNET)
+                        .withName(AWS_SUBNET_ID)
+                        .withType(ResourceType.AWS_SUBNET)
                         .build(),
                 createVolumeResource(VOLUME_ID_1, INSTANCE_ID_1, SIZE_DISK_1, FSTAB_1, CommonStatus.DETACHED),
                 createVolumeResource(VOLUME_ID_2, INSTANCE_ID_2, SIZE_DISK_2, FSTAB_2, CommonStatus.DETACHED),
@@ -490,12 +490,12 @@ public class AwsRepairTest {
                 .withVolumes(List.of(new VolumeSetAttributes.Volume(volumeId, DEVICE, sizeDisk, VOLUME_TYPE, CloudVolumeUsageType.GENERAL)))
                 .build());
         return CloudResource.builder()
-                .group(WORKER_GROUP)
-                .name(volumeId)
-                .status(status)
-                .type(ResourceType.AWS_VOLUMESET)
-                .instanceId(instanceId)
-                .persistent(true)
-                .params(attributes).build();
+                .withGroup(WORKER_GROUP)
+                .withName(volumeId)
+                .withStatus(status)
+                .withType(ResourceType.AWS_VOLUMESET)
+                .withInstanceId(instanceId)
+                .withPersistent(true)
+                .withParams(attributes).build();
     }
 }

@@ -113,17 +113,17 @@ public class CustomConfigurationProperty implements Serializable, AccountIdAware
         this.serviceType = serviceType;
     }
 
-    public CustomConfigurations getCustomConfigs() {
+    public CustomConfigurations getCustomConfigurations() {
         return customConfigurations;
     }
 
-    public void setCustomConfigs(CustomConfigurations customConfigurations) {
+    public void setCustomConfigurations(CustomConfigurations customConfigurations) {
         this.customConfigurations = customConfigurations;
     }
 
     @Override
     public String getAccountId() {
-        return getCustomConfigs().getAccount();
+        return getCustomConfigurations().getAccount();
     }
 
     @Override

@@ -118,9 +118,9 @@ public class AwsLaunchService {
             boolean existingVPC = awsNetworkView.isExistingVPC();
             boolean existingSubnet = awsNetworkView.isExistingSubnet();
             CloudResource cloudFormationStack = new Builder()
-                    .type(ResourceType.CLOUDFORMATION_STACK)
-                    .availabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
-                    .name(cFStackName)
+                    .withType(ResourceType.CLOUDFORMATION_STACK)
+                    .withAvailabilityZone(ac.getCloudContext().getLocation().getAvailabilityZone().value())
+                    .withName(cFStackName)
                     .build();
             resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
 
@@ -219,18 +219,18 @@ public class AwsLaunchService {
         if (awsNetworkView.isExistingVPC()) {
             String vpcId = awsNetworkView.getExistingVpc();
             CloudResource vpc = new Builder()
-                    .type(ResourceType.AWS_VPC)
-                    .name(vpcId)
-                    .availabilityZone(availabilityZone)
+                    .withType(ResourceType.AWS_VPC)
+                    .withName(vpcId)
+                    .withAvailabilityZone(availabilityZone)
                     .build();
             resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
             resources.add(vpc);
         } else {
             String vpcId = getCreatedVpc(cFStackName, client);
             CloudResource vpc = new Builder()
-                    .type(ResourceType.AWS_VPC)
-                    .availabilityZone(availabilityZone)
-                    .name(vpcId)
+                    .withType(ResourceType.AWS_VPC)
+                    .withAvailabilityZone(availabilityZone)
+                    .withName(vpcId)
                     .build();
             resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
             resources.add(vpc);
@@ -239,18 +239,18 @@ public class AwsLaunchService {
         if (awsNetworkView.isExistingSubnet()) {
             String subnetId = awsNetworkView.getExistingSubnet();
             CloudResource subnet = new Builder()
-                    .type(ResourceType.AWS_SUBNET)
-                    .name(subnetId)
-                    .availabilityZone(availabilityZone)
+                    .withType(ResourceType.AWS_SUBNET)
+                    .withName(subnetId)
+                    .withAvailabilityZone(availabilityZone)
                     .build();
             resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
             resources.add(subnet);
         } else {
             String subnetId = getCreatedSubnet(cFStackName, client);
             CloudResource subnet = new Builder()
-                    .type(ResourceType.AWS_SUBNET)
-                    .name(subnetId)
-                    .availabilityZone(availabilityZone)
+                    .withType(ResourceType.AWS_SUBNET)
+                    .withName(subnetId)
+                    .withAvailabilityZone(availabilityZone)
                     .build();
             resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
             resources.add(subnet);

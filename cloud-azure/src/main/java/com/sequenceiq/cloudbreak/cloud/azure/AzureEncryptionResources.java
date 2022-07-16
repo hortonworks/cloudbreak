@@ -208,10 +208,10 @@ public class AzureEncryptionResources implements EncryptionResources {
         // Resource group is persisted in cloudResource only when it is created by CDP, as part of disk encryption set creation in case of
         // multi-resource group.
         CloudResource rgCloudResource = CloudResource.builder()
-                .name(desResourceGroupName)
-                .type(AZURE_RESOURCE_GROUP)
-                .status(CommonStatus.CREATED)
-                .reference(resourceGroup.id())
+                .withName(desResourceGroupName)
+                .withType(AZURE_RESOURCE_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withReference(resourceGroup.id())
                 .build();
         persistenceNotifier.notifyAllocation(rgCloudResource, cloudContext);
     }
@@ -240,10 +240,10 @@ public class AzureEncryptionResources implements EncryptionResources {
         // Neither of createdSet, createdSet.id() or createdSet.identity().principalId() can be null at this point; polling will fail otherwise
 
         CloudResource desCloudResource = CloudResource.builder()
-                .name(diskEncryptionSetName)
-                .type(AZURE_DISK_ENCRYPTION_SET)
-                .reference(createdSet.id())
-                .status(CommonStatus.CREATED)
+                .withName(diskEncryptionSetName)
+                .withType(AZURE_DISK_ENCRYPTION_SET)
+                .withReference(createdSet.id())
+                .withStatus(CommonStatus.CREATED)
                 .build();
         persistenceNotifier.notifyAllocation(desCloudResource, cloudContext);
 

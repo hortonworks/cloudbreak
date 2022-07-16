@@ -94,11 +94,11 @@ public class AzureTransientDeploymentServiceTest {
 
     private CloudResource createCloudResource(String name, ResourceType resourceType) {
         return new CloudResource.Builder()
-                .name(name)
-                .status(CommonStatus.CREATED)
-                .type(resourceType)
-                .instanceId("instanceId")
-                .params(Collections.emptyMap())
+                .withName(name)
+                .withStatus(CommonStatus.CREATED)
+                .withType(resourceType)
+                .withInstanceId("instanceId")
+                .withParams(Collections.emptyMap())
                 .build();
     }
 }

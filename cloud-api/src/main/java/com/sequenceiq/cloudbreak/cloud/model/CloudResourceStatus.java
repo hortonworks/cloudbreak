@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class CloudResourceStatus {
 
     private final CloudResource cloudResource;
@@ -22,7 +25,13 @@ public class CloudResourceStatus {
         this(cloudResource, status, statusReason, null);
     }
 
-    public CloudResourceStatus(CloudResource cloudResource, ResourceStatus status, String statusReason, Long privateId) {
+    @JsonCreator
+    public CloudResourceStatus(
+            @JsonProperty("cloudResource") CloudResource cloudResource,
+            @JsonProperty("status") ResourceStatus status,
+            @JsonProperty("statusReason") String statusReason,
+            @JsonProperty("privateId") Long privateId) {
+
         this.cloudResource = cloudResource;
         this.status = status;
         this.statusReason = statusReason;

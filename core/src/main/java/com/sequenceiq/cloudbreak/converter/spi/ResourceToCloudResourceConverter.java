@@ -30,14 +30,14 @@ public class ResourceToCloudResourceConverter {
         attributes.ifPresent(attr -> paramsMap.put(CloudResource.ATTRIBUTES, attr));
 
         return new Builder()
-                .type(resource.getResourceType())
-                .name(resource.getResourceName())
-                .reference(resource.getResourceReference())
-                .status(resource.getResourceStatus())
-                .availabilityZone(resource.getAvailabilityZone())
-                .group(resource.getInstanceGroup())
-                .instanceId(resource.getInstanceId())
-                .params(paramsMap)
+                .withType(resource.getResourceType())
+                .withName(resource.getResourceName())
+                .withReference(resource.getResourceReference())
+                .withStatus(resource.getResourceStatus())
+                .withAvailabilityZone(resource.getAvailabilityZone())
+                .withGroup(resource.getInstanceGroup())
+                .withInstanceId(resource.getInstanceId())
+                .withParams(paramsMap)
                 .build();
     }
 }

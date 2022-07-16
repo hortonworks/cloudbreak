@@ -4,13 +4,19 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class SleepConfig {
 
     private final Duration sleepTime;
 
     private final LocalDateTime failUntil;
 
-    public SleepConfig(Duration sleepTime, LocalDateTime failUntil) {
+    @JsonCreator
+    public SleepConfig(
+            @JsonProperty("sleepTime") Duration sleepTime,
+            @JsonProperty("failUntil") LocalDateTime failUntil) {
         this.sleepTime = sleepTime;
         this.failUntil = failUntil;
     }

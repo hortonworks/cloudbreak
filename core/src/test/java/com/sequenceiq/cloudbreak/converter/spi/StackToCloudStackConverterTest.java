@@ -425,13 +425,11 @@ public class StackToCloudStackConverterTest {
         instanceGroups.add(new InstanceGroupDto(instanceGroup, emptyList()));
         Template template = mock(Template.class);
         when(template.getCloudPlatform()).thenReturn("AWS");
-        String platform = "platform";
         int expected = Integer.MAX_VALUE;
         when(instanceGroup.getTemplate()).thenReturn(template);
         when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
         when(template.getRootVolumeSize()).thenReturn(null);
-        when(template.cloudPlatform()).thenReturn(platform);
-        when(defaultRootVolumeSizeProvider.getForPlatform(platform)).thenReturn(expected);
+        when(defaultRootVolumeSizeProvider.getForPlatform("AWS")).thenReturn(expected);
         when(stack.getStack()).thenReturn(stack);
 
         CloudStack result = underTest.convert(stack);

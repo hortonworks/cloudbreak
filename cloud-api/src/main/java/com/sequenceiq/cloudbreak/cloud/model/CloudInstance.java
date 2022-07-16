@@ -26,15 +26,15 @@ public class CloudInstance extends DynamicModel {
 
     public static final String FQDN = "FQDN";
 
-    private String instanceId;
+    private final String instanceId;
 
     private String subnetId;
 
     private String availabilityZone;
 
-    private InstanceTemplate template;
+    private final InstanceTemplate template;
 
-    private InstanceAuthentication authentication;
+    private final InstanceAuthentication authentication;
 
     public CloudInstance(String instanceId,
         InstanceTemplate template,
@@ -54,7 +54,7 @@ public class CloudInstance extends DynamicModel {
             @JsonProperty("authentication") InstanceAuthentication authentication,
             @JsonProperty("subnetId") String subnetId,
             @JsonProperty("availabilityZone") String availabilityZone,
-            @JsonProperty("params") Map<String, Object> params) {
+            @JsonProperty("parameters") Map<String, Object> params) {
         super(params);
         this.instanceId = instanceId;
         this.template = template;

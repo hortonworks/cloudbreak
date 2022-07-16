@@ -140,14 +140,14 @@ class AwsNativeMetadataCollectorApiIntegrationTest {
     void collectLoadBalancerMetadataWhenTheSpecifiedArnsDoNotExist() {
         List<LoadBalancerType> loadbalancerTypes = List.of();
         CloudResource aLoadBalancer = new CloudResource.Builder()
-                .name("aLoadBalancer")
-                .reference("arn:aws:elasticloadbalancing:eu-central-1:152813717728:loadbalancer/net/notexisting-LoadB-1MYWS0111IT2K/2e65a6e6b1a801df")
-                .type(ResourceType.ELASTIC_LOAD_BALANCER)
+                .withName("aLoadBalancer")
+                .withReference("arn:aws:elasticloadbalancing:eu-central-1:152813717728:loadbalancer/net/notexisting-LoadB-1MYWS0111IT2K/2e65a6e6b1a801df")
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER)
                 .build();
         CloudResource secondLoadBalancer = new CloudResource.Builder()
-                .name("secondLoadBalancer")
-                .reference("arn:aws:elasticloadbalancing:eu-central-1:152813717728:loadbalancer/net/notexisting2-LoadB-1MYWS0111IT2K/2e65a6e6b1a801bf")
-                .type(ResourceType.ELASTIC_LOAD_BALANCER)
+                .withName("secondLoadBalancer")
+                .withReference("arn:aws:elasticloadbalancing:eu-central-1:152813717728:loadbalancer/net/notexisting2-LoadB-1MYWS0111IT2K/2e65a6e6b1a801bf")
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER)
                 .build();
         List<CloudResource> resources = List.of(aLoadBalancer, secondLoadBalancer);
 

@@ -110,12 +110,12 @@ public class GcpHealthCheckResourceBuilderTest {
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 8080);
         CloudResource resource = new CloudResource.Builder()
-                .type(ResourceType.GCP_HEALTH_CHECK)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("super")
-                .params(parameters)
-                .persistent(true)
+                .withType(ResourceType.GCP_HEALTH_CHECK)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withParams(parameters)
+                .withPersistent(true)
                 .build();
         Compute.RegionHealthChecks.Insert healthCheckInsert = mock(Compute.RegionHealthChecks.Insert.class);
 
@@ -145,12 +145,12 @@ public class GcpHealthCheckResourceBuilderTest {
         parameters.put("hcport", 8080);
         parameters.put("trafficport", 8080);
         CloudResource resource = new CloudResource.Builder()
-                .type(ResourceType.GCP_HEALTH_CHECK)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("super")
-                .params(parameters)
-                .persistent(true)
+                .withType(ResourceType.GCP_HEALTH_CHECK)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withParams(parameters)
+                .withPersistent(true)
                 .build();
 
         Compute.RegionHealthChecks.Delete healthCheckDelete = mock(Compute.RegionHealthChecks.Delete.class);

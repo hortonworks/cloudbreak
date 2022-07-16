@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Arrays;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class SecurityRule {
 
     private final String cidr;
@@ -10,7 +13,12 @@ public class SecurityRule {
 
     private final String protocol;
 
-    public SecurityRule(String cidr, PortDefinition[] ports, String protocol) {
+    @JsonCreator
+    public SecurityRule(
+            @JsonProperty("cidr") String cidr,
+            @JsonProperty("ports") PortDefinition[] ports,
+            @JsonProperty("protocol") String protocol) {
+
         this.cidr = cidr;
         this.ports = ports;
         this.protocol = protocol;

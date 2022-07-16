@@ -61,8 +61,8 @@ public class AutoScalingGroupHandlerTest {
     @Test
     public void testGetAutoScalingGroups() {
         CloudResource cfResource = CloudResource.builder()
-                .type(ResourceType.CLOUDFORMATION_STACK)
-                .name("cf")
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withName("cf")
                 .build();
         DescribeStackResourcesResult resourcesResult = new DescribeStackResourcesResult();
         StackResource stackResource = new StackResource()

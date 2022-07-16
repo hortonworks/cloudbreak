@@ -43,9 +43,9 @@ public class AwsUpdateServiceTest {
     @Test
     public void updateCloudFormationTemplateResourceWithImageParameter() {
         CloudResource cloudResource = CloudResource.builder()
-                .name("cf")
-                .type(ResourceType.CLOUDFORMATION_STACK)
-                .params(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
+                .withName("cf")
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withParams(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
 
         List<CloudResourceStatus> statuses = underTest.update(ac, stack, Collections.singletonList(cloudResource));
@@ -59,8 +59,8 @@ public class AwsUpdateServiceTest {
     @Test
     public void updateCloudFormationTemplateResourceWithoutImageParameter() {
         CloudResource cloudResource = CloudResource.builder()
-                .name("cf")
-                .type(ResourceType.CLOUDFORMATION_STACK)
+                .withName("cf")
+                .withType(ResourceType.CLOUDFORMATION_STACK)
                 .build();
 
         List<CloudResourceStatus> statuses = underTest.update(ac, stack, Collections.singletonList(cloudResource));
@@ -72,9 +72,9 @@ public class AwsUpdateServiceTest {
     @Test
     public void updateRandomResource() {
         CloudResource cloudResource = CloudResource.builder()
-                .name("cf")
-                .type(ResourceType.AWS_LAUNCHCONFIGURATION)
-                .params(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
+                .withName("cf")
+                .withType(ResourceType.AWS_LAUNCHCONFIGURATION)
+                .withParams(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
 
         List<CloudResourceStatus> statuses = underTest.update(ac, stack, Collections.singletonList(cloudResource));

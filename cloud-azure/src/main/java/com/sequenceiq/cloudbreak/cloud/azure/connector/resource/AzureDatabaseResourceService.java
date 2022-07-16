@@ -133,8 +133,8 @@ public class AzureDatabaseResourceService {
 
     private CloudResource createCloudResource(ResourceType type, String name) {
         return CloudResource.builder()
-                .type(type)
-                .name(name)
+                .withType(type)
+                .withName(name)
                 .build();
     }
 
@@ -176,8 +176,8 @@ public class AzureDatabaseResourceService {
         }
 
         return Lists.newArrayList(new CloudResourceStatus(CloudResource.builder()
-                .type(AZURE_RESOURCE_GROUP)
-                .name(resourceGroupName)
+                .withType(AZURE_RESOURCE_GROUP)
+                .withName(resourceGroupName)
                 .build(), ResourceStatus.DELETED));
     }
 
@@ -202,8 +202,8 @@ public class AzureDatabaseResourceService {
         azureUtils.deleteDatabaseServer(client, cloudResource.getReference(), force);
         persistenceNotifier.notifyDeletion(cloudResource, cloudContext);
         return new CloudResourceStatus(CloudResource.builder()
-                .type(AZURE_DATABASE)
-                .name(cloudResource.getReference())
+                .withType(AZURE_DATABASE)
+                .withName(cloudResource.getReference())
                 .build(), ResourceStatus.DELETED);
     }
 

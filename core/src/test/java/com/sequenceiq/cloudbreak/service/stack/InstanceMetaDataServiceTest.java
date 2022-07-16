@@ -331,10 +331,10 @@ class InstanceMetaDataServiceTest {
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 10, "type");
         volumeSetAttributes.setDiscoveryFQDN("hostname");
         CloudResource cloudResource = CloudResource.builder()
-                .type(ResourceType.AWS_VOLUMESET)
-                .status(CommonStatus.DETACHED)
-                .name("name")
-                .params(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
+                .withType(ResourceType.AWS_VOLUMESET)
+                .withStatus(CommonStatus.DETACHED)
+                .withName("name")
+                .withParams(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
                 .build();
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig"))
                 .thenReturn(List.of(cloudResource));
@@ -361,10 +361,10 @@ class InstanceMetaDataServiceTest {
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 10, "type");
         volumeSetAttributes.setDiscoveryFQDN("any-hostname");
         CloudResource cloudResource = CloudResource.builder()
-                .type(ResourceType.AWS_VOLUMESET)
-                .status(CommonStatus.DETACHED)
-                .name("name")
-                .params(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
+                .withType(ResourceType.AWS_VOLUMESET)
+                .withStatus(CommonStatus.DETACHED)
+                .withName("name")
+                .withParams(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
                 .build();
         when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(CommonStatus.DETACHED, ResourceType.AWS_VOLUMESET, 1L, "ig"))
                 .thenReturn(List.of(cloudResource));

@@ -59,8 +59,10 @@ class AwsCloudWatchServiceTest {
 
     @Test
     void testAddCloudWatchAlarmsForSystemFailures() {
-        CloudResource firstInst = CloudResource.builder().instanceId("i-1").name("i-1").type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED).build();
-        CloudResource secondInst = CloudResource.builder().instanceId("i-2").name("i-2").type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED).build();
+        CloudResource firstInst = CloudResource.builder().withInstanceId("i-1").withName("i-1").withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED).build();
+        CloudResource secondInst = CloudResource.builder().withInstanceId("i-2").withName("i-2").withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED).build();
         AwsCredentialView credentialView = mock(AwsCredentialView.class);
 
         AmazonCloudWatchClient cloudWatchClient = mock(AmazonCloudWatchClient.class);
@@ -76,8 +78,10 @@ class AwsCloudWatchServiceTest {
 
     @Test
     void testAddCloudWatchAlarmsForSystemFailuresWithRecoveryNotSupportedType() {
-        CloudResource firstInst = CloudResource.builder().instanceId("i-1").name("i-1").type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED).build();
-        CloudResource secondInst = CloudResource.builder().instanceId("i-2").name("i-2").type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED).build();
+        CloudResource firstInst = CloudResource.builder().withInstanceId("i-1").withName("i-1").withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED).build();
+        CloudResource secondInst = CloudResource.builder().withInstanceId("i-2").withName("i-2").withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED).build();
         secondInst.putParameter(INSTANCE_TYPE, "m5d.2xlarge");
         AwsCredentialView credentialView = mock(AwsCredentialView.class);
 

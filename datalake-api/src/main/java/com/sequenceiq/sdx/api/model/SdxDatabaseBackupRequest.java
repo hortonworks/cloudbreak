@@ -40,7 +40,7 @@ public class SdxDatabaseBackupRequest {
         this.backupLocation = backupLocation;
     }
 
-    public boolean getCloseConnections() {
+    public boolean isCloseConnections() {
         return closeConnections;
     }
 

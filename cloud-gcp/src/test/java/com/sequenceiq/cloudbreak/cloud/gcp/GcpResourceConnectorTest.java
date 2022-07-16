@@ -246,11 +246,11 @@ public class GcpResourceConnectorTest {
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 1, "type");
         volumeSetAttributes.setDiscoveryFQDN("fqdn");
         return CloudResource.builder()
-                .type(resourceType)
-                .name(name)
-                .group("master")
-                .status(CommonStatus.REQUESTED)
-                .params(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
+                .withType(resourceType)
+                .withName(name)
+                .withGroup("master")
+                .withStatus(CommonStatus.REQUESTED)
+                .withParams(Map.of(CloudResource.ATTRIBUTES, volumeSetAttributes))
                 .build();
     }
 

@@ -241,12 +241,12 @@ public class AwsEfsResourceBuilder extends AbstractAwsComputeBuilder {
 
     private Function<CloudResource, CloudResource> copyResourceWithCreatedStatus() {
         return resource -> new CloudResource.Builder()
-                .persistent(true)
-                .group(resource.getGroup())
-                .type(resource.getType())
-                .status(CommonStatus.CREATED)
-                .name(resource.getName())
-                .params(resource.getParameters())
+                .withPersistent(true)
+                .withGroup(resource.getGroup())
+                .withType(resource.getType())
+                .withStatus(CommonStatus.CREATED)
+                .withName(resource.getName())
+                .withParams(resource.getParameters())
                 .build();
     }
 

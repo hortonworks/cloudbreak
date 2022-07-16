@@ -87,13 +87,13 @@ public class GcpInstanceGroupResourceBuilderTest {
     @Test
     public void testDeleteWhenEverythingGoesFine() throws Exception {
         CloudResource resource = new CloudResource.Builder()
-                .type(ResourceType.GCP_INSTANCE_GROUP)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("super")
-                .instanceId("id-123")
-                .params(new HashMap<>())
-                .persistent(true)
+                .withType(ResourceType.GCP_INSTANCE_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withInstanceId("id-123")
+                .withParams(new HashMap<>())
+                .withPersistent(true)
                 .build();
 
         when(gcpContext.getCompute()).thenReturn(compute);
@@ -145,13 +145,13 @@ public class GcpInstanceGroupResourceBuilderTest {
     @Test
     public void testBuildWithItemsInGroup() throws Exception {
         CloudResource resource = new CloudResource.Builder()
-                .type(ResourceType.GCP_INSTANCE_GROUP)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("super")
-                .instanceId("id-123")
-                .params(new HashMap<>())
-                .persistent(true)
+                .withType(ResourceType.GCP_INSTANCE_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withInstanceId("id-123")
+                .withParams(new HashMap<>())
+                .withPersistent(true)
                 .build();
         Compute.InstanceGroups.Insert instanceGroupsInsert = mock(Compute.InstanceGroups.Insert.class);
 
@@ -176,13 +176,13 @@ public class GcpInstanceGroupResourceBuilderTest {
     @Test
     public void testBuildNoPermission() throws Exception {
         CloudResource resource = new CloudResource.Builder()
-                .type(ResourceType.GCP_INSTANCE_GROUP)
-                .status(CommonStatus.CREATED)
-                .group("master")
-                .name("super")
-                .instanceId("id-123")
-                .params(new HashMap<>())
-                .persistent(true)
+                .withType(ResourceType.GCP_INSTANCE_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withGroup("master")
+                .withName("super")
+                .withInstanceId("id-123")
+                .withParams(new HashMap<>())
+                .withPersistent(true)
                 .build();
         Compute.InstanceGroups.Insert instanceGroupsInsert = mock(Compute.InstanceGroups.Insert.class);
 

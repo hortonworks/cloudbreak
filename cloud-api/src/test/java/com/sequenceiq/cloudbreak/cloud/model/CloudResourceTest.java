@@ -21,7 +21,7 @@ public class CloudResourceTest {
 
     @Test
     void isStackAwareWhenTrueIsSet() {
-        CloudResource cloudResource = generateCloudResourceStub().stackAware(true).build();
+        CloudResource cloudResource = generateCloudResourceStub().withStackAware(true).build();
 
         assertThat(cloudResource).isNotNull();
         assertThat(cloudResource.isStackAware()).isTrue();
@@ -29,7 +29,7 @@ public class CloudResourceTest {
 
     @Test
     void isNonStackAwareWhenFalseIsSet() {
-        CloudResource cloudResource = generateCloudResourceStub().stackAware(false).build();
+        CloudResource cloudResource = generateCloudResourceStub().withStackAware(false).build();
 
         assertThat(cloudResource).isNotNull();
         assertThat(cloudResource.isStackAware()).isFalse();
@@ -37,10 +37,10 @@ public class CloudResourceTest {
 
     private CloudResource.Builder generateCloudResourceStub() {
         return CloudResource.builder()
-                .type(ResourceType.AZURE_MANAGED_IMAGE)
-                .name("test-image")
-                .status(CommonStatus.REQUESTED)
-                .params(Map.of());
+                .withType(ResourceType.AZURE_MANAGED_IMAGE)
+                .withName("test-image")
+                .withStatus(CommonStatus.REQUESTED)
+                .withParams(Map.of());
     }
 
 }

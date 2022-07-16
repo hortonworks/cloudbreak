@@ -97,10 +97,10 @@ public class AwsSecurityGroupResourceBuilderTest {
     @Test
     public void testBuild() throws Exception {
         CloudResource resource = CloudResource.builder()
-                .type(ResourceType.AWS_SECURITY_GROUP)
-                .status(CommonStatus.CREATED)
-                .name("name")
-                .params(Collections.emptyMap())
+                .withType(ResourceType.AWS_SECURITY_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
+                .withParams(Collections.emptyMap())
                 .build();
         String groupId = "groupId";
 
@@ -116,11 +116,11 @@ public class AwsSecurityGroupResourceBuilderTest {
     @Test
     public void testDeleteWhenResultNull() throws Exception {
         CloudResource resource = CloudResource.builder()
-                .type(ResourceType.AWS_SECURITY_GROUP)
-                .status(CommonStatus.CREATED)
-                .name("name")
-                .reference("ref")
-                .params(Collections.emptyMap())
+                .withType(ResourceType.AWS_SECURITY_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
+                .withReference("ref")
+                .withParams(Collections.emptyMap())
                 .build();
 
         when(awsMethodExecutor.execute(any(), eq(null))).thenReturn(null);
@@ -133,11 +133,11 @@ public class AwsSecurityGroupResourceBuilderTest {
     @Test
     public void testDeleteWhenResultNotNull() throws Exception {
         CloudResource resource = CloudResource.builder()
-                .type(ResourceType.AWS_SECURITY_GROUP)
-                .status(CommonStatus.CREATED)
-                .name("name")
-                .reference("ref")
-                .params(Collections.emptyMap())
+                .withType(ResourceType.AWS_SECURITY_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
+                .withReference("ref")
+                .withParams(Collections.emptyMap())
                 .build();
 
         when(awsMethodExecutor.execute(any(), eq(null))).thenReturn(new DeleteSecurityGroupResult());
@@ -150,10 +150,10 @@ public class AwsSecurityGroupResourceBuilderTest {
     @Test
     public void testDeleteWhenReferenceNull() throws Exception {
         CloudResource resource = CloudResource.builder()
-                .type(ResourceType.AWS_SECURITY_GROUP)
-                .status(CommonStatus.CREATED)
-                .name("name")
-                .params(Collections.emptyMap())
+                .withType(ResourceType.AWS_SECURITY_GROUP)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
+                .withParams(Collections.emptyMap())
                 .build();
 
         CloudResource actual = underTest.delete(awsContext, ac, resource, network);

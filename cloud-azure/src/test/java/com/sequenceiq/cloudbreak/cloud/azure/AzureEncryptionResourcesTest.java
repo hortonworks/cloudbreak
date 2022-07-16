@@ -897,17 +897,17 @@ public class AzureEncryptionResourcesTest {
     @Test
     public void testDeleteDiskEncryptionSetShouldDeduceValidDiskEncryptionSetNameAndCheckAndDeleteResourceGroupWhenDesResourceGroupIsCreatedByCDP() {
         CloudResource desCloudResource = new CloudResource.Builder()
-                .name("Des")
-                .type(AZURE_DISK_ENCRYPTION_SET)
-                .reference("/subscriptions/dummySubscriptionId/resourceGroups/dummy-CDP_DES-ResourceGroup/providers/" +
+                .withName("Des")
+                .withType(AZURE_DISK_ENCRYPTION_SET)
+                .withReference("/subscriptions/dummySubscriptionId/resourceGroups/dummy-CDP_DES-ResourceGroup/providers/" +
                         "Microsoft.Compute/diskEncryptionSets/dummyDesId")
-                .status(CREATED)
+                .withStatus(CREATED)
                 .build();
         CloudResource rgCloudResource = new CloudResource.Builder()
-                .name("dummy-CDP_DES-ResourceGroup")
-                .type(AZURE_RESOURCE_GROUP)
-                .reference("uniqueDummyId")
-                .status(CREATED)
+                .withName("dummy-CDP_DES-ResourceGroup")
+                .withType(AZURE_RESOURCE_GROUP)
+                .withReference("uniqueDummyId")
+                .withStatus(CREATED)
                 .build();
         List<CloudResource> resources = List.of(desCloudResource, rgCloudResource);
         DiskEncryptionSetDeletionRequest deletionRequest = new DiskEncryptionSetDeletionRequest.Builder()
@@ -979,10 +979,10 @@ public class AzureEncryptionResourcesTest {
 
     private List<CloudResource> getResources(String desId) {
         CloudResource desCloudResource = new CloudResource.Builder()
-                .name("Des")
-                .type(AZURE_DISK_ENCRYPTION_SET)
-                .reference(desId)
-                .status(CREATED)
+                .withName("Des")
+                .withType(AZURE_DISK_ENCRYPTION_SET)
+                .withReference(desId)
+                .withStatus(CREATED)
                 .build();
         return List.of(desCloudResource);
     }

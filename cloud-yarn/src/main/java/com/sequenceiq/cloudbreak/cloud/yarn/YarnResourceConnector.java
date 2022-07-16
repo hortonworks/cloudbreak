@@ -85,7 +85,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
             yarnApplicationCreationService.createApplication(yarnClient, createApplicationRequest);
         }
 
-        CloudResource yarnApplication = new Builder().type(YARN_APPLICATION).name(applicationName).build();
+        CloudResource yarnApplication = new Builder().withType(YARN_APPLICATION).withName(applicationName).build();
         persistenceNotifier.notifyAllocation(yarnApplication, authenticatedContext.getCloudContext());
         return check(authenticatedContext, Collections.singletonList(yarnApplication));
     }

@@ -46,9 +46,9 @@ public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilde
         for (Integer healthCheckPort : healthPorts) {
             String resourceName = getResourceNameService().resourceName(resourceType(), context.getName(), loadBalancer.getType(), healthCheckPort);
             Map<String, Object> parameters = Map.of(HCPORT, healthCheckPort);
-            resources.add(new Builder().type(resourceType())
-                    .name(resourceName)
-                    .params(parameters)
+            resources.add(new Builder().withType(resourceType())
+                    .withName(resourceName)
+                    .withParams(parameters)
                     .build());
         }
         return resources;

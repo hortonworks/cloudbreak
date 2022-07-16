@@ -450,7 +450,7 @@ class AwsUpscaleServiceTest {
     }
 
     private CloudResource newInstanceResource(String name, String group, String instanceId) {
-        return CloudResource.builder().type(ResourceType.AWS_INSTANCE).status(CommonStatus.CREATED)
-                .name(name).group(group).instanceId(instanceId).build();
+        return CloudResource.builder().withType(ResourceType.AWS_INSTANCE).withStatus(CommonStatus.CREATED)
+                .withName(name).withGroup(group).withInstanceId(instanceId).build();
     }
 }

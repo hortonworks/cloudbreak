@@ -73,12 +73,12 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
             if (mapPublicIpOnLaunch) {
                 String resourceName = getResourceNameService().resourceName(resourceType(), cloudContext.getName(), group.getName(), privateId);
                 return singletonList(CloudResource.builder()
-                        .group(group.getName())
-                        .type(resourceType())
-                        .status(CommonStatus.REQUESTED)
-                        .name(resourceName)
-                        .persistent(true)
-                        .reference(String.valueOf(privateId))
+                        .withGroup(group.getName())
+                        .withType(resourceType())
+                        .withStatus(CommonStatus.REQUESTED)
+                        .withName(resourceName)
+                        .withPersistent(true)
+                        .withReference(String.valueOf(privateId))
                         .build());
             } else {
                 LOGGER.debug("EIp doesn't need because no public ip on launch");
@@ -119,10 +119,10 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
             String associationId = associateAddressResults.get(0).getAssociationId();
             CloudResource cloudResource = CloudResource.builder()
                     .cloudResource(buildableResource.get(0))
-                    .instanceId(instanceId)
-                    .status(CommonStatus.CREATED)
-                    .reference(allocationId)
-                    .params(Map.of(CloudResource.ATTRIBUTES, EIpAttributes.EIpAttributesBuilder.builder()
+                    .withInstanceId(instanceId)
+                    .withStatus(CommonStatus.CREATED)
+                    .withReference(allocationId)
+                    .withParams(Map.of(CloudResource.ATTRIBUTES, EIpAttributes.EIpAttributesBuilder.builder()
                             .withAllocateId(allocationId)
                             .withAssociationId(associationId)
                             .build()))

@@ -125,27 +125,27 @@ public class GcpDatabaseServerLaunchService extends GcpDatabaseServerBaseService
 
     public CloudResource getRdsPort(String availabilityZone) {
         return new CloudResource.Builder()
-                .type(ResourceType.RDS_PORT)
-                .name(Integer.toString(POSTGRESQL_SERVER_PORT))
-                .availabilityZone(availabilityZone)
+                .withType(ResourceType.RDS_PORT)
+                .withName(Integer.toString(POSTGRESQL_SERVER_PORT))
+                .withAvailabilityZone(availabilityZone)
                 .build();
     }
 
     public CloudResource getGcpDatabase(String deploymentName, String availabilityZone) {
         return new CloudResource.Builder()
-                .type(ResourceType.GCP_DATABASE)
-                .name(deploymentName)
-                .availabilityZone(availabilityZone)
+                .withType(ResourceType.GCP_DATABASE)
+                .withName(deploymentName)
+                .withAvailabilityZone(availabilityZone)
                 .build();
     }
 
     public CloudResource getRdsHostName(DatabaseInstance instance, CloudResource.Builder rdsInstance,
         String instanceName, String availabilityZone) {
         return rdsInstance
-                .type(ResourceType.RDS_HOSTNAME)
-                .instanceId(instanceName)
-                .name(getPrivateIpAddressOfDbInstance(instance, instanceName))
-                .availabilityZone(availabilityZone)
+                .withType(ResourceType.RDS_HOSTNAME)
+                .withInstanceId(instanceName)
+                .withName(getPrivateIpAddressOfDbInstance(instance, instanceName))
+                .withAvailabilityZone(availabilityZone)
                 .build();
     }
 

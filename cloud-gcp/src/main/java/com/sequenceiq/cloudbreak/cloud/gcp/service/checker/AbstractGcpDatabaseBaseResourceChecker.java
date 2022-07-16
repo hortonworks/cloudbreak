@@ -12,8 +12,8 @@ public abstract class AbstractGcpDatabaseBaseResourceChecker extends AbstractGcp
     protected CloudResource createOperationAwareCloudResource(CloudResource resource, com.google.api.services.sqladmin.model.Operation operation) {
         return new Builder()
                 .cloudResource(resource)
-                .params(Collections.singletonMap(OPERATION_ID, operation.getName()))
-                .persistent(false)
+                .withParams(Collections.singletonMap(OPERATION_ID, operation.getName()))
+                .withPersistent(false)
                 .build();
     }
 }

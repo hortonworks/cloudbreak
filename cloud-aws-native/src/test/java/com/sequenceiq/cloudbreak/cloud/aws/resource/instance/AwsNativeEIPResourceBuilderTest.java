@@ -154,18 +154,18 @@ public class AwsNativeEIPResourceBuilderTest {
     @Test
     public void testBuildWhenHasBuildableResourceAndInstanceResourceExists() throws Exception {
         CloudResource cloudResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_RESERVED_IP)
-                .status(CommonStatus.CREATED)
-                .params(emptyMap())
+                .withName("name")
+                .withType(ResourceType.AWS_RESERVED_IP)
+                .withStatus(CommonStatus.CREATED)
+                .withParams(emptyMap())
                 .build();
 
         CloudResource instanceResource = CloudResource.builder()
-                .name("name")
-                .type(ResourceType.AWS_INSTANCE)
-                .status(CommonStatus.CREATED)
-                .instanceId("instanceId")
-                .params(emptyMap())
+                .withName("name")
+                .withType(ResourceType.AWS_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withInstanceId("instanceId")
+                .withParams(emptyMap())
                 .build();
 
         when(awsTaggingService.prepareEc2TagSpecification(any(), any())).thenReturn(new TagSpecification());

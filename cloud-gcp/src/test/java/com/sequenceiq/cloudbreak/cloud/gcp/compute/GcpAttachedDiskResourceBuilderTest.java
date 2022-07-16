@@ -147,7 +147,7 @@ public class GcpAttachedDiskResourceBuilderTest {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
 
         context = new GcpContext(cloudContext.getName(), location, "projectId", "serviceAccountId", compute, false, 30, false);
-        List<CloudResource> networkResources = Collections.singletonList(new Builder().type(ResourceType.GCP_NETWORK).name("network-test").build());
+        List<CloudResource> networkResources = Collections.singletonList(new Builder().withType(ResourceType.GCP_NETWORK).withName("network-test").build());
         context.addNetworkResources(networkResources);
 
         privateId = 1L;
@@ -180,10 +180,10 @@ public class GcpAttachedDiskResourceBuilderTest {
         Map<String, Object> params = new HashMap<>();
         params.put(CloudResource.ATTRIBUTES, attributes);
         buildableResource = List.of(CloudResource.builder()
-                .type(ResourceType.GCP_DISK)
-                .status(CommonStatus.REQUESTED)
-                .name("disk")
-                .params(params)
+                .withType(ResourceType.GCP_DISK)
+                .withStatus(CommonStatus.REQUESTED)
+                .withName("disk")
+                .withParams(params)
                 .build());
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");

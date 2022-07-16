@@ -143,10 +143,6 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
         this.instanceType = instanceType;
     }
 
-    public String cloudPlatform() {
-        return cloudPlatform;
-    }
-
     public String getCloudPlatform() {
         return cloudPlatform;
     }

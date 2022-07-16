@@ -30,9 +30,9 @@ class CloudResourceHelperTest {
 
     private static CloudResource createCloudResourceByType(ResourceType resourceType) {
         return CloudResource.builder()
-                .type(resourceType)
-                .status(CommonStatus.CREATED)
-                .name("name")
+                .withType(resourceType)
+                .withStatus(CommonStatus.CREATED)
+                .withName("name")
                 .build();
     }
 

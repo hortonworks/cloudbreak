@@ -47,11 +47,11 @@ public class AzureResourcePersistenceHelperService {
 
     private CloudResource buildCloudResource(String name, String reference, CommonStatus status, ResourceType resourceType) {
         return CloudResource.builder()
-                .name(name)
-                .status(status)
-                .persistent(true)
-                .reference(reference)
-                .type(resourceType)
+                .withName(name)
+                .withStatus(status)
+                .withPersistent(true)
+                .withReference(reference)
+                .withType(resourceType)
                 .build();
     }
 
