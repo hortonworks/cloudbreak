@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.event.setup;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.common.event.FlowPayload;
 
-public class SetupResult extends CloudPlatformResult {
+public class SetupResult extends CloudPlatformResult implements FlowPayload {
 
     public SetupResult(Long resourceId) {
         super(resourceId);
@@ -12,7 +15,11 @@ public class SetupResult extends CloudPlatformResult {
         this(errorDetails.getMessage(), errorDetails, resourceId);
     }
 
-    public SetupResult(String statusReason, Exception errorDetails, Long resourceId) {
+    @JsonCreator
+    public SetupResult(
+            @JsonProperty("statusReason") String statusReason,
+            @JsonProperty("errorDetails") Exception errorDetails,
+            @JsonProperty("resourceId") Long resourceId) {
         super(statusReason, errorDetails, resourceId);
     }
 

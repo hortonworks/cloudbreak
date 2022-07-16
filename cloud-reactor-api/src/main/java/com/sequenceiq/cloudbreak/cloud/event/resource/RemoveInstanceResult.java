@@ -6,13 +6,16 @@ import java.util.stream.Collectors;
 
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.InstancePayload;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.common.event.FlowPayload;
 
-public class RemoveInstanceResult extends CloudPlatformResult implements InstancePayload {
+public class RemoveInstanceResult extends CloudPlatformResult implements InstancePayload, FlowPayload {
 
-    private List<CloudInstance> instances;
+    private final List<CloudInstance> instances;
 
     public RemoveInstanceResult(DownscaleStackResult result, Long resourceId, List<CloudInstance> instances) {
         super(resourceId);
@@ -20,9 +23,21 @@ public class RemoveInstanceResult extends CloudPlatformResult implements Instanc
         init(result.getStatus(), result.getStatusReason(), result.getErrorDetails());
     }
 
-    public RemoveInstanceResult(String statusReason, Exception errorDetails, Long resourceId, List<CloudInstance> instances) {
+    @JsonCreator
+    public RemoveInstanceResult(
+            @JsonProperty("statusReason") String statusReason,
+            @JsonProperty("errorDetails") Exception errorDetails,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("instances") List<CloudInstance> instances) {
         super(statusReason, errorDetails, resourceId);
         this.instances = instances;
+    }
+
+    /**
+     * Need this for Jackson serialization
+     */
+    private List<CloudInstance> getInstances() {
+        return instances;
     }
 
     @Override

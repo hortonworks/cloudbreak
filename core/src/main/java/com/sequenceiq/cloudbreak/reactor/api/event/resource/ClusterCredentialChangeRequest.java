@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformRequest;
 
 public class ClusterCredentialChangeRequest extends ClusterPlatformRequest {
@@ -9,7 +11,12 @@ public class ClusterCredentialChangeRequest extends ClusterPlatformRequest {
 
     private final Type type;
 
-    public ClusterCredentialChangeRequest(Long stackId, String user, String password, Type type) {
+    @JsonCreator
+    public ClusterCredentialChangeRequest(
+            @JsonProperty("stackId") Long stackId,
+            @JsonProperty("user") String user,
+            @JsonProperty("password") String password,
+            @JsonProperty("type") Type type) {
         super(stackId);
         this.user = user;
         this.password = password;

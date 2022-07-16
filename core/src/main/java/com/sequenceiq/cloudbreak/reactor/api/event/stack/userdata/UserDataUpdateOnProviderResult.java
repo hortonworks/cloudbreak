@@ -1,10 +1,15 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.common.event.FlowPayload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 
-public class UserDataUpdateOnProviderResult extends CloudPlatformResult implements Selectable {
-    public UserDataUpdateOnProviderResult(Long resourceId) {
+public class UserDataUpdateOnProviderResult extends CloudPlatformResult implements Selectable, FlowPayload {
+    @JsonCreator
+    public UserDataUpdateOnProviderResult(
+            @JsonProperty("resourceId") Long resourceId) {
         super(resourceId);
     }
 }

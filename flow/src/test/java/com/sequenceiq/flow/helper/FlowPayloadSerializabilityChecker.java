@@ -22,6 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
@@ -31,6 +32,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.event.FlowPayload;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 
 public class FlowPayloadSerializabilityChecker {
@@ -47,7 +49,10 @@ public class FlowPayloadSerializabilityChecker {
         Reflections reflections = new Reflections(BASE_PACKAGE, new SubTypesScanner(true));
         Set<Class<? extends Acceptable>> acceptableClasses = reflections.getSubTypesOf(Acceptable.class);
         Set<Class<?>> filteredAcceptables = getClassesToCheck(acceptableClasses);
-        filteredAcceptables.forEach(this::performChecksCache);
+        Set<Class<? extends FlowPayload>> flowPayloadClasses = reflections.getSubTypesOf(FlowPayload.class);
+        Set<Class<?>> flowPayloads = getClassesToCheck(flowPayloadClasses);
+        Set<Class<?>> allClassesToCheck = SetUtils.union(filteredAcceptables, flowPayloads);
+        allClassesToCheck.forEach(this::performChecksCache);
         if (!validationErrors.isEmpty()) {
             fail("There are " + validationErrors.size() + " violations:\n" + String.join("\n", validationErrors));
         }

@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.reactor.api.event.cluster;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -15,8 +17,12 @@ public class StopStartUpscaleCommissionViaCMRequest extends ClusterPlatformReque
 
     private final List<InstanceMetadataView> servicesNotRunningInstancesToCommission;
 
-    public StopStartUpscaleCommissionViaCMRequest(Long stackId, String hostGroupName, List<InstanceMetadataView> startedInstancesToCommission,
-            List<InstanceMetadataView> servicesNotRunningInstancesToCommission) {
+    @JsonCreator
+    public StopStartUpscaleCommissionViaCMRequest(
+            @JsonProperty("stackId") Long stackId,
+            @JsonProperty("hostGroupName") String hostGroupName,
+            @JsonProperty("startedInstancesToCommission") List<InstanceMetadataView> startedInstancesToCommission,
+            @JsonProperty("servicesNotRunningInstancesToCommission") List<InstanceMetadataView> servicesNotRunningInstancesToCommission) {
         super(stackId);
         this.hostGroupName = hostGroupName;
         this.startedInstancesToCommission = startedInstancesToCommission == null ? Collections.emptyList() : startedInstancesToCommission;

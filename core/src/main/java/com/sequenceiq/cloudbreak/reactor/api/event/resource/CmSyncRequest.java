@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformRequest;
 
 public class CmSyncRequest extends ClusterPlatformRequest {
@@ -10,7 +12,11 @@ public class CmSyncRequest extends ClusterPlatformRequest {
 
     private final String flowTriggerUserCrn;
 
-    public CmSyncRequest(Long stackId, Set<String> candidateImageUuids, String flowTriggerUserCrn) {
+    @JsonCreator
+    public CmSyncRequest(
+            @JsonProperty("stackId") Long stackId,
+            @JsonProperty("candidateImageUuids") Set<String> candidateImageUuids,
+            @JsonProperty("flowTriggerUserCrn") String flowTriggerUserCrn) {
         super(stackId);
         this.candidateImageUuids = candidateImageUuids;
         this.flowTriggerUserCrn = flowTriggerUserCrn;

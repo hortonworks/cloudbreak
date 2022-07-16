@@ -3,7 +3,11 @@ package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 import java.util.Collections;
 import java.util.Set;
 
-public class CollectDownscaleCandidatesResult extends AbstractClusterScaleResult<CollectDownscaleCandidatesRequest> {
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.common.event.FlowPayload;
+
+public class CollectDownscaleCandidatesResult extends AbstractClusterScaleResult<CollectDownscaleCandidatesRequest> implements FlowPayload {
 
     private final Set<Long> privateIds;
 
@@ -12,7 +16,11 @@ public class CollectDownscaleCandidatesResult extends AbstractClusterScaleResult
         this.privateIds = privateIds;
     }
 
-    public CollectDownscaleCandidatesResult(String statusReason, Exception errorDetails, CollectDownscaleCandidatesRequest request) {
+    @JsonCreator
+    public CollectDownscaleCandidatesResult(
+            @JsonProperty("statusReason") String statusReason,
+            @JsonProperty("errorDetails") Exception errorDetails,
+            @JsonProperty("request") CollectDownscaleCandidatesRequest request) {
         super(statusReason, errorDetails, request);
         privateIds = Collections.emptySet();
     }

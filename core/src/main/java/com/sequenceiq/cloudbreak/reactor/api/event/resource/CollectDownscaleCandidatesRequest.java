@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 
 public class CollectDownscaleCandidatesRequest extends AbstractClusterScaleRequest {
@@ -13,9 +15,13 @@ public class CollectDownscaleCandidatesRequest extends AbstractClusterScaleReque
 
     private final Map<String, Set<Long>> hostGroupWithPrivateIds;
 
-    public CollectDownscaleCandidatesRequest(Long stackId, Map<String, Integer> hostGroupWithAdjustment, Map<String, Set<Long>> hostGroupWithPrivateIds,
-            ClusterDownscaleDetails details) {
-        super(stackId, hostGroupWithAdjustment.size() > 0 ? hostGroupWithAdjustment.keySet() : hostGroupWithPrivateIds.keySet());
+    @JsonCreator
+    public CollectDownscaleCandidatesRequest(
+            @JsonProperty("stackId") Long stackId,
+            @JsonProperty("hostGroupWithAdjustment") Map<String, Integer> hostGroupWithAdjustment,
+            @JsonProperty("hostGroupWithPrivateIds") Map<String, Set<Long>> hostGroupWithPrivateIds,
+            @JsonProperty("details") ClusterDownscaleDetails details) {
+        super(stackId, !hostGroupWithAdjustment.isEmpty() ? hostGroupWithAdjustment.keySet() : hostGroupWithPrivateIds.keySet());
         this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.hostGroupWithPrivateIds = hostGroupWithPrivateIds;
         this.details = details;

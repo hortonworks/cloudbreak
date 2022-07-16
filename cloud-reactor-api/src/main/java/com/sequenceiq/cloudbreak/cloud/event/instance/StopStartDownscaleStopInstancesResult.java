@@ -3,10 +3,13 @@ package com.sequenceiq.cloudbreak.cloud.event.instance;
 import java.util.Collections;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.common.event.FlowPayload;
 
-public class StopStartDownscaleStopInstancesResult extends CloudPlatformResult {
+public class StopStartDownscaleStopInstancesResult extends CloudPlatformResult implements FlowPayload {
 
     private final StopStartDownscaleStopInstancesRequest stopInstancesRequest;
 
@@ -19,8 +22,12 @@ public class StopStartDownscaleStopInstancesResult extends CloudPlatformResult {
         this.affectedInstanceStatuses = affectedInstanceStatuses;
     }
 
-    public StopStartDownscaleStopInstancesResult(String statusReason, Exception errorDetails, Long resourceId,
-            StopStartDownscaleStopInstancesRequest request) {
+    @JsonCreator
+    public StopStartDownscaleStopInstancesResult(
+            @JsonProperty("statusReason") String statusReason,
+            @JsonProperty("errorDetails") Exception errorDetails,
+            @JsonProperty("resourceId") Long resourceId,
+            @JsonProperty("stopInstancesRequest") StopStartDownscaleStopInstancesRequest request) {
         super(statusReason, errorDetails, resourceId);
         this.stopInstancesRequest = request;
         this.affectedInstanceStatuses = Collections.emptyList();

@@ -1,11 +1,19 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
-public class MountDisksOnNewHostsResult extends AbstractClusterBootstrapResult<MountDisksOnNewHostsRequest> {
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.common.event.FlowPayload;
+
+public class MountDisksOnNewHostsResult extends AbstractClusterBootstrapResult<MountDisksOnNewHostsRequest> implements FlowPayload {
     public MountDisksOnNewHostsResult(MountDisksOnNewHostsRequest request) {
         super(request);
     }
 
-    public MountDisksOnNewHostsResult(String statusReason, Exception errorDetails, MountDisksOnNewHostsRequest request) {
+    @JsonCreator
+    public MountDisksOnNewHostsResult(
+            @JsonProperty("statusReason") String statusReason,
+            @JsonProperty("errorDetails") Exception errorDetails,
+            @JsonProperty("request") MountDisksOnNewHostsRequest request) {
         super(statusReason, errorDetails, request);
     }
 }

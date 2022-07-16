@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CloudStackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -22,9 +24,16 @@ public class StopStartUpscaleStartInstancesRequest extends CloudStackRequest<Sto
 
     private final int numInstancesToStart;
 
-    public StopStartUpscaleStartInstancesRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack,
-            String hostGroupName, List<CloudInstance> stoppedCloudInstancesInHg, List<CloudInstance> allInstancesInHg,
-            List<CloudInstance> startedInstancesWithServicesNotRunning, int numInstancesToStart) {
+    @JsonCreator
+    public StopStartUpscaleStartInstancesRequest(
+            @JsonProperty("cloudContext") CloudContext cloudContext,
+            @JsonProperty("cloudCredential") CloudCredential cloudCredential,
+            @JsonProperty("cloudStack") CloudStack cloudStack,
+            @JsonProperty("hostGroupName") String hostGroupName,
+            @JsonProperty("stoppedCloudInstancesInHg") List<CloudInstance> stoppedCloudInstancesInHg,
+            @JsonProperty("allInstancesInHg") List<CloudInstance> allInstancesInHg,
+            @JsonProperty("startedInstancesWithServicesNotRunning") List<CloudInstance> startedInstancesWithServicesNotRunning,
+            @JsonProperty("numInstancesToStart") int numInstancesToStart) {
         super(cloudContext, cloudCredential, cloudStack);
         this.hostGroupName = hostGroupName;
         this.stoppedCloudInstancesInHg = stoppedCloudInstancesInHg;

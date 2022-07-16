@@ -100,7 +100,7 @@ public class GcpResourceConnectorTest {
     public void testGetTlsInfoWhenEverythingIsfine() {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
-        Assert.assertEquals(false, underTest.getTlsInfo(authenticatedContext,  cloudStack).usePrivateIpToTls());
+        Assert.assertEquals(false, underTest.getTlsInfo(authenticatedContext,  cloudStack).isUsePrivateIpToTls());
     }
 
     @Test

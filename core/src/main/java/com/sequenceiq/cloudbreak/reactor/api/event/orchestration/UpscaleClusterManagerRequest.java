@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleRequest;
 
 public class UpscaleClusterManagerRequest extends AbstractClusterScaleRequest {
@@ -12,7 +14,12 @@ public class UpscaleClusterManagerRequest extends AbstractClusterScaleRequest {
 
     private final boolean repair;
 
-    public UpscaleClusterManagerRequest(Long stackId, Map<String, Integer> hostGroupWithAdjustment, boolean primaryGatewayChanged, boolean repair) {
+    @JsonCreator
+    public UpscaleClusterManagerRequest(
+            @JsonProperty("stackId") Long stackId,
+            @JsonProperty("hostGroupWithAdjustment") Map<String, Integer> hostGroupWithAdjustment,
+            @JsonProperty("primaryGatewayChanged") boolean primaryGatewayChanged,
+            @JsonProperty("repair") boolean repair) {
         super(stackId, hostGroupWithAdjustment.keySet());
         this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.primaryGatewayChanged = primaryGatewayChanged;

@@ -229,7 +229,7 @@ public class StackCreationService {
     }
 
     public void saveTlsInfo(SecurityConfig securityConfig, TlsInfo tlsInfo) {
-        boolean usePrivateIpToTls = tlsInfo.usePrivateIpToTls();
+        boolean usePrivateIpToTls = tlsInfo.isUsePrivateIpToTls();
         if (usePrivateIpToTls) {
             securityConfig.setUsePrivateIpToTls(true);
             stackUpdater.updateSecurityConfig(securityConfig);

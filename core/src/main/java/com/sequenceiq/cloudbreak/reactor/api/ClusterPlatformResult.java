@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.api;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public abstract class ClusterPlatformResult<R extends ClusterPlatformRequest> implements Selectable {

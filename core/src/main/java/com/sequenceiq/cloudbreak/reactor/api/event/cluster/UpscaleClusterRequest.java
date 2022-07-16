@@ -4,17 +4,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleRequest;
 
 public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
 
-    private boolean repair;
+    private final boolean repair;
 
-    private boolean restartServices;
+    private final boolean restartServices;
 
-    private Map<String, Set<String>> hostGroupsWithHostNames;
+    private final Map<String, Set<String>> hostGroupsWithHostNames;
 
-    private Map<String, Integer> hostGroupWithAdjustment;
+    private final Map<String, Integer> hostGroupWithAdjustment;
 
     public UpscaleClusterRequest(Long stackId, Set<String> hostGroups, boolean repair, boolean restartServices, Map<String, Integer> hostGroupWithAdjustment) {
         super(stackId, hostGroups);
@@ -24,8 +26,14 @@ public class UpscaleClusterRequest extends AbstractClusterScaleRequest {
         this.hostGroupsWithHostNames = new HashMap<>();
     }
 
-    public UpscaleClusterRequest(Long stackId, Set<String> hostGroups, boolean repair, boolean restartServices,
-            Map<String, Set<String>> hostGroupsWithHostNames, Map<String, Integer> hostGroupWithAdjustment) {
+    @JsonCreator
+    public UpscaleClusterRequest(
+            @JsonProperty("stackId") Long stackId,
+            @JsonProperty("hostGroupNames") Set<String> hostGroups,
+            @JsonProperty("repair") boolean repair,
+            @JsonProperty("restartServices") boolean restartServices,
+            @JsonProperty("hostGroupsWithHostNames") Map<String, Set<String>> hostGroupsWithHostNames,
+            @JsonProperty("hostGroupWithAdjustment") Map<String, Integer> hostGroupWithAdjustment) {
         super(stackId, hostGroups);
         this.repair = repair;
         this.restartServices = restartServices;
