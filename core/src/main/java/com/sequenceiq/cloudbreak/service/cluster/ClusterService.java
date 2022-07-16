@@ -453,7 +453,9 @@ public class ClusterService {
     }
 
     public void updateDatabusCredentialByClusterId(Long clusterId, String databusCredentialJsonString) {
-        repository.updateDatabusCredentialByClusterId(clusterId, databusCredentialJsonString);
+        Cluster cluster = repository.getById(clusterId);
+        cluster.setDatabusCredential(databusCredentialJsonString);
+        updateCluster(cluster);
     }
 
     public void addRdsConfigToCluster(Long newRdsConfigId, Long clusterId) {
