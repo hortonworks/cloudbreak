@@ -117,7 +117,7 @@ class ClusterBuilderServiceTest {
         when(mockInstanceGroup.getId()).thenReturn(INSTANCE_GROUP_ID);
         lenient().when(mockHostGroup.getInstanceGroup()).thenReturn(mockInstanceGroup);
 
-        when(mockStackDtoService.getById(STACK_ID)).thenReturn(mockStack);
+        when(mockStackDtoService.getById(STACK_ID, true)).thenReturn(mockStack);
         when(mockClusterApiConnectors.getConnector(mockStack)).thenReturn(mockClusterApi);
         when(mockClusterApi.clusterSetupService()).thenReturn(mockClusterSetupService);
         when(mockHostGroupService.getByClusterWithRecipes(CLUSTER_ID)).thenReturn(Set.of(mockHostGroup));
