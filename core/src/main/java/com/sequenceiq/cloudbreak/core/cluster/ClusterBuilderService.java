@@ -178,7 +178,7 @@ public class ClusterBuilderService implements PaasRemoteDataContextSupplier {
     }
 
     public void prepareExtendedTemplate(Long stackId) {
-        StackDto stackDto = stackDtoService.getById(stackId);
+        StackDto stackDto = stackDtoService.getById(stackId, true);
         StackView stack = stackDto.getStack();
         ClusterView cluster = stackDto.getCluster();
         Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(cluster.getId());
