@@ -269,7 +269,7 @@ public class ClusterHostServiceRunner {
     public NodeReachabilityResult runTargetedClusterServices(@Nonnull StackDto stackDto, Map<String, String> candidateAddresses) {
         try {
             NodeReachabilityResult nodeReachabilityResult = stackUtil.collectReachableAndUnreachableCandidateNodes(stackDto, candidateAddresses.keySet());
-            addGatewaysToCandidatesIfNeeded(stackDto.getAllNodes(), nodeReachabilityResult);
+            addGatewaysToCandidatesIfNeeded(stackDto.getAllPrimaryGatewayInstanceNodes(), nodeReachabilityResult);
             Set<Node> reachableCandidates = nodeReachabilityResult.getReachableNodes();
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
             List<GrainProperties> grainsProperties = grainPropertiesService

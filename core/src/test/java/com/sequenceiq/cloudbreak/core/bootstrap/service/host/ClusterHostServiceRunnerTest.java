@@ -316,12 +316,9 @@ class ClusterHostServiceRunnerTest {
     @Test
     void testDecoratePillarWithMountInfoAndTargetedSaltCall() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices();
-        Template template = new Template();
-        template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
         Set<Node> nodes = Sets.newHashSet(node("fqdn3"), node("gateway1"), node("gateway3"));
-        List<InstanceGroupDto> instanceGroups = new ArrayList<>();
-        createInstanceGroup(template, instanceGroups, "gateway1", "gateway2", "1.1.3.1", "1.1.3.2");
-        when(stack.getInstanceGroupDtos()).thenReturn(instanceGroups);
+        Set<Node> gwNodes = Sets.newHashSet(node("gateway1"), node("gateway2"), node("1.1.3.1"), node("1.1.3.2"));
+        when(stack.getAllPrimaryGatewayInstanceNodes()).thenReturn(gwNodes);
         when(stackUtil.collectReachableAndUnreachableCandidateNodes(any(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
         underTest.runTargetedClusterServices(stack, Map.of("fqdn3", "1.1.1.1"));
 

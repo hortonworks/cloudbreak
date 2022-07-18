@@ -73,7 +73,7 @@ public class StackDownscaleActions {
                 stackDownscaleService.startStackDownscale(context, payload);
                 StackView stack = context.getStack();
                 LOGGER.debug("Assembling downscale stack event for stack: {}", stack.getName());
-                StackDto stackDto = stackDtoService.getById(stack.getId(), true);
+                StackDto stackDto = stackDtoService.getById(stack.getId());
                 List<CloudResource> resources = stackDto.getResources()
                         .stream().map(r -> cloudResourceConverter.convert(r))
                         .collect(Collectors.toList());
