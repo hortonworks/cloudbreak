@@ -6,13 +6,13 @@
     "blueprintUpgradeOption": "GA",
     "services": [
       {
-        "refName": "core_settings",
-        "serviceType": "CORE_SETTINGS",
+        "refName": "stub_dfs",
+        "serviceType": "STUB_DFS",
         "serviceConfigs": [
         ],
         "roleConfigGroups": [
           {
-            "refName": "core_settings-STORAGEOPERATIONS-BASE",
+            "refName": "stub_dfs-STORAGEOPERATIONS-BASE",
             "roleType": "STORAGEOPERATIONS",
             "base": true
           }
@@ -301,7 +301,7 @@
         "cardinality": 3,
         "roleConfigGroupsRefNames": [
           "nifi-NIFI_NODE-BASE",
-          "core_settings-STORAGEOPERATIONS-BASE"
+          "stub_dfs-STORAGEOPERATIONS-BASE"
         ]
       },
       {
@@ -309,7 +309,7 @@
         "cardinality": 1,
         "roleConfigGroupsRefNames": [
           "nifiregistry-NIFI_REGISTRY_SERVER-BASE",
-          "core_settings-STORAGEOPERATIONS-BASE"
+          "stub_dfs-STORAGEOPERATIONS-BASE"
         ]
       }
     ]
