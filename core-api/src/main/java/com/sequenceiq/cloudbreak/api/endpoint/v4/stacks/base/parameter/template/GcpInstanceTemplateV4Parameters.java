@@ -28,6 +28,17 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
     @ApiModelProperty
     private Boolean preemptible;
 
+    @ApiModelProperty(notes = "by default false")
+    private Boolean encrypted = Boolean.FALSE;
+
+    public Boolean getEncrypted() {
+        return encrypted;
+    }
+
+    public void setEncrypted(Boolean encrypted) {
+        this.encrypted = encrypted;
+    }
+
     public GcpEncryptionV4Parameters getEncryption() {
         return encryption;
     }
@@ -52,6 +63,7 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
             putIfValueNotNull(map, InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, encryption.getType());
         }
         putIfValueNotNull(map, "preemptible", preemptible);
+        putIfValueNotNull(map, "encrypted", encrypted);
         return map;
     }
 
@@ -88,5 +100,6 @@ public class GcpInstanceTemplateV4Parameters extends InstanceTemplateV4Parameter
         if (preemptible != null) {
             this.preemptible = Boolean.valueOf(preemptible);
         }
+        this.encrypted = getBoolean(parameters, "encrypted");
     }
 }

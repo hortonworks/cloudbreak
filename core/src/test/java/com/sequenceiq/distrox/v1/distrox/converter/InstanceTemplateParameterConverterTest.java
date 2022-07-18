@@ -1,6 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.Assert.assertEquals;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -153,8 +154,10 @@ class InstanceTemplateParameterConverterTest {
             assertThat(encryption.getType()).isEqualTo(EncryptionType.CUSTOM);
             assertThat(encryption.getKeyEncryptionMethod()).isEqualTo(KeyEncryptionMethod.KMS);
             assertThat(encryption.getKey()).isEqualTo(expectedEncryptionKey);
+            assertEquals(gcpInstanceTemplateV4Parameters.getEncrypted(), Boolean.TRUE);
         } else {
             assertThat(encryption).isNull();
+            assertEquals(gcpInstanceTemplateV4Parameters.getEncrypted(), Boolean.FALSE);
         }
     }
 

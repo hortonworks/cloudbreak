@@ -137,7 +137,9 @@ public class InstanceTemplateParameterConverter {
             encryption.setKeyEncryptionMethod(KeyEncryptionMethod.KMS);
             encryption.setKey(encryptionKey);
             response.setEncryption(encryption);
+            response.setEncrypted(Boolean.TRUE);
         } else {
+            response.setEncrypted(Boolean.FALSE);
             LOGGER.info("Environment has not requested for Customer-Managed Encryption with CMEK for GCP disks.");
         }
     }
