@@ -25,7 +25,9 @@ public class MetricsProcessorConfiguration extends AbstractStreamingConfiguratio
     }
 
     public String getRemoteWriteUrl() {
-        return monitoringConfiguration.getRemoteWriteUrl();
+        return StringUtils.isNotBlank(monitoringConfiguration.getRemoteWriteInternalUrl())
+                ? monitoringConfiguration.getRemoteWriteInternalUrl()
+                : monitoringConfiguration.getRemoteWriteUrl();
     }
 
     public boolean isComputeMonitoringSupported() {
