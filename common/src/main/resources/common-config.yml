@@ -28,6 +28,7 @@ telemetry:
     enabled: false
     paas-support: false
     remote-write-url: ""
+    remote-write-internal-url: ""
     scrape-interval-seconds: 60
     dev-stack: false
     status-processor:
