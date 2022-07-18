@@ -50,6 +50,7 @@ import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
@@ -198,6 +199,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     public DistroXTestDto awaitForHostGroup(String hostGroup, InstanceStatus instanceStatus) {
+        if (!getTestContext().getExceptionMap().isEmpty()) {
+            Log.await(LOGGER, String.format("Await for host group should be skipped because of previous error. awaitForHostGroup [%s] - [%s]",
+                    hostGroup, instanceStatus));
+            return this;
+        }
         Optional<InstanceGroupV4Response> instanceGroup = getResponse().getInstanceGroups().stream()
                 .filter(instanceGroupV4Response -> hostGroup.equals(instanceGroupV4Response.getName()))
                 .filter(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
