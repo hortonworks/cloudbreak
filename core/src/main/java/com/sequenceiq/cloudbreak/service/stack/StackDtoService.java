@@ -103,7 +103,7 @@ public class StackDtoService {
     }
 
     public StackDto getById(Long id) {
-        return getById(id, false);
+        return getById(id, true);
     }
 
     public StackDto getById(Long id, boolean fetchResources) {

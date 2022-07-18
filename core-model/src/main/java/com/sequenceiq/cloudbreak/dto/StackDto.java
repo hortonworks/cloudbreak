@@ -388,4 +388,18 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
                 .filter(im -> im.getInstanceGroupName().equals(instanceGroupName))
                 .collect(Collectors.toList());
     }
+
+    public Set<Node> getAllPrimaryGatewayInstanceNodes() {
+        Set<Node> ret = new HashSet<>();
+        getInstanceGroupDtos().forEach(ig -> {
+            InstanceGroupView instanceGroup = ig.getInstanceGroup();
+            ig.getInstanceMetadataViews().stream()
+                    .filter(InstanceMetadataView::isGatewayOrPrimaryGateway)
+                    .forEach(im -> {
+                        ret.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getInstanceId(),
+                                instanceGroup.getTemplate().getInstanceType(), im.getDiscoveryFQDN(), instanceGroup.getGroupName()));
+                    });
+        });
+        return ret;
+    }
 }
