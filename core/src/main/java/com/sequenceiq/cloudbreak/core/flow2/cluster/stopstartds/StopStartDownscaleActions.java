@@ -46,7 +46,6 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StopStartDownscaleTriggerEvent
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -140,7 +139,7 @@ public class StopStartDownscaleActions {
                 }
                 LOGGER.debug("toStopInstanceMetadata: count={}, metadata=[{}]", toStopInstanceMetadataList.size(), toStopInstanceMetadataList);
 
-                List<CloudInstance> cloudInstancesToStop = instanceMetaDataToCloudInstanceConverter.convert(instanceMetaDataList,
+                List<CloudInstance> cloudInstancesToStop = instanceMetaDataToCloudInstanceConverter.convert(toStopInstanceMetadataList,
                         context.getStack().getStack());
 
                 StopStartDownscaleStopInstancesRequest request = new StopStartDownscaleStopInstancesRequest(context.getCloudContext(),
@@ -173,15 +172,9 @@ public class StopStartDownscaleActions {
 
                 handleNotStartedInstances(context, payload.getAffectedInstanceStatuses());
 
-                stopStartDownscaleFlowService.clusterDownscaleFinished(
-                        stack.getId(), context.getHostGroupName(), stoppedInstanceMetadata);
+                stopStartDownscaleFlowService.clusterDownscaleFinished(stack.getId(), context.getHostGroupName(), stoppedInstanceMetadata);
 
                 sendEvent(context, STOPSTART_DOWNSCALE_FINALIZED_EVENT.event(), payload);
-            }
-
-            @Override
-            protected Selectable createRequest(StopStartDownscaleContext context) {
-                return null;
             }
 
             private void handleNotStartedInstances(StopStartDownscaleContext context, List<CloudVmInstanceStatus> cloudVmInstanceStatusList) {
@@ -218,10 +211,7 @@ public class StopStartDownscaleActions {
 
             private Set<String> getHostNamesForPrivateIds(Set<Long> hostIdsToRemove, StackDtoDelegate stack) {
                 return hostIdsToRemove.stream().map(privateId -> {
-                    List<InstanceGroupDto> instanceGroups = stack.getInstanceGroupDtos();
-                    List<InstanceMetadataView> instanceMetaDataList = instanceGroups.stream()
-                            .flatMap(e -> e.getInstanceMetadataViews().stream())
-                            .collect(Collectors.toList());
+                    List<InstanceMetadataView> instanceMetaDataList = stack.getNotTerminatedInstanceMetaData();
                     Optional<InstanceMetadataView> instanceMetadata = stackService.getInstanceMetadata(instanceMetaDataList, privateId);
                     return instanceMetadata.map(InstanceMetadataView::getDiscoveryFQDN).orElse(null);
                 }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
