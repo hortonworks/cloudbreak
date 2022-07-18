@@ -324,6 +324,15 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .validate();
     }
 
+    protected void createDatahubInEnvironment(TestContext testContext, String environmentName) {
+        testContext
+                .given(DistroXTestDto.class)
+                .withEnvironmentName(environmentName)
+                .when(distroXTestClient.create())
+                .validate();
+        waitForDefaultDatahubCreation(testContext);
+    }
+
     protected SdxCloudStorageRequest getCloudStorageRequest(TestContext testContext) {
         String storage = resourcePropertyProvider().getName();
         testContext.given(storage, SdxCloudStorageTestDto.class);
