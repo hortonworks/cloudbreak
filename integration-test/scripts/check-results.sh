@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #please don't add this property to Jenkins
-: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="10.5GB"}
+: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="4.05GB"}
 
 status_code=0
 
