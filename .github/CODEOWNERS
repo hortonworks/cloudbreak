@@ -46,6 +46,9 @@ core/src/main/resources/defaults/blueprints/*/cdp-streaming*.bp                 
 # Wolf team should review data hub template changes
 core/src/main/resources/defaults/clustertemplates/                              @hortonworks/cloudbreak-wolf
 
+# Wolf team should review the network usage in IT
+integration-test/scripts/check-results.sh                                       @hortonworks/cloudbreak-wolf
+
 # Wolf team should review template generation related changes
 template-manager-blueprint/                                                     @hortonworks/cloudbreak-wolf
 template-manager-cmtemplate/                                                    @hortonworks/cloudbreak-wolf
