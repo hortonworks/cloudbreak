@@ -8,8 +8,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,12 +22,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @ExtendWith(MockitoExtension.class)
 class StackSyncServiceTest {
@@ -58,7 +59,7 @@ class StackSyncServiceTest {
         instanceStateCounts.put(InstanceSyncState.RUNNING, running);
         instanceStateCounts.put(InstanceSyncState.DELETED_ON_PROVIDER_SIDE, deleted);
         instanceStateCounts.put(InstanceSyncState.DELETED_BY_PROVIDER, 0);
-        Set<InstanceMetaData> instances = Sets.newHashSet();
+        List<InstanceMetadataView> instances = new ArrayList<>();
         for (int i = 0; i < total; i++) {
             instances.add(new InstanceMetaData());
         }

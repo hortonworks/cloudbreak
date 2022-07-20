@@ -6,19 +6,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.LoadAlert;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
@@ -26,44 +27,44 @@ import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.repository.LoadAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
 
-public class AlertServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AlertServiceTest {
 
     private static final String TEST_ACCOUNT_ID = "accid";
 
     private static final String TEST_USER_CRN = String.format("crn:cdp:iam:us-west-1:%s:user:mockuser@cloudera.com", TEST_ACCOUNT_ID);
 
     @InjectMocks
-    AlertService underTest;
+    private AlertService underTest;
 
     @Mock
-    ClusterService clusterService;
+    private ClusterService clusterService;
 
     @Mock
-    LoadAlertRepository loadAlertRepository;
+    private LoadAlertRepository loadAlertRepository;
 
     @Mock
-    TimeAlertRepository timeAlertRepository;
+    private TimeAlertRepository timeAlertRepository;
 
     @Mock
-    Cluster mockCluster;
+    private Cluster mockCluster;
 
     @Mock
-    LoadAlert mockLoadAlert;
+    private LoadAlert mockLoadAlert;
 
     @Mock
-    TimeAlert mockTimeAlert;
+    private TimeAlert mockTimeAlert;
 
     @Mock
-    RegionAwareCrnGenerator regionAwareCrnGenerator;
+    private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
+    @BeforeEach
+    void setup() {
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
     }
 
     @Test
-    public void testCreateLoadAlert() {
+    void testCreateLoadAlert() {
         Long clusterId = 10L;
         LoadAlert testAlert = getLoadAlert();
         when(clusterService.findById(clusterId)).thenReturn(mockCluster);
@@ -80,7 +81,7 @@ public class AlertServiceTest {
     }
 
     @Test
-    public void testUpdateLoadAlert() {
+    void testUpdateLoadAlert() {
         Long clusterId = 10L;
         Long alertId = 20L;
         LoadAlert testAlert = getLoadAlert();
@@ -99,7 +100,7 @@ public class AlertServiceTest {
     }
 
     @Test
-    public void testDeleteLoadAlert() {
+    void testDeleteLoadAlert() {
         Long clusterId = 10L;
         Long alertId = 20L;
 
@@ -114,7 +115,7 @@ public class AlertServiceTest {
     }
 
     @Test
-    public void testCreateTimeAlert() {
+    void testCreateTimeAlert() {
         Long clusterId = 10L;
         TimeAlert testAlert = getTimeAlert();
         when(clusterService.findById(clusterId)).thenReturn(mockCluster);
@@ -132,7 +133,7 @@ public class AlertServiceTest {
     }
 
     @Test
-    public void testUpdateTimeAlert() {
+    void testUpdateTimeAlert() {
         Long clusterId = 10L;
         Long alertId = 20L;
         TimeAlert testAlert = getTimeAlert();
@@ -153,7 +154,7 @@ public class AlertServiceTest {
     }
 
     @Test
-    public void testDeleteTimeAlert() {
+    void testDeleteTimeAlert() {
         Long clusterId = 10L;
         Long alertId = 20L;
 

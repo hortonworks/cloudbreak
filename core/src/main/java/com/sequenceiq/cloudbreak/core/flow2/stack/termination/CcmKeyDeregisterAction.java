@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.ccm.key.CcmResourceUtil;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.CcmKeyDeregisterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.ClusterProxyDeregisterSuccess;
 
@@ -26,7 +26,7 @@ public class CcmKeyDeregisterAction extends AbstractStackTerminationAction<Clust
 
     @Override
     protected CcmKeyDeregisterRequest createRequest(StackTerminationContext context) {
-        Stack stack = context.getStack();
+        StackDtoDelegate stack = context.getStack();
 
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         String actorCrn = Objects.requireNonNull(userCrn, "userCrn is null");

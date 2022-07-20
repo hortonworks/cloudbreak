@@ -7,12 +7,19 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceLifeCycle;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.domain.InstanceStatusConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
+import com.sequenceiq.cloudbreak.domain.converter.InstanceLifeCycleConverter;
+import com.sequenceiq.cloudbreak.domain.converter.InstanceMetadataTypeConverter;
 
 @Entity
 @Table(name = "InstanceMetaData")
+@Deprecated
 public class InstanceMetaDataView implements ProvisionEntity {
 
     @Id
@@ -30,6 +37,51 @@ public class InstanceMetaDataView implements ProvisionEntity {
 
     @Column(columnDefinition = "TEXT")
     private String statusReason;
+
+    private Long privateId;
+
+    private String privateIp;
+
+    private String publicIp;
+
+    private Integer sshPort;
+
+    private String instanceId;
+
+    private Boolean ambariServer;
+
+    private Boolean clusterManagerServer;
+
+    private String discoveryFQDN;
+
+    @Convert(converter = InstanceMetadataTypeConverter.class)
+    private InstanceMetadataType instanceMetadataType;
+
+    private String localityIndicator;
+
+    private Long startDate;
+
+    private Long terminationDate;
+
+    private String subnetId;
+
+    private String availabilityZone;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json image;
+
+    /**
+     * ID of the virtual network rack the cloud instance is deployed in. Interpretation and syntax are as per the
+     * <a href="https://hadoop.apache.org/docs/current/hadoop-project-dist/hadoop-common/RackAwareness.html">Hadoop Rack Awareness</a> page.
+     */
+    @Column(columnDefinition = "TEXT")
+    private String rackId;
+
+    @Convert(converter = InstanceLifeCycleConverter.class)
+    private InstanceLifeCycle lifeCycle;
+
+    private String variant;
 
     public boolean isTerminated() {
         return InstanceStatus.TERMINATED.equals(instanceStatus);
@@ -57,5 +109,93 @@ public class InstanceMetaDataView implements ProvisionEntity {
 
     public String getStatusReason() {
         return statusReason;
+    }
+
+    public InstanceGroupView getInstanceGroup() {
+        return instanceGroup;
+    }
+
+    public void setInstanceGroup(InstanceGroupView instanceGroup) {
+        this.instanceGroup = instanceGroup;
+    }
+
+    public void setInstanceName(String instanceName) {
+        this.instanceName = instanceName;
+    }
+
+    public void setStatusReason(String statusReason) {
+        this.statusReason = statusReason;
+    }
+
+    public Long getPrivateId() {
+        return privateId;
+    }
+
+    public String getPrivateIp() {
+        return privateIp;
+    }
+
+    public String getPublicIp() {
+        return publicIp;
+    }
+
+    public Integer getSshPort() {
+        return sshPort;
+    }
+
+    public String getInstanceId() {
+        return instanceId;
+    }
+
+    public Boolean getAmbariServer() {
+        return ambariServer;
+    }
+
+    public Boolean getClusterManagerServer() {
+        return clusterManagerServer;
+    }
+
+    public String getDiscoveryFQDN() {
+        return discoveryFQDN;
+    }
+
+    public InstanceMetadataType getInstanceMetadataType() {
+        return instanceMetadataType;
+    }
+
+    public String getLocalityIndicator() {
+        return localityIndicator;
+    }
+
+    public Long getStartDate() {
+        return startDate;
+    }
+
+    public Long getTerminationDate() {
+        return terminationDate;
+    }
+
+    public String getSubnetId() {
+        return subnetId;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public String getRackId() {
+        return rackId;
+    }
+
+    public InstanceLifeCycle getLifeCycle() {
+        return lifeCycle;
+    }
+
+    public String getVariant() {
+        return variant;
+    }
+
+    public Json getImage() {
+        return image;
     }
 }

@@ -5,12 +5,15 @@ import java.util.Set;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 
 public class TestUtil {
 
     public static final String CDH = "CDH";
+
+    public static final String SPARK3 = "SPARK3";
+
+    public static final String FLINK = "FLINK";
 
     public static final String CDH_VERSION = "7.0.0-1.cdh7.0.0.p0.1376867";
 
@@ -31,21 +34,21 @@ public class TestUtil {
 
     private TestUtil() { }
 
-    private static ClusterComponent createClusterComponent(String attributeString, String name, ComponentType componentType, Cluster cluster) {
+    private static ClusterComponentView createClusterComponent(String attributeString, String name, ComponentType componentType, Long clusterId) {
         Json attributes = new Json(attributeString);
-        return new ClusterComponent(componentType, name, attributes, cluster);
+        ClusterComponentView clusterComponentView = new ClusterComponentView();
+        clusterComponentView.setClusterId(clusterId);
+        clusterComponentView.setAttributes(attributes);
+        clusterComponentView.setName(name);
+        clusterComponentView.setComponentType(componentType);
+        return clusterComponentView;
     }
 
-    public static Set<ClusterComponent> clusterComponentSet(Cluster cluster) {
-        ClusterComponent cdhComponent = createClusterComponent(CDH_ATTRIBUTES, CDH, ComponentType.CDH_PRODUCT_DETAILS, cluster);
-        ClusterComponent cdswComponent = createClusterComponent(CDSW_ATTRIBUTES, CDSW, ComponentType.CDH_PRODUCT_DETAILS, cluster);
-        ClusterComponent cmComponent = createClusterComponent(CM_ATTRIBUTES, ComponentType.CM_REPO_DETAILS.name(), ComponentType.CM_REPO_DETAILS, cluster);
+    public static Set<ClusterComponentView> clusterComponentSet(Long clusterId) {
+        ClusterComponentView cdhComponent = createClusterComponent(CDH_ATTRIBUTES, CDH, ComponentType.CDH_PRODUCT_DETAILS, clusterId);
+        ClusterComponentView cdswComponent = createClusterComponent(CDSW_ATTRIBUTES, CDSW, ComponentType.CDH_PRODUCT_DETAILS, clusterId);
+        ClusterComponentView cmComponent = createClusterComponent(CM_ATTRIBUTES, ComponentType.CM_REPO_DETAILS.name(), ComponentType.CM_REPO_DETAILS, clusterId);
         return Set.of(cdhComponent, cdswComponent, cmComponent);
-    }
-
-    public static Cluster clusterComponents(Cluster cluster) {
-        cluster.setComponents(clusterComponentSet(cluster));
-        return  cluster;
     }
 
     public static ApiParcel apiParcel(String type, String status) {

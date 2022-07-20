@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,10 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class CandidateUnhealthyInstanceSelector {
@@ -29,30 +29,23 @@ public class CandidateUnhealthyInstanceSelector {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    public Set<InstanceMetaData> selectCandidateUnhealthyInstances(long stackId) {
+    public Set<InstanceMetadataView> selectCandidateUnhealthyInstances(long stackId) {
         Map<HostName, String> hostStatuses = clusterService.getHostStatuses(stackId);
         LOGGER.debug("HostStatuses: {}", hostStatuses);
-        Set<InstanceMetaData> candidateUnhealthyInstances = hostStatuses.entrySet().stream()
+        List<String> hostnames = hostStatuses.entrySet().stream()
                 .filter(entry -> isUnhealthyStatus(entry.getValue()))
                 .map(Map.Entry::getKey)
                 .map(HostName::value)
                 .filter(Objects::nonNull)
-                .map(hostName -> instanceMetaDataService.findHostInStack(stackId, hostName))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .filter(CandidateUnhealthyInstanceSelector::isAWorker)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
+
+        List<InstanceMetadataView> candidateUnhealthyInstances = instanceMetaDataService.findAllWorkerWithHostnamesInStack(stackId, hostnames);
         LOGGER.debug("Candidate Unhealthy Instances: {}", candidateUnhealthyInstances);
-        return candidateUnhealthyInstances;
+        return new HashSet<>(candidateUnhealthyInstances);
     }
 
     private static boolean isUnhealthyStatus(String status) {
         // FIXME "UNKNOWN" is Ambari-specific
         return "UNKNOWN".equals(status);
     }
-
-    private static boolean isAWorker(InstanceMetaData instanceMetaData) {
-        return instanceMetaData.getInstanceGroup().getInstanceGroupType().equals(InstanceGroupType.CORE);
-    }
-
 }

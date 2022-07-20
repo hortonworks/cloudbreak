@@ -20,9 +20,9 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -30,7 +30,7 @@ public abstract class AbstractClusterUpgradeValidationAction<P extends Payload>
         extends AbstractAction<ClusterUpgradeValidationState, ClusterUpgradeValidationStateSelectors, StackContext, P> {
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
@@ -48,7 +48,7 @@ public abstract class AbstractClusterUpgradeValidationAction<P extends Payload>
     @Override
     protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<ClusterUpgradeValidationState,
             ClusterUpgradeValidationStateSelectors> stateContext, P payload) {
-        Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
+        StackDto stack = stackDtoService.getById(payload.getResourceId());
 
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
@@ -58,7 +58,7 @@ public abstract class AbstractClusterUpgradeValidationAction<P extends Payload>
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
+                .withWorkspaceId(stack.getWorkspaceId())
                 .withUserName(stack.getCreator().getUserName())
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                 .withTenantId(stack.getTenant().getId())

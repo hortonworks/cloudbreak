@@ -1,13 +1,12 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
+import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-
-import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
-import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -27,7 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -77,8 +76,11 @@ public class ParcelUrlProviderTest {
         verifyNoInteractions(parcelService);
     }
 
-    private Set<ClusterComponent> createClusterComponents() {
-        return Collections.singleton(new ClusterComponent(ComponentType.CDH_PRODUCT_DETAILS, "SPARK3", null, null));
+    private Set<ClusterComponentView> createClusterComponents() {
+        ClusterComponentView clusterComponent = new ClusterComponentView();
+        clusterComponent.setComponentType(ComponentType.CDH_PRODUCT_DETAILS);
+        clusterComponent.setName("SPARK3");
+        return Collections.singleton(clusterComponent);
     }
 
     private Image createImage(StackRepoDetails stackRepoDetails) {

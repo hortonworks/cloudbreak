@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster;
 
+import static org.mockito.Mockito.when;
+
 import java.util.Map;
 
 import org.assertj.core.api.Assertions;
@@ -9,16 +11,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.StateContext;
 
-import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -29,7 +30,7 @@ class AbstractClusterActionTest {
     private static final long STACK_ID = 1L;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private FlowParameters flowParameters;
@@ -40,23 +41,22 @@ class AbstractClusterActionTest {
     @InjectMocks
     private final MockClusterAction underTest = new MockClusterAction();
 
-    private ClusterView clusterView;
+    @Spy
+    private ClusterView cluster;
 
-    private StackView stackView;
+    @Spy
+    private StackView stack;
 
     @BeforeEach
     void setUp() {
-        clusterView = new ClusterView();
-        clusterView.setId(2L);
-        clusterView.setName("cluster-name");
-        clusterView.setWorkspace(TestUtil.workspace(3L, "workspace"));
+        when(cluster.getName()).thenReturn("cluster-name");
 
-        stackView = TestUtil.stackView();
-        stackView.setResourceCrn("resource-crn");
-        stackView.setEnvironmentCrn("env-crn");
-        stackView.setClusterView(clusterView);
+        when(stack.getResourceCrn()).thenReturn("resource-crn");
+        when(stack.getEnvironmentCrn()).thenReturn("env-crn");
+        when(stack.getWorkspaceName()).thenReturn("workspace");
 
-        Mockito.when(stackService.getViewByIdWithoutAuth(STACK_ID)).thenReturn(stackView);
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getClusterViewByStackId(STACK_ID)).thenReturn(cluster);
     }
 
     @Test
@@ -65,9 +65,9 @@ class AbstractClusterActionTest {
 
         Assertions.assertThat(MDC.getMap())
                 .containsEntry(LoggerContextKey.RESOURCE_TYPE.toString(), "CLUSTER")
-                .containsEntry(LoggerContextKey.RESOURCE_NAME.toString(), clusterView.getName())
-                .containsEntry(LoggerContextKey.RESOURCE_CRN.toString(), stackView.getResourceCrn())
-                .containsEntry(LoggerContextKey.ENVIRONMENT_CRN.toString(), stackView.getEnvironmentCrn());
+                .containsEntry(LoggerContextKey.RESOURCE_NAME.toString(), cluster.getName())
+                .containsEntry(LoggerContextKey.RESOURCE_CRN.toString(), stack.getResourceCrn())
+                .containsEntry(LoggerContextKey.ENVIRONMENT_CRN.toString(), stack.getEnvironmentCrn());
     }
 
     static class MockClusterAction extends AbstractClusterAction<StackEvent> {

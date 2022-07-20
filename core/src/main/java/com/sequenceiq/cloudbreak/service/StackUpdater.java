@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class StackUpdater {
@@ -52,10 +53,9 @@ public class StackUpdater {
         return doUpdateStackStatus(stackId, status, DetailedStackStatus.UNKNOWN, statusReason);
     }
 
-    public void updateStackSecurityConfig(Stack stack, SecurityConfig securityConfig) {
+    public void updateStackSecurityConfig(StackView stack, SecurityConfig securityConfig) {
         securityConfig = securityConfigService.save(securityConfig);
-        stack.setSecurityConfig(securityConfig);
-        stackService.save(stack);
+        stackService.updateSecurityConfigByStackId(stack.getId(), securityConfig);
     }
 
     public Stack updateClusterProxyRegisteredFlag(Stack stack, boolean registered) {
@@ -63,10 +63,8 @@ public class StackUpdater {
         return stackService.save(stack);
     }
 
-    public Stack updateStackVersion(Long stackId, String stackVersion) {
-        Stack stack = stackService.getByIdWithTransaction(stackId);
-        stack.setStackVersion(stackVersion);
-        return stackService.save(stack);
+    public void updateStackVersion(Long stackId, String stackVersion) {
+        stackService.updateStackVersion(stackId, stackVersion);
     }
 
     private Stack doUpdateStackStatus(Long stackId, Status newStatus, DetailedStackStatus newDetailedStatus, String statusReason) {

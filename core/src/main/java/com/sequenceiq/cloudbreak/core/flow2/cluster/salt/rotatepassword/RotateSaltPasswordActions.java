@@ -17,12 +17,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateService;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
-import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction;
-import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordFailureResponse;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordSuccessResponse;
+import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
 
 @Configuration
 public class RotateSaltPasswordActions {
@@ -35,58 +34,72 @@ public class RotateSaltPasswordActions {
     @Inject
     private StackUpdaterService stackUpdaterService;
 
+    @Inject
+    private RotateSaltPasswordService rotateSaltPasswordService;
+
     @Bean(name = "ROTATE_SALT_PASSWORD_STATE")
     public Action<?, ?> rotateSaltPassword() {
-        return new AbstractStackCreationAction<>(StackEvent.class) {
+        return new RotateSaltPasswordAction<>(RotateSaltPasswordRequest.class) {
 
             @Override
-            protected void doExecute(StackCreationContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void prepareExecution(RotateSaltPasswordRequest payload, Map<Object, Object> variables) {
+                super.prepareExecution(payload, variables);
+                variables.put(REASON, payload.getReason());
+            }
+
+            @Override
+            protected void doExecute(RotateSaltPasswordContext context, RotateSaltPasswordRequest payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Rotating salt password for stack {}", context.getStack().getResourceCrn());
-                saltUpdateService.rotateSaltPassword(context.getStack());
+                saltUpdateService.rotateSaltPassword(context.getStackId());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackCreationContext context) {
-                return new RotateSaltPasswordRequest(context.getStack().getId());
+            protected Selectable createRequest(RotateSaltPasswordContext context) {
+                return new RotateSaltPasswordRequest(context.getStack().getId(), context.getReason());
             }
         };
     }
 
     @Bean(name = "ROTATE_SALT_PASSWORD_SUCCESS_STATE")
     public Action<?, ?> rotateSaltPasswordFinished() {
-        return new AbstractStackCreationAction<>(RotateSaltPasswordSuccessResponse.class) {
+        return new RotateSaltPasswordAction<>(RotateSaltPasswordSuccessResponse.class) {
 
             @Override
-            protected void doExecute(StackCreationContext context, RotateSaltPasswordSuccessResponse payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(RotateSaltPasswordContext context, RotateSaltPasswordSuccessResponse payload, Map<Object, Object> variables)
+                    throws Exception {
                 LOGGER.info("Rotating salt password for stack {} finished", context.getStack().getResourceCrn());
                 stackUpdaterService.updateStatus(payload.getResourceId(), DetailedStackStatus.AVAILABLE,
                         CLUSTER_SALT_PASSWORD_ROTATE_FINISHED, "SaltStack user password rotated");
+                rotateSaltPasswordService.sendSuccessUsageReport(context.getStack().getResourceCrn(), context.getReason());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackCreationContext context) {
-                return new StackEvent(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_FINISHED_EVENT.event(), context.getStack().getId());
+            protected Selectable createRequest(RotateSaltPasswordContext context) {
+                return new StackEvent(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_FINISHED_EVENT.event(), context.getStackId());
             }
         };
     }
 
     @Bean(name = "ROTATE_SALT_PASSWORD_FAILED_STATE")
     public Action<?, ?> rotateSaltPasswordFailed() {
-        return new AbstractStackCreationAction<>(RotateSaltPasswordFailureResponse.class) {
+        return new RotateSaltPasswordAction<>(RotateSaltPasswordFailureResponse.class) {
 
             @Override
-            protected void doExecute(StackCreationContext context, RotateSaltPasswordFailureResponse payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(RotateSaltPasswordContext context, RotateSaltPasswordFailureResponse payload, Map<Object, Object> variables)
+                    throws Exception {
                 LOGGER.warn("Rotating salt password for stack {} failed", context.getStack().getResourceCrn());
                 stackUpdaterService.updateStatusAndSendEventWithArgs(payload.getResourceId(), DetailedStackStatus.SALT_UPDATE_FAILED,
                         CLUSTER_SALT_PASSWORD_ROTATE_FAILED, "Failed to rotate SaltStack user password", payload.getException().getMessage());
+                rotateSaltPasswordService.sendFailureUsageReport(context.getStack().getResourceCrn(), context.getReason(),
+                        payload.getException().getMessage());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(StackCreationContext context) {
-                return new StackEvent(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
+            protected Selectable createRequest(RotateSaltPasswordContext context) {
+                return new StackEvent(RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

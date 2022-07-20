@@ -11,7 +11,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.AbstractSdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 
 @Component
@@ -48,5 +50,24 @@ public class SshJUtil {
 
     public DistroXTestDto checkMeteringStatus(DistroXTestDto testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
         return sshJClientActions.checkMeteringStatus(testDto, instanceGroups, hostGroupNames);
+    }
+
+    public <T extends CloudbreakTestDto> T checkCommonMonitoringStatus(T testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames,
+            List<String> verifyMetricNames, List<String> acceptableNokNames) {
+        return sshJClientActions.checkMonitoringStatus(testDto, instanceGroups, hostGroupNames, verifyMetricNames, acceptableNokNames);
+    }
+
+    public FreeIpaTestDto checkCommonMonitoringStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient,
+            List<String> verifyMetricNames, List<String> acceptableNokNames) {
+        return sshJClientActions.checkMonitoringStatus(testDto, environmentCrn, freeipaClient, verifyMetricNames, acceptableNokNames);
+    }
+
+    public <T extends CloudbreakTestDto> T checkFilesystemFreeBytesGeneratedMetric(T testDto, List<InstanceGroupV4Response> instanceGroups,
+            List<String> hostGroupNames) {
+        return sshJClientActions.checkFilesystemFreeBytesGeneratedMetric(testDto, instanceGroups, hostGroupNames);
+    }
+
+    public FreeIpaTestDto checkFilesystemFreeBytesGeneratedMetric(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
+        return sshJClientActions.checkFilesystemFreeBytesGeneratedMetric(testDto, environmentCrn, freeipaClient);
     }
 }

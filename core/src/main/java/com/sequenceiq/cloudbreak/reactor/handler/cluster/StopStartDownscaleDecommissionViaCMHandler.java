@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTEREDCMMAINTMODE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTERINGCMMAINTMODE;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -23,18 +24,15 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -53,9 +51,6 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private HostGroupService hostGroupService;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
@@ -88,10 +83,7 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
             Set<String> hostNames = getHostNamesForPrivateIds(request.getInstanceIdsToDecommission(), stack);
             LOGGER.debug("Attempting to decommission hosts. count={}, hostnames={}", hostNames.size(), hostNames);
 
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), request.getHostGroupName())
-                    .orElseThrow(NotFoundException.notFound("hostgroup", request.getHostGroupName()));
-
-            Map<String, InstanceMetaData> hostsToRemove = clusterDecomissionService.collectHostsToRemove(hostGroup, hostNames);
+            Map<String, InstanceMetadataView> hostsToRemove = clusterDecomissionService.collectHostsToRemove(request.getHostGroupName(), hostNames);
             List<String> missingHostsInCm = Collections.emptyList();
             if (hostNames.size() != hostsToRemove.size()) {
                 missingHostsInCm = hostNames.stream()
@@ -163,21 +155,23 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
 
     private Set<String> getHostNamesForPrivateIds(Set<Long> hostIdsToRemove, Stack stack) {
         return hostIdsToRemove.stream().map(privateId -> {
-            Optional<InstanceMetaData> instanceMetadata = stackService.getInstanceMetadata(stack.getInstanceMetaDataAsList(), privateId);
-            return instanceMetadata.map(InstanceMetaData::getDiscoveryFQDN).orElse(null);
+            Optional<InstanceMetadataView> instanceMetadata = stackService.getInstanceMetadata(stack.getNotTerminatedInstanceMetaData(), privateId);
+            return instanceMetadata.map(InstanceMetadataView::getDiscoveryFQDN).orElse(null);
         }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
     }
 
-    private void updateInstanceStatuses(Map<String, InstanceMetaData> instanceMetadataMap, Set<String> fqdnsRemoved,
+    private void updateInstanceStatuses(Map<String, InstanceMetadataView> instanceMetadataMap, Set<String> fqdnsRemoved,
             InstanceStatus instanceStatus, String statusReason) {
+        List<Long> decommissionedInstanceIds = new ArrayList<>();
         for (String fqdn : fqdnsRemoved) {
-            InstanceMetaData instanceMetaData = instanceMetadataMap.get(fqdn);
+            InstanceMetadataView instanceMetaData = instanceMetadataMap.get(fqdn);
             if (instanceMetaData == null) {
                 throw new RuntimeException(
-                        String.format("Unexpected fqdn decommissioned. Not present in requsted list. unexpected fqdn=[%s], ExpectedSet=[%s]",
-                                fqdn, instanceMetadataMap));
+                        String.format("Unexpected fqdn decommissioned. Not present in requested list. unexpected fqdn=[%s], ExpectedSet=[%s]",
+                                fqdn, instanceMetadataMap.keySet()));
             }
-            instanceMetaDataService.updateInstanceStatus(instanceMetaData, instanceStatus, statusReason);
+            decommissionedInstanceIds.add(instanceMetaData.getId());
         }
+        instanceMetaDataService.updateInstanceStatuses(decommissionedInstanceIds, instanceStatus, statusReason);
     }
 }

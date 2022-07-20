@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -79,9 +79,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
 
-    private final Map<String, CloudbreakTestDto> resourceNames = new LinkedHashMap<>();
+    private final Map<String, CloudbreakTestDto> resourceNames = new ConcurrentHashMap<>();
 
-    private final Map<String, CloudbreakTestDto> resourceCrns = new LinkedHashMap<>();
+    private final Map<String, CloudbreakTestDto> resourceCrns = new ConcurrentHashMap<>();
 
     private final Map<String, Map<Class<? extends MicroserviceClient>, MicroserviceClient>> clients = new HashMap<>();
 
@@ -1053,7 +1053,7 @@ public abstract class TestContext implements ApplicationContextAware {
             return entity;
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        CloudbreakTestDto awaitEntity = get(key);
+        CloudbreakTestDto awaitEntity = entity == null ? get(key) : entity;
         instanceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter,
                 flowUtilSingleStatus.getPollingDurationOrTheDefault(runningParameter), maxRetry);
         return entity;

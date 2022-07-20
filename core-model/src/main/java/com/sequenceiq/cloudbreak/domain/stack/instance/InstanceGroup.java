@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.domain.stack.instance;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -9,7 +11,6 @@ import java.util.stream.Collectors;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Convert;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -36,6 +37,8 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 import com.sequenceiq.common.model.CloudIdentityType;
@@ -45,7 +48,7 @@ import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 @NamedEntityGraph(name = "InstanceGroup.instanceMetaData",
         attributeNodes = @NamedAttributeNode("instanceMetaData"))
 @Entity
-public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup> {
+public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>, InstanceGroupView {
 
     public static final String IDENTITY_TYPE_ATTRIBUTE = "identityType";
 
@@ -85,9 +88,8 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     @ManyToMany(mappedBy = "instanceGroups", fetch = FetchType.LAZY)
     private Set<TargetGroup> targetGroups = new HashSet<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Column(name = "availabilityzone")
-    private Set<String> availabilityZones = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "instanceGroup")
+    private Set<AvailabilityZone> availabilityZones = new HashSet<>();
 
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true)
     private InstanceGroupNetwork instanceGroupNetwork;
@@ -186,7 +188,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     public Set<InstanceMetaData> getUnattachedInstanceMetaDataSet() {
         return instanceMetaData.stream()
-                .filter(metaData -> metaData.getInstanceStatus() == InstanceStatus.CREATED)
+                .filter(metaData -> metaData.getInstanceStatus() == InstanceStatus.CREATED || metaData.getInstanceStatus() == InstanceStatus.DECOMMISSIONED)
                 .collect(Collectors.toSet());
     }
 
@@ -289,10 +291,10 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
     }
 
     public Set<String> getAvailabilityZones() {
-        return availabilityZones;
+        return availabilityZones.stream().map(AvailabilityZone::getAvailabilityZone).collect(Collectors.toSet());
     }
 
-    public void setAvailabilityZones(Set<String> availabilityZones) {
+    public void setAvailabilityZones(Set<AvailabilityZone> availabilityZones) {
         this.availabilityZones = availabilityZones;
     }
 
@@ -312,5 +314,9 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
                 ", instanceGroupType=" + instanceGroupType +
                 ", stack=" + stack.getName() +
                 '}';
+    }
+
+    public List<InstanceMetadataView> getAllAvailableInstanceMetadata() {
+        return new ArrayList<>(getNotTerminatedAndNotZombieInstanceMetaDataSet());
     }
 }

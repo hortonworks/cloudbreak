@@ -3,33 +3,33 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 
-public class EnvironmentUseCaseMapperTest {
+class EnvironmentUseCaseMapperTest {
 
     private EnvironmentUseCaseMapper underTest;
 
     @BeforeEach()
-    public void setUp() {
+    void setUp() {
         underTest = new EnvironmentUseCaseMapper();
-        Whitebox.setInternalState(underTest, "cdpRequestProcessingStepMapper", new CDPRequestProcessingStepMapper());
+        ReflectionTestUtils.setField(underTest, "cdpRequestProcessingStepMapper", new CDPRequestProcessingStepMapper());
     }
 
     @Test
-    public void testNullFlowDetailsMappedToUnset() {
+    void testNullFlowDetailsMappedToUnset() {
         Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.UNSET, underTest.useCase(null));
     }
 
     @Test
-    public void testEmptyFlowDetailsMappedToUnset() {
+    void testEmptyFlowDetailsMappedToUnset() {
         Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.UNSET, underTest.useCase(new FlowDetails()));
     }
 
     @Test
-    public void testOtherNextFlowStateMappedToUnsetUseCase() {
+    void testOtherNextFlowStateMappedToUnsetUseCase() {
         Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.UNSET,
                 mapFlowDetailsToUseCase("SOME_STATE"));
         Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.UNSET,
@@ -37,7 +37,7 @@ public class EnvironmentUseCaseMapperTest {
     }
 
     @Test
-    public void testInitNextFlowStatesMappedToStartedUseCases() {
+    void testInitNextFlowStatesMappedToStartedUseCases() {
         Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.CREATE_STARTED,
                 mapFlowDetailsWithFlowTypeToUseCase("INIT_STATE", "EnvCreationFlowConfig"));
         Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.DELETE_STARTED,
@@ -49,7 +49,7 @@ public class EnvironmentUseCaseMapperTest {
     }
 
     @Test
-    public void testInitNextFlowStateWithIncorrectFlowTypeMappedToUnsetUseCase() {
+    void testInitNextFlowStateWithIncorrectFlowTypeMappedToUnsetUseCase() {
         Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.UNSET,
                 mapFlowDetailsToUseCase("INIT_STATE"));
         Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.UNSET,
@@ -57,7 +57,7 @@ public class EnvironmentUseCaseMapperTest {
     }
 
     @Test
-    public void testCorrectFinishedAndFailedNextFlowStatesMappedCorrectly() {
+    void testCorrectFinishedAndFailedNextFlowStatesMappedCorrectly() {
         Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.CREATE_FINISHED,
                 mapFlowDetailsToUseCase("ENV_CREATION_FINISHED_STATE"));
         Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.CREATE_FAILED,
@@ -77,7 +77,7 @@ public class EnvironmentUseCaseMapperTest {
     }
 
     @Test
-    public void testOtherFinishedAndFailedNextFlowStatesMappedToUnsetUseCase() {
+    void testOtherFinishedAndFailedNextFlowStatesMappedToUnsetUseCase() {
         Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.UNSET,
                 mapFlowDetailsToUseCase("SOME_OTHER_FINISHED_STATE"));
         Assertions.assertEquals(UsageProto.CDPEnvironmentStatus.Value.UNSET,

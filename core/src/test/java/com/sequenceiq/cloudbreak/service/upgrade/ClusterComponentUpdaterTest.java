@@ -17,7 +17,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterComponentUpdaterTest {
@@ -36,62 +36,61 @@ public class ClusterComponentUpdaterTest {
 
     @Test
     public void testRemoveUnusedCdhProductsFromClusterComponentsWhenThereIsNoComponentToDelete() {
-        Set<ClusterComponent> clusterComponentsByBlueprint = createComponents(Set.of(CDH, FLINK));
-        Set<ClusterComponent> clusterComponentsFromDb = createComponents(Set.of(CDH, FLINK));
+        Set<ClusterComponentView> clusterComponentsByBlueprint = createComponents(Set.of(CDH, FLINK));
+        Set<ClusterComponentView> clusterComponentsFromDb = createComponents(Set.of(CDH, FLINK));
 
-        when(clusterComponentConfigProvider.getComponentsByClusterId(CLUSTER_ID)).thenReturn(clusterComponentsFromDb);
+        when(clusterComponentConfigProvider.getComponentListByType(CLUSTER_ID, ComponentType.CDH_PRODUCT_DETAILS)).thenReturn(clusterComponentsFromDb);
 
         underTest.removeUnusedCdhProductsFromClusterComponents(CLUSTER_ID, clusterComponentsByBlueprint, new ParcelOperationStatus(Map.of(), Map.of()));
 
-        verify(clusterComponentConfigProvider).getComponentsByClusterId(CLUSTER_ID);
+        verify(clusterComponentConfigProvider).getComponentListByType(CLUSTER_ID, ComponentType.CDH_PRODUCT_DETAILS);
         verifyNoMoreInteractions(clusterComponentConfigProvider);
     }
 
     @Test
     public void testRemoveUnusedCdhProductsFromClusterComponentsWhenThereIsNoComponentToDeleteAndAnExtraComponentIsPresent() {
-        Set<ClusterComponent> clusterComponentsByBlueprint = createComponents(Set.of(CDH, FLINK));
-        Set<ClusterComponent> clusterComponentsFromDb = createComponents(Set.of(CDH, FLINK));
-        clusterComponentsFromDb.add(createImageComponent());
+        Set<ClusterComponentView> clusterComponentsByBlueprint = createComponents(Set.of(CDH, FLINK));
+        Set<ClusterComponentView> clusterComponentsFromDb = createComponents(Set.of(CDH, FLINK));
 
-        when(clusterComponentConfigProvider.getComponentsByClusterId(CLUSTER_ID)).thenReturn(clusterComponentsFromDb);
+        when(clusterComponentConfigProvider.getComponentListByType(CLUSTER_ID, ComponentType.CDH_PRODUCT_DETAILS)).thenReturn(clusterComponentsFromDb);
 
         underTest.removeUnusedCdhProductsFromClusterComponents(CLUSTER_ID, clusterComponentsByBlueprint, new ParcelOperationStatus(Map.of(), Map.of()));
 
-        verify(clusterComponentConfigProvider).getComponentsByClusterId(CLUSTER_ID);
+        verify(clusterComponentConfigProvider).getComponentListByType(CLUSTER_ID, ComponentType.CDH_PRODUCT_DETAILS);
         verifyNoMoreInteractions(clusterComponentConfigProvider);
     }
 
     @Test
     public void testRemoveUnusedCdhProductsFromClusterComponentsWhenThereIsOneComponentToDelete() {
-        Set<ClusterComponent> clusterComponentsByBlueprint = createComponents(Set.of(CDH));
-        ClusterComponent flinkComponent = createComponent(FLINK);
-        ClusterComponent cdhComponent = createComponent(CDH);
-        Set<ClusterComponent> clusterComponentsFromDb = Set.of(flinkComponent, cdhComponent);
+        Set<ClusterComponentView> clusterComponentsByBlueprint = createComponents(Set.of(CDH));
+        ClusterComponentView flinkComponent = createComponent(FLINK);
+        ClusterComponentView cdhComponent = createComponent(CDH);
+        Set<ClusterComponentView> clusterComponentsFromDb = Set.of(flinkComponent, cdhComponent);
 
-        when(clusterComponentConfigProvider.getComponentsByClusterId(CLUSTER_ID)).thenReturn(clusterComponentsFromDb);
+        when(clusterComponentConfigProvider.getComponentListByType(CLUSTER_ID, ComponentType.CDH_PRODUCT_DETAILS)).thenReturn(clusterComponentsFromDb);
 
         underTest.removeUnusedCdhProductsFromClusterComponents(CLUSTER_ID, clusterComponentsByBlueprint,
                 new ParcelOperationStatus(Map.of("FLINK", "version"), Map.of()));
 
-        verify(clusterComponentConfigProvider).getComponentsByClusterId(CLUSTER_ID);
-        verify(clusterComponentConfigProvider).deleteClusterComponents(Set.of(flinkComponent));
+        verify(clusterComponentConfigProvider).getComponentListByType(CLUSTER_ID, ComponentType.CDH_PRODUCT_DETAILS);
+        verify(clusterComponentConfigProvider).deleteClusterComponentViews(Set.of(flinkComponent));
     }
 
-    private Set<ClusterComponent> createComponents(Set<String> names) {
+    private Set<ClusterComponentView> createComponents(Set<String> names) {
         return names.stream()
                 .map(this::createComponent)
                 .collect(Collectors.toSet());
     }
 
-    private ClusterComponent createComponent(String name) {
-        ClusterComponent component = new ClusterComponent();
+    private ClusterComponentView createComponent(String name) {
+        ClusterComponentView component = new ClusterComponentView();
         component.setName(name);
         component.setComponentType(ComponentType.CDH_PRODUCT_DETAILS);
         return component;
     }
 
-    private ClusterComponent createImageComponent() {
-        ClusterComponent component = new ClusterComponent();
+    private ClusterComponentView createImageComponent() {
+        ClusterComponentView component = new ClusterComponentView();
         component.setName("image");
         component.setComponentType(ComponentType.IMAGE);
         return component;

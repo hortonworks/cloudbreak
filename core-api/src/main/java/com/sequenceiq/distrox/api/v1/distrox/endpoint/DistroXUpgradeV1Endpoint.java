@@ -43,6 +43,18 @@ public interface DistroXUpgradeV1Endpoint {
     DistroXUpgradeV1Response upgradeClusterByCrn(@PathParam("crn") String crn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest);
 
     @POST
+    @Path("{name}/prepare_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "prepares the distrox cluster for upgrade", nickname = "prepareDistroxClusterUpgrade")
+    DistroXUpgradeV1Response prepareClusterUpgradeByName(@PathParam("name") String name, @Valid DistroXUpgradeV1Request distroxUpgradeRequest);
+
+    @POST
+    @Path("/crn/{crn}/prepare_upgrade")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "prepares the distrox cluster for upgrade", nickname = "prepareDistroxClusterUpgradeByCrn")
+    DistroXUpgradeV1Response prepareClusterUpgradeByCrn(@PathParam("crn") String crn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest);
+
+    @POST
     @Path("internal/{name}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "upgrades the distrox cluster internal", nickname = "upgradeDistroxClusterInternal")

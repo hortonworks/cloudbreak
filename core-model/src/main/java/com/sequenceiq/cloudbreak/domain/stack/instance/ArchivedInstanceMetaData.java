@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.stack.instance;
 
+import java.util.Objects;
+
 import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
@@ -276,6 +278,18 @@ public class ArchivedInstanceMetaData implements ProvisionEntity {
 
     public void setVariant(String variant) {
         this.variant = variant;
+    }
+
+    public Long getInstanceGroupId() {
+        return instanceGroup.getId();
+    }
+
+    public void setInstanceGroupId(Long instanceGroupId) {
+        if (instanceGroup == null || !Objects.equals(instanceGroupId, instanceGroup.getId())) {
+            InstanceGroup ig = new InstanceGroup();
+            ig.setId(instanceGroupId);
+            this.instanceGroup = ig;
+        }
     }
 
     @Override

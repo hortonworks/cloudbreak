@@ -14,7 +14,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 
 @ExtendWith(MockitoExtension.class)
 public class CmSyncOperationResultEvaluatorServiceTest {
@@ -70,8 +71,8 @@ public class CmSyncOperationResultEvaluatorServiceTest {
     @Test
     void testEvaluateParcelSyncWhenVersionsPresentAndMatchingProductsFoundThenSuccess() {
         Set<ParcelInfo> activeParcels = Set.of(
-                new ParcelInfo(PARCEL_1_NAME, PARCEL_1_VERSION),
-                new ParcelInfo(PARCEL_2_NAME, PARCEL_2_VERSION)
+                new ParcelInfo(PARCEL_1_NAME, PARCEL_1_VERSION, ParcelStatus.ACTIVATED),
+                new ParcelInfo(PARCEL_2_NAME, PARCEL_2_VERSION, ParcelStatus.ACTIVATED)
         );
         Set<ClouderaManagerProduct> foundCmProducts = Set.of(
                 new ClouderaManagerProduct().withName(PARCEL_1_NAME),
@@ -106,8 +107,8 @@ public class CmSyncOperationResultEvaluatorServiceTest {
     @Test
     void testEvaluateParcelSyncWhenMoreVersionsPresentThanMatchingProductsFoundThenFailure() {
         Set<ParcelInfo> activeParcels = Set.of(
-                new ParcelInfo(PARCEL_1_NAME, PARCEL_1_VERSION),
-                new ParcelInfo(PARCEL_2_NAME, PARCEL_2_VERSION)
+                new ParcelInfo(PARCEL_1_NAME, PARCEL_1_VERSION, ParcelStatus.ACTIVATED),
+                new ParcelInfo(PARCEL_2_NAME, PARCEL_2_VERSION, ParcelStatus.ACTIVATED)
         );
         Set<ClouderaManagerProduct> foundCmProducts = Set.of(new ClouderaManagerProduct().withName(PARCEL_1_NAME));
         CmParcelSyncOperationResult cmParcelSyncOperationResult = new CmParcelSyncOperationResult(activeParcels, foundCmProducts);
@@ -124,8 +125,8 @@ public class CmSyncOperationResultEvaluatorServiceTest {
     @Test
     void testEvaluateParcelSyncWhenVersionsPresentButNoMatchingProductsFoundThenFailure() {
         Set<ParcelInfo> activeParcels = Set.of(
-                new ParcelInfo(PARCEL_1_NAME, PARCEL_1_VERSION),
-                new ParcelInfo(PARCEL_2_NAME, PARCEL_2_VERSION)
+                new ParcelInfo(PARCEL_1_NAME, PARCEL_1_VERSION, ParcelStatus.ACTIVATED),
+                new ParcelInfo(PARCEL_2_NAME, PARCEL_2_VERSION, ParcelStatus.ACTIVATED)
         );
         Set<ClouderaManagerProduct> foundCmProducts = Set.of();
         CmParcelSyncOperationResult cmParcelSyncOperationResult = new CmParcelSyncOperationResult(activeParcels, foundCmProducts);

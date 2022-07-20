@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cm.model;
+package com.sequenceiq.cloudbreak.cluster.model;
 
 public enum ParcelStatus {
 

@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -34,6 +35,7 @@ public class StackRuntimeVersionValidator {
     private SdxClientService sdxClientService;
 
     @Inject
+    @Qualifier("stackViewServiceDeprecated")
     private StackViewService stackViewService;
 
     @Inject

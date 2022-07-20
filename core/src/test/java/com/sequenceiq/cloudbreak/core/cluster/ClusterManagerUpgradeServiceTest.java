@@ -3,10 +3,10 @@ package com.sequenceiq.cloudbreak.core.cluster;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -19,6 +19,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -32,12 +33,13 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceR
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.CmServerQueryService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -54,7 +56,7 @@ public class ClusterManagerUpgradeServiceTest {
     private GatewayConfigService gatewayConfigService;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
@@ -83,16 +85,25 @@ public class ClusterManagerUpgradeServiceTest {
     @InjectMocks
     private ClusterManagerUpgradeService underTest;
 
+    @Spy
+    private StackDto stackDto;
+
     private Stack stack;
+
+    private Cluster cluster;
 
     @BeforeEach
     public void setUp() {
         stack = TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential());
-        Cluster cluster = TestUtil.cluster();
-        stack.setCluster(cluster);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
-        when(cmServerQueryService.queryCmVersion(stack)).thenReturn(Optional.empty());
+        cluster = TestUtil.cluster();
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
+        when(stackDto.hasGateway()).thenReturn(cluster.getGateway() != null);
+        when(stackDto.getPrimaryGatewayInstance()).thenReturn(stack.getPrimaryGatewayInstance());
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stackDto.getCluster()).thenReturn(cluster);
+        when(stackDto.getSecurityConfig()).thenReturn(stack.getSecurityConfig());
+        when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.empty());
     }
 
     private static Stream<Arguments> cmVersions() {
@@ -107,15 +118,15 @@ public class ClusterManagerUpgradeServiceTest {
     @ParameterizedTest
     @MethodSource("cmVersions")
     public void testUpgradeClusterManager(String versionOnHost, String versionInRepo) throws CloudbreakOrchestratorException, CloudbreakException {
-        Cluster cluster = stack.getCluster();
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clouderaManagerRepo.getFullVersion()).thenReturn(versionInRepo);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
-        when(cmServerQueryService.queryCmVersion(stack)).thenReturn(Optional.of(versionOnHost));
+        when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.of(versionOnHost));
 
         underTest.upgradeClusterManager(STACK_ID, true);
 
-        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getPrimaryGatewayInstance(), cluster.getGateway() != null);
+        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getSecurityConfig(), stack.getPrimaryGatewayInstance(),
+                cluster.getGateway() != null);
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
@@ -125,15 +136,15 @@ public class ClusterManagerUpgradeServiceTest {
 
     @Test
     public void testUpgradeClusterManagerVersionIsDifferent() throws CloudbreakOrchestratorException, CloudbreakException {
-        Cluster cluster = stack.getCluster();
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clouderaManagerRepo.getFullVersion()).thenReturn(CM_VERSION);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
-        when(cmServerQueryService.queryCmVersion(stack)).thenReturn(Optional.of("wrong"));
+        when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.of("wrong"));
 
         assertThrows(CloudbreakServiceException.class, () -> underTest.upgradeClusterManager(STACK_ID, true));
 
-        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getPrimaryGatewayInstance(), cluster.getGateway() != null);
+        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getSecurityConfig(), stack.getPrimaryGatewayInstance(),
+                cluster.getGateway() != null);
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
@@ -143,11 +154,10 @@ public class ClusterManagerUpgradeServiceTest {
 
     @Test
     public void testUpgradeClusterManagerWithoutStartServices() throws CloudbreakOrchestratorException, CloudbreakException {
-        Cluster cluster = stack.getCluster();
-
         underTest.upgradeClusterManager(STACK_ID, false);
 
-        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getPrimaryGatewayInstance(), cluster.getGateway() != null);
+        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getSecurityConfig(), stack.getPrimaryGatewayInstance(),
+                cluster.getGateway() != null);
         verify(clusterComponentConfigProvider, times(1)).getClouderaManagerRepoDetails(cluster.getId());
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);
@@ -158,12 +168,12 @@ public class ClusterManagerUpgradeServiceTest {
 
     @Test
     public void testUpgradeClusterManagerShouldNotAddCsdToPillarWhenTheClusterTypeIsDataLake() throws CloudbreakOrchestratorException, CloudbreakException {
-        Cluster cluster = stack.getCluster();
         stack.setType(StackType.DATALAKE);
 
         underTest.upgradeClusterManager(STACK_ID, true);
 
-        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getPrimaryGatewayInstance(), cluster.getGateway() != null);
+        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getSecurityConfig(), stack.getPrimaryGatewayInstance(),
+                cluster.getGateway() != null);
         verify(clusterComponentConfigProvider, times(1)).getClouderaManagerRepoDetails(cluster.getId());
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);
@@ -175,12 +185,12 @@ public class ClusterManagerUpgradeServiceTest {
 
     @Test
     public void testUpgradeClusterManagerShouldAddCsdToPillarWhenTheClusterTypeIsWorkload() throws CloudbreakOrchestratorException, CloudbreakException {
-        Cluster cluster = stack.getCluster();
         stack.setType(StackType.WORKLOAD);
 
         underTest.upgradeClusterManager(STACK_ID, true);
 
-        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getPrimaryGatewayInstance(), cluster.getGateway() != null);
+        verify(gatewayConfigService, times(1)).getGatewayConfig(stack, stack.getSecurityConfig(), stack.getPrimaryGatewayInstance(),
+                cluster.getGateway() != null);
         verify(clusterComponentConfigProvider, times(1)).getClouderaManagerRepoDetails(cluster.getId());
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);

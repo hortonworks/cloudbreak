@@ -55,6 +55,10 @@ public interface RdsConfigRepository extends WorkspaceResourceRepository<RDSConf
             + "AND r.status <> 'DEFAULT_DELETED' AND r.type= :type")
     RDSConfig findByClusterIdAndType(@Param("clusterId") Long clusterId, @Param("type") String type);
 
+    @Query("SELECT count(r) > 0 FROM RDSConfig r INNER JOIN r.clusters cluster WHERE cluster.id= :clusterId "
+            + "AND r.status <> 'DEFAULT_DELETED' AND r.type= :type")
+    Boolean existsByClusterIdAndType(@Param("clusterId") Long clusterId, @Param("type") String type);
+
     @Query("SELECT r FROM RDSConfig r LEFT JOIN FETCH r.clusters WHERE r.workspace.id = :workspaceId "
             + "AND r.name in :names AND r.status = 'USER_MANAGED'")
     Set<RDSConfig> findAllByNameInAndWorkspaceId(@Param("names") Collection<String> names, @Param("workspaceId") Long workspaceId);

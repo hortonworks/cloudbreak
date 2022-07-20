@@ -39,8 +39,11 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.ScalabilityOption;
 
 @ExtendWith(MockitoExtension.class)
@@ -77,17 +80,21 @@ public class UpdateNodeCountValidatorTest {
             int scalingNodeCount,
             ScalabilityOption scalabilityOption,
             Optional<String> errorMessageSegment) {
-        Stack stack = mock(Stack.class);
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
         InstanceGroupAdjustmentV4Request instanceGroupAdjustmentV4Request = mock(InstanceGroupAdjustmentV4Request.class);
-        InstanceGroup instanceGroup = mock(InstanceGroup.class);
+        InstanceGroupDto instanceGroupDto = mock(InstanceGroupDto.class);
+        InstanceGroupView instanceGroup = mock(InstanceGroupView.class);
 
+        when(stack.getStack()).thenReturn(stackView);
         when(instanceGroupAdjustmentV4Request.getInstanceGroup()).thenReturn("master");
         when(instanceGroupAdjustmentV4Request.getScalingAdjustment()).thenReturn(scalingNodeCount);
-        when(stack.getInstanceGroupByInstanceGroupName("master")).thenReturn(instanceGroup);
-        when(stack.getName()).thenReturn("master-stack");
+        when(stack.getInstanceGroupByInstanceGroupName("master")).thenReturn(instanceGroupDto);
+        when(instanceGroupDto.getInstanceGroup()).thenReturn(instanceGroup);
+        when(stackView.getName()).thenReturn("master-stack");
         when(instanceGroup.getGroupName()).thenReturn("master");
         when(instanceGroup.getMinimumNodeCount()).thenReturn(minimumNodeCount);
-        when(instanceGroup.getNodeCount()).thenReturn(instanceGroupNodeCount);
+        when(instanceGroupDto.getNodeCount()).thenReturn(instanceGroupNodeCount);
         when(instanceGroup.getScalabilityOption()).thenReturn(scalabilityOption);
 
         if (errorMessageSegment.isPresent()) {
@@ -170,14 +177,14 @@ public class UpdateNodeCountValidatorTest {
 
     @Test
     public void testValidateInstanceGroupForStopStartIsSuccessful() {
-        Stack stack = mock(Stack.class);
+        StackDto stack = mock(StackDto.class);
         setupMocksForStopStartInstanceGroupValidation(stack);
         assertDoesNotThrow(() -> underTest.validateInstanceGroupForStopStart(stack, "compute", 5));
     }
 
     @Test
     public void testValidateInstanceGroupForStopStartThrowsExceptionForUpscale() {
-        Stack stack = mock(Stack.class);
+        StackDto stack = mock(StackDto.class);
         setupMocksForStopStartInstanceGroupValidation(stack);
         assertThatThrownBy(() -> underTest.validateInstanceGroupForStopStart(stack, "worker", 2))
                 .isInstanceOf(BadRequestException.class)
@@ -186,7 +193,7 @@ public class UpdateNodeCountValidatorTest {
 
     @Test
     public void testValidateInstanceGroupForStopStartThrowsExceptionForDownscale() {
-        Stack stack = mock(Stack.class);
+        StackDto stack = mock(StackDto.class);
         setupMocksForStopStartInstanceGroupValidation(stack);
         assertThatThrownBy(() -> underTest.validateInstanceGroupForStopStart(stack, "worker", -1))
                 .isInstanceOf(BadRequestException.class)
@@ -195,20 +202,20 @@ public class UpdateNodeCountValidatorTest {
 
     @Test
     public void testValidateInstanceGroupForStopStartThrowsExceptionForZeroScalingAdjustment() {
-        Stack stack = mock(Stack.class);
+        StackDto stack = mock(StackDto.class);
         setupMocksForStopStartInstanceGroupValidation(stack);
         assertThatThrownBy(() -> underTest.validateInstanceGroupForStopStart(stack, "worker", 0))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Zero Scaling adjustment detected for worker host group.");
     }
 
-    private void setupMocksForStopStartInstanceGroupValidation(Stack stack) {
+    private void setupMocksForStopStartInstanceGroupValidation(StackDto stack) {
         CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
         Cluster cluster = mock(Cluster.class);
         Blueprint blueprint = mock(Blueprint.class);
 
         when(stack.getCluster()).thenReturn(cluster);
-        when(cluster.getBlueprint()).thenReturn(blueprint);
+        when(stack.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(Set.of(TEST_COMPUTE_GROUP));

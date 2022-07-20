@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.util;
 
+import static java.util.Collections.emptySet;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -42,22 +42,24 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class StackUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackUtil.class);
-
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
@@ -80,16 +82,21 @@ public class StackUtil {
     @Inject
     private EntitlementService entitlementService;
 
-    public Set<Node> collectNodes(Stack stack) {
+    public Set<Node> collectNodes(StackDtoDelegate stackDto) {
+        return collectNodes(stackDto, emptySet());
+    }
+
+    public Set<Node> collectNodes(StackDtoDelegate stack, Set<String> hostNames) {
         Set<Node> agents = new HashSet<>();
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            if (instanceGroup.getNodeCount() != 0) {
-                for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
-                    if (im.getDiscoveryFQDN() != null) {
+        for (InstanceGroupDto instanceGroupDto : stack.getInstanceGroupDtos()) {
+            if (!instanceGroupDto.getNotDeletedInstanceMetaData().isEmpty()) {
+                InstanceGroupView instanceGroupView = instanceGroupDto.getInstanceGroup();
+                for (InstanceMetadataView im : instanceGroupDto.getNotDeletedInstanceMetaData()) {
+                    if (im.getDiscoveryFQDN() != null && (hostNames.isEmpty() || hostNames.contains(im.getDiscoveryFQDN()))) {
                         String instanceId = im.getInstanceId();
-                        String instanceType = instanceGroup.getTemplate().getInstanceType();
+                        String instanceType = instanceGroupView.getTemplate().getInstanceType();
                         agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType,
-                                im.getDiscoveryFQDN(), im.getInstanceGroupName()));
+                                im.getDiscoveryFQDN(), instanceGroupView.getGroupName()));
                     }
                 }
             }
@@ -97,33 +104,30 @@ public class StackUtil {
         return agents;
     }
 
-    public Set<Node> collectGatewayNodes(Stack stack) {
-        Set<Node> agents = stack.getInstanceGroups().stream()
-                .filter(ig -> ig.getNodeCount() != 0)
-                .flatMap(ig -> ig.getNotDeletedInstanceMetaDataSet().stream())
-                .filter(imd -> imd.getDiscoveryFQDN() != null && imd.isGateway())
-                .map(imd -> new Node(imd.getPrivateIp(), imd.getPublicIp(), imd.getInstanceId(), imd.getInstanceGroup().getTemplate().getInstanceType(),
-                        imd.getDiscoveryFQDN(), imd.getInstanceGroupName()))
+    public Set<Node> collectGatewayNodes(StackDto stack) {
+        Set<Node> agents = stack.getAllPrimaryGatewayInstances().stream()
+                .filter(imd -> imd.getDiscoveryFQDN() != null)
+                .map(imd -> {
+                    InstanceGroupDto instanceGroupDto = stack.getInstanceGroupByInstanceGroupName(imd.getInstanceGroupName());
+                    return new Node(imd.getPrivateIp(), imd.getPublicIp(), imd.getInstanceId(),
+                            instanceGroupDto.getInstanceGroup().getTemplate().getInstanceType(), imd.getDiscoveryFQDN(), imd.getInstanceGroupName());
+                })
                 .collect(Collectors.toSet());
         return agents;
     }
 
-    public Set<Node> collectReachableNodesByInstanceStates(Stack stack) {
-        return stack.getInstanceGroups()
-                .stream()
-                .filter(ig -> ig.getNodeCount() != 0)
-                .flatMap(ig -> ig.getReachableInstanceMetaDataSet().stream())
-                .filter(im -> im.getDiscoveryFQDN() != null)
-                .map(im -> {
+    public Set<Node> collectReachableNodesByInstanceStates(StackDto stackDto) {
+        Set<Node> agents = new HashSet<>();
+        stackDto.getReachableInstanceMetaDataSetWithInstanceGroup()
+                .forEach(ig -> ig.getReachableInstanceMetaData().forEach(im -> {
                     String instanceId = im.getInstanceId();
-                    String instanceType = im.getInstanceGroup().getTemplate().getInstanceType();
-                    return new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType,
-                            im.getDiscoveryFQDN(), im.getInstanceGroupName());
-                })
-                .collect(Collectors.toSet());
+                    String instanceType = ig.getInstanceGroup().getTemplate().getInstanceType();
+                    agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType, im.getDiscoveryFQDN(), im.getInstanceGroupName()));
+                }));
+        return agents;
     }
 
-    public NodeReachabilityResult collectReachableAndUnreachableCandidateNodes(Stack stack, Collection<String> necessaryNodes) {
+    public NodeReachabilityResult collectReachableAndUnreachableCandidateNodes(StackDto stack, Collection<String> necessaryNodes) {
         NodeReachabilityResult nodeReachabilityResult = collectReachableAndUnreachableNodes(stack);
         Set<Node> reachableCandidateNodes = nodeReachabilityResult.getReachableNodes().stream()
                 .filter(node -> necessaryNodes.contains(node.getHostname()))
@@ -140,7 +144,7 @@ public class StackUtil {
         return nodeReachabilityResultWithCandidates;
     }
 
-    public Set<Node> collectAndCheckReachableNodes(Stack stack, Collection<String> necessaryNodes) throws NodesUnreachableException {
+    public Set<Node> collectAndCheckReachableNodes(StackDto stack, Collection<String> necessaryNodes) throws NodesUnreachableException {
         Set<Node> reachableNodes = collectReachableNodes(stack);
         Set<String> reachableAddresses = reachableNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         Set<String> unReachableCandidateNodes = necessaryNodes.stream()
@@ -153,12 +157,13 @@ public class StackUtil {
         }
     }
 
-    public Set<Node> collectReachableNodes(Stack stack) {
-        return hostOrchestrator.getResponsiveNodes(collectNodes(stack), gatewayConfigService.getPrimaryGatewayConfig(stack)).getReachableNodes();
+    public Set<Node> collectReachableNodes(StackDto stackDto) {
+        return hostOrchestrator.getResponsiveNodes(collectNodes(stackDto, emptySet()), gatewayConfigService.getPrimaryGatewayConfig(stackDto))
+                .getReachableNodes();
     }
 
-    public NodeReachabilityResult collectReachableAndUnreachableNodes(Stack stack) {
-        NodeReachabilityResult nodeReachabilityResult = hostOrchestrator.getResponsiveNodes(collectNodes(stack),
+    public NodeReachabilityResult collectReachableAndUnreachableNodes(StackDto stack) {
+        NodeReachabilityResult nodeReachabilityResult = hostOrchestrator.getResponsiveNodes(collectNodes(stack, emptySet()),
                 gatewayConfigService.getPrimaryGatewayConfig(stack));
         LOGGER.debug("Node reachability result: {}", nodeReachabilityResult);
         return nodeReachabilityResult;
@@ -240,38 +245,33 @@ public class StackUtil {
         return (T) instanceToVolumeInfoMap.getOrDefault(instanceId, Map.of()).getOrDefault(innerKey, defaultValue);
     }
 
-    public String extractClusterManagerIp(StackView stackView) {
-        return extractClusterManagerIp(stackView.getId());
+    public String extractClusterManagerIp(StackDtoDelegate stack) {
+        return extractClusterManagerIp(stack.getCluster(), stack.getPrimaryGatewayInstance());
     }
 
-    public String extractClusterManagerIp(Stack stack) {
-        if (!isEmpty(stack.getClusterManagerIp())) {
-            return stack.getClusterManagerIp();
+    public String extractClusterManagerIp(ClusterView cluster, InstanceMetadataView primaryGatewayInstance) {
+        if (cluster != null && !isEmpty(cluster.getClusterManagerIp())) {
+            return cluster.getClusterManagerIp();
         }
-        return extractClusterManagerIp(stack.getId());
+        return primaryGatewayInstance == null ? null : primaryGatewayInstance.getPublicIpWrapper();
     }
 
-    private String extractClusterManagerIp(long stackId) {
-        AtomicReference<String> result = new AtomicReference<>(null);
-        instanceMetaDataService.getPrimaryGatewayInstanceMetadata(stackId).ifPresent(imd -> result.set(imd.getPublicIpWrapper()));
-        return result.get();
-    }
-
-    public String extractClusterManagerAddress(Stack stack) {
+    public String extractClusterManagerAddress(StackDtoDelegate stack) {
         String fqdn = loadBalancerConfigService.getLoadBalancerUserFacingFQDN(stack.getId());
-        fqdn = isEmpty(fqdn) ? stack.getFqdn() : fqdn;
+        ClusterView cluster = stack.getCluster();
+        fqdn = isEmpty(fqdn) ? cluster.getFqdn() : fqdn;
 
         if (isNotEmpty(fqdn)) {
             return fqdn;
         }
 
-        String clusterManagerIp = stack.getClusterManagerIp();
+        String clusterManagerIp = cluster.getClusterManagerIp();
 
         if (isNotEmpty(clusterManagerIp)) {
             return clusterManagerIp;
         }
 
-        return extractClusterManagerIp(stack.getId());
+        return extractClusterManagerIp(stack);
     }
 
     public long getUptimeForCluster(Cluster cluster, boolean addUpsinceToUptime) {
@@ -286,12 +286,24 @@ public class StackUtil {
         return uptime.toMillis();
     }
 
-    public CloudCredential getCloudCredential(Stack stack) {
-        Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
+    public long getUptimeForCluster(ClusterView cluster, boolean addUpsinceToUptime) {
+        Duration uptime = Duration.ZERO;
+        if (StringUtils.isNotBlank(cluster.getUptime())) {
+            uptime = Duration.parse(cluster.getUptime());
+        }
+        if (cluster.getUpSince() != null && addUpsinceToUptime) {
+            long now = new Date().getTime();
+            uptime = uptime.plusMillis(now - cluster.getUpSince());
+        }
+        return uptime.toMillis();
+    }
+
+    public CloudCredential getCloudCredential(String environmentCrn) {
+        Credential credential = credentialClientService.getByEnvironmentCrn(environmentCrn);
         return credentialConverter.convert(credential);
     }
 
-    public boolean stopStartScalingEntitlementEnabled(Stack stack) {
+    public boolean stopStartScalingEntitlementEnabled(StackView stack) {
         boolean entitled = false;
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         String cloudPlatform = stack.getCloudPlatform();

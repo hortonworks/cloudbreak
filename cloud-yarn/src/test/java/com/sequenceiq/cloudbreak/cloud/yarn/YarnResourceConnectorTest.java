@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -151,7 +152,7 @@ public class YarnResourceConnectorTest {
         List<CloudResourceStatus> cloudResourceStatusList = underTest.launch(authenticatedContextMock,
                 stackMock, persistenceNotifierMock, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, Long.MAX_VALUE));
 
-        verify(persistenceNotifierMock, times(1)).notifyAllocation(any(), any());
+        verify(persistenceNotifierMock, times(1)).notifyAllocation(any(CloudResource.class), any());
         verify(yarnApplicationCreationService).createApplication(any(), createRequestCaptor.capture());
 
         String expectedAppName = "n-1";

@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn.YarnRoles;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
@@ -36,7 +36,7 @@ public class HostAttributeDecoratorTest {
     private HostAttributeDecorator underTest;
 
     @Mock
-    private Stack stack;
+    private StackDto stack;
 
     @Mock
     private Cluster cluster;
@@ -56,8 +56,7 @@ public class HostAttributeDecoratorTest {
     public void testAddHostAttributes() {
 
         Blueprint blueprint = mock(Blueprint.class);
-        when(stack.getCluster()).thenReturn(cluster);
-        when(cluster.getBlueprint()).thenReturn(blueprint);
+        when(stack.getBlueprint()).thenReturn(blueprint);
         when(stackUtil.collectNodes(any())).thenReturn(Set.of(new Node(null, null, null, null, "fqdn1", "hg1"),
                 new Node(null, null, null, null, "fqdn2", "hg2"),
                 new Node(null, null, null, null, "fqdn3", "hg3"),

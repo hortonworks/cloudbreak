@@ -219,7 +219,7 @@ public class AzureImageServiceTest {
         when(azureClient.createImage(anyString(), anyString(), anyString(), anyString())).thenReturn(virtualMachineCustomImage);
         when(virtualMachineCustomImage.name()).thenReturn(CUSTOM_IMAGE_NAME_WITH_REGION);
         when(virtualMachineCustomImage.id()).thenReturn(CUSTOM_IMAGE_ID);
-        when(persistenceNotifier.notifyAllocation(any(), any()))
+        when(persistenceNotifier.notifyAllocation(any(CloudResource.class), any()))
                 .thenReturn(new ResourcePersisted())
                 .thenThrow(new DataIntegrityViolationException("Unique constraint violated"));
 

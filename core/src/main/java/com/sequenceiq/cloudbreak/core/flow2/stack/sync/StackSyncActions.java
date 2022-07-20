@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,15 +34,17 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackParameters;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.service.stack.flow.SyncConfig;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -58,6 +59,9 @@ public class StackSyncActions {
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Bean(name = "SYNC_STATE")
     public Action<?, ?> stackSyncAction() {
@@ -74,10 +78,10 @@ public class StackSyncActions {
 
             @Override
             protected Selectable createRequest(StackSyncContext context) {
-                Stack stack = context.getStack();
-                List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(context.getInstanceMetaData(), stack.getEnvironmentCrn(),
-                        stack.getStackAuthentication());
-                cloudInstances.forEach(instance -> stack.getParameters().forEach(instance::putParameter));
+                StackView stack = context.getStack();
+                List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(context.getInstanceMetaData(), stack);
+                List<StackParameters> stackParameters = stackDtoService.getStackParameters(stack.getId());
+                cloudInstances.forEach(instance -> stackParameters.forEach(p -> instance.putParameter(p.getKey(), p.getValue())));
                 return new GetInstancesStateRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudInstances);
             }
         };
@@ -106,13 +110,13 @@ public class StackSyncActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Error during Stack synchronization flow:", payload.getException());
-                flowMessageService.fireEventAndLog(context.getStackView().getId(), UPDATE_FAILED.name(), STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE);
+                flowMessageService.fireEventAndLog(context.getStackId(), UPDATE_FAILED.name(), STACK_SYNC_INSTANCE_STATUS_COULDNT_DETERMINE);
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }
@@ -121,10 +125,10 @@ public class StackSyncActions {
         static final String STATUS_UPDATE_ENABLED = "STATUS_UPDATE_ENABLED";
 
         @Inject
-        private StackService stackService;
+        private StackDtoService stackDtoService;
 
         @Inject
-        private ResourceService resourceService;
+        private InstanceMetaDataService instanceMetaDataService;
 
         @Inject
         private StackUtil stackUtil;
@@ -138,8 +142,7 @@ public class StackSyncActions {
                 P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             Long stackId = payload.getResourceId();
-            Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-            stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
+            StackView stack = stackDtoService.getStackViewById(stackId);
             MDCBuilder.buildMdcContext(stack);
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = CloudContext.Builder.builder()
@@ -149,12 +152,13 @@ public class StackSyncActions {
                     .withPlatform(stack.getCloudPlatform())
                     .withVariant(stack.getPlatformVariant())
                     .withLocation(location)
-                    .withWorkspaceId(stack.getWorkspace().getId())
+                    .withWorkspaceId(stack.getWorkspaceId())
                     .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
-                    .withTenantId(stack.getTenant().getId())
+                    .withTenantId(stack.getTenantId())
                     .build();
-            CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
-            return new StackSyncContext(flowParameters, stack, stack.getNotTerminatedAndNotZombieInstanceMetaDataList(), cloudContext, cloudCredential,
+            CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
+            List<InstanceMetadataView> allAvailableInstanceMetadata = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stackId);
+            return new StackSyncContext(flowParameters, stack, allAvailableInstanceMetadata, cloudContext, cloudCredential,
                     isStatusUpdateEnabled(variables));
         }
 

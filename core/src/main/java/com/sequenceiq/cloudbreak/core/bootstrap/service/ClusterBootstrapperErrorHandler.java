@@ -19,12 +19,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -63,7 +64,7 @@ public class ClusterBootstrapperErrorHandler {
     private Clock clock;
 
     public void terminateFailedNodes(HostOrchestrator hostOrchestrator, ContainerOrchestrator containerOrchestrator,
-            Stack stack, GatewayConfig gatewayConfig, Set<Node> nodes)
+            StackDto stack, GatewayConfig gatewayConfig, Set<Node> nodes)
             throws CloudbreakOrchestratorFailedException {
         List<String> allAvailableNode;
         allAvailableNode = hostOrchestrator != null ? hostOrchestrator.getAvailableNodes(gatewayConfig, nodes)
@@ -116,7 +117,7 @@ public class ClusterBootstrapperErrorHandler {
         return missingNodes;
     }
 
-    private void deleteResourceAndDependencies(Stack stack, InstanceMetaData instanceMetaData) {
+    private void deleteResourceAndDependencies(StackDto stack, InstanceMetaData instanceMetaData) {
         LOGGER.debug("Rolling back instance [name: {}, id: {}]", instanceMetaData.getId(), instanceMetaData.getInstanceId());
         Set<String> instanceIds = new HashSet<>();
         instanceIds.add(instanceMetaData.getInstanceId());
@@ -124,7 +125,7 @@ public class ClusterBootstrapperErrorHandler {
         LOGGER.debug("Deleted instance [name: {}, id: {}]", instanceMetaData.getId(), instanceMetaData.getInstanceId());
     }
 
-    private void deleteInstanceResourceFromDatabase(Stack stack, InstanceMetaData instanceMetaData) {
+    private void deleteInstanceResourceFromDatabase(StackDtoDelegate stack, InstanceMetaData instanceMetaData) {
         resourceService.findByStackIdAndNameAndType(stack.getId(), instanceMetaData.getInstanceId(), null)
                 .ifPresent(value -> resourceService.delete(value));
     }

@@ -20,8 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigProviderFactory;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
@@ -47,20 +47,19 @@ class PostgresConfigServiceTest {
     @InjectMocks
     private PostgresConfigService underTest;
 
-    private Stack stack;
-
-    private Cluster cluster;
+    @Mock
+    private StackDto stack;
 
     @BeforeEach
     void setUp() {
-        stack = new Stack();
-        cluster = new Cluster();
+        Cluster cluster = new Cluster();
+        when(stack.getCluster()).thenReturn(cluster);
     }
 
     @Test
     void decorateServicePillarWithPostgresIfNeededTestCertsWhenSslDisabled() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
-        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
+        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isEmpty();
     }
@@ -69,7 +68,7 @@ class PostgresConfigServiceTest {
     void decorateServicePillarWithPostgresWhenReusedDatabaseListIsEmpty() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         ReflectionTestUtils.setField(underTest, "databasesReusedDuringRecovery", List.of());
-        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
+        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isEmpty();
     }
@@ -78,7 +77,7 @@ class PostgresConfigServiceTest {
     void decorateServicePillarWithPostgresWhenReusedDatabaseListIsNotEmpty() {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         ReflectionTestUtils.setField(underTest, "databasesReusedDuringRecovery", List.of("HIVE"));
-        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
+        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         assertThat(servicePillar).isNotEmpty();
 
@@ -102,10 +101,10 @@ class PostgresConfigServiceTest {
         Set<String> rootCerts = new LinkedHashSet<>();
         rootCerts.add("cert1");
         rootCerts.add("cert2");
-        when(dbCertificateProvider.getRelatedSslCerts(stack, cluster)).thenReturn(rootCerts);
+        when(dbCertificateProvider.getRelatedSslCerts(stack)).thenReturn(rootCerts);
         when(dbCertificateProvider.getSslCertsFilePath()).thenReturn(SSL_CERTS_FILE_PATH);
 
-        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
+        underTest.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack);
 
         SaltPillarProperties saltPillarProperties = servicePillar.get(POSTGRES_COMMON);
         assertThat(saltPillarProperties).isNotNull();

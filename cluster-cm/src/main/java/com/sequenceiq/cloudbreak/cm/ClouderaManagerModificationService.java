@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
@@ -20,7 +21,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
@@ -75,22 +76,20 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.URLUtils;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Service
@@ -153,20 +152,20 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Inject
     private ClusterComponentConfigProvider clusterComponentProvider;
 
-    private final Stack stack;
+    private final StackDtoDelegate stack;
 
     private final HttpClientConfig clientConfig;
 
     private ApiClient apiClient;
 
-    public ClouderaManagerModificationService(Stack stack, HttpClientConfig clientConfig) {
+    public ClouderaManagerModificationService(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
     }
 
     @PostConstruct
     public void initApiClient() throws ClusterClientInitException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
@@ -228,12 +227,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         return createUpscaledHostRefList(upscaleInstancesMapForHostGroup, upscaleHostsMap);
     }
 
-    private BigDecimal deployClientConfig(ClustersResourceApi clustersResourceApi, Stack stack) throws ApiException, CloudbreakException {
+    private BigDecimal deployClientConfig(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack) throws ApiException, CloudbreakException {
         List<ApiCommand> commands = clustersResourceApi.listActiveCommands(stack.getName(), SUMMARY).getItems();
         return deployClientConfig(clustersResourceApi, stack, commands);
     }
 
-    private BigDecimal deployClientConfig(ClustersResourceApi clustersResourceApi, Stack stack, List<ApiCommand> commands)
+    private BigDecimal deployClientConfig(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, List<ApiCommand> commands)
             throws ApiException, CloudbreakException {
         BigDecimal deployCommandId = clouderaManagerCommonCommandService.getDeployClientConfigCommandId(stack, clustersResourceApi, commands);
         pollDeployConfig(deployCommandId);
@@ -261,7 +260,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade, Optional<String> remoteDataContext) throws CloudbreakException {
+    public void upgradeClusterRuntime(Set<ClusterComponentView> components, boolean patchUpgrade, Optional<String> remoteDataContext)
+            throws CloudbreakException {
         try {
             LOGGER.info("Starting to upgrade cluster runtimes. Patch upgrade: {}", patchUpgrade);
             ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
@@ -315,9 +315,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void startAsyncTagCalls(HostsResourceApi hostsResourceApi, Set<String> hostnamesFromCM) {
-        Optional.of(stack).map(Stack::getInstanceGroups).stream()
-                .flatMap(Set::stream)
-                .forEach(asyncTagHostsInHostGroup(hostsResourceApi, hostnamesFromCM));
+        stack.getNotTerminatedInstanceMetaData()
+                .stream()
+                .filter(im -> hostnamesFromCM.contains(im.getDiscoveryFQDN()))
+                .forEach(im -> asyncTagHost(im.getDiscoveryFQDN(), hostsResourceApi, im.getInstanceGroupName()));
     }
 
     private Set<String> fetchHostNamesFromCm(ApiClient v46Client) throws ApiException {
@@ -327,7 +328,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private ApiClient buildv46ApiClient() throws CloudbreakException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
         try {
@@ -338,16 +339,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
-    private Consumer<InstanceGroup> asyncTagHostsInHostGroup(HostsResourceApi hostsResourceApi, Set<String> hostnamesFromCM) {
-        return instanceGroup -> Optional.ofNullable(instanceGroup).map(InstanceGroup::getNotDeletedInstanceMetaDataSet)
-                .stream().flatMap(Set::stream)
-                .map(InstanceMetaData::getDiscoveryFQDN)
-                .filter(hostnamesFromCM::contains)
-                .forEach(hostname -> asyncTagHost(hostname, hostsResourceApi, instanceGroup));
-    }
-
-    private void asyncTagHost(String hostname, HostsResourceApi hostsResourceApi, InstanceGroup instanceGroup) {
-            ApiEntityTag tag = new ApiEntityTag().name(HOST_TEMPLATE_NAME_TAG).value(instanceGroup.getGroupName());
+    private void asyncTagHost(String hostname, HostsResourceApi hostsResourceApi, String instanceGroupName) {
+            ApiEntityTag tag = new ApiEntityTag().name(HOST_TEMPLATE_NAME_TAG).value(instanceGroupName);
             try {
                 ApiCallback<List<ApiEntityTag>> callback = new ApiCallback<>() {
                     @Override
@@ -378,25 +371,38 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void downloadAndDistributeParcels(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException {
+    public void updateParcelSettings(Set<ClouderaManagerProduct> products) throws CloudbreakException {
         try {
-            ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
-            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
             checkParcelApiAvailability();
-            Set<ClouderaManagerProduct> products = getProducts(components);
-            LOGGER.info("The following products will be downloaded and distributed: {}", products);
+            ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
             setParcelRepo(products, clouderaManagerResourceApi);
             refreshParcelRepos(clouderaManagerResourceApi);
-            if (patchUpgrade) {
-                LOGGER.info("Downloading parcels for {} products...", products);
-                downloadAndActivateParcels(products, parcelResourceApi, false);
-            } else {
-                ClouderaManagerProduct cdhProduct = clouderaManagerProductsProvider.getCdhProducts(products);
-                upgradeNonCdhProducts(products, cdhProduct.getName(), parcelResourceApi, false);
-                downloadAndActivateParcels(Collections.singleton(cdhProduct), parcelResourceApi, false);
-            }
         } catch (ApiException e) {
-            LOGGER.info("Error during downloading parcels!", e);
+            LOGGER.error("Error during updating parcel settings!", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void downloadParcels(Set<ClouderaManagerProduct> products) throws CloudbreakException {
+        try {
+            LOGGER.debug("Downloading parcels: {}", products);
+            ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
+            downloadParcels(products, parcelResourceApi);
+        } catch (ApiException e) {
+            LOGGER.error("Error during downloading parcels!", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public void distributeParcels(Set<ClouderaManagerProduct> products) throws CloudbreakException {
+        try {
+            LOGGER.debug("Distributing parcels: {}", products);
+            ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
+            distributeParcels(products, parcelResourceApi);
+        } catch (ApiException e) {
+            LOGGER.error("Error during distributing parcels!", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }
@@ -408,7 +414,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         callUpgradeCdhCommand(cdhService, clustersResourceApi);
     }
 
-    private Set<ClouderaManagerProduct> getProducts(Set<ClusterComponent> components) {
+    private Set<ClouderaManagerProduct> getProducts(Set<ClusterComponentView> components) {
         return clouderaManagerProductsProvider.getProducts(components);
     }
 
@@ -468,7 +474,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                     currentCMVersion, baseCMVersion.getVersion());
             eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_POST_UPGRADE);
             waitForRestartCommandIfThereIsAny(clustersResourceApi);
-            Cluster cluster = stack.getCluster();
+            ClusterView cluster = stack.getCluster();
             String user = cluster.getCloudbreakAmbariUser();
             String password = cluster.getCloudbreakAmbariPassword();
             try {
@@ -813,7 +819,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Override
     public void stopCluster(boolean disableKnoxAutorestart) throws CloudbreakException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         try {
             LOGGER.debug("Stopping all Cloudera Runtime services");
@@ -835,7 +841,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
     }
 
-    private void stopWithRunningCm(boolean disableKnoxAutorestart, Cluster cluster, ClustersResourceApi clustersResourceApi)
+    private void stopWithRunningCm(boolean disableKnoxAutorestart, ClusterView cluster, ClustersResourceApi clustersResourceApi)
             throws ApiException, CloudbreakException {
         eventService
                 .fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPING);
@@ -861,7 +867,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         }
     }
 
-    private Collection<ApiService> readServices(Stack stack) throws ApiException {
+    private Collection<ApiService> readServices(StackDtoDelegate stack) throws ApiException {
         ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
         return api.readServices(stack.getName(), SUMMARY).getItems();
     }
@@ -910,13 +916,25 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public Map<String, String> gatherInstalledParcels(String stackName) {
-        return clouderaManagerParcelDecommissionService.getParcelsInStatus(clouderaManagerApiFactory.getParcelsResourceApi(apiClient), stackName,
-                ParcelStatus.ACTIVATED);
+    public Set<ParcelInfo> gatherInstalledParcels(String stackName) {
+        return clouderaManagerParcelManagementService.getParcelsInStatus(clouderaManagerApiFactory.getParcelsResourceApi(apiClient), stackName, ACTIVATED);
     }
 
     @Override
-    public ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents, Set<String> parcelNamesFromImage) {
+    public Set<ParcelInfo> getAllParcels(String stackName) {
+        try {
+            ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiClient);
+            Set<ParcelInfo> availableParcels = clouderaManagerParcelManagementService.getAllParcels(parcelsResourceApi, stackName);
+            LOGGER.debug("The following parcels are available on the CM server: {}", availableParcels);
+            return availableParcels;
+        } catch (ApiException e) {
+            LOGGER.error("Error during retrieving parcels!", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public ParcelOperationStatus removeUnusedParcels(Set<ClusterComponentView> usedParcelComponents, Set<String> parcelNamesFromImage) {
         ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiClient);
         ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
         Set<String> usedParcelComponentNames = usedParcelComponents.stream()
@@ -934,7 +952,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private int startServices() throws ApiException, CloudbreakException {
-        Cluster cluster = stack.getCluster();
+        ClusterView cluster = stack.getCluster();
         ClustersResourceApi apiInstance = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         String clusterName = cluster.getName();
         LOGGER.debug("Starting all services for cluster.");

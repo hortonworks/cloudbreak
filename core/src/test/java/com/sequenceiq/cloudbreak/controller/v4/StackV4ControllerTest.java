@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -31,6 +32,8 @@ class StackV4ControllerTest {
     private static final String STACK_CRN = "crn:cdp:datalake:us-west-1:hortonworks:datalake:guid";
 
     private static final long WORKSPACE_ID = 1236L;
+
+    private static final String ACCOUNT_ID = "accountId";
 
     private static final String STACK_NAME = "stack name";
 
@@ -71,7 +74,7 @@ class StackV4ControllerTest {
 
         underTest.rangerRazEnabledInternal(WORKSPACE_ID, stackCrn, USER_CRN);
 
-        verify(stackOperationService).rangerRazEnabled(WORKSPACE_ID, stackCrn);
+        verify(stackOperationService).rangerRazEnabled(stackCrn);
     }
 
     @Test
@@ -94,8 +97,9 @@ class StackV4ControllerTest {
     public void rotateSaltPasswordInternal() {
         String stackCrn = "crn";
 
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
         underTest.rotateSaltPasswordInternal(WORKSPACE_ID, stackCrn, USER_CRN);
 
-        verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(stackCrn), WORKSPACE_ID);
+        verify(stackOperations).rotateSaltPassword(NameOrCrn.ofCrn(stackCrn), ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
     }
 }

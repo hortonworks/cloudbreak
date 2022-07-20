@@ -10,17 +10,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionConfiguration.ServiceRoleGroup;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 @Service
 public class StackStopRestrictionService {
@@ -42,7 +42,7 @@ public class StackStopRestrictionService {
     @Inject
     private InstanceGroupEphemeralVolumeChecker ephemeralVolumeChecker;
 
-    public StopRestrictionReason isInfrastructureStoppable(Stack stack) {
+    public StopRestrictionReason isInfrastructureStoppable(StackDtoDelegate stack) {
         if (!config.getRestrictedCloudPlatform().equals(stack.getCloudPlatform())) {
             return StopRestrictionReason.NONE;
         }
@@ -50,9 +50,9 @@ public class StackStopRestrictionService {
         String cbVersion = componentConfigProviderService.getCloudbreakDetails(stack.getId()).getVersion();
         String saltCbVersion = clusterComponentProvider.getSaltStateComponentCbVersion(stack.getCluster().getId());
 
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
+        for (InstanceGroupView instanceGroup : stack.getInstanceGroupViews()) {
             if (ephemeralVolumeChecker.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(instanceGroup)) {
-                StopRestrictionReason ephemeralResult = checkEphemeralOnlyInstanceGroupStoppable(instanceGroup, stack.getCluster(), cbVersion, saltCbVersion);
+                StopRestrictionReason ephemeralResult = checkEphemeralOnlyInstanceGroupStoppable(instanceGroup, stack.getBlueprint(), cbVersion, saltCbVersion);
                 if (ephemeralResult != StopRestrictionReason.NONE) {
                     return ephemeralResult;
                 }
@@ -67,10 +67,10 @@ public class StackStopRestrictionService {
         return StopRestrictionReason.NONE;
     }
 
-    private StopRestrictionReason checkEphemeralOnlyInstanceGroupStoppable(InstanceGroup instanceGroup, Cluster cluster,
+    private StopRestrictionReason checkEphemeralOnlyInstanceGroupStoppable(InstanceGroupView instanceGroup, Blueprint blueprint,
             String cbVersion, String saltCbVersion) {
         if (!isCbVersionBeforeMinVersion(cbVersion, config.getEphemeralOnlyMinVersion()) || !isSaltComponentCbVersionBeforeStopSupport(saltCbVersion)) {
-            Set<ServiceComponent> serviceComponents = cmTemplateProcessorFactory.get(cluster.getBlueprint().getBlueprintText())
+            Set<ServiceComponent> serviceComponents = cmTemplateProcessorFactory.get(blueprint.getBlueprintText())
                     .getServiceComponentsByHostGroup().get(instanceGroup.getGroupName());
             if (!isEphemeralInstanceGroupStoppable(serviceComponents)) {
                 LOGGER.info("Infrastructure cannot be stopped. Instances in group [{}] have ephemeral storage only " +
@@ -83,13 +83,13 @@ public class StackStopRestrictionService {
             }
         } else {
             LOGGER.info("Infrastructure cannot be stopped. Instances in group [{}] have ephemeral storage only. " +
-                            "Stopping clusters with ephemeral volume based host groups are only available in clusters " +
-                            "created at least with Cloudbreak version [{}] or upgraded.", instanceGroup.getGroupName(), config.getEphemeralOnlyMinVersion());
+                    "Stopping clusters with ephemeral volume based host groups are only available in clusters " +
+                    "created at least with Cloudbreak version [{}] or upgraded.", instanceGroup.getGroupName(), config.getEphemeralOnlyMinVersion());
             return StopRestrictionReason.EPHEMERAL_VOLUMES;
         }
     }
 
-    private StopRestrictionReason checkNonEphemeralOnlyInstanceGroupStoppable(InstanceGroup instanceGroup, String cbVersion) {
+    private StopRestrictionReason checkNonEphemeralOnlyInstanceGroupStoppable(InstanceGroupView instanceGroup, String cbVersion) {
         if (!isCbVersionBeforeMinVersion(cbVersion, config.getEphemeralCachingMinVersion())) {
             LOGGER.debug("Non ephemeral instance group [{}] was created with Cloudbbreak version above the required version. " +
                     "The instance group is stoppable.", instanceGroup.getGroupName());

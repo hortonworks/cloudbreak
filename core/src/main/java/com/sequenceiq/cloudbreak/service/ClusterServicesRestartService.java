@@ -17,9 +17,9 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider;
@@ -101,8 +101,8 @@ public class ClusterServicesRestartService {
     }
 
     private void updateDatabaseConfiguration(Stack datalakeStack, Stack dataHubStack, String service, DatabaseType databaseType) {
-        Cluster cluster = clusterService.getById(datalakeStack.getCluster().getId());
-        Optional<RDSConfig> rdsConfig = postgresConfigService.createRdsConfigIfNeeded(datalakeStack, cluster, databaseType)
+        Cluster cluster = clusterService.getByIdWithLists(datalakeStack.getCluster().getId());
+        Optional<RdsConfigWithoutCluster> rdsConfig = postgresConfigService.createRdsConfigIfNeeded(datalakeStack, cluster, databaseType)
                 .stream().filter(config -> config.getType().toLowerCase().equals(databaseType.toString().toLowerCase()))
                 .findFirst();
         try {
@@ -117,7 +117,7 @@ public class ClusterServicesRestartService {
         }
     }
 
-    private Map<String, String> getRdsConfigMap(RDSConfig rdsConfig) {
+    private Map<String, String> getRdsConfigMap(RdsConfigWithoutCluster rdsConfig) {
         RdsView hiveRdsView = new RdsView(rdsConfig, dbCertificateProvider.getSslCertsFilePath());
         Map<String, String> configs = new HashMap<String, String>();
         configs.put(HIVE_METASTORE_DATABASE_HOST, hiveRdsView.getHost());

@@ -37,8 +37,8 @@ import com.sequenceiq.cloudbreak.cm.database.DatabaseProperties;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 /**
@@ -90,7 +90,7 @@ public class ClouderaManagerMgmtSetupService {
      * @param proxyConfig ccm proxy configuration holder
      * @throws ApiException if there's a problem setting up management services
      */
-    public void setupMgmtServices(Stack stack, ApiClient apiClient, ApiHostRef cmHostRef, Telemetry telemetry,
+    public void setupMgmtServices(StackDtoDelegate stack, ApiClient apiClient, ApiHostRef cmHostRef, Telemetry telemetry,
             String sdxContextName, String sdxStackCrn, ProxyConfig proxyConfig)
             throws ApiException {
         LOGGER.debug("Setting up Cloudera Management Services.");
@@ -125,7 +125,7 @@ public class ClouderaManagerMgmtSetupService {
         setUpAutoConfiguration(mgmtServiceResourceApi);
     }
 
-    private void waitForGenerateCredentialsToFinish(Stack stack, ApiClient apiClient) throws ApiException {
+    private void waitForGenerateCredentialsToFinish(StackDtoDelegate stack, ApiClient apiClient) throws ApiException {
         LOGGER.debug("Wait if Generate Credentials command is still active.");
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
         ApiCommandList apiCommandList = clouderaManagerResourceApi.listActiveCommands(DataView.SUMMARY.name());
@@ -134,7 +134,7 @@ public class ClouderaManagerMgmtSetupService {
         generateCredentialsCommandId.ifPresent(pollCredentialGeneration(stack, apiClient));
     }
 
-    private Consumer<BigDecimal> pollCredentialGeneration(Stack stack, ApiClient client) {
+    private Consumer<BigDecimal> pollCredentialGeneration(StackDtoDelegate stack, ApiClient client) {
         return id -> {
             LOGGER.debug("Generate Credentials command is still active.");
             clouderaManagerPollingServiceProvider.startPollingCmGenerateCredentials(stack, client, id);

@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidatorUtil;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 @Component
 public class CmTemplateValidator implements BlueprintValidator {
@@ -49,7 +50,7 @@ public class CmTemplateValidator implements BlueprintValidator {
     private EntitlementService entitlementService;
 
     @Override
-    public void validate(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroup> instanceGroups,
+    public void validate(Blueprint blueprint, Set<HostGroup> hostGroups, Collection<InstanceGroupView> instanceGroups,
             boolean validateServiceCardinality) {
         CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
         Map<String, InstanceCount> blueprintHostGroupCardinality = templateProcessor.getCardinalityByHostGroup();

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -23,7 +24,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 
@@ -43,8 +45,8 @@ public class CsdParcelDecoratorTest {
 
     @Test
     public void testDecoratePillarWithCsdParcelsShouldAddTheParcelsToPillarWhenTheStackTypeIsWorkload() {
-        Stack stack = createStack(StackType.WORKLOAD);
-        Set<ClusterComponent> componentsByBlueprint = Collections.emptySet();
+        StackDto stack = createStack(StackType.WORKLOAD);
+        Set<ClusterComponentView> componentsByBlueprint = Collections.emptySet();
         Set<ClouderaManagerProduct> products = createProducts();
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
@@ -63,8 +65,8 @@ public class CsdParcelDecoratorTest {
 
     @Test
     public void testDecoratePillarWithCsdParcelsShouldNotAddTheParcelsToPillarWhenThereAreNoCsdAvailableAndTheStackTypeIsWorkload() {
-        Stack stack = createStack(StackType.WORKLOAD);
-        Set<ClusterComponent> componentsByBlueprint = Collections.emptySet();
+        StackDto stack = createStack(StackType.WORKLOAD);
+        Set<ClusterComponentView> componentsByBlueprint = Collections.emptySet();
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(componentsByBlueprint);
@@ -79,7 +81,7 @@ public class CsdParcelDecoratorTest {
 
     @Test
     public void testDecoratePillarWithCsdParcelsShouldNotAddTheParcelsToPillarWhenTheStackTypeIsDataLake() {
-        Stack stack = createStack(StackType.DATALAKE);
+        StackDto stack = createStack(StackType.DATALAKE);
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
 
         underTest.decoratePillarWithCsdParcels(stack, servicePillar);
@@ -88,10 +90,12 @@ public class CsdParcelDecoratorTest {
         verifyNoInteractions(parcelService, clouderaManagerProductsProvider);
     }
 
-    private Stack createStack(StackType stackType) {
+    private StackDto createStack(StackType stackType) {
+        StackDto stackDto = spy(StackDto.class);
         Stack stack = new Stack();
         stack.setType(stackType);
-        return stack;
+        when(stackDto.getStack()).thenReturn(stack);
+        return stackDto;
     }
 
     private Set<ClouderaManagerProduct> createProducts() {

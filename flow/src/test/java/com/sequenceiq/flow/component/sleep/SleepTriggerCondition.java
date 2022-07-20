@@ -2,6 +2,7 @@ package com.sequenceiq.flow.component.sleep;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.FlowTriggerConditionResult;
 
@@ -9,7 +10,7 @@ import com.sequenceiq.flow.core.FlowTriggerConditionResult;
 public class SleepTriggerCondition implements FlowTriggerCondition {
 
     @Override
-    public FlowTriggerConditionResult isFlowTriggerable(Long stackId) {
-        return FlowTriggerConditionResult.OK;
+    public FlowTriggerConditionResult isFlowTriggerable(Payload payload) {
+        return FlowTriggerConditionResult.ok();
     }
 }

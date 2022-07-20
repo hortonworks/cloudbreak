@@ -273,6 +273,14 @@ public class UsageReportProcessor implements UsageReporter {
                 .build(), null);
     }
 
+    @Override
+    public void cdpSaltPasswordRotationEvent(UsageProto.CDPSaltPasswordRotationEvent details) {
+        checkNotNull(details);
+        usageProcessingStrategy.processUsage(eventBuilder()
+                .setCdpSaltPasswordRotationEvent(details)
+                .build(), null);
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())

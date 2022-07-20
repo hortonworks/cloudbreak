@@ -77,12 +77,17 @@ public class DefaultModelService {
         String formatPattern = "%s.%s.%s.%s";
         int count = 0;
         String address;
+        int generateNewBecauseExisted = -1;
         do {
+            generateNewBecauseExisted++;
             int ipPart1 = count / IP_PART_MAX;
             int ipPart2 = count % IP_PART_MAX;
             address = String.format(formatPattern, prefix, groupIndex, ipPart1, ipPart2);
             count++;
         } while (isAddressExisted(address, spiDto.getVmMetaDataStatuses()) || isAddressExisted(address, current));
+        if (generateNewBecauseExisted > 0) {
+            LOGGER.info("There are {} times to re-generate address because they were occupied.", generateNewBecauseExisted);
+        }
         return address;
     }
 

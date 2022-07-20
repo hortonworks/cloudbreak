@@ -18,13 +18,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.repair.CandidateUnhealthyInstanceSelector;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstancesFinalizer;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 import reactor.bus.Event;
@@ -34,7 +35,7 @@ import reactor.bus.EventBus;
 public class UnhealthyInstancesDetectionHandlerTest {
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private CandidateUnhealthyInstanceSelector candidateUnhealthyInstanceSelector;
@@ -56,9 +57,9 @@ public class UnhealthyInstancesDetectionHandlerTest {
         Event<UnhealthyInstancesDetectionRequest> event = mock(Event.class);
         when(event.getData()).thenReturn(unhealthyInstancesDetectionRequest);
 
-        Stack stack = mock(Stack.class);
+        StackView stack = mock(StackView.class);
         when(stack.getId()).thenReturn(stackId);
-        when(stackService.getByIdWithTransaction(stackId)).thenReturn(stack);
+        when(stackDtoService.getStackViewById(stackId)).thenReturn(stack);
 
         when(candidateUnhealthyInstanceSelector.selectCandidateUnhealthyInstances(stackId)).thenReturn(Collections.emptySet());
 
@@ -76,9 +77,9 @@ public class UnhealthyInstancesDetectionHandlerTest {
         Event<UnhealthyInstancesDetectionRequest> event = mock(Event.class);
         when(event.getData()).thenReturn(unhealthyInstancesDetectionRequest);
 
-        Stack stack = mock(Stack.class);
-        when(stackService.getByIdWithTransaction(stackId)).thenReturn(stack);
-        Set<InstanceMetaData> unhealthyInstances = new HashSet<>();
+        StackView stack = mock(StackView.class);
+        when(stackDtoService.getStackViewById(stackId)).thenReturn(stack);
+        Set<InstanceMetadataView> unhealthyInstances = new HashSet<>();
         InstanceMetaData imd1 = mock(InstanceMetaData.class);
         InstanceMetaData imd2 = mock(InstanceMetaData.class);
         InstanceMetaData imd3 = mock(InstanceMetaData.class);

@@ -6,17 +6,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import reactor.bus.Event;
-
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.RegisterFreeIpaDnsFailure;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.RegisterFreeIpaDnsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.loadbalancer.RegisterFreeIpaDnsSuccess;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
+
+import reactor.bus.Event;
 
 @Component
 public class RegisterFreeIpaDnsHandler extends ExceptionCatcherEventHandler<RegisterFreeIpaDnsRequest> {
@@ -25,6 +26,9 @@ public class RegisterFreeIpaDnsHandler extends ExceptionCatcherEventHandler<Regi
 
     @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Override
     public String selector() {
@@ -39,12 +43,12 @@ public class RegisterFreeIpaDnsHandler extends ExceptionCatcherEventHandler<Regi
     @Override
     protected Selectable doAccept(HandlerEvent<RegisterFreeIpaDnsRequest> event) {
         RegisterFreeIpaDnsRequest request = event.getData();
-        Stack stack = request.getStack();
+        StackView stack = stackDtoService.getStackViewById(request.getResourceId());
         try {
             LOGGER.info("Registering load balancer DNS entry with FreeIPA");
             clusterPublicEndpointManagementService.registerLoadBalancerWithFreeIPA(stack);
             LOGGER.info("Load balancer FreeIPA DNS registration was successful");
-            return new RegisterFreeIpaDnsSuccess(stack);
+            return new RegisterFreeIpaDnsSuccess(stack.getId());
         } catch (Exception e) {
             LOGGER.warn("Failed to register load balancers with FreeIPA.", e);
             return new RegisterFreeIpaDnsFailure(request.getResourceId(), e);

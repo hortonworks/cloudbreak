@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
@@ -62,11 +62,11 @@ public class KnoxServiceConfigProviderTest {
         CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         BlueprintView blueprintView = new BlueprintView("text", cdhVersion, "CDH", blueprintTextProcessor);
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setConnectionPassword("pw");
-        rdsConfig.setConnectionUserName("usr");
-        rdsConfig.setType(DatabaseType.KNOX_GATEWAY.name());
-        rdsConfig.setConnectionURL("jdbc:postgresql://somehost.com:5432/dbName");
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getConnectionPassword()).thenReturn("pw");
+        when(rdsConfig.getConnectionUserName()).thenReturn("usr");
+        when(rdsConfig.getType()).thenReturn(DatabaseType.KNOX_GATEWAY.name());
+        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://somehost.com:5432/dbName");
         TemplatePreparationObject source = TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)
                 .withRdsSslCertificateFilePath("file://path")

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.notification;
 
+import java.util.List;
+
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
@@ -21,6 +23,15 @@ public interface PersistenceNotifier {
     ResourcePersisted notifyAllocation(CloudResource cloudResource, CloudContext cloudContext);
 
     /**
+     * Inform Cloudbreak about resources allocations on Cloud provider side.
+     *
+     * @param cloudResources the allocated {@link CloudResource} list
+     * @param cloudContext  the context containing information to identify which stack (cluster) is affected
+     * @return status of persisted resource
+     */
+    ResourcePersisted notifyAllocations(List<CloudResource> cloudResources, CloudContext cloudContext);
+
+    /**
      * Inform Cloudbreak about a resource has been updated
      *
      * @param cloudResource the allocated {@link CloudResource}
@@ -30,6 +41,15 @@ public interface PersistenceNotifier {
     ResourcePersisted notifyUpdate(CloudResource cloudResource, CloudContext cloudContext);
 
     /**
+     * Inform Cloudbreak about a resources have been updated
+     *
+     * @param cloudResources the allocated {@link CloudResource} list
+     * @param cloudContext  the context containing information to identify which stack (cluster) is affected
+     * @return status of update resource
+     */
+    ResourcePersisted notifyUpdates(List<CloudResource> cloudResources, CloudContext cloudContext);
+
+    /**
      * Inform Cloudbreak about a resource has been deleted
      *
      * @param cloudResource the allocated {@link CloudResource}
@@ -37,5 +57,14 @@ public interface PersistenceNotifier {
      * @return status of deleted resource
      */
     ResourcePersisted notifyDeletion(CloudResource cloudResource, CloudContext cloudContext);
+
+    /**
+     * Inform Cloudbreak about resource have been deleted
+     *
+     * @param cloudResources the allocated {@link CloudResource} list
+     * @param cloudContext  the context containing information to identify which stack (cluster) is affected
+     * @return status of deleted resource
+     */
+    ResourcePersisted notifyDeletions(List<CloudResource> cloudResources, CloudContext cloudContext);
 
 }

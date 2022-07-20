@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,17 +12,16 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -32,7 +31,9 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.StackView;
 
+@ExtendWith(MockitoExtension.class)
 public class ClusterKerberosServiceTest {
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -55,21 +56,19 @@ public class ClusterKerberosServiceTest {
     @Mock
     private Node node;
 
-    private Stack stack;
+    @Mock
+    private StackDto stack;
 
-    private Cluster cluster;
+    @Mock
+    private StackView stackView;
 
     private KerberosConfig kerberosConfig;
 
-    @Before
+    @BeforeEach
     public void init() throws CloudbreakException {
-        MockitoAnnotations.initMocks(this);
-        stack = new Stack();
-        Orchestrator orchestrator = new Orchestrator();
-        orchestrator.setType("HOST");
-        stack.setOrchestrator(orchestrator);
-        cluster = spy(new Cluster());
-        stack.setCluster(cluster);
+        when(stackView.getName()).thenReturn("");
+        when(stackView.getEnvironmentCrn()).thenReturn("");
+        when(stack.getStack()).thenReturn(stackView);
         kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().build();
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(new GatewayConfig("a", "a", "a", 1, "a", false));
     }
@@ -98,15 +97,15 @@ public class ClusterKerberosServiceTest {
                 .leaveDomain(any(GatewayConfig.class), any(), eq("ipa_member"), eq("ipa_leave"), any(ExitCriteriaModel.class));
     }
 
-    @Test(expected = CloudbreakException.class)
-    public void testExceptionMapped() throws CloudbreakOrchestratorFailedException, CloudbreakException {
+    @Test
+    public void testExceptionMapped() throws CloudbreakOrchestratorFailedException {
         when(kerberosConfigService.get(anyString(), anyString())).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.isAdJoinable(any())).thenReturn(Boolean.TRUE);
 
         doThrow(new CloudbreakOrchestratorFailedException("error")).when(hostOrchestrator)
                 .leaveDomain(any(GatewayConfig.class), any(), eq("ad_member"), eq("ad_leave"), any(ExitCriteriaModel.class));
 
-        underTest.leaveDomains(stack);
+        assertThrows(CloudbreakException.class, () -> underTest.leaveDomains(stack));
     }
 
 }

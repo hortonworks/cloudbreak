@@ -5,7 +5,7 @@ import java.util.List;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 
-public class LaunchLoadBalancerResult extends CloudPlatformResult {
+public class  LaunchLoadBalancerResult extends CloudPlatformResult {
     private List<CloudResourceStatus> results;
 
     public LaunchLoadBalancerResult(Long resourceId, List<CloudResourceStatus> results) {

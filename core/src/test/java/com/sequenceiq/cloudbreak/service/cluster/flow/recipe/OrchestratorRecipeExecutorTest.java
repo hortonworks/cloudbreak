@@ -22,10 +22,10 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.service.recipe.GeneratedRecipeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OrchestratorRecipeExecutorTest {
@@ -63,7 +64,10 @@ public class OrchestratorRecipeExecutorTest {
     private OrchestratorRecipeExecutor underTest;
 
     @Mock
-    private Stack stack;
+    private StackDto stack;
+
+    @Mock
+    private StackView stackView;
 
     @Mock
     private HostOrchestrator hostOrchestrator;
@@ -98,13 +102,10 @@ public class OrchestratorRecipeExecutorTest {
     @Test
     public void postClusterManagerStartRecipesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
             CloudbreakOrchestratorTimeoutException {
-        when(stack.getId()).thenReturn(1L);
-        Cluster cluster = new Cluster();
-        cluster.setId(2L);
-        when(stack.getCluster()).thenReturn(cluster);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         Set<Node> nodes = Set.of(this.node);
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
+        when(stack.getStack()).thenReturn(stackView);
 
         underTest.postClusterManagerStartRecipes(stack);
 

@@ -24,13 +24,13 @@ import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceStatusChecker;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class VmStatusCheckerConclusionStep extends ConclusionStep {
@@ -59,7 +59,7 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
     public Conclusion check(Long resourceId) {
         Stack stack = stackService.getById(resourceId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId());
+        List<InstanceMetadataView> runningInstances = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(stack.getId());
         if (isClusterManagerRunning(stack, connector)) {
             return checkCMForInstanceStatuses(connector, runningInstances, stack.getCluster().getId());
         } else {
@@ -67,7 +67,7 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
         }
     }
 
-    private Conclusion checkCMForInstanceStatuses(ClusterApi connector, Set<InstanceMetaData> runningInstances, Long clusterId) {
+    private Conclusion checkCMForInstanceStatuses(ClusterApi connector, List<InstanceMetadataView> runningInstances, Long clusterId) {
         ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses(
                 runtimeVersionService.getRuntimeVersion(clusterId));
         Map<HostName, Set<HealthCheck>> hostStatuses = extendedHostStatuses.getHostsHealth();
@@ -75,7 +75,7 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
                 .filter(hostName -> !extendedHostStatuses.isHostHealthy(hostName))
                 .collect(Collectors.toMap(StringType::value, extendedHostStatuses::statusReasonForHost));
         Set<String> noReportHosts = runningInstances.stream()
-                .map(InstanceMetaData::getDiscoveryFQDN)
+                .map(InstanceMetadataView::getDiscoveryFQDN)
                 .filter(Objects::nonNull)
                 .filter(discoveryFQDN -> !hostStatuses.containsKey(hostName(discoveryFQDN)))
                 .collect(toSet());
@@ -92,14 +92,14 @@ public class VmStatusCheckerConclusionStep extends ConclusionStep {
         }
     }
 
-    private Conclusion checkProviderForInstanceStatuses(Stack stack, Set<InstanceMetaData> runningInstances) {
-        List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(runningInstances, stack.getEnvironmentCrn(), stack.getStackAuthentication());
+    private Conclusion checkProviderForInstanceStatuses(Stack stack, List<InstanceMetadataView> runningInstances) {
+        List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(runningInstances, stack);
         List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, cloudInstances);
         Map<String, InstanceSyncState> instanceSyncStates = instanceStatuses.stream()
                 .collect(Collectors.toMap(i -> i.getCloudInstance().getInstanceId(), i -> InstanceSyncState.getInstanceSyncState(i.getStatus())));
         Set<String> notRunningInstances = runningInstances.stream()
                 .filter(i -> !InstanceSyncState.RUNNING.equals(instanceSyncStates.getOrDefault(i.getInstanceId(), InstanceSyncState.UNKNOWN)))
-                .map(InstanceMetaData::getDiscoveryFQDN)
+                .map(InstanceMetadataView::getDiscoveryFQDN)
                 .filter(Objects::nonNull)
                 .collect(toSet());
 

@@ -51,8 +51,12 @@ public class ResourceService {
         return repository.findByStackIdAndNameAndType(stackId, name, type);
     }
 
-    public List<Resource> findByStackIdAndType(Long stackId,  ResourceType type) {
+    public List<Resource> findByStackIdAndType(Long stackId, ResourceType type) {
         return repository.findByStackIdAndType(stackId, type);
+    }
+
+    public List<Resource> findAllByStackIdAndResourceTypeIn(Long stackId, Collection<ResourceType> resourceTypes) {
+        return repository.findAllByStackIdAndResourceTypeIn(stackId, resourceTypes);
     }
 
     public List<Resource> findAllByResourceStatusAndResourceTypeAndStackIdAndInstanceGroup(CommonStatus status, ResourceType resourceType, Long stackId,
@@ -91,5 +95,21 @@ public class ResourceService {
 
     public Optional<Resource> findFirstByStatusAndTypeAndStack(CommonStatus status, ResourceType resourceType, Long stackId) {
         return repository.findFirstByResourceStatusAndResourceTypeAndStackId(status, resourceType, stackId);
+    }
+
+    public boolean existsByStackIdAndNameAndType(Long stackId, String name, ResourceType type) {
+        return repository.existsByStackIdAndNameAndType(stackId, name, type);
+    }
+
+    public boolean existsByResourceReferenceAndType(String resourceReference, ResourceType resourceType) {
+        return repository.existsByResourceReferenceAndType(resourceReference, resourceType);
+    }
+
+    public void deleteByStackIdAndNameAndType(Long stackId, String name, ResourceType type) {
+        repository.deleteByStackIdAndNameAndType(stackId, name, type);
+    }
+
+    public void deleteByResourceReferenceAndType(String reference, ResourceType type) {
+        repository.deleteByResourceReferenceAndType(reference, type);
     }
 }

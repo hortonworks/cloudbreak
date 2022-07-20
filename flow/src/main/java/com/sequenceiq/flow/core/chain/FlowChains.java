@@ -131,6 +131,19 @@ public class FlowChains {
         }
     }
 
+    public void cleanFlowChain(String flowChainId, String flowTriggerUserCrn) {
+        FlowTriggerEventQueue flowTriggerEventQueue = flowChainMap.get(flowChainId);
+        if (flowTriggerEventQueue != null) {
+            Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
+            if (queue != null) {
+                if (!queue.isEmpty()) {
+                    queue.clear();
+                    flowLogService.saveChain(flowChainId, getParentFlowChainId(flowChainId), flowTriggerEventQueue, flowTriggerUserCrn);
+                }
+            }
+        }
+    }
+
     public void triggerNextFlow(String flowChainId, String flowTriggerUserCrn, Map<Object, Object> contextParams, String operationType,
             Optional<Runnable> finalizerCallback) {
         FlowTriggerEventQueue flowTriggerEventQueue = flowChainMap.get(flowChainId);

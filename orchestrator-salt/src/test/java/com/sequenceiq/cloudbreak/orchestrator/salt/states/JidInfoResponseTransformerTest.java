@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.states;
 
-import static com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates.RUNNING_HIGHSTATE_JID;
+import static com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService.RUNNING_HIGHSTATE_JID;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.hasItem;

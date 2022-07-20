@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -59,7 +60,7 @@ public class StackListItemToStackApiViewConverter {
         clusterResponse.setClusterManagerIp(item.getClusterManagerIp());
         clusterResponse.setBlueprint(getBlueprintView(item));
         clusterResponse.setStatus(item.getClusterStatus());
-        clusterResponse.setHostGroups(new HashSet<>(hostGroupViews));
+        clusterResponse.setHostGroups(hostGroupViews == null ? Collections.emptySet() : new HashSet<>(hostGroupViews));
         clusterResponse.setCertExpirationState(item.getCertExpirationState());
         return clusterResponse;
     }
@@ -72,7 +73,7 @@ public class StackListItemToStackApiViewConverter {
         blueprintResponse.setName(item.getBlueprintName());
         blueprintResponse.setStackType(item.getStackType());
         blueprintResponse.setStackVersion(item.getStackVersion());
-        blueprintResponse.setHostGroupCount(item.getHostGroupCount());
+        blueprintResponse.setHostGroupCount(item.getHostGroupCount() == null ? 0 : item.getHostGroupCount());
         blueprintResponse.setStatus(item.getBlueprintStatus());
         blueprintResponse.setTags(item.getBlueprintTags());
         blueprintResponse.setBlueprintUpgradeOption(item.getBlueprintUpgradeOption());

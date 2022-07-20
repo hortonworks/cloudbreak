@@ -13,7 +13,8 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 
 public class MixedPackageVersionComparatorTest {
 
@@ -131,6 +132,6 @@ public class MixedPackageVersionComparatorTest {
     }
 
     private Set<ParcelInfo> createParcelInfo(Map<String, String> parcels) {
-        return parcels.entrySet().stream().map(entry -> new ParcelInfo(entry.getKey(), entry.getValue())).collect(Collectors.toSet());
+        return parcels.entrySet().stream().map(entry -> new ParcelInfo(entry.getKey(), entry.getValue(), ParcelStatus.ACTIVATED)).collect(Collectors.toSet());
     }
 }

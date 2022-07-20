@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -45,20 +46,21 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
-import com.sequenceiq.cloudbreak.reactor.handler.userdata.UpdateUserDataHandler;
-import com.sequenceiq.cloudbreak.reactor.handler.userdata.UpdateUserDataOnProviderHandler;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UserDataUpdateRequest;
+import com.sequenceiq.cloudbreak.reactor.handler.userdata.UpdateUserDataHandler;
+import com.sequenceiq.cloudbreak.reactor.handler.userdata.UpdateUserDataOnProviderHandler;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.userdata.UserDataService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -96,6 +98,9 @@ class UpdateUserDataFlowIntegrationTest {
     @MockBean(reset = MockReset.NONE)
     private StackService stackService;
 
+    @MockBean(reset = MockReset.NONE)
+    private StackDtoService stackDtoService;
+
     @MockBean
     private UserDataService userDataService;
 
@@ -123,17 +128,6 @@ class UpdateUserDataFlowIntegrationTest {
     @Mock
     private ResourceConnector<Object> resourcesApi;
 
-    private StackView mockStackView() {
-        StackView stackView = mock(StackView.class);
-        ClusterView clusterView = mock(ClusterView.class);
-
-        when(stackView.getClusterView()).thenReturn(clusterView);
-        when(stackView.getId()).thenReturn(1L);
-        when(stackView.isStartInProgress()).thenReturn(true);
-
-        return stackView;
-    }
-
     private Stack mockStack() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
@@ -147,15 +141,20 @@ class UpdateUserDataFlowIntegrationTest {
         stack.setResourceCrn(DATAHUB_CRN);
         Workspace workspace = new Workspace();
         workspace.setId(1L);
+        workspace.setTenant(new Tenant());
         stack.setWorkspace(workspace);
 
         return stack;
     }
 
     private void mockStackService(Stack mockStack) {
-        StackView stackView = mockStackView();
-        when(stackService.getByIdWithTransaction(STACK_ID)).thenReturn(mockStack);
-        when(stackService.getViewByIdWithoutAuth(STACK_ID)).thenReturn(stackView);
+        StackDto stackDto = spy(StackDto.class);
+        Stack stack = mockStack();
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getClusterViewByStackId(STACK_ID)).thenReturn(stack.getCluster());
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(stackDto.getStack()).thenReturn(stack);
+        when(stackDto.getWorkspace()).thenReturn(stack.getWorkspace());
     }
 
     @BeforeEach

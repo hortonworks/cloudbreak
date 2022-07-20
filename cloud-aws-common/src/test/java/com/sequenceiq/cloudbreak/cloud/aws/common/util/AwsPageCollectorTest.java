@@ -9,13 +9,16 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class AwsPageCollectorTest {
+
+    private AwsPageCollector underTest = new AwsPageCollector();
+
     @Test
-    public void testCollector() {
+    void testCollector() {
         Map<String, TestCollectable> collection = Map.of(
                 "0", new TestCollectable("1", List.of("first")),
                 "1", new TestCollectable(null, List.of("second")));
         TestToken testToken = new TestToken("0");
-        List<String> stringList = AwsPageCollector.collectPages(requestString -> collection.get(testToken.getToken()),
+        List<String> stringList = underTest.collectPages(requestString -> collection.get(testToken.getToken()),
                 testToken,
                 TestCollectable::getListOfSomething,
                 TestCollectable::getToken,

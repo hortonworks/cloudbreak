@@ -96,7 +96,7 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         // GIVEN
         Stack stack = createStack();
         Image image = mock(Image.class);
-        given(stackImageService.getCurrentImage(stack)).willReturn(image);
+        given(stackImageService.getCurrentImage(stack.getId())).willReturn(image);
         given(image.getPackageVersions()).willReturn(Map.of("cdp-logging-agent", "0.2.11"));
         initIsAffectedMocks();
         // WHEN
@@ -111,7 +111,7 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         // GIVEN
         Stack stack = createStack();
         Image image = mock(Image.class);
-        given(stackImageService.getCurrentImage(stack)).willReturn(image);
+        given(stackImageService.getCurrentImage(stack.getId())).willReturn(image);
         given(image.getPackageVersions()).willReturn(Map.of("cdp-logging-agent", "0.2.13"));
         initIsAffectedMocks();
         // WHEN
@@ -126,7 +126,7 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         // GIVEN
         Stack stack = createStack();
         Image image = mock(Image.class);
-        given(stackImageService.getCurrentImage(stack)).willReturn(image);
+        given(stackImageService.getCurrentImage(stack.getId())).willReturn(image);
         given(image.getPackageVersions()).willReturn(Map.of("cdp-logging-agent", "0.2.15"));
         initIsAffectedMocks();
         // WHEN
@@ -145,7 +145,7 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         StatedImage statedImageMock = mock(StatedImage.class);
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image imageFromStated = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         given(image.getPackageVersions()).willReturn(new HashMap<>());
-        given(stackImageService.getCurrentImage(stack)).willReturn(image);
+        given(stackImageService.getCurrentImage(stack.getId())).willReturn(image);
         given(stackImageService.getImageCatalogFromStackAndImage(any(), any())).willReturn(imageCatalog);
         given(stackImageService.getStatedImageInternal(any(Stack.class), any(Image.class), any(ImageCatalog.class))).willReturn(Optional.of(statedImageMock));
         given(statedImageMock.getImage()).willReturn(imageFromStated);

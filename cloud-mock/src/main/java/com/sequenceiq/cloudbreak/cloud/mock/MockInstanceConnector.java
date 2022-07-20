@@ -10,10 +10,12 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.ResponseProcessingException;
 import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
@@ -57,6 +59,7 @@ public class MockInstanceConnector implements InstanceConnector {
     }
 
     @Override
+    @Retryable(include = ResponseProcessingException.class)
     public List<CloudVmInstanceStatus> check(AuthenticatedContext authenticatedContext, List<CloudInstance> vms) {
         try {
             LOGGER.debug("Collect instance statuses from mock spi");

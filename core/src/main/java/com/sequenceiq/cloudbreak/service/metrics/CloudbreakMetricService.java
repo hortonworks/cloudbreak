@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.metrics.AbstractMetricService;
 import com.sequenceiq.cloudbreak.common.metrics.type.MetricTag;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 
 @Service("MetricService")
@@ -20,27 +20,10 @@ public class CloudbreakMetricService extends AbstractMetricService {
 
     private static final String METRIC_PREFIX = "cloudbreak";
 
-    public void incrementMetricCounter(MetricType metric, Stack stack) {
-        String[] tags = nullableValueTags(
-                CloudbreakMetricTag.STACK_TYPE.name(), stack.getType().name(),
-                MetricTag.CLOUD_PROVIDER.name(), stack.cloudPlatform(),
-                MetricTag.TUNNEL_TYPE.name(), stack.getTunnel().name());
-        incrementMetricCounter(metric, tags);
-    }
-
-    public void incrementMetricCounter(MetricType metric, Stack stack, Exception e) {
-        String[] tags = nullableValueTags(
-                MetricTag.EXCEPTION_TYPE.name(), e.getClass().getName(),
-                CloudbreakMetricTag.STACK_TYPE.name(), stack.getType().name(),
-                MetricTag.CLOUD_PROVIDER.name(), stack.cloudPlatform(),
-                MetricTag.TUNNEL_TYPE.name(), stack.getTunnel().name());
-        incrementMetricCounter(metric, tags);
-    }
-
     public void incrementMetricCounter(MetricType metric, StackView stack) {
         String[] tags = nullableValueTags(
                 CloudbreakMetricTag.STACK_TYPE.name(), stack.getType().name(),
-                MetricTag.CLOUD_PROVIDER.name(), stack.cloudPlatform(),
+                MetricTag.CLOUD_PROVIDER.name(), stack.getCloudPlatform(),
                 MetricTag.TUNNEL_TYPE.name(), stack.getTunnel().name());
         incrementMetricCounter(metric, tags);
     }
@@ -49,7 +32,7 @@ public class CloudbreakMetricService extends AbstractMetricService {
         String[] tags = nullableValueTags(
                 MetricTag.EXCEPTION_TYPE.name(), e.getClass().getName(),
                 CloudbreakMetricTag.STACK_TYPE.name(), stack.getType().name(),
-                MetricTag.CLOUD_PROVIDER.name(), stack.cloudPlatform(),
+                MetricTag.CLOUD_PROVIDER.name(), stack.getCloudPlatform(),
                 MetricTag.TUNNEL_TYPE.name(), stack.getTunnel().name());
         incrementMetricCounter(metric, tags);
     }
@@ -75,9 +58,9 @@ public class CloudbreakMetricService extends AbstractMetricService {
         return arrAccumulatedTags;
     }
 
-    public void recordImageCopyTime(Stack stack, long startMillis) {
+    public void recordImageCopyTime(StackDtoDelegate stack, long startMillis) {
         String[] tags = {MetricTag.TENANT.name(), Optional.ofNullable(stack.getTenant()).map(Tenant::getName).orElse("NA"),
-                MetricTag.CLOUD_PROVIDER.name(), Optional.ofNullable(stack.cloudPlatform()).orElse("NA"),
+                MetricTag.CLOUD_PROVIDER.name(), Optional.ofNullable(stack.getCloudPlatform()).orElse("NA"),
                 MetricTag.REGION.name(), Optional.ofNullable(stack.getRegion()).orElse("NA")};
 
         long millispassed = System.currentTimeMillis() - startMillis;

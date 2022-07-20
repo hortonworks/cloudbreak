@@ -9,6 +9,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -33,6 +34,7 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExistingStackPatcherJob.class);
 
     @Inject
+    @Qualifier("stackViewServiceDeprecated")
     private StackViewService stackViewService;
 
     @Inject

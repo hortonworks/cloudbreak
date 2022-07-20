@@ -14,21 +14,21 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 
 @Component
 public class ClouderaManagerProductsProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerProductsProvider.class);
 
-    public Set<ClouderaManagerProduct> getProducts(Set<ClusterComponent> components) {
+    public Set<ClouderaManagerProduct> getProducts(Set<ClusterComponentView> components) {
         return components.stream()
                 .filter(clusterComponent -> ComponentType.CDH_PRODUCT_DETAILS.equals(clusterComponent.getComponentType()))
                 .map(this::getClouderaManagerProduct)
                 .collect(Collectors.toSet());
     }
 
-    public Optional<ClouderaManagerProduct> findCdhProduct(Set<ClusterComponent> components) {
+    public Optional<ClouderaManagerProduct> findCdhProduct(Set<ClusterComponentView> components) {
         return components.stream()
                 .filter(clusterComponent -> clusterComponent.getName().equals(StackType.CDH.name()))
                 .map(this::getClouderaManagerProduct)
@@ -42,7 +42,7 @@ public class ClouderaManagerProductsProvider {
                 .orElseThrow(() -> new NotFoundException("Runtime component not found!"));
     }
 
-    private ClouderaManagerProduct getClouderaManagerProduct(ClusterComponent clusterComponent) {
+    private ClouderaManagerProduct getClouderaManagerProduct(ClusterComponentView clusterComponent) {
         try {
             return clusterComponent.getAttributes().get(ClouderaManagerProduct.class);
         } catch (IOException e) {

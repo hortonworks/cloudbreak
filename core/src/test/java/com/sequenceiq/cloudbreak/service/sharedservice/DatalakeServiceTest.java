@@ -12,14 +12,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,15 +33,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackIdViewImpl;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @ExtendWith({MockitoExtension.class})
@@ -53,13 +49,10 @@ public class DatalakeServiceTest {
     private StackService stackService;
 
     @Mock
-    private TransactionService transactionService;
-
-    @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Mock
-    private StackViewService stackViewService;
+    private StackDtoService stackDtoService;
 
     @InjectMocks
     private DatalakeService underTest;
@@ -97,10 +90,8 @@ public class DatalakeServiceTest {
         when(resourceBasicView.getId()).thenReturn(1L);
         when(resourceBasicView.getName()).thenReturn("teststack");
         lenient().when(stackService.getResourceBasicViewByResourceCrn(anyString())).thenReturn(Optional.of(resourceBasicView));
-        Stack source = new Stack();
-        source.setDatalakeCrn("crn");
         StackV4Response x = new StackV4Response();
-        underTest.addSharedServiceResponse(source, x);
+        underTest.addSharedServiceResponse("crn", x);
         verify(stackService, times(1)).getResourceBasicViewByResourceCrn("crn");
         assertEquals(1L, x.getSharedService().getSharedClusterId());
         assertEquals("teststack", x.getSharedService().getSharedClusterName());
@@ -108,11 +99,9 @@ public class DatalakeServiceTest {
 
     @Test
     public void testAddSharedServiceResponseWhenDatalakeCrnIsNotNullAndDatalakeIsMissing() {
-        lenient().when(stackService.getResourceBasicViewByResourceCrn(anyString())).thenReturn(Optional.empty());
-        Stack source = new Stack();
-        source.setDatalakeCrn("crn");
+        when(stackService.getResourceBasicViewByResourceCrn(anyString())).thenReturn(Optional.empty());
         StackV4Response x = new StackV4Response();
-        underTest.addSharedServiceResponse(source, x);
+        underTest.addSharedServiceResponse("crn", x);
         verify(stackService, times(1)).getResourceBasicViewByResourceCrn("crn");
         assertNull(x.getSharedService().getSharedClusterId());
         assertNull(x.getSharedService().getSharedClusterName());
@@ -120,10 +109,8 @@ public class DatalakeServiceTest {
 
     @Test
     public void testAddSharedServiceResponseWhenDatalakeCrnIsNull() {
-        Stack source = new Stack();
-        source.setDatalakeCrn(null);
         StackV4Response x = new StackV4Response();
-        underTest.addSharedServiceResponse(source, x);
+        underTest.addSharedServiceResponse("crn", x);
         verify(stackService, never()).getByCrnOrElseNull("crn");
     }
 
@@ -186,13 +173,8 @@ public class DatalakeServiceTest {
 
     @Test
     public void testCreateSharedServiceConfigsViewByCrn() {
-        Stack stack = new Stack();
-        Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        stack.setDatalakeCrn("crn");
-        stack.setType(StackType.WORKLOAD);
 
-        SharedServiceConfigsView res = underTest.createSharedServiceConfigsView(stack);
+        SharedServiceConfigsView res = underTest.createSharedServiceConfigsView("pwd", StackType.WORKLOAD, "crn");
 
         verify(stackService, times(1)).getByCrnOrElseNull("crn");
         Assertions.assertFalse(res.isDatalakeCluster());
@@ -201,12 +183,8 @@ public class DatalakeServiceTest {
 
     @Test
     public void testCreateSharedServiceConfigsViewFromBlueprintUtilsWhenDatalake() {
-        Stack stack = new Stack();
-        Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        stack.setType(StackType.DATALAKE);
 
-        SharedServiceConfigsView res = underTest.createSharedServiceConfigsView(stack);
+        SharedServiceConfigsView res = underTest.createSharedServiceConfigsView("pwd", StackType.DATALAKE, null);
 
         verify(stackService, times(0)).getByCrnOrElseNull("crn");
         Assertions.assertTrue(res.isDatalakeCluster());
@@ -214,12 +192,7 @@ public class DatalakeServiceTest {
 
     @Test
     public void testCreateSharedServiceConfigsViewWhenDatahubButDatalakeCrnIsMissing() {
-        Stack stack = new Stack();
-        Cluster cluster = new Cluster();
-        stack.setCluster(cluster);
-        stack.setType(StackType.WORKLOAD);
-
-        SharedServiceConfigsView res = underTest.createSharedServiceConfigsView(stack);
+        SharedServiceConfigsView res = underTest.createSharedServiceConfigsView("pwd", StackType.WORKLOAD, null);
 
         verify(stackService, times(0)).getByCrnOrElseNull("crn");
         Assertions.assertFalse(res.isDatalakeCluster());
@@ -239,34 +212,41 @@ public class DatalakeServiceTest {
     }
 
     @Test
-    public void testGetResourceCrnByResourceName() throws IllegalAccessException {
-        when(stackViewService.findNotTerminatedByName(any(), any())).thenReturn(Optional.empty());
+    public void testGetResourceCrnByResourceName() {
+        when(stackDtoService.findNotTerminatedByNameAndAccountId(any(), any())).thenReturn(Optional.empty());
         assertThrows(NotFoundException.class, () -> underTest.getResourceCrnByResourceName("name"), "name stack not found");
 
-        when(stackViewService.findNotTerminatedByName(any(), any())).thenReturn(Optional.of(stackView(StackType.WORKLOAD, null, null)));
+        StackView stackView = stackView(StackType.WORKLOAD);
+        when(stackDtoService.findNotTerminatedByNameAndAccountId(any(), any())).thenReturn(Optional.of(stackView));
         assertThrows(BadRequestException.class, () -> underTest.getResourceCrnByResourceName("name"), "name stack is not a Data Lake");
 
-        when(stackViewService.findNotTerminatedByName(any(), any())).thenReturn(Optional.of(stackView(StackType.DATALAKE, "crn", null)));
+        StackView datalakeView = stackView(StackType.DATALAKE);
+        when(datalakeView.getResourceCrn()).thenReturn("crn");
+        when(stackDtoService.findNotTerminatedByNameAndAccountId(any(), any())).thenReturn(Optional.of(datalakeView));
         assertEquals("crn", underTest.getResourceCrnByResourceName("name"));
     }
 
     @Test
-    public void testGetEnviromentCrnByResourceCrn() throws IllegalAccessException {
-        when(stackViewService.findNotTerminatedByCrn(any(), any())).thenReturn(Optional.empty());
+    public void testGetEnviromentCrnByResourceCrn() {
+        when(stackDtoService.findNotTerminatedByCrn(any())).thenReturn(Optional.empty());
         assertEquals(Optional.empty(), underTest.getEnvironmentCrnByResourceCrn("crn"));
 
-        when(stackViewService.findNotTerminatedByCrn(any(), any())).thenReturn(Optional.of(stackView(StackType.WORKLOAD, null, null)));
+        StackView workloadView = stackView(StackType.WORKLOAD);
+        when(stackDtoService.findNotTerminatedByCrn(any())).thenReturn(Optional.of(workloadView));
         assertThrows(BadRequestException.class, () -> underTest.getEnvironmentCrnByResourceCrn("crn"), "Stack with CRN crn is not a Data Lake");
 
-        when(stackViewService.findNotTerminatedByCrn(any(), any())).thenReturn(Optional.of(stackView(StackType.DATALAKE, null, "envCrn")));
+        StackView datalakeView = stackView(StackType.DATALAKE);
+        when(datalakeView.getEnvironmentCrn()).thenReturn("envCrn");
+        when(stackDtoService.findNotTerminatedByCrn(any())).thenReturn(Optional.of(datalakeView));
         assertEquals(Optional.of("envCrn"), underTest.getEnvironmentCrnByResourceCrn("crn"));
     }
 
     @Test
-    public void testGetResourceCrnListByResourceNameList() throws IllegalAccessException {
-        when(stackViewService.findNotTerminatedByNames(any(), any())).thenReturn(Set.of(
-                stackView(StackType.WORKLOAD, "crn1", null),
-                stackView(StackType.DATALAKE, "crn2", null)));
+    public void testGetResourceCrnListByResourceNameList() {
+        StackView workloadView = stackView(StackType.WORKLOAD);
+        StackView datalakeView = stackView(StackType.DATALAKE);
+        when(datalakeView.getResourceCrn()).thenReturn("crn2");
+        when(stackDtoService.findNotTerminatedByNamesAndAccountId(any(), any())).thenReturn(List.of(workloadView, datalakeView));
         List<String> crnList = underTest.getResourceCrnListByResourceNameList(List.of("name1", "name2"));
         assertFalse(crnList.isEmpty());
         assertEquals(1, crnList.size());
@@ -274,10 +254,12 @@ public class DatalakeServiceTest {
     }
 
     @Test
-    public void testGetEnvironmentCrnListByResourceCrnList() throws IllegalAccessException {
-        when(stackViewService.findNotTerminatedByCrns(any(), any())).thenReturn(Set.of(
-                stackView(StackType.WORKLOAD, "crn1", "envCrn1"),
-                stackView(StackType.DATALAKE, "crn2", "envCrn2")));
+    public void testGetEnvironmentCrnListByResourceCrnList() {
+        StackView workloadView = stackView(StackType.WORKLOAD);
+        StackView datalakeView = stackView(StackType.DATALAKE);
+        when(datalakeView.getResourceCrn()).thenReturn("crn2");
+        when(datalakeView.getEnvironmentCrn()).thenReturn("envCrn2");
+        when(stackDtoService.findNotTerminatedByCrns(any())).thenReturn(List.of(workloadView, datalakeView));
         Map<String, Optional<String>> crnMap = underTest.getEnvironmentCrnsByResourceCrns(List.of("crn1", "crn2"));
         assertFalse(crnMap.isEmpty());
         assertEquals(1, crnMap.entrySet().size());
@@ -285,11 +267,9 @@ public class DatalakeServiceTest {
         assertTrue(crnMap.values().contains(Optional.of("envCrn2")));
     }
 
-    private StackView stackView(StackType type, String resourceCrn, String envCrn) throws IllegalAccessException {
-        StackView view = new StackView();
-        view.setType(type);
-        view.setResourceCrn(resourceCrn);
-        FieldUtils.writeField(view, "environmentCrn", envCrn, true);
+    private StackView stackView(StackType type) {
+        StackView view = mock(StackView.class);
+        when(view.getType()).thenReturn(type);
         return view;
     }
 }

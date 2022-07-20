@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -36,11 +36,11 @@ public class CmCommandLinkProvider {
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
 
-    public Optional<String> getCmCommandLink(Stack stack, String commandId) {
+    public Optional<String> getCmCommandLink(StackDtoDelegate stack, String commandId) {
         try {
             String managerAddress = stackUtil.extractClusterManagerAddress(stack);
             Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesForTopologies =
-                    serviceEndpointCollector.prepareClusterExposedServices(stack.getCluster(), managerAddress);
+                    serviceEndpointCollector.prepareClusterExposedServices(stack, managerAddress);
             if (clusterExposedServicesForTopologies.containsKey(defaultTopologyName)) {
                 Predicate<ClusterExposedServiceV4Response> cmUiPredicate = exposedService -> StringUtils.equals(exposedService.getServiceName(),
                         exposedServiceCollector.getClouderaManagerUIService().getServiceName());

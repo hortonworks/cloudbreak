@@ -38,10 +38,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
@@ -52,6 +51,8 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonResourceType;
 
@@ -86,14 +87,15 @@ public class StackUpscaleService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    public void startAddInstances(Stack stack, Map<String, Integer> hostGroupWithAdjustment) {
+    public void startAddInstances(StackView stack, Map<String, Integer> hostGroupWithAdjustment) {
         Integer scalingAdjustment = hostGroupWithAdjustment.values().stream().reduce(0, Integer::sum);
         String statusReason = format("Adding %s new instance(s) to instance group %s", scalingAdjustment,
                 String.join(", ", hostGroupWithAdjustment.keySet()));
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ADDING_NEW_INSTANCES, statusReason);
     }
 
-    public void addInstanceFireEventAndLog(Stack stack, Map<String, Integer> hostGroupWithAdjustment, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+    public void addInstanceFireEventAndLog(StackView stack, Map<String, Integer> hostGroupWithAdjustment,
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         Integer scalingAdjustment = hostGroupWithAdjustment.values().stream().reduce(0, Integer::sum);
         flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_ADDING_INSTANCES, String.valueOf(scalingAdjustment),
                 String.join(", ", hostGroupWithAdjustment.keySet()), String.valueOf(adjustmentTypeWithThreshold.getAdjustmentType()),
@@ -106,16 +108,16 @@ public class StackUpscaleService {
         validateResourceResults(context, payload.getErrorDetails(), results);
         Set<Long> successfulPrivateIds = results.stream().map(CloudResourceStatus::getPrivateId).filter(Objects::nonNull).collect(Collectors.toSet());
         Set<String> instanceGroups = context.getHostGroupWithAdjustment().keySet();
-        metadataSetupService.cleanupRequestedInstancesIfNotInList(context.getStack().getId(), instanceGroups, successfulPrivateIds);
+        metadataSetupService.cleanupRequestedInstancesIfNotInList(context.getStackId(), instanceGroups, successfulPrivateIds);
         if (successfulPrivateIds.isEmpty()) {
-            metadataSetupService.cleanupRequestedInstancesWithoutFQDN(context.getStack().getId(), instanceGroups);
+            metadataSetupService.cleanupRequestedInstancesWithoutFQDN(context.getStackId(), instanceGroups);
             throw new OperationException("Failed to upscale the cluster since all create request failed. Resource set is empty");
         }
         LOGGER.debug("Adding new instances to the stack is DONE");
     }
 
-    public void extendingMetadata(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.EXTENDING_METADATA);
+    public void extendingMetadata(Long stackId) {
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.EXTENDING_METADATA);
     }
 
     void reRegisterWithClusterProxy(long stackId) {
@@ -124,43 +126,42 @@ public class StackUpscaleService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_RE_REGISTER_WITH_CLUSTER_PROXY);
     }
 
-    public Set<String> finishExtendMetadata(Stack stack, Integer scalingAdjustment, CollectMetadataResult payload) throws TransactionExecutionException {
+    public Set<String> finishExtendMetadata(StackView stackView, Integer scalingAdjustment, CollectMetadataResult payload) throws TransactionExecutionException {
         return transactionService.required(() -> {
             List<CloudVmMetaDataStatus> coreInstanceMetaData = payload.getResults();
-            int newInstances = metadataSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, CREATED);
+            int newInstances = metadataSetupService.saveInstanceMetaData(stackView, coreInstanceMetaData, CREATED);
             Set<String> upscaleCandidateAddresses = coreInstanceMetaData.stream().filter(im -> im.getMetaData().getPrivateIp() != null)
                     .map(im -> im.getMetaData().getPrivateIp()).collect(Collectors.toSet());
             try {
-                clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), DetailedStackStatus.EXTENDING_METADATA_FINISHED);
+                clusterService.updateClusterStatusByStackIdOutOfTransaction(stackView.getId(), DetailedStackStatus.EXTENDING_METADATA_FINISHED);
             } catch (TransactionExecutionException e) {
                 throw e.getCause();
             }
             if (scalingAdjustment != newInstances) {
-                flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_METADATA_EXTEND_WITH_COUNT, String.valueOf(newInstances),
+                flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), STACK_METADATA_EXTEND_WITH_COUNT, String.valueOf(newInstances),
                         String.valueOf(scalingAdjustment));
             }
             return upscaleCandidateAddresses;
         });
     }
 
-    public void setupTls(StackContext context) throws CloudbreakException {
-        Stack stack = context.getStack();
-        for (InstanceMetaData gwInstance : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
+    public void setupTls(StackDto stack) throws CloudbreakException {
+        for (InstanceMetadataView gwInstance : stack.getAllAvailableGatewayInstances()) {
             if (!stack.getTunnel().useCcm() && CREATED.equals(gwInstance.getInstanceStatus())) {
                 tlsSetupService.setupTls(stack, gwInstance);
             }
         }
     }
 
-    public void bootstrappingNewNodes(Stack stack) {
+    public void bootstrappingNewNodes(StackView stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.BOOTSTRAPPING_NEW_NODES);
     }
 
-    public void extendingHostMetadata(Stack stack) {
+    public void extendingHostMetadata(StackView stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.EXTENDING_HOST_METADATA);
     }
 
-    public void finishExtendHostMetadata(Stack stack) {
+    public void finishExtendHostMetadata(StackView stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STACK_UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
     }
 
@@ -197,7 +198,7 @@ public class StackUpscaleService {
         }
     }
 
-    public int getInstanceCountToCreate(Stack stack, String instanceGroupName, int adjustment, boolean repair) {
+    public int getInstanceCountToCreate(StackDto stack, String instanceGroupName, int adjustment, boolean repair) {
         Set<InstanceMetaData> unusedInstanceMetadata = instanceMetaDataService.unusedInstancesInInstanceGroupByName(stack.getId(), instanceGroupName);
         int reusableInstanceCount = repair ? 0 : unusedInstanceMetadata.size();
         return stackScalabilityCondition.isScalable(stack, instanceGroupName) ? adjustment - reusableInstanceCount : 0;

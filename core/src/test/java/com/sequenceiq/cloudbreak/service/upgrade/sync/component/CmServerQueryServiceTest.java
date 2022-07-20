@@ -6,7 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DISTRIBUTED;
+
+import java.util.Collections;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,20 +20,24 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
 
 @ExtendWith(MockitoExtension.class)
 public class CmServerQueryServiceTest {
 
     private static final String STACK_NAME = "stackName";
 
-    @Mock
-    private ClusterApiConnectors apiConnectors;
+    private static final String CDH_PARCEL_NAME = "CDH";
+
+    private static final String CDH_PARCEL_VERSION = "7.2.7-1.cdh7.2.7.p7.12569826";
 
     @InjectMocks
     private CmServerQueryService underTest;
+
+    @Mock
+    private ClusterApiConnectors apiConnectors;
 
     @Mock
     private ClusterApi clusterApi;
@@ -45,26 +52,44 @@ public class CmServerQueryServiceTest {
     }
 
     @Test
-    void testGetActiveParcelsWhenParcelReturnedThenParsedIntoParcelInfo() {
-        Map<String, String> parcelNameToVersionMap = Map.of("CDH", "7.2.7-1.cdh7.2.7.p7.12569826");
-        when(clusterApi.gatherInstalledParcels(STACK_NAME)).thenReturn(parcelNameToVersionMap);
+    void testGetActiveParcelsWhenParcelReturned() {
+        ParcelInfo parcel = new ParcelInfo(CDH_PARCEL_NAME, CDH_PARCEL_VERSION, ACTIVATED);
+        when(clusterApi.gatherInstalledParcels(STACK_NAME)).thenReturn(Collections.singleton(parcel));
 
         Set<ParcelInfo> foundParcels = underTest.queryActiveParcels(stack);
 
         assertThat(foundParcels, hasSize(1));
         ParcelInfo activeParcel = foundParcels.iterator().next();
-        assertEquals("CDH", activeParcel.getName());
-        assertEquals("7.2.7-1.cdh7.2.7.p7.12569826", activeParcel.getVersion());
+        assertEquals(CDH_PARCEL_NAME, activeParcel.getName());
+        assertEquals(CDH_PARCEL_VERSION, activeParcel.getVersion());
     }
 
     @Test
     void testGetActiveParcelsWhenNoParcelReturnedThenEmptyList() {
-        Map<String, String> parcelNameToVersionMap = Map.of();
-        when(clusterApi.gatherInstalledParcels(STACK_NAME)).thenReturn(parcelNameToVersionMap);
+        when(clusterApi.gatherInstalledParcels(STACK_NAME)).thenReturn(Collections.emptySet());
 
         Set<ParcelInfo> foundParcels = underTest.queryActiveParcels(stack);
 
         assertThat(foundParcels, hasSize(0));
+    }
+
+    @Test
+    void testQueryAllParcelsShouldReturnAllParcel() {
+        Set<ParcelInfo> parcels = Set.of(new ParcelInfo(CDH_PARCEL_NAME, CDH_PARCEL_VERSION, ACTIVATED), new ParcelInfo("NIFI", "123", DISTRIBUTED));
+        when(clusterApi.getAllParcels(STACK_NAME)).thenReturn(parcels);
+
+        Set<ParcelInfo> actual = underTest.queryAllParcels(stack);
+
+        assertEquals(parcels, actual);
+    }
+
+    @Test
+    void testQueryAllParcelsShouldReturnEmptySetWhenClusterApiDoesNotReturnAnyParcels() {
+        when(clusterApi.getAllParcels(STACK_NAME)).thenReturn(Collections.emptySet());
+
+        Set<ParcelInfo> actual = underTest.queryAllParcels(stack);
+
+        assertEquals(Collections.emptySet(), actual);
     }
 
 }

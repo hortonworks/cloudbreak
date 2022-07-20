@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -41,8 +40,8 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.CloudStorageConvert
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.StackV4RequestToGatewayConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -54,7 +53,7 @@ import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConver
 import com.sequenceiq.cloudbreak.service.identitymapping.AwsMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.AzureMockAccountMappingService;
 import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -83,7 +82,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
     private static final int SERVER_PORT = 636;
 
     @Inject
-    private RdsConfigService rdsConfigService;
+    private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
 
     @Inject
     private GeneralClusterConfigsProvider generalClusterConfigsProvider;
@@ -151,7 +150,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
             Credential credential = getCredential(source, environment);
             LdapView ldapConfig = getLdapConfig(source, environment);
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(source, credential.getAttributes());
-            Set<RDSConfig> rdsConfigs = getRdsConfigs(source, workspace);
+            Set<RdsConfigWithoutCluster> rdsConfigs = getRdsConfigs(source, workspace);
             Blueprint blueprint = getBlueprint(source, workspace);
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getGateway() == null ? null : stackV4RequestToGatewayConverter.convert(source);
@@ -210,10 +209,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
         return hostgroupViews;
     }
 
-    private Set<RDSConfig> getRdsConfigs(StackV4Request source, Workspace workspace) {
-        return source.getCluster().getDatabases().stream()
-                .map(d -> rdsConfigService.getByNameForWorkspace(d, workspace))
-                .collect(Collectors.toSet());
+    private Set<RdsConfigWithoutCluster> getRdsConfigs(StackV4Request source, Workspace workspace) {
+        return rdsConfigWithoutClusterService.findAllByNamesAndWorkspaceId(source.getCluster().getDatabases(), workspace);
     }
 
     private BaseFileSystemConfigurationsView getFileSystemConfigurationView(StackV4Request source, Json credentialAttributes)

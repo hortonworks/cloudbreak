@@ -15,16 +15,17 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordFailureResponse;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordSuccessResponse;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.RotateSaltPasswordService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
@@ -39,10 +40,10 @@ class RotateSaltPasswordHandlerTest {
     private RotateSaltPasswordHandler underTest;
 
     @Mock
-    private ClusterBootstrapper clusterBootstrapper;
+    private RotateSaltPasswordService rotateSaltPasswordService;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private EventBus eventBus;
@@ -51,20 +52,20 @@ class RotateSaltPasswordHandlerTest {
     private ArgumentCaptor<Event<?>> eventCaptor;
 
     @Mock
-    private Stack stack;
+    private StackDto stack;
 
     private HandlerEvent<RotateSaltPasswordRequest> event;
 
     @BeforeEach
     void setUp() {
-        when(stackService.getByIdWithLists(STACK_ID)).thenReturn(stack);
-        event = new HandlerEvent<>(new Event<>(new RotateSaltPasswordRequest(STACK_ID)));
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
+        event = new HandlerEvent<>(new Event<>(new RotateSaltPasswordRequest(STACK_ID, RotateSaltPasswordReason.MANUAL)));
     }
 
     @Test
     void testFailure() throws CloudbreakOrchestratorException {
         CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException("error");
-        doThrow(exception).when(clusterBootstrapper).rotateSaltPassword(stack);
+        doThrow(exception).when(rotateSaltPasswordService).rotateSaltPassword(stack);
 
         Selectable result = underTest.doAccept(event);
 
@@ -73,7 +74,7 @@ class RotateSaltPasswordHandlerTest {
                 .extracting(RotateSaltPasswordFailureResponse.class::cast)
                 .returns(STACK_ID, StackEvent::getResourceId)
                 .returns(exception, StackFailureEvent::getException);
-        verify(clusterBootstrapper).rotateSaltPassword(stack);
+        verify(rotateSaltPasswordService).rotateSaltPassword(stack);
     }
 
     @Test
@@ -84,7 +85,7 @@ class RotateSaltPasswordHandlerTest {
                 .isInstanceOf(RotateSaltPasswordSuccessResponse.class)
                 .extracting(RotateSaltPasswordSuccessResponse.class::cast)
                 .returns(STACK_ID, StackEvent::getResourceId);
-        verify(clusterBootstrapper).rotateSaltPassword(stack);
+        verify(rotateSaltPasswordService).rotateSaltPassword(stack);
     }
 
 }

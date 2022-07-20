@@ -7,6 +7,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -16,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
-import com.google.common.base.Supplier;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.HierarchyAuthResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -34,11 +34,11 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
@@ -61,7 +61,7 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
     private TransactionService transactionService;
 
     @Inject
-    private StackViewService stackViewService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -91,23 +91,23 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
         clusterResponse.setSharedServiceResponse(sharedServiceResponse);
     }
 
-    public void addSharedServiceResponse(Stack stack, StackV4Response stackResponse) {
+    public void addSharedServiceResponse(String datalakeCrn, StackV4Response stackResponse) {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
-        if (!Strings.isNullOrEmpty(stack.getDatalakeCrn())) {
+        if (!Strings.isNullOrEmpty(datalakeCrn)) {
             LOGGER.debug("Checking datalake through the datalakeCrn.");
-            Optional<ResourceBasicView> resourceBasicView = stackService.getResourceBasicViewByResourceCrn(stack.getDatalakeCrn());
+            Optional<ResourceBasicView> resourceBasicView = stackService.getResourceBasicViewByResourceCrn(datalakeCrn);
             if (resourceBasicView.isPresent()) {
                 ResourceBasicView s = resourceBasicView.get();
                 sharedServiceResponse.setSharedClusterId(s.getId());
                 sharedServiceResponse.setSharedClusterName(s.getName());
             } else {
-                LOGGER.debug("Unable to find datalake with CRN {}", stack.getDatalakeCrn());
+                LOGGER.debug("Unable to find datalake with CRN {}", datalakeCrn);
             }
         }
         stackResponse.setSharedService(sharedServiceResponse);
     }
 
-    public Optional<Stack> getDatalakeStackByDatahubStack(Stack datahubStack) {
+    public Optional<Stack> getDatalakeStackByDatahubStack(StackView datahubStack) {
         if (!Strings.isNullOrEmpty(datahubStack.getDatalakeCrn())) {
             return Optional.ofNullable(stackService.getByCrnOrElseNull(datahubStack.getDatalakeCrn()));
         }
@@ -115,11 +115,11 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
         return Optional.empty();
     }
 
-    public Optional<Stack> getDatalakeStackByStackEnvironmentCrn(Stack datahubStack) {
-        if (StackType.DATALAKE.equals(datahubStack.getType())) {
+    public Optional<Stack> getDatalakeStackByStackEnvironmentCrn(StackView stackView) {
+        if (StackType.DATALAKE.equals(stackView.getType())) {
             return Optional.empty();
         }
-        List<StackIdView> res = stackService.getByEnvironmentCrnAndStackType(datahubStack.getEnvironmentCrn(), StackType.DATALAKE);
+        List<StackIdView> res = stackService.getByEnvironmentCrnAndStackType(stackView.getEnvironmentCrn(), StackType.DATALAKE);
         if (res.isEmpty()) {
             return Optional.empty();
         } else {
@@ -141,11 +141,10 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
         return null;
     }
 
-    public SharedServiceConfigsView createSharedServiceConfigsView(Stack stack) {
+    public SharedServiceConfigsView createSharedServiceConfigsView(String password, StackType stackType, String datalakeCrn) {
         SharedServiceConfigsView sharedServiceConfigsView = new SharedServiceConfigsView();
-        String password = stack.getCluster().getPassword();
 
-        switch (stack.getType()) {
+        switch (stackType) {
             case DATALAKE:
                 setRangerAttributes(password, sharedServiceConfigsView);
                 sharedServiceConfigsView.setDatalakeCluster(true);
@@ -155,10 +154,10 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
                 sharedServiceConfigsView.setDatalakeCluster(false);
                 sharedServiceConfigsView.setAttachedCluster(true);
 
-                if (Strings.isNullOrEmpty(stack.getDatalakeCrn())) {
+                if (Strings.isNullOrEmpty(datalakeCrn)) {
                     break;
                 }
-                Stack datalakeStack = stackService.getByCrnOrElseNull(stack.getDatalakeCrn());
+                Stack datalakeStack = stackService.getByCrnOrElseNull(datalakeCrn);
                 if (datalakeStack == null) {
                     break;
                 }
@@ -201,15 +200,16 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
 
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
-        Long requestedWorkspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
-        return getNotTerminatedDatalakeStackViewSafely(() -> stackViewService.findNotTerminatedByName(resourceName, requestedWorkspaceId),
+        String accountId = restRequestThreadLocalService.getAccountId();
+        return getNotTerminatedDatalakeStackViewSafely(() -> stackDtoService.findNotTerminatedByNameAndAccountId(resourceName, accountId),
                 "%s stack not found", "%s stack is not a Data Lake.", resourceName)
                 .getResourceCrn();
     }
 
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
-        return stackViewService.findNotTerminatedByNames(resourceNames, restRequestThreadLocalService.getRequestedWorkspaceId())
+        String accountId = restRequestThreadLocalService.getAccountId();
+        return stackDtoService.findNotTerminatedByNamesAndAccountId(resourceNames, accountId)
                 .stream()
                 .filter(stackView -> StackType.DATALAKE.equals(stackView.getType()))
                 .map(StackView::getResourceCrn)
@@ -218,9 +218,8 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
 
     @Override
     public Optional<String> getEnvironmentCrnByResourceCrn(String resourceCrn) {
-        Long requestedWorkspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         try {
-            return Optional.of(getNotTerminatedDatalakeStackViewSafely(() -> stackViewService.findNotTerminatedByCrn(resourceCrn, requestedWorkspaceId),
+            return Optional.of(getNotTerminatedDatalakeStackViewSafely(() -> stackDtoService.findNotTerminatedByCrn(resourceCrn),
                     "Stack by CRN %s not found", "Stack with CRN %s is not a Data Lake.", resourceCrn)
                     .getEnvironmentCrn());
         } catch (NotFoundException e) {
@@ -231,13 +230,13 @@ public class DatalakeService implements HierarchyAuthResourcePropertyProvider {
 
     @Override
     public Map<String, Optional<String>> getEnvironmentCrnsByResourceCrns(Collection<String> resourceCrns) {
-        return stackViewService.findNotTerminatedByCrns(resourceCrns, restRequestThreadLocalService.getRequestedWorkspaceId())
+        return stackDtoService.findNotTerminatedByCrns(resourceCrns)
                 .stream()
                 .filter(stackView -> StackType.DATALAKE.equals(stackView.getType()))
-                .collect(Collectors.toMap(stackView -> stackView.getResourceCrn(), stackView -> Optional.ofNullable(stackView.getEnvironmentCrn())));
+                .collect(Collectors.toMap(StackView::getResourceCrn, stackView -> Optional.ofNullable(stackView.getEnvironmentCrn())));
     }
 
-    private StackView getNotTerminatedDatalakeStackViewSafely(Supplier<Optional<StackView>> optionalStackView, String notFoundMessageTemplate,
+    private StackView getNotTerminatedDatalakeStackViewSafely(Supplier<Optional<? extends StackView>> optionalStackView, String notFoundMessageTemplate,
             String notDatalakeMessageTemplate, String input) {
         StackView stackView = optionalStackView.get().orElseThrow(() -> new NotFoundException(String.format(notFoundMessageTemplate, input)));
         if (!StackType.DATALAKE.equals(stackView.getType())) {

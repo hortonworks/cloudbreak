@@ -71,4 +71,9 @@ public class MgmtServiceResourceOperation {
         clouderaManagerStoreService.read(mockUuid).setStatus(ApiServiceState.STOPPED);
         return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(CommandId.MGMT_STOP));
     }
+
+    public ResponseEntity<ApiService> deleteCMS(String mockUuid) {
+        ApiService apiService = new ApiService().serviceState(ApiServiceState.NA);
+        return responseCreatorComponent.exec(apiService);
+    }
 }

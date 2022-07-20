@@ -18,14 +18,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,7 +34,7 @@ class UpgradeCcmOrchestratorServiceTest {
     private static final long STACK_ID = 123L;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -46,7 +46,7 @@ class UpgradeCcmOrchestratorServiceTest {
     private HostOrchestrator hostOrchestrator;
 
     @Mock
-    private Stack stack;
+    private StackDto stack;
 
     @Mock
     private Cluster cluster;
@@ -70,7 +70,7 @@ class UpgradeCcmOrchestratorServiceTest {
         node2 = new Node("privateIP2", "publicIP2", "instance2", "instanceType2", "fqdn2", "hostgroup");
         when(stack.getId()).thenReturn(STACK_ID);
         when(stack.getCluster()).thenReturn(cluster);
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(stackUtil.collectGatewayNodes(any())).thenReturn(Set.of(node1, node2));
     }

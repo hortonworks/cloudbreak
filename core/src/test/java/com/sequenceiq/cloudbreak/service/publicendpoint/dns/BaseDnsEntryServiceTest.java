@@ -99,7 +99,7 @@ class BaseDnsEntryServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getComponentLocation(stack));
 
-        verify(componentLocatorService).getComponentLocation(cluster, nifiConfigProvider.getRoleTypes());
+        verify(componentLocatorService).getComponentLocation(stack, nifiConfigProvider.getRoleTypes());
     }
 
     @Test
@@ -115,7 +115,7 @@ class BaseDnsEntryServiceTest {
         Map<String, List<String>> componentLocation = Map.of(NIFI_NODE, List.of(FQDN_1, FQDN_2, FQDN_3));
 
         when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
-        when(componentLocatorService.getComponentLocation(stack.getCluster(), nifiConfigProvider.getRoleTypes()))
+        when(componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes()))
                 .thenReturn(componentLocation);
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_2, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_2))).thenReturn(true);
@@ -145,7 +145,7 @@ class BaseDnsEntryServiceTest {
         Map<String, List<String>> componentLocation = Map.of(NIFI_NODE, List.of(FQDN_1, FQDN_2, FQDN_3));
 
         when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
-        when(componentLocatorService.getComponentLocation(stack.getCluster(), nifiConfigProvider.getRoleTypes()))
+        when(componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes()))
                 .thenReturn(componentLocation);
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
 
@@ -169,7 +169,7 @@ class BaseDnsEntryServiceTest {
         Map<String, List<String>> componentLocation = Map.of(NIFI_NODE, List.of(FQDN_1, FQDN_2, FQDN_3));
 
         when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
-        when(componentLocatorService.getComponentLocation(stack.getCluster(), nifiConfigProvider.getRoleTypes()))
+        when(componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes()))
                 .thenReturn(componentLocation);
         when(dnsManagementService.deleteDnsEntryWithIp(ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
         when(dnsManagementService.deleteDnsEntryWithIp(ACCOUNT_ID, FQDN_2, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_2))).thenReturn(true);
@@ -199,7 +199,7 @@ class BaseDnsEntryServiceTest {
         Map<String, List<String>> componentLocation = Map.of(NIFI_NODE, List.of(FQDN_1, FQDN_2, FQDN_3));
 
         when(environmentClientService.getByCrn(stack.getEnvironmentCrn())).thenReturn(environmentResponse);
-        when(componentLocatorService.getComponentLocation(stack.getCluster(), nifiConfigProvider.getRoleTypes()))
+        when(componentLocatorService.getComponentLocation(stack, nifiConfigProvider.getRoleTypes()))
                 .thenReturn(componentLocation);
         when(dnsManagementService.deleteDnsEntryWithIp(ACCOUNT_ID, FQDN_1, ENVIRONMENT_NAME, false, List.of(PUBLIC_IP_1))).thenReturn(true);
 

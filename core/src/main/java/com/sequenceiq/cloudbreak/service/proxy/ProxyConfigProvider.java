@@ -12,9 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Service
 public class ProxyConfigProvider {
@@ -27,7 +27,7 @@ public class ProxyConfigProvider {
     @Inject
     private ProxyConfigDtoService proxyConfigDtoService;
 
-    public void decoratePillarWithProxyDataIfNeeded(Map<String, SaltPillarProperties> servicePillar, Cluster cluster) {
+    public void decoratePillarWithProxyDataIfNeeded(Map<String, SaltPillarProperties> servicePillar, ClusterView cluster) {
         Optional<ProxyConfig> proxyConfig = proxyConfigDtoService.getByCrnWithEnvironmentFallback(cluster.getProxyConfigCrn(), cluster.getEnvironmentCrn());
         proxyConfig.ifPresent(pc -> {
             Map<String, Object> proxy = new HashMap<>();

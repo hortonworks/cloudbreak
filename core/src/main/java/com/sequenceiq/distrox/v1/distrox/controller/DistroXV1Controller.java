@@ -70,6 +70,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.service.diagnostics.DiagnosticsService;
 import com.sequenceiq.cloudbreak.service.operation.OperationService;
@@ -160,6 +161,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Inject
     private DataHubFiltering dataHubFiltering;
 
+    @Inject
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
     @Override
     @FilterListBasedOnPermissions
     public StackViewV4Responses list(@FilterParam(DataHubFiltering.ENV_NAME) String environmentName,
@@ -188,7 +192,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public StackV4Response getByName(@ResourceName String name, Set<String> entries) {
         return stackOperations.get(
                 NameOrCrn.ofName(name),
-                getWorkspaceIdForCurrentUser(),
+                restRequestThreadLocalService.getAccountId(),
                 entries,
                 StackType.WORKLOAD);
     }
@@ -198,7 +202,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public StackV4Response getByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @ResourceCrn @TenantAwareParam String crn, Set<String> entries) {
         return stackOperations.get(
                 NameOrCrn.ofCrn(crn),
-                getWorkspaceIdForCurrentUser(),
+                restRequestThreadLocalService.getAccountId(),
                 entries,
                 StackType.WORKLOAD);
     }
@@ -206,13 +210,13 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByResourceName(action = DELETE_DATAHUB)
     public void deleteByName(@ResourceName String name, Boolean forced) {
-        stackOperations.delete(NameOrCrn.ofName(name), getWorkspaceIdForCurrentUser(), forced);
+        stackOperations.delete(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), forced);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = DELETE_DATAHUB)
     public void deleteByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn, Boolean forced) {
-        stackOperations.delete(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser(), forced);
+        stackOperations.delete(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), forced);
     }
 
     @Override
@@ -240,26 +244,28 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         Set<NameOrCrn> nameOrCrns = multiDeleteRequest.getNames().stream()
                 .map(NameOrCrn::ofName)
                 .collect(Collectors.toSet());
-        nameOrCrns.forEach(nameOrCrn -> stackOperations.delete(nameOrCrn, getWorkspaceIdForCurrentUser(), forced));
+        nameOrCrns.forEach(nameOrCrn -> stackOperations.delete(nameOrCrn, restRequestThreadLocalService.getAccountId(), forced));
     }
 
     private void multideleteByCrn(DistroXMultiDeleteV1Request multiDeleteRequest, Boolean forced) {
         Set<NameOrCrn> nameOrCrns = multiDeleteRequest.getCrns().stream()
                 .map(NameOrCrn::ofCrn)
                 .collect(Collectors.toSet());
-        nameOrCrns.forEach(accessDto -> stackOperations.delete(accessDto, getWorkspaceIdForCurrentUser(), forced));
+        nameOrCrns.forEach(accessDto -> stackOperations.delete(accessDto, restRequestThreadLocalService.getAccountId(), forced));
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SYNC_DATAHUB)
     public void syncByName(@ResourceName String name) {
-        stackOperations.sync(NameOrCrn.ofName(name), getWorkspaceIdForCurrentUser());
+        String accountId = restRequestThreadLocalService.getAccountId();
+        stackOperations.sync(NameOrCrn.ofName(name), accountId);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SYNC_DATAHUB)
     public void syncByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
-        stackOperations.sync(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser());
+        String accountId = restRequestThreadLocalService.getAccountId();
+        stackOperations.sync(NameOrCrn.ofCrn(crn), accountId);
     }
 
     @Override
@@ -288,13 +294,13 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.STOP_DATAHUB)
     public FlowIdentifier putStopByName(@ResourceName String name) {
-        return stackOperations.putStop(NameOrCrn.ofName(name), getWorkspaceIdForCurrentUser());
+        return stackOperations.putStop(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_DATAHUB)
     public FlowIdentifier putStopByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
-        return stackOperations.putStop(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser());
+        return stackOperations.putStop(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId());
     }
 
     @Override
@@ -312,13 +318,13 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.START_DATAHUB)
     public FlowIdentifier putStartByName(@ResourceName String name) {
-        return stackOperations.putStart(NameOrCrn.ofName(name), getWorkspaceIdForCurrentUser());
+        return stackOperations.putStart(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId());
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATAHUB)
     public FlowIdentifier putStartByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
-        return stackOperations.putStart(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser());
+        return stackOperations.putStart(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId());
     }
 
     @Override
@@ -330,7 +336,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.ROTATE_SALTUSER_PASSWORD_DATAHUB)
     public FlowIdentifier rotateSaltPasswordByCrn(@ResourceCrn String crn) {
-        return stackOperations.rotateSaltPassword(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser());
+        return stackOperations.rotateSaltPassword(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), RotateSaltPasswordReason.MANUAL);
     }
 
     @Override
@@ -350,7 +356,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public FlowIdentifier putScalingByName(@ResourceName String name, @Valid DistroXScaleV1Request updateRequest) {
         StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
         stackScaleV4Request.setStackId(stackOperations.getStackByName(name).getId());
-        return stackOperations.putScaling(NameOrCrn.ofName(name), getWorkspaceIdForCurrentUser(), stackScaleV4Request);
+        return stackOperations.putScaling(NameOrCrn.ofName(name), restRequestThreadLocalService.getAccountId(), stackScaleV4Request);
     }
 
     @Override
@@ -359,7 +365,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
             @Valid DistroXScaleV1Request updateRequest) {
         StackScaleV4Request stackScaleV4Request = scaleRequestConverter.convert(updateRequest);
         stackScaleV4Request.setStackId(stackOperations.getStackByCrn(crn).getId());
-        stackOperations.putScaling(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser(), stackScaleV4Request);
+        stackOperations.putScaling(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getAccountId(), stackScaleV4Request);
     }
 
     @Override
@@ -418,7 +424,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public FlowIdentifier deleteInstanceByName(@ResourceName String name, Boolean forced, String instanceId) {
         return stackOperations.deleteInstance(
                 NameOrCrn.ofName(name),
-                getWorkspaceIdForCurrentUser(),
+                restRequestThreadLocalService.getAccountId(),
                 forced,
                 instanceId);
     }
@@ -429,7 +435,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
             String instanceId) {
         return stackOperations.deleteInstance(
                 NameOrCrn.ofCrn(crn),
-                getWorkspaceIdForCurrentUser(),
+                restRequestThreadLocalService.getAccountId(),
                 forced,
                 instanceId);
     }
@@ -440,7 +446,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
             MultipleInstanceDeleteRequest request, boolean forced) {
         return stackOperations.deleteInstances(
                 NameOrCrn.ofName(name),
-                getWorkspaceIdForCurrentUser(),
+                restRequestThreadLocalService.getAccountId(),
                 getInstances(instances, request),
                 forced);
     }
@@ -451,7 +457,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
             MultipleInstanceDeleteRequest request, boolean forced) {
         return stackOperations.deleteInstances(
                 NameOrCrn.ofCrn(crn),
-                getWorkspaceIdForCurrentUser(),
+                restRequestThreadLocalService.getAccountId(),
                 getInstances(instances, request),
                 forced);
     }
@@ -472,7 +478,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public void setClusterMaintenanceModeByName(@ResourceName String name, @NotNull DistroXMaintenanceModeV1Request maintenanceMode) {
         stackOperations.setClusterMaintenanceMode(
                 NameOrCrn.ofName(name),
-                getWorkspaceIdForCurrentUser(),
+                restRequestThreadLocalService.getAccountId(),
                 maintenanceModeConverter.convert(maintenanceMode));
 
     }
@@ -483,7 +489,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
             @NotNull DistroXMaintenanceModeV1Request maintenanceMode) {
         stackOperations.setClusterMaintenanceMode(
                 NameOrCrn.ofCrn(crn),
-                getWorkspaceIdForCurrentUser(),
+                restRequestThreadLocalService.getAccountId(),
                 maintenanceModeConverter.convert(maintenanceMode));
     }
 
@@ -492,7 +498,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public void deleteWithKerberosByName(@ResourceName String name, boolean forced) {
         stackOperations.delete(
                 NameOrCrn.ofName(name),
-                getWorkspaceIdForCurrentUser(),
+                restRequestThreadLocalService.getAccountId(),
                 forced);
 
     }
@@ -502,7 +508,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public void deleteWithKerberosByCrn(@TenantAwareParam @ResourceCrn String crn, boolean forced) {
         stackOperations.delete(
                 NameOrCrn.ofCrn(crn),
-                getWorkspaceIdForCurrentUser(),
+                restRequestThreadLocalService.getAccountId(),
                 forced);
 
     }
@@ -591,7 +597,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
             @Valid CertificatesRotationV4Request rotateCertificateRequest) {
         return stackOperations.rotateAutoTlsCertificates(
                 NameOrCrn.ofName(name),
-                getWorkspaceIdForCurrentUser(),
+                restRequestThreadLocalService.getAccountId(),
                 rotateCertificateRequest
         );
     }
@@ -603,7 +609,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
             @Valid CertificatesRotationV4Request rotateCertificateRequest) {
         return stackOperations.rotateAutoTlsCertificates(
                 NameOrCrn.ofCrn(crn),
-                getWorkspaceIdForCurrentUser(),
+                restRequestThreadLocalService.getAccountId(),
                 rotateCertificateRequest
         );
     }
@@ -678,8 +684,8 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     private DistroXSyncCmV1Response launchSyncComponentVersionsFromCm(NameOrCrn nameOrCrn) {
-        Long workspaceId = getWorkspaceIdForCurrentUser();
-        FlowIdentifier flowIdentifier = stackOperations.syncComponentVersionsFromCm(nameOrCrn, workspaceId, Set.of());
+        String accountId = restRequestThreadLocalService.getAccountId();
+        FlowIdentifier flowIdentifier = stackOperations.syncComponentVersionsFromCm(nameOrCrn, accountId, Set.of());
         return new DistroXSyncCmV1Response(flowIdentifier);
     }
 

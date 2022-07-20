@@ -22,8 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -45,6 +43,8 @@ class StackComponentUpdaterTest {
 
     private static final String CDH_VERSION = "7.0.0-1.cdh7.0.0.p0.1376867";
 
+    private static final Long STACK_ID = 1L;
+
     private static final String PARCEL_TEMPLATE = "{\"name\":\"%s\",\"version\":\"%s\","
             + "\"parcel\":\"https://archive.cloudera.com/cdh7/7.0.0/parcels/\"}";
 
@@ -64,7 +64,7 @@ class StackComponentUpdaterTest {
     private StackComponentUpdater underTest;
 
     @Test
-    public void testUpdateImageComponents() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
+    public void testUpdateImageComponents() {
 
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();

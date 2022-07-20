@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobState;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SaltJobFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
 public interface SaltJobRunner {
 
@@ -30,4 +31,6 @@ public interface SaltJobRunner {
     void setNodesWithError(Multimap<String, String> nodesWithError);
 
     StateType stateType();
+
+    SaltStateService saltStateService();
 }

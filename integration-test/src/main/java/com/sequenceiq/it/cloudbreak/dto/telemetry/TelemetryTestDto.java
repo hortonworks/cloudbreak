@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.request.FeaturesRequest;
+import com.sequenceiq.common.api.telemetry.request.MonitoringRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -55,6 +56,17 @@ public class TelemetryTestDto extends AbstractCloudbreakTestDto<TelemetryRequest
         featuresRequest.addWorkloadAnalytics(false);
         featuresRequest.addCloudStorageLogging(true);
         getRequest().setFeatures(featuresRequest);
+        return this;
+    }
+
+    public TelemetryTestDto withMonitoring(String remoteWriteUrl) {
+        FeaturesRequest featuresRequest = new FeaturesRequest();
+        featuresRequest.addMonitoring(true);
+        getRequest().setFeatures(featuresRequest);
+
+        MonitoringRequest monitoringRequest = new MonitoringRequest();
+        monitoringRequest.setRemoteWriteUrl(remoteWriteUrl);
+        getRequest().setMonitoring(monitoringRequest);
         return this;
     }
 }

@@ -28,7 +28,7 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
     Set<Blueprint> findAllByWorkspaceIdAndStatusIn(Long workspaceId, Set<ResourceStatus> statuses);
 
     @Override
-    <S extends Blueprint> Iterable<S> saveAll(Iterable<S> entities);
+    <S extends Blueprint> List<S> saveAll(Iterable<S> entities);
 
     Optional<Blueprint> findByResourceCrnAndWorkspaceId(String resourceCrn, Long workspaceId);
 
@@ -52,4 +52,9 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
 
     @Query("SELECT s.cluster.blueprint FROM Stack s WHERE s.resourceCrn = :datahubCrn AND s.type = 'WORKLOAD'")
     Optional<Blueprint> findByDatahubCrn(@Param("datahubCrn") String datahubCrn);
+
+    @Query("SELECT b FROM Cluster c " +
+            "JOIN c.blueprint b " +
+            "WHERE c.id = :clusterId")
+    Optional<Blueprint> findByClusterId(@Param("clusterId") Long clusterId);
 }

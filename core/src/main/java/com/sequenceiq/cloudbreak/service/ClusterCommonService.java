@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -53,9 +54,12 @@ import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.recipe.UpdateRecipeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.UpdateNodeCountValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -80,6 +84,9 @@ public class ClusterCommonService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
@@ -109,17 +116,21 @@ public class ClusterCommonService {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     public FlowIdentifier put(String crn, UpdateClusterV4Request updateJson) {
-        Stack stack = stackService.getByCrnWithLists(crn);
+        StackDto stackDto = stackDtoService.getByCrn(crn);
+        return put(stackDto, updateJson);
+    }
+
+    public FlowIdentifier put(StackDto stack, UpdateClusterV4Request updateJson) {
         Long stackId = stack.getId();
         MDCBuilder.buildMdcContext(stack);
         UserNamePasswordV4Request userNamePasswordJson = updateJson.getUserNamePassword();
         FlowIdentifier flowIdentifier;
         if (userNamePasswordJson != null) {
-            flowIdentifier = clusterManagerUserNamePasswordChange(stack, userNamePasswordJson);
+            flowIdentifier = clusterManagerUserNamePasswordChange(stack.getStack(), stack.getCluster(), userNamePasswordJson);
         } else if (updateJson.getStatus() != null) {
             LOGGER.debug("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
             flowIdentifier = clusterOperationService.updateStatus(stackId, updateJson.getStatus());
-        } else if (updateJson.getBlueprintName() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
+        } else if (updateJson.getBlueprintName() != null && updateJson.getHostgroups() != null && stack.getStack().isCreateFailed()) {
             LOGGER.debug("Cluster rebuild request received. Stack id:  {}", stackId);
             try {
                 flowIdentifier = recreateCluster(stack, updateJson);
@@ -127,7 +138,7 @@ public class ClusterCommonService {
                 throw new TransactionRuntimeExecutionException(e);
             }
         } else if (updateJson.getHostGroupAdjustment() != null) {
-            environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
+            environmentService.checkEnvironmentStatus(stack.getStack(), EnvironmentStatus.upscalable());
             flowIdentifier = clusterHostgroupAdjustmentChange(stackId, updateJson, stack);
         } else {
             LOGGER.info("Invalid cluster update request received. Stack id: {}", stackId);
@@ -136,14 +147,14 @@ public class ClusterCommonService {
         return flowIdentifier;
     }
 
-    private FlowIdentifier clusterHostgroupAdjustmentChange(Long stackId, UpdateClusterV4Request updateJson, Stack stack) {
-        if (!stack.isAvailable() && !stack.hasNodeFailure()) {
+    private FlowIdentifier clusterHostgroupAdjustmentChange(Long stackId, UpdateClusterV4Request updateJson, StackDto stack) {
+        if (!stack.getStack().isAvailable() && !stack.getStack().hasNodeFailure()) {
             throw new BadRequestException(String.format(
                     "Stack '%s' is currently in '%s' status. Cluster scale can only be made " +
                             "if the underlying stack status is 'AVAILABLE' or 'NODE_FAILURE'.", stackId, stack.getStatus()));
         }
         LOGGER.debug("Cluster host adjustment request received. Stack id: {} ", stackId);
-        Blueprint blueprint = stack.getCluster().getBlueprint();
+        Blueprint blueprint = stack.getBlueprint();
         String hostGroupName = updateJson.getHostGroupAdjustment().getHostGroup();
         if (!hostGroupService.hasHostGroupInCluster(stack.getCluster().getId(), hostGroupName)) {
             throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'", hostGroupName, stack.getName()));
@@ -162,23 +173,23 @@ public class ClusterCommonService {
         return clusterOperationService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
 
-    private FlowIdentifier recreateCluster(Stack stack, UpdateClusterV4Request updateCluster) throws TransactionExecutionException {
+    private FlowIdentifier recreateCluster(StackDto stack, UpdateClusterV4Request updateCluster) throws TransactionExecutionException {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupV4Request json : updateCluster.getHostgroups()) {
             HostGroup hostGroup = hostGroupV4RequestToHostGroupConverter.convert(json);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack);
+            hostGroup = hostGroupDecorator.decorate(hostGroup, json, stack.getStack());
             hostGroups.add(hostGroup);
         }
         return clusterOperationService.recreate(stack, updateCluster.getBlueprintName(), hostGroups, updateCluster.getValidateBlueprint());
     }
 
-    private FlowIdentifier clusterManagerUserNamePasswordChange(Stack stack, UserNamePasswordV4Request userNamePasswordJson) {
+    private FlowIdentifier clusterManagerUserNamePasswordChange(StackView stack, ClusterView cluster, UserNamePasswordV4Request userNamePasswordJson) {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format(
                     "Stack '%s' is currently in '%s' state. PUT requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.", stack.getId(),
                     stack.getStatus()));
         }
-        if (!userNamePasswordJson.getOldPassword().equals(stack.getCluster().getPassword())) {
+        if (!userNamePasswordJson.getOldPassword().equals(cluster.getPassword())) {
             throw new BadRequestException(String.format(
                     "Cluster actual password does not match in the request, please pass the real password on Stack '%s' with status '%s'.", stack.getId(),
                     stack.getStatus()));
@@ -188,9 +199,9 @@ public class ClusterCommonService {
         return clusterOperationService.updateUserNamePassword(stack.getId(), userNamePasswordJson);
     }
 
-    public FlowIdentifier setMaintenanceMode(Stack stack, MaintenanceModeStatus maintenanceMode) {
-        Cluster cluster = stack.getCluster();
-        if (cluster == null) {
+    public FlowIdentifier setMaintenanceMode(StackView stack, MaintenanceModeStatus maintenanceMode) {
+        Long clusterId = stack.getClusterId();
+        if (clusterId == null) {
             throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stack.getId()));
         } else if (!stack.isAvailable() && !stack.isMaintenanceModeEnabled()) {
             throw new BadRequestException(String.format(
@@ -210,10 +221,9 @@ public class ClusterCommonService {
                 if (!MAINTENANCE_MODE_ENABLED.equals(stack.getStatus())) {
                     throw new BadRequestException(String.format(
                             "Maintenance mode is not enabled for cluster '%s' (status:'%s'), it should be enabled before validation.",
-                            cluster.getId(), stack.getStatus()));
+                            clusterId, stack.getStatus()));
                 }
-                flowIdentifier = clusterOperationService.triggerMaintenanceModeValidation(stack);
-                clusterService.save(cluster);
+                flowIdentifier = clusterOperationService.triggerMaintenanceModeValidation(stack.getId());
                 break;
             default:
                 // Nothing to do here
@@ -270,7 +280,7 @@ public class ClusterCommonService {
         return String.format("[%s]%n%s%n", section, rawBody);
     }
 
-    private void saveAndFireEventOnClusterStatusChange(Stack stack, DetailedStackStatus newDetailedStackStatus, ResourceEvent event) {
+    private void saveAndFireEventOnClusterStatusChange(StackView stack, DetailedStackStatus newDetailedStackStatus, ResourceEvent event) {
         Status actualStatus = stack.getStatus();
         if (!actualStatus.equals(newDetailedStackStatus.getStatus())) {
             clusterService.updateClusterStatusByStackId(stack.getId(), newDetailedStackStatus);
@@ -278,25 +288,25 @@ public class ClusterCommonService {
         }
     }
 
-    public FlowIdentifier updateSalt(NameOrCrn nameOrCrn, Long workspaceId) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+    public FlowIdentifier updateSalt(NameOrCrn nameOrCrn, String accountId) {
+        StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
-        return clusterOperationService.updateSalt(stack);
+        return clusterOperationService.updateSalt(stack.getId());
     }
 
-    public FlowIdentifier updatePillarConfiguration(NameOrCrn nameOrCrn, Long workspaceId) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+    public FlowIdentifier updatePillarConfiguration(NameOrCrn nameOrCrn, String accountId) {
+        StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         validateOperationOnStack(stack, "Updates to the Pillar Configuration");
-        return clusterOperationService.updatePillarConfiguration(stack);
+        return clusterOperationService.updatePillarConfiguration(stack.getId());
     }
 
-    public CertificatesRotationV4Response rotateAutoTlsCertificates(NameOrCrn nameOrCrn, Long workspaceId,
+    public CertificatesRotationV4Response rotateAutoTlsCertificates(NameOrCrn nameOrCrn, String accountId,
             CertificatesRotationV4Request certificatesRotationV4Request) {
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         validateOperationOnStack(stack, "Certificates rotation");
-        return new CertificatesRotationV4Response(clusterOperationService.rotateAutoTlsCertificates(stack, certificatesRotationV4Request));
+        return new CertificatesRotationV4Response(clusterOperationService.rotateAutoTlsCertificates(stack.getId(), certificatesRotationV4Request));
     }
 
     public UpdateRecipesV4Response refreshRecipes(NameOrCrn nameOrCrn, Long workspaceId, UpdateRecipesV4Request request) {
@@ -318,7 +328,7 @@ public class ClusterCommonService {
         return updateRecipeService.detachRecipeFromCluster(workspaceId, stack, request.getRecipeName(), request.getHostGroupName());
     }
 
-    private void validateOperationOnStack(Stack stack, String operationDescription) {
+    private void validateOperationOnStack(StackView stack, String operationDescription) {
         if (!stack.isAvailable()) {
             throw new BadRequestException(String.format("Stack '%s' is currently in '%s' state. %s can only be made when the underlying stack is 'AVAILABLE'.",
                     stack.getName(), stack.getStatus(), operationDescription));

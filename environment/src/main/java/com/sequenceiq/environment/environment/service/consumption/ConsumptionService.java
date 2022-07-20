@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
 import com.sequenceiq.consumption.client.ConsumptionInternalCrnClient;
@@ -27,31 +28,33 @@ public class ConsumptionService {
     }
 
     public void scheduleStorageConsumptionCollection(String accountId, StorageConsumptionRequest request) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
-            LOGGER.info("Executing storage consumption collection scheduling: account '{}' and request '{}'", accountId, request);
+            LOGGER.info("Executing storage consumption collection scheduling: account '{}', user '{}' and request '{}'", accountId, userCrn, request);
             consumptionInternalCrnClient.withInternalCrn()
                     .consumptionEndpoint()
-                    .scheduleStorageConsumptionCollection(accountId, request);
+                        .scheduleStorageConsumptionCollection(accountId, request, userCrn);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to schedule storage consumption collection for account '%s' and request '%s' due to '%s'.", accountId, request,
-                            errorMessage), e);
+            LOGGER.error(String.format("Failed to schedule storage consumption collection for account '%s' with user '%s' and request '%s' due to '%s'.",
+                    accountId, userCrn, request, errorMessage), e);
             throw new ConsumptionOperationFailedException(errorMessage, e);
         }
     }
 
     public void unscheduleStorageConsumptionCollection(String accountId, String monitoredResourceCrn, String storageLocation) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         try {
-            LOGGER.info("Executing storage consumption collection unscheduling: account '{}', resource '{}' and storage location '{}'",
-                    accountId, monitoredResourceCrn, storageLocation);
+            LOGGER.info("Executing storage consumption collection unscheduling: account '{}', user '{} , resource '{}' and storage location '{}'",
+                    accountId, userCrn, monitoredResourceCrn, storageLocation);
             consumptionInternalCrnClient.withInternalCrn()
                     .consumptionEndpoint()
-                    .unscheduleStorageConsumptionCollection(accountId, monitoredResourceCrn, storageLocation);
+                    .unscheduleStorageConsumptionCollection(accountId, monitoredResourceCrn, storageLocation, userCrn);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(
-                    String.format("Failed to unschedule storage consumption collection for account '%s', resource '%s' and storage location '%s' due to '%s'.",
-                            accountId, monitoredResourceCrn, storageLocation, errorMessage), e);
+                    String.format("Failed to unschedule storage consumption collection for account '%s', user '%s', resource '%s' " +
+                            "and storage location '%s' due to '%s'.", accountId, userCrn, monitoredResourceCrn, storageLocation, errorMessage), e);
             throw new ConsumptionOperationFailedException(errorMessage, e);
         }
     }

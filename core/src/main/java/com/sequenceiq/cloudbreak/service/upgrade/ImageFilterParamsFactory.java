@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
@@ -43,7 +43,7 @@ public class ImageFilterParamsFactory {
     }
 
     public Map<String, String> getStackRelatedParcels(Stack stack) {
-        Set<ClusterComponent> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stack);
+        Set<ClusterComponentView> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stack);
         if (stack.isDatalake()) {
             ClouderaManagerProduct stackProduct = getCdhProduct(componentsByBlueprint);
             LOGGER.debug("For datalake clusters only the CDH parcel is related in CM: {}", stackProduct);
@@ -55,7 +55,7 @@ public class ImageFilterParamsFactory {
         }
     }
 
-    private ClouderaManagerProduct getCdhProduct(Set<ClusterComponent> componentsByBlueprint) {
+    private ClouderaManagerProduct getCdhProduct(Set<ClusterComponentView> componentsByBlueprint) {
         return clouderaManagerProductsProvider.findCdhProduct(componentsByBlueprint)
                 .orElseThrow(() -> new NotFoundException("Runtime component not found!"));
     }

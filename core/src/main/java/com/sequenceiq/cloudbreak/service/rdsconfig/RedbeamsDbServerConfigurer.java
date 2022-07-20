@@ -17,11 +17,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.common.database.DatabaseCommon;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SslMode;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
@@ -51,8 +50,8 @@ public class RedbeamsDbServerConfigurer {
      * @param type    database type
      * @return RDSConfig object for database
      */
-    public RDSConfig createNewRdsConfig(Stack stack, Cluster cluster, String dbName, String dbUser, DatabaseType type) {
-        DatabaseServerV4Response resp = getDatabaseServer(cluster.getDatabaseServerCrn());
+    public RDSConfig createNewRdsConfig(String stackName, Long stackId, String dbServerCrn, Long clusterId, String dbName, String dbUser, DatabaseType type) {
+        DatabaseServerV4Response resp = getDatabaseServer(dbServerCrn);
         LOGGER.info("Using redbeams for remote database configuration: {}", resp.toString());
         if (Objects.nonNull(resp.getStatus()) && !resp.getStatus().isAvailable()) {
             String message = String.format("Redbeams database server is not available (%s) with message: %s", resp.getStatus(), resp.getStatusReason());
@@ -68,11 +67,13 @@ public class RedbeamsDbServerConfigurer {
         rdsConfig.setConnectionDriver(resp.getConnectionDriver());
         rdsConfig.setDatabaseEngine(DatabaseVendor.fromValue(resp.getDatabaseVendor()));
         rdsConfig.setStatus(ResourceStatus.DEFAULT);
-        rdsConfig.setName(type.name() + '_' + stack.getName() + stack.getId());
+        rdsConfig.setName(type.name() + '_' + stackName + stackId);
         rdsConfig.setType(type.name());
         rdsConfig.setStatus(ResourceStatus.DEFAULT);
         rdsConfig.setCreationDate(new Date().getTime());
-        rdsConfig.setClusters(Collections.singleton(cluster));
+        Cluster attachedCluster = new Cluster();
+        attachedCluster.setId(clusterId);
+        rdsConfig.setClusters(Collections.singleton(attachedCluster));
         LOGGER.info("Created RDS config {} for database type {} with connection URL {}, connection username {}",
                 rdsConfig.getName(), type, rdsConfig.getConnectionURL(), rdsConfig.getConnectionUserName());
         return rdsConfig;
@@ -83,8 +84,8 @@ public class RedbeamsDbServerConfigurer {
         return SslMode.isEnabled(sslMode) ? RdsSslMode.ENABLED : RdsSslMode.DISABLED;
     }
 
-    public boolean isRemoteDatabaseNeeded(Cluster cluster) {
-        return StringUtils.isNotEmpty(cluster.getDatabaseServerCrn());
+    public boolean isRemoteDatabaseNeeded(String dbServerCrn) {
+        return StringUtils.isNotEmpty(dbServerCrn);
     }
 
     public DatabaseServerV4Response getDatabaseServer(String serverCrn) {

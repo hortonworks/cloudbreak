@@ -3,12 +3,12 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
 
-public class FreeIpaUseCaseMapperTest {
+class FreeIpaUseCaseMapperTest {
 
     private static final String UPSCALEFLOWCONFIG = "UpscaleFlowConfig";
 
@@ -23,36 +23,36 @@ public class FreeIpaUseCaseMapperTest {
     private FreeIpaUseCaseMapper underTest;
 
     @BeforeEach()
-    public void setUp() {
+    void setUp() {
         underTest = new FreeIpaUseCaseMapper();
-        Whitebox.setInternalState(underTest, "cdpRequestProcessingStepMapper", new CDPRequestProcessingStepMapper());
+        ReflectionTestUtils.setField(underTest, "cdpRequestProcessingStepMapper", new CDPRequestProcessingStepMapper());
         underTest.initUseCaseMaps();
     }
 
     @Test
-    public void testNullFlowDetailsMappedToUnset() {
+    void testNullFlowDetailsMappedToUnset() {
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UNSET, underTest.useCase(null));
     }
 
     @Test
-    public void testEmptyFlowDetailsMappedToUnset() {
+    void testEmptyFlowDetailsMappedToUnset() {
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UNSET, underTest.useCase(new FlowDetails()));
     }
 
     @Test
-    public void testOtherNextFlowStateMappedToUnsetUseCase() {
+    void testOtherNextFlowStateMappedToUnsetUseCase() {
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UNSET,
                 mapFlowDetailsToUseCase(null, UPSCALEFLOWCONFIG, "SOME_STATE"));
     }
 
     @Test
-    public void testInitNextFlowStateWithCorrectFlowChainAndFlowTypeMappedToCorrectUseCase() {
+    void testInitNextFlowStateWithCorrectFlowChainAndFlowTypeMappedToCorrectUseCase() {
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UPSCALE_STARTED,
                 mapFlowDetailsToUseCase(null, UPSCALEFLOWCONFIG, INIT_STATE));
     }
 
     @Test
-    public void testInitNextFlowStateWithIncorrectFlowChainAndFlowTypeMappedToUnsetUseCase() {
+    void testInitNextFlowStateWithIncorrectFlowChainAndFlowTypeMappedToUnsetUseCase() {
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UNSET,
                 mapFlowDetailsToUseCase(OTHERFLOWEVENTCHAINFACTORY, UPSCALEFLOWCONFIG, INIT_STATE));
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UNSET,
@@ -64,7 +64,7 @@ public class FreeIpaUseCaseMapperTest {
     }
 
     @Test
-    public void testCorrectFinishedAndFailedNextFlowStatesWithCorrectFlowChainMappedToCorrectUseCase() {
+    void testCorrectFinishedAndFailedNextFlowStatesWithCorrectFlowChainMappedToCorrectUseCase() {
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UPSCALE_FINISHED,
                 mapFlowDetailsToUseCase(null, UPSCALEFLOWCONFIG, UPSCALE_FINISHED_STATE));
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UPSCALE_FAILED,
@@ -74,7 +74,7 @@ public class FreeIpaUseCaseMapperTest {
     }
 
     @Test
-    public void testCorrectFinishedAndFailedNextFlowStatesWithIncorrectFlowChainMappedToUnsetUseCase() {
+    void testCorrectFinishedAndFailedNextFlowStatesWithIncorrectFlowChainMappedToUnsetUseCase() {
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UNSET,
                 mapFlowDetailsToUseCase(OTHERFLOWEVENTCHAINFACTORY, UPSCALEFLOWCONFIG, UPSCALE_FINISHED_STATE));
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UNSET,
@@ -86,7 +86,7 @@ public class FreeIpaUseCaseMapperTest {
     }
 
     @Test
-    public void testIncorrectFinishedNextFlowStatesWithCorrectFlowMappedToUnsetUseCase() {
+    void testIncorrectFinishedNextFlowStatesWithCorrectFlowMappedToUnsetUseCase() {
         Assertions.assertEquals(UsageProto.CDPFreeIPAStatus.Value.UNSET,
                 mapFlowDetailsToUseCase(null, UPSCALEFLOWCONFIG, "OTHER_FINISHED_STATE"));
     }

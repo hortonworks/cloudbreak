@@ -4,11 +4,11 @@ import static com.sequenceiq.cloudbreak.util.MapUtil.cleanMap;
 import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -22,6 +22,8 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
@@ -41,17 +43,23 @@ public class NetworkToNetworkV4ResponseConverter {
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
+    @Inject
+    private ResourceService resourceService;
+
     @Nullable
-    public NetworkV4Response convert(Stack source) {
-        LOGGER.debug("Converting {} to {} from the content of: {}", Stack.class.getSimpleName(), NetworkV4Response.class.getSimpleName(), source);
+    public NetworkV4Response convert(StackDtoDelegate source) {
+        if (source == null) {
+            return null;
+        }
+        LOGGER.debug("Converting {} to {} from the content of: {}", source.getClass().getSimpleName(), NetworkV4Response.class.getSimpleName(), source);
         NetworkV4Response networkResp = null;
-        Optional<Network> network = source != null ? ofNullable(source.getNetwork()) : empty();
+        Optional<Network> network = source.getNetwork() != null ? ofNullable(source.getNetwork()) : empty();
         if (network.isPresent()) {
             networkResp = new NetworkV4Response();
             networkResp.setSubnetCIDR(network.get().getSubnetCIDR());
             if (network.get().getAttributes() != null) {
                 Map<String, Object> parameters = cleanMap(network.get().getAttributes().getMap());
-                putNetworkResourcesIntoResponse(source, parameters);
+                putNetworkResourcesIntoResponse(source.getId(), parameters);
                 providerParameterCalculator.parse(parameters, networkResp);
             }
         }
@@ -60,9 +68,12 @@ public class NetworkToNetworkV4ResponseConverter {
         return networkResp;
     }
 
-    private void putNetworkResourcesIntoResponse(Stack stack, Map<String, Object> parameters) {
-        Set<Resource> resources = stack.getResources();
-
+    private void putNetworkResourcesIntoResponse(Long stackId, Map<String, Object> parameters) {
+        List<ResourceType> types = new ArrayList<>();
+        types.add(ResourceType.AWS_VPC);
+        types.addAll(NETWORK_RESOURCE_TYPES);
+        types.addAll(SUBNET_RESOURCE_TYPES);
+        List<Resource> resources = resourceService.findAllByStackIdAndResourceTypeIn(stackId, types);
         for (Resource aResource : resources) {
             if (ResourceType.AWS_VPC.equals(aResource.getResourceType())) {
                 parameters.put("vpcId", aResource.getResourceName());

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.domain.converter.ComponentTypeConverter;
 
 @Entity
 @Table(name = "ClusterComponent")
+@Deprecated
 public class ClusterComponentView implements ProvisionEntity {
     @Id
     private Long id;

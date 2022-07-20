@@ -40,7 +40,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternal
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.StopExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -107,7 +109,7 @@ class ExternalDatabaseStopActionsTest {
     private Event<Object> event;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private CloudbreakMetricService metricService;
@@ -161,7 +163,7 @@ class ExternalDatabaseStopActionsTest {
         when(stateContext.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
-        when(stackService.getByIdWithClusterInTransaction(any())).thenReturn(STACK);
+        when(stackDtoService.getStackViewById(any())).thenReturn(STACK);
 
         when(stateContext.getEvent()).thenReturn(flowEvent);
         when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
@@ -171,6 +173,9 @@ class ExternalDatabaseStopActionsTest {
         when(tracer.activateSpan(span)).thenReturn(scope);
         when(span.context()).thenReturn(spanContext);
         when(flowEvent.name()).thenReturn("eventName");
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        STACK.setWorkspace(workspace);
     }
 
     @Test
@@ -210,7 +215,7 @@ class ExternalDatabaseStopActionsTest {
                 new StopExternalDatabaseFailed(STACK_ID, EXTERNAL_DATABASE_STOP_FAILED_EVENT.event(),
                         STACK_NAME, null, expectedException);
 
-        when(stackService.getByIdWithClusterInTransaction(any())).thenReturn(STACK);
+        when(stackDtoService.getStackViewById(any())).thenReturn(STACK);
 
         when(runningFlows.get(anyString())).thenReturn(flow);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(stopExternalDatabaseFailedPayload);
@@ -245,7 +250,7 @@ class ExternalDatabaseStopActionsTest {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
-        ReflectionTestUtils.setField(action, null, stackService, StackService.class);
+        ReflectionTestUtils.setField(action, null, stackDtoService, StackDtoService.class);
         ReflectionTestUtils.setField(action, null, metricService, MetricService.class);
         ReflectionTestUtils.setField(action, null, tracer, Tracer.class);
     }

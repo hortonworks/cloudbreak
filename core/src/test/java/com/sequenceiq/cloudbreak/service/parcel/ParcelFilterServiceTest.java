@@ -129,7 +129,8 @@ public class ParcelFilterServiceTest {
         when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("hdfs", "hive")));
         ClouderaManagerProduct cdhParcel = new ClouderaManagerProduct().withParcel("cdh-parcel-url").withName("CDH");
         ClouderaManagerProduct nifiParcel = new ClouderaManagerProduct().withParcel("nifi-parcel-url").withName("NIFI");
-        when(manifestRetrieverService.readRepoManifest(cdhParcel.getParcel())).thenReturn(ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("hdfs", "hive")));
+        when(manifestRetrieverService.readRepoManifest(cdhParcel.getParcel())).thenReturn(
+                ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("hdfs", "hive")));
 
         Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, createParcelSet(cdhParcel, nifiParcel), getBlueprint());
         assertEquals(1, actual.size());
@@ -141,7 +142,8 @@ public class ParcelFilterServiceTest {
         when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("hdfs", "hive", "spark")));
         ClouderaManagerProduct cdhParcel = new ClouderaManagerProduct().withParcel("cdh-parcel-url").withName("CDH");
         ClouderaManagerProduct nifiParcel = new ClouderaManagerProduct().withParcel("nifi-parcel-url").withName("NIFI");
-        when(manifestRetrieverService.readRepoManifest(cdhParcel.getParcel())).thenReturn(ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("hdfs", "hive")));
+        when(manifestRetrieverService.readRepoManifest(cdhParcel.getParcel())).thenReturn(
+                ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("hdfs", "hive")));
         when(manifestRetrieverService.readRepoManifest(nifiParcel.getParcel())).thenReturn(ImmutablePair.of(ManifestStatus.FAILED, null));
 
         Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, createParcelSet(cdhParcel, nifiParcel), getBlueprint());

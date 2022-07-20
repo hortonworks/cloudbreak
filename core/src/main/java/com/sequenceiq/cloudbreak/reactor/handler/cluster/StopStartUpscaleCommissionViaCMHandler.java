@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscal
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -75,7 +76,7 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
                 request.getStartedInstancesToCommission(),
                 request.getServicesNotRunningInstancesToCommission());
 
-        List<InstanceMetaData> allInstancesToCommission = new LinkedList<>();
+        List<InstanceMetadataView> allInstancesToCommission = new LinkedList<>();
         allInstancesToCommission.addAll(request.getStartedInstancesToCommission());
         allInstancesToCommission.addAll(request.getServicesNotRunningInstancesToCommission());
 

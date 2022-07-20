@@ -11,6 +11,8 @@ public class MonitoringConfiguration {
 
     private String remoteWriteUrl;
 
+    private String remoteWriteInternalUrl;
+
     private Integer scrapeIntervalSeconds;
 
     private boolean devStack;
@@ -41,6 +43,14 @@ public class MonitoringConfiguration {
 
     public void setRemoteWriteUrl(String remoteWriteUrl) {
         this.remoteWriteUrl = remoteWriteUrl;
+    }
+
+    public String getRemoteWriteInternalUrl() {
+        return remoteWriteInternalUrl;
+    }
+
+    public void setRemoteWriteInternalUrl(String remoteWriteInternalUrl) {
+        this.remoteWriteInternalUrl = remoteWriteInternalUrl;
     }
 
     public boolean isDevStack() {

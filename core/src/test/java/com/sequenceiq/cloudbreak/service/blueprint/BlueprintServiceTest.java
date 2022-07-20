@@ -38,7 +38,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.validation.Errors;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
@@ -75,7 +75,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @ExtendWith(MockitoExtension.class)
-public class BlueprintServiceTest {
+class BlueprintServiceTest {
     private static final String ACCOUNT_ID = "ACCOUNT_ID";
 
     private static final String CREATOR = "CREATOR";
@@ -135,11 +135,11 @@ public class BlueprintServiceTest {
     private BlueprintService underTest;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
         SupportedRuntimes supportedRuntimes = new SupportedRuntimes();
-        Whitebox.setInternalState(blueprintListFilters, "supportedRuntimes", supportedRuntimes);
-        Whitebox.setInternalState(supportedRuntimes, "imageCatalogService", imageCatalogService);
+        ReflectionTestUtils.setField(blueprintListFilters, "supportedRuntimes", supportedRuntimes);
+        ReflectionTestUtils.setField(supportedRuntimes, "imageCatalogService", imageCatalogService);
         lenient().when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         lenient().when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
         lenient().when(workspaceService.get(1L, user)).thenReturn(getWorkspace());
@@ -147,7 +147,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testDeleteByWorkspaceWhenDtoNameFilledThenDeleteCalled() {
+    void testDeleteByWorkspaceWhenDtoNameFilledThenDeleteCalled() {
         Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
@@ -164,7 +164,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testDeleteServiceManaged() {
+    void testDeleteServiceManaged() {
         Blueprint blueprint = getBlueprint("name", SERVICE_MANAGED);
         when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
@@ -181,7 +181,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testDeleteByWorkspaceWhenDtoCrnFilledThenDeleteCalled() {
+    void testDeleteByWorkspaceWhenDtoCrnFilledThenDeleteCalled() {
         Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         when(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
@@ -198,7 +198,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testGetByWorkspaceWhenDtoNameFilledThenProperGetCalled() {
+    void testGetByWorkspaceWhenDtoNameFilledThenProperGetCalled() {
         Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
@@ -213,7 +213,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testGetByWorkspaceWhenDtoCrnFilledThenProperGetCalled() {
+    void testGetByWorkspaceWhenDtoCrnFilledThenProperGetCalled() {
         Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         when(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
@@ -228,7 +228,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testDeletionWithZeroClusters() {
+    void testDeletionWithZeroClusters() {
         Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         when(clusterService.findByBlueprint(any())).thenReturn(Collections.emptySet());
 
@@ -238,7 +238,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testDeletionWithNonTerminatedClusterAndStack() {
+    void testDeletionWithNonTerminatedClusterAndStack() {
         Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         Cluster cluster = getCluster("c1", 1L, blueprint, DetailedStackStatus.AVAILABLE);
         ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
@@ -254,7 +254,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testDeletionWithTerminatedClustersNonTerminatedStacks() {
+    void testDeletionWithTerminatedClustersNonTerminatedStacks() {
         Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         Set<Cluster> clusters = new HashSet<>();
         clusters.add(getCluster("c1", 1L, blueprint, DetailedStackStatus.PRE_DELETE_IN_PROGRESS));
@@ -273,7 +273,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testDeletionWithTerminatedAndNonTerminatedClusters() {
+    void testDeletionWithTerminatedAndNonTerminatedClusters() {
         Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         Set<Cluster> clusters = new HashSet<>();
         clusters.add(getCluster("c1", 1L, blueprint, DetailedStackStatus.PRE_DELETE_IN_PROGRESS));
@@ -295,7 +295,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenFound() {
+    void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenFound() {
         Blueprint blueprint1 = getBlueprint("One", DEFAULT);
         when(blueprintRepository.findByNameAndWorkspaceId("One", 1L)).thenReturn(Optional.of(blueprint1));
 
@@ -308,7 +308,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenLoaded() {
+    void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenLoaded() {
         Blueprint blueprint1 = getBlueprint("One", DEFAULT);
         Blueprint blueprint2 = getBlueprint("Two", DEFAULT);
         when(blueprintRepository.findByNameAndWorkspaceId("Two", 1L)).thenReturn(Optional.empty());
@@ -326,7 +326,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenNotFound() {
+    void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenNotFound() {
         Blueprint blueprint1 = getBlueprint("One", DEFAULT);
         Blueprint blueprint2 = getBlueprint("Two", DEFAULT);
         when(blueprintRepository.findByNameAndWorkspaceId("Three", 1L)).thenReturn(Optional.empty());
@@ -347,7 +347,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testPopulateCrnCorrectly() {
+    void testPopulateCrnCorrectly() {
         Blueprint blueprint = new Blueprint();
         underTest.decorateWithCrn(blueprint, ACCOUNT_ID, CREATOR);
 
@@ -356,10 +356,10 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testGetAllAvailableViewInWorkspaceGivenHasSdxReadyWhenWithSdxReady() {
-        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", ResourceStatus.DEFAULT, true),
-                getBlueprintView("bp2", ResourceStatus.DEFAULT, false),
-                getBlueprintView("bp3", ResourceStatus.DEFAULT, false));
+    void testGetAllAvailableViewInWorkspaceGivenHasSdxReadyWhenWithSdxReady() {
+        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", DEFAULT, true),
+                getBlueprintView("bp2", DEFAULT, false),
+                getBlueprintView("bp3", DEFAULT, false));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
         Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
         assertEquals(3, result.size());
@@ -367,20 +367,20 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testGetAllAvailableViewInWorkspaceGivenSdxReadyIsNullWhenWithSdxReady() {
+    void testGetAllAvailableViewInWorkspaceGivenSdxReadyIsNullWhenWithSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json("{}")),
-                getBlueprintView("bp2", ResourceStatus.DEFAULT, false),
-                getBlueprintView("bp3", ResourceStatus.DEFAULT, false));
+                getBlueprintView("bp2", DEFAULT, false),
+                getBlueprintView("bp3", DEFAULT, false));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
         Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
         assertEquals(3, result.size());
     }
 
     @Test
-    public void testGetAllAvailableViewInWorkspaceGivenHasNullOfSdxReadyWhenWithSdxReady() {
+    void testGetAllAvailableViewInWorkspaceGivenHasNullOfSdxReadyWhenWithSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json("{}")),
-                getBlueprintView("bp2", ResourceStatus.DEFAULT, true),
-                getBlueprintView("bp3", ResourceStatus.DEFAULT, false));
+                getBlueprintView("bp2", DEFAULT, true),
+                getBlueprintView("bp3", DEFAULT, false));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
         Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
         assertEquals(3, result.size());
@@ -388,7 +388,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testGetAllAvailableViewInWorkspaceGivenAttributeIsNullWhenWithSdxReady() {
+    void testGetAllAvailableViewInWorkspaceGivenAttributeIsNullWhenWithSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", null));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
         Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
@@ -397,7 +397,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testGetAllAvailableViewInWorkspaceGivenAttributeValueIsNullWhenWithSdxReady() {
+    void testGetAllAvailableViewInWorkspaceGivenAttributeValueIsNullWhenWithSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json(null)));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
         Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
@@ -407,7 +407,7 @@ public class BlueprintServiceTest {
 
     @Test
     // if the tags are null or empty that same as no an sdx ready bp
-    public void testGetAllAvailableViewInWorkspaceGivenAttributeValueIsNullWhenWithoutSdxReady() {
+    void testGetAllAvailableViewInWorkspaceGivenAttributeValueIsNullWhenWithoutSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json(null)));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
         Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
@@ -416,10 +416,10 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testGetAllAvailableViewInWorkspaceGivenHasSdxReadyWhenWithoutSdxReady() {
-        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", ResourceStatus.DEFAULT, true),
-                getBlueprintView("bp2", ResourceStatus.DEFAULT, false),
-                getBlueprintView("bp3", ResourceStatus.DEFAULT, false));
+    void testGetAllAvailableViewInWorkspaceGivenHasSdxReadyWhenWithoutSdxReady() {
+        Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", DEFAULT, true),
+                getBlueprintView("bp2", DEFAULT, false),
+                getBlueprintView("bp3", DEFAULT, false));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
         Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
         assertEquals(2, result.size());
@@ -428,10 +428,10 @@ public class BlueprintServiceTest {
 
     @Test
     // if the tags are null or empty that same as no an sdx ready bp
-    public void testGetAllAvailableViewInWorkspaceGivenSdxReadyIsNullWhenWithoutSdxReady() {
+    void testGetAllAvailableViewInWorkspaceGivenSdxReadyIsNullWhenWithoutSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json("{}")),
-                getBlueprintView("bp2", ResourceStatus.DEFAULT, false),
-                getBlueprintView("bp3", ResourceStatus.DEFAULT, false));
+                getBlueprintView("bp2", DEFAULT, false),
+                getBlueprintView("bp3", DEFAULT, false));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
         Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
         assertEquals(3, result.size());
@@ -440,10 +440,10 @@ public class BlueprintServiceTest {
 
     @Test
     // if the tags are null or empty that same as no an sdx ready bp
-    public void testGetAllAvailableViewInWorkspaceGivenHasNullOfSdxReadyWhenWithoutSdxReady() {
+    void testGetAllAvailableViewInWorkspaceGivenHasNullOfSdxReadyWhenWithoutSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json("{}")),
-                getBlueprintView("bp2", ResourceStatus.DEFAULT, true),
-                getBlueprintView("bp3", ResourceStatus.DEFAULT, false));
+                getBlueprintView("bp2", DEFAULT, true),
+                getBlueprintView("bp3", DEFAULT, false));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
         Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
         assertEquals(2, result.size());
@@ -452,7 +452,7 @@ public class BlueprintServiceTest {
 
     @Test
     // if the tags are null or empty that same as no an sdx ready bp
-    public void testGetAllAvailableViewInWorkspaceGivenAttributeIsNullWhenWithoutSdxReady() {
+    void testGetAllAvailableViewInWorkspaceGivenAttributeIsNullWhenWithoutSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", null));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
         Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
@@ -461,7 +461,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testBadRequestExceptionRaisedWhenValidationIsFailing() {
+    void testBadRequestExceptionRaisedWhenValidationIsFailing() {
         String someBlueprintText = "someText";
 
         doAnswer(invocation -> {
@@ -475,7 +475,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testBadRequestExceptionRaisedWhenValidationIsFailingOnCreateWithInternalUser() {
+    void testBadRequestExceptionRaisedWhenValidationIsFailingOnCreateWithInternalUser() {
         String someBlueprintText = "someText";
 
         doAnswer(invocation -> {
@@ -489,7 +489,7 @@ public class BlueprintServiceTest {
     }
 
     @Test
-    public void testCreateWithInternalUser() throws TransactionExecutionException {
+    void testCreateWithInternalUser() throws TransactionExecutionException {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText("{}");
 
@@ -504,11 +504,11 @@ public class BlueprintServiceTest {
 
         assertEquals(workspace, savedBlueprint.getWorkspace());
         assertTrue(blueprint.getResourceCrn().matches("crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":clustertemplate:.*"));
-        assertEquals(ResourceStatus.SERVICE_MANAGED, savedBlueprint.getStatus());
+        assertEquals(SERVICE_MANAGED, savedBlueprint.getStatus());
     }
 
     @Test
-    public void testPrepareDeletionWhenHasOneClusterDefinitionAndOneCluster() {
+    void testPrepareDeletionWhenHasOneClusterDefinitionAndOneCluster() {
         Blueprint blueprint = new Blueprint();
         blueprint.setName("TemplateName");
         Cluster templateCluster = getCluster("Stack Template Name", 0L, blueprint, DetailedStackStatus.AVAILABLE);
@@ -521,13 +521,13 @@ public class BlueprintServiceTest {
         when(clusterTemplateViewService.findAllByStackIds(List.of(0L))).thenReturn(Set.of(clusterTemplateView));
         when(clusterService.findByBlueprint(blueprint)).thenReturn(Set.of(workloadCluster, templateCluster));
         BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
-        Assertions.assertEquals("There are clusters or cluster definitions associated with cluster template 'TemplateName'. "
+        assertEquals("There are clusters or cluster definitions associated with cluster template 'TemplateName'. "
                 + "The cluster template used by 1 cluster(s) (Workload Name) and 1 cluster definitions (ClusterDefinition). "
                 + "Please remove these before deleting the cluster template.", actual.getMessage());
     }
 
     @Test
-    public void testPrepareDeletionWhenHasOneClusterDefinition() {
+    void testPrepareDeletionWhenHasOneClusterDefinition() {
         Blueprint blueprint = new Blueprint();
         blueprint.setName("TemplateName");
         Cluster templateCluster = getCluster("Cluster Name", 0L, blueprint, DetailedStackStatus.AVAILABLE);
@@ -537,12 +537,12 @@ public class BlueprintServiceTest {
         when(clusterService.findByBlueprint(blueprint)).thenReturn(Set.of(templateCluster));
         when(clusterTemplateViewService.findAllByStackIds(any())).thenReturn(Set.of(clusterTemplateView));
         BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
-        Assertions.assertEquals("There is a cluster definition ['ClusterDefinition'] which uses cluster template 'TemplateName'. "
+        assertEquals("There is a cluster definition ['ClusterDefinition'] which uses cluster template 'TemplateName'. "
                 + "Please remove this cluster before deleting the cluster template.", actual.getMessage());
     }
 
     @Test
-    public void testPrepareDeletionWhenHasOneCluster() {
+    void testPrepareDeletionWhenHasOneCluster() {
         Blueprint blueprint = new Blueprint();
         blueprint.setName("TemplateName");
         Cluster templateCluster = getCluster("Cluster Name", 0L, blueprint, DetailedStackStatus.AVAILABLE);
@@ -551,7 +551,7 @@ public class BlueprintServiceTest {
         when(clusterService.findByBlueprint(blueprint)).thenReturn(Set.of(templateCluster));
         when(clusterTemplateViewService.findAllByStackIds(any())).thenReturn(Set.of(clusterTemplateView));
         BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
-        Assertions.assertEquals("There is a cluster ['ClusterDefinition'] which uses cluster template 'TemplateName'. "
+        assertEquals("There is a cluster ['ClusterDefinition'] which uses cluster template 'TemplateName'. "
                 + "Please remove this cluster before deleting the cluster template.", actual.getMessage());
     }
 

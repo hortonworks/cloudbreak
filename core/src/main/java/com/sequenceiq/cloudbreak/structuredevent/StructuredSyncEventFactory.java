@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.structuredevent;
 
 import static com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType.SYNC;
 
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
@@ -10,9 +12,9 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.converter.BlueprintToBlueprintDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.converter.ClusterToClusterDetailsConverter;
 import com.sequenceiq.cloudbreak.structuredevent.converter.StackToStackDetailsConverter;
@@ -22,6 +24,9 @@ import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.legacy.OperationDetails;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.GatewayView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.ha.NodeConfig;
 
 @Component
@@ -32,7 +37,7 @@ public class StructuredSyncEventFactory {
     private Clock clock;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ClusterToClusterDetailsConverter clusterToClusterDetailsConverter;
@@ -50,20 +55,23 @@ public class StructuredSyncEventFactory {
     private String serviceVersion;
 
     public StructuredSyncEvent createStructuredSyncEvent(Long resourceId) {
-        Stack stack = stackService.getByIdWithTransaction(resourceId);
+        StackView stack = stackDtoService.getStackViewById(resourceId);
+        ClusterView cluster = stackDtoService.getClusterViewByStackId(resourceId);
+        List<InstanceGroupDto> instanceGroupDtos = stackDtoService.getInstanceMetadataByInstanceGroup(resourceId);
         String resourceType = (stack.getType() == null || stack.getType().equals(StackType.WORKLOAD))
                 ? CloudbreakEventService.DATAHUB_RESOURCE_TYPE
                 : CloudbreakEventService.DATALAKE_RESOURCE_TYPE;
         OperationDetails operationDetails = new OperationDetails(clock.getCurrentTimeMillis(), SYNC, resourceType, resourceId, stack.getName(),
-                nodeConfig.getId(), serviceVersion, stack.getWorkspace().getId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(),
-                stack.getTenant().getName(), stack.getResourceCrn(), stack.getCreator().getUserCrn(), stack.getEnvironmentCrn(), null);
-        StackDetails stackDetails = stackToStackDetailsConverter.convert(stack);
+                nodeConfig.getId(), serviceVersion, stack.getWorkspaceId(), stack.getCreator().getUserId(), stack.getCreator().getUserName(),
+                stack.getTenantName(), stack.getResourceCrn(), stack.getCreator().getUserCrn(), stack.getEnvironmentCrn(), null);
+        StackDetails stackDetails = stackToStackDetailsConverter.convert(stack, cluster, instanceGroupDtos);
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;
-        Cluster cluster = stack.getCluster();
         if (cluster != null) {
-            clusterDetails = clusterToClusterDetailsConverter.convert(cluster);
-            blueprintDetails = blueprintToBlueprintDetailsConverter.convert(cluster.getBlueprint());
+            GatewayView gateway = stackDtoService.getGatewayView(cluster.getId());
+            Blueprint blueprint = stackDtoService.getBlueprint(cluster.getId());
+            clusterDetails = clusterToClusterDetailsConverter.convert(cluster, stack, gateway);
+            blueprintDetails = blueprintToBlueprintDetailsConverter.convert(blueprint);
         }
         return new StructuredSyncEvent(operationDetails, stackDetails, clusterDetails, blueprintDetails);
     }

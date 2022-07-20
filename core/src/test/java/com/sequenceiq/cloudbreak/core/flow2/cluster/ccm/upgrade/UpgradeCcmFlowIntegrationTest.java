@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCc
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -54,8 +53,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.logger.concurrent.MDCCleanerThreadPoolExecutor;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmTriggerRequest;
@@ -72,10 +69,13 @@ import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.HealthCheckService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.UpgradeCcmOrchestratorService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -120,6 +120,9 @@ class UpgradeCcmFlowIntegrationTest {
 
     @MockBean(reset = MockReset.NONE)
     private StackService stackService;
+
+    @MockBean(reset = MockReset.NONE)
+    private StackDtoService stackDtoService;
 
     @SpyBean
     private UpgradeCcmService upgradeCcmService;
@@ -213,18 +216,6 @@ class UpgradeCcmFlowIntegrationTest {
         } while (flowRegister.get(flowIdentifier.getPollableId()) != null && i < 10);
     }
 
-    private StackView mockStackView() {
-        StackView stackView = mock(StackView.class);
-        ClusterView clusterView = mock(ClusterView.class);
-
-        when(stackView.getClusterView()).thenReturn(clusterView);
-        when(stackView.getId()).thenReturn(1L);
-        when(stackView.isStartInProgress()).thenReturn(true);
-        when(clusterView.getId()).thenReturn(CLUSTER_ID);
-
-        return stackView;
-    }
-
     private Stack mockStack() {
         stack = new Stack();
         stack.setId(STACK_ID);
@@ -235,16 +226,17 @@ class UpgradeCcmFlowIntegrationTest {
         Cluster cluster = new Cluster();
         cluster.setId(CLUSTER_ID);
         stack.setCluster(cluster);
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
 
         return stack;
     }
 
     private void mockStackService() {
-        StackView stackView = mockStackView();
         Stack stack = mockStack();
-        when(stackService.getById(STACK_ID)).thenReturn(stack);
-        when(stackService.getByIdWithTransaction(STACK_ID)).thenReturn(stack);
-        when(stackService.getViewByIdWithoutAuth(STACK_ID)).thenReturn(stackView);
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
+        when(stackDtoService.getClusterViewByStackId(STACK_ID)).thenReturn(stack.getCluster());
     }
 
     private FlowIdentifier triggerFlow() {

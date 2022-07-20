@@ -31,11 +31,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Component
 public class StopStartDownscaleFlowService {
@@ -84,10 +84,11 @@ public class StopStartDownscaleFlowService {
                 String.valueOf(decommissionedFqdns.size()), hostGroupName, String.join(", ", decommissionedFqdns));
     }
 
-    public void instancesStopped(long stackId, List<InstanceMetaData> instancesStopped) {
-        instancesStopped.forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.STOPPED));
+    public void instancesStopped(long stackId, List<InstanceMetadataView> instancesStopped) {
+        List<Long> instanceIds = instancesStopped.stream().map(im -> im.getId()).collect(Collectors.toList());
+        instanceMetaDataService.updateAllInstancesToStatus(instanceIds, InstanceStatus.STOPPED, "Instance successfully stopped");
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODES_STOPPED,
-                String.valueOf(instancesStopped.size()), instancesStopped.stream().map(InstanceMetaData::getInstanceId)
+                String.valueOf(instancesStopped.size()), instancesStopped.stream().map(InstanceMetadataView::getInstanceId)
                         .collect(Collectors.joining(", ")));
     }
 
@@ -99,14 +100,14 @@ public class StopStartDownscaleFlowService {
                         notStoppedInstances.stream().map(x -> x.getCloudInstance().getInstanceId()).collect(Collectors.joining(", ")));
     }
 
-    public void clusterDownscaleFinished(Long stackId, String hostGroupName, List<InstanceMetaData> instancesStopped) {
+    public void clusterDownscaleFinished(Long stackId, String hostGroupName, List<InstanceMetadataView> instancesStopped) {
         stackUpdater.updateStackStatus(
                 stackId,
                 DetailedStackStatus.AVAILABLE,
                 "Instances: " + instancesStopped.size() + " stopped successfully.");
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_FINISHED,
                 hostGroupName, String.valueOf(instancesStopped.size()),
-                instancesStopped.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.joining(", ")));
+                instancesStopped.stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(Collectors.joining(", ")));
     }
 
     public void decommissionViaCmFailed(long stackId, Set<String> hostnamesAttempted) {

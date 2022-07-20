@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class GeneralClusterConfigsProvider {
@@ -21,13 +21,13 @@ public class GeneralClusterConfigsProvider {
 
     private static final String PENDING_DEFAULT_VALUE = "pending...";
 
-    public GeneralClusterConfigs generalClusterConfigs(Stack stack, Cluster cluster) {
+    public GeneralClusterConfigs generalClusterConfigs(StackDtoDelegate stack) {
+        ClusterView cluster = stack.getCluster();
         boolean gatewayInstanceMetadataPresented = false;
         boolean instanceMetadataPresented = false;
-        if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
-            List<InstanceMetaData> gatewayInstanceMetadata = stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata();
-            gatewayInstanceMetadataPresented = !gatewayInstanceMetadata.isEmpty()
-                    && stack.getCluster().getGateway() != null;
+        if (stack.getInstanceGroupDtos() != null && !stack.getInstanceGroupDtos().isEmpty()) {
+            List<InstanceMetadataView> gatewayInstanceMetadata = stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata();
+            gatewayInstanceMetadataPresented = !gatewayInstanceMetadata.isEmpty() && stack.hasGateway();
             instanceMetadataPresented = true;
         }
         GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
@@ -41,10 +41,10 @@ public class GeneralClusterConfigsProvider {
         generalClusterConfigs.setPassword(cluster.getPassword());
         generalClusterConfigs.setCloudbreakAmbariUser(cluster.getCloudbreakAmbariUser());
         generalClusterConfigs.setCloudbreakAmbariPassword(cluster.getCloudbreakAmbariPassword());
-        generalClusterConfigs.setNodeCount(stack.getFullNodeCount());
+        generalClusterConfigs.setNodeCount(stack.getFullNodeCount().intValue());
         generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.ofNullable(stack.getPrimaryGatewayInstance().getDiscoveryFQDN()));
         generalClusterConfigs.setVariant(cluster.getVariant());
-        generalClusterConfigs.setAutoTlsEnabled(cluster.isAutoTlsEnabled());
+        generalClusterConfigs.setAutoTlsEnabled(cluster.getAutoTlsEnabled());
         boolean userFacingCertHasBeenGenerated = StringUtils.isNotEmpty(stack.getSecurityConfig().getUserFacingKey())
                 && StringUtils.isNotEmpty(stack.getSecurityConfig().getUserFacingCert());
         generalClusterConfigs.setKnoxUserFacingCertConfigured(userFacingCertHasBeenGenerated);

@@ -1,14 +1,11 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -25,10 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -44,18 +43,23 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.join.MinionAcceptor;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
-public class SaltBootstrapTest {
+@ExtendWith(MockitoExtension.class)
+class SaltBootstrapTest {
 
+    @Mock
+    private SaltStateService saltStateService;
+
+    @Mock
     private SaltConnector saltConnector;
 
     private GatewayConfig gatewayConfig;
 
     private MinionIpAddressesResponse minionIpAddressesResponse;
 
-    @Before
-    public void setUp() {
-        saltConnector = mock(SaltConnector.class);
+    @BeforeEach
+    void setUp() {
         gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43",
                 "10-0-0-1.example.com", 9443, "instanceId", "serverCert", "clientCert", "clientKey",
                 "saltpasswd", "saltbootpassword", "signkey", false, true, null, null, null, null);
@@ -68,12 +72,11 @@ public class SaltBootstrapTest {
         when(saltConnector.action(any(SaltAction.class))).thenReturn(genericResponses);
 
         minionIpAddressesResponse = new MinionIpAddressesResponse();
-        when(saltConnector.run(any(), ArgumentMatchers.eq("network.ipaddrs"), any(), any(), anyLong()))
-                .thenReturn(minionIpAddressesResponse);
+        when(saltStateService.collectMinionIpAddresses(eq(saltConnector))).thenReturn(minionIpAddressesResponse);
     }
 
     @Test
-    public void callTest() throws Exception {
+    void callTest() throws Exception {
         List<Map<String, JsonNode>> result = new ArrayList<>();
         Map<String, JsonNode> ipAddressesForMinions = new HashMap<>();
         ipAddressesForMinions.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
@@ -87,16 +90,15 @@ public class SaltBootstrapTest {
         targets.add(new Node("10.0.0.2", null, null, "hg"));
         targets.add(new Node("10.0.0.3", null, null, "hg"));
 
-        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, List.of(saltConnector), Collections.singletonList(gatewayConfig), targets,
-                new BootstrapParams());
-        saltBootstrap = spy(saltBootstrap);
+        SaltBootstrap saltBootstrap = spy(new SaltBootstrap(saltStateService, saltConnector, List.of(saltConnector),
+                Collections.singletonList(gatewayConfig), targets, new BootstrapParams()));
         doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor();
 
         saltBootstrap.call();
     }
 
     @Test
-    public void callFailTest() throws IOException {
+    void callFailTest() throws IOException {
         List<Map<String, JsonNode>> result = new ArrayList<>();
         Map<String, JsonNode> ipAddressesForMinions = new HashMap<>();
         ipAddressesForMinions.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
@@ -110,23 +112,20 @@ public class SaltBootstrapTest {
         String missingNodeIp = "10.0.0.3";
         targets.add(new Node(missingNodeIp, null, null, "hg"));
 
-        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, List.of(saltConnector), Collections.singletonList(gatewayConfig), targets,
-                new BootstrapParams());
-        saltBootstrap = spy(saltBootstrap);
+        SaltBootstrap saltBootstrap = spy(new SaltBootstrap(saltStateService, saltConnector, List.of(saltConnector),
+                Collections.singletonList(gatewayConfig), targets,
+                new BootstrapParams()));
         doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor();
-        try {
-            saltBootstrap.call();
-            fail("should throw exception");
-        } catch (Exception e) {
-            assertEquals(CloudbreakOrchestratorFailedException.class.getSimpleName(), e.getClass().getSimpleName());
-            assertThat(e.getMessage(), containsString("10.0.0.3"));
-            assertThat(e.getMessage(), not(containsString("10.0.0.2")));
-            assertThat(e.getMessage(), not(containsString("10.0.0.1")));
-        }
+
+        assertThatThrownBy(saltBootstrap::call)
+                .hasMessageContaining("10.0.0.3")
+                .hasMessageNotContaining("10.0.0.1")
+                .hasMessageNotContaining("10.0.0.2")
+                .isInstanceOf(CloudbreakOrchestratorFailedException.class);
     }
 
     @Test
-    public void restartNeededTrueButFlagNotSupportedBySaltBootstrap() throws Exception {
+    void restartNeededTrueButFlagNotSupportedBySaltBootstrap() throws Exception {
         List<Map<String, JsonNode>> result = new ArrayList<>();
         Map<String, JsonNode> ipAddressesForMinions = new HashMap<>();
         ipAddressesForMinions.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
@@ -143,8 +142,8 @@ public class SaltBootstrapTest {
         BootstrapParams params = new BootstrapParams();
         params.setRestartNeeded(true);
         params.setRestartNeededFlagSupported(false);
-        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, List.of(saltConnector), Collections.singletonList(gatewayConfig), targets, params);
-        saltBootstrap = spy(saltBootstrap);
+        SaltBootstrap saltBootstrap =
+                spy(new SaltBootstrap(saltStateService, saltConnector, List.of(saltConnector), Collections.singletonList(gatewayConfig), targets, params));
         doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor();
 
         saltBootstrap.call();
@@ -163,7 +162,7 @@ public class SaltBootstrapTest {
     }
 
     @Test
-    public void restartNeededTrueAndFlagSupportedBySaltBootstrap() throws Exception {
+    void restartNeededTrueAndFlagSupportedBySaltBootstrap() throws Exception {
         List<Map<String, JsonNode>> result = new ArrayList<>();
         Map<String, JsonNode> ipAddressesForMinions = new HashMap<>();
         ipAddressesForMinions.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
@@ -180,8 +179,8 @@ public class SaltBootstrapTest {
         BootstrapParams params = new BootstrapParams();
         params.setRestartNeeded(true);
         params.setRestartNeededFlagSupported(true);
-        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, List.of(saltConnector), Collections.singletonList(gatewayConfig), targets, params);
-        saltBootstrap = spy(saltBootstrap);
+        SaltBootstrap saltBootstrap =
+                spy(new SaltBootstrap(saltStateService, saltConnector, List.of(saltConnector), Collections.singletonList(gatewayConfig), targets, params));
         doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor();
 
         saltBootstrap.call();
@@ -200,7 +199,7 @@ public class SaltBootstrapTest {
     }
 
     @Test
-    public void restartNeededFalseAndFlagSupportedBySaltBootstrap() throws Exception {
+    void restartNeededFalseAndFlagSupportedBySaltBootstrap() throws Exception {
         List<Map<String, JsonNode>> result = new ArrayList<>();
         Map<String, JsonNode> ipAddressesForMinions = new HashMap<>();
         ipAddressesForMinions.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
@@ -217,8 +216,8 @@ public class SaltBootstrapTest {
         BootstrapParams params = new BootstrapParams();
         params.setRestartNeeded(false);
         params.setRestartNeededFlagSupported(true);
-        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, List.of(saltConnector), Collections.singletonList(gatewayConfig), targets, params);
-        saltBootstrap = spy(saltBootstrap);
+        SaltBootstrap saltBootstrap =
+                spy(new SaltBootstrap(saltStateService, saltConnector, List.of(saltConnector), Collections.singletonList(gatewayConfig), targets, params));
         doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor();
 
         saltBootstrap.call();
@@ -237,7 +236,7 @@ public class SaltBootstrapTest {
     }
 
     @Test
-    public void restartNeededFalseAndFlagNotSupportedBySaltBootstrap() throws Exception {
+    void restartNeededFalseAndFlagNotSupportedBySaltBootstrap() throws Exception {
         List<Map<String, JsonNode>> result = new ArrayList<>();
         Map<String, JsonNode> ipAddressesForMinions = new HashMap<>();
         ipAddressesForMinions.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
@@ -254,8 +253,8 @@ public class SaltBootstrapTest {
         BootstrapParams params = new BootstrapParams();
         params.setRestartNeeded(false);
         params.setRestartNeededFlagSupported(false);
-        SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, List.of(saltConnector), Collections.singletonList(gatewayConfig), targets, params);
-        saltBootstrap = spy(saltBootstrap);
+        SaltBootstrap saltBootstrap =
+                spy(new SaltBootstrap(saltStateService, saltConnector, List.of(saltConnector), Collections.singletonList(gatewayConfig), targets, params));
         doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor();
 
         saltBootstrap.call();

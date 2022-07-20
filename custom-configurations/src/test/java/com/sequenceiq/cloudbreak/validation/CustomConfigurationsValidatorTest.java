@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurationProperty;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
-import com.sequenceiq.cloudbreak.exception.CustomConfigurationsServiceTypeNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
 class CustomConfigurationsValidatorTest {
@@ -51,7 +50,7 @@ class CustomConfigurationsValidatorTest {
                 "role1",
                 "invalidServiceName");
         customConfigurations.setConfigurations(Set.of(invalidProperty));
-        assertThrows(CustomConfigurationsServiceTypeNotFoundException.class, () -> underTest.validateServiceNames(customConfigurations));
+        assertThrows(BadRequestException.class, () -> underTest.validateServiceNames(customConfigurations));
     }
 
     @Test

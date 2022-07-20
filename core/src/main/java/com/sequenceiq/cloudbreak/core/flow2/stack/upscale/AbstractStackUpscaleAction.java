@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -18,20 +17,17 @@ import org.springframework.statemachine.StateContext;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
-import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -64,13 +60,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
     static final String ADJUSTMENT_WITH_THRESHOLD = "ADJUSTMENT_WITH_THRESHOLD";
 
     @Inject
-    private StackService stackService;
-
-    @Inject
-    private ResourceService resourceService;
-
-    @Inject
-    private StackToCloudStackConverter cloudStackConverter;
+    private StackDtoService stackDtoService;
 
     @Inject
     private StackUtil stackUtil;
@@ -83,8 +73,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
     protected StackScalingFlowContext createFlowContext(FlowParameters flowParameters,
             StateContext<StackUpscaleState, StackUpscaleEvent> stateContext, P payload) {
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
-        Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
-        stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
+        StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
@@ -94,12 +83,11 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(getTriggeredVariantOrStackVariant(variables, stack))
                 .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
+                .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
-                .withTenantId(stack.getTenant().getId())
+                .withTenantId(stack.getTenantId())
                 .build();
-        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
-        CloudStack cloudStack = cloudStackConverter.convert(stack);
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
         if (payload instanceof StackScaleTriggerEvent) {
             StackScaleTriggerEvent stackScaleTriggerEvent = (StackScaleTriggerEvent) payload;
             boolean repair = stackScaleTriggerEvent.isRepair();
@@ -113,14 +101,14 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
             variables.put(HOST_GROUP_WITH_HOSTNAMES, hostgroupsWithHostnames);
             variables.put(NETWORK_SCALE_DETAILS, networkScaleDetails);
             variables.put(ADJUSTMENT_WITH_THRESHOLD, adjustmentTypeWithThreshold);
-            return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, hostGroupsWithAdjustment,
+            return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, hostGroupsWithAdjustment,
                     hostGroupsWithPrivateIds, hostgroupsWithHostnames, repair, networkScaleDetails, adjustmentTypeWithThreshold);
         } else {
             Map<String, Integer> hostGroupWithAdjustment = getHostGroupWithAdjustment(variables);
             Map<String, Set<String>> hostgroupWithHostnames = getHostGroupWithHostnames(variables);
             NetworkScaleDetails stackNetworkScaleDetails = getStackNetworkScaleDetails(variables);
             AdjustmentTypeWithThreshold adjustmentWithThreshold = getAdjustmentWithThreshold(variables);
-            return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack,
+            return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential,
                     hostGroupWithAdjustment, null, hostgroupWithHostnames, isRepair(variables), stackNetworkScaleDetails,
                     adjustmentWithThreshold);
         }
@@ -131,7 +119,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
         return new StackFailureEvent(payload.getResourceId(), ex);
     }
 
-    private String getTriggeredVariantOrStackVariant(Map<Object, Object> variables, Stack stack) {
+    private String getTriggeredVariantOrStackVariant(Map<Object, Object> variables, StackView stack) {
         String variant = (String) variables.get(TRIGGERED_VARIANT);
         if (StringUtils.isEmpty(variant)) {
             variant = stack.getPlatformVariant();

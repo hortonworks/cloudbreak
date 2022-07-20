@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 
@@ -44,22 +44,22 @@ public class QueryProcessorConfigProviderTest {
 
     @Test
     public void getServiceConfigs() {
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(QUERY_PROCESSOR);
-        rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
-        rdsConfig.setConnectionUserName(USER_NAME);
-        rdsConfig.setConnectionPassword(PASSWORD);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(QUERY_PROCESSOR);
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
         TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
 
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
         Map<String, String> configToValue =
                 result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getValue));
         assertThat(configToValue).containsOnly(
-            new SimpleEntry<>("query_processor_database_host", HOST),
-            new SimpleEntry<>("query_processor_database_port", PORT),
-            new SimpleEntry<>("query_processor_database_name", DB_NAME),
-            new SimpleEntry<>("query_processor_database_username", USER_NAME),
-            new SimpleEntry<>("query_processor_database_password", PASSWORD));
+                new SimpleEntry<>("query_processor_database_host", HOST),
+                new SimpleEntry<>("query_processor_database_port", PORT),
+                new SimpleEntry<>("query_processor_database_name", DB_NAME),
+                new SimpleEntry<>("query_processor_database_username", USER_NAME),
+                new SimpleEntry<>("query_processor_database_password", PASSWORD));
     }
 
     @Test
@@ -78,11 +78,11 @@ public class QueryProcessorConfigProviderTest {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(QueryStoreRoles.QUERY_PROCESSOR, List.of(QueryStoreRoles.QUERY_PROCESSOR))).thenReturn(true);
 
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(QUERY_PROCESSOR);
-        rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
-        rdsConfig.setConnectionUserName(USER_NAME);
-        rdsConfig.setConnectionPassword(PASSWORD);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(QUERY_PROCESSOR);
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
         TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);
@@ -95,11 +95,11 @@ public class QueryProcessorConfigProviderTest {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(QueryStoreRoles.QUERY_PROCESSOR, List.of(QueryStoreRoles.QUERY_PROCESSOR))).thenReturn(false);
 
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(QUERY_PROCESSOR);
-        rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
-        rdsConfig.setConnectionUserName(USER_NAME);
-        rdsConfig.setConnectionPassword(PASSWORD);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(QUERY_PROCESSOR);
+        when(rdsConfig.getConnectionURL()).thenReturn(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
         TemplatePreparationObject tpo = new Builder().withRdsConfigs(Set.of(rdsConfig)).build();
 
         boolean result = underTest.isConfigurationNeeded(mockTemplateProcessor, tpo);

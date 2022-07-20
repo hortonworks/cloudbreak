@@ -79,7 +79,7 @@ public class FlowLogDBService implements FlowLogService {
     public FlowLog save(FlowParameters flowParameters, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
             FlowState currentState) {
         String payloadAsString = getSerializedString(payload);
-        String variablesJson = getSerializedString(variables);
+        String variablesJson = variables == null ? null : getSerializedString(variables);
         FlowLog flowLog = new FlowLog(payload.getResourceId(), flowParameters.getFlowId(), flowChanId, flowParameters.getFlowTriggerUserCrn(), key,
                 payloadAsString, ClassValue.of(payload.getClass()), variablesJson, ClassValue.of(flowType), currentState.toString());
         flowLog.setOperationType(StringUtils.isNotBlank(flowParameters.getFlowOperationType())
@@ -106,19 +106,19 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
-    public FlowLog close(Long resourceId, String flowId, boolean failed) throws TransactionExecutionException {
-        return finalize(resourceId, flowId, FlowConstants.FINISHED_STATE, failed);
+    public FlowLog close(Long resourceId, String flowId, boolean failed, Map<Object, Object> contextParams) throws TransactionExecutionException {
+        return finalize(resourceId, flowId, FlowConstants.FINISHED_STATE, failed, contextParams);
     }
 
     @Override
     public FlowLog cancel(Long resourceId, String flowId) throws TransactionExecutionException {
-        return finalize(resourceId, flowId, FlowConstants.CANCELLED_STATE, false);
+        return finalize(resourceId, flowId, FlowConstants.CANCELLED_STATE, false, null);
     }
 
     @Override
     public FlowLog terminate(Long resourceId, String flowId) throws TransactionExecutionException {
         LOGGER.info("Terminate flow [{}] for resource [{}]", flowId, resourceId);
-        FlowLog flowLog = finalize(resourceId, flowId, FlowConstants.TERMINATED_STATE, false);
+        FlowLog flowLog = finalize(resourceId, flowId, FlowConstants.TERMINATED_STATE, false, null);
         applicationFlowInformation.handleFlowFail(flowLog);
         return flowLog;
     }
@@ -127,7 +127,8 @@ public class FlowLogDBService implements FlowLogService {
         flowLogRepository.finalizeByFlowId(flowId);
     }
 
-    private FlowLog finalize(Long resourceId, String flowId, String state, boolean failed) throws TransactionExecutionException {
+    private FlowLog finalize(Long resourceId, String flowId, String state, boolean failed, Map<Object, Object> contextParams)
+            throws TransactionExecutionException {
         return transactionService.required(() -> {
             LOGGER.info("Finalize flow [{}] with state [{}] and failed [{}] for resource [{}]", flowId, state, failed, resourceId);
             flowLogRepository.finalizeByFlowId(flowId);
@@ -140,6 +141,10 @@ public class FlowLogDBService implements FlowLogService {
                 operationType = lastFlowLog.getOperationType();
             }
             FlowLog flowLog = new FlowLog(resourceId, flowId, state, Boolean.TRUE, StateStatus.SUCCESSFUL, operationType);
+            if (contextParams != null) {
+                String variablesJson = getSerializedString(contextParams);
+                flowLog.setVariables(variablesJson);
+            }
             flowLog.setCloudbreakNodeId(nodeConfig.getId());
             LOGGER.info("Persisting final FlowLog: {}", flowLog);
             return flowLogRepository.save(flowLog);

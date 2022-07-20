@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cluster.service.AbstractClusterSecurityProvider;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Service
 public class ClouderaManagerSecurityConfigProvider extends AbstractClusterSecurityProvider {
@@ -23,7 +23,7 @@ public class ClouderaManagerSecurityConfigProvider extends AbstractClusterSecuri
     }
 
     @Override
-    public String getMasterKey(Cluster cluster) {
+    public String getMasterKey(ClusterView cluster) {
         return "cmmasterpw";
     }
 }

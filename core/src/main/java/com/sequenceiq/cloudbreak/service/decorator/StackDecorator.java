@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.AvailabilityZone;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
@@ -228,25 +229,28 @@ public class StackDecorator {
         }
     }
 
-    private Set<String> getAvailabilityZoneFromEnv(InstanceGroup group, DetailedEnvironmentResponse environment) {
+    private Set<AvailabilityZone> getAvailabilityZoneFromEnv(InstanceGroup group, DetailedEnvironmentResponse environment) {
         if (environment.getNetwork() != null
                 && environment.getNetwork().getSubnetMetas() != null
                 && (group.getAvailabilityZones() == null || group.getAvailabilityZones().isEmpty())) {
-            return getAvailabilityZones(environment, group.getInstanceGroupNetwork().getAttributes());
+            return getAvailabilityZones(environment, group, group.getInstanceGroupNetwork().getAttributes());
         } else {
             return Set.of();
         }
     }
 
-    private Set<String> getAvailabilityZones(DetailedEnvironmentResponse environment, Json attributes) {
-        Set<String> azs = new HashSet<>();
+    private Set<AvailabilityZone> getAvailabilityZones(DetailedEnvironmentResponse environment, InstanceGroup group, Json attributes) {
+        Set<AvailabilityZone> azs = new HashSet<>();
         if (attributes != null) {
             List<String> subnetIds = (List<String>) attributes.getMap().getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>());
             for (String subnetId : subnetIds) {
                 for (Map.Entry<String, CloudSubnet> cloudSubnetEntry : environment.getNetwork().getSubnetMetas().entrySet()) {
                     CloudSubnet value = cloudSubnetEntry.getValue();
                     if (subnetId.equals(value.getId()) || subnetId.equals(value.getName())) {
-                        azs.add(value.getAvailabilityZone());
+                        AvailabilityZone az = new AvailabilityZone();
+                        az.setAvailabilityZone(value.getAvailabilityZone());
+                        az.setInstanceGroup(group);
+                        azs.add(az);
                         break;
                     }
                 }

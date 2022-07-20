@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -48,8 +47,8 @@ public class ClusterStopService {
         flowMessageService.fireEventAndLog(stackId, Status.STOPPED.name(), CLUSTER_STOPPED);
     }
 
-    public void handleClusterStopFailure(StackView stackView, String errorReason) {
-        clusterService.updateClusterStatusByStackId(stackView.getId(), DetailedStackStatus.STOP_FAILED, errorReason);
-        flowMessageService.fireEventAndLog(stackView.getId(), Status.STOP_FAILED.name(), CLUSTER_STOP_FAILED, errorReason);
+    public void handleClusterStopFailure(Long stackId, String errorReason) {
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.STOP_FAILED, errorReason);
+        flowMessageService.fireEventAndLog(stackId, Status.STOP_FAILED.name(), CLUSTER_STOP_FAILED, errorReason);
     }
 }

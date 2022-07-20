@@ -12,7 +12,6 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmDeregisterAgentRequest;
@@ -31,6 +30,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCc
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmTriggerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmTunnelUpdateRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ccm.UpgradeCcmTunnelUpdateResult;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Configuration
 public class UpgradeCcmActions {
@@ -173,14 +173,14 @@ public class UpgradeCcmActions {
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 UpgradeCcmFailedEvent concretePayload = (UpgradeCcmFailedEvent) payload;
                 upgradeCcmService.ccmUpgradeFailed(concretePayload.getResourceId(),
-                        Optional.ofNullable(context.getStackView().getClusterView()).map(ClusterView::getId).orElse(null),
+                        Optional.ofNullable(context.getStack()).map(StackView::getClusterId).orElse(null),
                         concretePayload.getOldTunnel(), concretePayload.getFailureOrigin());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(UpgradeCcmEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(UpgradeCcmEvent.FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

@@ -18,8 +18,9 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ClusterUpgradeTargetImageService {
@@ -32,7 +33,7 @@ public class ClusterUpgradeTargetImageService {
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private StackImageService stackImageService;
@@ -74,14 +75,15 @@ public class ClusterUpgradeTargetImageService {
     }
 
     private Component createTargetImageComponent(Long stackId, StatedImage targetImage) {
-        Stack stack = stackService.getById(stackId);
-        Image imageModel = stackImageService.getImageModelFromStatedImage(stack, getCurrentImage(stack), targetImage);
-        return new Component(ComponentType.IMAGE, TARGET_IMAGE, new Json(imageModel), stack);
+        StackView stack = stackDtoService.getStackViewById(stackId);
+        Image imageModel = stackImageService.getImageModelFromStatedImage(stack, getCurrentImage(stack.getId()), targetImage);
+        Stack stackReference = stackDtoService.getStackReferenceById(stackId);
+        return new Component(ComponentType.IMAGE, TARGET_IMAGE, new Json(imageModel), stackReference);
     }
 
-    private Image getCurrentImage(Stack stack) {
+    private Image getCurrentImage(Long stackId) {
         try {
-            return stackImageService.getCurrentImage(stack);
+            return stackImageService.getCurrentImage(stackId);
         } catch (CloudbreakImageNotFoundException e) {
             String errorMessage = "Image not found in the database for this cluster.";
             LOGGER.error(errorMessage, e);

@@ -13,6 +13,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+    import org.springframework.util.CollectionUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -36,21 +37,24 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterToClusterV4R
 import com.sequenceiq.cloudbreak.converter.v4.stacks.customdomains.StackToCustomDomainsSettingsV4Response;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.database.ExternalDatabaseToDatabaseResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.InstanceGroupToInstanceGroupV4ResponseConverter;
-import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.network.InstanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.loadbalancer.LoadBalancerToLoadBalancerResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.network.NetworkToNetworkV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.workspaces.WorkspaceToWorkspaceResourceV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 
@@ -114,21 +118,22 @@ public class StackToStackV4ResponseConverter {
     private StackAuthenticationToStackAuthenticationV4ResponseConverter stackAuthenticationToStackAuthenticationV4ResponseConverter;
 
     @Inject
-    private ExternalDatabaseToDatabaseResponseConverter externalDatabaseToDatabaseResponseConverter;
-
-    @Inject
     private RecipeToRecipeV4ResponseConverter recipeToRecipeV4ResponseConverter;
 
     @Inject
     private LoadBalancerToLoadBalancerResponseConverter loadBalancerToLoadBalancerResponseConverter;
 
     @Inject
-    private InstanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter instanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter;
+    private ExternalDatabaseToDatabaseResponseConverter externalDatabaseToDatabaseResponseConverter;
 
-    public StackV4Response convert(Stack source) {
+    @Inject
+    private HostGroupService hostGroupService;
+
+    public StackV4Response convert(StackDtoDelegate stack) {
+        StackView source = stack.getStack();
         StackV4Response response = new StackV4Response();
         try {
-            restRequestThreadLocalService.setWorkspace(source.getWorkspace());
+            restRequestThreadLocalService.setWorkspaceId(source.getWorkspaceId());
 
             Image image = imageService.getImage(source.getId());
             response.setImage(imageToStackImageV4ResponseConverter.convert(image));
@@ -137,8 +142,7 @@ public class StackToStackV4ResponseConverter {
         }
 
         response.setName(source.getName());
-        response.setAuthentication(stackAuthenticationToStackAuthenticationV4ResponseConverter
-                .convert(source.getStackAuthentication()));
+        response.setAuthentication(stackAuthenticationToStackAuthenticationV4ResponseConverter.convert(source.getStackAuthentication()));
         response.setCrn(source.getResourceCrn());
         response.setId(source.getId());
         response.setEnvironmentCrn(source.getEnvironmentCrn());
@@ -147,28 +151,27 @@ public class StackToStackV4ResponseConverter {
         response.setStatus(source.getStatus());
         response.setTerminated(source.getTerminated());
         response.setStatusReason(source.getStatusReason());
-        response.setInstanceGroups(getInstanceGroups(source));
+        response.setInstanceGroups(getInstanceGroups(stack));
         response.setTunnel(source.getTunnel());
-        response.setCluster(clusterToClusterV4ResponseConverter.convert(source.getCluster()));
-        response.setNetwork(networkToNetworkV4ResponseConverter.convert(source));
-        providerParameterCalculator.parse(new HashMap<>(source.getParameters()), response);
+        response.setCluster(clusterToClusterV4ResponseConverter.convert(stack));
+        response.setNetwork(networkToNetworkV4ResponseConverter.convert(stack));
+        providerParameterCalculator.parse(new HashMap<>(stack.getParameters()), response);
         response.setCreated(source.getCreated());
         response.setGatewayPort(source.getGatewayPort());
         response.setCustomDomains(stackToCustomDomainsSettingsV4Response.convert(source));
-        response.setWorkspace(workspaceToWorkspaceResourceV4ResponseConverter
-                .convert(source.getWorkspace()));
-        addNodeCount(source, response);
+        response.setWorkspace(workspaceToWorkspaceResourceV4ResponseConverter.convert(stack.getWorkspace()));
+        addNodeCount(response);
         convertComponentConfig(response, source);
         convertTelemetryComponent(response, source);
         response.setTags(getTags(source.getTags()));
-        response.setTimeToLive(getStackTimeToLive(source));
+        response.setTimeToLive(getStackTimeToLive(stack));
         response.setVariant(Strings.isNullOrEmpty(source.getPlatformVariant()) ? source.getCloudPlatform() : source.getPlatformVariant());
         response.setExternalDatabase(externalDatabaseToDatabaseResponseConverter
                 .convert(source.getExternalDatabaseCreationType(), source.getExternalDatabaseEngineVersion()));
-        datalakeService.addSharedServiceResponse(source, response);
+        datalakeService.addSharedServiceResponse(source.getDatalakeCrn(), response);
         filterExposedServicesByType(source.getType(), response.getCluster());
         response.setLoadBalancers(convertLoadBalancers(source.getId()));
-        if (!source.getLoadBalancers().isEmpty()) {
+        if (!CollectionUtils.isEmpty(response.getLoadBalancers())) {
             response.setEnableLoadBalancer(true);
         }
         return response;
@@ -182,12 +185,12 @@ public class StackToStackV4ResponseConverter {
         }
     }
 
-    private void addNodeCount(Stack source, StackV4Response stackJson) {
+    private void addNodeCount(StackV4Response response) {
         int nodeCount = 0;
-        for (InstanceGroup instanceGroup : source.getInstanceGroups()) {
+        for (InstanceGroupV4Response instanceGroup : response.getInstanceGroups()) {
             nodeCount += instanceGroup.getNodeCount();
         }
-        stackJson.setNodeCount(nodeCount);
+        response.setNodeCount(nodeCount);
     }
 
     private TagsV4Response getTags(Json tag) {
@@ -206,7 +209,7 @@ public class StackToStackV4ResponseConverter {
         return response;
     }
 
-    private void convertTelemetryComponent(StackV4Response response, Stack source) {
+    private void convertTelemetryComponent(StackV4Response response, StackView source) {
         TelemetryResponse telemetryResponse = null;
         try {
             Telemetry telemetry = componentConfigProviderService.getTelemetry(source.getId());
@@ -217,7 +220,7 @@ public class StackToStackV4ResponseConverter {
         response.setTelemetry(telemetryResponse);
     }
 
-    private void convertComponentConfig(StackV4Response stackV4Response, Stack source) {
+    private void convertComponentConfig(StackV4Response stackV4Response, StackView source) {
         try {
             CloudbreakDetails cloudbreakDetails = componentConfigProviderService.getCloudbreakDetails(source.getId());
             if (cloudbreakDetails != null) {
@@ -230,49 +233,32 @@ public class StackToStackV4ResponseConverter {
 
     }
 
-    private List<InstanceGroupV4Response> getInstanceGroups(Stack stack) {
+    private List<InstanceGroupV4Response> getInstanceGroups(StackDtoDelegate stack) {
         var instanceGroups = new LinkedList<InstanceGroupV4Response>();
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            var instanceGroupResponse = instanceGroupToInstanceGroupV4ResponseConverter
-                    .convert(instanceGroup);
+        for (InstanceGroupDto instanceGroupDto : stack.getInstanceGroupDtos()) {
+            InstanceGroupView instanceGroup = instanceGroupDto.getInstanceGroup();
+            InstanceGroupV4Response instanceGroupResponse = instanceGroupToInstanceGroupV4ResponseConverter
+                    .convert(instanceGroup, stack.getAvailabilityZonesByInstanceGroup(instanceGroup.getId()), instanceGroupDto.getInstanceMetadataViews());
             collectInformationsFromActualHostgroup(stack.getCluster(), instanceGroup, instanceGroupResponse);
+            instanceGroupResponse.setRecoveryMode(hostGroupService.getRecoveryMode(stack.getCluster(), instanceGroup.getGroupName()));
             instanceGroups.add(instanceGroupResponse);
         }
         return instanceGroups;
     }
 
-    private void collectInformationsFromActualHostgroup(Cluster cluster, InstanceGroup instanceGroup, InstanceGroupV4Response instanceGroupResponse) {
-        if (cluster != null && cluster.getHostGroups() != null) {
-            cluster.getHostGroups().stream()
-                    .filter(hostGroup -> hostGroup.getName().equals(instanceGroup.getGroupName()))
-                    .findFirst()
-                    .ifPresent(hostGroup -> {
-                        instanceGroupResponse.setRecipes(
-                                hostGroup.getRecipes().stream()
-                                        .map(e -> recipeToRecipeV4ResponseConverter.convert(e))
-                                        .collect(Collectors.toList())
-                        );
-                        instanceGroupResponse.setRecoveryMode(hostGroup.getRecoveryMode());
-                        instanceGroupResponse.setAvailabilityZones(instanceGroup.getAvailabilityZones());
-                        instanceGroupResponse.setNetwork(instanceGroupNetworkToInstanceGroupNetworkV4ResponseConverter
-                                .convert(instanceGroup.getInstanceGroupNetwork()));
-                        instanceGroupResponse.getMetadata().stream()
-                                .filter(md -> md.getDiscoveryFQDN() != null)
-                                .forEach(md -> {
-                                    instanceGroup.getInstanceMetaDataSet().stream()
-                                            .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null
-                                                    && instanceMetaData.getDiscoveryFQDN().equals(md.getDiscoveryFQDN()))
-                                            .findFirst()
-                                            .ifPresent(instanceMetaData -> {
-                                                md.setState(instanceMetaData.getInstanceStatus().getAsHostState());
-                                                md.setStatusReason(instanceMetaData.getStatusReason());
-                                            });
-                                });
-                    });
+    private void collectInformationsFromActualHostgroup(ClusterView cluster, InstanceGroupView instanceGroup, InstanceGroupV4Response instanceGroupResponse) {
+        if (cluster != null) {
+            List<Recipe> recipes = hostGroupService.getRecipesForHostGroup(cluster.getId(), instanceGroup.getGroupName());
+            instanceGroupResponse.setRecipes(
+                    recipes.stream()
+                            .map(e -> recipeToRecipeV4ResponseConverter.convert(e))
+                            .collect(Collectors.toList())
+            );
         }
+
     }
 
-    private Long getStackTimeToLive(Stack stack) {
+    private Long getStackTimeToLive(StackDtoDelegate stack) {
         Map<String, String> params = stack.getParameters();
         Optional<String> optional = Optional.ofNullable(params.get(PlatformParametersConsts.TTL_MILLIS));
         if (optional.isPresent()) {

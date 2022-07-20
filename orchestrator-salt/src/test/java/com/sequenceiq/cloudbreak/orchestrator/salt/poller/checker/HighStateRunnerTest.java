@@ -1,37 +1,42 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
-import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(SaltStates.class)
-public class HighStateRunnerTest {
+@ExtendWith(MockitoExtension.class)
+class HighStateRunnerTest {
+
+    @Mock
+    private SaltStateService saltStateService;
+
+    @Mock
+    private SaltConnector saltConnector;
 
     private Set<String> targets;
 
     private Set<Node> allNode;
 
     @Test
-    public void submit() {
+    void submit() {
         String target1 = "10.0.0.1";
         String target2 = "10.0.0.2";
         targets = new HashSet<>();
@@ -42,19 +47,15 @@ public class HighStateRunnerTest {
         allNode.add(new Node("10.0.0.2", "5.5.5.2", "10-0-0-2.example.com", "hg"));
         allNode.add(new Node("10.0.0.3", "5.5.5.3", "10-0-0-3.example.com", "hg"));
 
-        HighStateRunner highStateRunner = new HighStateRunner(targets, allNode);
+        HighStateRunner highStateRunner = new HighStateRunner(saltStateService, targets, allNode);
 
-        SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
-
-        PowerMockito.mockStatic(SaltStates.class);
         String jobId = "1";
-        PowerMockito.when(SaltStates.highstate(any(), any())).thenReturn(jobId);
+        when(saltStateService.highstate(any(), any())).thenReturn(jobId);
 
         String jid = highStateRunner.submit(saltConnector);
         assertEquals(jobId, jid);
-        PowerMockito.verifyStatic(SaltStates.class);
         ArgumentCaptor<Target<String>> targetCaptor = ArgumentCaptor.forClass(Target.class);
-        SaltStates.highstate(eq(saltConnector), targetCaptor.capture());
+        verify(saltStateService).highstate(eq(saltConnector), targetCaptor.capture());
         String order1 = target1 + "," + target2;
         String order2 = target2 + "," + target1;
         String actual = targetCaptor.getValue().getTarget();
@@ -62,8 +63,8 @@ public class HighStateRunnerTest {
     }
 
     @Test
-    public void stateType() {
-        assertEquals(StateType.HIGH, new HighStateRunner(targets, allNode).stateType());
+    void stateType() {
+        assertEquals(StateType.HIGH, new HighStateRunner(saltStateService, targets, allNode).stateType());
     }
 
 }

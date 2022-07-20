@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterUpgradeTargetImageServiceTest {
@@ -49,7 +49,7 @@ public class ClusterUpgradeTargetImageServiceTest {
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private StackImageService stackImageService;
@@ -69,15 +69,17 @@ public class ClusterUpgradeTargetImageServiceTest {
     @Test
     void testSaveImageShouldSaveTheTargetImageWhenIsNotPresent() throws IOException, CloudbreakImageNotFoundException {
         Image targetModelImage = createTargetModelImage(IMAGE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
+        when(stack.getId()).thenReturn(STACK_ID);
         when(stackImageService.findImageComponentByName(STACK_ID, TARGET_IMAGE)).thenReturn(Optional.empty());
-        when(stackService.getById(STACK_ID)).thenReturn(stack);
-        when(stackImageService.getCurrentImage(stack)).thenReturn(currentImage);
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
+        when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(currentImage);
         when(stackImageService.getImageModelFromStatedImage(stack, currentImage, targetStatedImage)).thenReturn(targetModelImage);
+        when(stackDtoService.getStackReferenceById(STACK_ID)).thenReturn(stack);
 
         underTest.saveImage(STACK_ID, targetStatedImage);
 
         verify(stackImageService).findImageComponentByName(STACK_ID, TARGET_IMAGE);
-        verify(stackService).getById(STACK_ID);
+        verify(stackDtoService).getStackViewById(STACK_ID);
         ArgumentCaptor<Component> targetComponentCaptor = ArgumentCaptor.forClass(Component.class);
         verify(componentConfigProviderService).store(targetComponentCaptor.capture());
         Component targetComponent = targetComponentCaptor.getValue();
@@ -93,17 +95,19 @@ public class ClusterUpgradeTargetImageServiceTest {
         Image targetModelImage = createTargetModelImage(IMAGE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
         Image oldTargetImage = createTargetModelImage("old-image-id", IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
         Optional<Component> existingTargetImageComponent = createExistingTargetImageComponent(oldTargetImage);
+        when(stack.getId()).thenReturn(STACK_ID);
         when(imageConverter.convertJsonToImage(existingTargetImageComponent.get().getAttributes())).thenReturn(oldTargetImage);
         when(stackImageService.findImageComponentByName(STACK_ID, TARGET_IMAGE)).thenReturn(existingTargetImageComponent);
-        when(stackService.getById(STACK_ID)).thenReturn(stack);
-        when(stackImageService.getCurrentImage(stack)).thenReturn(currentImage);
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
+        when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(currentImage);
         when(stackImageService.getImageModelFromStatedImage(stack, currentImage, targetImage)).thenReturn(targetModelImage);
+        when(stackDtoService.getStackReferenceById(STACK_ID)).thenReturn(stack);
 
         underTest.saveImage(STACK_ID, targetImage);
 
-        verify(stackImageService).getCurrentImage(stack);
+        verify(stackImageService).getCurrentImage(STACK_ID);
         verify(stackImageService).findImageComponentByName(STACK_ID, TARGET_IMAGE);
-        verify(stackService).getById(STACK_ID);
+        verify(stackDtoService).getStackViewById(STACK_ID);
         ArgumentCaptor<Component> targetComponentCaptor = ArgumentCaptor.forClass(Component.class);
         verify(componentConfigProviderService).store(targetComponentCaptor.capture());
         Component targetComponent = targetComponentCaptor.getValue();
@@ -120,17 +124,19 @@ public class ClusterUpgradeTargetImageServiceTest {
         Image targetModelImage = createTargetModelImage(IMAGE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
         Image oldTargetImage = createTargetModelImage(IMAGE_ID, "old-image-catalog-url", IMAGE_CATALOG_NAME);
         Optional<Component> existingTargetImageComponent = createExistingTargetImageComponent(oldTargetImage);
+        when(stack.getId()).thenReturn(STACK_ID);
         when(imageConverter.convertJsonToImage(existingTargetImageComponent.get().getAttributes())).thenReturn(oldTargetImage);
         when(stackImageService.findImageComponentByName(STACK_ID, TARGET_IMAGE)).thenReturn(existingTargetImageComponent);
-        when(stackService.getById(STACK_ID)).thenReturn(stack);
-        when(stackImageService.getCurrentImage(stack)).thenReturn(currentImage);
+        when(stackDtoService.getStackViewById(STACK_ID)).thenReturn(stack);
+        when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(currentImage);
         when(stackImageService.getImageModelFromStatedImage(stack, currentImage, targetImage)).thenReturn(targetModelImage);
+        when(stackDtoService.getStackReferenceById(STACK_ID)).thenReturn(stack);
 
         underTest.saveImage(STACK_ID, targetImage);
 
-        verify(stackImageService).getCurrentImage(stack);
+        verify(stackImageService).getCurrentImage(STACK_ID);
         verify(stackImageService).findImageComponentByName(STACK_ID, TARGET_IMAGE);
-        verify(stackService).getById(STACK_ID);
+        verify(stackDtoService).getStackViewById(STACK_ID);
         ArgumentCaptor<Component> targetComponentCaptor = ArgumentCaptor.forClass(Component.class);
         verify(componentConfigProviderService).store(targetComponentCaptor.capture());
         Component targetComponent = targetComponentCaptor.getValue();
@@ -152,7 +158,7 @@ public class ClusterUpgradeTargetImageServiceTest {
 
         verify(stackImageService).findImageComponentByName(STACK_ID, TARGET_IMAGE);
         verify(imageConverter).convertJsonToImage(existingTargetImageComponent.get().getAttributes());
-        verifyNoInteractions(stackService);
+        verifyNoInteractions(stackDtoService);
         verifyNoInteractions(componentConfigProviderService);
     }
 

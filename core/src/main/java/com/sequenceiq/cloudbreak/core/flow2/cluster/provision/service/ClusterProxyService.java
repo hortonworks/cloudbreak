@@ -37,12 +37,13 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultConfigException;
 import com.sequenceiq.cloudbreak.service.secret.vault.VaultSecret;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.Tunnel;
 
 @Component
@@ -98,11 +99,11 @@ public class ClusterProxyService {
         return clusterProxyEnablementService.isClusterProxyApplicable(cloudPlatform) && tunnel.useClusterProxy();
     }
 
-    public boolean useClusterProxyForCommunication(Stack stack) {
-        return useClusterProxyForCommunication(stack.getTunnel(), stack.cloudPlatform());
+    public boolean useClusterProxyForCommunication(StackView stack) {
+        return useClusterProxyForCommunication(stack.getTunnel(), stack.getCloudPlatform());
     }
 
-    public boolean isCreateConfigForClusterProxy(Stack stack) {
+    public boolean isCreateConfigForClusterProxy(StackView stack) {
         return useClusterProxyForCommunication(stack) && stack.isClusterProxyRegistered();
     }
 
@@ -163,13 +164,13 @@ public class ClusterProxyService {
     }
 
     private List<ClusterServiceConfig> getClusterServiceConfigsForGWs(Stack stack, boolean preferPrivateIp) {
-        List<InstanceMetaData> gatewayInstanceMetadatas = stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata();
+        List<InstanceMetadataView> gatewayInstanceMetadatas = stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata();
         return gatewayInstanceMetadatas.stream()
                 .map(gatewayInstanceMetadata -> createClusterServiceConfigFromGWMetadata(stack, gatewayInstanceMetadata, preferPrivateIp))
                 .collect(Collectors.toList());
     }
 
-    private ClusterServiceConfig createClusterServiceConfigFromGWMetadata(Stack stack, InstanceMetaData gatewayInstanceMetadata, boolean preferPrivateIp) {
+    private ClusterServiceConfig createClusterServiceConfigFromGWMetadata(Stack stack, InstanceMetadataView gatewayInstanceMetadata, boolean preferPrivateIp) {
         String gatewayIp = gatewayInstanceMetadata.getIpWrapper(preferPrivateIp);
         String internalAdminUrl = String.format("https://%s:%d", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort());
         return cmServiceConfig(stack, clientCertificates(stack),
@@ -210,10 +211,10 @@ public class ClusterProxyService {
         Cluster cluster = stack.getCluster();
 
         String cloudbreakUser = cluster.getCloudbreakAmbariUser();
-        String cloudbreakPasswordVaultPath = vaultPath(cluster.getCloudbreakAmbariPasswordSecret(), false);
+        String cloudbreakPasswordVaultPath = vaultPath(cluster.getCloudbreakAmbariPasswordSecretPath(), false);
 
         String dpUser = cluster.getDpAmbariUser();
-        String dpPasswordVaultPath = vaultPath(cluster.getDpAmbariPasswordSecret(), false);
+        String dpPasswordVaultPath = vaultPath(cluster.getDpAmbariPasswordSecretPath(), false);
 
         List<ClusterServiceCredential> credentials = asList(new ClusterServiceCredential(cloudbreakUser, cloudbreakPasswordVaultPath),
                 new ClusterServiceCredential(dpUser, dpPasswordVaultPath, true));

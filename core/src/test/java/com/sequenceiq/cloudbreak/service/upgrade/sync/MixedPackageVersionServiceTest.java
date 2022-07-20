@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -28,7 +29,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
-import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmParcelSyncOperationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmRepoSyncOperationResult;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOperationResult;
@@ -216,7 +217,7 @@ public class MixedPackageVersionServiceTest {
 
     private CmParcelSyncOperationResult createCmParcelSyncResult(Map<String, String> parcelVersionsByName) {
         return new CmParcelSyncOperationResult(parcelVersionsByName.entrySet().stream()
-                .map(parcel -> new ParcelInfo(parcel.getKey(), parcel.getValue()))
+                .map(parcel -> new ParcelInfo(parcel.getKey(), parcel.getValue(), ParcelStatus.ACTIVATED))
                 .collect(Collectors.toCollection(LinkedHashSet::new)),
                 Collections.emptySet());
     }

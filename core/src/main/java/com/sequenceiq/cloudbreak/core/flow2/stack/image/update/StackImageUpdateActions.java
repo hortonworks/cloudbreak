@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -102,12 +101,11 @@ public class StackImageUpdateActions {
         return new AbstractStackImageUpdateAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-                getStackCreationService().prepareImage(context.getStack(), variables);
+                getStackCreationService().prepareImage(context.getStack().getId(), variables);
                 try {
-                    CloudStack cloudStack = getCloudStackConverter().convert(context.getStack());
                     Image image = getImageService().getImage(context.getCloudContext().getId());
                     PrepareImageRequest<Selectable> request =
-                            new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, image);
+                            new PrepareImageRequest<>(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(), image);
                     sendEvent(context, request);
                 } catch (CloudbreakImageNotFoundException e) {
                     throw new CloudbreakServiceException(e);
@@ -121,12 +119,11 @@ public class StackImageUpdateActions {
         return new AbstractStackImageUpdateAction<>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-                CloudStack cloudStack = getCloudStackConverter().convert(context.getStack());
                 Collection<Resource> resources = getResourceService().getAllByStackId(context.getStack().getId());
                 List<CloudResource> cloudResources =
                         resources.stream().map(resource -> getResourceToCloudResourceConverter().convert(resource)).collect(Collectors.toList());
                 UpdateImageRequest<Selectable> request =
-                        new UpdateImageRequest<>(context.getCloudContext(), context.getCloudCredential(), cloudStack, cloudResources);
+                        new UpdateImageRequest<>(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(), cloudResources);
                 sendEvent(context, request);
             }
         };
@@ -157,10 +154,10 @@ public class StackImageUpdateActions {
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Error during Stack image update flow:", payload.getException());
                 String errorMessage = payload.getException().getMessage();
-                flowMessageService.fireEventAndLog(context.getStackView().getId(), Status.UPDATE_FAILED.name(), STACK_IMAGE_UPDATE_FAILED, errorMessage);
-                stackUpdater.updateStackStatus(context.getStackView().getId(), DetailedStackStatus.STACK_IMAGE_UPDATE_FAILED, errorMessage);
+                flowMessageService.fireEventAndLog(context.getStackId(), Status.UPDATE_FAILED.name(), STACK_IMAGE_UPDATE_FAILED, errorMessage);
+                stackUpdater.updateStackStatus(context.getStackId(), DetailedStackStatus.STACK_IMAGE_UPDATE_FAILED, errorMessage);
                 sendEvent(context, new StackEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT.event(),
-                        context.getStackView().getId()));
+                        context.getStackId()));
             }
         };
     }

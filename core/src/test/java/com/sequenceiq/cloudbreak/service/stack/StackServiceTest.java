@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.stack.AutoscaleStackToAutoscaleStackResponseJsonConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.StackToStackV4RequestConverter;
@@ -63,8 +62,8 @@ import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.projection.StackImageView;
-import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -428,49 +427,45 @@ public class StackServiceTest {
 
     @Test
     public void testGetComputeMonitoringFlagWhenEnabled() {
-        when(componentConfigProviderService.getComponentsByStackId(any())).thenReturn(Set.of(getTelemetryComponent(true, true)));
-        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(new Stack());
+        when(componentConfigProviderService.getTelemetry(any())).thenReturn(getTelemetry(true, true));
+        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
         assertTrue(computeMonitoringEnabled.isPresent());
         assertTrue(computeMonitoringEnabled.get());
     }
 
     @Test
     public void testGetComputeMonitoringFlagWhenDisabled() {
-        when(componentConfigProviderService.getComponentsByStackId(any())).thenReturn(Set.of(getTelemetryComponent(true, false)));
-        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(new Stack());
+        when(componentConfigProviderService.getTelemetry(any())).thenReturn(getTelemetry(true, false));
+        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
         assertTrue(computeMonitoringEnabled.isPresent());
         assertFalse(computeMonitoringEnabled.get());
     }
 
     @Test
     public void testGetComputeMonitoringFlagWhenTelemetryNull() {
-        when(componentConfigProviderService.getComponentsByStackId(any())).thenReturn(Set.of(getTelemetryComponent(false, false)));
-        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(new Stack());
+        when(componentConfigProviderService.getTelemetry(any())).thenReturn(getTelemetry(false, false));
+        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
         assertFalse(computeMonitoringEnabled.isPresent());
     }
 
     @Test
     public void testGetComputeMonitoringFlagWhenExceptionThrown() {
-        when(componentConfigProviderService.getComponentsByStackId(any())).thenThrow(new InternalServerErrorException("something"));
-        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(new Stack());
+        when(componentConfigProviderService.getTelemetry(any())).thenThrow(new InternalServerErrorException("something"));
+        Optional<Boolean> computeMonitoringEnabled = underTest.computeMonitoringEnabled(mock(StackDto.class));
         assertFalse(computeMonitoringEnabled.isPresent());
     }
 
-    private Component getTelemetryComponent(boolean telemetryPresent, boolean monitoringEnabled) {
-        Component component = new Component();
-        component.setStack(new Stack());
+    private Telemetry getTelemetry(boolean telemetryPresent, boolean monitoringEnabled) {
+        Telemetry telemetry = null;
         if (telemetryPresent) {
-            component.setComponentType(ComponentType.TELEMETRY);
-            component.setName(ComponentType.TELEMETRY.name());
-            Telemetry telemetry = new Telemetry();
+            telemetry = new Telemetry();
             if (monitoringEnabled) {
                 Monitoring monitoring = new Monitoring();
                 monitoring.setRemoteWriteUrl("something");
                 telemetry.setMonitoring(monitoring);
             }
-            component.setAttributes(Json.silent(telemetry));
         }
-        return component;
+        return telemetry;
     }
 
     private Set<StackIdView> findClusterConnectedToDatalake(

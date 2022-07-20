@@ -20,11 +20,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.Gc
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.TargetGroupResponse;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
-import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroupConfigDbWrapper;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroup;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.TargetGroupConfigDbWrapper;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsLoadBalancerConfigDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupArnsDb;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.aws.AwsTargetGroupConfigDb;
@@ -37,6 +36,7 @@ import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
+import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 
 @Component
 public class LoadBalancerToLoadBalancerResponseConverter {
@@ -105,7 +105,7 @@ public class LoadBalancerToLoadBalancerResponseConverter {
     }
 
     public List<TargetGroupResponse> convertTargetGroup(TargetGroup targetGroup) {
-        Set<InstanceGroup> instanceGroups = instanceGroupService.findByTargetGroupId(targetGroup.getId());
+        List<InstanceGroupView> instanceGroups = instanceGroupService.findByTargetGroupId(targetGroup.getId());
         Set<String> instanceIds = getInstanceMetadataForGroups(instanceGroups).stream()
             .map(InstanceMetaData::getInstanceId)
             .collect(Collectors.toSet());
@@ -167,7 +167,7 @@ public class LoadBalancerToLoadBalancerResponseConverter {
 
     }
 
-    private List<InstanceMetaData> getInstanceMetadataForGroups(Set<InstanceGroup> instanceGroups) {
+    private List<InstanceMetaData> getInstanceMetadataForGroups(List<InstanceGroupView> instanceGroups) {
         return instanceGroups.stream()
             .map(ig -> instanceMetaDataService.findAliveInstancesInInstanceGroup(ig.getId()))
             .flatMap(List::stream)

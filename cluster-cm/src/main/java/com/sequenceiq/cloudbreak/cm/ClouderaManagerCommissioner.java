@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 
 @Component
@@ -51,7 +51,7 @@ public class ClouderaManagerCommissioner {
      * @param client api client to communicate with ClouderaManager
      * @return the hostnames for hosts which were successfully recommissioned
      */
-    public Set<String> recommissionNodes(Stack stack, Map<String, InstanceMetaData> hostsToRecommission, ApiClient client) {
+    public Set<String> recommissionNodes(StackDtoDelegate stack, Map<String, InstanceMetaData> hostsToRecommission, ApiClient client) {
 
         // TODO CB-15132: Check status of target nodes / previously issued commands - in case of pod restarts etc.
         //  Ideally without needing to persist anything (commandId etc)
@@ -101,7 +101,7 @@ public class ClouderaManagerCommissioner {
      * @param client api client to communicate with ClouderaManager
      * @throws CloudbreakServiceException when it fails to recommission due to timeout or cancellation
      */
-    public void recommissionHosts(Stack stack, ApiClient client, List<String> hostsToRecommission) {
+    public void recommissionHosts(StackDtoDelegate stack, ApiClient client, List<String> hostsToRecommission) {
         ClouderaManagerResourceApi apiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
 
         ApiHostNameList body = new ApiHostNameList().items(hostsToRecommission);
@@ -133,7 +133,7 @@ public class ClouderaManagerCommissioner {
         }
     }
 
-    public Map<String, InstanceMetaData> collectHostsToCommission(Stack stack, HostGroup hostGroup, Set<String> hostNames, ApiClient client) {
+    public Map<String, InstanceMetaData> collectHostsToCommission(StackDtoDelegate stack, HostGroup hostGroup, Set<String> hostNames, ApiClient client) {
         Set<InstanceMetaData> hostsInHostGroup = hostGroup.getInstanceGroup().getNotTerminatedAndNotZombieInstanceMetaDataSet();
         Map<String, InstanceMetaData> hostsToCommission = hostsInHostGroup.stream()
                 .filter(hostMetadata -> hostNames.contains(hostMetadata.getDiscoveryFQDN()))

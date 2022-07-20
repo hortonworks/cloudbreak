@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -16,11 +18,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @ExtendWith(MockitoExtension.class)
 class ComponentLocatorServiceTest {
@@ -83,58 +87,50 @@ class ComponentLocatorServiceTest {
     @Test
     void testGetComponentLocation() {
 
-        HostGroup master1 = new HostGroup();
-        master1.setName(MASTER_1);
+        StackDto stackDto = mock(StackDto.class);
+
         InstanceGroup ig1 = new InstanceGroup();
+        ig1.setGroupName(MASTER_1);
         InstanceMetaData imd1 = new InstanceMetaData();
         imd1.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         imd1.setDiscoveryFQDN(MASTER1_FQDN);
-        ig1.setInstanceMetaData(Set.of(imd1));
-        master1.setInstanceGroup(ig1);
+        InstanceGroupDto master1 = new InstanceGroupDto(ig1, List.of(imd1));
 
-        HostGroup master2 = new HostGroup();
-        master2.setName(MASTER_2);
         InstanceGroup ig2 = new InstanceGroup();
+        ig2.setGroupName(MASTER_2);
         InstanceMetaData imd2 = new InstanceMetaData();
         imd2.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         imd2.setDiscoveryFQDN(MASTER2_FQDN);
-        ig2.setInstanceMetaData(Set.of(imd2));
-        master2.setInstanceGroup(ig2);
+        InstanceGroupDto master2 = new InstanceGroupDto(ig2, List.of(imd2));
 
-        HostGroup master3 = new HostGroup();
-        master3.setName(MASTER_3);
         InstanceGroup ig3 = new InstanceGroup();
+        ig3.setGroupName(MASTER_3);
         InstanceMetaData imd3 = new InstanceMetaData();
         imd3.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         imd3.setDiscoveryFQDN(MASTER3_FQDN);
-        ig3.setInstanceMetaData(Set.of(imd3));
-        master3.setInstanceGroup(ig3);
+        InstanceGroupDto master3 = new InstanceGroupDto(ig3, List.of(imd3));
 
-        HostGroup executor = new HostGroup();
-        executor.setName(EXECUTOR);
         InstanceGroup ig4 = new InstanceGroup();
-        Set<InstanceMetaData> imd4 = EXECUTOR_FQDNS.stream().map(fqdn -> {
+        ig4.setGroupName(EXECUTOR);
+        List<InstanceMetadataView> imd4 = EXECUTOR_FQDNS.stream().map(fqdn -> {
             InstanceMetaData imd = new InstanceMetaData();
             imd.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
             imd.setDiscoveryFQDN(fqdn);
             return imd;
-        }).collect(Collectors.toSet());
-        ig4.setInstanceMetaData(imd4);
-        executor.setInstanceGroup(ig4);
+        }).collect(Collectors.toList());
+        InstanceGroupDto executor = new InstanceGroupDto(ig4, imd4);
 
-        HostGroup coordinator = new HostGroup();
-        coordinator.setName(COORDINATOR);
         InstanceGroup ig5 = new InstanceGroup();
-        Set<InstanceMetaData> imd5 = COORDINATOR_FQDNS.stream().map(fqdn -> {
+        ig5.setGroupName(COORDINATOR);
+        List<InstanceMetadataView> imd5 = COORDINATOR_FQDNS.stream().map(fqdn -> {
             InstanceMetaData imd = new InstanceMetaData();
             imd.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
             imd.setDiscoveryFQDN(fqdn);
             return imd;
-        }).collect(Collectors.toSet());
-        ig5.setInstanceMetaData(imd5);
-        coordinator.setInstanceGroup(ig5);
+        }).collect(Collectors.toList());
+        InstanceGroupDto coordinator = new InstanceGroupDto(ig5, imd5);
 
-        Set<HostGroup> hostGroups = new LinkedHashSet<>(List.of(master1, master2, master3, executor, coordinator));
+        List<InstanceGroupDto> instanceGroupDtos = new ArrayList<>(List.of(master1, master2, master3, executor, coordinator));
 
         when(blueprintTextProcessor.getComponentsInHostGroup(MASTER_1)).thenReturn(MASTER1_COMPONENTS);
         when(blueprintTextProcessor.getComponentsInHostGroup(MASTER_2)).thenReturn(MASTER2_COMPONENTS);
@@ -142,9 +138,9 @@ class ComponentLocatorServiceTest {
         when(blueprintTextProcessor.getComponentsInHostGroup(EXECUTOR)).thenReturn(EXECUTOR_COMPONENTS);
         when(blueprintTextProcessor.getComponentsInHostGroup(COORDINATOR)).thenReturn(COORDINATOR_COMPONENTS);
 
-        when(hostGroupService.getByCluster(CLUSTER_ID)).thenReturn(hostGroups);
+        when(stackDto.getInstanceGroupDtos()).thenReturn(instanceGroupDtos);
 
-        Map<String, List<String>> result = underTest.getComponentLocation(CLUSTER_ID, blueprintTextProcessor, COMPONENT_NAMES);
+        Map<String, List<String>> result = underTest.getComponentLocation(stackDto, blueprintTextProcessor, COMPONENT_NAMES);
 
         assertEquals(1, result.get(NAMENODE).size());
         assertEquals(MASTER1_FQDN, result.get(NAMENODE).get(0));

@@ -148,6 +148,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         testContext
                 .given(SdxInternalTestDto.class)
                     .withCloudStorage(getCloudStorageRequest(testContext))
+                    .withEnableMultiAz()
                 .when(sdxTestClient.createInternal())
                 .validate();
     }
@@ -169,6 +170,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .given(SdxInternalTestDto.class)
                     .withDatabase(database)
                     .withCloudStorage(getCloudStorageRequest(testContext))
+                    .withEnableMultiAz()
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
@@ -322,6 +324,15 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .init(BlueprintTestDto.class)
                 .when(blueprintTestClient.listV4())
                 .validate();
+    }
+
+    protected void createDatahubInEnvironment(TestContext testContext, String environmentName) {
+        testContext
+                .given(DistroXTestDto.class)
+                .withEnvironmentName(environmentName)
+                .when(distroXTestClient.create())
+                .validate();
+        waitForDefaultDatahubCreation(testContext);
     }
 
     protected SdxCloudStorageRequest getCloudStorageRequest(TestContext testContext) {

@@ -9,16 +9,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.StackPreTerminationSuccess;
 import com.sequenceiq.cloudbreak.service.cluster.flow.PreTerminationStateExecutor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.cluster.flow.telemetry.TelemetryAgentService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -34,7 +34,7 @@ public class StackPreTerminationHandler implements EventHandler<StackPreTerminat
     private EventBus eventBus;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private RecipeEngine recipeEngine;
@@ -51,20 +51,20 @@ public class StackPreTerminationHandler implements EventHandler<StackPreTerminat
     @Override
     public void accept(Event<StackPreTerminationRequest> requestEvent) {
         StackPreTerminationRequest request = requestEvent.getData();
-        Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
+        StackDto stackDto = stackDtoService.getById(request.getResourceId());
         try {
-            Cluster cluster = stack.getCluster();
+            ClusterView cluster = stackDto.getCluster();
             if (cluster != null) {
                 Set<HostGroup> hostGroupsWithRecipes = hostGroupService.getByClusterWithRecipes(cluster.getId());
-                telemetryAgentService.stopTelemetryAgent(stack);
-                recipeEngine.executePreTerminationRecipes(stack, hostGroupsWithRecipes, request.isForced());
-                preTerminationStateExecutor.runPreTerminationTasks(stack);
+                telemetryAgentService.stopTelemetryAgent(stackDto);
+                recipeEngine.executePreTerminationRecipes(stackDto, hostGroupsWithRecipes, request.isForced());
+                preTerminationStateExecutor.runPreTerminationTasks(stackDto);
             }
         } catch (Exception ex) {
             LOGGER.info("Pre-termination failed: {}", ex.getMessage(), ex);
         }
 
-        Selectable result = new StackPreTerminationSuccess(stack.getId());
+        Selectable result = new StackPreTerminationSuccess(stackDto.getStack().getId());
         eventBus.notify(result.selector(), new Event<>(requestEvent.getHeaders(), result));
     }
 

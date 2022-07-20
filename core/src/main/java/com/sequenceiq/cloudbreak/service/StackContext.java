@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.service;
 
 import com.sequenceiq.cloudbreak.cluster.service.StackAware;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 public abstract class StackContext implements StackAware {
 
-    private final Stack stack;
+    private final StackDtoDelegate stack;
 
-    protected StackContext(Stack stack) {
+    protected StackContext(StackDtoDelegate stack) {
         this.stack = stack;
     }
 
-    public Stack getStack() {
+    public StackDtoDelegate getStack() {
         return stack;
     }
 }

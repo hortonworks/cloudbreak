@@ -42,4 +42,12 @@ public class ResourceService {
     public Optional<Resource> findByEnvironmentIdAndType(Long environmentId, ResourceType resourceType) {
         return repository.findByEnvironmentIdAndType(environmentId, resourceType);
     }
+
+    public boolean existsByResourceReferenceAndType(String reference, ResourceType type) {
+        return repository.existsByResourceReferenceAndType(reference, type);
+    }
+
+    public void deleteByReferenceAndType(String reference, ResourceType type) {
+        repository.deleteByReferenceAndType(reference, type);
+    }
 }

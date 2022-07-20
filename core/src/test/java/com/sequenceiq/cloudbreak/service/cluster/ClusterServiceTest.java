@@ -20,22 +20,23 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -50,11 +51,14 @@ import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.CertExpirationState;
 
 @ExtendWith(MockitoExtension.class)
@@ -73,7 +77,7 @@ class ClusterServiceTest {
     private static final String RANGER_RAZ = "RANGER_RAZ";
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private ClusterApiConnectors clusterApiConnectors;
@@ -92,9 +96,6 @@ class ClusterServiceTest {
 
     @Mock
     private RuntimeVersionService runtimeVersionService;
-
-    @Captor
-    private ArgumentCaptor<Iterable<InstanceMetaData>> payloadArgumentCaptor;
 
     @InjectMocks
     private ClusterService underTest;
@@ -127,37 +128,33 @@ class ClusterServiceTest {
 
     static Object[][] updateClusterMetadataScenarios() {
         return new Object[][]{
-                {"CM returns HEALTHY", HEALTHY, InstanceStatus.SERVICES_HEALTHY, ""},
-                {"CM returns UNHEALTHY", UNHEALTHY, InstanceStatus.SERVICES_UNHEALTHY, STATUS_REASON_SERVER},
-                {"CM returns no data for the host", null, InstanceStatus.SERVICES_RUNNING, STATUS_REASON_ORIGINAL},
+                {"CM returns HEALTHY", HEALTHY, InstanceStatus.SERVICES_HEALTHY, "", 1},
+                {"CM returns UNHEALTHY", UNHEALTHY, InstanceStatus.SERVICES_UNHEALTHY, STATUS_REASON_SERVER, 1},
+                {"CM returns no data for the host", null, InstanceStatus.SERVICES_RUNNING, STATUS_REASON_ORIGINAL, 0},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("updateClusterMetadataScenarios")
     public void testUpdateClusterMetadataWhenCmReachable(
-            String name, HealthCheckResult healthCheckResult, InstanceStatus expectedInstanceStatus, String expectedStatusReason)
-            throws TransactionService.TransactionExecutionException {
-        when(transactionService.required(any(Supplier.class))).thenAnswer(ans -> ((Supplier) ans.getArgument(0)).get());
+            String name, HealthCheckResult healthCheckResult, InstanceStatus expectedInstanceStatus, String expectedStatusReason, int expectedCount) {
         when(runtimeVersionService.getRuntimeVersion(anyLong())).thenReturn(Optional.of("7.2.11"));
-        Stack stack = setupStack(STACK_ID);
+        StackDto stack = setupStack(STACK_ID);
         setupClusterApi(stack, healthCheckResult, expectedStatusReason);
         setupInstanceMetadata(stack);
+        ArgumentCaptor<InstanceMetadataView> captor = ArgumentCaptor.forClass(InstanceMetadataView.class);
 
         underTest.updateClusterMetadata(STACK_ID);
 
-        verify(instanceMetaDataService).saveAll(payloadArgumentCaptor.capture());
-        payloadArgumentCaptor.getValue().forEach(imd -> {
-            if (FQDN1.equals(imd.getDiscoveryFQDN())) {
-                assertEquals(expectedInstanceStatus, imd.getInstanceStatus());
-                assertEquals(expectedStatusReason, imd.getStatusReason());
-            }
-        });
+        verify(instanceMetaDataService, times(expectedCount)).updateInstanceStatus(captor.capture(), eq(expectedInstanceStatus), eq(expectedStatusReason));
+        if (expectedCount > 0) {
+            Assertions.assertEquals(FQDN1, captor.getValue().getDiscoveryFQDN());
+        }
     }
 
     @Test
     void testIsRangerRazEnabledOnClusterReturnsTrueWhenCmIsRunning() {
-        Stack stack = setupStack(STACK_ID);
+        StackDto stack = setupStack(STACK_ID);
         ClusterApi clusterApi = mock(ClusterApi.class);
         ClusterStatusService clusterStatusService = mock(ClusterStatusService.class);
         ClusterModificationService clusterModificationService = mock(ClusterModificationService.class);
@@ -172,7 +169,7 @@ class ClusterServiceTest {
 
     @Test
     void testIsRangerRazEnabledOnClusterThrowsExceptionIfCmIsNotRunning() {
-        Stack stack = setupStack(STACK_ID);
+        StackDto stack = setupStack(STACK_ID);
         ClusterApi clusterApi = mock(ClusterApi.class);
         ClusterStatusService clusterStatusService = mock(ClusterStatusService.class);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
@@ -185,7 +182,7 @@ class ClusterServiceTest {
 
     @Test
     void testIsRangerRazEnabledOnClusterReturnsFalseIfCmIsRunning() {
-        Stack stack = setupStack(STACK_ID);
+        StackDto stack = setupStack(STACK_ID);
         ClusterApi clusterApi = mock(ClusterApi.class);
         ClusterStatusService clusterStatusService = mock(ClusterStatusService.class);
         ClusterModificationService clusterModificationService = mock(ClusterModificationService.class);
@@ -198,26 +195,30 @@ class ClusterServiceTest {
         assertFalse(underTest.isRangerRazEnabledOnCluster(stack));
     }
 
-    private Stack setupStack(long stackId) {
+    private StackDto setupStack(long stackId) {
+        StackDto stackDto = mock(StackDto.class);
+        lenient().when(stackDto.getId()).thenReturn(stackId);
+        lenient().when(stackDto.getStatus()).thenReturn(Status.AVAILABLE);
         Stack stack = new Stack();
         stack.setId(stackId);
         Cluster cluster = new Cluster();
         cluster.setId(2L);
         cluster.setName(CLUSTER_NAME);
-        stack.setCluster(cluster);
-        lenient().when(stackService.getById(anyLong())).thenReturn(stack);
-        return stack;
+        lenient().when(stackDto.getStack()).thenReturn(stack);
+        lenient().when(stackDto.getCluster()).thenReturn(cluster);
+        lenient().when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
+        return stackDto;
     }
 
-    private void setupInstanceMetadata(Stack stack) {
+    private void setupInstanceMetadata(StackDto stack) {
         InstanceMetaData instanceMetadata = new InstanceMetaData();
         instanceMetadata.setDiscoveryFQDN(FQDN1);
         instanceMetadata.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
         instanceMetadata.setStatusReason(STATUS_REASON_ORIGINAL);
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId())).thenReturn(Set.of(instanceMetadata));
+        when(stack.getNotTerminatedInstanceMetaData()).thenReturn(List.of(instanceMetadata));
     }
 
-    private void setupClusterApi(Stack stack, HealthCheckResult healthCheckResult, String statusReason) {
+    private void setupClusterApi(StackDto stack, HealthCheckResult healthCheckResult, String statusReason) {
         ClusterApi connector = mock(ClusterApi.class);
         ClusterStatusService clusterStatusService = mock(ClusterStatusService.class);
         when(clusterStatusService.isClusterManagerRunning()).thenReturn(true);
@@ -230,6 +231,6 @@ class ClusterServiceTest {
         }
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(clusterManagerStateMap);
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
-        when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
+        when(clusterApiConnectors.getConnector(any(StackDtoDelegate.class))).thenReturn(connector);
     }
 }

@@ -48,7 +48,7 @@ public interface ClusterTemplateViewRepository extends WorkspaceResourceReposito
     }
 
     @Override
-    default <S extends ClusterTemplateView> Iterable<S> saveAll(Iterable<S> entities) {
+    default <S extends ClusterTemplateView> List<S> saveAll(Iterable<S> entities) {
         throw new UnsupportedOperationException("Creation is not supported from ClusterTemplateViewRepository");
     }
 

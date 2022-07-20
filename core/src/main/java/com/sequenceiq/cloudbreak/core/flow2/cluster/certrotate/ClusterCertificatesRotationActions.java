@@ -47,7 +47,7 @@ public class ClusterCertificatesRotationActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new ClusterCMCARotationSuccess(context.getStack().getId());
+                return new ClusterCMCARotationSuccess(context.getStackId());
             }
         };
     }
@@ -63,7 +63,7 @@ public class ClusterCertificatesRotationActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new ClusterHostCertificatesRotationRequest(context.getStack().getId());
+                return new ClusterHostCertificatesRotationRequest(context.getStackId());
             }
         };
     }
@@ -79,7 +79,7 @@ public class ClusterCertificatesRotationActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new RestartClusterManagerServerRequest(context.getStack().getId(), false, CLUSTER_CERTIFICATES_ROTATION_FAILED_EVENT.event());
+                return new RestartClusterManagerServerRequest(context.getStackId(), false, CLUSTER_CERTIFICATES_ROTATION_FAILED_EVENT.event());
             }
         };
     }
@@ -95,7 +95,7 @@ public class ClusterCertificatesRotationActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new RestartClusterServicesRequest(context.getStack().getId(), true, CLUSTER_CERTIFICATES_ROTATION_FAILED_EVENT.event());
+                return new RestartClusterServicesRequest(context.getStackId(), true, CLUSTER_CERTIFICATES_ROTATION_FAILED_EVENT.event());
             }
         };
     }
@@ -111,7 +111,7 @@ public class ClusterCertificatesRotationActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new StackEvent(ClusterCertificatesRotationEvent.CLUSTER_CERTIFICATES_ROTATION_FINISHED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ClusterCertificatesRotationEvent.CLUSTER_CERTIFICATES_ROTATION_FINISHED_EVENT.event(), context.getStackId());
             }
         };
     }
@@ -121,13 +121,13 @@ public class ClusterCertificatesRotationActions {
         return new AbstractStackFailureAction<ClusterCertificatesRotationState, ClusterCertificatesRotationEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                clusterCertificatesRotationService.certificatesRotationFailed(context.getStackView(), payload.getException());
+                clusterCertificatesRotationService.certificatesRotationFailed(context.getStack(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(CLUSTER_CERTIFICATES_ROTATION_FAILURE_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(CLUSTER_CERTIFICATES_ROTATION_FAILURE_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyToGatewayTopologyV4ResponseConverter;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
+import com.sequenceiq.cloudbreak.view.GatewayView;
 
 @Component
 public class GatewayToGatewayV4ResponseConverter {
@@ -16,7 +16,7 @@ public class GatewayToGatewayV4ResponseConverter {
     @Inject
     private GatewayTopologyToGatewayTopologyV4ResponseConverter gatewayTopologyToGatewayTopologyV4ResponseConverter;
 
-    public GatewayV4Response convert(Gateway source) {
+    public GatewayV4Response convert(GatewayView source) {
         GatewayV4Response response = new GatewayV4Response();
         response.setGatewayType(source.getGatewayType());
         response.setPath(source.getPath());

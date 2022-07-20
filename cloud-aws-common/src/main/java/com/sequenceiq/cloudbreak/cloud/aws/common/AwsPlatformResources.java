@@ -203,6 +203,9 @@ public class AwsPlatformResources implements PlatformResources {
     @Inject
     private MinimalHardwareFilter minimalHardwareFilter;
 
+    @Inject
+    private AwsPageCollector awsPageCollector;
+
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
 
@@ -342,7 +345,7 @@ public class AwsPlatformResources implements PlatformResources {
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential), region.value());
         try {
             LOGGER.debug("Describing route tables in region {}", region.getRegionName());
-            List<RouteTable> allRouteTables = AwsPageCollector.getAllRouteTables(ec2Client, new DescribeRouteTablesRequest());
+            List<RouteTable> allRouteTables = awsPageCollector.getAllRouteTables(ec2Client, new DescribeRouteTablesRequest());
             DescribeVpcsRequest describeVpcsRequest = getDescribeVpcsRequestWithFilters(filters);
             Set<CloudNetwork> cloudNetworks = new HashSet<>();
 

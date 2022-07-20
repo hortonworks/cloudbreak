@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
@@ -31,17 +32,22 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
-import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupEphemeralVolumeChecker;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.model.AwsDiskType;
 
 @ExtendWith(MockitoExtension.class)
 class StackCreationServiceTest {
+
+    private static final Long STACK_ID = 1L;
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -49,12 +55,15 @@ class StackCreationServiceTest {
     @Mock
     private TemplateService templateService;
 
+    @Mock
+    private StackDtoService stackDtoService;
+
     @InjectMocks
     private StackCreationService underTest;
 
     @BeforeEach
     void setUp() {
-        Whitebox.setInternalState(underTest, "ephemeralVolumeChecker", new InstanceGroupEphemeralVolumeChecker());
+        ReflectionTestUtils.setField(underTest, "ephemeralVolumeChecker", new InstanceGroupEphemeralVolumeChecker());
         CloudConnector<Object> cloudConnector = Mockito.mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         MetadataCollector metadataCollector = Mockito.mock(MetadataCollector.class);
@@ -67,7 +76,8 @@ class StackCreationServiceTest {
 
     @Test
     void setInstanceStoreCountOnAWS() {
-        StackContext context = getStackContext(AwsDiskType.Standard.value(), CloudPlatform.AWS.name(), TemporaryStorage.EPHEMERAL_VOLUMES);
+        StackView stack = stack(AwsDiskType.Standard.value(), CloudPlatform.AWS.name(), TemporaryStorage.EPHEMERAL_VOLUMES);
+        StackCreationContext context = getStackContext(CloudPlatform.AWS.name(), stack);
         underTest.setInstanceStoreCount(context);
 
         ArgumentCaptor<Template> savedTemplate = ArgumentCaptor.forClass(Template.class);
@@ -86,7 +96,8 @@ class StackCreationServiceTest {
 
     @Test
     void setInstanceStoreCountOnClusterWithEphemeralDisksOnlyOnAWS() {
-        StackContext context = getStackContext(AwsDiskType.Ephemeral.value(), CloudPlatform.AWS.name(), TemporaryStorage.EPHEMERAL_VOLUMES);
+        StackView stack = stack(AwsDiskType.Ephemeral.value(), CloudPlatform.AWS.name(), TemporaryStorage.EPHEMERAL_VOLUMES);
+        StackCreationContext context = getStackContext(CloudPlatform.AWS.name(), stack);
         underTest.setInstanceStoreCount(context);
 
         ArgumentCaptor<Template> savedTemplate = ArgumentCaptor.forClass(Template.class);
@@ -105,7 +116,8 @@ class StackCreationServiceTest {
 
     @Test
     void setTemporaryStorageToEphemeralVolumesIfInstanceStorageIsAvailable() {
-        StackContext context = getStackContext(AwsDiskType.Standard.value(), CloudPlatform.AWS.name(), TemporaryStorage.ATTACHED_VOLUMES);
+        StackView stack = stack(AwsDiskType.Standard.value(), CloudPlatform.AWS.name(), TemporaryStorage.ATTACHED_VOLUMES);
+        StackCreationContext context = getStackContext(CloudPlatform.AWS.name(), stack);
         underTest.setInstanceStoreCount(context);
 
         ArgumentCaptor<Template> savedTemplate = ArgumentCaptor.forClass(Template.class);
@@ -124,7 +136,8 @@ class StackCreationServiceTest {
 
     @Test
     void setInstanceStoreCountOnAzure() {
-        StackContext context = getStackContext(AzureDiskType.STANDARD_SSD_LRS.value(), CloudPlatform.AZURE.name(), TemporaryStorage.EPHEMERAL_VOLUMES);
+        StackView stack = stack(AzureDiskType.STANDARD_SSD_LRS.value(), CloudPlatform.AZURE.name(), TemporaryStorage.EPHEMERAL_VOLUMES);
+        StackCreationContext context = getStackContext(CloudPlatform.AZURE.name(), stack);
         underTest.setInstanceStoreCount(context);
 
         ArgumentCaptor<Template> savedTemplate = ArgumentCaptor.forClass(Template.class);
@@ -149,8 +162,14 @@ class StackCreationServiceTest {
         return instanceStoreMetadata;
     }
 
-    private StackContext getStackContext(String volumeType, String cloudPlatform, TemporaryStorage tempStorage) {
+    private StackCreationContext getStackContext(String cloudPlatform, StackView stack) {
+        CloudContext cloudContext = CloudContext.Builder.builder().withPlatform(cloudPlatform).build();
+        return new StackCreationContext(null, stack, cloudPlatform, cloudContext, null, null);
+    }
+
+    private StackView stack(String volumeType, String cloudPlatform, TemporaryStorage tempStorage) {
         Stack stack = new Stack();
+        stack.setId(STACK_ID);
         stack.setType(StackType.WORKLOAD);
         InstanceGroup group = new InstanceGroup();
         Template template = new Template();
@@ -160,10 +179,8 @@ class StackCreationServiceTest {
         volumeTemplate.setVolumeType(volumeType);
         template.setVolumeTemplates(new HashSet<>(Set.of(volumeTemplate)));
         group.setTemplate(template);
-        stack.setInstanceGroups(Set.of(group));
         stack.setCloudPlatform(cloudPlatform);
-
-        CloudContext cloudContext = CloudContext.Builder.builder().withPlatform(cloudPlatform).build();
-        return new StackContext(null, stack, cloudContext, null, null);
+        when(stackDtoService.getInstanceMetadataByInstanceGroup(STACK_ID)).thenReturn(List.of(new InstanceGroupDto(group, List.of())));
+        return stack;
     }
 }

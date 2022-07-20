@@ -6,12 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -52,7 +52,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.service.ClusterCreationSetupService;
 import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
@@ -66,8 +66,8 @@ import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.multiaz.MultiAzCalculatorService;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.sharedservice.SharedServiceConfigProvider;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.User;
@@ -90,6 +90,8 @@ public class StackCreatorServiceTest {
 
     private static final String YARN_PLATFORM = "YARN";
 
+    private static final String ACCOUNT_ID = "accountId";
+
     @Mock
     private StackDecorator stackDecorator;
 
@@ -103,7 +105,7 @@ public class StackCreatorServiceTest {
     private StackService stackService;
 
     @Mock
-    private StackViewService stackViewService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private ReactorFlowManager flowManager;
@@ -201,14 +203,15 @@ public class StackCreatorServiceTest {
         stackRequest.setInstanceGroups(List.of(instanceGroupV4Request));
 
         doNothing().when(nodeCountLimitValidator).validateProvision(any());
-        when(stackViewService.findByName(anyString(), anyLong())).thenReturn(Optional.of(new StackView()));
+        when(restRequestThreadLocalService.getAccountId()).thenReturn(ACCOUNT_ID);
+        when(stackDtoService.getStackViewByNameOrCrnOpt(any(), anyString())).thenReturn(Optional.of(mock(StackView.class)));
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, stackRequest, false));
 
         assertThat(badRequestException).hasMessage("Cluster already exists: STACK_NAME");
 
         verify(recipeService).get(NameOrCrn.ofName(RECIPE_NAME), WORKSPACE_ID);
-        verify(stackViewService).findByName(STACK_NAME, WORKSPACE_ID);
+        verify(stackDtoService).getStackViewByNameOrCrnOpt(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID);
     }
 
     @Test

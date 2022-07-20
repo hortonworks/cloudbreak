@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -24,11 +23,11 @@ import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -38,7 +37,7 @@ abstract class AbstractStackTerminationAction<P extends Payload>
     public static final String TERMINATION_TYPE = "TERMINATION_TYPE";
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ResourceService resourceService;
@@ -61,8 +60,7 @@ abstract class AbstractStackTerminationAction<P extends Payload>
             StateContext<StackTerminationState, StackTerminationEvent> stateContext, P payload) {
         Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
         TerminationType terminationType = (TerminationType) variables.getOrDefault(TERMINATION_TYPE, TerminationType.REGULAR);
-        Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
-        stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
+        StackDto stack = stackDtoService.getById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
@@ -73,19 +71,19 @@ abstract class AbstractStackTerminationAction<P extends Payload>
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
+                .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                 .withTenantId(stack.getTenant().getId())
                 .build();
-        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
-        List<CloudResource> resources = stack.getResources().stream()
+        List<CloudResource> resources = resourceService.getAllByStackId(stack.getId()).stream()
                 .map(r -> cloudResourceConverter.convert(r))
                 .collect(Collectors.toList());
         return createStackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources, terminationType);
     }
 
-    protected StackTerminationContext createStackTerminationContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext,
+    protected StackTerminationContext createStackTerminationContext(FlowParameters flowParameters, StackDto stack, CloudContext cloudContext,
             CloudCredential cloudCredential, CloudStack cloudStack, List<CloudResource> resources, TerminationType terminationType) {
         return new StackTerminationContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, resources, terminationType);
     }

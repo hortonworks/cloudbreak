@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
-import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 
 public class RdsViewTest {
 
@@ -259,8 +258,8 @@ public class RdsViewTest {
         when(rdsView.isArchived()).thenReturn(true);
         when(rdsView.getConnectionDriver()).thenReturn("driver");
         when(rdsView.getConnectionURL()).thenReturn("jdbc:mysql://ranger-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ranger");
-        when(rdsView.getConnectionPassword()).thenReturn(new Secret("pass"));
-        when(rdsView.getConnectionUserName()).thenReturn(new Secret("username"));
+        when(rdsView.getConnectionPassword()).thenReturn("pass");
+        when(rdsView.getConnectionUserName()).thenReturn("username");
         when(rdsView.getConnectorJarUrl()).thenReturn("jarurl");
         when(rdsView.getCreationDate()).thenReturn(1L);
         when(rdsView.getDatabaseEngine()).thenReturn(DatabaseVendor.MYSQL);

@@ -13,11 +13,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
-import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 @Primary
 @Component
@@ -26,6 +27,9 @@ public class CloudbreakHaApplication implements HaApplication {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Inject
     private FlowRegister runningFlows;
@@ -48,10 +52,10 @@ public class CloudbreakHaApplication implements HaApplication {
 
     @Override
     public void cleanupInMemoryStore(Long resourceId) {
-        Stack stack = stackService.getByIdWithTransaction(resourceId);
+        StackView stack = stackDtoService.getStackViewById(resourceId);
         InMemoryStateStore.deleteStack(resourceId);
-        if (stack.getCluster() != null) {
-            InMemoryStateStore.deleteCluster(stack.getCluster().getId());
+        if (stack.getClusterId() != null) {
+            InMemoryStateStore.deleteCluster(stack.getClusterId());
         }
     }
 

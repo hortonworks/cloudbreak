@@ -1,48 +1,51 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.powermock.reflect.Whitebox;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterRequestProcessingStepMapper;
 
-public class StructuredFlowEventToCDPDatahubRequestedConverterTest {
+class StructuredFlowEventToCDPDatahubRequestedConverterTest {
 
     private StructuredFlowEventToCDPDatahubRequestedConverter underTest;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         underTest = new StructuredFlowEventToCDPDatahubRequestedConverter();
         StructuredEventToCDPOperationDetailsConverter operationDetailsConverter = new StructuredEventToCDPOperationDetailsConverter();
-        Whitebox.setInternalState(operationDetailsConverter, "appVersion", "version-1234");
-        Whitebox.setInternalState(operationDetailsConverter, "clusterRequestProcessingStepMapper", new ClusterRequestProcessingStepMapper());
-        Whitebox.setInternalState(underTest, "operationDetailsConverter", operationDetailsConverter);
+        ReflectionTestUtils.setField(operationDetailsConverter, "appVersion", "version-1234");
+        ReflectionTestUtils.setField(operationDetailsConverter, "clusterRequestProcessingStepMapper", new ClusterRequestProcessingStepMapper());
+        ReflectionTestUtils.setField(underTest, "operationDetailsConverter", operationDetailsConverter);
+
         StructuredEventToCDPClusterDetailsConverter clusterDetailsConverter = new StructuredEventToCDPClusterDetailsConverter();
-        Whitebox.setInternalState(clusterDetailsConverter, "clusterShapeConverter", new StructuredEventToCDPClusterShapeConverter());
-        Whitebox.setInternalState(clusterDetailsConverter, "imageDetailsConverter", new StructuredEventToCDPImageDetailsConverter());
-        Whitebox.setInternalState(clusterDetailsConverter, "versionDetailsConverter", new StructuredEventToCDPVersionDetailsConverter());
-        Whitebox.setInternalState(underTest, "clusterDetailsConverter", clusterDetailsConverter);
+        ReflectionTestUtils.setField(clusterDetailsConverter, "clusterShapeConverter", new StructuredEventToCDPClusterShapeConverter());
+        ReflectionTestUtils.setField(clusterDetailsConverter, "imageDetailsConverter", new StructuredEventToCDPImageDetailsConverter());
+        ReflectionTestUtils.setField(clusterDetailsConverter, "versionDetailsConverter", new StructuredEventToCDPVersionDetailsConverter());
+        ReflectionTestUtils.setField(underTest, "clusterDetailsConverter", clusterDetailsConverter);
     }
 
     @Test
-    public void testConvertWithNull() {
+    void testConvertWithNull() {
         UsageProto.CDPDatahubRequested datahubRequested = underTest.convert(null);
 
-        Assertions.assertNotNull(datahubRequested.getOperationDetails());
-        Assertions.assertNotNull(datahubRequested.getClusterDetails());
-        Assertions.assertEquals("", datahubRequested.getEnvironmentCrn());
+        assertNotNull(datahubRequested.getOperationDetails());
+        assertNotNull(datahubRequested.getClusterDetails());
+        assertEquals("", datahubRequested.getEnvironmentCrn());
     }
 
     @Test
-    public void testConvertWithEmptyStructuredFlowEvent() {
+    void testConvertWithEmptyStructuredFlowEvent() {
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         UsageProto.CDPDatahubRequested datahubRequested = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertNotNull(datahubRequested.getOperationDetails());
-        Assertions.assertNotNull(datahubRequested.getClusterDetails());
-        Assertions.assertEquals("", datahubRequested.getEnvironmentCrn());
+        assertNotNull(datahubRequested.getOperationDetails());
+        assertNotNull(datahubRequested.getClusterDetails());
+        assertEquals("", datahubRequested.getEnvironmentCrn());
     }
 }

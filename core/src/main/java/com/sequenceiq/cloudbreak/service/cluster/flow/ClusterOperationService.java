@@ -16,7 +16,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NO
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
-import static java.lang.Math.abs;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -67,6 +66,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -83,6 +83,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidator;
 import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -245,8 +246,6 @@ public class ClusterOperationService {
         }
         boolean downscaleRequest = updateHostsValidator.validateRequest(stack, hostGroupAdjustment);
         if (downscaleRequest) {
-            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_REQUESTED,
-                    "Requested node count for downscaling: " + abs(hostGroupAdjustment.getScalingAdjustment()));
             return flowManager.triggerClusterDownscale(stackId, hostGroupAdjustment);
         } else {
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_REQUESTED,
@@ -545,28 +544,25 @@ public class ClusterOperationService {
         return flowManager.triggerClusterServicesRestart(stack.getId());
     }
 
-    private FlowIdentifier triggerClusterInstall(Stack stack) {
-        return flowManager.triggerClusterReInstall(stack.getId());
+    private FlowIdentifier triggerClusterInstall(Long stackId) {
+        return flowManager.triggerClusterReInstall(stackId);
     }
 
-    public FlowIdentifier recreate(Stack stack, String blueprintName, Set<HostGroup> hostGroups, boolean validateBlueprint)
-            throws TransactionExecutionException {
-        return transactionService.required(() -> {
-            checkBlueprintIdAndHostGroups(blueprintName, hostGroups);
-            Stack stackWithLists = stackService.getByIdWithListsInTransaction(stack.getId());
-            Cluster cluster = stackWithLists.getCluster();
-            Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, stack.getWorkspace());
-            if (!clusterService.withEmbeddedClusterManagerDB(cluster)) {
-                throw new BadRequestException("Cluster Manager doesn't support resetting external DB automatically. To reset Cluster Manager schema you "
-                        + "must first drop and then create it using DDL scripts from /opt/cloudera/cm/schema/postgresql/");
-            }
-            BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(blueprint);
-            blueprintValidator.validate(blueprint, hostGroups, stackWithLists.getInstanceGroups(), validateBlueprint);
+    public FlowIdentifier recreate(StackDto stack, String blueprintName, Set<HostGroup> hostGroups, boolean validateBlueprint) {
+        checkBlueprintIdAndHostGroups(blueprintName, hostGroups);
+        ClusterView cluster = stack.getCluster();
+        Blueprint blueprint = blueprintService.getByNameForWorkspace(blueprintName, stack.getWorkspace());
+        if (!clusterService.withEmbeddedClusterManagerDB(cluster)) {
+            throw new BadRequestException("Cluster Manager doesn't support resetting external DB automatically. To reset Cluster Manager schema you "
+                    + "must first drop and then create it using DDL scripts from /opt/cloudera/cm/schema/postgresql/");
+        }
+        BlueprintValidator blueprintValidator = blueprintValidatorFactory.createBlueprintValidator(blueprint);
+        blueprintValidator.validate(blueprint, hostGroups, stack.getInstanceGroupViews(), validateBlueprint);
 
-            clusterService.prepareCluster(hostGroups, blueprint, stackWithLists, cluster);
-            clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.CLUSTER_RECREATE_REQUESTED);
-            return triggerClusterInstall(stackWithLists);
-        });
+        Cluster clusterDBReference = clusterService.getCluster(cluster.getId());
+        clusterService.prepareCluster(hostGroups, blueprint, stack.getId(), clusterDBReference);
+        clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.CLUSTER_RECREATE_REQUESTED);
+        return triggerClusterInstall(stack.getId());
     }
 
     private void checkBlueprintIdAndHostGroups(String blueprint, Set<HostGroup> hostGroups) {
@@ -575,19 +571,19 @@ public class ClusterOperationService {
         }
     }
 
-    public FlowIdentifier triggerMaintenanceModeValidation(Stack stack) {
-        return flowManager.triggerMaintenanceModeValidationFlow(stack.getId());
+    public FlowIdentifier triggerMaintenanceModeValidation(Long stackId) {
+        return flowManager.triggerMaintenanceModeValidationFlow(stackId);
     }
 
-    public FlowIdentifier updateSalt(Stack stack) {
-        return flowManager.triggerSaltUpdate(stack.getId());
+    public FlowIdentifier updateSalt(Long stackId) {
+        return flowManager.triggerSaltUpdate(stackId);
     }
 
-    public FlowIdentifier updatePillarConfiguration(Stack stack) {
-        return flowManager.triggerPillarConfigurationUpdate(stack.getId());
+    public FlowIdentifier updatePillarConfiguration(Long stackId) {
+        return flowManager.triggerPillarConfigurationUpdate(stackId);
     }
 
-    public FlowIdentifier rotateAutoTlsCertificates(Stack stack, CertificatesRotationV4Request certificatesRotationV4Request) {
-        return flowManager.triggerAutoTlsCertificatesRotation(stack.getId(), certificatesRotationV4Request);
+    public FlowIdentifier rotateAutoTlsCertificates(Long stackId, CertificatesRotationV4Request certificatesRotationV4Request) {
+        return flowManager.triggerAutoTlsCertificatesRotation(stackId, certificatesRotationV4Request);
     }
 }

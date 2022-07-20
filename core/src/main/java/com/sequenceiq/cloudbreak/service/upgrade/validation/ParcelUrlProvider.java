@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 
 @Component
@@ -95,7 +95,7 @@ public class ParcelUrlProvider {
     private Set<String> getRequiredParcelNames(Stack stack, Image image) {
         return parcelService.getComponentsByImage(stack, image)
                 .stream()
-                .map(ClusterComponent::getName)
+                .map(ClusterComponentView::getName)
                 .collect(Collectors.toSet());
     }
 

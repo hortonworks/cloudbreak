@@ -5,8 +5,6 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
-import org.springframework.data.jpa.repository.EntityGraph;
-import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -33,6 +31,4 @@ public interface ClusterComponentRepository extends CrudRepository<ClusterCompon
     @Query("SELECT cv FROM ClusterComponent cv WHERE cv.cluster.id = :clusterId")
     Set<ClusterComponent> findComponentByClusterId(@Param("clusterId") Long clusterId);
 
-    @EntityGraph(value = "ClusterComponent.cluster.rdsConfig", type = EntityGraphType.LOAD)
-    Set<ClusterComponent> findByComponentType(ComponentType componentType);
 }

@@ -20,13 +20,13 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -51,10 +51,10 @@ class StartAmbariServicesHandlerTest {
     private ClusterApiConnectors clusterApiConnectors;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
-    private Stack stack;
+    private StackDto stack;
 
     @Mock
     private ClusterApi clusterApi;
@@ -63,12 +63,13 @@ class StartAmbariServicesHandlerTest {
     @ValueSource(booleans = { false, true })
     void testAcceptWhenStartAmbariHandlerSucceeds(boolean defaultClusterManagerAuth) throws ClusterClientInitException, CloudbreakException {
 
-        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
+        when(stack.getClusterManagerIp()).thenReturn("ip");
+        when(clusterApiConnectors.getConnector(stack, "ip")).thenReturn(clusterApi);
 
         underTest.accept(getEvent(defaultClusterManagerAuth));
 
-        verify(clusterApi).waitForServer(eq(stack), eq(defaultClusterManagerAuth));
+        verify(clusterApi).waitForServer(eq(defaultClusterManagerAuth));
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(any(Object.class), resultCaptor.capture());
 
@@ -82,8 +83,8 @@ class StartAmbariServicesHandlerTest {
     @ParameterizedTest
     @ValueSource(booleans = { false, true })
     void testAcceptWhenExceptionThenFailure(boolean defaultClusterManagerAuth) {
-
-        doThrow(new CloudbreakServiceException(EXCEPTION_MESSAGE)).when(clusterServiceRunner).runAmbariServices(STACK_ID);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
+        doThrow(new CloudbreakServiceException(EXCEPTION_MESSAGE)).when(clusterServiceRunner).runAmbariServices(stack);
         underTest.accept(getEvent(defaultClusterManagerAuth));
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);

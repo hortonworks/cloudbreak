@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter.stack.cluster;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -26,11 +26,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.ClusterExposedServiceV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
-import com.sequenceiq.cloudbreak.cmtemplate.validation.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintToBlueprintV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.database.RDSConfigToDatabaseV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.ClusterToClusterV4ResponseConverter;
+import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClusterToClouderaManagerV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.GatewayToGatewayV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.workspaces.WorkspaceToWorkspaceResourceV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -38,9 +38,11 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterService;
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -80,33 +82,45 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Mock
     private RDSConfigToDatabaseV4ResponseConverter rdsConfigToDatabaseV4ResponseConverter;
 
+    @Mock
+    private RdsConfigWithoutClusterService rdsConfigWithoutClusterService;
+
+    @Mock
+    private ClusterToClouderaManagerV4ResponseConverter clusterToClouderaManagerV4ResponseConverter;
+
     @Before
     public void setUp() {
-        given(workspaceToWorkspaceResourceV4ResponseConverter.convert(any(Workspace.class)))
-                .willReturn(new WorkspaceResourceV4Response());
+        when(workspaceToWorkspaceResourceV4ResponseConverter.convert(any(Workspace.class)))
+                .thenReturn(new WorkspaceResourceV4Response());
     }
 
     @Test
     public void testConvert() {
         // GIVEN
-        getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
-        getSource().setBlueprint(new Blueprint());
-        getSource().setExtendedBlueprintText("asdf");
-        getSource().setFqdn("some.fqdn");
-        getSource().setCertExpirationState(CertExpirationState.HOST_CERT_EXPIRING);
-        given(stackUtil.extractClusterManagerIp(any(Stack.class))).willReturn("10.0.0.1");
-        given(stackUtil.extractClusterManagerAddress(any(Stack.class))).willReturn("some.fqdn");
+        StackDtoDelegate stackDtoDelegate = mock(StackDtoDelegate.class);
         Cluster source = getSource();
+        source.setConfigStrategy(ConfigStrategy.NEVER_APPLY);
+        source.setBlueprint(new Blueprint());
+        source.setExtendedBlueprintText("asdf");
+        source.setFqdn("some.fqdn");
+        source.setCertExpirationState(CertExpirationState.HOST_CERT_EXPIRING);
+        Blueprint blueprint = source.getBlueprint();
+        when(stackDtoDelegate.getBlueprint()).thenReturn(blueprint);
+        when(stackDtoDelegate.getStack()).thenReturn(source.getStack());
+        when(stackUtil.extractClusterManagerIp(any(StackDtoDelegate.class))).thenReturn("10.0.0.1");
+        when(stackUtil.extractClusterManagerAddress(any(StackDtoDelegate.class))).thenReturn("some.fqdn");
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariUser", source, "user", "secret/path");
         TestUtil.setSecretField(Cluster.class, "cloudbreakAmbariPassword", source, "pass", "secret/path");
         TestUtil.setSecretField(Cluster.class, "dpAmbariUser", source, "user", "secret/path");
         TestUtil.setSecretField(Cluster.class, "dpAmbariPassword", source, "pass", "secret/path");
         when(stringToSecretResponseConverter.convert("secret/path")).thenReturn(new SecretResponse("kv", "pass"));
-        when(blueprintToBlueprintV4ResponseConverter.convert(getSource().getBlueprint())).thenReturn(new BlueprintV4Response());
-        when(serviceEndpointCollector.getManagerServerUrl(any(Cluster.class), anyString())).thenReturn("http://server/");
-        given(proxyConfigDtoService.getByCrn(anyString())).willReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
+        when(blueprintToBlueprintV4ResponseConverter.convert(blueprint)).thenReturn(new BlueprintV4Response());
+        when(serviceEndpointCollector.getManagerServerUrl(any(StackDtoDelegate.class), anyString())).thenReturn("http://server/");
+        when(proxyConfigDtoService.getByCrn(anyString())).thenReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
+        when(stackDtoDelegate.getWorkspace()).thenReturn(source.getWorkspace());
+        when(stackDtoDelegate.getCluster()).thenReturn(source);
         // WHEN
-        ClusterV4Response result = underTest.convert(source);
+        ClusterV4Response result = underTest.convert(stackDtoDelegate);
         // THEN
         assertEquals(1L, (long) result.getId());
         assertEquals(getSource().getExtendedBlueprintText(), result.getExtendedBlueprintText());
@@ -120,10 +134,14 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Test
     public void testConvertWithoutUpSinceField() {
         // GIVEN
-        given(proxyConfigDtoService.getByCrn(anyString())).willReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
-        getSource().setUpSince(null);
+        StackDtoDelegate stackDtoDelegate = mock(StackDtoDelegate.class);
+        when(proxyConfigDtoService.getByCrn(anyString())).thenReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
+        Cluster source = getSource();
+        source.setUpSince(null);
+        when(stackDtoDelegate.getStack()).thenReturn(source.getStack());
+        when(stackDtoDelegate.getCluster()).thenReturn(source);
         // WHEN
-        ClusterV4Response result = underTest.convert(getSource());
+        ClusterV4Response result = underTest.convert(stackDtoDelegate);
         // THEN
         assertEquals(0L, result.getMinutesUp());
     }
@@ -131,23 +149,31 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Test
     public void testConvertWithoutMasterComponent() {
         // GIVEN
-        given(proxyConfigDtoService.getByCrn(anyString())).willReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
+        StackDtoDelegate stackDtoDelegate = mock(StackDtoDelegate.class);
+        when(stackDtoDelegate.getStack()).thenReturn(new Stack());
+        when(proxyConfigDtoService.getByCrn(anyString())).thenReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
+        Cluster source = getSource();
+        when(stackDtoDelegate.getCluster()).thenReturn(source);
         // WHEN
-        ClusterV4Response result = underTest.convert(getSource());
+        ClusterV4Response result = underTest.convert(stackDtoDelegate);
         // THEN
         assertEquals(1L, (long) result.getId());
     }
 
     @Test
     public void testExposedServices() {
+        StackDtoDelegate stackDtoDelegate = mock(StackDtoDelegate.class);
         Map<String, Collection<ClusterExposedServiceV4Response>> exposedServiceResponseMap = new HashMap<>();
         exposedServiceResponseMap.put("topology1", getExpiosedServices());
-        given(serviceEndpointCollector.prepareClusterExposedServices(any(), anyString())).willReturn(exposedServiceResponseMap);
-        given(proxyConfigDtoService.getByCrn(anyString())).willReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
+        Cluster source = getSource();
+        when(stackDtoDelegate.getCluster()).thenReturn(source);
+        when(serviceEndpointCollector.prepareClusterExposedServices(any(), anyString())).thenReturn(exposedServiceResponseMap);
+        when(proxyConfigDtoService.getByCrn(anyString())).thenReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
 
-        given(stackUtil.extractClusterManagerIp(any(Stack.class))).willReturn("10.0.0.1");
-        given(stackUtil.extractClusterManagerAddress(any(Stack.class))).willReturn("some.fqdn");
-        ClusterV4Response clusterResponse = underTest.convert(getSource());
+        when(stackDtoDelegate.getStack()).thenReturn(source.getStack());
+        when(stackUtil.extractClusterManagerIp(any(StackDtoDelegate.class))).thenReturn("10.0.0.1");
+        when(stackUtil.extractClusterManagerAddress(any(StackDtoDelegate.class))).thenReturn("some.fqdn");
+        ClusterV4Response clusterResponse = underTest.convert(stackDtoDelegate);
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesForTopologies = clusterResponse.getExposedServices();
         assertEquals(1L, clusterExposedServicesForTopologies.keySet().size());
         Collection<ClusterExposedServiceV4Response> topology1ServiceList = clusterExposedServicesForTopologies.get("topology1");
@@ -185,7 +211,4 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
         return clusterExposedServiceResponseList;
     }
 
-    private StackServiceComponentDescriptor createStackServiceComponentDescriptor() {
-        return new StackServiceComponentDescriptor("ELASTIC_SEARCH", "MASTER", 1, 1);
-    }
 }

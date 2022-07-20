@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 public class NotAllowedStatusUpdate {
 
@@ -17,21 +17,21 @@ public class NotAllowedStatusUpdate {
 
     private String type;
 
-    private final Stack stack;
+    private final StackView stack;
 
-    public NotAllowedStatusUpdate(Stack stack) {
+    public NotAllowedStatusUpdate(StackView stack) {
         this.stack = Objects.requireNonNull(stack);
     }
 
-    public static NotAllowedStatusUpdate builder(Stack stack) {
+    public static NotAllowedStatusUpdate builder(StackView stack) {
         return new NotAllowedStatusUpdate(stack);
     }
 
-    public static NotAllowedStatusUpdate stack(Stack stack) {
+    public static NotAllowedStatusUpdate stack(StackView stack) {
         return new NotAllowedStatusUpdate(stack).type("stack");
     }
 
-    public static NotAllowedStatusUpdate cluster(Stack stack) {
+    public static NotAllowedStatusUpdate cluster(StackView stack) {
         return new NotAllowedStatusUpdate(stack).type("cluster");
     }
 

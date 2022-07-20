@@ -26,8 +26,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterDownscaleFailedConclusionRequest;
@@ -38,7 +37,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCand
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Configuration
 public class ClusterDownscaleActions {
@@ -49,11 +49,11 @@ public class ClusterDownscaleActions {
 
     private ClusterDownscaleService clusterDownscaleService;
 
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
-    public ClusterDownscaleActions(ClusterDownscaleService clusterDownscaleService, StackService stackService) {
+    public ClusterDownscaleActions(ClusterDownscaleService clusterDownscaleService, StackDtoService stackDtoService) {
         this.clusterDownscaleService = clusterDownscaleService;
-        this.stackService = stackService;
+        this.stackDtoService = stackDtoService;
     }
 
     @Bean(name = "COLLECT_CANDIDATES_STATE")
@@ -63,10 +63,7 @@ public class ClusterDownscaleActions {
             protected void doExecute(ClusterViewContext context, ClusterDownscaleTriggerEvent payload, Map<Object, Object> variables) {
                 ClusterDownscaleDetails clusterDownscaleDetails = payload.getDetails();
                 variables.put(REPAIR, clusterDownscaleDetails == null ? Boolean.FALSE : Boolean.valueOf(payload.getDetails().isRepair()));
-                clusterDownscaleService.clusterDownscaleStarted(context.getStackId(), payload.getHostGroupsWithAdjustment(),
-                        payload.getHostGroupsWithPrivateIds(), payload.getDetails());
-                CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(context.getStackId(), payload.getHostGroupsWithAdjustment(),
-                        payload.getHostGroupsWithPrivateIds(), payload.getDetails());
+                CollectDownscaleCandidatesRequest request = clusterDownscaleService.clusterDownscaleStarted(context.getStackId(), payload);
                 sendEvent(context, request.selector(), request);
             }
         };
@@ -81,7 +78,7 @@ public class ClusterDownscaleActions {
                 Selectable event;
                 if (isPayloadContainsAnyPrivateId(payload)) {
                     Boolean repair = (Boolean) variables.get(REPAIR);
-                    Stack stack = stackService.getByIdWithListsInTransaction(context.getStackId());
+                    StackDto stack = stackDtoService.getById(context.getStackId());
                     DecommissionRequest decommissionRequest =
                             new DecommissionRequest(context.getStackId(), payload.getHostGroupNames(), payload.getPrivateIds(),
                                     payload.getRequest().getDetails());
@@ -161,17 +158,17 @@ public class ClusterDownscaleActions {
         return new AbstractStackFailureAction<ClusterStartState, ClusterStartEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                clusterDownscaleService.handleClusterDownscaleFailure(context.getStackView().getId(), payload.getException());
-                ClusterDownscaleFailedConclusionRequest request = new ClusterDownscaleFailedConclusionRequest(context.getStackView().getId());
+                clusterDownscaleService.handleClusterDownscaleFailure(context.getStackId(), payload.getException());
+                ClusterDownscaleFailedConclusionRequest request = new ClusterDownscaleFailedConclusionRequest(context.getStackId());
                 sendEvent(context, request.selector(), request);
             }
         };
     }
 
-    private Set<String> getHostNamesForPrivateIds(Set<Long> privateIds, Stack stack) {
+    private Set<String> getHostNamesForPrivateIds(Set<Long> privateIds, StackDto stack) {
         return privateIds.stream().map(privateId -> {
-            Optional<InstanceMetaData> instanceMetadata = stackService.getInstanceMetadata(stack.getInstanceMetaDataAsList(), privateId);
-            return instanceMetadata.map(InstanceMetaData::getDiscoveryFQDN).orElse(null);
+            Optional<InstanceMetadataView> instanceMetadata = stack.getInstanceMetadata(privateId);
+            return instanceMetadata.map(InstanceMetadataView::getDiscoveryFQDN).orElse(null);
         }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
     }
 

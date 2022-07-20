@@ -118,7 +118,7 @@ public abstract class StackTestDtoBase<T extends StackTestDtoBase<T>> extends Ab
     public StackTestDtoBase<T> withEnvironmentClass(Class<EnvironmentTestDto> environmentTestDtoClass) {
         EnvironmentTestDto env = getTestContext().get(environmentTestDtoClass.getSimpleName());
         if (env == null) {
-            throw new IllegalArgumentException(String.format("Environment has not been provided for this stack: '%s' response!", getName()));
+            return this;
         }
         return withEnvironmentCrn(env.getCrn());
     }

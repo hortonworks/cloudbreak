@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
-import java.util.HashSet;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -23,14 +22,14 @@ import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.service.StackCreationService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowParameters;
 
@@ -48,7 +47,7 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
     private StackImageService stackImageService;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
@@ -77,8 +76,7 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
 
     @Override
     protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<StackImageUpdateState, StackImageUpdateEvent> stateContext, P payload) {
-        Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
-        stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
+        StackDto stack = stackDtoService.getById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
         CloudContext cloudContext = CloudContext.Builder.builder()
@@ -88,11 +86,11 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
                 .withPlatform(stack.getCloudPlatform())
                 .withVariant(stack.getPlatformVariant())
                 .withLocation(location)
-                .withWorkspaceId(stack.getWorkspace().getId())
+                .withWorkspaceId(stack.getWorkspaceId())
                 .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                 .withTenantId(stack.getTenant().getId())
                 .build();
-        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
+        CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         return new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
     }
@@ -112,14 +110,6 @@ abstract class AbstractStackImageUpdateAction<P extends Payload> extends Abstrac
 
     protected StackImageService getStackImageService() {
         return stackImageService;
-    }
-
-    protected StackService getStackService() {
-        return stackService;
-    }
-
-    protected StackToCloudStackConverter getCloudStackConverter() {
-        return cloudStackConverter;
     }
 
     protected StackCreationService getStackCreationService() {

@@ -83,7 +83,7 @@ public class AwsVariantMigrationActions {
                     LOGGER.debug("Variant will be changed");
                     stackUpdater.updateVariant(payload.getResourceId(), CloudConstants.AWS_NATIVE);
                     LOGGER.info("Variant changed to AWS_NATIVE");
-                    getMetricService().incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_SUCCESSFUL, context.getStack());
+                    getMetricService().incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_SUCCESSFUL, context.getStack().getStack());
                 } else {
                     LOGGER.info("Variant won't be changed because the CF template exists");
                 }
@@ -108,13 +108,13 @@ public class AwsVariantMigrationActions {
                 LOGGER.info("Aws variant migration failed: {}", errorReason, payload.getException());
                 stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_UPGRADE_FAILED, "AWS variant migration failed. " + errorReason);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_INFRASTRUCTURE_UPDATE_FAILED, errorReason);
-                getMetricService().incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_FAILED, context.getStackView(), payload.getException());
+                getMetricService().incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_FAILED, context.getStack(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(AWS_VARIANT_MIGRATION_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(AWS_VARIANT_MIGRATION_FAIL_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

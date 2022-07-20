@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
 @Table(name = "InstanceGroup")
+@Deprecated
 public class ClusterTemplateInstanceGroupView implements ProvisionEntity {
 
     @Id

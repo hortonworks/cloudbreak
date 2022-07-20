@@ -14,9 +14,9 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class BackupRestoreSaltConfigGenerator {
@@ -33,7 +33,7 @@ public class BackupRestoreSaltConfigGenerator {
 
     public static final String CLOSE_CONNECTIONS = "close_connections";
 
-    public SaltConfig createSaltConfig(String location, String backupId, String rangerAdminGroup, boolean closeConnections, Stack stack)
+    public SaltConfig createSaltConfig(String location, String backupId, String rangerAdminGroup, boolean closeConnections, StackView stack)
             throws URISyntaxException {
         String fullLocation = buildFullLocation(location, backupId, stack.getCloudPlatform());
 

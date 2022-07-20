@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
@@ -35,10 +35,9 @@ public class HostAttributeDecorator {
         this.stackUtil = stackUtil;
     }
 
-    public Map<String, SaltPillarProperties> createHostAttributePillars(Stack stack) {
-        Set<Node> allNodes = stackUtil.collectNodes(stack);
-        stack.getCluster().getBlueprint().getBlueprintText();
-        BlueprintTextProcessor blueprintTextProcessor = cmTemplateProcessorFactory.get(stack.getCluster().getBlueprint().getBlueprintText());
+    public Map<String, SaltPillarProperties> createHostAttributePillars(StackDto stackDto) {
+        Set<Node> allNodes = stackUtil.collectNodes(stackDto);
+        BlueprintTextProcessor blueprintTextProcessor = cmTemplateProcessorFactory.get(stackDto.getBlueprint().getBlueprintText());
         Versioned blueprintVersion = () -> blueprintTextProcessor.getVersion().get();
 
         Map<String, Map<String, ServiceAttributes>> serviceAttributes = blueprintTextProcessor.getHostGroupBasedServiceAttributes(blueprintVersion);

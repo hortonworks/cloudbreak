@@ -32,10 +32,10 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
     protected void doExecute(StackTerminationContext context, TerminateStackResult payload, Map<Object, Object> variables) {
         if (context.getTerminationType().isRecovery()) {
             LOGGER.debug("Recovery is in progress, skipping stack termination finalization!");
-            recoveryTeardownService.handleRecoveryTeardownSuccess(context, payload);
+            recoveryTeardownService.handleRecoveryTeardownSuccess(context.getStack().getStack(), payload);
         } else {
             LOGGER.debug("Termination type is {}, executing stack termination finalization!", context.getTerminationType());
-            stackTerminationService.finishStackTermination(context, payload);
+            stackTerminationService.finishStackTermination(context.getStack().getStack(), context.getTerminationType().isForced(), payload);
         }
         sendEvent(context);
     }

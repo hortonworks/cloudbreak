@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
 @Table(name = "Orchestrator")
+@Deprecated
 public class OrchestratorView implements ProvisionEntity {
     @Id
     private Long id;

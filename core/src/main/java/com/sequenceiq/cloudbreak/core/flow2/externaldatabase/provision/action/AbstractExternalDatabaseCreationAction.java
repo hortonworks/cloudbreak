@@ -11,16 +11,16 @@ import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseContext;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.config.ExternalDatabaseCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.config.ExternalDatabaseCreationState;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public abstract class AbstractExternalDatabaseCreationAction<P extends Payload>
         extends AbstractStackAction<ExternalDatabaseCreationState, ExternalDatabaseCreationEvent, ExternalDatabaseContext, P> {
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     protected AbstractExternalDatabaseCreationAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -30,7 +30,7 @@ public abstract class AbstractExternalDatabaseCreationAction<P extends Payload>
     protected ExternalDatabaseContext createFlowContext(FlowParameters flowParameters,
             StateContext<ExternalDatabaseCreationState, ExternalDatabaseCreationEvent> stateContext, P payload) {
 
-        Stack stack = stackService.getByIdWithClusterInTransaction(payload.getResourceId());
+        StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         beforeReturnFlowContext(flowParameters, stateContext, payload);
         return new ExternalDatabaseContext(flowParameters, stack);

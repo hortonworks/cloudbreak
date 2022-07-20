@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -22,12 +23,17 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaCleanupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @Service
 public class TerminationService {
@@ -38,6 +44,9 @@ public class TerminationService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackDtoService stackDtoService;
 
     @Inject
     private InstanceGroupService instanceGroupService;
@@ -63,6 +72,9 @@ public class TerminationService {
     @Inject
     private OwnerAssignmentService ownerAssignmentService;
 
+    @Inject
+    private ClusterService clusterService;
+
     public void finalizeTermination(Long stackId, boolean force) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Date now = new Date();
@@ -74,6 +86,7 @@ public class TerminationService {
             transactionService.required(() -> {
                 if (cluster != null) {
                     try {
+                        clusterService.cleanupCluster(stack);
                         clusterTerminationService.finalizeClusterTermination(cluster.getId(), force);
                     } catch (TransactionExecutionException e) {
                         throw e.getCause();
@@ -92,15 +105,15 @@ public class TerminationService {
     }
 
     public void finalizeRecoveryTeardown(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        cleanupFreeIpa(stack);
-        deleteMetaDataInstances(stack);
+        StackDto stackDto = stackDtoService.getById(stackId);
+        cleanupFreeIpa(stackDto);
+        deleteMetaDataInstances(stackDto);
     }
 
-    private void cleanupFreeIpa(Stack stack) {
+    private void cleanupFreeIpa(StackDtoDelegate stackDto) {
         try {
             LOGGER.info("Cleaning up the related FreeIpa");
-            freeIpaCleanupService.cleanupButIp(stack);
+            freeIpaCleanupService.cleanupButIp(stackDto);
         } catch (Exception e) {
             LOGGER.warn("FreeIPA cleanup has failed during termination finalization, ignoring error", e);
         }
@@ -153,11 +166,10 @@ public class TerminationService {
         instanceMetaDataService.saveAll(instanceMetaDatas);
     }
 
-    private void deleteMetaDataInstances(Stack stack) {
-        for (InstanceMetaData metaData : stack.getNotTerminatedInstanceMetaDataSet()) {
-            LOGGER.debug("Deleting instance metadata entry {}", metaData);
-            instanceMetaDataService.delete(metaData);
-        }
+    private void deleteMetaDataInstances(StackDto stackDto) {
+        List<Long> metaData = stackDto.getNotTerminatedInstanceMetaData().stream().map(InstanceMetadataView::getId).collect(Collectors.toList());
+        LOGGER.debug("Deleting instance metadata entry {}", metaData);
+        instanceMetaDataService.deleteAllByInstanceIds(metaData);
     }
 
 }

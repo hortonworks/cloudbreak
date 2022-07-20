@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
@@ -16,7 +18,7 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -72,13 +74,13 @@ public class SqlStreamBuilderSnapperDatabaseConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
         BlueprintView blueprintView = new BlueprintView(null, null, null, cmTemplateProcessor);
 
-        RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(DatabaseType.SQL_STREAM_BUILDER_SNAPPER.toString());
-        rdsConfig.setDatabaseEngine(DatabaseVendor.POSTGRES);
-        rdsConfig.setConnectionDriver(DatabaseVendor.POSTGRES.connectionDriver());
-        rdsConfig.setConnectionURL("jdbc:postgresql://testhost:5432/eventador_snapper");
-        rdsConfig.setConnectionUserName("ssb_test_user");
-        rdsConfig.setConnectionPassword("ssb_test_pw");
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
+        when(rdsConfig.getType()).thenReturn(DatabaseType.SQL_STREAM_BUILDER_SNAPPER.toString());
+        when(rdsConfig.getDatabaseEngine()).thenReturn(DatabaseVendor.POSTGRES);
+        when(rdsConfig.getConnectionDriver()).thenReturn(DatabaseVendor.POSTGRES.connectionDriver());
+        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/eventador_snapper");
+        when(rdsConfig.getConnectionUserName()).thenReturn("ssb_test_user");
+        when(rdsConfig.getConnectionPassword()).thenReturn("ssb_test_pw");
 
         return TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)

@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cluster.service;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 public interface StackAware {
 
-    Stack getStack();
+    StackDtoDelegate getStack();
 }

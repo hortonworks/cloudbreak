@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.sequenceiq.cloudbreak.TestUtil.rdsConfig;
+import static com.sequenceiq.cloudbreak.TestUtil.rdsConfigWithoutCluster;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_HOST;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager.ProfilerMetricsRoleConfigProvider.PROFILER_METRICS_DATABASE_TYPE;
@@ -70,7 +70,7 @@ public class ProfilerMetricsRoleConfigProviderTest {
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
 
         return Builder.builder().withHostgroupViews(Set.of(master, worker))
-                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.PROFILER_METRIC))).build();
+                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.PROFILER_METRIC))).build();
     }
 
     @Test
@@ -82,7 +82,7 @@ public class ProfilerMetricsRoleConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = Builder.builder()
                 .withHostgroupViews(Set.of(master, gateway))
-                .withRdsConfigs(Set.of(rdsConfig(DatabaseType.PROFILER_METRIC)))
+                .withRdsConfigs(Set.of(rdsConfigWithoutCluster(DatabaseType.PROFILER_METRIC)))
                 .build();
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs =

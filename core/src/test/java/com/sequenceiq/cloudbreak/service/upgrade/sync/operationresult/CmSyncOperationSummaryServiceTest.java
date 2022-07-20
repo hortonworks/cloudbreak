@@ -17,7 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelStatus;
 
 @ExtendWith(MockitoExtension.class)
 public class CmSyncOperationSummaryServiceTest {
@@ -31,7 +32,8 @@ public class CmSyncOperationSummaryServiceTest {
     @Test
     void evaluateWhenCmSyncOperationResultHasValuesThenEvaluatorsAreCalled() {
         CmRepoSyncOperationResult cmRepoSyncOperationResult = new CmRepoSyncOperationResult("installedCmVersion", null);
-        CmParcelSyncOperationResult cmParcelSyncOperationResult = new CmParcelSyncOperationResult(Set.of(new ParcelInfo("", "")), Set.of());
+        CmParcelSyncOperationResult cmParcelSyncOperationResult = new CmParcelSyncOperationResult(Set.of(new ParcelInfo("", "", ParcelStatus.ACTIVATED)),
+                Set.of());
         CmSyncOperationResult cmSyncOperationResult = new CmSyncOperationResult(cmRepoSyncOperationResult, cmParcelSyncOperationResult);
 
         CmSyncOperationStatus.Builder cmSyncOperationStatusBuilder = mock(CmSyncOperationStatus.Builder.class);

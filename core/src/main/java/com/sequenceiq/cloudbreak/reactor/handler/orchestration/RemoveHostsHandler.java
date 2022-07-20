@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsRequ
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsSuccess;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
@@ -42,7 +42,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoveHostsHandler.class);
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private HostOrchestrator hostOrchestrator;
@@ -67,7 +67,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
         Set<String> hostNames = request.getHostNames();
         Selectable result;
         try {
-            Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
+            StackDto stack = stackDtoService.getById(request.getResourceId());
             if (stack.getPrimaryGatewayInstance() != null && stack.getPrimaryGatewayInstance().isReachable()) {
                 List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
                 PollingResult orchestratorRemovalPollingResult =
@@ -85,12 +85,12 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
         eventBus.notify(result.selector(), new Event<>(removeHostsRequestEvent.getHeaders(), result));
     }
 
-    private PollingResult removeHostsFromOrchestrator(Stack stack, List<String> hostNames, HostOrchestrator hostOrchestrator,
+    private PollingResult removeHostsFromOrchestrator(StackDto stack, List<String> hostNames, HostOrchestrator hostOrchestrator,
             List<GatewayConfig> allGatewayConfigs) throws CloudbreakException {
         LOGGER.debug("Remove hosts from orchestrator: {}", hostNames);
         try {
             Map<String, String> removeNodePrivateIPsByFQDN = new HashMap<>();
-            stack.getNotTerminatedInstanceMetaDataSet().stream()
+            stack.getNotTerminatedInstanceMetaData().stream()
                     .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                     .filter(instanceMetaData ->
                             hostNames.stream()

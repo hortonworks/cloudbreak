@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -27,7 +27,7 @@ public class FileSystemConfigurationProvider {
     @Inject
     private FileSystemConfigurationsViewProvider fileSystemConfigurationsViewProvider;
 
-    public BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fileSystem, Stack stack,
+    public BaseFileSystemConfigurationsView fileSystemConfiguration(FileSystem fileSystem, StackView stack,
             Function<ResourceType, Collection<Resource>> resourceFuction, Json credentialAttributes,
             ConfigQueryEntries configQueryEntries) throws IOException {
         Optional<Resource> resource = Optional.empty();

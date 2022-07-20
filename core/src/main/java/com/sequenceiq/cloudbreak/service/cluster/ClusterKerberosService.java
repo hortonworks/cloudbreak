@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ClusterKerberosService {
@@ -40,15 +41,16 @@ public class ClusterKerberosService {
     @Inject
     private KerberosDetailService kerberosDetailService;
 
-    public void leaveDomains(Stack stack) throws CloudbreakException {
-        leaveDomains(stack, stackUtil.collectReachableNodes(stack));
+    public void leaveDomains(StackDto stackDto) throws CloudbreakException {
+        leaveDomains(stackDto, stackUtil.collectReachableNodes(stackDto));
     }
 
-    public void leaveDomains(Stack stack, Set<Node> nodes) throws CloudbreakException {
+    public void leaveDomains(StackDto stackDto, Set<Node> nodes) throws CloudbreakException {
+        StackView stack = stackDto.getStack();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         if (kerberosDetailService.isAdJoinable(kerberosConfig) || kerberosDetailService.isIpaJoinable(kerberosConfig)) {
             try {
-                GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+                GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
                 ExitCriteriaModel noExitModel = ClusterDeletionBasedExitCriteriaModel.nonCancellableModel();
                 if (kerberosDetailService.isAdJoinable(kerberosConfig)) {
                     hostOrchestrator.leaveDomain(gatewayConfig, nodes, "ad_member", "ad_leave", noExitModel);

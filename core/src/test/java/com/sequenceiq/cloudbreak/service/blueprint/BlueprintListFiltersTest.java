@@ -4,26 +4,26 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DE
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.powermock.reflect.Whitebox;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BlueprintListFiltersTest {
+@ExtendWith(MockitoExtension.class)
+class BlueprintListFiltersTest {
 
     @InjectMocks
     private BlueprintListFilters underTest;
@@ -31,13 +31,13 @@ public class BlueprintListFiltersTest {
     @Spy
     private SupportedRuntimes supportedRuntimes;
 
-    @Before
-    public void setup() {
-        Whitebox.setInternalState(supportedRuntimes, "latestSupportedRuntime", "7.1.0");
+    @BeforeEach
+    void setup() {
+        ReflectionTestUtils.setField(supportedRuntimes, "latestSupportedRuntime", "7.1.0");
     }
 
     @Test
-    public void testUserManagedShallBeShown() {
+    void testUserManagedShallBeShown() {
         assertTrue(underTest.isDistroXDisplayed(createBlueprintView(USER_MANAGED, "7.0.0", null)));
         assertTrue(underTest.isDistroXDisplayed(createBlueprintView(USER_MANAGED, "7.1.0", null)));
         assertTrue(underTest.isDistroXDisplayed(createBlueprintView(USER_MANAGED, "7.2.0", null)));
@@ -48,15 +48,15 @@ public class BlueprintListFiltersTest {
     }
 
     @Test
-    public void testDefaultManagedShallBeShownBasedOnVersion() {
+    void testDefaultManagedShallBeShownBasedOnVersion() {
         assertTrue(underTest.isDistroXDisplayed(createBlueprintView(DEFAULT, "7.0.0", null)));
         assertTrue(underTest.isDistroXDisplayed(createBlueprintView(DEFAULT, "7.1.0", null)));
 
-        assertFalse("Version is newer than supported", underTest.isDistroXDisplayed(createBlueprintView(DEFAULT, "7.2.0", null)));
+        assertFalse(underTest.isDistroXDisplayed(createBlueprintView(DEFAULT, "7.2.0", null)), "Version is newer than supported");
     }
 
     @Test
-    public void testDatalakeShallBeShown() {
+    void testDatalakeShallBeShown() {
         assertTrue(underTest.isDistroXDisplayed(createBlueprintView(DEFAULT, "7.0.0", TRUE)));
         assertTrue(underTest.isDistroXDisplayed(createBlueprintView(DEFAULT, "7.1.0", TRUE)));
         assertTrue(underTest.isDistroXDisplayed(createBlueprintView(DEFAULT, "7.2.0", TRUE)));

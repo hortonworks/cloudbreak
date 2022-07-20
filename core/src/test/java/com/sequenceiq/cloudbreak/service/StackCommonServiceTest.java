@@ -15,10 +15,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -46,25 +44,29 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
-import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -72,6 +74,8 @@ import com.sequenceiq.flow.api.model.FlowType;
 class StackCommonServiceTest {
 
     private static final long WORKSPACE_ID = 1L;
+
+    private static final String ACCOUNT_ID = "accountId";
 
     private static final long STACK_ID = 2L;
 
@@ -84,6 +88,8 @@ class StackCommonServiceTest {
 
     private static final String SUBNET_ID = "aSubnetId";
 
+    private static final String SUBNET_ID2 = "otherSubnetId";
+
     @Mock
     private ImageCatalogService imageCatalogService;
 
@@ -91,10 +97,10 @@ class StackCommonServiceTest {
     private StackService stackService;
 
     @Mock
-    private StackOperationService stackOperationService;
+    private StackDtoService stackDtoService;
 
     @Mock
-    private UserService userService;
+    private StackOperationService stackOperationService;
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
@@ -113,9 +119,6 @@ class StackCommonServiceTest {
 
     @Mock
     private NodeCountLimitValidator nodeCountLimitValidator;
-
-    @Mock
-    private TransactionService transactionService;
 
     @Mock
     private StackUtil stackUtil;
@@ -188,12 +191,14 @@ class StackCommonServiceTest {
 
     @Test
     public void testThrowsExceptionWhenDeleteInstanceFromDataLake() {
-        Stack stack = new Stack();
-        stack.setType(StackType.DATALAKE);
-        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.getType()).thenReturn(StackType.DATALAKE);
+        when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.deleteInstanceInWorkspace(STACK_NAME, WORKSPACE_ID, "node1", true));
+                () -> underTest.deleteInstanceInWorkspace(STACK_NAME, ACCOUNT_ID, "node1", true));
 
         assertEquals("node1 is a node of a data lake cluster, therefore it's not allowed to delete/stop it.", exception.getMessage());
         verifyNoInteractions(stackOperationService);
@@ -201,27 +206,31 @@ class StackCommonServiceTest {
 
     @Test
     public void testDeleteInstanceFromDataHub() {
-        Stack stack = new Stack();
-        stack.setType(StackType.WORKLOAD);
-        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.getType()).thenReturn(StackType.WORKLOAD);
+        when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
 
-        underTest.deleteInstanceInWorkspace(STACK_NAME, WORKSPACE_ID, "node1", true);
+        underTest.deleteInstanceInWorkspace(STACK_NAME, ACCOUNT_ID, "node1", true);
 
         verify(stackOperationService).removeInstance(stack, "node1", true);
     }
 
     @Test
     public void testThrowsExceptionWhenDeleteInstancesFromDataLake() {
-        Stack stack = new Stack();
-        stack.setType(StackType.DATALAKE);
-        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.getType()).thenReturn(StackType.DATALAKE);
+        when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
 
         Set<String> nodes = new LinkedHashSet<>();
         nodes.add("node1");
         nodes.add("node2");
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.deleteMultipleInstancesInWorkspace(STACK_NAME, WORKSPACE_ID, nodes, true));
+                () -> underTest.deleteMultipleInstancesInWorkspace(STACK_NAME, ACCOUNT_ID, nodes, true));
 
         assertEquals("node1, node2 are nodes of a data lake cluster, therefore it's not allowed to delete/stop them.", exception.getMessage());
         verifyNoInteractions(stackOperationService);
@@ -229,48 +238,54 @@ class StackCommonServiceTest {
 
     @Test
     public void testDeleteInstancesFromDataHub() {
-        Stack stack = new Stack();
-        stack.setType(StackType.WORKLOAD);
-        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.getType()).thenReturn(StackType.WORKLOAD);
+        when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
 
         Set<String> nodes = new LinkedHashSet<>();
         nodes.add("node1");
         nodes.add("node2");
 
-        underTest.deleteMultipleInstancesInWorkspace(STACK_NAME, WORKSPACE_ID, nodes, true);
+        underTest.deleteMultipleInstancesInWorkspace(STACK_NAME, ACCOUNT_ID, nodes, true);
 
         verify(stackOperationService).removeInstances(stack, nodes, true);
     }
 
     @Test
     public void testStopInstancesInDatahub() {
-        Stack stack = new Stack();
-        stack.setType(StackType.WORKLOAD);
-        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
-        when(stackUtil.stopStartScalingEntitlementEnabled(stack)).thenReturn(true);
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.getType()).thenReturn(StackType.WORKLOAD);
+        when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
+        when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
 
         Set<String> instances = new LinkedHashSet<>();
         instances.add("i-09855f4f334550bce");
         instances.add("i-0c06d3e9d07bacad8");
 
-        underTest.stopMultipleInstancesInWorkspace(STACK_NAME, WORKSPACE_ID, instances, true);
+        underTest.stopMultipleInstancesInWorkspace(STACK_NAME, ACCOUNT_ID, instances, true);
 
         verify(stackOperationService).stopInstances(stack, instances, true);
     }
 
     @Test
     public void testThrowsExceptionWhenStopInstancesInDatalake() {
-        Stack stack = new Stack();
-        stack.setType(StackType.DATALAKE);
-        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_CRN, WORKSPACE_ID)).thenReturn(Optional.of(stack));
-        when(stackUtil.stopStartScalingEntitlementEnabled(stack)).thenReturn(true);
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.getType()).thenReturn(StackType.DATALAKE);
+        when(stackDtoService.getByNameOrCrn(STACK_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
 
         Set<String> instances = new LinkedHashSet<>();
         instances.add("i-09855f4f334550bce");
         instances.add("i-0c06d3e9d07bacad8");
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.stopMultipleInstancesInWorkspace(STACK_CRN, WORKSPACE_ID, instances, true));
+                () -> underTest.stopMultipleInstancesInWorkspace(STACK_CRN, ACCOUNT_ID, instances, true));
         assertEquals("i-09855f4f334550bce, i-0c06d3e9d07bacad8 are nodes of a data lake cluster, therefore it's not allowed to delete/stop them.",
                 exception.getMessage());
         verifyNoInteractions(stackOperationService);
@@ -278,15 +293,13 @@ class StackCommonServiceTest {
 
     @Test
     public void testStartInstancesInDefaultWorkspace() {
-        Stack stack = new Stack();
-        stack.setType(StackType.WORKLOAD);
+        StackDto stack = mock(StackDto.class);
 
-        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_CRN, WORKSPACE_ID)).thenReturn(Optional.of(stack));
-
+        when(stackDtoService.getByNameOrCrn(STACK_CRN, ACCOUNT_ID)).thenReturn(stack);
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
         when(cloudbreakUser.getUserCrn()).thenReturn("crn:cdp:" + Crn.Service.AUTOSCALE.getName() + ":us-west-1:altus:user:__internal__actor__");
         when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
-        when(stackUtil.stopStartScalingEntitlementEnabled(stack)).thenReturn(true);
+        when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
 
         UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
         updateStackV4Request.setWithClusterEvent(true);
@@ -296,26 +309,26 @@ class StackCommonServiceTest {
         updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustmentV4Request);
         when(regionAwareInternalCrnGeneratorFactory.autoscale()).thenReturn(regionAwareInternalCrnGenerator);
         // Regular flow
-        underTest.putStartInstancesInDefaultWorkspace(STACK_CRN, WORKSPACE_ID, updateStackV4Request, ScalingStrategy.STOPSTART_FALLBACK_TO_REGULAR);
+        underTest.putStartInstancesInDefaultWorkspace(STACK_CRN, ACCOUNT_ID, updateStackV4Request, ScalingStrategy.STOPSTART_FALLBACK_TO_REGULAR);
         verify(stackOperationService).updateNodeCountStartInstances(stack, updateStackV4Request.getInstanceGroupAdjustment(),
                 true, ScalingStrategy.STOPSTART_FALLBACK_TO_REGULAR);
 
         // Null scaling strategy
-        underTest.putStartInstancesInDefaultWorkspace(STACK_CRN, WORKSPACE_ID, updateStackV4Request, null);
+        underTest.putStartInstancesInDefaultWorkspace(STACK_CRN, ACCOUNT_ID, updateStackV4Request, null);
         verify(stackOperationService).updateNodeCountStartInstances(stack, updateStackV4Request.getInstanceGroupAdjustment(),
                 true, ScalingStrategy.STOPSTART);
 
         // Status is set - Bad Request
         updateStackV4Request.setStatus(StatusRequest.FULL_SYNC);
-        assertThrows(BadRequestException.class, () -> underTest.putStartInstancesInDefaultWorkspace(STACK_CRN, WORKSPACE_ID, updateStackV4Request,
+        assertThrows(BadRequestException.class, () -> underTest.putStartInstancesInDefaultWorkspace(STACK_CRN, ACCOUNT_ID, updateStackV4Request,
                 null));
     }
 
     @Test
     public void testvalidateNetworkScaleRequestWhenVariantIsNotSupportedForMultiAzButAzHasBeenPreferredInTheRequest() {
-        Stack stack = new Stack();
+        StackDto stack = mock(StackDto.class);
         String variant = AwsConstants.AwsVariant.AWS_VARIANT.name();
-        stack.setPlatformVariant(variant);
+        when(stack.getPlatformVariant()).thenReturn(variant);
         when(multiAzValidator.supportedVariant(variant)).thenReturn(Boolean.FALSE);
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
@@ -328,9 +341,9 @@ class StackCommonServiceTest {
 
     @Test
     public void testValidateNetworkScaleRequestWhenThereIsPreferredAzAndStackProvisionedToASingleSubnet() {
-        Stack stack = new Stack();
+        StackDto stack = mock(StackDto.class);
         String variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.name();
-        stack.setPlatformVariant(variant);
+        when(stack.getPlatformVariant()).thenReturn(variant);
         when(multiAzValidator.supportedVariant(variant)).thenReturn(Boolean.TRUE);
         when(multiAzValidator.collectSubnetIds(any())).thenReturn(Set.of(SUBNET_ID));
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
@@ -343,13 +356,16 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testPutScalingInWorkspaceWhenThereIsPreferredAzAndStackProvisionedInMultipleSubnetButScalingIsNotSupportedOnPlatform()
-            throws TransactionService.TransactionExecutionException {
-        Stack stack = new Stack();
-        stack.setCloudPlatform(AwsConstants.AWS_PLATFORM.value());
+    public void testPutScalingInWorkspaceWhenThereIsPreferredAzAndStackProvisionedInMultipleSubnetButScalingIsNotSupportedOnPlatform() {
+        StackDto stack = mock(StackDto.class);
+        StackView stackView = mock(StackView.class);
+        when(stack.getStack()).thenReturn(stackView);
+        when(stackView.getCloudPlatform()).thenReturn(AwsConstants.AWS_PLATFORM.value());
         String variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.name();
-        stack.setPlatformVariant(variant);
-        when(transactionService.required(any(Supplier.class))).thenReturn(stack);
+        when(stack.getPlatformVariant()).thenReturn(variant);
+        when(stackDtoService.getByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
+        when(multiAzValidator.supportedVariant(variant)).thenReturn(Boolean.TRUE);
+        when(multiAzValidator.collectSubnetIds(any())).thenReturn(Set.of(SUBNET_ID, SUBNET_ID2));
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
         StackScaleV4Request updateRequest = new StackScaleV4Request();
@@ -361,7 +377,7 @@ class StackCommonServiceTest {
         when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(any())).thenReturn(updateStackV4Request);
         when(cloudParameterCache.isUpScalingSupported(anyString())).thenReturn(Boolean.FALSE);
 
-        BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.putScalingInWorkspace(STACK_NAME, WORKSPACE_ID, updateRequest));
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.putScalingInWorkspace(STACK_NAME, ACCOUNT_ID, updateRequest));
         assertEquals(actual.getMessage(), "Upscaling is not supported on AWS cloudplatform");
 
     }
@@ -370,7 +386,8 @@ class StackCommonServiceTest {
     public void testRotateSaltPasswordWithoutEntitlement() {
         when(entitlementService.isSaltUserPasswordRotationEnabled(any())).thenReturn(false);
 
-        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, WORKSPACE_ID)))
+        assertThatThrownBy(() ->
+                ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL)))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage("Rotating SaltStack user password is not supported in your account");
     }
@@ -379,10 +396,10 @@ class StackCommonServiceTest {
     public void testRotateSaltPassword() throws CloudbreakOrchestratorException {
         when(entitlementService.isSaltUserPasswordRotationEnabled(any())).thenReturn(true);
 
-        ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, WORKSPACE_ID));
+        ThreadBasedUserCrnProvider.doAs(ACTOR_CRN, () -> underTest.rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL));
 
         verify(entitlementService).isSaltUserPasswordRotationEnabled(any());
-        verify(stackOperationService).rotateSaltPassword(STACK_CRN, WORKSPACE_ID);
+        verify(stackOperationService).rotateSaltPassword(STACK_CRN, ACCOUNT_ID, RotateSaltPasswordReason.MANUAL);
     }
 
     @Test
@@ -390,11 +407,14 @@ class StackCommonServiceTest {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setName(STACK_NAME.getName());
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOPPED));
-        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackDtoService.getStackViewByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.syncComponentVersionsFromCmInWorkspace(STACK_NAME, WORKSPACE_ID, Set.of()));
+                () -> underTest.syncComponentVersionsFromCmInWorkspace(STACK_NAME, ACCOUNT_ID, Set.of()));
 
         assertEquals("Reading CM and parcel versions from CM cannot be initiated as the cluster is in STOPPED state.",
                 badRequestException.getMessage());
@@ -405,13 +425,16 @@ class StackCommonServiceTest {
     public void testSyncWhenInvalidInstanceStatusThenBadRequest() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         stack.setName(STACK_NAME.getName());
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
-        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackDtoService.getStackViewByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
         when(instanceMetaDataService.anyInstanceStopped(STACK_ID)).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.syncComponentVersionsFromCmInWorkspace(STACK_NAME, WORKSPACE_ID, Set.of()));
+                () -> underTest.syncComponentVersionsFromCmInWorkspace(STACK_NAME, ACCOUNT_ID, Set.of()));
 
         assertEquals("Please start all stopped instances. Reading CM and parcel versions from CM can only be made when all your nodes in running state.",
                 badRequestException.getMessage());
@@ -423,12 +446,15 @@ class StackCommonServiceTest {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setName(STACK_NAME.getName());
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.NODE_FAILURE));
-        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
+        when(stackDtoService.getStackViewByNameOrCrn(STACK_NAME, ACCOUNT_ID)).thenReturn(stack);
         when(instanceMetaDataService.anyInstanceStopped(STACK_ID)).thenReturn(false);
         when(stackOperationService.syncComponentVersionsFromCm(stack, Set.of())).thenReturn(new FlowIdentifier(FlowType.FLOW, "1"));
 
-        FlowIdentifier flowIdentifier = underTest.syncComponentVersionsFromCmInWorkspace(STACK_NAME, WORKSPACE_ID, Set.of());
+        FlowIdentifier flowIdentifier = underTest.syncComponentVersionsFromCmInWorkspace(STACK_NAME, ACCOUNT_ID, Set.of());
 
         assertEquals("1", flowIdentifier.getPollableId());
         verify(instanceMetaDataService, times(1)).anyInstanceStopped(STACK_ID);

@@ -11,7 +11,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
@@ -28,10 +28,10 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionKeysOnMasterResp
 
 class MinionAcceptorTest {
 
-    private SaltConnector sc = mock(SaltConnector.class);
+    private final SaltConnector sc = mock(SaltConnector.class);
 
     @Test
-    public void handleIfAMinionInUnacceptedAndDeniedAtTheSameTime() {
+    void handleIfAMinionInUnacceptedAndDeniedAtTheSameTime() {
         MinionKeysOnMasterResponse response = mock(MinionKeysOnMasterResponse.class);
 
         Minion m1 = new Minion();
@@ -56,7 +56,7 @@ class MinionAcceptorTest {
     }
 
     @Test
-    public void fetchUnacceptedMinionsFromMasterMissingMinions() {
+    void fetchUnacceptedMinionsFromMasterMissingMinions() {
         MinionKeysOnMasterResponse response = mock(MinionKeysOnMasterResponse.class);
 
         Minion m1 = new Minion();
@@ -75,7 +75,7 @@ class MinionAcceptorTest {
     }
 
     @Test
-    public void testEmptyUnacceptedMinionFromMaster() throws CloudbreakOrchestratorFailedException {
+    void testEmptyUnacceptedMinionFromMaster() throws CloudbreakOrchestratorFailedException {
         MinionKeysOnMasterResponse response = mock(MinionKeysOnMasterResponse.class);
 
         Minion m1 = new Minion();
@@ -94,7 +94,7 @@ class MinionAcceptorTest {
     }
 
     @Test
-    public void testOldUnacceptedMinionFromMaster() throws CloudbreakOrchestratorFailedException {
+    void testOldUnacceptedMinionFromMaster() throws CloudbreakOrchestratorFailedException {
         MinionKeysOnMasterResponse response = mock(MinionKeysOnMasterResponse.class);
         FingerprintCollector fingerprintCollector = mock(FingerprintCollector.class);
 
@@ -118,7 +118,7 @@ class MinionAcceptorTest {
     }
 
     @Test
-    public void testFetchFingerprintsFromMasterFails() {
+    void testFetchFingerprintsFromMasterFails() {
         MinionKeysOnMasterResponse response = mock(MinionKeysOnMasterResponse.class);
 
         Minion m1 = new Minion();
@@ -139,7 +139,7 @@ class MinionAcceptorTest {
     }
 
     @Test
-    public void testFetchFingerprintsFromMasterValidation() {
+    void testFetchFingerprintsFromMasterValidation() {
         MinionKeysOnMasterResponse keysOnMasterResponse = mock(MinionKeysOnMasterResponse.class);
         MinionFingersOnMasterResponse fingersOnMasterResponse = mock(MinionFingersOnMasterResponse.class);
 
@@ -162,7 +162,7 @@ class MinionAcceptorTest {
     }
 
     @Test
-    public void testAllMinionsAcceptedWithMatchingFingerprint() throws CloudbreakOrchestratorFailedException {
+    void testAllMinionsAcceptedWithMatchingFingerprint() throws CloudbreakOrchestratorFailedException {
         MinionKeysOnMasterResponse keysOnMasterResponse = mock(MinionKeysOnMasterResponse.class);
         MinionFingersOnMasterResponse fingersOnMasterResponse = mock(MinionFingersOnMasterResponse.class);
         FingerprintFromSbCollector fingerprintCollector = mock(FingerprintFromSbCollector.class);
@@ -211,7 +211,7 @@ class MinionAcceptorTest {
     }
 
     @Test
-    public void handleIfMinionDenied() throws Exception {
+    void handleIfMinionDenied() throws Exception {
         MinionKeysOnMasterResponse response = mock(MinionKeysOnMasterResponse.class);
 
         Minion m1 = new Minion();

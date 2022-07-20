@@ -21,18 +21,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataTyp
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class ChangePrimaryGatewayService {
@@ -46,7 +47,7 @@ public class ChangePrimaryGatewayService {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ClusterService clusterService;
@@ -90,13 +91,11 @@ public class ChangePrimaryGatewayService {
                 npg.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
                 npg.setServer(Boolean.TRUE);
                 instanceMetaDataService.save(npg);
-                Stack updatedStack = stackService.getByIdWithListsInTransaction(stackId);
+                StackDto updatedStack = stackDtoService.getById(stackId);
                 String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(updatedStack);
 
-                Cluster cluster = updatedStack.getCluster();
-                cluster.setClusterManagerIp(gatewayIp);
+                clusterService.updateClusterManagerIp(updatedStack.getCluster().getId(), gatewayIp);
                 LOGGER.info("Primary gateway IP has been updated to: '{}'", gatewayIp);
-                clusterService.save(cluster);
                 clusterPublicEndpointManagementService.changeGateway(updatedStack);
                 return null;
             });
@@ -105,9 +104,10 @@ public class ChangePrimaryGatewayService {
         }
     }
 
-    public void ambariServerStarted(StackView stack) {
+    public void ambariServerStarted(StackView stack, ClusterView cluster, InstanceMetadataView primaryGatewayInstanceMetadata) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Gateway successfully changed.");
-        flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY, stackUtil.extractClusterManagerIp(stack));
+        String clusterManagerIp = stackUtil.extractClusterManagerIp(cluster, primaryGatewayInstanceMetadata);
+        flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY, clusterManagerIp);
     }
 
     public void changePrimaryGatewayFailed(long stackId, Exception exception) {

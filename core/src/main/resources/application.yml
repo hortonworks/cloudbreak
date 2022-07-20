@@ -50,10 +50,12 @@ spring:
   datasource:
     maxActive: 30
   jpa:
+    show-sql: false
     properties:
       hibernate:
+        format_sql: false
         jdbc:
-          batch_size: 50
+          batch_size: 400
         order_inserts: true
         order_updates: true
   lifecycle:
@@ -114,7 +116,7 @@ cb:
     AWS: 100
     AZURE: 100
     GCP: 100
-  enabled.linux.types: redhat6,redhat7,centos6,centos7
+  enabled.linux.types: redhat6,redhat7,redhat8,centos6,centos7
   default.gateway.cidr: 0.0.0.0/0
   publicip:
   etc.config.dir: /etc/cloudbreak
@@ -799,6 +801,8 @@ cb:
   loadBalancer:
     supportedPlatforms: AWS,YARN,AZURE,GCP
 
+  upscale:
+    zombie.auto.cleanup.enabled: true
   upgrade:
     failure.sync:
       sdx.enabled: false
@@ -905,7 +909,7 @@ existing-stack-patcher:
       date-before: 2022-01-18
       custom-rpm-url: https://archive.cloudera.com/cp_clients/thunderhead-metering-heartbeat-application-0.1-SNAPSHOT.x86_64.rpm
     cluster-public-endpoint:
-      enabled: true
+      enabled: false
       related-stacks:
 
 clusterdns:

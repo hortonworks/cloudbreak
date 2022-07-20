@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Service
 class CmMgmtServiceConfigMemoryService implements CmConfigServiceDelegate {
@@ -25,9 +25,9 @@ class CmMgmtServiceConfigMemoryService implements CmConfigServiceDelegate {
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Override
-    public void setConfigs(Stack stack, ApiRoleList apiRoleList) {
+    public void setConfigs(StackDtoDelegate stack, ApiRoleList apiRoleList) {
         Optional<ApiRole> serviceMonitor = getApiRole("SERVICEMONITOR", apiRoleList);
-        Set<String> components = cmTemplateProcessorFactory.get(stack.getCluster().getBlueprint().getBlueprintText())
+        Set<String> components = cmTemplateProcessorFactory.get(stack.getBlueprint().getBlueprintText())
                 .getComponentsByHostGroup()
                 .values()
                 .stream()
@@ -43,7 +43,7 @@ class CmMgmtServiceConfigMemoryService implements CmConfigServiceDelegate {
         serviceMonitor.ifPresent(apiRole ->
                 addConfig(apiRole,
                     createApiConfig("firehose_non_java_memory_bytes",
-                        sMONMemoryWorkaroundService.firehoseNonJavaMemoryBytes(stack.getType(), components, stack.getFullNodeCount())
+                        sMONMemoryWorkaroundService.firehoseNonJavaMemoryBytes(stack.getType(), components, stack.getFullNodeCount().intValue())
                     )
                 )
         );

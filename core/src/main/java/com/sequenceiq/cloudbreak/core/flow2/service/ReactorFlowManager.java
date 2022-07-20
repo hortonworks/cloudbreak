@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
@@ -64,6 +65,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEv
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
@@ -166,7 +169,7 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId, boolean forced) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
-        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
+        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false, false);
         ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, Collections.singletonMap(hostGroup, 1),
                 Collections.singletonMap(hostGroup, Collections.singleton(privateId)), ScalingType.DOWNSCALE_TOGETHER,
                 new Promise<>(), details);
@@ -187,15 +190,15 @@ public class ReactorFlowManager {
 
         String selector = FlowChainTriggers.STOPSTART_DOWNSCALE_CHAIN_TRIGGER_EVENT;
 
-        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
+        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false, false);
         ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
-                Collections.singletonMap(hostGroup, privateIds), ScalingType.DOWNSCALE_TOGETHER,  new Promise<>(), details);
+                Collections.singletonMap(hostGroup, privateIds), ScalingType.DOWNSCALE_TOGETHER, new Promise<>(), details);
         return reactorNotifier.notify(stackId, selector, event);
     }
 
     public FlowIdentifier triggerStackRemoveInstances(Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap, boolean forced) {
         String selector = FlowChainTriggers.FULL_DOWNSCALE_MULTIHOSTGROUP_TRIGGER_EVENT;
-        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
+        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false, false);
         MultiHostgroupClusterAndStackDownscaleTriggerEvent event = new MultiHostgroupClusterAndStackDownscaleTriggerEvent(selector, stackId,
                 instanceIdsByHostgroupMap, details, ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
         return reactorNotifier.notify(stackId, selector, event);
@@ -212,9 +215,9 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public FlowIdentifier triggerRotateSaltPassword(Long stackId) {
+    public FlowIdentifier triggerRotateSaltPassword(Long stackId, RotateSaltPasswordReason reason) {
         String selector = RotateSaltPasswordEvent.ROTATE_SALT_PASSWORD_EVENT.event();
-        return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
+        return reactorNotifier.notify(stackId, selector, new RotateSaltPasswordRequest(stackId, reason));
     }
 
     public FlowIdentifier triggerClusterReInstall(Long stackId) {
@@ -231,6 +234,11 @@ public class ReactorFlowManager {
         String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
         return reactorNotifier.notify(stackId, selector, new DistroXUpgradeTriggerEvent(selector, stackId, imageChangeDto, replaceVms, lockComponents,
                 variant));
+    }
+
+    public FlowIdentifier triggerDistroXUpgradePreparation(Long stackId, ImageChangeDto imageChangeDto, boolean lockComponents) {
+        String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_PREPARATION_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, new DistroXUpgradePreparationChainTriggerEvent(selector, stackId, imageChangeDto, lockComponents));
     }
 
     public FlowIdentifier triggerDatalakeClusterRecovery(Long stackId) {

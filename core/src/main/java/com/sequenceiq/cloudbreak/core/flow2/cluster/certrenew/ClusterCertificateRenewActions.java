@@ -39,7 +39,7 @@ public class ClusterCertificateRenewActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new ClusterCertificateReissueRequest(context.getStack().getId());
+                return new ClusterCertificateReissueRequest(context.getStackId());
             }
         };
     }
@@ -55,7 +55,7 @@ public class ClusterCertificateRenewActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new ClusterCertificateRedeployRequest(context.getStack().getId());
+                return new ClusterCertificateRedeployRequest(context.getStackId());
             }
         };
     }
@@ -71,7 +71,7 @@ public class ClusterCertificateRenewActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                return new StackEvent(ClusterCertificateRenewEvent.CLUSTER_CERTIFICATE_RENEW_FINISHED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ClusterCertificateRenewEvent.CLUSTER_CERTIFICATE_RENEW_FINISHED_EVENT.event(), context.getStackId());
             }
         };
     }
@@ -81,13 +81,13 @@ public class ClusterCertificateRenewActions {
         return new AbstractStackFailureAction<ClusterCreationState, ClusterCreationEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                certificateRenewService.certificateRenewalFailed(context.getStackView(), payload.getException());
+                certificateRenewService.certificateRenewalFailed(context.getStack(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterCertificateRenewEvent.CLUSTER_CERTIFICATE_RENEW_FAILURE_HANDLED_EVENT.event(), context.getStackView().getId());
+                return new StackEvent(ClusterCertificateRenewEvent.CLUSTER_CERTIFICATE_RENEW_FAILURE_HANDLED_EVENT.event(), context.getStackId());
             }
         };
     }

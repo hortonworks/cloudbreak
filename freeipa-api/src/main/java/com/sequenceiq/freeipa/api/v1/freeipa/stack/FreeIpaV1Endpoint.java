@@ -202,8 +202,7 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FreeIpaOperationDescriptions.ROTATE_SALT_PASSWORD, produces = MediaType.APPLICATION_JSON,
             notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "rotateSaltPasswordV1")
-    void rotateSaltPasswordInternal(@QueryParam("environment") @NotEmpty String environmentCrn,
-            @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+    FlowIdentifier rotateSaltPassword(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @POST
     @Path("cluster-proxy/register")

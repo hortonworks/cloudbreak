@@ -28,7 +28,7 @@ public class GenerateImageCatalogService {
 
     public CloudbreakImageCatalogV3 generateImageCatalogForStack(Stack stack) {
         try {
-            Image image = stackImageService.getCurrentImage(stack);
+            Image image = stackImageService.getCurrentImage(stack.getId());
             if (!Strings.isNullOrEmpty(image.getImageCatalogUrl())) {
                 StatedImage statedImage = imageCatalogService.getImage(stack.getWorkspace().getId(), image.getImageCatalogUrl(), image.getImageCatalogName(),
                         image.getImageId());

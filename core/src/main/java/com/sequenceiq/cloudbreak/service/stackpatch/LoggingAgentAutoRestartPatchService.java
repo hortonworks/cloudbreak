@@ -79,7 +79,7 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
         try {
             boolean affected = false;
             if (StackType.WORKLOAD.equals(stack.getType())) {
-                Image image = stackImageService.getCurrentImage(stack);
+                Image image = stackImageService.getCurrentImage(stack.getId());
                 Map<String, String> packageVersions = image.getPackageVersions();
                 boolean hasCdpLoggingAgentPackageVersion = packageVersions.containsKey(ImagePackageVersion.CDP_LOGGING_AGENT.getKey());
                 if (hasCdpLoggingAgentPackageVersion

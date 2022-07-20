@@ -8,30 +8,29 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 public interface ClusterDecomissionService {
-    void verifyNodesAreRemovable(Stack stack, Collection<InstanceMetaData> removableInstances);
+    void verifyNodesAreRemovable(StackDtoDelegate stack, Collection<InstanceMetadataView> removableInstances);
 
-    Set<InstanceMetaData> collectDownscaleCandidates(@Nonnull HostGroup hostGroup, Integer scalingAdjustment,
-            Set<InstanceMetaData> instanceMetaDatasInStack) throws CloudbreakException;
+    Set<InstanceMetadataView> collectDownscaleCandidates(@Nonnull String hostGroupName, Integer scalingAdjustment,
+            Set<InstanceMetadataView> instanceMetaDatasInStack) throws CloudbreakException;
 
-    Map<String, InstanceMetaData> collectHostsToRemove(@Nonnull HostGroup hostGroup, Set<String> hostNames);
+    Map<String, InstanceMetadataView> collectHostsToRemove(@Nonnull String hostGroupName, Set<String> hostNames);
 
-    Set<String> decommissionClusterNodes(Map<String, InstanceMetaData> hostsToRemove);
+    Set<String> decommissionClusterNodes(Map<String, InstanceMetadataView> hostsToRemove);
 
-    Set<String> decommissionClusterNodesStopStart(Map<String, InstanceMetaData> hostsToRemove, long pollingTimeout);
+    Set<String> decommissionClusterNodesStopStart(Map<String, InstanceMetadataView> hostsToRemove, long pollingTimeout);
 
     void enterMaintenanceMode(Set<String> hostFqdnList);
 
     void removeManagementServices();
 
-    void deleteHostFromCluster(InstanceMetaData data);
+    void deleteHostFromCluster(InstanceMetadataView data);
 
-    void removeHostsFromCluster(List<InstanceMetaData> hosts) throws ClusterClientInitException;
+    void removeHostsFromCluster(List<InstanceMetadataView> hosts) throws ClusterClientInitException;
 
     void deleteUnusedCredentialsFromCluster();
 

@@ -332,6 +332,9 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_NOT_NEEDED("cluster.upgrade.not.needed"),
     CLUSTER_UPGRADE_FINISHED("cluster.upgrade.finished.newversion"),
     CLUSTER_UPGRADE_FINISHED_NOVERSION("cluster.upgrade.finished.noversion"),
+    CLUSTER_UPGRADE_PREPARATION_STARTED("cluster.upgrade.preparation.started"),
+    CLUSTER_UPGRADE_PREPARATION_FINISHED("cluster.upgrade.preparation.finished"),
+    CLUSTER_UPGRADE_PREPARATION_FAILED("cluster.upgrade.preparation.failed"),
     CLUSTER_UPGRADE_DOWNLOAD_PARCEL("cluster.upgrade.download.parcel"),
     CLUSTER_UPGRADE_DISTRIBUTE_PARCEL("cluster.upgrade.distribute.parcel"),
     CLUSTER_UPGRADE_ACTIVATE_PARCEL("cluster.upgrade.activate.parcel"),
@@ -385,6 +388,7 @@ public enum ResourceEvent {
     CLUSTER_STOPPED("cluster.stopped"),
     CLUSTER_STOP_FAILED("cluster.stop.failed"),
     CLUSTER_SCALING_DOWN("cluster.scaling.down"),
+    CLUSTER_SCALING_DOWN_ZOMBIE_NODES("cluster.scaling.down.zombie.nodes"),
     CLUSTER_SCALED_DOWN("cluster.scaled.down"),
     CLUSTER_SCALED_DOWN_NONE("cluster.scaled.down.none"),
     CLUSTER_SCALING_FAILED("cluster.scaling.failed"),
@@ -415,6 +419,7 @@ public enum ResourceEvent {
     CLUSTER_MANAGER_CLUSTER_SERVICES_STARTING("cluster.ambari.cluster.services.starting"),
     CLUSTER_MANAGER_CLUSTER_SERVICES_STARTED("cluster.ambari.cluster.services.started"),
     CLUSTER_REMOVING_NODES("cluster.removing.nodes"),
+    CLUSTER_REMOVING_ZOMBIE_NODES("cluster.removing.zombie.nodes"),
     CLUSTER_FORCE_REMOVING_NODES("cluster.force.removing.nodes"),
     CLUSTER_LOST_NODE_DECOMMISSION_ABORTED_TWICE("cluster.removing.node.lost.node.decommission.aborted"),
     CLUSTER_CERTIFICATE_REISSUE("cluster.certificate.reissue"),
@@ -502,6 +507,7 @@ public enum ResourceEvent {
 
     DATALAKE_SALT_PASSWORD_ROTATION_IN_PROGRESS("datalake.salt.passwordrotation.in.progress"),
     DATALAKE_SALT_PASSWORD_ROTATION_FAILED("datalake.salt.passwordrotation.failed"),
+    DATALAKE_SALT_PASSWORD_ROTATION_FINISHED("datalake.salt.passwordrotation.finished"),
 
     // deprecated
     STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped");

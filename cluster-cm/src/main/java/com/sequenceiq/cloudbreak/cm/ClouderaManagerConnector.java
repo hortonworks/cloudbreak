@@ -11,11 +11,12 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDiagnosticsService;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterHealthService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSecurityService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Service(ClusterApi.CLOUDERA_MANAGER)
 @Scope("prototype")
@@ -24,11 +25,11 @@ public class ClouderaManagerConnector implements ClusterApi {
     @Inject
     private ApplicationContext applicationContext;
 
-    private final Stack stack;
+    private final StackDtoDelegate stack;
 
     private final HttpClientConfig clientConfig;
 
-    public ClouderaManagerConnector(Stack stack, HttpClientConfig clientConfig) {
+    public ClouderaManagerConnector(StackDtoDelegate stack, HttpClientConfig clientConfig) {
         this.stack = stack;
         this.clientConfig = clientConfig;
     }
@@ -66,5 +67,10 @@ public class ClouderaManagerConnector implements ClusterApi {
     @Override
     public ClusterDiagnosticsService clusterDiagnosticsService() {
         return applicationContext.getBean(ClouderaManagerDiagnosticsService.class, stack, clientConfig);
+    }
+
+    @Override
+    public ClusterHealthService clusterHealthService() {
+        return applicationContext.getBean(ClouderaManagerClusterHealthService.class, stack, clientConfig);
     }
 }

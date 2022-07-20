@@ -19,10 +19,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -30,14 +30,15 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Service
 public class ClusterUpscaleService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpscaleService.class);
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
@@ -62,31 +63,31 @@ public class ClusterUpscaleService {
 
     public void installServicesOnNewHosts(Long stackId, Set<String> hostGroupNames, Boolean repair, Boolean restartServices,
             Map<String, Set<String>> hostGroupsWithHostNames, Map<String, Integer> hostGroupWithAdjustment) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
+        StackDto stackDto = stackDtoService.getById(stackId);
         LOGGER.debug("Start installing CM services");
-        removeUnusedParcelComponents(stack);
-        Set<HostGroup> hostGroupSetWithRecipes = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
-        Set<HostGroup> hostGroupSetWithInstanceMetadas = hostGroupService.getByCluster(stack.getCluster().getId());
+        removeUnusedParcelComponents(stackDto);
+        Set<HostGroup> hostGroupSetWithRecipes = hostGroupService.getByClusterWithRecipes(stackDto.getCluster().getId());
+        Set<HostGroup> hostGroupSetWithInstanceMetadas = hostGroupService.getByCluster(stackDto.getCluster().getId());
         Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup = hostGroupSetWithInstanceMetadas.stream()
                 .filter(hostGroup -> hostGroupNames.contains(hostGroup.getName()))
                 .collect(Collectors.toMap(Function.identity(), hostGroup -> hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet()));
-        recipeEngine.executePostClouderaManagerStartRecipesOnTargets(stack, hostGroupSetWithRecipes,
-                clusterHostServiceRunner.collectUpscaleCandidates(stack.getCluster().getId(), hostGroupWithAdjustment, false));
+        recipeEngine.executePostClouderaManagerStartRecipesOnTargets(stackDto, hostGroupSetWithRecipes,
+                clusterHostServiceRunner.collectUpscaleCandidates(stackDto, hostGroupWithAdjustment, false));
         Set<InstanceMetaData> runningInstanceMetaDataSet =
                 hostGroupSetWithInstanceMetadas.stream()
                         .flatMap(hostGroup -> hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet().stream())
                         .collect(Collectors.toSet());
-        ClusterApi connector = getClusterConnector(stack);
+        ClusterApi connector = getClusterConnector(stackDto);
         List<String> upscaledHosts = connector.upscaleCluster(instanceMetaDatasByHostGroup);
         if (Boolean.TRUE.equals(repair)) {
             recommissionHostsIfNeeded(connector, hostGroupsWithHostNames);
-            restartServicesIfNecessary(restartServices, stack, connector);
+            restartServicesIfNecessary(restartServices, stackDto, connector);
         }
         setInstanceStatus(runningInstanceMetaDataSet, upscaledHosts);
     }
 
-    private void removeUnusedParcelComponents(Stack stack) throws CloudbreakException {
-        ParcelOperationStatus parcelOperationStatus = parcelService.removeUnusedParcelComponents(stack);
+    private void removeUnusedParcelComponents(StackDto stackDto) throws CloudbreakException {
+        ParcelOperationStatus parcelOperationStatus = parcelService.removeUnusedParcelComponents(stackDto);
         if (!parcelOperationStatus.getFailed().isEmpty()) {
             LOGGER.error("There are failed parcel removals: {}", parcelOperationStatus);
             throw new CloudbreakException(format("Failed to remove the following parcels: %s", parcelOperationStatus.getFailed()));
@@ -102,8 +103,8 @@ public class ClusterUpscaleService {
                 });
     }
 
-    private void restartServicesIfNecessary(Boolean restartServices, Stack stack, ClusterApi connector) throws CloudbreakException {
-        if (shouldRestartServices(restartServices, stack)) {
+    private void restartServicesIfNecessary(Boolean restartServices, StackDto stackDto, ClusterApi connector) throws CloudbreakException {
+        if (shouldRestartServices(restartServices, stackDto)) {
             try {
                 LOGGER.info("Trying to restart services");
                 connector.restartAll(false);
@@ -113,15 +114,15 @@ public class ClusterUpscaleService {
         }
     }
 
-    private boolean shouldRestartServices(Boolean restartServices, Stack stack) {
-        return restartServices && stack.getNotTerminatedAndNotZombieInstanceMetaDataList().size() == stack.getRunningInstanceMetaDataSet().size();
+    private boolean shouldRestartServices(Boolean restartServices, StackDto stackDto) {
+        return restartServices && stackDto.getAllAvailableInstances().size() == stackDto.getRunningInstanceMetaDataSet().size();
     }
 
     public void executePostRecipesOnNewHosts(Long stackId, Map<String, Integer> hostGroupWithAdjustment) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        StackDto stackDto = stackDtoService.getById(stackId);
         LOGGER.debug("Start executing post recipes");
-        recipeEngine.executePostInstallRecipesOnTargets(stack, hostGroupService.getByClusterWithRecipes(stack.getCluster().getId()),
-                clusterHostServiceRunner.collectUpscaleCandidates(stack.getCluster().getId(), hostGroupWithAdjustment, false));
+        recipeEngine.executePostInstallRecipesOnTargets(stackDto, hostGroupService.getByClusterWithRecipes(stackDto.getCluster().getId()),
+                clusterHostServiceRunner.collectUpscaleCandidates(stackDto, hostGroupWithAdjustment, false));
     }
 
     public Map<String, String> gatherInstalledComponents(Long stackId, String hostname) {
@@ -130,40 +131,41 @@ public class ClusterUpscaleService {
     }
 
     public void ensureComponentsAreStopped(Long stackId, Map<String, String> components, String hostname) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        StackDto stackDto = stackDtoService.getById(stackId);
         LOGGER.info("Ensuring components are in stopped state in ambari on host {}", hostname);
-        getClusterConnector(stack).ensureComponentsAreStopped(components, hostname);
+        getClusterConnector(stackDto).ensureComponentsAreStopped(components, hostname);
     }
 
     public void initComponents(Long stackId, Map<String, String> components, String hostname) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        StackDto stackDto = stackDtoService.getById(stackId);
         LOGGER.info("Start init components in ambari on host {}", hostname);
-        getClusterConnector(stack).initComponents(components, hostname);
+        getClusterConnector(stackDto).initComponents(components, hostname);
     }
 
     public void stopComponents(Long stackId, Map<String, String> components, String hostname) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        StackDto stackDto = stackDtoService.getById(stackId);
         LOGGER.info("Start stop components in ambari on host {}", hostname);
-        getClusterConnector(stack).stopComponents(components, hostname);
+        getClusterConnector(stackDto).stopComponents(components, hostname);
     }
 
     public void installComponents(Long stackId, Map<String, String> components, String hostname) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        StackDto stackDto = stackDtoService.getById(stackId);
         LOGGER.info("Start installing components in ambari on host {}", hostname);
-        getClusterConnector(stack).installComponents(components, hostname);
+        getClusterConnector(stackDto).installComponents(components, hostname);
     }
 
     public void regenerateKerberosKeytabs(Long stackId, String hostname) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        StackDto stackDto = stackDtoService.getById(stackId);
+        StackView stack = stackDto.getStack();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         LOGGER.info("Start regenerate kerberos keytabs in ambari on host {}", hostname);
-        getClusterConnector(stack).clusterModificationService().regenerateKerberosKeytabs(hostname, kerberosConfig);
+        getClusterConnector(stackDto).clusterModificationService().regenerateKerberosKeytabs(hostname, kerberosConfig);
     }
 
     public void startComponents(Long stackId, Map<String, String> components, String hostname) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        StackDto stackDto = stackDtoService.getById(stackId);
         LOGGER.info("Start components in ambari on host {}", hostname);
-        getClusterConnector(stack).startComponents(components, hostname);
+        getClusterConnector(stackDto).startComponents(components, hostname);
     }
 
     private void recommissionHostsIfNeeded(ClusterApi connector, Map<String, Set<String>> hostGroupsWithHostNames) {
@@ -182,12 +184,12 @@ public class ClusterUpscaleService {
     }
 
     public void restartAll(Long stackId) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        StackDto stackDto = stackDtoService.getById(stackId);
         LOGGER.info("Restart all in ambari");
-        getClusterConnector(stack).restartAll(false);
+        getClusterConnector(stackDto).restartAll(false);
     }
 
-    private ClusterApi getClusterConnector(Stack stack) {
-        return clusterApiConnectors.getConnector(stack);
+    private ClusterApi getClusterConnector(StackDto stackDto) {
+        return clusterApiConnectors.getConnector(stackDto);
     }
 }

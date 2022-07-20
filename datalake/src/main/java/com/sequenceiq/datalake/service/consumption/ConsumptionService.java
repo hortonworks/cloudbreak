@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.consumption.api.v1.consumption.model.common.ResourceType;
 import com.sequenceiq.consumption.api.v1.consumption.model.request.StorageConsumptionRequest;
@@ -50,6 +51,7 @@ public class ConsumptionService {
     }
 
     private void scheduleStorageConsumptionCollectionForStorageLocation(SdxCluster sdxCluster, String storageLocation) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         StorageConsumptionRequest request = new StorageConsumptionRequest();
         request.setEnvironmentCrn(sdxCluster.getEnvCrn());
         request.setMonitoredResourceCrn(sdxCluster.getResourceCrn());
@@ -57,8 +59,9 @@ public class ConsumptionService {
         request.setMonitoredResourceType(ResourceType.DATALAKE);
         request.setStorageLocation(storageLocation);
         String accountId = sdxCluster.getAccountId();
-        LOGGER.info("Executing storage consumption collection scheduling for storage base location: account '{}' and request '{}'", accountId, request);
-        consumptionClientService.scheduleStorageConsumptionCollection(accountId, request);
+        LOGGER.info("Executing storage consumption collection scheduling for storage base location: account '{}', user '{} and request '{}'",
+                accountId, userCrn, request);
+        consumptionClientService.scheduleStorageConsumptionCollection(accountId, request, userCrn);
     }
 
     public void unscheduleStorageConsumptionCollectionIfNeeded(SdxCluster sdxCluster) {
@@ -73,18 +76,21 @@ public class ConsumptionService {
 
     private void unscheduleStorageConsumptionCollection(SdxCluster sdxCluster) {
         String storageBaseLocation = sdxCluster.getCloudStorageBaseLocation();
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         if (!Strings.isNullOrEmpty(storageBaseLocation)) {
-            unscheduleStorageConsumptionCollectionForStorageLocation(sdxCluster.getAccountId(), sdxCluster.getResourceCrn(), storageBaseLocation);
+            unscheduleStorageConsumptionCollectionForStorageLocation(sdxCluster.getAccountId(), sdxCluster.getResourceCrn(), storageBaseLocation, userCrn);
         } else {
             LOGGER.warn("Skipping storage consumption collection unscheduling for storage base location because it is not provided: " +
                             "cloudStorageBaseLocation='{}'", storageBaseLocation);
         }
     }
 
-    private void unscheduleStorageConsumptionCollectionForStorageLocation(String accountId, String monitoredResourceCrn, String storageLocation) {
-        LOGGER.info("Executing storage consumption collection unscheduling for storage base location: account '{}', resource '{}' and storage location '{}'",
-                accountId, monitoredResourceCrn, storageLocation);
-        consumptionClientService.unscheduleStorageConsumptionCollection(accountId, monitoredResourceCrn, storageLocation);
+    private void unscheduleStorageConsumptionCollectionForStorageLocation(String accountId, String monitoredResourceCrn,
+            String storageLocation, String initiatorUserCrn) {
+        LOGGER.info("Executing storage consumption collection unscheduling for storage base location: " +
+                        "account '{}', user '{} resource '{}' and storage location '{}'",
+                accountId, initiatorUserCrn, monitoredResourceCrn, storageLocation);
+        consumptionClientService.unscheduleStorageConsumptionCollection(accountId, monitoredResourceCrn, storageLocation, initiatorUserCrn);
     }
 
 }

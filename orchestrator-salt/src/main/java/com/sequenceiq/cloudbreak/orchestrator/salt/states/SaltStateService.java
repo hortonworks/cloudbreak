@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -53,18 +54,16 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.service.Retry;
 
-public class SaltStates {
+@Service
+public class SaltStateService {
 
     public static final Pattern RUNNING_HIGHSTATE_JID = Pattern.compile(".*The function .*state\\.highstate.* is running as PID.*with jid (\\d+).*");
 
     private static final long NETWORK_IPADDRS_TIMEOUT = 15L;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SaltStates.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SaltStateService.class);
 
-    private SaltStates() {
-    }
-
-    public static Map<String, String> getUuidList(SaltConnector sc) {
+    public Map<String, String> getUuidList(SaltConnector sc) {
         ApplyResponse applyResponse = applyStateAllSync(sc, "disks.get-uuid-list");
         List<Map<String, JsonNode>> result = (List<Map<String, JsonNode>>) applyResponse.getResult();
         if (CollectionUtils.isEmpty(result) || 1 != result.size()) {
@@ -81,40 +80,40 @@ public class SaltStates {
         }));
     }
 
-    public static ApplyResponse addGrain(SaltConnector sc, Target<String> target, String key, String value) {
+    public ApplyResponse addGrain(SaltConnector sc, Target<String> target, String key, String value) {
         return measure(() -> sc.run(target, "grains.append", LOCAL, ApplyResponse.class, key, value), LOGGER,
                 "Grains append took {}ms for key [{}] value [{}] to targets: {}", key, value, target);
     }
 
-    public static ApplyResponse removeGrain(SaltConnector sc, Target<String> target, String key, String value) {
+    public ApplyResponse removeGrain(SaltConnector sc, Target<String> target, String key, String value) {
         return measure(() -> sc.run(target, "grains.remove", LOCAL, ApplyResponse.class, key, value), LOGGER,
                 "Grains remove took {}ms for key [{}] value [{}] to targets: {}", key, value, target);
     }
 
-    public static ApplyResponse syncAll(SaltConnector sc) {
+    public ApplyResponse syncAll(SaltConnector sc) {
         return measure(() -> sc.run(Glob.ALL, "saltutil.sync_all", LOCAL_ASYNC, ApplyResponse.class), LOGGER,
                 "SyncAll call took {}ms");
     }
 
-    public static ApplyResponse updateMine(SaltConnector sc) {
+    public ApplyResponse updateMine(SaltConnector sc) {
         return measure(() -> sc.run(Glob.ALL, "mine.update", LOCAL, ApplyResponse.class), LOGGER,
                 "Mine update took {}msd");
     }
 
-    public static String highstate(SaltConnector sc) {
+    public String highstate(SaltConnector sc) {
         return highstate(sc, Glob.ALL);
     }
 
-    public static String highstate(SaltConnector sc, Target<String> target) {
+    public String highstate(SaltConnector sc, Target<String> target) {
         return measure(() -> sc.run(target, "state.highstate", LOCAL_ASYNC, ApplyResponse.class).getJid(), LOGGER,
                 "HisghState call took {}ms for targets: {}", target);
     }
 
-    public static ApplyFullResponse showState(SaltConnector sc, String state) {
+    public ApplyFullResponse showState(SaltConnector sc, String state) {
         return sc.run(Glob.ALL, "state.show_sls", LOCAL, ApplyFullResponse.class, state);
     }
 
-    public static Multimap<String, Map<String, String>> jidInfo(SaltConnector sc, String jid, StateType stateType) {
+    public Multimap<String, Map<String, String>> jidInfo(SaltConnector sc, String jid, StateType stateType) {
         if (StateType.HIGH.equals(stateType)) {
             try {
                 return highStateJidInfo(sc, jid);
@@ -132,7 +131,7 @@ public class SaltStates {
         return ArrayListMultimap.create();
     }
 
-    private static Optional<String> extractJidIfPossible(SaltExecutionWentWrongException e) {
+    private Optional<String> extractJidIfPossible(SaltExecutionWentWrongException e) {
         Optional<String> jid = Optional.empty();
         if (e.getMessage() != null) {
             Matcher matcher = RUNNING_HIGHSTATE_JID.matcher(e.getMessage());
@@ -145,20 +144,20 @@ public class SaltStates {
         return jid;
     }
 
-    private static Multimap<String, Map<String, String>> applyStateJidInfo(SaltConnector sc, String jid) {
+    private Multimap<String, Map<String, String>> applyStateJidInfo(SaltConnector sc, String jid) {
         JidInfoResponse jidInfo = sc.run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", jid);
         LOGGER.debug("Salt apply state jid info: {}", jidInfo);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
         return collectMissingTargets(states);
     }
 
-    private static Multimap<String, Map<String, String>> highStateJidInfo(SaltConnector sc, String jid) {
+    private Multimap<String, Map<String, String>> highStateJidInfo(SaltConnector sc, String jid) {
         JidInfoResponse jidInfo = sc.run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", jid, "missing", "True");
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
     }
 
-    private static Multimap<String, Map<String, String>> collectMissingTargets(Map<String, List<RunnerInfo>> stringRunnerInfoObjectMap) {
+    private Multimap<String, Map<String, String>> collectMissingTargets(Map<String, List<RunnerInfo>> stringRunnerInfoObjectMap) {
         Multimap<String, Map<String, String>> missingTargetsWithErrors = ArrayListMultimap.create();
         for (Entry<String, List<RunnerInfo>> stringMapEntry : stringRunnerInfoObjectMap.entrySet()) {
             LOGGER.debug("Collect missing targets from host: {}", stringMapEntry.getKey());
@@ -176,7 +175,7 @@ public class SaltStates {
         return missingTargetsWithErrors;
     }
 
-    private static void logRunnerInfos(Entry<String, List<RunnerInfo>> stringMapEntry) {
+    private void logRunnerInfos(Entry<String, List<RunnerInfo>> stringMapEntry) {
         List<RunnerInfo> runnerInfos = stringMapEntry.getValue();
         runnerInfos.sort(Collections.reverseOrder(new DurationComparator()));
         double sum = runnerInfos.stream().mapToDouble(RunnerInfo::getDuration).sum();
@@ -184,7 +183,7 @@ public class SaltStates {
                 TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)));
     }
 
-    public static boolean jobIsRunning(SaltConnector sc, String jid) throws CloudbreakOrchestratorFailedException {
+    public boolean jobIsRunning(SaltConnector sc, String jid) throws CloudbreakOrchestratorFailedException {
         RunningJobsResponse runningInfo = getRunningJobs(sc);
         for (Map<String, Map<String, Object>> results : runningInfo.getResult()) {
             for (Entry<String, Map<String, Object>> stringMapEntry : results.entrySet()) {
@@ -196,21 +195,21 @@ public class SaltStates {
         return false;
     }
 
-    public static RunningJobsResponse getRunningJobs(SaltConnector sc) throws CloudbreakOrchestratorFailedException {
+    public RunningJobsResponse getRunningJobs(SaltConnector sc) throws CloudbreakOrchestratorFailedException {
         RunningJobsResponse runningInfo = sc.run("jobs.active", RUNNER, RunningJobsResponse.class);
         LOGGER.debug("Active salt jobs: {}", runningInfo);
         validateRunningInfoResultNotNull(runningInfo);
         return runningInfo;
     }
 
-    private static void validateRunningInfoResultNotNull(RunningJobsResponse runningInfo) throws CloudbreakOrchestratorFailedException {
+    private void validateRunningInfoResultNotNull(RunningJobsResponse runningInfo) throws CloudbreakOrchestratorFailedException {
         if (runningInfo == null || runningInfo.getResult() == null) {
             throw new CloudbreakOrchestratorFailedException("Configuration Management Software (Salt) installed on CDP cluster has returned an empty response "
                     + "multiple times. Contact Cloudera support with this message for resolving this error.");
         }
     }
 
-    public static Set<String> collectMinionIpAddresses(Retry retry, SaltConnector sc) {
+    public Set<String> collectMinionIpAddresses(Retry retry, SaltConnector sc) {
         Set<String> minionIpAddresses = new HashSet<>();
         try {
             return collectMinionIpAddressesWithRetry(retry, sc, minionIpAddresses);
@@ -223,7 +222,7 @@ public class SaltStates {
         }
     }
 
-    private static Set<String> collectMinionIpAddressesWithRetry(Retry retry, SaltConnector sc, Set<String> minionIpAddresses) {
+    private Set<String> collectMinionIpAddressesWithRetry(Retry retry, SaltConnector sc, Set<String> minionIpAddresses) {
         return retry.testWith1SecDelayMax5Times(() -> {
             try {
                 return collectMinionIpAddressesAndHandleUnreachableNodes(sc, minionIpAddresses);
@@ -236,7 +235,7 @@ public class SaltStates {
         });
     }
 
-    private static Set<String> collectMinionIpAddressesAndHandleUnreachableNodes(SaltConnector sc, Set<String> minionIpAddresses) {
+    private Set<String> collectMinionIpAddressesAndHandleUnreachableNodes(SaltConnector sc, Set<String> minionIpAddresses) {
         MinionIpAddressesResponse minionIpAddressesResponse = collectMinionIpAddresses(sc);
         if (minionIpAddressesResponse == null) {
             LOGGER.debug("Minions ip address collection returned null value");
@@ -250,7 +249,7 @@ public class SaltStates {
         return minionIpAddresses;
     }
 
-    public static MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc) {
+    public MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc) {
         MinionIpAddressesResponse minionIpAddressesResponse = measure(() -> sc.run(Glob.ALL, "network.ipaddrs", LOCAL,
                         MinionIpAddressesResponse.class, NETWORK_IPADDRS_TIMEOUT),
                 LOGGER, "Network IP address call took {}ms");
@@ -258,22 +257,22 @@ public class SaltStates {
         return minionIpAddressesResponse;
     }
 
-    public static MinionStatusSaltResponse collectNodeStatus(SaltConnector sc) {
+    public MinionStatusSaltResponse collectNodeStatus(SaltConnector sc) {
         MinionStatusSaltResponse minionStatus = measure(() -> sc.run("manage.status", RUNNER, MinionStatusSaltResponse.class), LOGGER,
                 "Manage status call took {}ms");
         LOGGER.debug("Minion status: {}", minionStatus);
         return minionStatus;
     }
 
-    public static PingResponse ping(SaltConnector sc, Target<String> target) {
+    public PingResponse ping(SaltConnector sc, Target<String> target) {
         return measure(() -> sc.run(target, "test.ping", LOCAL, PingResponse.class), LOGGER, "Ping took {}ms");
     }
 
-    public static PingResponse ping(SaltConnector sc) {
+    public PingResponse ping(SaltConnector sc) {
         return measure(() -> sc.run(Glob.ALL, "test.ping", LOCAL, PingResponse.class), LOGGER, "Ping took {}ms");
     }
 
-    public static void stopMinions(SaltConnector sc, Set<String> privateIPs) {
+    public void stopMinions(SaltConnector sc, Set<String> privateIPs) {
         SaltAction saltAction = new SaltAction(SaltActionType.STOP);
         for (String entry : privateIPs) {
             Minion minion = new Minion();
@@ -283,7 +282,7 @@ public class SaltStates {
         sc.action(saltAction);
     }
 
-    public static GenericResponses changePassword(SaltConnector sc, Set<String> privateIPs, String password) throws CloudbreakOrchestratorFailedException {
+    public GenericResponses changePassword(SaltConnector sc, Set<String> privateIPs, String password) throws CloudbreakOrchestratorFailedException {
         SaltAuth auth = new SaltAuth(password);
         SaltAction saltAction = new SaltAction(SaltActionType.CHANGE_PASSWORD);
         for (String privateIp : privateIPs) {
@@ -295,7 +294,7 @@ public class SaltStates {
         return sc.action(saltAction);
     }
 
-    public static Map<String, List<PackageInfo>> getPackageVersions(SaltConnector sc, Map<String, Optional<String>> packages) {
+    public Map<String, List<PackageInfo>> getPackageVersions(SaltConnector sc, Map<String, Optional<String>> packages) {
         Map<String, List<PackageInfo>> packageVersions = new HashMap<>();
             packages.forEach((key, value) -> {
                 Map<String, PackageInfo> singlePackageVersion = getSinglePackageVersion(sc, key, value);
@@ -304,7 +303,7 @@ public class SaltStates {
             return packageVersions;
         }
 
-    private static void addToVersionList(Map<String, List<PackageInfo>> packageVersions, Entry<String, PackageInfo> entry) {
+    private void addToVersionList(Map<String, List<PackageInfo>> packageVersions, Entry<String, PackageInfo> entry) {
         String hostKey = entry.getKey();
         PackageInfo packageInfoValue = entry.getValue();
         if (packageVersions.containsKey(hostKey)) {
@@ -316,7 +315,7 @@ public class SaltStates {
         }
     }
 
-    private static Map<String, PackageInfo> getSinglePackageVersion(SaltConnector sc, String singlePackage, Optional<String> versionPattern) {
+    private Map<String, PackageInfo> getSinglePackageVersion(SaltConnector sc, String singlePackage, Optional<String> versionPattern) {
         PackageVersionResponse packageVersionResponse = measure(() -> sc.run(Glob.ALL, "pkg.version", LOCAL, PackageVersionResponse.class, singlePackage),
                 LOGGER, "Get package version took {}ms for package [{}] with pattern [{}]", singlePackage, versionPattern);
         Map<String, String> packageVersionsMap =
@@ -328,7 +327,7 @@ public class SaltStates {
         return result;
     }
 
-    public static Map<String, String> runCommand(Retry retry, SaltConnector sc, String command) {
+    public Map<String, String> runCommand(Retry retry, SaltConnector sc, String command) {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
                 CommandExecutionResponse resp = measure(() -> sc.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, command), LOGGER,
@@ -342,7 +341,7 @@ public class SaltStates {
         });
     }
 
-    public static Map<String, String> replacePatternInFile(Retry retry, SaltConnector sc, String file, String pattern, String replace) {
+    public Map<String, String> replacePatternInFile(Retry retry, SaltConnector sc, String file, String pattern, String replace) {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
                 String[] args = new String[]{file, String.format("pattern='%s'", pattern), String.format("repl='%s'", replace)};
@@ -357,7 +356,7 @@ public class SaltStates {
         });
     }
 
-    public static Map<String, String> runCommandOnHosts(Retry retry, SaltConnector sc, Target<String> target, String command) {
+    public Map<String, String> runCommandOnHosts(Retry retry, SaltConnector sc, Target<String> target, String command) {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
                 CommandExecutionResponse resp = measure(() -> sc.run(target, "cmd.run", LOCAL, CommandExecutionResponse.class, command), LOGGER,
@@ -371,46 +370,46 @@ public class SaltStates {
         });
     }
 
-    public static Map<String, JsonNode> getGrains(SaltConnector sc, String grain) {
+    public Map<String, JsonNode> getGrains(SaltConnector sc, String grain) {
         return getGrains(sc, Glob.ALL, grain);
     }
 
-    public static Map<String, JsonNode> getGrains(SaltConnector sc, Target<String> target, String grain) {
+    public Map<String, JsonNode> getGrains(SaltConnector sc, Target<String> target, String grain) {
         ApplyResponse resp = measure(() -> sc.run(target, "grains.get", LOCAL, ApplyResponse.class, grain), LOGGER,
                 "GrainsGet took {}ms for grain [{}]", grain);
         Iterable<Map<String, JsonNode>> result = resp.getResult();
         return result.iterator().hasNext() ? result.iterator().next() : new HashMap<>();
     }
 
-    public static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target) {
+    public ApplyResponse applyState(SaltConnector sc, String service, Target<String> target) {
         return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service), LOGGER,
                 "ApplyState async took {}ms for service [{}]", service);
     }
 
-    public static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target,
+    public ApplyResponse applyState(SaltConnector sc, String service, Target<String> target,
             Map<String, Object> inlinePillars) throws JsonProcessingException {
         String inlinePillarsStr = new ObjectMapper().writeValueAsString(inlinePillars);
         return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service, String.format("pillar=%s", inlinePillarsStr)), LOGGER,
                 "ApplyState with pillars took {}ms for service [{}]", service);
     }
 
-    public static ApplyResponse applyConcurrentState(SaltConnector sc, String service, Target<String> target,
+    public ApplyResponse applyConcurrentState(SaltConnector sc, String service, Target<String> target,
             Map<String, Object> inlinePillars) throws JsonProcessingException {
         String inlinePillarsStr = new ObjectMapper().writeValueAsString(inlinePillars);
         return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class,  service, String.format("pillar=%s", inlinePillarsStr),
                 "concurrent=True"), LOGGER, "ApplyConcurrentState took {}ms for service [{}]", service);
     }
 
-    public static ApplyResponse applyStateAll(SaltConnector sc, String service) {
+    public ApplyResponse applyStateAll(SaltConnector sc, String service) {
         return applyState(sc, service, Glob.ALL);
     }
 
-    private static ApplyResponse applyStateAllSync(SaltConnector sc, String service) {
+    private ApplyResponse applyStateAllSync(SaltConnector sc, String service) {
         return measure(() -> sc.run(Glob.ALL, "state.apply", LOCAL, ApplyResponse.class, service), LOGGER,
                 "ApplyState in sync for ALL took {}ms for service [{}]", service);
     }
 
-    private static PackageInfo parseVersion(String packageName, String versionCommandOutput, Optional<String> pattern) {
+    private PackageInfo parseVersion(String packageName, String versionCommandOutput, Optional<String> pattern) {
         PackageInfo packageInfo = new PackageInfo();
         packageInfo.setName(packageName);
         packageInfo.setVersion(versionCommandOutput);
@@ -427,7 +426,7 @@ public class SaltStates {
         return packageInfo;
     }
 
-    public static boolean unboundClusterConfigPresentOnAnyNodes(SaltConnector sc, Target<String> target) {
+    public boolean unboundClusterConfigPresentOnAnyNodes(SaltConnector sc, Target<String> target) {
         return measure(() -> sc.run(target, "file.file_exists", LOCAL, PingResponse.class, "/etc/unbound/conf.d/00-cluster.conf"), LOGGER,
                 "Getting information about existence of unbound config took {}ms").getResult().stream()
                 .anyMatch(map -> map.values().stream().anyMatch(Boolean::booleanValue));

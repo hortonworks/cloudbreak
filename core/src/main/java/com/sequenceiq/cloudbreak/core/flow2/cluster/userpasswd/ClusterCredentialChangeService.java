@@ -26,14 +26,14 @@ public class ClusterCredentialChangeService {
     }
 
     public void finishCredentialReplace(Long stackId, Long clusterId, String user, String password) {
-        Cluster cluster = clusterService.getById(clusterId);
+        Cluster cluster = clusterService.getByIdWithLists(clusterId);
         cluster.setUserName(user);
         cluster.setPassword(password);
         finishCredentialChange(stackId, cluster);
     }
 
     public void finishCredentialUpdate(Long stackId, Long clusterId, String password) {
-        Cluster cluster = clusterService.getById(clusterId);
+        Cluster cluster = clusterService.getByIdWithLists(clusterId);
         cluster.setPassword(password);
         finishCredentialChange(stackId, cluster);
     }

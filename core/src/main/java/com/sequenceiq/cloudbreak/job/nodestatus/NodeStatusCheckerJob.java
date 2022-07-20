@@ -17,6 +17,7 @@ import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
@@ -55,6 +56,7 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
     private StackService stackService;
 
     @Inject
+    @Qualifier("stackViewServiceDeprecated")
     private StackViewService stackViewService;
 
     @Inject

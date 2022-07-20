@@ -40,6 +40,8 @@ import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
+import com.sequenceiq.cloudbreak.workspace.model.Tenant;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -95,14 +97,17 @@ class DistroXUpgradeServiceTest {
         stack = new Stack();
         stack.setId(STACK_ID);
         stack.setPlatformVariant("variant");
+        Workspace workspace = new Workspace();
+        workspace.setTenant(new Tenant());
+        stack.setWorkspace(workspace);
     }
 
     @Test
     public void testUpgradeResponseHasReason() {
         UpgradeV4Request request = new UpgradeV4Request();
-        when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(new UpgradeV4Response("reason", null));
+        when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(new UpgradeV4Response("reason", null, false));
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request));
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
     }
 
     @Test
@@ -110,7 +115,7 @@ class DistroXUpgradeServiceTest {
         UpgradeV4Request request = new UpgradeV4Request();
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(new UpgradeV4Response());
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request));
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
     }
 
     @Test
@@ -122,7 +127,8 @@ class DistroXUpgradeServiceTest {
         when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(clouderaManagerLicenseProvider.getLicense(any())).thenThrow(new BadRequestException("No valid CM license is present"));
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request));
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
         assertEquals(exception.getMessage(), "No valid CM license is present");
     }
 
@@ -148,7 +154,7 @@ class DistroXUpgradeServiceTest {
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString()))
                 .thenReturn(flowIdentifier);
 
-        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
+        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
 
         verify(paywallAccessChecker).checkPaywallAccess(any(), any());
         assertEquals(flowIdentifier, result.getFlowIdentifier());
@@ -179,7 +185,7 @@ class DistroXUpgradeServiceTest {
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString()))
                 .thenReturn(flowIdentifier);
 
-        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
+        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
 
         verifyNoInteractions(paywallAccessChecker);
         assertEquals(flowIdentifier, result.getFlowIdentifier());
@@ -212,7 +218,7 @@ class DistroXUpgradeServiceTest {
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString()))
                 .thenReturn(flowIdentifier);
         // WHEN
-        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
+        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
         // THEN
         verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS, "variant");
         assertFalse(result.isReplaceVms());
@@ -240,7 +246,7 @@ class DistroXUpgradeServiceTest {
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), anyBoolean(), anyString())).thenReturn(flowIdentifier);
         // WHEN
-        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
+        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
         // THEN
         verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true, true, "variant");
         assertTrue(result.isReplaceVms());
@@ -258,12 +264,9 @@ class DistroXUpgradeServiceTest {
         imageInfoV4Response.setImageId("imgId");
         imageInfoV4Response.setImageCatalogName("catalogName");
         when(imageSelector.determineImageId(request, response.getUpgradeCandidates())).thenReturn(imageInfoV4Response);
-        ArgumentCaptor<StackImageChangeV4Request> imageChangeRequestArgumentCaptor = ArgumentCaptor.forClass(StackImageChangeV4Request.class);
-        ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, imageInfoV4Response.getImageId());
-        when(stackCommonService.createImageChangeDto(eq(CLUSTER), eq(WS_ID), imageChangeRequestArgumentCaptor.capture())).thenReturn(imageChangeDto);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(stack);
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request));
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false));
     }
 
     @Test
@@ -289,7 +292,7 @@ class DistroXUpgradeServiceTest {
         when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString()))
                 .thenReturn(flowIdentifier);
         // WHEN
-        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
+        UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request, false);
         // THEN
         verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS, "variant");
         assertFalse(result.isReplaceVms());

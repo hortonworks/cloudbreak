@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurationProperty;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.exception.CustomConfigurationsCreationException;
 import com.sequenceiq.cloudbreak.repository.CustomConfigurationPropertyRepository;
 import com.sequenceiq.cloudbreak.repository.CustomConfigurationsRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -143,7 +142,7 @@ class CustomConfigurationsServiceTest {
         when(customConfigurationsRepository.findByNameAndAccountId(TEST_NAME, TEST_ACCOUNT_ID_1)).thenReturn(Optional.of(customConfigurations));
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN_1,
-                () -> assertThrows(CustomConfigurationsCreationException.class, () -> underTest.create(customConfigurations, TEST_ACCOUNT_ID_1)));
+                () -> assertThrows(BadRequestException.class, () -> underTest.create(customConfigurations, TEST_ACCOUNT_ID_1)));
     }
 
     @Test

@@ -94,7 +94,7 @@ public class SMONMemoryWorkaroundService {
     }
 
     //CHECKSTYLE:OFF: checkstyle:magicnumber
-    private double getAtLeastMin(int numberOfNodes, double memoryInGig) {
+    private double getAtLeastMin(long numberOfNodes, double memoryInGig) {
         double minMemoryInGig;
         if (numberOfNodes <= smonSmallClusterMaxSize) {
             minMemoryInGig = 1;

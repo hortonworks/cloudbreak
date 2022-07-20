@@ -33,14 +33,14 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -74,8 +74,6 @@ class ExternalDatabaseCreationActionsTest {
 
     private static final String STACK_CRN = "stackCrn";
 
-    private static final Stack STACK = new Stack();
-
     @Mock
     private StackUpdaterService stackUpdaterService;
 
@@ -107,7 +105,7 @@ class ExternalDatabaseCreationActionsTest {
     private Event<Object> event;
 
     @Mock
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Mock
     private CloudbreakMetricService metricService;
@@ -148,20 +146,23 @@ class ExternalDatabaseCreationActionsTest {
     @Mock
     private FlowEvent flowEvent;
 
+    @Mock
+    private StackView stack;
+
     @InjectMocks
     private ExternalDatabaseCreationActions underTest;
 
     @BeforeEach
     void setup() {
-        STACK.setId(STACK_ID);
         FlowParameters flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN, null);
+        when(stack.getId()).thenReturn(STACK_ID);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
         when(stateContext.getExtendedState()).thenReturn(extendedState);
         when(extendedState.getVariables()).thenReturn(new HashMap<>());
         when(stateContext.getStateMachine()).thenReturn(stateMachine);
         when(stateMachine.getState()).thenReturn(state);
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
-        when(stackService.getByIdWithClusterInTransaction(any())).thenReturn(STACK);
+        when(stackDtoService.getStackViewById(any())).thenReturn(stack);
 
         when(stateContext.getEvent()).thenReturn(flowEvent);
         when(tracer.buildSpan(anyString())).thenReturn(spanBuilder);
@@ -195,7 +196,7 @@ class ExternalDatabaseCreationActionsTest {
         verifyNoMoreInteractions(stackUpdaterService);
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
-        verify(metricService).incrementMetricCounter(MetricType.EXTERNAL_DATABASE_CREATION_SUCCESSFUL, STACK);
+        verify(metricService).incrementMetricCounter(MetricType.EXTERNAL_DATABASE_CREATION_SUCCESSFUL, stack);
         assertThat(selectorArgumentCaptor.getValue()).isEqualTo("EXTERNAL_DATABASE_CREATION_FINISHED_EVENT");
         Object capturedPayload = payloadArgumentCaptor.getValue();
         assertThat(capturedPayload).isInstanceOf(StackEvent.class);
@@ -210,7 +211,7 @@ class ExternalDatabaseCreationActionsTest {
                 new CreateExternalDatabaseFailed(STACK_ID,  EXTERNAL_DATABASE_CREATION_FAILED_EVENT.event(),
                         STACK_NAME, null, expectedException);
 
-        when(stackService.getByIdWithClusterInTransaction(any())).thenReturn(STACK);
+        when(stackDtoService.getStackViewById(any())).thenReturn(stack);
 
         when(runningFlows.get(anyString())).thenReturn(flow);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(createExternalDatabaseFailedPayload);
@@ -221,7 +222,7 @@ class ExternalDatabaseCreationActionsTest {
                 ResourceEvent.CLUSTER_EXTERNAL_DATABASE_CREATION_FAILED, MESSAGE);
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
-        verify(metricService).incrementMetricCounter(MetricType.EXTERNAL_DATABASE_CREATION_FAILED, STACK);
+        verify(metricService).incrementMetricCounter(MetricType.EXTERNAL_DATABASE_CREATION_FAILED, stack);
         verify(flow).setFlowFailed(exceptionCaptor.capture());
         assertThat(selectorArgumentCaptor.getValue()).isEqualTo("EXTERNAL_DATABASE_CREATION_FAILURE_HANDLED_EVENT");
         Object capturedPayload = payloadArgumentCaptor.getValue();
@@ -245,7 +246,7 @@ class ExternalDatabaseCreationActionsTest {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
-        ReflectionTestUtils.setField(action, null, stackService, StackService.class);
+        ReflectionTestUtils.setField(action, null, stackDtoService, StackDtoService.class);
         ReflectionTestUtils.setField(action, null, metricService, MetricService.class);
         ReflectionTestUtils.setField(action, null, tracer, Tracer.class);
     }

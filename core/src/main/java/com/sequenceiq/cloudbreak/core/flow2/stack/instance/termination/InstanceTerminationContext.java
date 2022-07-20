@@ -1,49 +1,43 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination;
 
-import java.util.Collection;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public class InstanceTerminationContext extends CommonContext {
 
-    private final Stack stack;
+    private final StackView stack;
 
     private final CloudContext cloudContext;
 
     private final CloudCredential cloudCredential;
 
-    private final CloudStack cloudStack;
-
-    private final List<CloudResource> cloudResources;
-
     private final List<CloudInstance> cloudInstances;
 
-    private final List<InstanceMetaData> instanceMetaDataList;
+    private final List<InstanceMetadataView> instanceMetaDataList;
 
-    public InstanceTerminationContext(FlowParameters flowParameters, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential,
-            CloudStack cloudStack, Collection<CloudResource> cloudResources, List<CloudInstance> cloudInstances, List<InstanceMetaData> instanceMetaDataList) {
+    public InstanceTerminationContext(FlowParameters flowParameters, StackView stack, CloudContext cloudContext, CloudCredential cloudCredential,
+            List<CloudInstance> cloudInstances, List<InstanceMetadataView> instanceMetaDataList) {
         super(flowParameters);
         this.stack = stack;
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
-        this.cloudStack = cloudStack;
-        this.cloudResources = ImmutableList.copyOf(cloudResources);
         this.cloudInstances = cloudInstances;
         this.instanceMetaDataList = instanceMetaDataList;
     }
 
-    public Stack getStack() {
+    public StackView getStack() {
         return stack;
+    }
+
+    public Long getStackId() {
+        return stack.getId();
     }
 
     public CloudContext getCloudContext() {
@@ -54,19 +48,11 @@ public class InstanceTerminationContext extends CommonContext {
         return cloudCredential;
     }
 
-    public CloudStack getCloudStack() {
-        return cloudStack;
-    }
-
-    public List<CloudResource> getCloudResources() {
-        return cloudResources;
-    }
-
     public List<CloudInstance> getCloudInstances() {
         return cloudInstances;
     }
 
-    public List<InstanceMetaData> getInstanceMetaDataList() {
+    public List<InstanceMetadataView> getInstanceMetaDataList() {
         return instanceMetaDataList;
     }
 }

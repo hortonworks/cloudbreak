@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter.util;
 
-import java.security.KeyPair;
-import java.security.cert.X509Certificate;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -12,7 +10,6 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
-import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToGatewayTopologyConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
@@ -50,19 +47,5 @@ public class GatewayConvertUtil {
         gateway.setSsoType(source.getSsoType() != null ? source.getSsoType() : SSOType.NONE);
         gateway.setTokenCert(source.getTokenCert());
         gateway.setKnoxMasterSecret(PasswordUtil.generatePassword());
-    }
-
-    public void generateSignKeys(Gateway gateway) {
-        if (gateway != null) {
-            if (gateway.getSignCert() == null) {
-                KeyPair identityKey = PkiUtil.generateKeypair();
-                KeyPair signKey = PkiUtil.generateKeypair();
-                X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKey);
-
-                gateway.setSignKey(PkiUtil.convert(identityKey.getPrivate()));
-                gateway.setSignPub(PkiUtil.convert(identityKey.getPublic()));
-                gateway.setSignCert(PkiUtil.convert(cert));
-            }
-        }
     }
 }

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_EXISTING_UPGRADE_COMMAND_EVENT;
 
-import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -17,16 +16,18 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ClusterManagerCommand;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -41,7 +42,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandler extends Excep
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Override
     protected Selectable doAccept(HandlerEvent<ClusterUpgradeExistingUpgradeCommandValidationEvent> event) {
@@ -51,10 +52,10 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandler extends Excep
 
         Image targetImage = request.getImage();
         Long stackId = request.getResourceId();
-        Stack stack = getStack(stackId);
+        StackDto stackDto = getStack(stackId);
 
-        ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Optional<ClusterManagerCommand> optionalUpgradeCommand = connector.clusterStatusService().findCommand(stack, ClusterCommandType.UPGRADE_CLUSTER);
+        ClusterApi connector = clusterApiConnectors.getConnector(stackDto);
+        Optional<ClusterManagerCommand> optionalUpgradeCommand = connector.clusterStatusService().findCommand(stackDto, ClusterCommandType.UPGRADE_CLUSTER);
 
         if (optionalUpgradeCommand.isEmpty()) {
             LOGGER.debug("There is no existing upgradeCDH command, validation passed successfully");
@@ -63,7 +64,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandler extends Excep
             ClusterManagerCommand upgradeCommand = optionalUpgradeCommand.get();
 
             if (upgradeCommand.getActive() || (!upgradeCommand.getSuccess() &&  upgradeCommand.getRetryable())) {
-                return validateIfExistingRuntimeMatchesTargetRuntime(stack, connector, targetImage);
+                return validateIfExistingRuntimeMatchesTargetRuntime(stackDto.getStack(), connector, targetImage);
             } else {
                 LOGGER.debug("There is no retryable upgradeCDH command, validation passed successfully");
                 return new ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent(stackId);
@@ -71,7 +72,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandler extends Excep
         }
     }
 
-    private StackEvent validateIfExistingRuntimeMatchesTargetRuntime(Stack stack, ClusterApi connector, Image targetImage) {
+    private StackEvent validateIfExistingRuntimeMatchesTargetRuntime(StackView stack, ClusterApi connector, Image targetImage) {
         String activeRuntimeParcelVersion = getActiveRuntimeParcelVersion(stack, connector);
         String targetRuntimeBuildNumber = getTargetRuntimeBuildNumber(targetImage);
         Long stackId = stack.getId();
@@ -108,18 +109,17 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandler extends Excep
         return targetImage.getPackageVersions().get(ImagePackageVersion.STACK.getKey());
     }
 
-    private String getActiveRuntimeParcelVersion(Stack stack, ClusterApi connector) {
+    private String getActiveRuntimeParcelVersion(StackView stack, ClusterApi connector) {
         return connector.gatherInstalledParcels(stack.getName())
-                .entrySet()
                 .stream()
-                .filter(parcel -> parcel.getKey().equals(StackType.CDH.name()))
+                .filter(parcel -> parcel.getName().equals(StackType.CDH.name()))
                 .findFirst()
-                .map(Map.Entry::getValue)
+                .map(ParcelInfo::getVersion)
                 .orElse("");
     }
 
-    private Stack getStack(Long stackId) {
-        return stackService.getByIdWithListsInTransaction(stackId);
+    private StackDto getStack(Long stackId) {
+        return stackDtoService.getById(stackId);
     }
 
     @Override

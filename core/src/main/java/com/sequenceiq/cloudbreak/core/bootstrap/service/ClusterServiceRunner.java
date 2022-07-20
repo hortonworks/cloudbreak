@@ -11,13 +11,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.converter.util.GatewayConvertUtil;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -25,14 +20,18 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
+import com.sequenceiq.cloudbreak.view.GatewayView;
+import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @Component
 public class ClusterServiceRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterServiceRunner.class);
 
     @Inject
-    private StackService stackService;
+    private StackDtoService stackDtoService;
 
     @Inject
     private ClusterService clusterService;
@@ -50,68 +49,55 @@ public class ClusterServiceRunner {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private GatewayConvertUtil convertUtil;
-
-    @Inject
     private GatewayService gatewayService;
 
-    public void runAmbariServices(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Cluster cluster = clusterService.getById(stack.getCluster().getId());
+    public void runAmbariServices(StackDto stackDto) {
+        ClusterView cluster = stackDto.getCluster();
 
-        generateGatewaySignKeys(cluster);
+        generateGatewaySignKeys(stackDto.getGateway());
 
         MDCBuilder.buildMdcContext(cluster);
-        hostRunner.runClusterServices(stack, cluster, Map.of());
-        updateAmbariClientConfig(stack, cluster);
-        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaDataSet()) {
+        hostRunner.runClusterServices(stackDto, Map.of());
+        for (InstanceMetadataView instanceMetaData : stackDto.getRunningInstanceMetaDataSet()) {
             instanceMetaDataService.updateInstanceStatus(instanceMetaData, InstanceStatus.SERVICES_RUNNING);
         }
 
     }
 
-    private void generateGatewaySignKeys(Cluster cluster) {
-        Gateway gateway = cluster.getGateway();
+    private void generateGatewaySignKeys(GatewayView gateway) {
         if (Objects.nonNull(gateway)) {
-            convertUtil.generateSignKeys(gateway);
-            gatewayService.save(gateway);
+            gatewayService.generateAndUpdateSignKeys(gateway);
         }
     }
 
-    public void updateAmbariClientConfig(Stack stack, Cluster cluster) {
-        String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
-        HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, gatewayIp);
-        Cluster updatedCluster = clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
-        stack.setCluster(updatedCluster);
+    public String updateAmbariClientConfig(StackDto stackDto) {
+        String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(stackDto);
+        HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stackDto.getStack(), gatewayIp);
+        clusterService.updateAmbariClientConfig(stackDto.getCluster().getId(), ambariClientConfig);
+        return gatewayIp;
     }
 
     public void redeployGatewayCertificate(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Long clusterId = stack.getCluster().getId();
-        Cluster cluster = clusterService.findOneWithLists(clusterId).orElseThrow(NotFoundException.notFound("Cluster", clusterId));
-        hostRunner.redeployGatewayCertificate(stack, cluster);
+        StackDto stackDto = stackDtoService.getById(stackId);
+        hostRunner.redeployGatewayCertificate(stackDto);
     }
 
     public void redeployGatewayPillar(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Long clusterId = stack.getCluster().getId();
-        Cluster cluster = clusterService.findOneWithLists(clusterId).orElseThrow(NotFoundException.notFound("Cluster", clusterId));
-        hostRunner.redeployGatewayPillarOnly(stack, cluster);
+        StackDto stack = stackDtoService.getById(stackId);
+        hostRunner.redeployGatewayPillarOnly(stack);
     }
 
     public void redeployStates(Long stackId) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Long clusterId = stack.getCluster().getId();
-        Cluster cluster = clusterService.findOneWithLists(clusterId).orElseThrow(NotFoundException.notFound("Cluster", clusterId));
-        hostRunner.redeployStates(stack, cluster);
+        StackDto stack = stackDtoService.getById(stackId);
+        hostRunner.redeployStates(stack);
     }
 
     public String changePrimaryGateway(Long stackId) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        return hostRunner.changePrimaryGateway(stack);
+        StackDto stackDto = stackDtoService.getById(stackId);
+        return hostRunner.changePrimaryGateway(stackDto);
     }
 
-    private HttpClientConfig buildAmbariClientConfig(Stack stack, String gatewayPublicIp) {
-        return tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), gatewayPublicIp, stack.cloudPlatform());
+    private HttpClientConfig buildAmbariClientConfig(StackView stack, String gatewayPublicIp) {
+        return tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), gatewayPublicIp, stack.getCloudPlatform());
     }
 }

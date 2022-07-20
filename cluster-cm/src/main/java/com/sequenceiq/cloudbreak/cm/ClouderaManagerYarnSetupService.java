@@ -20,7 +20,7 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
 @Service
 public class ClouderaManagerYarnSetupService {
@@ -36,7 +36,7 @@ public class ClouderaManagerYarnSetupService {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
-    void suppressWarnings(Stack stack, ApiClient apiClient) {
+    void suppressWarnings(StackDtoDelegate stack, ApiClient apiClient) {
         if (!CloudPlatform.YARN.equalsIgnoreCase(stack.getCloudPlatform())) {
             return;
         }

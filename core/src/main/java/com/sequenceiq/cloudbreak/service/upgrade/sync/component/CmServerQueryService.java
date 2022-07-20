@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -14,9 +13,10 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.PackageInfo;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.upgrade.sync.common.ParcelInfo;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 
 @Service
 public class CmServerQueryService {
@@ -29,6 +29,12 @@ public class CmServerQueryService {
     @Inject
     private CmVersionQueryService cmVersionQueryService;
 
+    public Set<ParcelInfo> queryAllParcels(Stack stack) {
+        Set<ParcelInfo> parcels = apiConnectors.getConnector(stack).getAllParcels(stack.getName());
+        LOGGER.debug("Reading parcel info from CM server, found parcels: " + parcels);
+        return parcels;
+    }
+
     /**
      * Will query all active parcels (CDH and non-CDH as well) from the CM server. Received format:
      * CDH -> 7.2.7-1.cdh7.2.7.p7.12569826
@@ -39,11 +45,9 @@ public class CmServerQueryService {
      * @return List of parcels found in the CM
      */
     public Set<ParcelInfo> queryActiveParcels(Stack stack) {
-        Map<String, String> activeParcels = apiConnectors.getConnector(stack).gatherInstalledParcels(stack.getName());
-        LOGGER.debug("Reading parcel info from CM server, found parcels: " + activeParcels);
-        return activeParcels.entrySet().stream()
-                .map(es -> new ParcelInfo(es.getKey(), es.getValue()))
-                .collect(Collectors.toSet());
+        Set<ParcelInfo> activeParcels = apiConnectors.getConnector(stack).gatherInstalledParcels(stack.getName());
+        LOGGER.debug("Reading parcel info from CM server, found active parcels: " + activeParcels);
+        return activeParcels;
     }
 
     /**
@@ -51,7 +55,7 @@ public class CmServerQueryService {
      * @param stack The stack, with metadata to be able to build the client to query package versions
      * @return The actual CM version, in format version-build number e.g. 7.2.2-13072522
      */
-    public Optional<String> queryCmVersion(Stack stack) {
+    public Optional<String> queryCmVersion(StackDtoDelegate stack) {
         try {
             Map<String, List<PackageInfo>> packageVersions = cmVersionQueryService.queryCmPackageInfo(stack);
             PackageInfo cmPackageInfo = cmVersionQueryService.checkCmPackageInfoConsistency(packageVersions);
