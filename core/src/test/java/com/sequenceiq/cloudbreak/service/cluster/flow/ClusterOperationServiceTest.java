@@ -281,7 +281,7 @@ public class ClusterOperationServiceTest {
         when(updateHostsValidator.validateRequest(stack, upscaleHostGroupAdjustment)).thenReturn(false);
         underTest.updateHosts(STACK_ID, upscaleHostGroupAdjustment);
         verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.UPSCALE_REQUESTED,
-                "Requested node count for upscaling: " + 5);
+                "Requested node count for upscaling: " + 5 + ", instance group: worker");
         verify(flowManager, times(1)).triggerClusterUpscale(STACK_ID, upscaleHostGroupAdjustment);
     }
 

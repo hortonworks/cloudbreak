@@ -146,6 +146,9 @@ public class StackOperationService {
                 updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
             }
         }
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED,
+                String.format("Requested node count for downscaling: %s, instance group(s): %s",
+                        instanceIds.size(), instanceIdsByHostgroupMap.keySet()));
         return flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
     }
 
@@ -351,14 +354,16 @@ public class StackOperationService {
                 }
                 if (upscale) {
                     stackUpdater.updateStackStatus(stackDto.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
-                            "Requested node count for upscaling: " + instanceGroupAdjustmentJson.getScalingAdjustment());
+                            String.format("Requested node count for upscaling: %s, instance group: %s",
+                                    instanceGroupAdjustmentJson.getScalingAdjustment(), instanceGroupAdjustmentJson.getInstanceGroup()));
                     return flowManager.triggerStackUpscale(
                             stackDto.getId(),
                             instanceGroupAdjustmentJson,
                             withClusterEvent);
                 } else {
                     stackUpdater.updateStackStatus(stackDto.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED,
-                            "Requested node count for downscaling: " + abs(instanceGroupAdjustmentJson.getScalingAdjustment()));
+                            String.format("Requested node count for downscaling: %s, instance group: %s",
+                                    abs(instanceGroupAdjustmentJson.getScalingAdjustment()), instanceGroupAdjustmentJson.getInstanceGroup()));
                     return flowManager.triggerStackDownscale(stackDto.getId(), instanceGroupAdjustmentJson);
                 }
             });
