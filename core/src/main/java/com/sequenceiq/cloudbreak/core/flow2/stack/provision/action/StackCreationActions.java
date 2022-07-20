@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.service.StackCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -319,8 +320,8 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<>(GetTlsInfoResult.class) {
             @Override
             protected void doExecute(StackCreationContext context, GetTlsInfoResult payload, Map<Object, Object> variables) {
-                StackDto stack = stackDtoService.getById(context.getStackId());
-                stackCreationService.saveTlsInfo(stack, payload.getTlsInfo());
+                SecurityConfig securityConfig = stackDtoService.getSecurityConfig(context.getStackId());
+                stackCreationService.saveTlsInfo(securityConfig, payload.getTlsInfo());
                 sendEvent(context);
             }
 

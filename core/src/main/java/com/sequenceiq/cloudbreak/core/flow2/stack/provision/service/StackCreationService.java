@@ -228,12 +228,11 @@ public class StackCreationService {
         LOGGER.debug("Load balancer metadata setup DONE.");
     }
 
-    public void saveTlsInfo(StackDto stack, TlsInfo tlsInfo) {
+    public void saveTlsInfo(SecurityConfig securityConfig, TlsInfo tlsInfo) {
         boolean usePrivateIpToTls = tlsInfo.usePrivateIpToTls();
         if (usePrivateIpToTls) {
-            SecurityConfig securityConfig = stack.getSecurityConfig();
             securityConfig.setUsePrivateIpToTls(true);
-            stackUpdater.updateStackSecurityConfig(stack.getStack(), securityConfig);
+            stackUpdater.updateSecurityConfig(securityConfig);
             LOGGER.debug("Update Stack and it's SecurityConfig to use private ip when TLS is built.");
         }
     }
