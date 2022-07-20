@@ -39,6 +39,10 @@ public class EnvironmentExperienceDto {
         return new Builder().fromEnvironment(environment);
     }
 
+    public static EnvironmentExperienceDto fromEnvironmentDto(EnvironmentDto environmentDto) {
+        return new Builder().fromEnvironmentDto(environmentDto);
+    }
+
     @Override
     public String toString() {
         return "EnvironmentExperienceDto{" +
@@ -92,6 +96,14 @@ public class EnvironmentExperienceDto {
                     .withCrn(environment.getResourceCrn())
                     .withAccountId(environment.getAccountId())
                     .withCloudPlatform(environment.getCloudPlatform())
+                    .build();
+        }
+
+        public EnvironmentExperienceDto fromEnvironmentDto(EnvironmentDto environmentDto) {
+            return withName(environmentDto.getName())
+                    .withCrn(environmentDto.getResourceCrn())
+                    .withAccountId(accountId)
+                    .withCloudPlatform(environmentDto.getCloudPlatform())
                     .build();
         }
 

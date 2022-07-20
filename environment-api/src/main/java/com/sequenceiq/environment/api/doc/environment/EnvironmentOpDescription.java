@@ -4,6 +4,8 @@ public class EnvironmentOpDescription {
     public static final String CREATE = "Create an environment.";
     public static final String GET_BY_NAME = "Get an environment by name.";
     public static final String GET_BY_CRN = "Get an environment by CRN.";
+    public static final String GET_XP_BY_NAME = "Get the experience(s) that connects to an environment that has the following name.";
+    public static final String GET_XP_BY_CRN = "Get the experience(s) that connects to an environment that has the following CRN.";
     public static final String LIST = "List all environments.";
     public static final String INTERNAL_LIST = "List all environments by account ID using the internal actor.";
     public static final String INTERNAL_CONSUMPTION_LIST = "List all environments for consumption.";

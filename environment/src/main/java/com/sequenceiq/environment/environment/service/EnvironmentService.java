@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
+import static com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto.fromEnvironmentDto;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.Collection;
@@ -18,6 +19,9 @@ import java.util.stream.Collectors;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.InternalServerErrorException;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.environment.experience.ExperienceCluster;
+import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +93,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     private final RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
+    private final ExperienceConnectorService experienceConnectorService;
+
     public EnvironmentService(
             EnvironmentValidatorService validatorService,
             EnvironmentRepository environmentRepository,
@@ -98,7 +104,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             GrpcUmsClient grpcUmsClient,
             TransactionService transactionService,
             RoleCrnGenerator roleCrnGenerator,
-            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory) {
+            RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory,
+            ExperienceConnectorService experienceConnectorService) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
         this.platformParameterService = platformParameterService;
@@ -107,6 +114,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         this.grpcUmsClient = grpcUmsClient;
         this.transactionService = transactionService;
         this.roleCrnGenerator = roleCrnGenerator;
+        this.experienceConnectorService = experienceConnectorService;
         this.regionAwareInternalCrnGeneratorFactory = regionAwareInternalCrnGeneratorFactory;
     }
 
@@ -168,6 +176,26 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             setRegionsFromCloudRegions(requestedRegions, cloudRegions, regionSet);
         }
         environment.setRegions(regionSet);
+    }
+
+    public Map<String, Set<String>> collectExperiences(NameOrCrn environmentNameOrCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        Map<String, Set<String>> xps = new HashMap<>();
+        EnvironmentDto environment;
+        if (environmentNameOrCrn.hasName()) {
+            environment = getByNameAndAccountId(environmentNameOrCrn.getName(), accountId);
+        } else {
+            environment = getByCrnAndAccountId(environmentNameOrCrn.getCrn(), accountId);
+        }
+        Set<ExperienceCluster> connectedExperiences = experienceConnectorService.getConnectedExperiences(fromEnvironmentDto(environment));
+        Set<String> experienceTypes = connectedExperiences.stream().map(ExperienceCluster::getPublicName).collect(Collectors.toSet());
+        for (String experienceType : experienceTypes) {
+            Set<String> clusters = connectedExperiences.stream().filter(experienceCluster -> experienceType.equals(experienceCluster.getPublicName()))
+                    .map(experienceCluster -> experienceCluster.getName())
+                    .collect(Collectors.toSet());
+            xps.put(experienceType, clusters);
+        }
+        return xps;
     }
 
     private void setRegionsFromCloudCoordinates(Set<String> requestedRegions, CloudRegions cloudRegions, Set<Region> regionSet) {
