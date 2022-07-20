@@ -537,6 +537,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
 
     private ImageFilterParams createImageFilterParams(Stack stack, Image currentImageFromCatalog) {
         return new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels,
-                stack.getType(), null, STACK_ID, INTERNAL_UPGRADE_SETTINGS, imageCatalogPlatform(CLOUD_PLATFORM));
+                stack.getType(), null, STACK_ID, INTERNAL_UPGRADE_SETTINGS, imageCatalogPlatform(CLOUD_PLATFORM), REGION);
     }
 }

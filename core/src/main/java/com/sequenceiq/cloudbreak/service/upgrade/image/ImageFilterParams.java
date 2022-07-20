@@ -27,8 +27,10 @@ public class ImageFilterParams {
 
     private final ImageCatalogPlatform cloudPlatform;
 
+    private final String region;
+
     public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType, Blueprint blueprint,
-            Long stackId, InternalUpgradeSettings internalUpgradeSettings, ImageCatalogPlatform cloudPlatform) {
+            Long stackId, InternalUpgradeSettings internalUpgradeSettings, ImageCatalogPlatform cloudPlatform, String region) {
         this.currentImage = currentImage;
         this.lockComponents = lockComponents;
         this.stackRelatedParcels = stackRelatedParcels;
@@ -37,6 +39,7 @@ public class ImageFilterParams {
         this.stackId = stackId;
         this.internalUpgradeSettings = internalUpgradeSettings;
         this.cloudPlatform = cloudPlatform;
+        this.region = region;
     }
 
     public Image getCurrentImage() {
@@ -75,6 +78,10 @@ public class ImageFilterParams {
         return cloudPlatform;
     }
 
+    public String getRegion() {
+        return region;
+    }
+
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
     @Override
     public boolean equals(Object o) {
@@ -92,11 +99,12 @@ public class ImageFilterParams {
                 Objects.equals(stackType, that.stackType) &&
                 Objects.equals(blueprint, that.blueprint) &&
                 Objects.equals(cloudPlatform, that.cloudPlatform) &&
-                Objects.equals(stackId, that.stackId);
+                Objects.equals(stackId, that.stackId) &&
+                Objects.equals(region, that.region);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint, stackId, internalUpgradeSettings, cloudPlatform);
+        return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint, stackId, internalUpgradeSettings, cloudPlatform, region);
     }
 }

@@ -24,12 +24,14 @@ public class CsdLocationFilterTest {
 
     private static final String CLOUD_PLATFORM = "AWS";
 
+    private static final String REGION = "us-west-1";
+
     private final CsdLocationFilter underTest = new CsdLocationFilter();
 
     @Test
     public void testFilterImageShouldReturnTrueWhenTheStackTypeIsNotWorkload() {
         assertTrue(underTest.filterImage(null, null, new ImageFilterParams(null, false, null, StackType.DATALAKE, null, STACK_ID,
-                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM))));
+                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM), REGION)));
     }
 
     @Test
@@ -111,7 +113,7 @@ public class CsdLocationFilterTest {
 
     private ImageFilterParams createImageFilterParams(Map<String, String> stackRelatedParcels) {
         return new ImageFilterParams(null, false, stackRelatedParcels, StackType.WORKLOAD, null, STACK_ID,
-                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM));
+                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM), REGION);
     }
 
 }

@@ -41,6 +41,8 @@ public class ClusterUpgradeImageFilterTest {
 
     private static final Long WORKSPACE_ID = 2L;
 
+    private static final String REGION = "us-west-1";
+
     @InjectMocks
     private ClusterUpgradeImageFilter underTest;
 
@@ -119,7 +121,8 @@ public class ClusterUpgradeImageFilterTest {
 
     private ImageFilterParams createImageFilterParams() {
         return new ImageFilterParams(image, false, Collections.emptyMap(), StackType.DATALAKE, new Blueprint(), STACK_ID,
-                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM));
+                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
+                REGION);
     }
 
 }
