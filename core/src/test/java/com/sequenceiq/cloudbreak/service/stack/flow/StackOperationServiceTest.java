@@ -285,6 +285,7 @@ public class StackOperationServiceTest {
         when(stackDto.getStack()).thenReturn(stack);
         InstanceGroupAdjustmentV4Request upscaleAdjustment = new InstanceGroupAdjustmentV4Request();
         upscaleAdjustment.setScalingAdjustment(5);
+        upscaleAdjustment.setInstanceGroup("master");
 
         when(transactionService.required(any(Supplier.class))).thenAnswer(ans -> ((Supplier) ans.getArgument(0)).get());
         when(targetedUpscaleSupportService.targetedUpscaleOperationSupported(any())).thenReturn(Boolean.TRUE);
@@ -296,16 +297,17 @@ public class StackOperationServiceTest {
 
         underTest.updateNodeCount(stackDto, upscaleAdjustment, true);
         verify(stackUpdater).updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
-                "Requested node count for upscaling: " + upscaleAdjustment.getScalingAdjustment());
+                "Requested node count for upscaling: " + upscaleAdjustment.getScalingAdjustment() + ", instance group: master");
         verify(flowManager).triggerStackUpscale(stack.getId(), upscaleAdjustment, true);
         verify(updateNodeCountValidator, times(0)).validateInstanceStatuses(any(), any());
         verify(updateNodeCountValidator, times(0)).validataHostMetadataStatuses(any(), any());
 
         InstanceGroupAdjustmentV4Request downscaleAdjustment = new InstanceGroupAdjustmentV4Request();
         downscaleAdjustment.setScalingAdjustment(-5);
+        downscaleAdjustment.setInstanceGroup("master");
         underTest.updateNodeCount(stackDto, downscaleAdjustment, true);
         verify(stackUpdater).updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED,
-                "Requested node count for downscaling: " + 5);
+                "Requested node count for downscaling: " + 5 + ", instance group: master");
         verify(flowManager).triggerStackDownscale(stack.getId(), downscaleAdjustment);
 
         when(targetedUpscaleSupportService.targetedUpscaleOperationSupported(any())).thenReturn(Boolean.FALSE);
@@ -447,6 +449,8 @@ public class StackOperationServiceTest {
         reset(flowManager);
         doReturn(im4).when(updateNodeCountValidator).validateInstanceForDownscale(im4.getInstanceId(), stack);
         underTest.removeInstances(stackDto, instanceIds, false);
+        verify(stackUpdater).updateStackStatus(eq(stack.getId()), eq(DetailedStackStatus.DOWNSCALE_REQUESTED),
+                eq("Requested node count for downscaling: 3, instance group(s): [group1]"));
         verify(flowManager).triggerStackRemoveInstances(eq(stack.getId()), capturedInstances.capture(), eq(false));
         captured = capturedInstances.getValue();
         assertEquals(2, captured.size());

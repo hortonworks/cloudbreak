@@ -246,10 +246,14 @@ public class ClusterOperationService {
         }
         boolean downscaleRequest = updateHostsValidator.validateRequest(stack, hostGroupAdjustment);
         if (downscaleRequest) {
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_REQUESTED,
+                    String.format("Requested node count for downscaling: %s, instance group: %s",
+                            hostGroupAdjustment.getScalingAdjustment(), hostGroupAdjustment.getHostGroup()));
             return flowManager.triggerClusterDownscale(stackId, hostGroupAdjustment);
         } else {
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_REQUESTED,
-                    "Requested node count for upscaling: " + hostGroupAdjustment.getScalingAdjustment());
+                    String.format("Requested node count for upscaling: %s, instance group: %s",
+                            hostGroupAdjustment.getScalingAdjustment(), hostGroupAdjustment.getHostGroup()));
             return flowManager.triggerClusterUpscale(stackId, hostGroupAdjustment);
         }
     }
