@@ -431,7 +431,8 @@ public interface StackV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Initiates the CCM tunnel type upgrade to the latest available version", nickname = "upgradeCcmByNameInternal")
     StackCcmUpgradeV4Response upgradeCcmByNameInternal(@PathParam("workspaceId") Long workspaceId, @NotEmpty @ResourceName @PathParam("name") String name,
-            @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.USER) @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @NotEmpty @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
     @Path("internal/crn/{crn}/upgrade_ccm")
@@ -439,7 +440,8 @@ public interface StackV4Endpoint {
     @ApiOperation(value = "Initiates the CCM tunnel type upgrade to the latest available version", nickname = "upgradeCcmByCrnInternal")
     StackCcmUpgradeV4Response upgradeCcmByCrnInternal(@PathParam("workspaceId") Long workspaceId,
             @NotEmpty @ValidCrn(resource = { CrnResourceDescriptor.DATAHUB, CrnResourceDescriptor.DATALAKE }) @PathParam("crn") String crn,
-            @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.USER) @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @NotEmpty @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @GET
     @Path("internal/{envCrn}/upgrade_ccm_stacks_remaining")
@@ -447,7 +449,8 @@ public interface StackV4Endpoint {
     @ApiOperation(value = "Returns the count of not upgraded stacks for an environment CRN", nickname = "getNotCcmUpgradedStackCountInternal")
     int getNotCcmUpgradedStackCount(@PathParam("workspaceId") Long workspaceId,
             @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("envCrn") String envCrn,
-            @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.USER) @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @NotEmpty @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
     @Path("{name}/salt_update")
