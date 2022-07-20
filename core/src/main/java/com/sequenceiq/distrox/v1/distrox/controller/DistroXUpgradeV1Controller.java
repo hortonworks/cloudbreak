@@ -91,7 +91,7 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     @Override
     @InternalOnly
     public DistroXCcmUpgradeV1Response upgradeCcmByCrnInternal(@NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) String crn,
-            @InitiatorUserCrn @ValidCrn(resource = CrnResourceDescriptor.USER) @NotEmpty String initiatorUserCrn) {
+            @InitiatorUserCrn @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER }) @NotEmpty String initiatorUserCrn) {
         return upgradeConverter.convert(stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(crn)));
     }
 

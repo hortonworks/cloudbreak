@@ -48,5 +48,6 @@ public interface SdxUpgradeEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Upgrade Cluster Connectivity Manager", nickname = "upgradeCcm")
     SdxCcmUpgradeResponse upgradeCcm(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
-            @ValidCrn(resource = CrnResourceDescriptor.USER) @NotEmpty @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @NotEmpty @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }
