@@ -45,6 +45,10 @@ public class FlowUtil {
 
     public Duration getPollingDurationOrTheDefault(RunningParameter runningParameter) {
 
+        if (runningParameter == null) {
+            runningParameter = RunningParameter.emptyRunningParameter();
+        }
+
         Duration pollingInterval = runningParameter.getPollingInterval();
 
         if (pollingInterval == null) {
@@ -86,7 +90,7 @@ public class FlowUtil {
 
         int retryCount = 0;
         int failureCount = 0;
-        long pollingInterval = getPollingInterval();
+        long pollingInterval = getPollingDurationOrTheDefault(runningParameter).toMillis();
         while (flowRunning && retryCount < maxRetry) {
             sleep(pollingInterval, crn, flowChainId, flowId);
             try {
