@@ -41,6 +41,8 @@ public class ClusterUpgradeImageFilterTest {
 
     private static final Long WORKSPACE_ID = 2L;
 
+    private static final String REGION = "us-west-1";
+
     @InjectMocks
     private ClusterUpgradeImageFilter underTest;
 
@@ -92,7 +94,8 @@ public class ClusterUpgradeImageFilterTest {
         String errorMessage = "There are no available image";
         ImageFilterResult imageFilterResult = new ImageFilterResult(Collections.emptyList(), errorMessage);
         when(blueprintBasedUpgradeValidator.isValidBlueprint(imageFilterParams, ACCOUNT_ID)).thenReturn(new BlueprintValidationResult(true));
-        when(imageCatalogService.getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getCloudPlatform())).thenReturn(imageFilterResult);
+        when(imageCatalogService.getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform()))
+                .thenReturn(imageFilterResult);
 
         ImageFilterResult actual = underTest.filter(ACCOUNT_ID, WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams);
 
@@ -108,7 +111,7 @@ public class ClusterUpgradeImageFilterTest {
         ImageFilterResult imageFilterResult = new ImageFilterResult(images, EMPTY_REASON);
         ImageFilterResult otherImageFilterResult = new ImageFilterResult(otherImages, EMPTY_REASON);
         when(blueprintBasedUpgradeValidator.isValidBlueprint(imageFilterParams, ACCOUNT_ID)).thenReturn(new BlueprintValidationResult(true));
-        when(imageCatalogService.getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getCloudPlatform()))
+        when(imageCatalogService.getImageFilterResult(WORKSPACE_ID, IMAGE_CATALOG_NAME, imageFilterParams.getImageCatalogPlatform()))
                 .thenReturn(imageFilterResult);
         when(imageFilterUpgradeService.filterImages(imageFilterResult, imageFilterParams)).thenReturn(otherImageFilterResult);
 
@@ -119,7 +122,8 @@ public class ClusterUpgradeImageFilterTest {
 
     private ImageFilterParams createImageFilterParams() {
         return new ImageFilterParams(image, false, Collections.emptyMap(), StackType.DATALAKE, new Blueprint(), STACK_ID,
-                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM));
+                new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM),
+                CLOUD_PLATFORM, REGION);
     }
 
 }

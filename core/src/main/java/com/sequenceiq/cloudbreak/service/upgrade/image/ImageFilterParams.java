@@ -25,10 +25,14 @@ public class ImageFilterParams {
 
     private final InternalUpgradeSettings internalUpgradeSettings;
 
-    private final ImageCatalogPlatform cloudPlatform;
+    private final ImageCatalogPlatform imageCatalogPlatform;
+
+    private final String cloudPlatform;
+
+    private final String region;
 
     public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType, Blueprint blueprint,
-            Long stackId, InternalUpgradeSettings internalUpgradeSettings, ImageCatalogPlatform cloudPlatform) {
+            Long stackId, InternalUpgradeSettings internalUpgradeSettings, ImageCatalogPlatform imageCatalogPlatform, String cloudPlatform, String region) {
         this.currentImage = currentImage;
         this.lockComponents = lockComponents;
         this.stackRelatedParcels = stackRelatedParcels;
@@ -36,7 +40,9 @@ public class ImageFilterParams {
         this.blueprint = blueprint;
         this.stackId = stackId;
         this.internalUpgradeSettings = internalUpgradeSettings;
+        this.imageCatalogPlatform = imageCatalogPlatform;
         this.cloudPlatform = cloudPlatform;
+        this.region = region;
     }
 
     public Image getCurrentImage() {
@@ -71,8 +77,16 @@ public class ImageFilterParams {
         return internalUpgradeSettings != null && internalUpgradeSettings.isDataHubRuntimeUpgradeEntitled();
     }
 
-    public ImageCatalogPlatform getCloudPlatform() {
+    public ImageCatalogPlatform getImageCatalogPlatform() {
+        return imageCatalogPlatform;
+    }
+
+    public String getCloudPlatform() {
         return cloudPlatform;
+    }
+
+    public String getRegion() {
+        return region;
     }
 
     @SuppressWarnings("checkstyle:CyclomaticComplexity")
@@ -91,12 +105,15 @@ public class ImageFilterParams {
                 Objects.equals(stackRelatedParcels, that.stackRelatedParcels) &&
                 Objects.equals(stackType, that.stackType) &&
                 Objects.equals(blueprint, that.blueprint) &&
+                Objects.equals(imageCatalogPlatform, that.imageCatalogPlatform) &&
+                Objects.equals(stackId, that.stackId) &&
                 Objects.equals(cloudPlatform, that.cloudPlatform) &&
-                Objects.equals(stackId, that.stackId);
+                Objects.equals(region, that.region);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint, stackId, internalUpgradeSettings, cloudPlatform);
+        return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint, stackId, internalUpgradeSettings,
+                imageCatalogPlatform, cloudPlatform, region);
     }
 }

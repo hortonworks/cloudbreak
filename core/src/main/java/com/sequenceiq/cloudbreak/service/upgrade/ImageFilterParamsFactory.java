@@ -38,8 +38,8 @@ public class ImageFilterParamsFactory {
 
     public ImageFilterParams create(Image image, boolean lockComponents, Stack stack, InternalUpgradeSettings internalUpgradeSettings) {
         return new ImageFilterParams(image, lockComponents, getStackRelatedParcels(stack), stack.getType(),
-                getBlueprint(stack), stack.getId(), internalUpgradeSettings,
-                platformStringTransformer.getPlatformStringForImageCatalog(stack.cloudPlatform(), stack.getPlatformVariant()));
+                getBlueprint(stack), stack.getId(), internalUpgradeSettings, platformStringTransformer.getPlatformStringForImageCatalog(stack.cloudPlatform(),
+                stack.getPlatformVariant()), stack.cloudPlatform(), stack.getRegion());
     }
 
     public Map<String, String> getStackRelatedParcels(Stack stack) {

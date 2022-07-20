@@ -73,7 +73,7 @@ public class ImageFilterParamsFactoryTest {
         assertEquals(StackType.DATALAKE, actual.getStackType());
         assertEquals(blueprint, actual.getBlueprint());
         assertEquals(STACK_ID, actual.getStackId());
-        assertEquals(CLOUD_PLATFORM, actual.getCloudPlatform().nameToUpperCase());
+        assertEquals(CLOUD_PLATFORM, actual.getImageCatalogPlatform().nameToUpperCase());
         verify(parcelService).getParcelComponentsByBlueprint(stack);
         verify(clouderaManagerProductsProvider).findCdhProduct(clusterComponents);
     }
@@ -103,7 +103,7 @@ public class ImageFilterParamsFactoryTest {
         assertEquals(StackType.WORKLOAD, actual.getStackType());
         assertEquals(blueprint, actual.getBlueprint());
         assertEquals(STACK_ID, actual.getStackId());
-        assertEquals(CLOUD_PLATFORM, actual.getCloudPlatform().nameToUpperCase());
+        assertEquals(CLOUD_PLATFORM, actual.getImageCatalogPlatform().nameToUpperCase());
         verify(parcelService).getParcelComponentsByBlueprint(stack);
         verify(clouderaManagerProductsProvider).getProducts(cdhClusterComponent);
     }

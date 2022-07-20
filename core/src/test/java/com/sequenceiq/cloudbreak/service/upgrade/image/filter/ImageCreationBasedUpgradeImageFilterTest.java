@@ -192,6 +192,6 @@ class ImageCreationBasedUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams(Image currentImage) {
-        return new ImageFilterParams(currentImage, false, null, null, null, null, null, null);
+        return new ImageFilterParams(currentImage, false, null, null, null, null, null, null, null, null);
     }
 }
