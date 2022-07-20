@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
@@ -77,7 +76,7 @@ public class ResponseModifierService {
      * @return return with the default values or throw an exception based on the pre-defined status code
      * @throws Throwable if any errors occurred in the supplier.
      */
-    public <T> T evaluateResponse(String path, Class<?> returnType, CheckedSupplier<T, Throwable> defaultResponse, List<Object> args) throws Throwable {
+    public <T> T evaluateResponse(String path, Class<?> returnType, CheckedSupplier<T, Throwable> defaultResponse) throws Throwable {
         List<MockResponse> mockResponses = responses.get(path);
         if (CollectionUtils.isEmpty(mockResponses)) {
             LOGGER.debug("Cannot find mock response, call the default. Path: {}", path);
@@ -85,10 +84,6 @@ public class ResponseModifierService {
         }
         MockResponse mockResponse = mockResponses.get(0);
         handleTimes(path, mockResponse);
-        if (!args.isEmpty() && !handleBodyContains(args, mockResponse)) {
-            LOGGER.debug("{} could not be found in args {}", mockResponse.getBodyContains(), args);
-            return defaultResponse.get();
-        }
 
         return parseStatusCode(returnType, mockResponse);
     }
@@ -110,19 +105,6 @@ public class ResponseModifierService {
                 called.put(calledKey, call);
             }
         }
-    }
-
-    private boolean handleBodyContains(List<Object> args, MockResponse mockResponse) {
-        Set<String> bodyContains = mockResponse.getBodyContains();
-        if (bodyContains == null) {
-            return false;
-        }
-        for (String body : bodyContains) {
-            if (args.stream().filter(o -> o instanceof String).noneMatch(o -> ((String) o).contains(body))) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private <T> T parseStatusCode(Class<?> returnType, MockResponse mockResponse) {

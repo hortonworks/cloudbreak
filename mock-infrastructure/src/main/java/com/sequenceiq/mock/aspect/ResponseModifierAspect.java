@@ -54,7 +54,7 @@ public class ResponseModifierAspect {
         String resolvedPath = resolvePath(method, proceedingJoinPoint.getArgs(), sb.toString());
         String mockUuid = getArgByName(method, proceedingJoinPoint.getArgs(), Set.of("mock_uuid", "mockuuid", "mockUuid"));
         responseModifierService.handleProfiles(mockUuid, resolvedPath);
-        return responseModifierService.evaluateResponse(resolvedPath, method.getReturnType(), proceedingJoinPoint::proceed, Arrays.asList(proceedingJoinPoint.getArgs()));
+        return responseModifierService.evaluateResponse(resolvedPath, method.getReturnType(), proceedingJoinPoint::proceed);
     }
 
     private String resolvePath(Method method, Object[] args, String path) {
