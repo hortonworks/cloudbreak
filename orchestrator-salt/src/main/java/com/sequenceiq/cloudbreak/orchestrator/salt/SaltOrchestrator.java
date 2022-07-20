@@ -896,6 +896,20 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public Map<String, String> runCommandOnHosts(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, String command)
+            throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
+        Target<String> hosts = new HostList(nodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
+        LOGGER.debug("Execute command: {}, on hosts: {}", command, hosts);
+        try (SaltConnector saltConnector = saltService.createSaltConnector(primaryGateway)) {
+            return saltStateService.runCommandOnHosts(retry, saltConnector, hosts, command);
+        } catch (RuntimeException e) {
+            LOGGER.warn("Error occurred during command execution: " + command, e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public Map<String, JsonNode> getGrainOnAllHosts(GatewayConfig gateway, String grain) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
             return saltStateService.getGrains(saltConnector, grain);

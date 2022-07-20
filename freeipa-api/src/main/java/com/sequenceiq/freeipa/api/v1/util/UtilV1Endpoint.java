@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -12,6 +13,8 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.common.api.command.RemoteCommandsExecutionRequest;
+import com.sequenceiq.common.api.command.RemoteCommandsExecutionResponse;
 import com.sequenceiq.freeipa.api.v1.util.doc.UtilDescriptions;
 import com.sequenceiq.freeipa.api.v1.util.model.UsedImagesListV1Response;
 
@@ -35,4 +38,10 @@ public interface UtilV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilDescriptions.USED_IMAGES, produces = MediaType.APPLICATION_JSON, nickname = "usedRecipesV1")
     List<String> usedRecipes(@AccountId @PathParam("accountId") String accountId);
+
+    @POST
+    @Path("remote_execution/{environmentCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UtilDescriptions.REMOTE_EXEC, produces = MediaType.APPLICATION_JSON, nickname = "remoteExecV1")
+    RemoteCommandsExecutionResponse remoteCommandExecution(@PathParam("environmentCrn") String environmentCrn, RemoteCommandsExecutionRequest request);
 }
