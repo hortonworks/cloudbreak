@@ -57,15 +57,9 @@ public class ClouderaManagerPollingServiceProvider {
 
     private static final int INFINITE_ATTEMPT = -1;
 
-    private static final long POLL_FOR_15_MINUTES = TimeUnit.MINUTES.toSeconds(15);
-
     private static final long POLL_FOR_5_MINUTES = TimeUnit.MINUTES.toSeconds(5);
 
     private static final long POLL_FOR_10_MINUTES = TimeUnit.MINUTES.toSeconds(10);
-
-    private static final long POLL_FOR_ONE_HOUR = TimeUnit.HOURS.toSeconds(1);
-
-    private static final long POLL_FOR_TWO_HOURS = TimeUnit.HOURS.toSeconds(2);
 
     @Inject
     private ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
@@ -87,7 +81,7 @@ public class ClouderaManagerPollingServiceProvider {
 
     public ExtendedPollingResult startPollingCmStartup(StackDtoDelegate stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager startup. [Server address: {}]", stack.getClusterManagerIp());
-        return pollApiWithTimeListener(stack, apiClient, POLL_FOR_ONE_HOUR,
+        return pollApiWithTimeListener(stack, apiClient, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerStartupListenerTask(clouderaManagerApiPojoFactory, clusterEventService));
     }
 
@@ -107,7 +101,7 @@ public class ClouderaManagerPollingServiceProvider {
     public ExtendedPollingResult startPollingCmHostStatus(StackDtoDelegate stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Cloudera Manager hosts to connect. [Server address: {}]", stack.getClusterManagerIp());
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-        return pollApiWithTimeListener(stack, apiClient, POLL_FOR_ONE_HOUR,
+        return pollApiWithTimeListener(stack, apiClient, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService,
                         entitlementService.targetedUpscaleSupported(accountId)));
     }
@@ -116,20 +110,20 @@ public class ClouderaManagerPollingServiceProvider {
         LOGGER.debug("Waiting for Cloudera Manager hosts to connect. [Server address: {}, target hosts: {}]",
                 stack.getClusterManagerIp(), Joiner.on(",").join(CollectionUtils.emptyIfNull(targets)));
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-        return pollApiWithTimeListener(stack, apiClient, POLL_FOR_ONE_HOUR,
+        return pollApiWithTimeListener(stack, apiClient, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, targets,
                         entitlementService.targetedUpscaleSupported(accountId)));
     }
 
     public ExtendedPollingResult startPollingCmTemplateInstallation(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to install template. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_ONE_HOUR,
+        return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerTemplateInstallationChecker(clouderaManagerApiPojoFactory, clusterEventService));
     }
 
     public ExtendedPollingResult startDefaultPolling(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId, String commandName) {
         LOGGER.debug("Waiting for Cloudera Manager for [{}]. [Server address: {}]", commandName, stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_ONE_HOUR,
+        return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService, commandName));
     }
 
@@ -152,14 +146,14 @@ public class ClouderaManagerPollingServiceProvider {
     public ExtendedPollingResult startPollingCmParcelActivation(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId,
             List<ClouderaManagerProduct> products) {
         LOGGER.debug("Waiting for Cloudera Manager to deploy client configurations. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_ONE_HOUR,
+        return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerParcelActivationListenerTask(clouderaManagerApiPojoFactory, clusterEventService, products));
     }
 
     public ExtendedPollingResult startPollingCmSingleParcelActivation(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId,
             ClouderaManagerProduct product) {
         LOGGER.debug("Waiting for Cloudera Manager to activate {} parcel. [Server address: {}]", product.getName(), stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_ONE_HOUR,
+        return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerSingleParcelActivationListenerTask(clouderaManagerApiPojoFactory, clusterEventService, product));
     }
 
@@ -167,14 +161,14 @@ public class ClouderaManagerPollingServiceProvider {
             ParcelStatus parcelStatus) {
         LOGGER.debug("Waiting for Cloudera Manager parcels {} to become to status [{}]. [Server address: {}]", parcelVersions, parcelStatus,
                 stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, BigDecimal.ZERO, POLL_FOR_ONE_HOUR,
+        return pollCommandWithTimeListener(stack, apiClient, BigDecimal.ZERO, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerParcelStatusListenerTask(clouderaManagerApiPojoFactory, clusterEventService, parcelVersions, parcelStatus));
     }
 
     public ExtendedPollingResult startPollingCmParcelDelete(StackDtoDelegate stack, ApiClient apiClient, Multimap<String, String> parcelVersions) {
         LOGGER.debug("Waiting for Cloudera Manager parcels {} to be deleted. [Server address: {}]", parcelVersions,
                 stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, BigDecimal.ZERO, POLL_FOR_ONE_HOUR,
+        return pollCommandWithTimeListener(stack, apiClient, BigDecimal.ZERO, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerParcelDeletedListenerTask(clouderaManagerApiPojoFactory, clusterEventService, parcelVersions));
     }
 
@@ -220,14 +214,14 @@ public class ClouderaManagerPollingServiceProvider {
 
     public ExtendedPollingResult startPollingCmManagementServiceStartup(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to start management service. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_ONE_HOUR,
+        return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService,
                         "Start Cloudera Manager management service"));
     }
 
     public ExtendedPollingResult startPollingCmManagementServiceShutdown(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to stop management service. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_ONE_HOUR,
+        return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService,
                         "Stop Cloudera Manager management service"));
     }
@@ -238,7 +232,7 @@ public class ClouderaManagerPollingServiceProvider {
 
     public ExtendedPollingResult startPollingParcelsApiAvailable(StackDtoDelegate stack, ApiClient apiClient) {
         LOGGER.debug("Waiting for Parcels API to become available. [Server address: {}]", stack.getClusterManagerIp());
-        return pollApiWithTimeListener(stack, apiClient, POLL_FOR_ONE_HOUR,
+        return pollApiWithTimeListener(stack, apiClient, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerParcelsApiListenerTask(clouderaManagerApiPojoFactory, clusterEventService));
     }
 
@@ -249,14 +243,15 @@ public class ClouderaManagerPollingServiceProvider {
     public ExtendedPollingResult startPollingCdpRuntimeParcelDownload(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId,
             ParcelResource parcelResource) {
         LOGGER.debug("Waiting for Cloudera Manager to download CDP Runtime Parcel. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_TWO_HOURS,
+        return pollCommandWithTimeListener(stack, apiClient, commandId,
+                ClouderaManagerPollingTimeoutProvider.getParcelDownloadTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerUpgradeParcelDownloadListenerTask(clouderaManagerApiPojoFactory, clusterEventService, parcelResource));
     }
 
     public ExtendedPollingResult startPollingCdpRuntimeParcelDistribute(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId,
             ParcelResource parcelResource) {
         LOGGER.debug("Waiting for Cloudera Manager to distribute CDP Runtime Parcel. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_ONE_HOUR,
+        return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerUpgradeParcelDistributeListenerTask(clouderaManagerApiPojoFactory, clusterEventService, parcelResource));
     }
 
@@ -270,13 +265,13 @@ public class ClouderaManagerPollingServiceProvider {
 
     public ExtendedPollingResult startPollingRemoveHostsFromCluster(StackDtoDelegate stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to finish removal of hosts from cluster. [Server address: {}]", stack.getClusterManagerIp());
-        return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_ONE_HOUR,
+        return pollCommandWithTimeListener(stack, apiClient, commandId, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService, "Remove hosts from cluster"));
     }
 
     public ExtendedPollingResult startPollingCommandList(StackDtoDelegate stack, ApiClient apiClient, List<BigDecimal> commandIds, String commandName) {
         LOGGER.debug("Waiting for Cloudera Manager to finish the following commands: {}. [Server address: {}]", commandIds, stack.getClusterManagerIp());
-        return pollCommandListWithTimeListener(stack, apiClient, commandIds, POLL_FOR_ONE_HOUR,
+        return pollCommandListWithTimeListener(stack, apiClient, commandIds, ClouderaManagerPollingTimeoutProvider.getDefaultTimeout(stack.getCloudPlatform()),
                 new ClouderaManagerBatchCommandsListenerTask(clouderaManagerApiPojoFactory, clusterEventService, commandName));
     }
 
@@ -291,7 +286,7 @@ public class ClouderaManagerPollingServiceProvider {
                 listenerTask,
                 pollerObject,
                 POLL_INTERVAL,
-                POLL_FOR_15_MINUTES);
+                ClouderaManagerPollingTimeoutProvider.getSyncApiCommandTimeout(stack.getCloudPlatform()));
     }
 
     private ExtendedPollingResult pollCommandListWithTimeListener(StackDtoDelegate stack, ApiClient apiClient, List<BigDecimal> commandIds,
