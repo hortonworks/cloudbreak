@@ -36,9 +36,12 @@ import com.sequenceiq.cloudbreak.service.filesystem.FileSystemSupportMatrixServi
 import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.image.UsedImagesProvider;
 import com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService;
+import com.sequenceiq.cloudbreak.service.stack.RemoteExecutionService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
+import com.sequenceiq.common.api.command.RemoteCommandsExecutionRequest;
+import com.sequenceiq.common.api.command.RemoteCommandsExecutionResponse;
 import com.sequenceiq.common.api.util.versionchecker.ClientVersionUtil;
 import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
 
@@ -77,6 +80,9 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
 
     @Inject
     private PlatformStringTransformer platformStringTransformer;
+
+    @Inject
+    private RemoteExecutionService remoteExecutionService;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -151,5 +157,12 @@ public class UtilV4Controller extends NotificationController implements UtilV4En
     @AccountIdNotNeeded
     public UsedImagesListV4Response usedImages(Integer thresholdInDays) {
         return usedImagesProvider.getUsedImages(thresholdInDays);
+    }
+
+    @Override
+    @InternalOnly
+    @AccountIdNotNeeded
+    public RemoteCommandsExecutionResponse remoteCommandExecution(String resourceCrn, RemoteCommandsExecutionRequest request) {
+        return remoteExecutionService.remoteExec(resourceCrn, request);
     }
 }

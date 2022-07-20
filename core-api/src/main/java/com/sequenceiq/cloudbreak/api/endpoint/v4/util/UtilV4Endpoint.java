@@ -7,6 +7,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
@@ -27,6 +28,8 @@ import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RepositoryConfigsVali
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.SecurityRuleOpDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.common.api.command.RemoteCommandsExecutionRequest;
+import com.sequenceiq.common.api.command.RemoteCommandsExecutionResponse;
 import com.sequenceiq.common.api.util.UtilControllerDescription;
 import com.sequenceiq.common.api.util.versionchecker.VersionCheckResult;
 
@@ -101,4 +104,10 @@ public interface UtilV4Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.USED_IMAGES, produces = MediaType.APPLICATION_JSON, nickname = "usedImages")
     UsedImagesListV4Response usedImages(@QueryParam("thresholdInDays") Integer thresholdInDays);
+
+    @POST
+    @Path("remote_execution/{resourceCrn}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = UtilityOpDescription.REMOTE_EXEC, produces = MediaType.APPLICATION_JSON, nickname = "remoteExecV4")
+    RemoteCommandsExecutionResponse remoteCommandExecution(@PathParam("resourceCrn") String resourceCrn, RemoteCommandsExecutionRequest request);
 }

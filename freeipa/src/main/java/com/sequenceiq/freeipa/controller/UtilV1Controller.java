@@ -9,10 +9,13 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.common.api.command.RemoteCommandsExecutionRequest;
+import com.sequenceiq.common.api.command.RemoteCommandsExecutionResponse;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.util.model.UsedImagesListV1Response;
 import com.sequenceiq.freeipa.service.UsedImagesProvider;
 import com.sequenceiq.freeipa.service.recipe.FreeIpaRecipeService;
+import com.sequenceiq.freeipa.service.stack.RemoteExecutionService;
 
 @Controller
 public class UtilV1Controller implements UtilV1Endpoint {
@@ -22,6 +25,9 @@ public class UtilV1Controller implements UtilV1Endpoint {
 
     @Inject
     private FreeIpaRecipeService freeIpaRecipeService;
+
+    @Inject
+    private RemoteExecutionService remoteExecutionService;
 
     @Override
     @InternalOnly
@@ -34,5 +40,12 @@ public class UtilV1Controller implements UtilV1Endpoint {
     @InternalOnly
     public List<String> usedRecipes(@AccountId String accountId) {
         return freeIpaRecipeService.getUsedRecipeNamesForAccount(accountId);
+    }
+
+    @Override
+    @InternalOnly
+    @AccountIdNotNeeded
+    public RemoteCommandsExecutionResponse remoteCommandExecution(String environmentCrn, RemoteCommandsExecutionRequest request) {
+        return remoteExecutionService.remoteExec(environmentCrn, request);
     }
 }

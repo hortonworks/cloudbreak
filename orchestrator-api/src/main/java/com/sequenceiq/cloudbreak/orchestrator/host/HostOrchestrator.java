@@ -77,6 +77,8 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     Map<String, String> runCommandOnAllHosts(GatewayConfig gateway, String command) throws CloudbreakOrchestratorFailedException;
 
+    Map<String, String> runCommandOnHosts(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, String command) throws CloudbreakOrchestratorFailedException;
+
     Map<String, String> replacePatternInFileOnAllHosts(GatewayConfig gatewayConfig, String file, String pattern, String replace)
             throws CloudbreakOrchestratorFailedException;
 
