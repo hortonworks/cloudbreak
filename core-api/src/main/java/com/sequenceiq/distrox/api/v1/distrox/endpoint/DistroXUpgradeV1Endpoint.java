@@ -73,6 +73,7 @@ public interface DistroXUpgradeV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Initiates the CCM tunnel type upgrade to the latest available version", nickname = "upgradeCcmByDatahubCrnInternal")
     DistroXCcmUpgradeV1Response upgradeCcmByCrnInternal(@NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
-            @ValidCrn(resource = CrnResourceDescriptor.USER) @NotEmpty @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @NotEmpty @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
 }
