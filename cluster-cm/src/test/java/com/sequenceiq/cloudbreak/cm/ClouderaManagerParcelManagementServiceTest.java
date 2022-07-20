@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.UNKNOWN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -143,6 +144,17 @@ class ClouderaManagerParcelManagementServiceTest {
         assertParcel(actual, CDH, "7.2.15", DISTRIBUTED);
         assertParcel(actual, SPARK3, "5.4.1", AVAILABLE_REMOTELY);
         assertParcel(actual, FLINK, "1.2.2", DOWNLOADED);
+    }
+
+    @Test
+    void testGetAllParcelsShouldReturnUnknownWhenUnknownStatus() throws ApiException {
+        when(parcelsResourceApi.readParcels(STACK_NAME, VIEW)).thenReturn(new ApiParcelList()
+                .addItemsItem(createApiParcel(CDH, "7.2.7", "anUnknownStatus")));
+
+        Set<ParcelInfo> actual = underTest.getAllParcels(parcelsResourceApi, STACK_NAME);
+
+        assertEquals(1, actual.size());
+        assertParcel(actual, CDH, "7.2.7", UNKNOWN);
     }
 
     @Test

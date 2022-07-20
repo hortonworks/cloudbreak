@@ -9,5 +9,7 @@ public enum ParcelStatus {
     DISTRIBUTED,
     UNDISTRIBUTING,
     ACTIVATING,
-    ACTIVATED
+    ACTIVATED,
+    UNAVAILABLE,
+    UNKNOWN
 }

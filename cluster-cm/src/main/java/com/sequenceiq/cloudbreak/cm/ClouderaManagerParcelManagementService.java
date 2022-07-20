@@ -19,6 +19,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
@@ -60,8 +61,17 @@ class ClouderaManagerParcelManagementService {
     public Set<ParcelInfo> getAllParcels(ParcelsResourceApi parcelsResourceApi, String stackName) throws ApiException {
         LOGGER.debug("Retrieving all available parcels from CM");
         return getClouderaManagerParcels(parcelsResourceApi, stackName).getItems().stream()
-                .map(apiParcel -> new ParcelInfo(apiParcel.getProduct(), apiParcel.getVersion(), ParcelStatus.valueOf(apiParcel.getStage())))
+                .map(apiParcel -> new ParcelInfo(apiParcel.getProduct(), apiParcel.getVersion(), parseParcelStatus(apiParcel)))
                 .collect(Collectors.toSet());
+    }
+
+    private ParcelStatus parseParcelStatus(ApiParcel apiParcel) {
+        try {
+            return ParcelStatus.valueOf(apiParcel.getStage());
+        } catch (IllegalArgumentException e) {
+            LOGGER.warn("An unknown parcel status occurred: {} for parcel {}. Returning UNKNOWN state.", apiParcel.getStage(), apiParcel, e);
+            return ParcelStatus.UNKNOWN;
+        }
     }
 
     public void setParcelRepos(Set<ClouderaManagerProduct> products, ClouderaManagerResourceApi clouderaManagerResourceApi) throws ApiException {
